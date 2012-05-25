@@ -17,16 +17,18 @@ package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.pipeline.AbstractTaskFactory;
-import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.FileUtil;
 import org.labkey.ms2.protein.fasta.FastaValidator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,8 +39,14 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 {
     private static final String ACTION_NAME = "Check FASTA";
 
-    public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
+    public static final String DECOY_DATABASE_PARAM_NAME = "pipeline, decoy database"; 
+
+    private static List<String> DECOY_FILE_SUFFIXES = new ArrayList<String>(Arrays.asList("-reverse", "-decoy", "-rev"));
+
+    public static class Factory extends AbstractTaskFactory<FastaCheckTaskFactorySettings, Factory>
     {
+        private boolean _requireDecoyDatabase;
+
         public Factory()
         {
             super(FastaCheckTask.class);
@@ -56,6 +64,22 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             // CONSIDER: Not really the input type, but the input type for the search.
             //           Should it be null or FASTA?
             return Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML);
+        }
+
+        @Override
+        protected void configure(FastaCheckTaskFactorySettings settings)
+        {
+            super.configure(settings);
+
+            if (settings.getRequireDecoyDatabase() != null)
+            {
+                _requireDecoyDatabase = settings.getRequireDecoyDatabase().booleanValue();
+            }
+
+            if (settings.getDecoyFileSuffixes() != null)
+            {
+                DECOY_FILE_SUFFIXES = settings.getDecoyFileSuffixes();
+            }
         }
 
         public String getStatusName()
@@ -97,6 +121,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             getJob().header("Check FASTA validity");
 
             RecordedAction action = new RecordedAction(ACTION_NAME);
+            boolean success = true;
 
             for (File sequenceFile : getJobSupport().getSequenceFiles())
             {
@@ -108,13 +133,21 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
                     continue;
                 getJob().info("Checking sequence file validity of " + sequenceFile);
 
-                FastaValidator validator = new FastaValidator(sequenceFile);
-                String errors = StringUtils.join(validator.validate(), "\n");
-                if (errors.length() > 0)
+                success &= validateSequenceFile(sequenceFile);
+            }
+
+            if (_factory._requireDecoyDatabase)
+            {
+                for (File decoyFile : getDecoySequenceFiles(getJobSupport()))
                 {
-                    getJob().error(errors);
-                    return new RecordedActionSet();
+                    getJob().info("Checking decoy file: " + decoyFile);
+                    success &= validateSequenceFile(decoyFile);
                 }
+            }
+
+            if (!success)
+            {
+                throw new PipelineJobException("FASTA errors found");
             }
 
             getJob().info("");  // blank line
@@ -129,5 +162,53 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         {
             throw new PipelineJobException("Failed to check FASTA file(s)", e);
         }
+    }
+
+    public static List<File> getDecoySequenceFiles(MS2SearchJobSupport job) throws IOException
+    {
+        List<File> result = new ArrayList<File>();
+        if (job.getParameters().get(DECOY_DATABASE_PARAM_NAME) != null)
+        {
+            String decoyPath = job.getParameters().get(DECOY_DATABASE_PARAM_NAME);
+            result.add(MS2PipelineManager.getSequenceDBFile(job.getSequenceRootDirectory(), decoyPath));
+        }
+        else
+        {
+            for (File sequenceFile : job.getSequenceFiles())
+            {
+                String basename = FileUtil.getBaseName(sequenceFile);
+                String extension = FileUtil.getExtension(sequenceFile);
+                if (DECOY_FILE_SUFFIXES.isEmpty())
+                {
+                    throw new IllegalStateException("No decoy file suffixes configured!");
+                }
+                int i = 0;
+                File decoyFile = new File(sequenceFile.getParentFile(), basename + DECOY_FILE_SUFFIXES.get(i++) + (extension == null ? "" : "." + extension));
+                while (!decoyFile.exists() && i < DECOY_FILE_SUFFIXES.size())
+                {
+                    decoyFile = new File(sequenceFile.getParentFile(), basename + DECOY_FILE_SUFFIXES.get(i++) + (extension == null ? "" : "." + extension));
+                }
+                result.add(decoyFile);
+            }
+        }
+        return result;
+    }
+
+    private boolean validateSequenceFile(File decoyFile)
+    {
+        if (!decoyFile.exists())
+        {
+            getJob().error("Sequence file not found: " + decoyFile);
+            return false;
+        }
+
+        FastaValidator validator = new FastaValidator(decoyFile);
+        String errors = StringUtils.join(validator.validate(), "\n");
+        if (errors.length() > 0)
+        {
+            getJob().error(errors);
+            return false;
+        }
+        return true;
     }
 }

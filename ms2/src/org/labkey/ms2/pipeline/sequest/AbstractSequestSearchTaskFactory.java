@@ -126,7 +126,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
                 NetworkDrive.exists(_sequestInstallDir);
                 if (!_sequestInstallDir.isDirectory())
                 {
-                    throw new IllegalArgumentException("No such Sequest install dir: " + _sequestInstallDir);
+//                    throw new IllegalArgumentException("No such Sequest install dir: " + _sequestInstallDir);
                 }
             }
         }

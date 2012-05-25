@@ -26,6 +26,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
+import org.labkey.ms2.pipeline.FastaCheckTask;
 import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
@@ -240,20 +241,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             // Write out sequest.params file
             File fileWorkParams = _wd.newFile(SEQUEST_PARAMS);
 
-            List<File> decoySequenceFiles = new ArrayList<File>();
-            for (File sequenceFile : sequenceFiles)
-            {
-                int index = sequenceFile.getName().lastIndexOf(".");
-                if (index != -1)
-                {
-                    String decoyName = sequenceFile.getName().substring(0, index) + "-rev" + sequenceFile.getName().substring(index);
-                    File decoyFile = new File(sequenceFile.getParentFile(), decoyName);
-                    if (decoyFile.isFile())
-                    {
-                        decoySequenceFiles.add(decoyFile);
-                    }
-                }
-            }
+            List<File> decoySequenceFiles = FastaCheckTask.getDecoySequenceFiles(getJob());
 
             File sequestLogFileWork = SEQUEST_OUTPUT_FILE_TYPE.getFile(_wd.getDir(), getJob().getBaseName());
 

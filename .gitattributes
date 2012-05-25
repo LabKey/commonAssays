@@ -1263,6 +1263,7 @@ ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/FastaCheckTask.java -text
+ms2/src/org/labkey/ms2/pipeline/FastaCheckTaskFactorySettings.java -text
 ms2/src/org/labkey/ms2/pipeline/FileStatus.java -text
 ms2/src/org/labkey/ms2/pipeline/ImportScanCountsUpgradeJob.java -text
 ms2/src/org/labkey/ms2/pipeline/LibraProtocolFactory.java -text
