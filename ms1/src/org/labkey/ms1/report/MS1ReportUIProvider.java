@@ -16,13 +16,17 @@
 package org.labkey.ms1.report;
 
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms1.query.MS1Schema;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*
 * User: Dave
@@ -31,6 +35,13 @@ import java.util.List;
 */
 public class MS1ReportUIProvider extends DefaultReportUIProvider
 {
+    private static Map<String, String> _typeToIconMap = new HashMap<String, String>();
+    static {
+
+        _typeToIconMap.put(FeaturesRReport.TYPE, "/reports/r.gif");
+        _typeToIconMap.put(PeaksRReport.TYPE, "/reports/r.gif");
+    }
+
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
@@ -45,10 +56,15 @@ public class MS1ReportUIProvider extends DefaultReportUIProvider
         return reportDesigners;
     }
 
-    public String getReportIcon(ViewContext context, String reportType)
+    public String getIconPath(Report report)
     {
-        if (FeaturesRReport.TYPE.equals(reportType) || PeaksRReport.TYPE.equals(reportType))
-            return context.getContextPath() + "/reports/r.gif";
-        return super.getReportIcon(context, reportType);
+        if (report != null)
+        {
+            if (_typeToIconMap.containsKey(report.getType()))
+            {
+                return AppProps.getInstance().getContextPath() + _typeToIconMap.get(report.getType());
+            }
+        }
+        return super.getIconPath(report);
     }
 }

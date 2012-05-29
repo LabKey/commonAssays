@@ -16,18 +16,22 @@
 package org.labkey.ms2.compare;
 
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /*
@@ -38,7 +42,11 @@ import java.util.Set;
 
 public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
-    private static final Set<String> R_REPORT_TYPES = new HashSet<String>(Arrays.asList(SpectraCountRReport.TYPE, SingleMS2RunRReport.TYPE));
+    private static Map<String, String> _typeToIconMap = new HashMap<String, String>();
+    static {
+        _typeToIconMap.put(SpectraCountRReport.TYPE, "/reports/r.gif");
+        _typeToIconMap.put(SingleMS2RunRReport.TYPE, "/reports/r.gif");
+    }
 
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
@@ -53,16 +61,26 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
             bean.setReportType(SpectraCountRReport.TYPE);
             bean.setRedirectUrl(context.getActionURL().toString());
 
-            reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report", ReportUtil.getRReportDesignerURL(context, bean)));
+            reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report",
+                    ReportUtil.getRReportDesignerURL(context, bean), _getIconPath(SpectraCountRReport.TYPE)));
         }
         return reportDesigners;
     }
 
-    public String getReportIcon(ViewContext context, String reportType)
+    private String _getIconPath(String type)
     {
-        if (R_REPORT_TYPES.contains(reportType))
-            return context.getContextPath() + "/reports/r.gif";
-        return super.getReportIcon(context, reportType);
+        return AppProps.getInstance().getContextPath() + _typeToIconMap.get(type);
     }
 
+    public String getIconPath(Report report)
+    {
+        if (report != null)
+        {
+            if (_typeToIconMap.containsKey(report.getType()))
+            {
+                return _getIconPath(report.getType());
+            }
+        }
+        return super.getIconPath(report);
+    }
 }
