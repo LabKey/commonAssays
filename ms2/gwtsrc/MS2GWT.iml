@@ -22,7 +22,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="InternalGWT" />
-    <orderEntry type="library" name="gwt-user" level="project" />
   </component>
 </module>
 
