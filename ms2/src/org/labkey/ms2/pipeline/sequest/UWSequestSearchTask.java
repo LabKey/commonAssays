@@ -845,11 +845,4 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             }
         }
     }
-
-    public static void main(String[] args) throws IOException
-    {
-        Writer writer = new FileWriter("c:/temp/headers.txt");
-        UWSequestSearchTask.writeParams(writer, new File("C:\\Users\\jeckels\\Documents\\MacCoss\\hermie\\pipeline-verbose\\sequest\\sequest.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/150Proteins.fsa"));
-        writer.close();
-    }
 }
