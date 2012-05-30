@@ -27,7 +27,7 @@ public class ParamsValidatorFactory
     private static NaturalNumberParamsValidator _naturalNumber;
     private static PositiveDoubleParamsValidator _positiveDouble;
     private static RealNumberParamsValidator _realNumber;
-    private static PositiveIntegerParamsValidator _positiveInteger;
+    private static NonNegativeIntegerParamsValidator _nonNegativeInteger;
     private static ListParamsValidator _listParamsValidator;
 
 
@@ -69,14 +69,14 @@ public class ParamsValidatorFactory
 
     public static IParamsValidator getPositiveIntegerParamsValidator()
     {
-        if (_positiveInteger == null)
+        if (_nonNegativeInteger == null)
         {
-            _positiveInteger = new PositiveIntegerParamsValidator();
+            _nonNegativeInteger = new NonNegativeIntegerParamsValidator();
         }
-        return _positiveInteger;
+        return _nonNegativeInteger;
     }
 
-    public static ListParamsValidator getListParamsValidator(String[] list)
+    public static ListParamsValidator getListParamsValidator(String... list)
     {
         if(_listParamsValidator == null)
         {

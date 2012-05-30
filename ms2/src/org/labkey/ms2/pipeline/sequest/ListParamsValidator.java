@@ -30,7 +30,7 @@ public class ListParamsValidator implements IParamsValidator
 {
     private String[] list;
 
-    public ListParamsValidator(String[] list)
+    public ListParamsValidator(String... list)
     {
         this.list = list;
     }
@@ -82,7 +82,7 @@ public class ListParamsValidator implements IParamsValidator
                           "peptide_mass_units",                                 // the sequest.params property name
                           "0=amu, 1=mmu, 2=ppm",                                // the sequest.params comment
                            ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
-                           ParamsValidatorFactory.getListParamsValidator(new String[]{"0","1","2"}),
+                           ParamsValidatorFactory.getListParamsValidator("0","1","2"),
                            true                                                    //is pass through
                   ).setInputXmlLabels("spectrum, parent monoisotopic mass error units");
         }

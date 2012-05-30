@@ -568,11 +568,11 @@ public class SequestParamsBuilder
             Param modProp;
             if(residues.get(i) == '[')
             {
-                modProp = _params.startsWith("add_Nterm_peptide");
+                modProp = _params.startsWith(_variant.getStaticNTermModification());
             }
             else if(residues.get(i) == ']')
             {
-                modProp = _params.startsWith("add_Cterm_peptide");
+                modProp = _params.startsWith(_variant.getStaticCTermModification());
             }
             else
             {
@@ -917,7 +917,7 @@ public class SequestParamsBuilder
     }
 
     //Used with JUnit
-    private SequestParams getProperties()
+    protected SequestParams getProperties()
     {
         return _params;
     }
@@ -974,8 +974,8 @@ public class SequestParamsBuilder
             return false;
         }
     }
-    //JUnit TestCase
-    public static class TestCase extends Assert
+
+    public abstract static class AbstractSequestTestCase extends Assert
     {
         SequestParamsBuilder spb;
         ParamParser ip;
@@ -989,7 +989,7 @@ public class SequestParamsBuilder
             String projectRoot = AppProps.getInstance().getProjectRoot();
             root = new File(new File(projectRoot), "/sampledata/xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
-            spb = new SequestParamsBuilder(ip.getInputParameters(), root);
+            spb = createParamsBuilder();
         }
 
         @After
@@ -1007,7 +1007,19 @@ public class SequestParamsBuilder
         public void parseParams(String xml)
         {
             ip.parse(xml);
-            spb = new SequestParamsBuilder(ip.getInputParameters(), root);
+            spb = createParamsBuilder();
+        }
+
+        public abstract SequestParamsBuilder createParamsBuilder();
+    }
+
+    //JUnit TestCase
+    public static class TestCase extends AbstractSequestTestCase
+    {
+        @Override
+        public SequestParamsBuilder createParamsBuilder()
+        {
+            return new SequestParamsBuilder(ip.getInputParameters(), root);
         }
 
         @Test
@@ -2114,7 +2126,7 @@ public class SequestParamsBuilder
                     passThrough.setValue("-2");
                     assertEquals("", passThrough.validate());
                 }
-                else if (passThrough.getValidator().getClass() == PositiveIntegerParamsValidator.class)
+                else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     passThrough.setValue("0");
                     assertEquals("", passThrough.validate());
@@ -2169,11 +2181,11 @@ public class SequestParamsBuilder
                     passThrough.setValue(value);
                     assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a real number(" + value + ").\n", passThrough.validate());
                 }
-                else if (passThrough.getValidator().getClass() == PositiveIntegerParamsValidator.class)
+                else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     String value = "";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
                 {
@@ -2210,11 +2222,11 @@ public class SequestParamsBuilder
                     passThrough.setValue(value);
                     assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
                 }
-                else if (passThrough.getValidator().getClass() == PositiveIntegerParamsValidator.class)
+                else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     String value = "-3";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == BooleanParamsValidator.class)
                 {
@@ -2276,11 +2288,11 @@ public class SequestParamsBuilder
                     passThrough.setValue(value);
                     assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a real number(" + value + ").\n", passThrough.validate());
                 }
-                else if (passThrough.getValidator().getClass() == PositiveIntegerParamsValidator.class)
+                else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     String value = "blue";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
                 {

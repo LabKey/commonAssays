@@ -33,18 +33,32 @@ public class SequestParams extends Params
 
     public enum Variant
     {
-        thermosequest("[SEQUEST]", "first_database_name"),
-        uwsequest("[SEQUEST]", "database_name"),
-        sequest("[SEQUEST]", "database_name"),
-        makedb("[MAKEDB]", "database_name");
+        thermosequest("[SEQUEST]", "first_database_name", "add_Cterm_peptide", "add_Nterm_peptide"),
+        uwsequest("[SEQUEST]", "database_name", "add_C_terminus", "add_N_terminus"),
+        sequest("[SEQUEST]", "database_name", "add_Cterm_peptide", "add_Nterm_peptide"),
+        makedb("[MAKEDB]", "database_name", "add_Cterm_peptide", "add_Nterm_peptide");
 
         private final String _header;
         private final String _fastaDatabase;
+        private final String _staticCTermModification;
+        private final String _staticNTermModification;
 
-        private Variant(String header, String fastaDatabase)
+        private Variant(String header, String fastaDatabase, String staticCTerm, String staticNTerm)
         {
             _header = header;
             _fastaDatabase = fastaDatabase;
+            _staticCTermModification = staticCTerm;
+            _staticNTermModification = staticNTerm;
+        }
+
+        public String getStaticCTermModification()
+        {
+            return _staticCTermModification;
+        }
+
+        public String getStaticNTermModification()
+        {
+            return _staticNTermModification;
         }
     }
 
@@ -52,6 +66,12 @@ public class SequestParams extends Params
     {
         _variant = variant;
         initProperties();
+    }
+
+    public SequestParam addProperty(SequestParam param)
+    {
+        _params.add(param);
+        return param;
     }
 
     void initProperties()
@@ -431,7 +451,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
         _params.add(new SequestParam(
             310,                                                       //sortOrder
             "0.0",                                            //The value of the property
-            "add_Cterm_peptide",                                // the sequest.params property name
+            _variant._staticCTermModification,                                // the sequest.params property name
             "added to each peptide C-terminus",       // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
@@ -451,7 +471,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
         _params.add(new SequestParam(
             330,                                                       //sortOrder
             "0.0",                                            //The value of the property
-            "add_Nterm_peptide",                                // the sequest.params property name
+            _variant._staticNTermModification,                                // the sequest.params property name
             "added to each peptide N-terminus",       // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,

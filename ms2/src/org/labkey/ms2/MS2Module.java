@@ -57,11 +57,12 @@ import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
 import org.labkey.ms2.pipeline.sequest.NaturalNumberParamsValidator;
+import org.labkey.ms2.pipeline.sequest.NonNegativeIntegerParamsValidator;
 import org.labkey.ms2.pipeline.sequest.PositiveDoubleParamsValidator;
-import org.labkey.ms2.pipeline.sequest.PositiveIntegerParamsValidator;
 import org.labkey.ms2.pipeline.sequest.RealNumberParamsValidator;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
+import org.labkey.ms2.pipeline.sequest.UWSequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
@@ -335,12 +336,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     {
         return new HashSet<Class>(Arrays.asList(
             SequestParamsBuilder.TestCase.class,
+            UWSequestParamsBuilder.TestCase.class,
             PositiveDoubleParamsValidator.TestCase.class,
             NaturalNumberParamsValidator.TestCase.class,
             NaturalNumberParamsValidator.TestCase.class,
             RealNumberParamsValidator.TestCase.class,
             BooleanParamsValidator.TestCase.class,
-            PositiveIntegerParamsValidator.TestCase.class,
+            NonNegativeIntegerParamsValidator.TestCase.class,
             ListParamsValidator.TestCase.class,
             org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
             org.labkey.ms2.reader.RandomAccessPwizMSDataIterator.TestCase.class,

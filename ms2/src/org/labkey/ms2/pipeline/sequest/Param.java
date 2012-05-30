@@ -148,7 +148,7 @@ public abstract class Param implements Comparable<Param>
     public int compareTo(Param o)
     {
         if (o.getSortOrder() > this.getSortOrder()) return -1;
-        if (o.getSortOrder() == this.getSortOrder()) return 0;
+        if (o.getSortOrder() == this.getSortOrder()) return getName().compareTo(o.getName());
         return 1;
     }
 

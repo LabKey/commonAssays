@@ -241,10 +241,6 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             throw new IOException("Could not find any enzymes, perhaps labkeydbmgmt.pl is out of date?");
         }
         return enzymes;
-//        Map<String, String> mock = new HashMap< String, String >();
-//        mock.put("trypsin", "Typsin");
-//        mock.put("aspn","AspN");
-//        return mock;
     }
 
     public Map<String, String> getResidue0Mods() throws IOException

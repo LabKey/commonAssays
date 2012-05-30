@@ -26,7 +26,7 @@ import org.junit.Test;
  * Date: Oct 26, 2006
  * Time: 4:21:53 PM
  */
-public class PositiveIntegerParamsValidator implements IParamsValidator
+public class NonNegativeIntegerParamsValidator implements IParamsValidator
 {
     public String validate(Param spp)
     {
@@ -35,7 +35,7 @@ public class PositiveIntegerParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a positive integer(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
             return parserError;
         }
         try
@@ -44,11 +44,11 @@ public class PositiveIntegerParamsValidator implements IParamsValidator
         }
         catch (NumberFormatException e)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a positive integer(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
             return parserError;
         }
         if (i < 0)
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a positive integer(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
         return parserError;
     }
 
@@ -66,7 +66,7 @@ public class PositiveIntegerParamsValidator implements IParamsValidator
                 "num_description_lines",                                  // the sequest.params property name
                 "# full protein descriptions to show for top N peptides", // the sequest.params comment
                 ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
-                new PositiveIntegerParamsValidator(),
+                new NonNegativeIntegerParamsValidator(),
                 true
             );
             _property.setInputXmlLabels("sequest, num_description_lines");
@@ -93,11 +93,11 @@ public class PositiveIntegerParamsValidator implements IParamsValidator
         {
             _property.setValue("");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive integer().\n", parserError);
+            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer().\n", parserError);
 
             _property.setValue(null);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive integer(null).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(null).\n", parserError);
         }
 
         @Test
@@ -106,12 +106,12 @@ public class PositiveIntegerParamsValidator implements IParamsValidator
             String value = "-4";
             _property.setValue(value);
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", parserError);
 
             value = "-4.7";
             _property.setValue(value);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", parserError);
 
         }
 
@@ -120,11 +120,11 @@ public class PositiveIntegerParamsValidator implements IParamsValidator
         {
             _property.setValue("foo");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive integer(foo).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(foo).\n", parserError);
 
             _property.setValue("1. 2");
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive integer(1. 2).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(1. 2).\n", parserError);
         }
     }
 }
