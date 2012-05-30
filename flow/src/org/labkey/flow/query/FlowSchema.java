@@ -686,21 +686,15 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public boolean hasContainerContext()
-        {
-            return ((FilteredTable)_expData).hasContainerContext();
-        }
-
-        @Override
         public ContainerContext getContainerContext()
         {
-            return ((FilteredTable)_expData).getContainerContext();
+            return _expData.getContainerContext();
         }
 
         @Override
         public FieldKey getContainerFieldKey()
         {
-            return _expData.getContainerFieldKey();
+            return ((AbstractTableInfo)_expData).getContainerFieldKey();
         }
 
     }
@@ -1063,21 +1057,15 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public boolean hasContainerContext()
-        {
-            return ((FilteredTable)_expData).hasContainerContext();
-        }
-
-        @Override
         public ContainerContext getContainerContext()
         {
-            return ((FilteredTable)_expData).getContainerContext();
+            return _expData.getContainerContext();
         }
 
         @Override
         public FieldKey getContainerFieldKey()
         {
-            return _expData.getContainerFieldKey();
+            return ((AbstractTableInfo)_expData).getContainerFieldKey();
         }
 
     }

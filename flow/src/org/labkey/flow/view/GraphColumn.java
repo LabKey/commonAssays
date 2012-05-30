@@ -22,10 +22,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowPreference;
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.well.WellController;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -71,9 +68,7 @@ public class GraphColumn extends DataColumn
         }
         else
         {
-            ActionURL urlGraph = new ActionURL(WellController.ShowGraphAction.class, ctx.getContainer());
-            urlGraph.addParameter(FlowParam.objectId.toString(), boundValue.toString());
-            urlGraph.addParameter(FlowParam.graph.toString(), displayValue.toString());
+            String urlGraph = renderURL(ctx);
             out.write("<img alt=\"Graph of: " + graphTitle + "\" title=\"" + graphTitle + "\"");
             out.write(" style=\"height: " + graphSize + "; width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
             out.write(PageFlowUtil.filter(urlGraph));
