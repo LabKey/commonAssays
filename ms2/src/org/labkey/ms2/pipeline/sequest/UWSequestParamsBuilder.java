@@ -150,11 +150,11 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
                         258,                                                       //sortOrder
-                        "sqt",                                            //The value of the property
+                        "0",                                            //The value of the property
                         "output_format",                                // the sequest.params property name
-                        "Output format - sqt or out",       // the sequest.params comment
+                        "0=sqt stdout (default), 1=out files",       // the sequest.params comment
                         ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                        new ListParamsValidator("sqt", "out"),
+                        new BooleanParamsValidator(),
                         false
         ));
 
