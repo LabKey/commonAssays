@@ -420,7 +420,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                             if (N_y == 1)
                                 szIonSeries += "Y";
                             szIonSeries += line.charAt(13);
-                            szIons = Character.toString(line.charAt(13));
+                            szIons = line.substring(13);
                         }
                         catch (NumberFormatException e)
                         {
@@ -754,7 +754,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             */
 
             writer.write(String.format("H\tAlg-DisplayTop\t%s\n", szOutPutLines));
-            writer.write(String.format("H\tAlg-IonSeries\t%s", szIons));
+            writer.write(String.format("H\tAlg-IonSeries\t%s\n", szIons));
             writer.write(String.format("H\tEnzymeSpec\t%s\n", szEnzymeSpec));
             /*
             if(flag_stat)
