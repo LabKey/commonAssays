@@ -1899,7 +1899,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(wellFK, dataNameFK, analyteFK));
 
-            SimpleFilter filter = new SimpleFilter(provider.getTableMetadata().getRunFieldKeyFromResults().toString(), run.getRowId());
+            SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults().toString(), run.getRowId());
             filter.addCondition(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, true);
             Map<String, Object>[] rows = Table.select(table, new ArrayList<ColumnInfo>(cols.values()), filter, null, Map.class);
 

@@ -275,7 +275,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         for (DomainProperty prop : _provider.getRunDomain(protocol).getProperties())
         {
-            defaultCols.add(new FieldKey(_provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
+            defaultCols.add(new FieldKey(_provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), prop.getName()));
         }
         for (DomainProperty prop : AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN).getProperties())
         {
@@ -283,7 +283,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         }
         for (DomainProperty prop : _provider.getBatchDomain(protocol).getProperties())
         {
-            defaultCols.add(new FieldKey(new FieldKey(_provider.getTableMetadata().getRunFieldKeyFromResults(), "Batch"), prop.getName()));
+            defaultCols.add(new FieldKey(new FieldKey(_provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), "Batch"), prop.getName()));
         }
 
         setDefaultVisibleColumns(defaultCols);

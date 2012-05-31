@@ -95,11 +95,19 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public MicroarrayAssayProvider()
     {
-        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE, new AssayTableMetadata(
-            null,
-            FieldKey.fromParts("Run"),
-            FieldKey.fromParts(AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME)
-        ));
+        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE);
+    }
+
+    @Override
+    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    {
+        return new AssayTableMetadata(
+                this,
+                protocol,
+                null,
+                FieldKey.fromParts("Run"),
+                FieldKey.fromParts(AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME)
+        );
     }
 
     @Override

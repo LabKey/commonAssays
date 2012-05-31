@@ -78,15 +78,15 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", GuavaDataHandler.DATA_TYPE, new ResultsAssayTableMetadata());
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", GuavaDataHandler.DATA_TYPE);
     }
 
     /** Relative from Results table. */
     static class ResultsAssayTableMetadata extends AssayTableMetadata
     {
-        public ResultsAssayTableMetadata()
+        public ResultsAssayTableMetadata(AssayProvider provider, ExpProtocol protocol)
         {
-            super(null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
+            super(provider, protocol, null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
         }
 
         @Override
@@ -100,9 +100,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     /** Relative from ResultSpecimens table. */
     static class ResultsSpecimensAssayTableMetadata extends AssayTableMetadata
     {
-        public ResultsSpecimensAssayTableMetadata()
+        public ResultsSpecimensAssayTableMetadata(AssayProvider provider, ExpProtocol protocol)
         {
-            super(FieldKey.fromParts("ResultID"), FieldKey.fromParts("ResultID", "Run"), FieldKey.fromParts("ResultID"));
+            super(provider, protocol, FieldKey.fromParts("ResultID"), FieldKey.fromParts("ResultID", "Run"), FieldKey.fromParts("ResultID"));
         }
 
         @Override
@@ -194,6 +194,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public String getDescription()
     {
         return "Imports Guava ViaCount and ExpressPlus cell count and viability data.";
+    }
+
+    @Override
+    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    {
+        return new ResultsAssayTableMetadata(this, protocol);
     }
 
     @Override

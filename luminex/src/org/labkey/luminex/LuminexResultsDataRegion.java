@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.study.assay.AssayProvider;
@@ -34,9 +35,9 @@ public class LuminexResultsDataRegion extends ResultsQueryView.ResultsDataRegion
 {
     private ColumnInfo _excludedColumn;
 
-    public LuminexResultsDataRegion(AssayProvider provider)
+    public LuminexResultsDataRegion(AssayProvider provider, ExpProtocol protocol)
     {
-        super(provider);
+        super(provider, protocol);
     }
 
     @Override

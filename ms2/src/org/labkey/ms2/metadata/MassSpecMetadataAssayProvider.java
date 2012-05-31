@@ -98,10 +98,18 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
     public MassSpecMetadataAssayProvider()
     {
-        super(PROTOCOL_LSID_NAMESPACE_PREFIX, RUN_LSID_NAMESPACE_PREFIX, MS_ASSAY_DATA_TYPE, new AssayTableMetadata(
+        super(PROTOCOL_LSID_NAMESPACE_PREFIX, RUN_LSID_NAMESPACE_PREFIX, MS_ASSAY_DATA_TYPE);
+    }
+
+    @Override
+    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    {
+        return new AssayTableMetadata(
+                this,
+                protocol,
                 FieldKey.fromParts("Run"),
                 FieldKey.fromParts("Run"),
-                FieldKey.fromParts("RowId")));
+                FieldKey.fromParts("RowId"));
     }
 
     @Override

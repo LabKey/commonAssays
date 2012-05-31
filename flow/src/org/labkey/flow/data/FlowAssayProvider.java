@@ -81,36 +81,54 @@ public class FlowAssayProvider extends AbstractAssayProvider
         // NOTE: Flow uses generic 'Protocol' and 'Run' LSID namespace prefixes so we can't
         // register LSID handlers in the same mannaer the AbstractAssayProvider does.
         // FlowAssayProvider.getPriority() will find the 'Flow' protocol in the container.
-        //super(FlowProtocol.getProtocolLSIDPrefix(), FlowRun.getRunLSIDPrefix(), null, new FlowAssayTableMetadata());
-        super(null, null, null, new FlowAssayTableMetadata());
+        //super(FlowProtocol.getProtocolLSIDPrefix(), FlowRun.getRunLSIDPrefix(), null);
+        super(null, null, null);
     }
 
     private static class FlowAssayTableMetadata extends AssayTableMetadata
     {
-        FlowAssayTableMetadata()
+        ICSMetadata _metadata;
+
+        FlowAssayTableMetadata(AssayProvider provider, ExpProtocol protocol)
         {
-            super(null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
+            super(provider, protocol, null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
+
+            FlowProtocol fp = new FlowProtocol(protocol);
+            _metadata = fp.getICSMetadata();
         }
 
         @Override
         public FieldKey getParticipantIDFieldKey()
         {
-            // UNDONE: Lookup fieldkey from flow protocol settings
+            if (_metadata != null && _metadata.getParticipantColumn() != null)
+                return _metadata.getParticipantColumn();
+
             return super.getParticipantIDFieldKey();
         }
 
         @Override
         public FieldKey getVisitIDFieldKey(TimepointType timepointType)
         {
-            // UNDONE: Lookup fieldkey from flow protocol settings
-            return super.getVisitIDFieldKey(timepointType);
+            if (timepointType == TimepointType.DATE)
+            {
+                if (_metadata != null && _metadata.getDateColumn() != null)
+                    return _metadata.getDateColumn();
+            }
+            else if (timepointType == TimepointType.VISIT)
+            {
+                if (_metadata != null && _metadata.getVisitColumn() != null)
+                    return _metadata.getVisitColumn();
+            }
+
+            // Either metadata has no visit or date FieldKey or timepointType is continuous.
+            return null;
         }
 
         @Override
-        public FieldKey getTargetStudyFieldKey(AssayProvider provider, ExpProtocol protocol)
+        public FieldKey getTargetStudyFieldKey()
         {
             // UNDONE: Lookup fieldkey from flow protocol settings
-            return super.getTargetStudyFieldKey(provider, protocol);
+            return super.getTargetStudyFieldKey();
         }
 
     }
@@ -229,6 +247,12 @@ public class FlowAssayProvider extends AbstractAssayProvider
                 return Priority.HIGH;
         }
         return null;
+    }
+
+    @Override
+    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    {
+        return new FlowAssayTableMetadata(this, protocol);
     }
 
     @Override

@@ -59,7 +59,6 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -318,8 +317,8 @@ public class MigrateNAbPipelineJob extends PipelineJob
                 // Now figure out the mapping from specimen name to Id for the newly created run
                 AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
                 TableInfo resultsTableInfo = provider.createDataTable(schema, protocol, false);
-                FieldKey runFK = provider.getTableMetadata().getRunRowIdFieldKeyFromResults();
-                FieldKey rowIdFK = provider.getTableMetadata().getResultRowIdFieldKey();
+                FieldKey runFK = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
+                FieldKey rowIdFK = provider.getTableMetadata(protocol).getResultRowIdFieldKey();
                 FieldKey specimenNameFK = FieldKey.fromParts("Properties", NabDataHandler.WELLGROUP_NAME_PROPERTY);
 
                 // Do the query to get the new run's info

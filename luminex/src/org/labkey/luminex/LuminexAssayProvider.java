@@ -85,11 +85,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public LuminexAssayProvider()
     {
-        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexDataHandler.LUMINEX_DATA_TYPE, new AssayTableMetadata(
-            null,
-            FieldKey.fromParts("Data", "Run"),
-            FieldKey.fromParts("RowId")));
-
+        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexDataHandler.LUMINEX_DATA_TYPE);
         setMaxFileInputs(10);
     }
 
@@ -129,6 +125,17 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 return dataURL.getLocalURIString();
             }
         });
+    }
+
+    @Override
+    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    {
+        return new AssayTableMetadata(
+                this,
+                protocol,
+                null,
+                FieldKey.fromParts("Data", "Run"),
+                FieldKey.fromParts("RowId"));
     }
 
     @Override
@@ -439,7 +446,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             @Override
             protected DataRegion createDataRegion()
             {
-                ResultsDataRegion rgn = new LuminexResultsDataRegion(_provider);
+                ResultsDataRegion rgn = new LuminexResultsDataRegion(_provider, _protocol);
                 initializeDataRegion(rgn);
                 return rgn;
             }

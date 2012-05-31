@@ -130,6 +130,8 @@ public class ICSMetadata
 
     public List<FieldKey> getMatchColumns()
     {
+        if (matchColumns == null || matchColumns.size() == 0)
+            return Collections.emptyList();
         return Collections.unmodifiableList(matchColumns);
     }
 
@@ -140,6 +142,8 @@ public class ICSMetadata
 
     public List<FilterInfo> getBackgroundFilter()
     {
+        if (background == null || background.size() == 0)
+            return Collections.emptyList();
         return Collections.unmodifiableList(background);
     }
 

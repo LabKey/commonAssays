@@ -32,7 +32,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -168,7 +167,7 @@ public class ElispotController extends SpringActionController
             if (!clauses.isEmpty())
             {
                 AssayProvider provider = AssayService.get().getProvider(protocol);
-                FieldKey column = provider.getTableMetadata().getRunRowIdFieldKeyFromResults();
+                FieldKey column = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
 
                 for (SimpleFilter.FilterClause clause : clauses)
                 {
@@ -258,7 +257,7 @@ public class ElispotController extends SpringActionController
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
         String name = ElispotSchema.getAssayTableName(protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
-        url.addFilter(name, provider.getTableMetadata().getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, rowId);
+        url.addFilter(name, provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, rowId);
     }
 
     private class ElispotDetailsHeaderView extends AssayHeaderView

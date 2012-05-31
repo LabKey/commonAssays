@@ -49,6 +49,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
@@ -512,7 +513,8 @@ public class ViabilityAssaySchema extends AssaySchema
             ColumnInfo specimenID = addVisible(wrapColumn(getRealTable().getColumn("SpecimenID")));
             specimenID.setLabel("Specimen");
             specimenID.setKeyField(true);
-            SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, getProtocol(), new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata());
+            AssayTableMetadata metadata = new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata(_provider, getProtocol());
+            SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, getProtocol(), metadata);
             SimpleFilter filter = new SimpleFilter("volumeunits", "CEL");
             fk.addSpecimenFilter(filter);
             specimenID.setFk(fk);

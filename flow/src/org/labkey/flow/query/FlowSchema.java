@@ -801,6 +801,12 @@ public class FlowSchema extends UserSchema
             ColumnInfo colBackground = addObjectIdColumn(columnAlias);
             colBackground.setFk(new BackgroundForeignKey(FlowSchema.this, _fps, _type));
             colBackground.setIsUnselectable(true);
+
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            ICSMetadata metadata = protocol != null ? protocol.getICSMetadata() : null;
+            if (metadata == null || !metadata.hasBackground())
+                colBackground.setHidden(true);
+
             addMethod(columnAlias, new BackgroundMethod(FlowSchema.this, colBackground));
             return colBackground;
         }
@@ -1218,7 +1224,8 @@ public class FlowSchema extends UserSchema
                 }
             }
 
-            if (_colBackground != null)
+            // Background column will be hidden if the ICSMetadata doesn't have background information
+            if (!_colBackground.isHidden())
             {
                 lookup = _colBackground.getFk().getLookupTableInfo();
                 if (lookup != null)
@@ -1307,10 +1314,9 @@ public class FlowSchema extends UserSchema
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
-        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-        ColumnInfo colBackground = null;
-        if (protocol != null && protocol.hasICSMetadata())
-            colBackground = ret.addBackgroundColumn("Background");
+        
+        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
+
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.toString());
         colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
@@ -1364,10 +1370,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
 
-        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-        ColumnInfo colBackground = null;
-        if (protocol != null && protocol.hasICSMetadata())
-            colBackground = ret.addBackgroundColumn("Background");
+        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
 
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
 
@@ -1693,6 +1696,8 @@ public class FlowSchema extends UserSchema
             String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
             
             ICSMetadata ics = _protocol.getICSMetadata();
+            if (!ics.hasBackground())
+                return null;
 
             // BACKGROUND            
             FlowDataTable bg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());

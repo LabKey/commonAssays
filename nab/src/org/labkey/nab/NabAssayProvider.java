@@ -123,10 +123,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public NabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, AssayDataType dataType)
     {
-        super(protocolLSIDPrefix, runLSIDPrefix, dataType, new AssayTableMetadata(
-            FieldKey.fromParts("Properties", SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
-            FieldKey.fromParts("Run"),
-            FieldKey.fromParts("ObjectId")));
+        super(protocolLSIDPrefix, runLSIDPrefix, dataType);
     }
 
 
@@ -153,6 +150,17 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 //                return c.hasPermission(user, perm, RunDataSetContextualRoles.getContextualRolesForRun(c, user, run));
             }
         });
+    }
+
+    @Override
+    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    {
+        return new AssayTableMetadata(
+                this,
+                protocol,
+                FieldKey.fromParts("Properties", SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+                FieldKey.fromParts("Run"),
+                FieldKey.fromParts("ObjectId"));
     }
 
     @Override

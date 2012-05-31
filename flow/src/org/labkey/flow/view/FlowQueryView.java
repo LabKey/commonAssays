@@ -259,30 +259,35 @@ public class FlowQueryView extends QueryView
 
         super.populateButtonBar(view, bar, exportAsWebPage);
 
-        // UNDONE: refactor ResultsQueryView create "Copy to Study" button code so it can be re-used here
-        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-        if (protocol != null && !AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
+        // NOTE: Only add "Copy to Study" to FCSAnlayses wells.  This isn't a reliable way to check if the wells are FCSAnalysis wells.
+        String queryName = getSettings().getQueryName();
+        if (queryName.equals(FlowTableType.FCSAnalyses.toString()))
         {
-            ExpProtocol expProtocol = protocol.getProtocol();
-            ActionURL publishURL = PageFlowUtil.urlProvider(AssayUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
-            /*
-            for (Pair<String, String> param : publishURL.getParameters())
+            // UNDONE: refactor ResultsQueryView create "Copy to Study" button code so it can be re-used here
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            if (protocol != null && !AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
-                if (!"rowId".equalsIgnoreCase(param.getKey()))
-                    view.getDataRegion().addHiddenFormField(param.getKey(), param.getValue());
+                ExpProtocol expProtocol = protocol.getProtocol();
+                ActionURL publishURL = PageFlowUtil.urlProvider(AssayUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
+                /*
+                for (Pair<String, String> param : publishURL.getParameters())
+                {
+                    if (!"rowId".equalsIgnoreCase(param.getKey()))
+                        view.getDataRegion().addHiddenFormField(param.getKey(), param.getValue());
+                }
+                publishURL.deleteParameters();
+                */
+
+                if (getTable().getContainerFilter() != null)
+                    publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
+
+                ActionButton publishButton = new ActionButton(publishURL,
+                        "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+                publishButton.setDisplayPermission(InsertPermission.class);
+                publishButton.setRequiresSelection(true);
+
+                bar.add(publishButton);
             }
-            publishURL.deleteParameters();
-            */
-
-            if (getTable().getContainerFilter() != null)
-                publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
-
-            ActionButton publishButton = new ActionButton(publishURL,
-                    "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
-            publishButton.setDisplayPermission(InsertPermission.class);
-            publishButton.setRequiresSelection(true);
-
-            bar.add(publishButton);
         }
     }
 
