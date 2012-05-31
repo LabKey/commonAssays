@@ -125,7 +125,7 @@ public class ICSMetadata
 
     public void setDateColumn(FieldKey dateColumn)
     {
-        dateColumn = dateColumn;
+        this.dateColumn = dateColumn;
     }
 
     public List<FieldKey> getMatchColumns()
