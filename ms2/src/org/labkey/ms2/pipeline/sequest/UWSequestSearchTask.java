@@ -835,7 +835,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 if (diffMass != 0.0f)
                 {
                     //now we know that the diff mod mass is a valid float and is not zero
-                    // prefix positive values with =
+                    // prefix positive values with +
                     diffMods.add(new Pair<String, String>(aminoAcid, (diffMass > 0 ? "+" : "") + Float.toString(diffMass)));
                 }
             }
