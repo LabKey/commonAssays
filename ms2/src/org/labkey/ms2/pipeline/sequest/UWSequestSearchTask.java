@@ -621,8 +621,8 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                     //sprintf(szTemp1,"%d", N_enz);
                     while ((line = reader.readLine()) != null)
                     {
-                        String[] values = line.split("\\s");
-                        if (values.length != 4)
+                        String[] values = line.split("\\s+");
+                        if (values.length < 4)
                             logger.error("Error: Enzyme Reader\n");
                         else
                         {
@@ -844,5 +844,12 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 logger.error("Trouble reading a differential mod mass for amino acid " + aminoAcid);
             }
         }
+    }
+
+    public static void main(String... args) throws Exception
+    {
+        FileWriter writer = new FileWriter("c:/temp/headers.txt");
+        writeParams(writer, new File("c:/temp/sequestProduction.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/149Proteins.fsa"));
+        writer.close();
     }
 }
