@@ -16,21 +16,21 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.labkey.api.query.QueryNestingOption;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.DataView;
-import org.labkey.api.view.DisplayElement;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.reports.ReportService;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.DisplayElement;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
-import org.labkey.api.reports.ReportService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,13 +40,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * User: jeckels
  * Date: Apr 27, 2007
  */
-public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<AbstractQueryMS2RunView.AbstractMS2QueryView>
+public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<NestableQueryView>
 {
     public AbstractQueryMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
     {
@@ -80,7 +79,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
     @Override
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException
     {
-        AbstractMS2QueryView queryView = createGridView(false, null, null, true);
+        NestableQueryView queryView = createGridView(false, null, null, true);
         RenderContext context = queryView.createDataView().getRenderContext();
         TableInfo tinfo = queryView.createTable();
 
@@ -88,15 +87,9 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
         SimpleFilter filter = context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, 0, sort);
 
         FieldKey desiredFK;
-        boolean proteinProphetNesting = queryView._selectedNestingOption instanceof ProteinProphetQueryNestingOption;
-        boolean proteinGroupNesting = queryView._selectedNestingOption instanceof ProteinGroupQueryNestingOption;
-        if (proteinProphetNesting)
+        if (queryView.getSelectedNestingOption() != null)
         {
-            desiredFK = FieldKey.fromString(queryView._selectedNestingOption.getRowIdColumnName());
-        }
-        else if (proteinGroupNesting)
-        {
-            desiredFK = FieldKey.fromString(queryView._selectedNestingOption.getRowIdColumnName());
+            desiredFK = FieldKey.fromString(queryView.getSelectedNestingOption().getRowIdColumnName());
         }
         else
         {
@@ -113,18 +106,11 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
 
         SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
 
-        if (proteinProphetNesting)
+        if (queryView.getSelectedNestingOption() != null)
         {
             SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
             result.append(sql);
             result.append(") x");
-            return result;
-        }
-        else if (proteinGroupNesting)
-        {
-            SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
-            result.append(sql);
-            result.append(")");
             return result;
         }
         else
@@ -138,7 +124,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
 
     public Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run) throws ServletException
     {
-        AbstractMS2QueryView queryView = createGridView(false, null, null, true);
+        NestableQueryView queryView = createGridView(false, null, null, true);
         RenderContext context = queryView.createDataView().getRenderContext();
         TableInfo tinfo = queryView.createTable();
 
@@ -154,22 +140,13 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
 
     public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException;
 
-    public abstract class AbstractMS2QueryView extends QueryView
+    public abstract class AbstractMS2QueryView extends NestableQueryView
     {
-        protected QueryNestingOption _selectedNestingOption;
-
-        protected final boolean _expanded;
-        protected final boolean _allowNesting;
         protected List<Integer> _selectedRows;
-        protected List<FieldKey> _overrideColumns;
 
-        public AbstractMS2QueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
+        public AbstractMS2QueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting, QueryNestingOption... queryNestingOptions)
         {
-            super(schema, settings);
-            _expanded = expanded;
-            _allowNesting = allowNesting;
-            _buttonBarPosition = DataRegion.ButtonBarPosition.BOTH;
-            setShowExportButtons(false);
+            super(schema, settings, expanded, allowNesting, queryNestingOptions);
 
             setViewItemFilter(new ReportService.ItemFilter()
             {
@@ -178,12 +155,6 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
                     return SingleMS2RunRReport.TYPE.equals(type);
                 }
             });
-
-        }
-        
-        public void setOverrideColumns(List<FieldKey> fieldKeys)
-        {
-            _overrideColumns = fieldKeys;
         }
 
         protected void populateButtonBar(DataView view, ButtonBar bar)
@@ -193,21 +164,6 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
             for (DisplayElement element : bb.getList())
             {
                 bar.add(element);
-            }
-        }
-
-        public abstract TableInfo createTable();
-
-        private void createRowIdFragment(List<String> selectedRows)
-        {
-            if (selectedRows != null)
-            {
-                _selectedRows = new ArrayList<Integer>();
-                for (String selectedRow : selectedRows)
-                {
-                    Integer row = new Integer(selectedRow);
-                    _selectedRows.add(row);
-                }
             }
         }
 
@@ -228,6 +184,33 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
             createRowIdFragment(selectedRows);
             exportToExcel(response);
             return null;
+        }
+
+        protected void createRowIdFragment(List<String> selectedRows)
+        {
+            if (selectedRows != null)
+            {
+                _selectedRows = new ArrayList<Integer>();
+                for (String selectedRow : selectedRows)
+                {
+                    Integer row = new Integer(selectedRow);
+                    _selectedRows.add(row);
+                }
+            }
+        }
+
+        public DataView createDataView()
+        {
+            DataView result = super.createDataView();
+            SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());
+            if (_selectedRows != null)
+            {
+                String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
+                filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
+            }
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
+            result.getRenderContext().setBaseFilter(filter);
+            return result;
         }
     }
 }

@@ -15,6 +15,7 @@
  */
 package org.labkey.ms1.query;
 
+import org.labkey.api.ProteinService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
@@ -45,7 +46,7 @@ public class FeaturesFilterFactory
 
         //start with the container filter
         String scParam = url.getParameter(NAMESPACE_PREFIX + PARAM_SOURCE_CONTAINER);
-        String subfoldersParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.PepSearchForm.ParamNames.subfolders.name());
+        String subfoldersParam = url.getParameter(NAMESPACE_PREFIX + ProteinService.PeptideSearchForm.ParamNames.subfolders.name());
         Container root = null != scParam && scParam.length() > 0 
                 ? ContainerManager.getForPath(scParam)
                 : ContainerManager.getForPath(url.getExtraPath());
@@ -57,8 +58,8 @@ public class FeaturesFilterFactory
             filters.add(new RunFilter(runParam));
 
         //PeptideFilter
-        String pepParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.PepSearchForm.ParamNames.pepSeq.name());
-        String exactParam = url.getParameter(MS1Controller.PepSearchForm.ParamNames.exact.name());
+        String pepParam = url.getParameter(NAMESPACE_PREFIX + ProteinService.PeptideSearchForm.ParamNames.pepSeq.name());
+        String exactParam = url.getParameter(ProteinService.PeptideSearchForm.ParamNames.exact.name());
         if(null != pepParam && pepParam.length() > 0)
             filters.add(new PeptideFilter(pepParam, null != exactParam && exactParam.length() > 0));
 

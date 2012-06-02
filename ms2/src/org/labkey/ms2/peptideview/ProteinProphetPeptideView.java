@@ -196,7 +196,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             _maxPeptideRows = 75000;
             _maxGroupingRows = 1000;
         }
-        ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion(_url);
+        ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion(getAJAXNestedGridURL());
         proteinRgn.setTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteinGroups());
         proteinRgn.addDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));

@@ -356,7 +356,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         return fdbu._insertIntoOrgsStmt.executeUpdate();
     }
 
-    private String extractGenus(String fullOrg)
+    public static String extractGenus(String fullOrg)
     {
         if (fullOrg == null)
         {
@@ -373,7 +373,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         }
     }
 
-    private String extractSpecies(String fullOrg)
+    public static String extractSpecies(String fullOrg)
     {
         if (fullOrg == null)
         {

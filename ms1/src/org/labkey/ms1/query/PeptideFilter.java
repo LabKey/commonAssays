@@ -37,17 +37,20 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
 {
     private String[] _sequences;
     private boolean _exact = false;
+    private final String _sequenceColumnName;
+    private final String _exactSequenceColumnName;
 
-    public PeptideFilter(String sequenceList, boolean exact)
+    public PeptideFilter(String sequenceList, boolean exact, String sequenceColumnName, String exactSequenceColumnName)
     {
         _sequences = sequenceList.split(",");
         _exact = exact;
+        _sequenceColumnName = sequenceColumnName;
+        _exactSequenceColumnName = exactSequenceColumnName;
     }
 
-    public PeptideFilter(String[] sequences, boolean exact)
+    public PeptideFilter(String sequenceList, boolean exact)
     {
-        _sequences = sequences;
-        _exact = exact;
+        this(sequenceList, exact, "TrimmedPeptide", "Peptide");
     }
 
     private String normalizeSequence(String sequence)
@@ -136,8 +139,8 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         sequence = sequence.toUpperCase();
 
         //always add a condition for pd.TrimmedPeptide using normalized version of sequence
-        StringBuilder sql = new StringBuilder(null == pepDataAlias ? "(TrimmedPeptide"
-                : "(" + pepDataAlias + ".TrimmedPeptide");
+        StringBuilder sql = new StringBuilder(null == pepDataAlias ? "(" + _sequenceColumnName
+                : "(" + pepDataAlias + "." + _sequenceColumnName);
 
         if (_exact)
         {
@@ -155,7 +158,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         //if _exact, AND another contains condition against pd.Peptide
         if(_exact)
         {
-            sql.append(null == pepDataAlias ? " AND Peptide LIKE '%" : " AND " + pepDataAlias + ".Peptide LIKE '%");
+            sql.append(null == pepDataAlias ? " AND " + _exactSequenceColumnName + " LIKE '%" : " AND " + pepDataAlias + "." + _exactSequenceColumnName + " LIKE '%");
             sql.append(sequence.replace("'", "''").trim()); //FIX: 6679
             sql.append("%'");
         }

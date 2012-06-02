@@ -18,8 +18,8 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.query.AbstractNestableDataRegion;
 import org.labkey.ms2.Protein;
-import org.labkey.api.view.ActionURL;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -32,11 +32,11 @@ import java.util.ArrayList;
  * User: jeckels
  * Date: Feb 22, 2006
  */
-public class StandardProteinDataRegion extends AbstractProteinDataRegion
+public class StandardProteinDataRegion extends AbstractNestableDataRegion
 {
     private int _peptideIndex = -1;
 
-    public StandardProteinDataRegion(ActionURL url)
+    public StandardProteinDataRegion(String url)
     {
         super("Protein", url);
         setShadeAlternatingRows(true);

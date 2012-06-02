@@ -279,6 +279,12 @@ public class SequencesTableInfo extends FilteredTable
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinManager.getTableInfoSequences(), "s");
+        sql.append(" WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "s.BestName", exactMatch));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations(), "a");
         sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
@@ -299,7 +305,7 @@ public class SequencesTableInfo extends FilteredTable
         addCondition(sql);
     }
 
-    public void addSeqIdFilter(Integer[] seqIds)
+    public void addSeqIdFilter(int[] seqIds)
     {
         SQLFragment sql = new SQLFragment("SeqId IN (");
         if (seqIds.length == 0)

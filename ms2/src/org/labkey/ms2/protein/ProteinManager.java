@@ -22,6 +22,7 @@ import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
@@ -32,13 +33,17 @@ import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.settings.PreferenceService;
+import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.webdav.SimpleDocumentResource;
 import org.labkey.ms2.*;
+import org.labkey.ms2.protein.fasta.PeptideGenerator;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -198,20 +203,18 @@ public class ProteinManager
     }
 
 
-    public static Protein getProtein(int seqId) throws SQLException
+    public static Protein getProtein(int seqId)
     {
-        Protein[] proteins = Table.executeQuery(getSchema(),
+        return new SqlSelector(getSchema(),
                 "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE SeqId=?",
-                new Object[]{seqId}, Protein.class);
+                seqId).getObject(Protein.class);
+    }
 
-        if (proteins.length < 1)
-            _log.error("Protein sequence not found: " + seqId);
-        else if (proteins.length > 1)
-            _log.error("Duplicate protein sequence found: " + seqId);
-        else
-            return proteins[0];
-
-        return null;
+    public static Protein getProtein(String sequence, int organismId)
+    {
+        return new SqlSelector(getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE Hash=? AND OrgId=?",
+                hashSequence(sequence), organismId).getObject(Protein.class);
     }
 
 
@@ -500,6 +503,69 @@ public class ProteinManager
         {
             MS2Manager.getSchema().getScope().closeConnection();
         }
+    }
+
+    public static int ensureProtein(String sequence, String organismName, String name, String description)
+    {
+        try
+        {
+            String genus = FastaDbLoader.extractGenus(organismName);
+            String species = FastaDbLoader.extractSpecies(organismName);
+            SimpleFilter filter = new SimpleFilter("species", species);
+            filter.addCondition("genus", genus);
+            Organism organism = new TableSelector(getTableInfoOrganisms(), Table.ALL_COLUMNS, filter, null).getObject(Organism.class);
+            if (organism == null)
+            {
+                organism = new Organism();
+                organism.setGenus(genus);
+                organism.setSpecies(species);
+                organism = Table.insert(null, getTableInfoOrganisms(), organism);
+            }
+
+            Protein protein = getProtein(sequence, organism.getOrgId());
+            if (protein == null)
+            {
+                Map<String, Object> map = new CaseInsensitiveHashMap<Object>();
+                map.put("ProtSequence", sequence);
+                byte[] sequenceBytes = getSequenceBytes(sequence);
+                map.put("Mass", PeptideGenerator.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES));
+                map.put("OrgId", organism.getOrgId());
+                map.put("Hash", hashSequence(sequence));
+                map.put("Description", description.length() > 200 ? description.substring(0, 196) + "..." : description);
+                map.put("BestName", name);
+                map.put("Length", sequence.length());
+                map.put("InsertDate", new Date());
+                map.put("ChangeDate", new Date());
+
+                Table.insert(null, getTableInfoSequences(), map);
+                protein = getProtein(sequence, organism.getOrgId());
+            }
+            return protein.getSeqId();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
+
+    private static String hashSequence(String sequence)
+    {
+        return HashHelpers.hash(getSequenceBytes(sequence));
+    }
+
+    private static byte[] getSequenceBytes(String sequence)
+    {
+        byte[] bytes = sequence.getBytes();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(bytes.length);
+
+        for (byte aByte : bytes)
+    {
+        if ((aByte >= 'A') && (aByte <= 'Z'))
+        {
+            bOut.write(aByte);
+        }
+    }
+        return bOut.toByteArray();
     }
 
 
@@ -1222,7 +1288,7 @@ public class ProteinManager
         return sql;
     }
 
-    public static MultiMap<String, String> getIdentifiersFromId(int seqid) throws SQLException
+    public static MultiMap<String, String> getIdentifiersFromId(int seqid)
     {
         ResultSet rs = null;
         try
@@ -1243,6 +1309,10 @@ public class ProteinManager
             }
             return map;
         }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
         finally
         {
             ResultSetUtil.close(rs);
@@ -1250,35 +1320,49 @@ public class ProteinManager
     }
 
 
-    public static Set<String> getOrganismsFromId(int id) throws SQLException
+    public static Set<String> getOrganismsFromId(int id)
     {
-        HashSet<String> retVal = new HashSet<String>();
-        Integer paramArr[] = {id};
-        String rvString[] = Table.executeArray(getSchema(),
-                "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND seqID=?",
-                paramArr,
-                String.class);
+        try
+        {
+            HashSet<String> retVal = new HashSet<String>();
+            Integer paramArr[] = {id};
+            String rvString[] = Table.executeArray(getSchema(),
+                    "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND seqID=?",
+                    paramArr,
+                    String.class);
 
-        retVal.addAll(Arrays.asList(rvString));
+            retVal.addAll(Arrays.asList(rvString));
 
-        String org = Table.executeSingleton(getSchema(),
-                "SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
-                        " FROM " + getTableInfoOrganisms() +
-                        " WHERE orgid=(SELECT orgid FROM " + getTableInfoSequences() +
-                        " WHERE seqid=?)",
-                paramArr, String.class);
+            String org = Table.executeSingleton(getSchema(),
+                    "SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
+                            " FROM " + getTableInfoOrganisms() +
+                            " WHERE orgid=(SELECT orgid FROM " + getTableInfoSequences() +
+                            " WHERE seqid=?)",
+                    paramArr, String.class);
 
-        retVal.add(org);
-        return retVal;
+            retVal.add(org);
+            return retVal;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
 
-    public static String makeIdentURLString(String identifier, String infoSourceURLString) throws UnsupportedEncodingException
+    public static String makeIdentURLString(String identifier, String infoSourceURLString)
     {
         if (identifier == null || infoSourceURLString == null)
             return null;
 
-        identifier = java.net.URLEncoder.encode(identifier, "UTF-8");
+        try
+        {
+            identifier = java.net.URLEncoder.encode(identifier, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new UnexpectedException(e);
+        }
 
         return infoSourceURLString.replaceAll("\\{\\}", identifier);
     }
@@ -1287,7 +1371,7 @@ public class ProteinManager
     static final String NOTFOUND = "NOTFOUND";
     static final Map<String, String> cacheURLs = new ConcurrentHashMap<String, String>(200);
 
-    public static String makeIdentURLStringWithType(String identifier, String identType) throws Exception
+    public static String makeIdentURLStringWithType(String identifier, String identType)
     {
         if (identifier == null || identType == null)
             return null;
@@ -1295,16 +1379,23 @@ public class ProteinManager
         String url = cacheURLs.get(identType);
         if (url == null)
         {
-            url = Table.executeSingleton(getSchema(), 
-                    "SELECT S.url\n" +
-                    "FROM " + ProteinManager.getTableInfoInfoSources() + " S INNER JOIN " + ProteinManager.getTableInfoIdentTypes() +" T " +
-                        "ON S.sourceId = T.cannonicalSourceId\n" +
-                    "WHERE T.name=?",
-                    new Object[]{identType},
-                    String.class);
+            try
+            {
+                url = Table.executeSingleton(getSchema(),
+                        "SELECT S.url\n" +
+                        "FROM " + ProteinManager.getTableInfoInfoSources() + " S INNER JOIN " + ProteinManager.getTableInfoIdentTypes() +" T " +
+                            "ON S.sourceId = T.cannonicalSourceId\n" +
+                        "WHERE T.name=?",
+                        new Object[]{identType},
+                        String.class);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
             cacheURLs.put(identType, null==url ? NOTFOUND : url);
         }
-        if (null == url || NOTFOUND == url)
+        if (null == url || NOTFOUND.equals(url))
             return null;
 
         return makeIdentURLString(identifier, url);
@@ -1323,7 +1414,7 @@ public class ProteinManager
         return retVal;
     }
 
-    public static String[] makeFullAnchorStringArray(Collection<String> idents, String target, String identType) throws Exception
+    public static String[] makeFullAnchorStringArray(Collection<String> idents, String target, String identType)
     {
         if (idents == null || idents.isEmpty() || identType == null)
             return new String[0];
@@ -1334,7 +1425,7 @@ public class ProteinManager
         return retVal;
     }
 
-    public static String[] makeFullGOAnchorStringArray(Collection<String> goStrings, String target) throws Exception
+    public static String[] makeFullGOAnchorStringArray(Collection<String> goStrings, String target)
     {
         if (goStrings == null) return new String[0];
         String[] retVal = new String[goStrings.size()];
@@ -1445,35 +1536,29 @@ public class ProteinManager
             {
                 if (0==id)
                     continue;
-                try
-                {
-                    Protein p = getProtein(id);
-                    MultiMap<String, String> map = getIdentifiersFromId(id);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(p.getBestName()).append("\n");
-                    sb.append(p.getDescription()).append("\n");
-                    for (String v : map.values())
-                    {
-                        sb.append(v).append(" ");
-                    }
 
-                    String docid = "protein:" + id;
-                    Map<String,Object> m = new HashMap<String,Object>();
-                    m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
-                    m.put(SearchService.PROPERTY.displayTitle.toString(), "Protein " + p.getBestName());
-                    SimpleDocumentResource r = new SimpleDocumentResource(
-                            new Path(docid),
-                            docid,
-                            c.getId(), "text/plain",
-                            sb.toString().getBytes(),
-                            url.clone().addParameter("seqId",id),
-                            m);
-                    task.addResource(r, SearchService.PRIORITY.item);
-                }
-                catch (SQLException x)
+                Protein p = getProtein(id);
+                MultiMap<String, String> map = getIdentifiersFromId(id);
+                StringBuilder sb = new StringBuilder();
+                sb.append(p.getBestName()).append("\n");
+                sb.append(p.getDescription()).append("\n");
+                for (String v : map.values())
                 {
-                    throw new RuntimeSQLException(x);
+                    sb.append(v).append(" ");
                 }
+
+                String docid = "protein:" + id;
+                Map<String,Object> m = new HashMap<String,Object>();
+                m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
+                m.put(SearchService.PROPERTY.displayTitle.toString(), "Protein " + p.getBestName());
+                SimpleDocumentResource r = new SimpleDocumentResource(
+                        new Path(docid),
+                        docid,
+                        c.getId(), "text/plain",
+                        sb.toString().getBytes(),
+                        url.clone().addParameter("seqId",id),
+                        m);
+                task.addResource(r, SearchService.PRIORITY.item);
             }
         }
         else // fast query

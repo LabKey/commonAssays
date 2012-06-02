@@ -15,6 +15,7 @@
  */
 package org.labkey.ms1.report;
 
+import org.labkey.api.ProteinService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.reports.report.CustomRReport;
@@ -43,8 +44,8 @@ public class FeaturesRReport extends CustomRReport
             MS1Controller.SimilarSearchForm.ParamNames.timeOffset.name(),
             MS1Controller.SimilarSearchForm.ParamNames.timeSource.name(),
             MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name(),
-            MS1Controller.PepSearchForm.ParamNames.pepSeq.name(),
-            MS1Controller.PepSearchForm.ParamNames.exact.name(),
+            ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(),
+            ProteinService.PeptideSearchForm.ParamNames.exact.name(),
     };
 
     public FeaturesRReport()
@@ -106,14 +107,14 @@ public class FeaturesRReport extends CustomRReport
         }
 
         //if pepSeq is there, it's a peptide search view
-        if (null != url.getParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name()))
+        if (null != url.getParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name()))
         {
             forSearch = true;
-            MS1Controller.PepSearchForm form = new MS1Controller.PepSearchForm();
-            form.setPepSeq(url.getParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name()));
-            if(null != url.getParameter(MS1Controller.PepSearchForm.ParamNames.exact.name()))
+            MS1Controller.PeptideFilterSearchForm form = new MS1Controller.PeptideFilterSearchForm();
+            form.setPepSeq(url.getParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name()));
+            if(null != url.getParameter(ProteinService.PeptideSearchForm.ParamNames.exact.name()))
                 form.setExact(true);
-            if(null != url.getParameter(MS1Controller.PepSearchForm.ParamNames.subfolders.name()))
+            if(null != url.getParameter(ProteinService.PeptideSearchForm.ParamNames.subfolders.name()))
             {
                 form.setSubfolders(true);
                 restrictContainer = false;

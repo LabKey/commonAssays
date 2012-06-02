@@ -16,6 +16,7 @@
 
 package org.labkey.ms1.query;
 
+import org.labkey.api.ProteinService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -131,8 +132,8 @@ public class MS1Schema extends UserSchema
         tinfo.setBaseFilters(filters);
 
         ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
-        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
-        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.runIds.name(), runFilter.getRunIdString());
+        urlPepSearch.addParameter(ProteinService.PeptideSearchForm.ParamNames.exact.name(), "on");
+        urlPepSearch.addParameter(ProteinService.PeptideSearchForm.ParamNames.runIds.name(), runFilter.getRunIdString());
 
         CrosstabSettings settings = new CrosstabSettings(tinfo);
 

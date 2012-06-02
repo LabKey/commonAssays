@@ -1,7 +1,6 @@
  .protein-coverage-map, .protein-coverage-map table  {
     border-collapse: collapse;
     padding: 0;
-    width: 950px;
 }
 
 .sequence-row, .sequence-row tr  {

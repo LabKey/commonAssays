@@ -16,6 +16,7 @@
 
 package org.labkey.ms1.model;
 
+import org.labkey.api.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.util.PageFlowUtil;
@@ -207,7 +208,7 @@ public class FeatureDetailsModel
 
     public String getPepSearchUrl(String sequence)
     {
-        _pepSearchUrl.replaceParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name(), sequence);
+        _pepSearchUrl.replaceParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
         return _pepSearchUrl.getLocalURIString();
     }
 

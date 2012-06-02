@@ -20,7 +20,9 @@ import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.Stats;
 import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.TableSelector;
 import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
@@ -53,7 +55,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
 
     SPROTload sprotLoadStatus = SPROTload.not_tried_yet;
 
-    public String guess(ProteinPlus p) throws SQLException
+    public String guess(ProteinPlus p)
     {
         //Is the first token on the defn line an identifier.  If
         //  so, do we already have it?  If so, what organisms is
@@ -75,13 +77,20 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         return null;
     }
 
-    public String guessOrganismBySprotSuffix(String pName) throws SQLException
+    public String guessOrganismBySprotSuffix(String pName)
     {
         if (sprotLoadStatus == SPROTload.not_tried_yet)
         {
-            if (Table.isEmpty(ProteinManager.getTableInfoSprotOrgMap()))
+            if (new TableSelector(ProteinManager.getTableInfoSprotOrgMap()).getRowCount() == 0)
             {
-                ProteinDictionaryHelpers.loadProtSprotOrgMap();
+                try
+                {
+                    ProteinDictionaryHelpers.loadProtSprotOrgMap();
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
                 sprotLoadStatus = SPROTload.tried_and_succeeded;
             }
             else
@@ -99,12 +108,10 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         if (retVal != null)
             return retVal;
 
-        retVal = Table.executeSingleton(
-                _schema,
+        retVal = new SqlSelector(_schema,
                 "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " + ProteinManager.getTableInfoSprotOrgMap() + " " +
                         " WHERE SprotSuffix=?",
-                new String[]{pName}, String.class
-        );
+                new String[]{pName}).getObject(String.class);
         _sprotCache.put(pName, retVal != null ? retVal : CACHED_MISS_VALUE);
         return retVal;
     }

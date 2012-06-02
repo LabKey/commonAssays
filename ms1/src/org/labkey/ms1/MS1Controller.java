@@ -16,7 +16,7 @@
 
 package org.labkey.ms1;
 
-import org.apache.log4j.Logger;
+import org.labkey.api.ProteinService;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.QueryViewAction;
@@ -32,6 +32,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.ms1.MS1Urls;
@@ -64,7 +65,6 @@ import java.sql.SQLException;
  */
 public class MS1Controller extends SpringActionController
 {
-    static Logger _log = Logger.getLogger(MS1Controller.class);
     static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS1Controller.class);
 
     public MS1Controller() throws Exception
@@ -587,82 +587,42 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    /**
-     * Form used for PepSearchAction
-     */
-    public static class PepSearchForm extends QueryViewAction.QueryExportForm
+    public static class PeptideFilterSearchForm extends ProteinService.PeptideSearchForm
     {
-        public enum ParamNames
+        @Override
+        public PeptideFilter createFilter(String sequenceColumnName)
         {
-            pepSeq,
-            exact,
-            subfolders,
-            runIds
-        }
-
-        private String _pepSeq = "";
-        private boolean _exact = false;
-        private boolean _subfolders = false;
-        private String _runIds = null;
-
-        public String getPepSeq()
-        {
-            return _pepSeq;
-        }
-
-        public void setPepSeq(String pepSeq)
-        {
-            _pepSeq = pepSeq;
-        }
-
-        public boolean isExact()
-        {
-            return _exact;
-        }
-
-        public void setExact(boolean exact)
-        {
-            _exact = exact;
-        }
-
-        public boolean isSubfolders()
-        {
-            return _subfolders;
-        }
-
-        public void setSubfolders(boolean subfolders)
-        {
-            _subfolders = subfolders;
-        }
-
-        public String getRunIds()
-        {
-            return _runIds;
-        }
-
-        public void setRunIds(String runIds)
-        {
-            _runIds = runIds;
+            return new PeptideFilter(getPepSeq(), isExact(), sequenceColumnName, null);
         }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class PepSearchAction extends BaseFeaturesViewAction<PepSearchForm, QueryView>
+    public class PepSearchAction extends BaseFeaturesViewAction<PeptideFilterSearchForm, QueryView>
     {
         public PepSearchAction()
         {
-            super(PepSearchForm.class);
+            super(PeptideFilterSearchForm.class);
         }
 
-        protected QueryView createQueryView(PepSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion) throws Exception
+        protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion) throws Exception
         {
             if(FeaturesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
                 return getFeaturesView(pepSearchForm, bindErrors, forExport);
-            else
+            else if (PeptidesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
                 return getPeptidesView(pepSearchForm, bindErrors, forExport);
+
+            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ServiceRegistry.get().getService(ProteinService.class).getPeptideSearchViews())
+            {
+                if (viewProvider.getDataRegionName().equalsIgnoreCase(dataRegion))
+                {
+                    return viewProvider.createView(getViewContext(), pepSearchForm, bindErrors);
+                }
+            }
+
+            throw new NotFoundException("Unknown data region: " + dataRegion);
         }
 
-        protected FeaturesView getFeaturesView(PepSearchForm form, BindException bindErrors, boolean forExport) throws Exception
+        protected FeaturesView getFeaturesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
             baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
@@ -678,7 +638,7 @@ public class MS1Controller extends SpringActionController
             return featuresView;
         }
 
-        protected PeptidesView getPeptidesView(PepSearchForm form, BindException bindErrors, boolean forExport) throws Exception
+        protected PeptidesView getPeptidesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
@@ -693,7 +653,7 @@ public class MS1Controller extends SpringActionController
             return pepView;
         }
 
-        public ModelAndView getHtmlView(PepSearchForm form, BindException errors) throws Exception
+        public ModelAndView getHtmlView(PeptideFilterSearchForm form, BindException errors) throws Exception
         {
             //create the search view
             PepSearchModel searchModel = new PepSearchModel(getViewContext().getContainer(), form.getPepSeq(),
@@ -715,7 +675,14 @@ public class MS1Controller extends SpringActionController
             //create the peptide search results view
             PeptidesView pepView = (PeptidesView)createInitializedQueryView(form, errors, false, PeptidesView.DATAREGION_NAME);
 
-            return new VBox(searchView, featuresView, pepView);
+            VBox result = new VBox(searchView, featuresView, pepView);
+
+            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ServiceRegistry.get().getService(ProteinService.class).getPeptideSearchViews())
+            {
+                result.addView(viewProvider.createView(getViewContext(), form, errors));
+            }
+
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1319,7 +1286,7 @@ public class MS1Controller extends SpringActionController
         {
             ActionURL url = new ActionURL(PepSearchAction.class, container);
             if(null != sequence)
-                url.addParameter(PepSearchForm.ParamNames.pepSeq.name(), sequence);
+                url.addParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
             return url;
         }
     }

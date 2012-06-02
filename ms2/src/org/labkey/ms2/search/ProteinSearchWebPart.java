@@ -27,7 +27,7 @@ public class ProteinSearchWebPart extends JspView<ProteinSearchBean>
 {
     public static final String NAME = "Protein Search";
 
-    public ProteinSearchWebPart(boolean horizontal, MS2Controller.ProteinSearchForm form)
+    public ProteinSearchWebPart(boolean horizontal, MS2Controller.ProbabilityProteinSearchForm form)
     {
         super(horizontal ? "/org/labkey/ms2/search/searchProteins.jsp" : "/org/labkey/ms2/search/searchProteinsNarrow.jsp");
         setTitle(NAME);

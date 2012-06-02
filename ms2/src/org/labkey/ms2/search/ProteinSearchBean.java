@@ -28,10 +28,10 @@ import org.labkey.api.view.ViewContext;
 public class ProteinSearchBean implements PeptideFilter
 {
     private boolean _horizontal;
-    private final MS2Controller.ProteinSearchForm _form;
+    private final MS2Controller.ProbabilityProteinSearchForm _form;
     private FilterView _peptideView;
     
-    public ProteinSearchBean(boolean horizontal, MS2Controller.ProteinSearchForm form)
+    public ProteinSearchBean(boolean horizontal, MS2Controller.ProbabilityProteinSearchForm form)
     {
         _horizontal = horizontal;
         _form = form;
@@ -56,7 +56,7 @@ public class ProteinSearchBean implements PeptideFilter
         return _horizontal;
     }
 
-    public MS2Controller.ProteinSearchForm getForm()
+    public MS2Controller.ProbabilityProteinSearchForm getForm()
     {
         return _form;
     }

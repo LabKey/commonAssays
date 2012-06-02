@@ -107,7 +107,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
     private StandardProteinDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
     {
-        StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(_url);
+        StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(getAJAXNestedGridURL());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteins());
         proteinRgn.addDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);

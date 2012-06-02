@@ -16,12 +16,11 @@
 
 package org.labkey.ms2.protein.organism;
 
+import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.Table;
 
-import java.sql.*;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -48,7 +47,7 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         HASHCMD = sb.toString();
     }
 
-    public String guess(ProteinPlus p) throws SQLException
+    public String guess(ProteinPlus p)
     {
         startTimer();
         String retVal = _cache.get(p.getHash());
@@ -57,7 +56,7 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         if (retVal != null)
             return retVal;
 
-        retVal = Table.executeSingleton(_schema, HASHCMD, new Object[]{p.getHash()}, String.class);
+        retVal = new SqlSelector(_schema, HASHCMD, p.getHash()).getObject(String.class);
         _cache.put(p.getHash(), retVal != null ? retVal : CACHED_MISS_VALUE);
         stopTimer();
         return retVal;

@@ -175,7 +175,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         setDefaultVisibleColumns(defaultColumns);
     }
 
-    public void addPeptideFilter(MS2Controller.ProteinSearchForm form, ViewContext context)
+    public void addPeptideFilter(MS2Controller.ProbabilityProteinSearchForm form, ViewContext context)
     {
         if (form.isNoPeptideFilter())
         {
@@ -372,7 +372,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         addCondition(sql);
     }
 
-    public void addSeqIdFilter(Integer[] seqIds)
+    public void addSeqIdFilter(int[] seqIds)
     {
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");

@@ -15,17 +15,19 @@
  */
 package org.labkey.ms2;
 
-import org.apache.commons.collections15.MultiMap;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
+import org.labkey.api.ProteinService;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.ExportException;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
+import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.RedirectAction;
@@ -109,6 +111,7 @@ import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.compare.SpectraCountQueryView;
+import org.labkey.api.data.NestableQueryView;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.AbstractQueryMS2RunView;
 import org.labkey.ms2.peptideview.FlatPeptideView;
@@ -128,9 +131,9 @@ import org.labkey.ms2.protein.AnnotationInsertion;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.FastaReloaderJob;
-import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.SetBestNameRunnable;
 import org.labkey.ms2.protein.XMLProteinLoader;
 import org.labkey.ms2.protein.tools.GoLoader;
@@ -169,7 +172,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -342,7 +344,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, ProteinSearchForm.createDefault());
+            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, ProbabilityProteinSearchForm.createDefault());
 
             QueryView gridView = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
             gridView.setTitle(MS2Module.MS2_RUNS_NAME);
@@ -476,9 +478,6 @@ public class MS2Controller extends SpringActionController
             }
 
             VBox vBox = new VBox();
-            JspView scriptView = new JspView<String>("/org/labkey/ms2/nestedGridScript.jsp", dataRegionName);
-            vBox.addView(scriptView);
-
             JspView<RunSummaryBean> runSummary = new JspView<RunSummaryBean>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
             runSummary.setFrame(WebPartView.FrameType.PORTAL);
             runSummary.setTitle("Run Overview");
@@ -3276,17 +3275,17 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class DoProteinSearchAction extends QueryViewAction<ProteinSearchForm, QueryView>
+    public class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
     {
         private static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
         private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
 
         public DoProteinSearchAction()
         {
-            super(ProteinSearchForm.class);
+            super(ProbabilityProteinSearchForm.class);
         }
 
-        protected QueryView createQueryView(ProteinSearchForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             if (PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
             {
@@ -3297,10 +3296,18 @@ public class MS2Controller extends SpringActionController
                 return createProteinSearchView(form, errors);
             }
 
+            for (ProteinService.QueryViewProvider provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
+            {
+                if (provider.getDataRegionName().equals(dataRegion))
+                {
+                    return provider.createView(getViewContext(), form, errors);
+                }
+            }
+
             throw new IllegalArgumentException("Unsupported dataRegion name" + dataRegion);
         }
 
-        private QueryView createProteinSearchView(ProteinSearchForm form, BindException errors)
+        private QueryView createProteinSearchView(ProbabilityProteinSearchForm form, BindException errors)
             throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
@@ -3313,7 +3320,7 @@ public class MS2Controller extends SpringActionController
 
             proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
             SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
-            Integer[] seqIds = getSeqIds(form);
+            int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
                 sequencesTableInfo.addSeqIdFilter(seqIds);
@@ -3326,11 +3333,11 @@ public class MS2Controller extends SpringActionController
                     sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
                 }
             }
-            proteinsView.setTitle("Matching Proteins");
+            proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
             return proteinsView;
         }
 
-        private QueryView createProteinGroupSearchView(final ProteinSearchForm form, BindException errors) throws ServletException
+        private QueryView createProteinGroupSearchView(final ProbabilityProteinSearchForm form, BindException errors) throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
@@ -3341,7 +3348,7 @@ public class MS2Controller extends SpringActionController
                 {
                     ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable();
                     table.addPeptideFilter(form, getViewContext());
-                    Integer[] seqIds = getSeqIds(form);
+                    int[] seqIds = form.getSeqId();
                     if (seqIds.length <= 500)
                     {
                         table.addSeqIdFilter(seqIds);
@@ -3364,25 +3371,7 @@ public class MS2Controller extends SpringActionController
             return groupsView;
         }
 
-        private Integer[] getSeqIds(ProteinSearchForm form)
-        {
-            SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(getUser(), getContainer()));
-            tableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-            if (form.isRestrictProteins())
-            {
-                tableInfo.addContainerCondition(getContainer(), getUser(), true);
-            }
-            try
-            {
-                return Table.executeArray(tableInfo, tableInfo.getColumn("SeqId"), null, null, Integer.class);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-        }
-
-        protected ModelAndView getHtmlView(ProteinSearchForm form, BindException errors) throws Exception
+        protected ModelAndView getHtmlView(ProbabilityProteinSearchForm form, BindException errors) throws Exception
         {
             HttpServletRequest request = getViewContext().getRequest();
             SimpleFilter filter = new SimpleFilter();
@@ -3429,7 +3418,13 @@ public class MS2Controller extends SpringActionController
             proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
             groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
 
-            return new VBox(searchView, proteinsView, groupsView);
+            VBox result = new VBox(searchView, proteinsView, groupsView);
+            for (ProteinService.QueryViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
+            {
+                result.addView(provider.createView(getViewContext(), form, errors));
+            }
+
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -3438,61 +3433,21 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public static class ProteinSearchForm extends QueryViewAction.QueryExportForm
+    public static class ProbabilityProteinSearchForm extends ProteinService.ProteinSearchForm implements HasViewContext
     {
-        private String _identifier;
         private Float _minimumProbability;
         private Float _maximumErrorRate;
-        private String _peptideFilterType = "none";
-        private Float _peptideProphetProbability;
-        private boolean _includeSubfolders;
-        private boolean _exactMatch;
-        private boolean _restrictProteins;
-        private String _defaultCustomView;
+        private ViewContext _context;
+        private int[] _seqId;
 
-        public String getDefaultCustomView()
+        public void setViewContext(ViewContext context)
         {
-            return _defaultCustomView;
+            _context = context;
         }
 
-        public void setDefaultCustomView(String defaultCustomView)
+        public ViewContext getViewContext()
         {
-            _defaultCustomView = defaultCustomView;
-        }
-
-        public boolean isExactMatch()
-        {
-            return _exactMatch;
-        }
-
-        public void setExactMatch(boolean exactMatch)
-        {
-            _exactMatch = exactMatch;
-        }
-
-        public String getPeptideFilterType()
-        {
-            return _peptideFilterType;
-        }
-
-        public void setPeptideFilterType(String peptideFilterType)
-        {
-            _peptideFilterType = peptideFilterType;
-        }
-
-        public Float getPeptideProphetProbability()
-        {
-            return _peptideProphetProbability;
-        }
-
-        public void setPeptideProphetProbability(Float peptideProphetProbability)
-        {
-            _peptideProphetProbability = peptideProphetProbability;
-        }
-
-        public boolean isNoPeptideFilter()
-        {
-            return !isCustomViewPeptideFilter() && !isPeptideProphetFilter();
+            return _context;
         }
 
         public boolean isPeptideProphetFilter()
@@ -3503,16 +3458,6 @@ public class MS2Controller extends SpringActionController
         public boolean isCustomViewPeptideFilter()
         {
             return ProphetFilterType.customView.toString().equals(getPeptideFilterType());
-        }
-
-        public String getIdentifier()
-        {
-            return _identifier;
-        }
-
-        public void setIdentifier(String identifier)
-        {
-            _identifier = identifier;
         }
 
         public Float getMaximumErrorRate()
@@ -3535,26 +3480,6 @@ public class MS2Controller extends SpringActionController
             _minimumProbability = minimumProbability;
         }
 
-        public boolean isIncludeSubfolders()
-        {
-            return _includeSubfolders;
-        }
-
-        public void setIncludeSubfolders(boolean includeSubfolders)
-        {
-            _includeSubfolders = includeSubfolders;
-        }
-
-        public boolean isRestrictProteins()
-        {
-            return _restrictProteins;
-        }
-
-        public void setRestrictProteins(boolean restrictProteins)
-        {
-            _restrictProteins = restrictProteins;
-        }
-
         public String getCustomViewName(ViewContext context)
         {
             String result = context.getRequest().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME);
@@ -3569,13 +3494,46 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public static ProteinSearchForm createDefault()
+        public boolean isNoPeptideFilter()
         {
-            ProteinSearchForm result = new ProteinSearchForm();
+            return !isCustomViewPeptideFilter() && !isPeptideProphetFilter();
+        }
+
+        public static ProbabilityProteinSearchForm createDefault()
+        {
+            ProbabilityProteinSearchForm result = new ProbabilityProteinSearchForm();
             result.setIncludeSubfolders(true);
             result.setRestrictProteins(true);
             result.setExactMatch(true);
             return result;
+        }
+
+        public void setSeqId(int[] seqIds)
+        {
+            _seqId = seqIds;
+        }
+
+        @Override
+        public int[] getSeqId()
+        {
+            if (_seqId == null)
+            {
+                SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(_context.getUser(), _context.getContainer()));
+                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch());
+                if (isRestrictProteins())
+                {
+                    tableInfo.addContainerCondition(_context.getContainer(), _context.getUser(), true);
+                }
+                try
+                {
+                    _seqId = ArrayUtils.toPrimitive(Table.executeArray(tableInfo, tableInfo.getColumn("SeqId"), null, null, Integer.class));
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
+            }
+            return _seqId;
         }
     }
 
@@ -4416,6 +4374,41 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ShowProteinAJAXAction extends SimpleViewAction<DetailsForm>
+    {
+        @Override
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        {
+            MS2Run run = validateRun(form);
+            getPageConfig().setTemplate(PageConfig.Template.None);
+
+            Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
+
+            if (protein == null)
+            {
+                throw new NotFoundException("No such protein: " + form.getSeqIdInt());
+            }
+
+            QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
+            SimpleFilter filter = new SimpleFilter();
+            AbstractQueryMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
+            protein.setPeptides(Table.executeArray(gridView.getTable(), "Peptide", filter, new Sort("Peptide"), String.class));
+
+            PrintWriter writer = getViewContext().getResponse().getWriter();
+            ActionURL searchURL = new ActionURL(DoProteinSearchAction.class, getContainer());
+            searchURL.addParameter("seqId", protein.getSeqId());
+            searchURL.addParameter("identifier", protein.getBestName());
+            writer.write("<a href=\"" + searchURL + "\">Search for other references to this protein</a><br/>");
+            writer.write(protein.getCoverageMap(run, null, 40).toString());
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root;
+        }
+    }
 
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowProteinAction extends SimpleViewAction<DetailsForm>
@@ -4604,6 +4597,7 @@ public class MS2Controller extends SpringActionController
         public String showRunUrl;
         public boolean enableAllPeptidesFeature;
         public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
+        public int aaRowWidth;
     }
 
 
@@ -4618,7 +4612,7 @@ public class MS2Controller extends SpringActionController
             // don't show the peptides grid or the coveage map for the Proteins matching a peptide or the no run case (e.g click on a protein Name in Matching Proteins grid of search results)
             boolean showPeptides = !stringSearch && run != null;
             SimpleFilter allPeptidesQueryFilter = null;
-            AbstractQueryMS2RunView.AbstractMS2QueryView gridView = null;
+            NestableQueryView gridView = null;
 
             ActionURL targetURL = currentURL.clone();
             ProteinViewBean bean = new ProteinViewBean();
@@ -4653,11 +4647,16 @@ public class MS2Controller extends SpringActionController
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
                 //TODO:  do something sensible for a single seqid and no run.
-                JspView<ProteinViewBean> sequenceView;
+                WebPartView sequenceView;
                 bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
-                    sequenceView = new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
+                    bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
+                    VBox box = new VBox(
+                        new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
+                        new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean));
+                    box.setFrame(FrameType.PORTAL);
+                    sequenceView = box;
                 }
                 else
                 {
@@ -4668,7 +4667,7 @@ public class MS2Controller extends SpringActionController
                 addView(sequenceView);
 
                 // Add annotations
-                AnnotView annotations = new AnnotView(proteins[i]);
+                AnnotationView annotations = new AnnotationView(proteins[i]);
                 annotations.enableExpandCollapse("ProteinAnnotationsView", true);
                 addView(annotations);
             }
@@ -4759,7 +4758,7 @@ public class MS2Controller extends SpringActionController
 
             SimpleFilter allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
             QueryPeptideMS2RunView qpmv = new QueryPeptideMS2RunView(getViewContext(), ms2Run);
-            AbstractQueryMS2RunView.AbstractMS2QueryView qv = qpmv.createGridView(allPeptidesQueryFilter);
+            NestableQueryView qv = qpmv.createGridView(allPeptidesQueryFilter);
             String[] peptides = Table.executeArray(qv.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
 
             protein.setPeptides(peptides);
@@ -4873,7 +4872,7 @@ public class MS2Controller extends SpringActionController
             {
                 int curSeqId = Integer.parseInt(curSqid);
                 Protein protein = ProteinManager.getProtein(curSeqId);
-                vbox.addView(new AnnotView(protein));
+                vbox.addView(new AnnotationView(protein));
             }
 
             return vbox;
@@ -4882,88 +4881,6 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Pieslice Details for: " + _form.getSliceTitle());
-        }
-    }
-
-
-    private static class AnnotView extends JspView<AnnotViewBean>
-    {
-        // TODO: Pass in Protein object
-        private AnnotView(Protein protein) throws Exception
-        {
-            super("/org/labkey/ms2/protAnnots.jsp", getBean(protein));
-            setTitle("Annotations");
-        }
-
-        private static AnnotViewBean getBean(Protein protein) throws Exception
-        {
-            int seqId = protein.getSeqId();
-
-            MultiMap<String, String> identifiers = ProteinManager.getIdentifiersFromId(seqId);
-
-            /* collect header info */
-            String SeqName = protein.getBestName(); // ProteinManager.getSeqParamFromId("BestName", seqId);
-            String SeqDesc = protein.getDescription(); // ProteinManager.getSeqParamFromId("Description", seqId);
-            Collection<String> GeneNames = identifiers.get("genename");
-            /* collect first table info */
-            Collection<String> GenBankIds = identifiers.get("genbank");
-            Collection<String> SwissProtNames = identifiers.get("swissprot");
-            Collection<String> EnsemblIDs = identifiers.get("ensembl");
-            Collection<String> GIs = identifiers.get("gi");
-            Collection<String> SwissProtAccns = identifiers.get(IdentifierType.SwissProtAccn.name().toLowerCase());
-            Collection<String> IPIds = identifiers.get("ipi");
-            Collection<String> RefSeqIds = identifiers.get("refseq");
-            Collection<String> GOCategories = identifiers.get("go");
-
-            HashSet<String> allGbIds = new HashSet<String>();
-            if (null != GenBankIds)
-                allGbIds.addAll(GenBankIds);
-            if (null != RefSeqIds)
-                allGbIds.addAll(RefSeqIds);
-
-            Set<String> allGbURLs = new HashSet<String>();
-
-            for (String ident : allGbIds)
-            {
-                String url = ProteinManager.makeFullAnchorString(
-                        ProteinManager.makeIdentURLStringWithType(ident, "Genbank"),
-                        "protWindow",
-                        ident);
-                allGbURLs.add(url);
-            }
-
-            // It is convenient to strip the version numbers from the IPI identifiers
-            // and this may cause some duplications.  Use a hash-set to compress
-            // duplicates
-            if (null != IPIds && !IPIds.isEmpty())
-            {
-                Set<String> IPIset = new HashSet<String>();
-
-                for (String idWithoutVersion : IPIds)
-                {
-                    int dotIndex = idWithoutVersion.indexOf(".");
-                    if (dotIndex != -1) idWithoutVersion = idWithoutVersion.substring(0, dotIndex);
-                    IPIset.add(idWithoutVersion);
-                }
-                IPIds = IPIset;
-            }
-
-            AnnotViewBean bean = new AnnotViewBean();
-
-            /* info from db into view */
-            bean.seqName = SeqName;
-            bean.seqDesc = SeqDesc;
-            bean.geneName = StringUtils.join(ProteinManager.makeFullAnchorStringArray(GeneNames, "protWindow", "GeneName"), ", ");
-            bean.seqOrgs = ProteinManager.getOrganismsFromId(seqId);
-            bean.genBankUrls = allGbURLs;
-            bean.swissProtNames = ProteinManager.makeFullAnchorStringArray(SwissProtNames, "protWindow", "SwissProt");
-            bean.swissProtAccns = ProteinManager.makeFullAnchorStringArray(SwissProtAccns, "protWindow", "SwissProtAccn");
-            bean.GIs = ProteinManager.makeFullAnchorStringArray(GIs, "protWindow", "GI");
-            bean.ensemblIds = ProteinManager.makeFullAnchorStringArray(EnsemblIDs, "protWindow", "Ensembl");
-            bean.goCategories = ProteinManager.makeFullGOAnchorStringArray(GOCategories, "protWindow");
-            bean.IPI = ProteinManager.makeFullAnchorStringArray(IPIds, "protWindow", "IPI");
-
-            return bean;
         }
     }
 
@@ -4979,21 +4896,6 @@ public class MS2Controller extends SpringActionController
         return p.getLookupString() + " (" + p.getBestName() + ")";
     }
 
-
-    public static class AnnotViewBean
-    {
-        public String seqName;
-        public String seqDesc;
-        public String geneName;
-        public Set<String> seqOrgs;
-        public Set<String> genBankUrls;
-        public String[] swissProtNames;
-        public String[] swissProtAccns;
-        public String[] GIs;
-        public String[] ensemblIds;
-        public String[] goCategories;
-        public String[] IPI;
-    }
 
     protected void showElutionGraph(HttpServletResponse response, DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
     {
@@ -6203,7 +6105,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static class DetailsForm extends RunForm
     {
         private long peptideId;
@@ -6524,6 +6425,11 @@ public class MS2Controller extends SpringActionController
         public ActionURL getShowListUrl(Container container)
         {
             return new ActionURL(ShowListAction.class, container);
+        }
+
+        public ActionURL getProteinSearchUrl(Container container)
+        {
+            return new ActionURL(DoProteinSearchAction.class, container);
         }
 
         public ActionURL getShowProteinAdminUrl()

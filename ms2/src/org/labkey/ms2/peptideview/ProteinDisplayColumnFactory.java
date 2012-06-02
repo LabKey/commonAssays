@@ -16,10 +16,17 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.ProteinDisplayColumn;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -27,21 +34,27 @@ import org.labkey.ms2.ProteinDisplayColumn;
 */
 public class ProteinDisplayColumnFactory implements DisplayColumnFactory
 {
+    private final Container _container;
     private final String _url;
 
-    public ProteinDisplayColumnFactory()
+    public ProteinDisplayColumnFactory(Container container)
     {
-        this(null);
+        this(container, null);
     }
 
-    public ProteinDisplayColumnFactory(String url)
+    public ProteinDisplayColumnFactory(Container container, String url)
     {
+        _container = container;
         _url = url;
     }
 
     public DisplayColumn createRenderer(ColumnInfo colInfo)
     {
-        ProteinDisplayColumn result = new ProteinDisplayColumn(colInfo);
+        ActionURL detailsURL = new ActionURL(MS2Controller.ShowProteinAJAXAction.class, _container);
+        Map<String, FieldKey> params = new HashMap<String, FieldKey>();
+        params.put("seqId", new FieldKey(colInfo.getFieldKey().getParent(), "SeqId"));
+        params.put("run", new FieldKey(new FieldKey(colInfo.getFieldKey().getParent(), "Fraction"), "Run"));
+        ProteinDisplayColumn result = new ProteinDisplayColumn(colInfo, detailsURL, params);
         if (_url != null)
         {
             result.setURL(_url);

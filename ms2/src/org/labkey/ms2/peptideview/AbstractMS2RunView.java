@@ -95,6 +95,15 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return _container;
     }
 
+    protected String getAJAXNestedGridURL()
+    {
+        ActionURL groupURL = _url.clone();
+        groupURL.setAction(MS2Controller.GetProteinGroupingPeptidesAction.class);
+        groupURL.deleteParameter("proteinGroupingId");
+
+        return groupURL.toString() + "&proteinGroupingId=";
+    }
+    
     protected ButtonBar createButtonBar(Class<? extends Controller> exportAllAction, Class<? extends Controller> exportSelectedAction, String whatWeAreSelecting, DataRegion dataRegion)
     {
         ButtonBar result = new ButtonBar();
@@ -310,7 +319,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         table.wrapAllColumns(true);
         table.getColumn("RowId").setKeyField(true);
         // Different renderer to ensure that SeqId is always selected when Protein column is displayed
-        table.getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
+        table.getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(getContainer()));
 
         PeptidesTableInfo.addCalculatedColumns(table);
         return table;

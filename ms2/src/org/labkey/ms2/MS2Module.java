@@ -16,6 +16,7 @@
 package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -69,6 +70,7 @@ import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.DatDocumentParser;
@@ -161,14 +163,14 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
+                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
                 }
             },
             new BaseWebPartFactory(ProteinSearchWebPart.NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
+                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
                 }
             },
             new BaseWebPartFactory(CustomProteinListView.NAME)
@@ -202,6 +204,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         CustomAnnotationSchema.register();
 
         MS2Service.register(new MS2ServiceImpl());
+
+        ServiceRegistry.get().registerService(ProteinService.class, new ProteinServiceImpl());
     }
 
     @Override

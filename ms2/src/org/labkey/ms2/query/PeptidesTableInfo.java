@@ -366,7 +366,7 @@ public class PeptidesTableInfo extends FilteredTable
                 ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
 
-                fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(showProteinURLString));
+                fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(_schema.getContainer(), showProteinURLString));
                 fastaNameColumn.setURL(StringExpressionFactory.createURL(showProteinURLString));
 
                 sequenceTable.addPeptideAggregationColumns();
@@ -378,10 +378,10 @@ public class PeptidesTableInfo extends FilteredTable
         getColumn("SeqId").setFk(fk);
 
         getColumn("SeqId").setURL(StringExpressionFactory.createURL(showProteinURLString));
-        getColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
+        getColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_schema.getContainer()));
         getColumn("SeqId").setLabel("Search Engine Protein");
         getColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURLString));
-        getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
+        getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_schema.getContainer()));
     }
 
     private void addScoreColumns()

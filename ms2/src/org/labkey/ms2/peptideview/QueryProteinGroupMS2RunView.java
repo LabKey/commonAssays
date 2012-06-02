@@ -29,7 +29,6 @@ import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.sql.SQLException;
 
@@ -72,61 +71,27 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     {
         public ProteinGroupQueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
-            super(schema, settings, expanded, allowNesting);
+            super(schema, settings, expanded, allowNesting, new QueryNestingOption(FieldKey.fromParts("RowId"), FieldKey.fromParts("RowId"), getAJAXNestedGridURL())
+            {
+                public boolean isOuter(String columnName)
+                {
+                    return columnName.indexOf("/") < 0;
+                }
+            });
         }
 
         protected DataRegion createDataRegion()
         {
-            List<DisplayColumn> originalColumns = getDisplayColumns();
-            ProteinGroupQueryNestingOption proteinGroupNesting = new ProteinGroupQueryNestingOption(_allowNesting);
-
-            if (proteinGroupNesting.isNested(originalColumns))
-            {
-                _selectedNestingOption = proteinGroupNesting;
-            }
-
-            DataRegion rgn;
-            if (_selectedNestingOption != null && (_allowNesting || !_expanded))
-            {
-                rgn = _selectedNestingOption.createDataRegion(originalColumns, _url, getDataRegionName(), _expanded);
-            }
-            else
-            {
-                rgn = new DataRegion();
-                rgn.setDisplayColumns(originalColumns);
-            }
-            rgn.setSettings(getSettings());
-
+            DataRegion rgn = super.createDataRegion();
             rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
-            rgn.setShowRecordSelectors(true);
-            rgn.setFixedWidthColumns(true);
 
             return rgn;
         }
 
-        public DataView createDataView()
+        @Override
+        protected Sort getBaseSort()
         {
-            DataRegion rgn = createDataRegion();
-            GridView result = new GridView(rgn, new NestedRenderContext(_selectedNestingOption, getViewContext()));
-            setupDataView(result);
-
-            Sort customViewSort = result.getRenderContext().getBaseSort();
-            Sort sort = new Sort("RowId");     // Always sort peptide lists by RowId
-            if (customViewSort != null)
-            {
-                sort.insertSort(customViewSort);
-            }
-            result.getRenderContext().setBaseSort(sort);
-            Filter customViewFilter = result.getRenderContext().getBaseFilter();
-            SimpleFilter filter = new SimpleFilter(customViewFilter);
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
-            if (_selectedRows != null)
-            {
-                String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
-                filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
-            }
-            result.getRenderContext().setBaseFilter(filter);
-            return result;
+            return new Sort("RowId");
         }
 
         public ProteinGroupTableInfo createTable()
@@ -167,7 +132,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             throw new RuntimeException(e);
         }
         ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, true, true);
-        QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)peptideView.createDataRegion();
+        NestableDataRegion rgn = (NestableDataRegion)peptideView.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();
         GridView result = new GridView(nestedRegion, (BindException)null);
@@ -176,23 +141,16 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         SimpleFilter filter = new SimpleFilter(customViewFilter);
         filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
 
-        Integer groupId = null;
-
         try
         {
-            groupId = Integer.parseInt(proteinGroupingId);
+            int groupId = Integer.parseInt(proteinGroupingId);
+            filter.addCondition(peptideView.getSelectedNestingOption().getRowIdColumnName(), groupId);
+            result.getRenderContext().setBaseFilter(filter);
         }
         catch (NumberFormatException e)
         {
+            throw new NotFoundException("Invalid proteinGroupingId parameter: " + proteinGroupingId);
         }
-
-        if (null == groupId)
-        {
-            throw new NotFoundException("Invalid proteinGroupingId parameter");
-        }
-
-        filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), groupId.intValue());
-        result.getRenderContext().setBaseFilter(filter);
 
         return result;
     }

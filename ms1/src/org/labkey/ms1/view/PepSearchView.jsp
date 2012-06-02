@@ -19,7 +19,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.ms1.MS1Controller" %>
+<%@ page import="org.labkey.api.ProteinService" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<PepSearchModel> me = (JspView<PepSearchModel>) HttpView.currentView();
@@ -29,20 +29,20 @@
 <p class="error"><%=model.getErrorMsg()%></p>
 <% } %>
 <form action="<%=model.getResultsUri()%>" method="get">
-    <input type="hidden" name="<%=MS1Controller.PepSearchForm.ParamNames.runIds.name()%>" value="<%=h(model.getRunIds())%>"/>
+    <input type="hidden" name="<%=ProteinService.PeptideSearchForm.ParamNames.runIds.name()%>" value="<%=h(model.getRunIds())%>"/>
     <table>
         <tr>
             <td class="labkey-form-label"><label for="pepSeq">Peptide sequence</label> *<%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%></td>
-            <td><input id="pepSeq" type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>" value="<%=h(model.getPepSeq())%>" size="40"/></td>
+            <td><input id="pepSeq" type="text" name="<%=ProteinService.PeptideSearchForm.ParamNames.pepSeq.name()%>" value="<%=h(model.getPepSeq())%>" size="40"/></td>
             <td><%=PageFlowUtil.generateSubmitButton("Search", "", "id=\"btnSearch\" name=\"submit\"")%></td>
         </tr>
         <tr>
             <td class="labkey-form-label"><label for="cbxExact">Exact matches only</label><%=helpPopup("Exact matches only", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%></td>
-            <td><input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>" style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
+            <td><input id="cbxExact" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.exact.name()%>" style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
         </tr>
         <tr>
             <td class="labkey-form-label"><label for="cbxSubfolders">Search in subfolders</label><%=helpPopup("Search in subfolders", "Check to search this folder and all of its descendants.")%></td>
-            <td><input id="cbxSubfolders" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle" <%=model.includeSubfolders() ? "checked" : ""%> /></td>
+            <td><input id="cbxSubfolders" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle" <%=model.includeSubfolders() ? "checked" : ""%> /></td>
         </tr>
     </table>
 </form>

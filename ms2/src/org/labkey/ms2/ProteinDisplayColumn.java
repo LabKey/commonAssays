@@ -16,12 +16,15 @@
 
 package org.labkey.ms2;
 
+import org.json.JSONObject;
+import org.labkey.api.data.AJAXDetailsDisplayColumn;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryService;
+import org.labkey.api.view.ActionURL;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,21 +33,41 @@ import java.util.Set;
  * Date: Aug 3, 2006
  * Time: 10:42 AM
  */
-public class ProteinDisplayColumn extends DataColumn
+public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
 {
-    public ProteinDisplayColumn(ColumnInfo col)
+    private final FieldKey _seqIdFK;
+    private final FieldKey _proteinNameFK;
+    private boolean _renderedCSS = false;
+
+    public ProteinDisplayColumn(ColumnInfo col, ActionURL url, Map<String, FieldKey> params)
     {
-        super(col);
+        super(col, url, params, new JSONObject().put("width", 450).put("title", "Protein Details"));
         setLinkTarget("prot");
+
+        FieldKey parentFK = getColumnInfo().getFieldKey().getParent();
+        _seqIdFK = new FieldKey(parentFK, "SeqId");
+        _proteinNameFK = new FieldKey(parentFK, "Protein");
     }
 
-    public void addQueryColumns(Set<ColumnInfo> set)
+    @Override
+    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
-        super.addQueryColumns(set);
-        FieldKey seqIdKey = FieldKey.fromParts("SeqId");
-        FieldKey proteinKey = FieldKey.fromParts("Protein");
+        if (!_renderedCSS)
+        {
+            out.write("<script type=\"text/javascript\">\n" +
+            "LABKEY.requiresCss(\"ProteinCoverageMap.css\");\n" +
+            "LABKEY.requiresScript(\"util.js\");\n" +
+            "</script>");
+            _renderedCSS = true;
+        }
+        super.renderGridCellContents(ctx, out);
+    }
 
-        Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(getColumnInfo().getParentTable(), Arrays.asList(seqIdKey, proteinKey));
-        set.addAll(colMap.values());
+    @Override
+    public void addQueryFieldKeys(Set<FieldKey> keys)
+    {
+        super.addQueryFieldKeys(keys);
+        keys.add(_seqIdFK);
+        keys.add(_proteinNameFK);
     }
 }

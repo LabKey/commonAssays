@@ -15,38 +15,13 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
-
-    if (bean.showPeptides)
-    {
-        ActionURL showPeptidesPopupUrl = getViewContext().cloneActionURL();
-        showPeptidesPopupUrl.setAction(MS2Controller.ShowPeptidePopupAction.class);
-        if (null!=showPeptidesPopupUrl.getParameter("MS2Peptides.viewName"))
-            showPeptidesPopupUrl.deleteParameter("MS2Peptides.viewName");
-        showPeptidesPopupUrl.addParameter("MS2Peptides.viewName", "Standard");
-        bean.showRunUrl = showPeptidesPopupUrl.toString();
-    }
-    ActionURL toggleURL = HttpView.currentContext().getActionURL().clone();
-    toggleURL.replaceParameter("simpleSequenceView", "true");
 %>
-<table class="labkey-tab-strip">
-    <tr>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
-        <td class="labkey-tab-selected" style="margin-bottom: 0;"><a href="#">Detail View</a></td>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
-        <td class="labkey-tab" style="margin-bottom: 0;"><a href="<%= toggleURL %>">Summary View</a></td>
-        <td class="labkey-tab-space" width="100%"></td>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
-    </tr>
-</table>
 
 <script type="text/javascript">
 LABKEY.requiresCss("ProteinCoverageMap.css");
@@ -57,10 +32,4 @@ LABKEY.requiresScript("util.js");
     Ext.QuickTips.init();
 </script>
 
-<p><%
-    ActionURL exportUrl = getViewContext().cloneActionURL();
-    exportUrl.setAction(MS2Controller.ExportProteinCoverageMapAction.class);
-    if (null==exportUrl.getParameter("seqId"))
-        exportUrl.addParameter("seqId", bean.protein.getSeqId());
-%><%=PageFlowUtil.generateButton("Export", exportUrl)%></p>
-<p><%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl) %></p>
+<%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth) %>

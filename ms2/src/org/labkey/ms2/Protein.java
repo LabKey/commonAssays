@@ -53,9 +53,9 @@ public class Protein
     private String PEPTIDE_NONE_CLASS= "";
     private String SEQUENCE_CELL_TD="<td %s >%s</td>";
     private String SEQUENCE_CELL_CLASS="";
-    private String TABLE_TAG="<div><table id=\"peptideMap\" class=\"protein-coverage-map\"  >";
+    private String TABLE_TAG="<div><table id=\"peptideMap\" width=\"%d\" class=\"protein-coverage-map\"  >";
     private String TABLE_TAG_EXPORT="<div><table id=\"peptideMap\" border=\"1\"  >";
-    private static final int DEFAULT_WRAP_COLUMNS = 100;
+    public static final int DEFAULT_WRAP_COLUMNS = 100;
 
     public Protein()
     {
@@ -182,10 +182,14 @@ public class Protein
      */
     public StringBuffer getCoverageMap(MS2Run run, String showRunViewUrl)
     {
+        return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS);
+    }
+
+    public StringBuffer getCoverageMap(MS2Run run, String showRunViewUrl, int wrapCols)
+    {
         if(_showEntireFragmentInCoverage)
             return new StringBuffer();
 
-        int wrapCols = DEFAULT_WRAP_COLUMNS;
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
 
@@ -229,7 +233,7 @@ public class Protein
         StringBuffer address;
         StringBuffer seqs;
 
-        sb.append(_forCoverageMapExport?TABLE_TAG_EXPORT:TABLE_TAG);
+        sb.append(_forCoverageMapExport?TABLE_TAG_EXPORT:String.format(TABLE_TAG, wrapCols * 10));
         int colst=0;
         int lastCol;
         // now go back and asj each positsion to render their html fo the table

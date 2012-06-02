@@ -66,7 +66,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
     }
 
 
-    public String guess(ProteinPlus p) throws SQLException
+    public String guess(ProteinPlus p)
     {
         //First check for Tax_id=nnnnn.  If we don't find it, check for
         // [Genus species].  Two gotchas:  sometimes there are several
@@ -89,11 +89,18 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
 
                 if (!cachedMiss)
                 {
-                    retVal = Table.executeSingleton(_schema, _organismFromTaxIdSql, new String[]{taxid}, String.class);
+                    try
+                    {
+                        retVal = Table.executeSingleton(_schema, _organismFromTaxIdSql, new String[]{taxid}, String.class);
 
-                    _cache.put(taxid, retVal != null ? retVal : CACHED_MISS_VALUE);
-                    if (retVal != null)
-                        return retVal;
+                        _cache.put(taxid, retVal != null ? retVal : CACHED_MISS_VALUE);
+                        if (retVal != null)
+                            return retVal;
+                    }
+                    catch (SQLException e)
+                    {
+                        throw new RuntimeSQLException(e);
+                    }
                 }
             }
         }

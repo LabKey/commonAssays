@@ -111,7 +111,9 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     {
         public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
-            super(schema, settings, expanded, allowNesting);
+            super(schema, settings, expanded, allowNesting,
+                    new QueryNestingOption(FieldKey.fromParts("ProteinProphetData", "ProteinGroupId"), FieldKey.fromParts("ProteinProphetData", "ProteinGroupId", "RowId"), getAJAXNestedGridURL()),
+                    new QueryNestingOption(FieldKey.fromParts("SeqId"), FieldKey.fromParts("SeqId", "SeqId"), getAJAXNestedGridURL()));
         }
 
         public List<DisplayColumn> getDisplayColumns()
@@ -131,37 +133,8 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
 
         protected DataRegion createDataRegion()
-        { 
-            List<DisplayColumn> originalColumns = getDisplayColumns();
-            ProteinProphetQueryNestingOption proteinProphetNesting = new ProteinProphetQueryNestingOption(_allowNesting);
-            StandardProteinQueryNestingOption standardProteinNesting = new StandardProteinQueryNestingOption(_allowNesting);
-
-            if (_allowNesting)
-            {
-                if (proteinProphetNesting.isNested(originalColumns))
-                {
-                    _selectedNestingOption = proteinProphetNesting;
-                }
-                else if (standardProteinNesting.isNested(originalColumns))
-                {
-                    _selectedNestingOption = standardProteinNesting;
-                }
-            }
-
-            DataRegion rgn;
-            if (_selectedNestingOption != null && (_allowNesting || !_expanded))
-            {
-                rgn = _selectedNestingOption.createDataRegion(originalColumns, _url, getDataRegionName(), _expanded);
-            }
-            else
-            {
-                rgn = new DataRegion();
-                rgn.setDisplayColumns(originalColumns);
-            }
-            rgn.setSettings(getSettings());
-
-            rgn.setShowRecordSelectors(true);
-            rgn.setFixedWidthColumns(true);
+        {
+            DataRegion rgn = super.createDataRegion();
 
             setPeptideUrls(rgn, null);
 
@@ -171,29 +144,10 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             return rgn;
         }
 
-        public DataView createDataView()
+        @Override
+        protected Sort getBaseSort()
         {
-            DataRegion rgn = createDataRegion();
-            GridView result = new GridView(rgn, new NestedRenderContext(_selectedNestingOption, getViewContext()));
-            setupDataView(result);
-
-            Sort customViewSort = result.getRenderContext().getBaseSort();
-            Sort sort = ProteinManager.getPeptideBaseSort();
-            if (customViewSort != null)
-            {
-                sort.insertSort(customViewSort);
-            }
-            result.getRenderContext().setBaseSort(sort);
-            Filter customViewFilter = result.getRenderContext().getBaseFilter();
-            SimpleFilter filter = new SimpleFilter(customViewFilter);
-            if (_selectedRows != null)
-            {
-                String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
-                filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
-            }
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
-            result.getRenderContext().setBaseFilter(filter);
-            return result;
+            return ProteinManager.getPeptideBaseSort();
         }
 
         public PeptidesTableInfo createTable()
@@ -248,11 +202,11 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
         PeptideQueryView view = new PeptideQueryView(schema, settings, true, true);
         DataRegion region = view.createDataRegion();
-        if (!(region instanceof QueryPeptideDataRegion))
+        if (!(region instanceof NestableDataRegion))
         {
             throw new NotFoundException("No nesting possible");
         }
-        QueryPeptideDataRegion rgn = (QueryPeptideDataRegion) region;
+        NestableDataRegion rgn = (NestableDataRegion) region;
 
         DataRegion nestedRegion = rgn.getNestedRegion();
         GridView result = new GridView(nestedRegion, (BindException)null);
@@ -275,7 +229,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
         filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
-        filter.addCondition(view._selectedNestingOption.getRowIdColumnName(), groupId.intValue());
+        filter.addCondition(view.getSelectedNestingOption().getRowIdColumnName(), groupId.intValue());
         result.getRenderContext().setBaseFilter(filter);
 
         return result;
