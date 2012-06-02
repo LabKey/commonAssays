@@ -34,6 +34,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -113,7 +114,8 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
         }
 
         int row = 1;
-        List<Map<String, File>> allFiles = form.getSelectedDataCollector().getFileQueue(form);
+        // Create a copy in case another HTTP request modifies the set of files
+        List<Map<String, File>> allFiles = new ArrayList<Map<String, File>>(form.getSelectedDataCollector().getFileQueue(form));
         for (Map<String, File> files : allFiles)
         {
             for (File file : files.values())
