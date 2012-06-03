@@ -980,7 +980,7 @@ Ext4.define('Microarray.GeoExportPanel', {
             row = [];
             fields.each(function(field){
                 val = rec.get(field.name);
-                val = Ext4.isDefined(val) ? LABKEY.ext.MetaHelper.getDisplayString(val, field, rec, resultStore) : '';
+                val = Ext4.isDefined(val) ? LABKEY.ext.Ext4Helper.getDisplayString(val, field, rec, resultStore) : '';
                 row.push(val);
             }, this);
             sections.Samples.push(row);
