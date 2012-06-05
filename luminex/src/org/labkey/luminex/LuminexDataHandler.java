@@ -1613,7 +1613,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             return;
         }
         ParticipantVisit match = null;
-        if (parseDescription)
+        if (parseDescription || (dataRow.getSpecimenID() == null && dataRow.getVisitID() == null && dataRow.getParticipantID() == null && dataRow.getDate() == null))
         {
             String value = dataRow.getDescription();
             if (value != null)
@@ -1848,7 +1848,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         ExpProtocol protocol = run.getProtocol();
         LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
 
-        // create a temperary resolver to use for parsing the description value prior to creating the data file for the transform script
+        // create a temporary resolver to use for parsing the description value prior to creating the data file for the transform script
         // i.e. we don't care about about resolving the study or lookup information at this time (that will happen after the transform is run)
         ParticipantVisitResolver resolver = new StudyParticipantVisitResolverType().createResolver(run, null, info.getUser());
 
