@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;

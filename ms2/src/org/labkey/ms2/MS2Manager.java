@@ -52,6 +52,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -590,7 +591,14 @@ public class MS2Manager
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
         MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, root);
-        PipelineService.get().queueJob(job);
+        try
+        {
+            PipelineService.get().queueJob(job);
+        }
+        catch (PipelineValidationException e)
+        {
+            throw new IOException(e);
+        }
         return runInfo;
     }
 
@@ -601,7 +609,14 @@ public class MS2Manager
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
         MS2ImportPipelineJob job = new MS2ImportPipelineJob(info, file, description, runInfo, root);
-        PipelineService.get().queueJob(job);
+        try
+        {
+            PipelineService.get().queueJob(job);
+        }
+        catch (PipelineValidationException e)
+        {
+            throw new IOException(e);
+        }
         return runInfo;
     }
 

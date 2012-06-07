@@ -458,7 +458,7 @@ public class PipelineController extends SpringActionController
                 errors.reject(ERROR_MSG, e.getMessage());
                 return false;
             }
-            catch (PipelineProtocol.PipelineValidationException e)
+            catch (PipelineValidationException e)
             {
                 errors.reject(ERROR_MSG, e.getMessage());
                 return false;

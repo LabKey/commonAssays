@@ -17,9 +17,9 @@ package org.labkey.ms2.pipeline.comet;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
@@ -74,7 +74,7 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return null;
     }
 
-    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
+    public void ensureEnabled() throws PipelineValidationException
     {
         // Nothing to do.
         throw new UnsupportedOperationException("Comet does not support search job creation.");

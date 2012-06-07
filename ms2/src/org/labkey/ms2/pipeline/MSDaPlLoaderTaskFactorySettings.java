@@ -19,8 +19,6 @@ import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.PathMapper;
 
-import java.io.File;
-
 /**
  * User: jeckels
  * Date: May 17, 2011
@@ -28,10 +26,10 @@ import java.io.File;
 public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
 {
     private String _cloneName;
-    private String _baseServerURL;
+    private String _submitURL;
+    private String _statusBaseURL;
     private String _username;
     private String _password;
-    private Integer _projectId;
     private String _pipeline;
     private PathMapper _pathMapper;
 
@@ -60,14 +58,24 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
         _cloneName = cloneName;
     }
 
-    public String getBaseServerURL()
+    public String getSubmitURL()
     {
-        return _baseServerURL;
+        return _submitURL;
     }
 
-    public void setBaseServerURL(String baseServerURL)
+    public void setSubmitURL(String submitURL)
     {
-        _baseServerURL = baseServerURL;
+        _submitURL = submitURL;
+    }
+
+    public String getStatusBaseURL()
+    {
+        return _statusBaseURL;
+    }
+
+    public void setStatusBaseURL(String statusBaseURL)
+    {
+        _statusBaseURL = statusBaseURL;
     }
 
     public String getUsername()
@@ -88,16 +96,6 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
     public void setPassword(String password)
     {
         _password = password;
-    }
-
-    public Integer getProjectId()
-    {
-        return _projectId;
-    }
-
-    public void setProjectId(Integer projectId)
-    {
-        _projectId = projectId;
     }
 
     public String getPipeline()

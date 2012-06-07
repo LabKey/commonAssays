@@ -15,8 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
-import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.module.Module;
@@ -72,7 +72,7 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
 
-    abstract public void ensureEnabled() throws PipelineProtocol.PipelineValidationException;
+    abstract public void ensureEnabled() throws PipelineValidationException;
 
     abstract public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException;
 

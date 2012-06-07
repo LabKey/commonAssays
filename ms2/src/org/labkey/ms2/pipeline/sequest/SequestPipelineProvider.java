@@ -19,11 +19,10 @@ package org.labkey.ms2.pipeline.sequest;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.TaskFactory;
-import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.*;
-import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
@@ -163,10 +162,10 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "pipelineSequest";
     }
 
-    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
+    public void ensureEnabled() throws PipelineValidationException
     {
         if (!hasSequest())
-            throw new PipelineProtocol.PipelineValidationException("Sequest server has not been specified in site customization.");
+            throw new PipelineValidationException("Sequest server has not been specified in site customization.");
     }
 
     public boolean supportsDirectories()

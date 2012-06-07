@@ -151,7 +151,7 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "pipelineXTandem";
     }
 
-    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
+    public void ensureEnabled() throws PipelineValidationException
     {
         // Always enabled.
     }

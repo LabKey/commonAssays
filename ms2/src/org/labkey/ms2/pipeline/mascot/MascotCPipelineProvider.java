@@ -19,7 +19,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ActionURL;
@@ -287,11 +287,11 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return false;
     }
 
-    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
+    public void ensureEnabled() throws PipelineValidationException
     {
         AppProps appProps = AppProps.getInstance();
         String mascotServer = appProps.getMascotServer();
         if ((!appProps.hasMascotServer() || 0==mascotServer.length()))
-            throw new PipelineProtocol.PipelineValidationException("Mascot server has not been specified in site customization.");
+            throw new PipelineValidationException("Mascot server has not been specified in site customization.");
     }
 }
