@@ -64,7 +64,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descripti
     <% } %>
     </p>
     <p>
-    <a href="<%=h(urlFcsFilesWithSamples)%>"><%=fcsFilesWithSamplesCount%> FCS Files</a> are have been joined with a sample and
+    <a href="<%=h(urlFcsFilesWithSamples)%>"><%=fcsFilesWithSamplesCount%> FCS Files</a> have been joined with a sample and
     <a href="<%=h(urlFcsFilesWithoutSamples)%>"><%=fcsFilesWithoutSamplesCount%> FCS Files</a> are not joined with any samples.
     </p>
 
