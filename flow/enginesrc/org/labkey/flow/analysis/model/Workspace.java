@@ -244,11 +244,11 @@ public abstract class Workspace implements Serializable
     public List<String> getAllSampleIDs()
     {
         GroupInfo allSamplesGroup = getGroup("0");
-        if (allSamplesGroup == null || !allSamplesGroup.getGroupName().toString().equalsIgnoreCase(ALL_SAMPLES))
+        if (allSamplesGroup == null || !allSamplesGroup.isAllSamples())
         {
             for (GroupInfo groupInfo : getGroups())
             {
-                if (groupInfo.getGroupName().toString().equalsIgnoreCase(ALL_SAMPLES))
+                if (groupInfo.isAllSamples())
                 {
                     allSamplesGroup = groupInfo;
                     break;
@@ -485,15 +485,23 @@ public abstract class Workspace implements Serializable
         PopulationName _groupName;
         List<String> _sampleIds = new ArrayList<String>();
 
+        public boolean isAllSamples()
+        {
+            return ALL_SAMPLES.equalsIgnoreCase(_groupName.toString());
+        }
+
         public List<String> getSampleIds()
         {
+            if (_sampleIds.size() == 0 && isAllSamples())
+                return new ArrayList<String>(Workspace.this._sampleInfos.keySet());
             return _sampleIds;
         }
 
         public List<SampleInfo> getSampleInfos()
         {
-            ArrayList<SampleInfo> sampleInfos = new ArrayList<SampleInfo>(_sampleIds.size());
-            for (String sampleId : _sampleIds)
+            List<String> sampleIds = getSampleIds();
+            ArrayList<SampleInfo> sampleInfos = new ArrayList<SampleInfo>(sampleIds.size());
+            for (String sampleId : sampleIds)
             {
                 SampleInfo sampleInfo = getSample(sampleId);
                 if (sampleInfo != null)
