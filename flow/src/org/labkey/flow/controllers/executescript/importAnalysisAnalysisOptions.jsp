@@ -88,7 +88,7 @@
             if (sampleInfo != null)
                 groupSamples.add(sampleInfo.getLabel());
         }
-        if (group.isAllSamples()) || groupSamples.size() > 0)
+        if (group.isAllSamples() || groupSamples.size() > 0)
             groups.put(group.getGroupName().toString(), groupSamples);
     }
 
