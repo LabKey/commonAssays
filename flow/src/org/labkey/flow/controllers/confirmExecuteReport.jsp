@@ -15,23 +15,13 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.Pair" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.flow.reports.FlowReport" %>
-<%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
-<%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
-<%@ page import="org.labkey.flow.controllers.ReportsController" %>
-<%@ page import="org.labkey.flow.controllers.ReportsController.ExecuteForm" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.flow.data.ICSMetadata" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.ExecuteForm" %>
+<%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -50,6 +40,6 @@
     Execute the background report?
     <p>
     <%= generateSubmitButton("Execute Report") %>
-    <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? generateButton("Cancel", "begin.view") : generateButton("Cancel", form.getReturnUrl())%>
+    <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? generateButton("Cancel", buildURL(ReportsController.BeginAction.class)) : generateButton("Cancel", form.getReturnUrl())%>
 </form>
 

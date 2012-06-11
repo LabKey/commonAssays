@@ -70,7 +70,7 @@ function keywordCombo_onSelect()
 function form_onSubmit()
 {
     var form = updateFormPanel.getForm();
-    form.getEl().dom.action="bulkUpdateKeywords.post";
+    form.getEl().dom.action=<%=q(buildURL(WellController.BulkUpdateKeywordsAction.class))%>;
     form.getEl().dom.submit();
 }
 
@@ -125,7 +125,7 @@ Ext.onReady(function(){
                 ]
             } <%}}%>
         ],
-        buttons:[{text: 'Update', type:'submit', handler:function() {updateFormPanel.getForm().submit({url:"bulkUpdateKeywords.view"})}}]
+        buttons:[{text: 'Update', type:'submit', handler:function() {updateFormPanel.getForm().submit({url:<%=q(buildURL(WellController.BulkUpdateKeywordsAction.class))%>})}}]
     });
 
     keywordCombo.on('select', keywordCombo_onSelect);
