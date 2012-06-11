@@ -70,6 +70,7 @@
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
     ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
+    ExpMaterial[] _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples();
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
     Arrays.sort(_scripts);
@@ -84,11 +85,14 @@
             .addParameter("query.FCSAnalysisCount~neq", 0);
     ActionURL compMatricesURL = FlowTableType.CompensationMatrices.urlFor(user, c, QueryAction.executeQuery);
 
+    final int DISPLAY_MAX_ROWS = 15;
 %>
 <style type="text/css">
     .summary-div {
         padding-bottom:1.2em;
         line-height:140%;
+        /* Keep the label and tooltip downarrow from being wrapped */
+        white-space: nowrap;
     }
     .summary-header {
         border-bottom:1px solid lightgray;
@@ -104,11 +108,11 @@
 </style>
 
 <script type="text/javascript">
-    function createRenderer(urlFlagged, countProperty, countLabel)
+    function createRenderer(detailsURL, urlFlagged, countProperty, countLabel)
     {
         return function (el, json) {
             var html = "<table border='0'>";
-            for (var i = 0; i < json.rows.length; i++) {
+            for (var i = 0; i < <%=DISPLAY_MAX_ROWS%> && i < json.rows.length; i++) {
                 var row = json.rows[i];
                 var name = row.Name.value;
                 var url = row.Name.url;
@@ -121,6 +125,11 @@
                 if (countProperty) {
                     html += "<td align='right' nowrap>(" + row[countProperty].value + " " + countLabel + ")</td>";
                 }
+                html += "</tr>";
+            }
+            if (json.rows.length > <%=DISPLAY_MAX_ROWS%>) {
+                html += "<tr>";
+                html += "<td colspan=2><a href='" + detailsURL + "'>More...</a></td>";
                 html += "</tr>";
             }
             html += "</table>";
@@ -149,7 +158,7 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(FlowDataType.FCSFile.urlFlag(true))%>", "FCSFileCount", "files")
+                renderer: createRenderer("<%=h(fcsFileRunsURL)%>", "<%=h(FlowDataType.FCSFile.urlFlag(true))%>", "FCSFileCount", "files")
             });
         });
         </script>
@@ -173,7 +182,7 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
+                renderer: createRenderer("<%=fcsAnalysisRunsURL%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
             });
         });
         </script>
@@ -196,24 +205,25 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(FlowDataType.CompensationMatrix.urlFlag(true))%>")
+                renderer: createRenderer("<%=h(compMatricesURL)%>", "<%=h(FlowDataType.CompensationMatrix.urlFlag(true))%>")
             });
         });
         </script>
         <div id="compensationMatrices-div">
-            <a href="<%=compMatricesURL%>">Compensation (<%=_compensationMatrixCount%> <%=_compensationMatrixCount == 1 ? "matrix" : "matrices"%>)</a>
+            <a href="<%=h(compMatricesURL)%>">Compensation (<%=_compensationMatrixCount%> <%=_compensationMatrixCount == 1 ? "matrix" : "matrices"%>)</a>
         </div>
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
-    <% if (_sampleSet != null) { %>
+    <% if (_sampleSetSamples != null && _sampleSetSamples.length > 0) { %>
         <script type="text/javascript">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "samples-div",
                 html: "<table border='0'>" +
                       <%
-                        for (ExpMaterial sample : _sampleSet.getSamples())
+                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleSetSamples.length; sampleIndex++)
                         {
+                            ExpMaterial sample = _sampleSetSamples[sampleIndex];
                             String name = sample.getName();
                             String url = sample.detailsURL().getLocalURIString();
                             String comment = sample.getComment() != null ? " title='" + h(sample.getComment()) + "'" : "";
@@ -223,6 +233,15 @@
                           "<td><a<%=comment%> href='<%=url%>'><img src='<%=src%>'></a>" +
                           "<td nowrap><a<%=comment%> href='<%=url%>'><%=name%></a>" +
                           "</tr>" +
+                      <%
+                         }
+
+                         if (_sampleSetSamples.length > DISPLAY_MAX_ROWS)
+                         {
+                      %>
+                            "<tr>" +
+                            "<td colspan=2><a href='<%=h(_sampleSet.detailsURL())%>'>More...</a></td>" +
+                            "</tr>" +
                       <%
                          }
                       %>
@@ -359,7 +378,7 @@
                               apiVersion: 9.1
                           })
                         },
-                        renderer: createRenderer("<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "WellCount", "wells")
+                        renderer: createRenderer("<%=h(experiment.urlShow())%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "WellCount", "wells")
                     });
                 });
                 </script>
@@ -367,7 +386,7 @@
             }
             %>
             <div id="script-<%=experiment.getExperimentId()%>-div">
-                <a href="<%=experiment.urlShow()%>"><%=experiment.getName()%> (<%=runCount%> <%=runCount == 1 ? "run" : "runs"%>)</a>
+                <a href="<%=h(experiment.urlShow())%>"><%=experiment.getName()%> (<%=runCount%> <%=runCount == 1 ? "run" : "runs"%>)</a>
             </div>
             <%
         }

@@ -75,6 +75,7 @@ Ext.QuickTips.init();
 </script>
 <%
     ViewContext context = HttpView.currentContext();
+    User user = context.getUser();
     FlowWell well = getWell();
     FlowWell fcsFile = well.getFCSFile();
     FlowScript script = well.getScript();
@@ -465,7 +466,6 @@ if (null == fileURI)
 }
 else
 {
-    User user = context.getUser();
     PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
     if (null != r)
     {
@@ -495,11 +495,11 @@ else
             }
         }
     }
+}
 
-    if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
-    {
-        %><a href="<%=well.urlFor(RunController.ExportAnalysis.class)%>" rel="nofollow">Download Analysis zip</a><br><%
-    }
+if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
+{
+    %><a href="<%=well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells")%>" rel="nofollow">Download Analysis zip</a><br><%
 }
 
 if (getRun() != null)

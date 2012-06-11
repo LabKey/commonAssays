@@ -85,18 +85,6 @@ public class FlowQueryView extends QueryView
         setShowRecordSelectors(true);
     }
 
-//    protected MenuButton createExportButton(boolean exportAsWebPage)
-//    {
-//        MenuButton button = super.createExportButton(exportAsWebPage);
-//
-//        // XXX: only add menu item for queries based on FCSAnalyses
-//        ActionURL url = getViewContext().cloneActionURL();
-//        url.setAction(RunController.ExportToSpiceAction.class);
-//        button.addMenuItem("Export All to Spice (.spd)", url);
-//        return button;
-//    }
-
-
     @Override
     protected boolean canDelete()
     {

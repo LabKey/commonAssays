@@ -39,6 +39,8 @@
     exportFormats.put(AnalysisSerializer.Options.FormatRowPerStatistic, "One row per sample and statistic");
 
     boolean renderForm = bean._renderForm;
+    String selectionType = bean.getSelectionType() == null ? "runs" : bean.getSelectionType();
+    ActionURL exportURL = urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", selectionType);
 %>
 <script>
     function toggleShortNames(checked)
@@ -52,7 +54,7 @@
 </script>
 
 <% if (renderForm) { %>
-    <form action='<%=new ActionURL(RunController.ExportAnalysis.class, container)%>' method='POST'>
+    <form action='<%=exportURL%>' method='POST'>
 <% } %>
 
 <table class="labkey-export-tab-contents">
@@ -84,7 +86,7 @@
             <% if (bean.getRunId() != null || bean.getWellId() != null) { %>
             <%=PageFlowUtil.generateSubmitButton("Export", null, "rel='nofollow'")%>
             <% } else { %>
-            <%=PageFlowUtil.generateSubmitButton("Export", "return verifySelected(this.form, '" + urlFor(RunController.ExportAnalysis.class) + "', 'POST', 'rows')", "rel='nofollow'")%>
+            <%=PageFlowUtil.generateSubmitButton("Export", "return verifySelected(this.form, '" + exportURL + "', 'POST', " + q(selectionType) + ")", "rel='nofollow'")%>
             <% } %>
         </td>
     </tr>
