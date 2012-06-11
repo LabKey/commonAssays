@@ -98,7 +98,7 @@
         {
         %><labkey:link href="<%=run.urlFor(RunController.DownloadAction.class)%>" text="Download FCS Files" rel="nofollow"/><br><%
         }
-        %><labkey:link href="<%=run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")%>" text="Download Analysis zip" rel="nofollow" /><br><%
+        %><labkey:link href='<%=run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")%>' text="Download Analysis zip" rel="nofollow" /><br><%
     }
 
 
