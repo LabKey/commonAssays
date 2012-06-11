@@ -27,7 +27,7 @@
 %>
 <labkey:errors />
 <br>
-<form method="post" action="insertAnnots.post" enctype="multipart/form-data">
+<form method="post" action="<%=h(buildURL(MS2Controller.InsertAnnotsAction.class))%>" enctype="multipart/form-data">
 <table>
     <tr>
       <td class="labkey-form-label">Full file path</td>

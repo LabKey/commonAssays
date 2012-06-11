@@ -34,7 +34,7 @@
     if (form.getRun() != null)
     {
 %>
-<form method=get action="discriminate.post">
+<form method=get action="<%=h(buildURL(ScoringController.DiscriminateAction.class))%>">
 <input type="hidden" name="runId" value="<%=form.getRunId()%>">
 <table>
     <tr><td colspan=2 class="labkey-header-large">

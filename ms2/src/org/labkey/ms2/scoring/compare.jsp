@@ -29,7 +29,7 @@
 
     MS2Run[] runs = form.getRuns();
 %>
-<form method=get action="compare.post">
+<form method=get action="<%=h(ScoringController.CompareAction.class)%>">
 <labkey:errors/>
 <% if (runs.length > 0)
 { %>

@@ -15,16 +15,14 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.action.ReturnUrlForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
-<form method="post" action="saveView.view" class="labkey-data-region">
+<form method="post" action="<%=h(buildURL(MS2Controller.SaveViewAction.class))%>" class="labkey-data-region">
     <table>
         <tr>
             <td>Name:</td>
