@@ -10,6 +10,7 @@ import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.TaskFactorySettings;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.pipeline.cmd.TaskPath;
@@ -59,7 +60,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                     targetWriter = new BufferedWriter(new FileWriter(targetListFile));
                     decoyWriter = new BufferedWriter(new FileWriter(decoyListFile));
 
-                    FileType targetSQTFileType = new FileType(".target.sqt");
+                    FileType targetSQTFileType = new FileType(".sqt");
                     FileType decoySQTFileType = new FileType(".decoy.sqt");
 
                     int index = 1;
@@ -74,7 +75,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                         _wd.inputFile(inputTargetFile, false);
                         File inputDecoyFile = new File(job.getAnalysisDirectory(), decoyFileName);
                         _wd.inputFile(inputDecoyFile, false);
-                        action.addInput(inputTargetFile, "TargetSQT" + (index == 1 ? "" : Integer.toString(index)));
+                        action.addInput(inputTargetFile, "SQT" + (index == 1 ? "" : Integer.toString(index)));
                         action.addInput(inputDecoyFile, "DecoySQT" + (index == 1 ? "" : Integer.toString(index)));
                         index++;
                     }
@@ -111,6 +112,33 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
             throw new PipelineJobException(e);
         }
         return new RecordedActionSet(action);
+    }
+
+    public static class FactorySettings extends AbstractTaskFactorySettings
+    {
+        private String _cloneName;
+
+        public FactorySettings(String name)
+        {
+            super(Sqt2PinTask.class, name);
+        }
+
+        public TaskId getCloneId()
+        {
+            return new TaskId(Sqt2PinTask.class, _cloneName);
+        }
+
+        public String getCloneName()
+        {
+            return _cloneName;
+        }
+
+        public void setCloneName(String cloneName)
+        {
+            _cloneName = cloneName;
+        }
+
+
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>

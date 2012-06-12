@@ -35,12 +35,7 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
 
     public MSDaPlLoaderTaskFactorySettings(String name)
     {
-        this(MSDaPlLoaderTask.class, name);
-    }
-
-    public MSDaPlLoaderTaskFactorySettings(Class namespaceClass, String name)
-    {
-        super(namespaceClass, name);
+        super(MSDaPlLoaderTask.class, name);
     }
 
     public TaskId getCloneId()

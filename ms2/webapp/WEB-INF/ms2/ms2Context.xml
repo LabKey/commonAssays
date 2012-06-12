@@ -43,6 +43,7 @@
                 </bean>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
                 <bean class="org.labkey.ms2.pipeline.MSDaPlLoaderTask$Factory" />
+                <bean class="org.labkey.ms2.pipeline.Sqt2PinTask$Factory" />
             </list>
         </property>
         <property name="factories">
@@ -628,41 +629,9 @@
     </bean>
 
     <!-- Part of the MacCoss UW Sequest pipeline -->
-    <bean id="sqt2pinCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+    <bean id="sqt2pinCommand" class="org.labkey.ms2.pipeline.Sqt2PinTask$FactorySettings">
         <constructor-arg value="sqt2pinCommand"/>
-        <property name="statusName" value="SQT2PIN"/>
         <property name="groupParameterName" value="sqt2pin" />
-        <property name="protocolActionName" value="SQT2PIN" />
-        <property name="switchFormat" ref="unixDefaultSwitch"/>
-        <property name="inputPaths">
-            <map>
-                <entry key="sqt">
-                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg ref="sqtFileType" />
-                    </bean>
-                </entry>
-                <entry key="decoySqt">
-                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg ref="decoySqtFileType" />
-                    </bean>
-                </entry>
-            </map>
-        </property>
-        <property name="outputExtension" value=".pin.xml" />
-        <property name="converters">
-            <list>
-                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
-                    <property name="exePath" value="sqt2pin"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="sqt" />
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="decoySqt" />
-                </bean>
-            </list>
-        </property>
-        <property name="pipeToOutput" value="true" />
     </bean>
 
     <!-- TaskIds for TPP tasks registered in factoryImpls -->
@@ -1130,6 +1099,9 @@
                             </bean>
                             <bean class="org.labkey.api.pipeline.cmd.PathInLine">
                                 <property name="key" value="RAW"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                <property name="switchName" value="b"/>
                             </bean>
                             <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                                 <property name="switchName" value="c"/>
