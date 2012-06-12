@@ -402,6 +402,7 @@
         <property name="groupParameterName" value="percolator" />
         <property name="protocolActionName" value="Percolator" />
         <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="join" value="true" />
         <property name="inputPaths">
             <map>
                 <entry key="searchResults">
@@ -1107,12 +1108,12 @@
             <map>
                 <entry key="ms1">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".ms1" />
+                        <constructor-arg value=".cms1" />
                     </bean>
                 </entry>
                 <entry key="ms2">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".ms2" />
+                        <constructor-arg value=".cms2" />
                     </bean>
                 </entry>
             </map>

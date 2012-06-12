@@ -72,9 +72,9 @@ public class CumulativeTimer
         endCurrentTask();
         long totalTime = 0;
 
-        _log.info("========================================");
-        _log.info("Summary of all timed tasks:");
-        _log.info("");
+        _log.debug("========================================");
+        _log.debug("Summary of all timed tasks:");
+        _log.debug("");
 
         for (Object key : _cumulativeTime.keySet())
         {
@@ -84,9 +84,9 @@ public class CumulativeTimer
             totalTime += time;
         }
 
-        _log.info("");
+        _log.debug("");
         logElapsedTime(totalTime, description);
-        _log.info("========================================");
+        _log.debug("========================================");
     }
 
     protected void logElapsedTime(long elapsedTimeNano, String action)
@@ -94,7 +94,7 @@ public class CumulativeTimer
         double seconds = (double)elapsedTimeNano / 1000000000;
         double minutes = seconds / 60;
 
-        _log.info(Formats.f2.format(seconds) + " seconds " + ((minutes > 1) ? ("(" + Formats.f2.format(seconds / 60) + " minutes) ") : "") + "to " + action);
+        _log.debug(Formats.f2.format(seconds) + " seconds " + ((minutes > 1) ? ("(" + Formats.f2.format(seconds / 60) + " minutes) ") : "") + "to " + action);
     }
 
     private class Task

@@ -1253,6 +1253,7 @@ ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/QuantitationAlgorithm.java -text
 ms2/src/org/labkey/ms2/pipeline/SearchFormUtil.java -text
 ms2/src/org/labkey/ms2/pipeline/SearchServiceImpl.java -text
+ms2/src/org/labkey/ms2/pipeline/Sqt2PinTask.java -text
 ms2/src/org/labkey/ms2/pipeline/TPPTask.java -text
 ms2/src/org/labkey/ms2/pipeline/UnknownMS2Run.java -text
 ms2/src/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp -text

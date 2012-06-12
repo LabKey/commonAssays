@@ -96,6 +96,12 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
             return Collections.singletonList(ACTION_NAME);
         }
 
+        @Override
+        public boolean isJoin()
+        {
+            return true;
+        }
+
         public boolean isJobComplete(PipelineJob job)
         {
             // No way of knowing.
@@ -174,13 +180,13 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         RecordedAction action = new RecordedAction(ACTION_NAME);
 
         File dir = getJob().getLogFile().getParentFile();
-        File sequestDir = new File(dir, "sequest");
-        File decoyDir = new File(sequestDir, "decoy");
-        File percolatorDir = new File(dir, "percolator");
-
-        sequestDir.mkdir();
-        decoyDir.mkdir();
-        percolatorDir.mkdir();
+//        File sequestDir = new File(dir, "sequest");
+//        File decoyDir = new File(sequestDir, "decoy");
+//        File percolatorDir = new File(dir, "percolator");
+//
+//        sequestDir.mkdir();
+//        decoyDir.mkdir();
+//        percolatorDir.mkdir();
 
         JSONObject postBody = new JSONObject();
         try
@@ -193,8 +199,6 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         }
         postBody.put("date", DateUtil.formatDateTime(new Date(), "yyyy-MM-dd"));
         postBody.put("pipeline", _factory._pipeline);
-//        postBody.put("targetSpecies", "6239");
-//        postBody.put("instrument", "LTQ");
         String comments = getJob().getDescription();
         if (getJob().getStatusHref() != null)
         {
@@ -204,31 +208,31 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
 
         try
         {
-            FileUtils.copyFileToDirectory(new File(dir, "sequest.params"), sequestDir);
-            File sequestResultsFile = UWSequestSearchTask.SEQUEST_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
-            FileUtils.copyFileToDirectory(sequestResultsFile, sequestDir);
-            File inputFile = getJob().getInputFiles().get(0);
-            if (!inputFile.getName().endsWith("ms2"))
-            {
-                File ms2File = new File(inputFile.getParentFile(), getJob().getBaseName() + ".ms2");
-                File cms2File = new File(inputFile.getParentFile(), getJob().getBaseName() + ".cms2");
-                if (ms2File.isFile())
-                {
-                    FileUtils.copyFileToDirectory(ms2File, sequestDir);
-                }
-                if (cms2File.isFile())
-                {
-                    FileUtils.copyFileToDirectory(ms2File, sequestDir);
-                }
-            }
-            FileUtils.copyFileToDirectory(inputFile, sequestDir);
-            File decoySearchResultFile = UWSequestSearchTask.SEQUEST_DECOY_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
-            if (NetworkDrive.exists(decoySearchResultFile))
-            {
-                FileUtils.copyFile(decoySearchResultFile, new File(decoyDir, sequestResultsFile.getName()));
-            }
-            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(percolatorDir, "combined-results.xml"));
-
+//            FileUtils.copyFileToDirectory(new File(dir, "sequest.params"), sequestDir);
+//            File sequestResultsFile = UWSequestSearchTask.SEQUEST_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
+//            FileUtils.copyFileToDirectory(sequestResultsFile, sequestDir);
+//            File inputFile = getJob().getInputFiles().get(0);
+//            if (!inputFile.getName().endsWith("ms2"))
+//            {
+//                File ms2File = new File(inputFile.getParentFile(), getJob().getBaseName() + ".ms2");
+//                File cms2File = new File(inputFile.getParentFile(), getJob().getBaseName() + ".cms2");
+//                if (ms2File.isFile())
+//                {
+//                    FileUtils.copyFileToDirectory(ms2File, sequestDir);
+//                }
+//                if (cms2File.isFile())
+//                {
+//                    FileUtils.copyFileToDirectory(ms2File, sequestDir);
+//                }
+//            }
+//            FileUtils.copyFileToDirectory(inputFile, sequestDir);
+//            File decoySearchResultFile = UWSequestSearchTask.SEQUEST_DECOY_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
+//            if (NetworkDrive.exists(decoySearchResultFile))
+//            {
+//                FileUtils.copyFile(decoySearchResultFile, new File(decoyDir, sequestResultsFile.getName()));
+//            }
+//            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(percolatorDir, "combined-results.xml"));
+//
             changePermissions(dir);
 
             String localURI = getJob().getLogFile().getParentFile().getCanonicalFile().toURI().toString();
@@ -290,16 +294,16 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         {
             try
             {
+                if (sleeps++ % 10 == 0)
+                {
+                    // Write a message every five minutes to show that we're still working
+                    getJob().getLogger().info("Polling MSDaPl for status");
+                }
+
                 // Wait 30 seconds before polling again
                 Thread.sleep(30 * 1000);
             }
             catch (InterruptedException ignored) {}
-            sleeps++;
-            if (sleeps % 10 == 0)
-            {
-                // Write a message every five minutes to show that we're still working
-                getJob().getLogger().info("Polling MSDaPl for status");
-            }
             // Update status so we'll see if we've been cancelled
             getJob().setStatus("WAITING FOR MSDaPl LOAD");
             HttpClient client = new HttpClient();
@@ -325,8 +329,6 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
 
     private void changePermissions(File file)
     {
-        file.setExecutable(true, false);
-        file.setWritable(true, false);
         file.setReadable(true, false);
 
         File[] children = file.listFiles();
