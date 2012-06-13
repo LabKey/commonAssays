@@ -68,8 +68,10 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                     {
                         String targetFileName = targetSQTFileType.getName(job.getAnalysisDirectory(), inputBaseName);
                         targetWriter.write(targetFileName);
+                        targetWriter.write("\n");
                         String decoyFileName = decoySQTFileType.getName(job.getAnalysisDirectory(), inputBaseName);
                         decoyWriter.write(decoyFileName);
+                        decoyWriter.write("\n");
 
                         File inputTargetFile = new File(job.getAnalysisDirectory(), targetFileName);
                         _wd.inputFile(inputTargetFile, false);
@@ -96,11 +98,13 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
 
                 File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");
 
-                job.runSubProcess(pb, _wd.getDir(), output, 0, false);
+                job.runSubProcess(pb, _wd.getDir(), output, 10, false);
 
                 action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
 
                 action.addOutput(_wd.outputFile(output), "PinXML", false);
+                action.addOutput(_wd.outputFile(targetListFile), "SQTFileList", false);
+                action.addOutput(_wd.outputFile(decoyListFile), "DecoySQTFileList", false);
             }
             finally
             {

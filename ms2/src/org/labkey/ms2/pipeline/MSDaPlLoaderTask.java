@@ -231,8 +231,8 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
 //            {
 //                FileUtils.copyFile(decoySearchResultFile, new File(decoyDir, sequestResultsFile.getName()));
 //            }
-//            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(percolatorDir, "combined-results.xml"));
-//
+            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(dir, "combined-results.xml"));
+
             changePermissions(dir);
 
             String localURI = getJob().getLogFile().getParentFile().getCanonicalFile().toURI().toString();
