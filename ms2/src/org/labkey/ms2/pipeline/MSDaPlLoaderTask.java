@@ -180,13 +180,6 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         RecordedAction action = new RecordedAction(ACTION_NAME);
 
         File dir = getJob().getLogFile().getParentFile();
-//        File sequestDir = new File(dir, "sequest");
-//        File decoyDir = new File(sequestDir, "decoy");
-//        File percolatorDir = new File(dir, "percolator");
-//
-//        sequestDir.mkdir();
-//        decoyDir.mkdir();
-//        percolatorDir.mkdir();
 
         JSONObject postBody = new JSONObject();
         try
@@ -208,31 +201,6 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
 
         try
         {
-//            FileUtils.copyFileToDirectory(new File(dir, "sequest.params"), sequestDir);
-//            File sequestResultsFile = UWSequestSearchTask.SEQUEST_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
-//            FileUtils.copyFileToDirectory(sequestResultsFile, sequestDir);
-//            File inputFile = getJob().getInputFiles().get(0);
-//            if (!inputFile.getName().endsWith("ms2"))
-//            {
-//                File ms2File = new File(inputFile.getParentFile(), getJob().getBaseName() + ".ms2");
-//                File cms2File = new File(inputFile.getParentFile(), getJob().getBaseName() + ".cms2");
-//                if (ms2File.isFile())
-//                {
-//                    FileUtils.copyFileToDirectory(ms2File, sequestDir);
-//                }
-//                if (cms2File.isFile())
-//                {
-//                    FileUtils.copyFileToDirectory(ms2File, sequestDir);
-//                }
-//            }
-//            FileUtils.copyFileToDirectory(inputFile, sequestDir);
-//            File decoySearchResultFile = UWSequestSearchTask.SEQUEST_DECOY_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
-//            if (NetworkDrive.exists(decoySearchResultFile))
-//            {
-//                FileUtils.copyFile(decoySearchResultFile, new File(decoyDir, sequestResultsFile.getName()));
-//            }
-            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(dir, "combined-results.xml"));
-
             changePermissions(dir);
 
             String localURI = getJob().getLogFile().getParentFile().getCanonicalFile().toURI().toString();
