@@ -22,6 +22,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -52,7 +53,7 @@
 %>
 <%=textLink("Download Datafile", bean.getDatafileURL())%>
 <% } %>
-<% if (me.getViewContext().getUser().isAdministrator()) { %>
+<% if (me.getViewContext().hasPermission(org.labkey.api.security.permissions.AdminPermission.class)) { %>
     <%= textLink("Migrate Legacy NAb Runs", new org.labkey.api.view.ActionURL(NabController.MigrateToAssayAction.class, me.getViewContext().getContainer())) %>
 <% } %>
 <br>

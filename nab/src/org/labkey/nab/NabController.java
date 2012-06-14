@@ -67,6 +67,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -957,7 +958,7 @@ public class NabController extends SpringActionController
         }
     }
 
-    @RequiresSiteAdmin
+    @RequiresPermissionClass(AdminPermission.class)
     public class MigrateToAssayAction extends FormViewAction<MigrateToAssayForm>
     {
         @Override
