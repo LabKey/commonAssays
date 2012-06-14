@@ -92,7 +92,7 @@ public class ViabilityModule extends DefaultModule
 
     @Override
     @NotNull
-    public Set<Class> getJUnitTests()
+    public Set<Class> getIntegrationTests()
     {
         return new HashSet<Class>(Arrays.asList(
                 ViabilityManager.TestCase.class,

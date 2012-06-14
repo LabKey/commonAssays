@@ -336,24 +336,31 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     @Override
     @NotNull
-    public Set<Class> getJUnitTests()
+    public Set<Class> getIntegrationTests()
     {
         return new HashSet<Class>(Arrays.asList(
             SequestParamsBuilder.TestCase.class,
-            UWSequestParamsBuilder.TestCase.class,
-            PositiveDoubleParamsValidator.TestCase.class,
-            NaturalNumberParamsValidator.TestCase.class,
-            NaturalNumberParamsValidator.TestCase.class,
-            RealNumberParamsValidator.TestCase.class,
-            BooleanParamsValidator.TestCase.class,
-            NonNegativeIntegerParamsValidator.TestCase.class,
-            ListParamsValidator.TestCase.class,
-            org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
-            org.labkey.ms2.reader.RandomAccessPwizMSDataIterator.TestCase.class,
-            org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator.TestCase.class,
-            org.labkey.ms2.protein.fasta.PeptideTestCase.class,
+            UWSequestParamsBuilder.TestCase.class
+        ));
+    }
+
+    @Override
+    @NotNull
+    public Set<Class> getUnitTests()
+    {
+        return new HashSet<Class>(Arrays.asList(
+            PeptideProphetSummary.TestCase.class,
             MS2Modification.MS2ModificationTest.class,
-            PeptideProphetSummary.TestCase.class
+            org.labkey.ms2.protein.fasta.PeptideTestCase.class,
+            org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator.TestCase.class,
+            org.labkey.ms2.reader.RandomAccessPwizMSDataIterator.TestCase.class,
+            org.labkey.ms2.protein.FastaDbLoader.TestCase.class,
+            ListParamsValidator.TestCase.class,
+            NonNegativeIntegerParamsValidator.TestCase.class,
+            BooleanParamsValidator.TestCase.class,
+            RealNumberParamsValidator.TestCase.class,
+            PositiveDoubleParamsValidator.TestCase.class,
+            NaturalNumberParamsValidator.TestCase.class
         ));
     }
 

@@ -187,12 +187,11 @@ public class FlowModule extends DefaultModule
 
     @Override
     @NotNull
-    public Set<Class> getJUnitTests()
+    public Set<Class> getUnitTests()
     {
         return new HashSet<Class>(Arrays.asList(
                 PopulationName.NameTests.class,
                 SubsetParser.TestLexer.class,
-                SubsetParser.TestParser.class,
                 SubsetTests.class,
                 StatisticSpec.TestCase.class,
                 FlowJoWorkspace.LoadTests.class,
