@@ -29,7 +29,7 @@ import java.sql.SQLException;
  * User: jeckels
  * Date: Apr 23, 2007
  */
-public class NabPlateTypeHandler implements PlateTypeHandler
+public class NabPlateTypeHandler extends AbstractPlateTypeHandler
 {
     public static final String SINGLE_PLATE_TYPE = "single-plate";
     public static final String HIGH_THROUGHPUT_PLATE_TYPE = "high-throughput";

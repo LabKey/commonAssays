@@ -150,7 +150,9 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
                 if (!hiddenCols.contains(pd.getName()))
                 {
-                    if (!ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME.equals(pd.getName()))
+                    if (!ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME.equals(pd.getName()) &&
+                        !ElispotDataHandler.RAW_SFU_PROPERTY_NAME.equals(pd.getName()))
+
                         visibleColumns.add(FieldKey.fromParts(pd.getName()));
                 }
             }

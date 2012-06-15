@@ -17,24 +17,37 @@
 package org.labkey.elispot;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.study.*;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
+import org.labkey.api.study.AbstractPlateTypeHandler;
+import org.labkey.api.study.Plate;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.Position;
+import org.labkey.api.study.Well;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.Stats;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Karl Lum
  * Date: Jan 14, 2008
  */
-public class ElispotPlateTypeHandler implements PlateTypeHandler
+public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
 {
     public static final String BLANK_PLATE = "blank";
     public static final String DEFAULT_PLATE = "default";
+    public static final String BACKGROUND_WELL_GROUP = "Background Wells";
 
     public String getAssayType()
     {
@@ -100,8 +113,94 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
     public WellGroup.Type[] getWellGroupTypes()
     {
         return new WellGroup.Type[]{
-                WellGroup.Type.CONTROL, WellGroup.Type.SPECIMEN,
-                WellGroup.Type.REPLICATE, WellGroup.Type.ANTIGEN};
+                WellGroup.Type.SPECIMEN, WellGroup.Type.ANTIGEN,
+                WellGroup.Type.CONTROL, WellGroup.Type.REPLICATE};
+    }
+
+    @Override
+    public void validate(Container container, User user, PlateTemplate template) throws ValidationException
+    {
+        boolean hasBackgroundWell = false;
+
+        for (WellGroupTemplate group : template.getWellGroups())
+        {
+            if (group.getType() == WellGroup.Type.CONTROL)
+            {
+                // look for background well groups
+
+                if (BACKGROUND_WELL_GROUP.equals(group.getName()))
+                {
+                    if (hasBackgroundWell)
+                        throw new ValidationException("Only one Background Well group is permitted");
+                    else
+                        hasBackgroundWell = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Calculates the background value on a per specimen basis and returns a map of specimen
+     * wellgroup name to background value.
+     *
+     * Background values are calculated from the median of all background wells that exist within a
+     * specimen wellgroup. Background wells are specified on the plate template control type using the
+     * background well wellgroup.
+     */
+    public static Map<String, Double> getBackgroundValues(Container container, Plate plate)
+    {
+        Map<String, Double> backgroundMap = new HashMap<String, Double>();
+        WellGroup backgroundGroup = null;
+
+        for (WellGroup group : plate.getWellGroups(WellGroup.Type.CONTROL))
+        {
+            if (BACKGROUND_WELL_GROUP.equals(group.getName()));
+            {
+                backgroundGroup = group;
+                break;
+            }
+        }
+
+        if (backgroundGroup != null)
+        {
+            // for each specimen group, find the background wells
+            for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
+            {
+                List<Position> positions = group.getPositions();
+                double[] statsData = new double[positions.size()];
+                int i = 0;
+
+                for (Position pos : positions)
+                {
+                    if (backgroundGroup.contains(pos))
+                    {
+                        Well well = plate.getWell(pos.getRow(), pos.getColumn());
+                        if (ElispotDataHandler.isSpotCountValid(well.getValue()))
+                            statsData[i++] = well.getValue();
+                    }
+                }
+
+                if (i > 0)
+                {
+                    statsData = Arrays.copyOf(statsData, i);
+                    Stats.DoubleStats stats = new Stats.DoubleStats(statsData);
+
+                    if (!Double.isNaN(stats.getMedian()))
+                        backgroundMap.put(group.getName(), stats.getMedian());
+                }
+            }
+        }
+        return backgroundMap;
+    }
+
+    @Override
+    public Map<String, List<String>> getDefaultGroupsForTypes()
+    {
+        Map<String, List<String>> groupMap = new HashMap<String, List<String>>();
+
+        groupMap.put(WellGroup.Type.CONTROL.name(), Collections.singletonList(BACKGROUND_WELL_GROUP));
+
+        return groupMap;
     }
 }
 

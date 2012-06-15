@@ -32,6 +32,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
@@ -60,14 +61,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     // run properties
     public static final String READER_PROPERTY_NAME = "PlateReader";
     public static final String READER_PROPERTY_CAPTION = "Plate Reader";
+    public static final String BACKGROUND_WELL_PROPERTY_NAME = "SubtractBackground";
+    public static final String BACKGROUND_WELL_PROPERTY_CAPTION = "Background Subtraction";
 
     // sample well groups
     public static final String SAMPLE_DESCRIPTION_PROPERTY_NAME = "SampleDescription";
     public static final String SAMPLE_DESCRIPTION_PROPERTY_CAPTION = "Sample Description";
-    public static final String EFFECTOR_PROPERTY_NAME = "Effector";
-    public static final String EFFECTOR_PROPERTY_CAPTION = "Effector Cell";
-    public static final String STCL_PROPERTY_NAME = "STCL";
-    public static final String STCL_PROPERTY_CAPTION = "Stimulation Antigen";
 
     // antigen well groups
     public static final String CELLWELL_PROPERTY_NAME = "CellWell";
@@ -76,8 +75,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String ANTIGENID_PROPERTY_CAPTION = "Antigen ID";
     public static final String ANTIGENNAME_PROPERTY_NAME = "AntigenName";
     public static final String ANTIGENNAME_PROPERTY_CAPTION = "Antigen Name";
-    public static final String PEPTIDE_CONCENTRATION_NAME = "PeptideConcentration";
-    public static final String PEPTIDE_CONCENTRATION_CAPTION = "Peptide Concentration (ug/ml)";
 
 
     public ElispotAssayProvider()
@@ -181,6 +178,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(runDomain, "PlateID", "Plate ID", PropertyType.STRING);
         addProperty(runDomain, "TemplateID", "Template ID", PropertyType.STRING);
         addProperty(runDomain, "ExperimentDate", "Experiment Date", PropertyType.DATE_TIME);
+        addProperty(runDomain, BACKGROUND_WELL_PROPERTY_NAME, BACKGROUND_WELL_PROPERTY_CAPTION, PropertyType.BOOLEAN);
 
         ListDefinition plateReaderList = createPlateReaderList(c, user);
         DomainProperty reader = addProperty(runDomain, READER_PROPERTY_NAME, READER_PROPERTY_CAPTION, PropertyType.STRING);
@@ -263,8 +261,27 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public RunListDetailsQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
-        return new RunListDetailsQueryView(protocol, context,
-                ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString());
+        RunListDetailsQueryView view = new RunListDetailsQueryView(protocol, context,
+                ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString())
+        {
+            @Override
+            protected void populateButtonBar(DataView view, ButtonBar bar)
+            {
+                super.populateButtonBar(view, bar);
+
+                ActionURL url = new ActionURL(ElispotController.BackgroundSubtractionAction.class, getContainer());
+                ActionButton btn = new ActionButton(url, "Subtract Background");
+
+                btn.setRequiresSelection(true);
+                btn.setDisplayPermission(InsertPermission.class);
+                btn.setActionType(ActionButton.Action.POST);
+
+                bar.add(btn);
+            }
+        };
+
+        return view;
+
     }
 
     public String getDescription()

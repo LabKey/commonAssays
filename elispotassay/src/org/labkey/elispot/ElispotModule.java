@@ -22,9 +22,11 @@ import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.elispot.pipeline.ElispotPipelineProvider;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
@@ -43,7 +45,7 @@ public class ElispotModule extends DefaultModule
 
     public double getVersion()
     {
-        return 12.10;
+        return 12.11;
     }
 
     protected void init()
@@ -74,6 +76,8 @@ public class ElispotModule extends DefaultModule
 
         ElispotPlateReaderService.registerProvider(new ExcelPlateReader());
         ElispotPlateReaderService.registerProvider(new TextPlateReader());
+
+        PipelineService.get().registerPipelineProvider(new ElispotPipelineProvider(this));
     }
 
     @Override

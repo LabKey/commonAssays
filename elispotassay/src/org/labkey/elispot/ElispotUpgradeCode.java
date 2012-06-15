@@ -15,6 +15,7 @@
  */
 package org.labkey.elispot;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DeferredUpgrade;
 import org.labkey.api.data.UpgradeCode;
@@ -22,12 +23,15 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
@@ -116,8 +120,8 @@ public class ElispotUpgradeCode implements UpgradeCode
                                     propMap.put(UploadWizardAction.getInputName(antigenNameProp, group.getName()), o.getStringValue());
                                 }
                             }
-                            ElispotDataHandler.populateAntigenDataProperties(run, plate, propMap, true);
-                            ElispotDataHandler.populateAntigenRunProperties(run, plate, propMap, true);
+                            ElispotDataHandler.populateAntigenDataProperties(run, plate, propMap, true, false);
+                            ElispotDataHandler.populateAntigenRunProperties(run, plate, propMap, true, false);
 
                             ExperimentService.get().getSchema().getScope().commitTransaction();
                         }
@@ -130,6 +134,68 @@ public class ElispotUpgradeCode implements UpgradeCode
                         {
                             ExperimentService.get().getSchema().getScope().closeConnection();
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Recompute sample level statistics so that spot counts are normalized per million cells and take into account
+     * the antigen well group cell/well property.
+     *
+     * invoked from elispot-12.10-12.11.sql
+     *
+     * @param context
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
+    @DeferredUpgrade
+    public void addSubtractBackgroundRunProp(ModuleContext context)
+    {
+        if (!context.isNewInstall())
+        {
+            _log.info("Starting upgrade task for elispot addSubtractBackgroundRunProp");
+
+            // get all the elispot assay instances
+            for (ExpProtocol protocol : ExperimentService.get().getAllExpProtocols())
+            {
+                AssayProvider provider = AssayService.get().getProvider(protocol);
+                if (provider instanceof ElispotAssayProvider)
+                {
+                    try
+                    {
+                        ExperimentService.get().getSchema().getScope().ensureTransaction();
+
+                        // add a run property for background well subtraction
+                        Domain domain = provider.getRunDomain(protocol);
+
+                        if (domain.getPropertyByName(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME) == null)
+                        {
+                            DomainProperty prop = domain.addProperty();
+                            prop.setLabel(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_CAPTION);
+                            prop.setName(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME);
+                            prop.setPropertyURI(domain.getTypeURI() + "#" + ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME);
+
+                            prop.setType(PropertyService.get().getType(domain.getContainer(), PropertyType.BOOLEAN.getXmlName()));
+                            prop.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
+
+                            domain.save(context.getUpgradeUser());
+
+                            for (ExpRun run : protocol.getExpRuns())
+                            {
+                                run.setProperty(context.getUpgradeUser(), prop.getPropertyDescriptor(), false);
+                            }
+                        }
+                        ExperimentService.get().getSchema().getScope().commitTransaction();
+                    }
+                    catch (Exception e)
+                    {
+                        // fail upgrading the run but continue on to subsequent runs
+                        _log.error("An error occurred upgrading elispot assay : " + protocol.getName() + " in folder: " + protocol.getContainer().getPath(), e);
+                    }
+                    finally
+                    {
+                        ExperimentService.get().getSchema().getScope().closeConnection();
                     }
                 }
             }

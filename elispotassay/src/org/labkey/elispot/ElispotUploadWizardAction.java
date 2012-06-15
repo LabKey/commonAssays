@@ -16,6 +16,7 @@
 
 package org.labkey.elispot;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.action.SpringActionController;
@@ -357,16 +358,18 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
                 Plate plate = null;
 
+                // populate property name to value map
+                Map<String, String> runPropMap = new HashMap<String, String>();
                 for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
+                    runPropMap.put(entry.getKey().getName(), entry.getValue());
+
+                if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
-                    if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(entry.getKey().getName()))
-                    {
-                        ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(entry.getValue(), form.getContainer());
-                        plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
-                        break;
-                    }
+                    ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getContainer());
+                    plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
                 }
 
+                boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;
                 Map<String, Object> postedPropMap = new HashMap<String, Object>();
 
                 for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : _postedAntigenProperties.entrySet())
@@ -379,8 +382,8 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (plate != null)
                 {
-                    ElispotDataHandler.populateAntigenDataProperties(run, plate, postedPropMap, false);
-                    ElispotDataHandler.populateAntigenRunProperties(run, plate, postedPropMap, false);
+                    ElispotDataHandler.populateAntigenDataProperties(run, plate, postedPropMap, false, subtractBackground);
+                    ElispotDataHandler.populateAntigenRunProperties(run, plate, postedPropMap, false, subtractBackground);
                 }
                 ExperimentService.get().getSchema().getScope().commitTransaction();
 
