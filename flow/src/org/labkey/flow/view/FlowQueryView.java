@@ -150,7 +150,7 @@ public class FlowQueryView extends QueryView
         rgn.setShowPaginationCount(false);
     }
 
-    protected User getUser()
+    public User getUser()
     {
         return getViewContext().getUser();
     }
