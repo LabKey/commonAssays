@@ -623,7 +623,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                     {
                         String[] values = line.split("\\s+");
                         if (values.length < 4)
-                            logger.error("Error: Enzyme Reader\n");
+                            logger.error("Enzyme Reader only got " + values.length + " values instead of the expected 4");
                         else
                         {
                             if (values[0].length() > 1)
@@ -792,7 +792,6 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         //the first string is the aminio acid being modified, along with its symbolic representation the second is the mass of the differential mod
         //which is guaranteed to either have a + or - sign in front of it
         //read in the line using a string stream
-        logger.debug("Processing diff mod line");
         diffMods.clear();
         String[] values = line.split("\\s");
         String aminoAcid;
