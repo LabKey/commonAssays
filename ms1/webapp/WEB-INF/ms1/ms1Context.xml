@@ -221,7 +221,7 @@
                 </bean>
 -->
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="msinstpect findpeptides, minimum m/z"/>
+                    <property name="parameter" value="msinspect findpeptides, minimum m/z"/>
                     <property name="switchName" value="minmz"/>
                     <property name="help" value="Minimum M/Z Value (default: the minimum m/z value in the file)"/>
                 </bean>
