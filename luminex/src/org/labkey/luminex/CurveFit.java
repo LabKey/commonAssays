@@ -81,7 +81,7 @@ public class CurveFit
 
     public void setEC50(Double ec50)
     {
-        _ec50 = ec50;
+        _ec50 = checkMaxValue(ec50);
     }
 
     public Double getAUC()
@@ -101,7 +101,7 @@ public class CurveFit
 
     public void setMinAsymptote(Double minAsymptote)
     {
-        _minAsymptote = minAsymptote;
+        _minAsymptote = checkMaxValue(minAsymptote);
     }
 
     public Double getMaxAsymptote()
@@ -111,7 +111,7 @@ public class CurveFit
 
     public void setMaxAsymptote(Double maxAsymptote)
     {
-        _maxAsymptote = maxAsymptote;
+        _maxAsymptote = checkMaxValue(maxAsymptote);
     }
 
     public Double getAsymmetry()
@@ -121,7 +121,7 @@ public class CurveFit
 
     public void setAsymmetry(Double asymmetry)
     {
-        _asymmetry = asymmetry;
+        _asymmetry = checkMaxValue(asymmetry);
     }
 
     public Double getSlope()
@@ -131,7 +131,7 @@ public class CurveFit
 
     public void setSlope(Double slope)
     {
-        _slope = slope;
+        _slope = checkMaxValue(slope);
     }
 
     public Double getInflection()
@@ -141,7 +141,7 @@ public class CurveFit
 
     public void setInflection(Double inflection)
     {
-        _inflection = inflection;
+        _inflection = checkMaxValue(inflection);
     }
 
     public Boolean getFailureFlag()
@@ -152,5 +152,14 @@ public class CurveFit
     public void setFailureFlag(Boolean failureFlag)
     {
         _failureFlag = failureFlag;
+    }
+
+    private Double checkMaxValue(Double val)
+    {
+        if (val != null && val > LuminexDataHandler.MAX_CURVE_PARAM_VALUE)
+            return LuminexDataHandler.MAX_CURVE_PARAM_VALUE;
+        else
+            return val;
+
     }
 }

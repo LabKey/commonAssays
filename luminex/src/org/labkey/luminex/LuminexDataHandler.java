@@ -82,6 +82,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String POSITIVITY_THRESHOLD_COLUMN_NAME = "PositivityThreshold";
     public static final String POSITIVITY_THRESHOLD_DISPLAY_NAME = "Positivity Threshold";
     public static final String CALCULATE_POSITIVITY_COLUMN_NAME = "calculatePositivity";
+    public static final Double MAX_CURVE_PARAM_VALUE = 10e37; // Issue 15200
 
     private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
 
