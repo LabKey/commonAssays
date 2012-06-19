@@ -187,7 +187,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         Set<FieldKey> peptideFieldKeys = Collections.singleton(FieldKey.fromParts("RowId"));
         if (form.isCustomViewPeptideFilter())
         {
-            peptidesSQL = _schema.getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), peptideFieldKeys);
+            peptidesSQL = _schema.getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), peptideFieldKeys, null);
         }
         else
         {

@@ -170,7 +170,7 @@ public class ComparePeptideTableInfo extends VirtualTable
                 FieldKey.fromParts("Peptide"),
                 FieldKey.fromParts("RowId")
         );
-        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, fieldKeys));
+        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, fieldKeys, null));
         result.append(") ");
         result.append(" p WHERE f.Run IN(");
         String separator = "";

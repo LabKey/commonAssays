@@ -17,6 +17,7 @@
 package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
@@ -157,25 +158,50 @@ public class SpectraCountTableInfo extends VirtualTable
             addColumn(new ExprColumn(this, "TrimmedPeptide", new SQLFragment("TrimmedPeptide"), JdbcType.VARCHAR));
         }
 
+        if (config.isGroupedByPeptide())
+        {
+            ColumnInfo indexColumn;
+            if (form != null && form.getTargetSeqId() != null)
+            {
+                SQLFragment indexSQL = new SQLFragment(getSqlDialect().getStringIndexOfFunction(ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide", ExprColumn.STR_TABLE_ALIAS + ".ProtSequence"));
+                indexColumn = new ExprColumn(this, "PeptideIndex", indexSQL, JdbcType.INTEGER);
+            }
+            else
+            {
+                indexColumn = new ExprColumn(this, "PeptideIndex", new SQLFragment("NULL"), JdbcType.INTEGER);
+            }
+            addColumn(indexColumn);
+            indexColumn.setDescription("Index of the peptide's sequence within the protein sequence. Only available if a grouping by protein information, or a target protein has been specified.");
+        }
+
         if (_config.isGroupedByCharge())
         {
             addColumn(new ExprColumn(this, "Charge", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Charge"), JdbcType.INTEGER));
             defaultCols.add(FieldKey.fromParts("Charge"));
         }
 
+        ExprColumn proteinColumn;
+        if (_config.isGroupedByProtein() || (form != null && form.getTargetSeqId() != null))
+        {
+            proteinColumn = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
+            defaultCols.add(FieldKey.fromParts(proteinColumn.getName()));
+
+        }
+        else
+        {
+            proteinColumn = new ExprColumn(this, "Protein", new SQLFragment("NULL"), JdbcType.INTEGER);
+        }
+        addColumn(proteinColumn);
+        proteinColumn.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return _ms2Schema.createSequencesTable();
+            }
+        });
+
         if (_config.isGroupedByProtein())
         {
-            ExprColumn col = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".SequenceId"), JdbcType.INTEGER);
-            col.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
-            {
-                public TableInfo getLookupTableInfo()
-                {
-                    return _ms2Schema.createSequencesTable();
-                }
-            });
-            addColumn(col);
-            defaultCols.add(FieldKey.fromParts(col.getName()));
-
             addColumn(new ExprColumn(this, "FastaName", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FastaName"), JdbcType.VARCHAR));
         }
 
@@ -235,7 +261,13 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 sql.append(", pd.SeqId AS SequenceId");
             }
+            sql.append(", s.ProtSequence");
             sql.append(", MIN(fs.LookupString) AS FastaName");
+        }
+        else if (_form.getTargetSeqId() != null)
+        {
+            sql.append(", s.SeqId\n");
+            sql.append(", s.ProtSequence\n");
         }
 
         sql.append(", COUNT(distinct pd.charge) AS ChargeStatesObsv\n");
@@ -280,7 +312,7 @@ public class SpectraCountTableInfo extends VirtualTable
         SQLFragment peptidesSQL;
         if (_form != null && _form.isCustomViewPeptideFilter())
         {
-            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys);
+            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys, _form.getTargetSeqId());
         }
         else
         {
@@ -288,6 +320,10 @@ public class SpectraCountTableInfo extends VirtualTable
             if (_form != null && _form.isPeptideProphetFilter() && _form.getPeptideProphetProbability() != null)
             {
                 filter.addClause(new CompareType.CompareClause("PeptideProphet", CompareType.GTE, _form.getPeptideProphetProbability()));
+            }
+            if (_form != null && _form.getTargetSeqId() != null)
+            {
+                filter.addClause(new ProteinManager.SequenceFilter(_form.getTargetSeqId()));
             }
             peptidesSQL = _ms2Schema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
@@ -303,11 +339,20 @@ public class SpectraCountTableInfo extends VirtualTable
                 sql.append("INNER JOIN " + MS2Manager.getTableInfoProteinGroups() + " pg ON (pm.proteinGroupId = pg.rowid)\n");
                 sql.append("INNER JOIN " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm ON (pgm.ProteinGroupId = pg.rowId)\n");
                 sql.append("INNER JOIN " + ProteinManager.getTableInfoFastaSequences() + " fs ON (fs.fastaid = r.fastaid AND pgm.seqid = fs.seqid)\n");
+                sql.append("INNER JOIN " + ProteinManager.getTableInfoSequences() + " s ON (fs.seqId = s.seqid)\n");
             }
             else
             {
                 sql.append("INNER JOIN " + ProteinManager.getTableInfoFastaSequences() + " fs ON (fs.fastaid = r.fastaid AND pd.seqid = fs.seqid)\n");
+                sql.append("INNER JOIN " + ProteinManager.getTableInfoSequences() + " s ON (s.seqid = fs.seqid)\n");
             }
+        }
+        else if (_form.getTargetSeqId() != null)
+        {
+            sql.append("INNER JOIN ");
+            sql.append(ProteinManager.getTableInfoSequences(), "s");
+            sql.append(" ON (s.SeqId = ?)\n");
+            sql.add(_form.getTargetSeqId());
         }
 
         if (_ms2Schema.getRuns() != null)
@@ -335,6 +380,12 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 sql.append(", pd.SeqId");
             }
+            sql.append(", s.ProtSequence");
+        }
+        else if (_form.getTargetSeqId() != null)
+        {
+            sql.append(", s.SeqId");
+            sql.append(", s.ProtSequence");
         }
         return sql;
     }

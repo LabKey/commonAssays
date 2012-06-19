@@ -383,13 +383,13 @@ public class MS2Schema extends UserSchema
                 {
                     totalSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(p.RowId) FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm, ");
                     totalSQL.append("(");
-                    totalSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
+                    totalSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide")), null));
                     totalSQL.append(") p ");
                     totalSQL.append("WHERE p.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
 
                     uniqueSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(DISTINCT p.TrimmedPeptide) FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm, ");
                     uniqueSQL.append("(");
-                    uniqueSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
+                    uniqueSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide")), null));
                     uniqueSQL.append(") p ");
                     uniqueSQL.append("WHERE p.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
                 }
@@ -812,10 +812,15 @@ public class MS2Schema extends UserSchema
         return sql;
     }
 
-    protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys)
+    protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys, Integer targetSeqId)
     {
         QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.PeptidesFilter.toString());
         SimpleFilter filter = new SimpleFilter();
+
+        if (targetSeqId != null)
+        {
+            filter.addCondition(new ProteinManager.SequenceFilter(targetSeqId));
+        }
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
         {
@@ -1365,22 +1370,15 @@ public class MS2Schema extends UserSchema
         else if (form != null && form.isCustomViewPeptideFilter())
         {
             whereSQL = new SQLFragment( "( RowId IN ( ");
-            whereSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"))));
+            whereSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId")), null));
             whereSQL.append(") ) ");
             baseTable.addCondition(whereSQL, "RowId");
         }
 
         if (form != null && form.getTargetSeqId() != null)
         {
-            try
-            {
-                filt = new ProteinManager.SequenceFilter(form.getTargetSeqId());
-                baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
-            }
-            catch (SQLException e)
-            {
-                // log?
-            }
+            filt = new ProteinManager.SequenceFilter(form.getTargetSeqId());
+            baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
         else
         {

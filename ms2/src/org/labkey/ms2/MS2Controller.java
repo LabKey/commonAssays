@@ -2119,17 +2119,12 @@ public class MS2Controller extends SpringActionController
         {
             if (null != form.getTargetProteinMsg())
             {
-                //Todo: are these addParams needed?
                 ActionURL setupURL= getViewContext().getActionURL().clone();
                 setupURL.setAction(MS2Controller.ComparePeptideQuerySetupAction.class);
 
-                setupURL.deleteParameter(PeptideFilteringFormElements.targetProteinMsg.name());
-                setupURL.deleteParameter(PeptideFilteringFormElements.matchingProtNames.name());
-                setupURL.deleteParameter(PeptideFilteringFormElements.matchingSeqIds.name());
-
-                setupURL.addParameter(PeptideFilteringFormElements.targetProteinMsg.name(),form.getTargetProteinMsg());
-                setupURL.addParameter(PeptideFilteringFormElements.matchingProtNames.name(),form.getMatchingProtNames());
-                setupURL.addParameter(PeptideFilteringFormElements.matchingSeqIds.name(),form.getMatchingSeqIds());
+                setupURL.replaceParameter(PeptideFilteringFormElements.targetProteinMsg.name(), form.getTargetProteinMsg());
+                setupURL.replaceParameter(PeptideFilteringFormElements.matchingProtNames.name(), form.getMatchingProtNames());
+                setupURL.replaceParameter(PeptideFilteringFormElements.matchingSeqIds.name(), form.getMatchingSeqIds());
                 return HttpView.redirect(setupURL);
             }
             ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
@@ -2539,6 +2534,7 @@ public class MS2Controller extends SpringActionController
             form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? "none" : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
             form.setSpectraConfig(prefs.get(PeptideFilteringFormElements.spectraConfig.name()));
             form.setDefaultPeptideCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            form.setTargetProtein(prefs.get(PeptideFilteringFormElements.targetProtein.name()));
             if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
             {
                 try
@@ -2603,8 +2599,26 @@ public class MS2Controller extends SpringActionController
             super(SpectraCountForm.class);
         }
 
+        @Override
+        public void validate(SpectraCountForm form, BindException errors)
+        {
+            super.validate(form, errors);
+            PeptideFilteringComparisonForm.validateTargetProtein(form, getViewContext());
+        }
+
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
+            if (null != form.getTargetProteinMsg())
+            {
+                ActionURL setupURL= getViewContext().getActionURL().clone();
+                setupURL.setAction(SpectraCountSetupAction.class);
+
+                setupURL.replaceParameter(PeptideFilteringFormElements.targetProteinMsg.name(), form.getTargetProteinMsg());
+                setupURL.replaceParameter(PeptideFilteringFormElements.matchingProtNames.name(), form.getMatchingProtNames());
+                setupURL.replaceParameter(PeptideFilteringFormElements.matchingSeqIds.name(), form.getMatchingSeqIds());
+                throw new RedirectException(setupURL);
+            }
+
             _form = form;
             _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
             if (_config == null)
@@ -2617,6 +2631,7 @@ public class MS2Controller extends SpringActionController
             prefs.put(PeptideFilteringFormElements.spectraConfig.name(), form.getSpectraConfig());
             prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+            prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein() == null ? null : form.getTargetProtein());
             if (!getUser().isGuest())
             {
                 // Real users have their preferences stored in the database, guests keep it in session
@@ -2648,6 +2663,8 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
                 setupURL.addParameter(PeptideFilteringFormElements.spectraConfig, _form.getSpectraConfig());
+                setupURL.addParameter(PeptideFilteringFormElements.targetProtein, _form.getTargetProtein());
+                setupURL.addParameter(PeptideFilteringFormElements.targetSeqId, _form.getTargetSeqId());
 
                 root.addChild("Spectra Count Options", setupURL);
                 StringBuilder title = new StringBuilder("Spectra Counts: ");

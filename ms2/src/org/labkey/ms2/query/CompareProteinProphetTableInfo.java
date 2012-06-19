@@ -197,7 +197,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         result.append(", ");
         result.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
         result.append(", (");
-        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, Collections.singletonList(FieldKey.fromParts("RowId"))));
+        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, Collections.singletonList(FieldKey.fromParts("RowId")), null));
         result.append(" ) pep WHERE ppf.Run IN (");
         String separator = "";
         for (MS2Run run : _runs)

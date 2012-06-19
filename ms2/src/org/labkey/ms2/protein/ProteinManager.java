@@ -869,14 +869,7 @@ public class ProteinManager
                     // rather than just filtering for search engine protein.
                     if (ProteinManager.showAllPeptides(currentUrl, user))
                     {
-                        try
-                        {
-                            filter.addClause(new SequenceFilter(Integer.parseInt(seqId)));
-                        }
-                        catch (SQLException e)
-                        {
-                            throw new RuntimeSQLException(e);
-                        }
+                        filter.addClause(new SequenceFilter(Integer.parseInt(seqId)));
                     }
                     else
                         filter.addCondition("SeqId", Integer.parseInt(seqId));
@@ -917,7 +910,7 @@ public class ProteinManager
         String _sequence;
         String _bestName;
 
-        public SequenceFilter(int seqid) throws SQLException
+        public SequenceFilter(int seqid)
         {
             _seqid = seqid;
             Protein prot = getProtein(seqid);
