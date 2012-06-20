@@ -199,7 +199,9 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT, MS2RunType.values());
+                PeptidesTableInfo peptidesTable = (PeptidesTableInfo)ms2Schema.createPeptidesTable(ContainerFilter.CURRENT, MS2RunType.values());
+                peptidesTable.setName(this.toString());
+                return peptidesTable;
             }
         },
         ProteinGroupsFilter

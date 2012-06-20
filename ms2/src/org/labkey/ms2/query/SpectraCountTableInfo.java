@@ -272,7 +272,7 @@ public class SpectraCountTableInfo extends VirtualTable
 
         sql.append(", COUNT(distinct pd.charge) AS ChargeStatesObsv\n");
         sql.append(", COUNT(distinct pd.rowid) AS TotalPeptideCount\n");
-        // all sensible aggreigates of peptide-level data
+        // all sensible aggregates of peptide-level data
         for (PeptideAggregate aggregate : _aggregates)
         {
             aggregate.addSelect(sql);
@@ -292,8 +292,11 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", MIN(pg.PercentCoverage) AS PercentCoverage\n");
         }
 
-        sql.append("FROM " + MS2Manager.getTableInfoRuns() + " r\n");
-        sql.append("INNER JOIN " + MS2Manager.getTableInfoFractions() + " f ON (r.run = f.run)\n");
+        sql.append("FROM ");
+        sql.append(MS2Manager.getTableInfoRuns(), "r");
+        sql.append("\nINNER JOIN ");
+        sql.append(MS2Manager.getTableInfoFractions(), "f");
+        sql.append(" ON (r.run = f.run)\n");
 
         sql.append("INNER JOIN (");
 
@@ -335,16 +338,25 @@ public class SpectraCountTableInfo extends VirtualTable
         {
             if (_config.isUsingProteinProphet())
             {
-                sql.append("INNER JOIN " + MS2Manager.getTableInfoPeptideMemberships()+ " pm ON (pd.rowId = pm.peptideid)\n");
-                sql.append("INNER JOIN " + MS2Manager.getTableInfoProteinGroups() + " pg ON (pm.proteinGroupId = pg.rowid)\n");
-                sql.append("INNER JOIN " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm ON (pgm.ProteinGroupId = pg.rowId)\n");
-                sql.append("INNER JOIN " + ProteinManager.getTableInfoFastaSequences() + " fs ON (fs.fastaid = r.fastaid AND pgm.seqid = fs.seqid)\n");
-                sql.append("INNER JOIN " + ProteinManager.getTableInfoSequences() + " s ON (fs.seqId = s.seqid)\n");
+                sql.append(" INNER JOIN ");
+                sql.append(MS2Manager.getTableInfoPeptideMemberships(), "pm");
+                sql.append(" ON (pd.rowId = pm.peptideid)\nINNER JOIN ");
+                sql.append(MS2Manager.getTableInfoProteinGroups(), "pg");
+                sql.append(" ON (pm.proteinGroupId = pg.rowid)\nINNER JOIN ");
+                sql.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
+                sql.append(" ON (pgm.ProteinGroupId = pg.rowId)\nINNER JOIN ");
+                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                sql.append(" ON (fs.fastaid = r.fastaid AND pgm.seqid = fs.seqid)\nINNER JOIN ");
+                sql.append(ProteinManager.getTableInfoSequences(), "s");
+                sql.append(" ON (fs.seqId = s.seqid)\n");
             }
             else
             {
-                sql.append("INNER JOIN " + ProteinManager.getTableInfoFastaSequences() + " fs ON (fs.fastaid = r.fastaid AND pd.seqid = fs.seqid)\n");
-                sql.append("INNER JOIN " + ProteinManager.getTableInfoSequences() + " s ON (s.seqid = fs.seqid)\n");
+                sql.append(" INNER JOIN ");
+                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                sql.append(" ON (fs.fastaid = r.fastaid AND pd.seqid = fs.seqid)\n INNER JOIN ");
+                sql.append(ProteinManager.getTableInfoSequences(), "s");
+                sql.append(" ON (s.seqid = fs.seqid)\n");
             }
         }
         else if (_form.getTargetSeqId() != null)

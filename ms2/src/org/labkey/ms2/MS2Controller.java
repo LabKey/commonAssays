@@ -2643,7 +2643,7 @@ public class MS2Controller extends SpringActionController
 
             QuerySettings settings = schema.getSettings(getViewContext(), "SpectraCount", _config.getTableName());
             settings.setAllowChooseQuery(false);
-            QueryView view = new SpectraCountQueryView(schema, settings, _config, _form);
+            QueryView view = new SpectraCountQueryView(schema, settings, errors, _config, _form);
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
             view.setAllowExportExternalQuery(false);
             return view;
@@ -2664,7 +2664,10 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
                 setupURL.addParameter(PeptideFilteringFormElements.spectraConfig, _form.getSpectraConfig());
                 setupURL.addParameter(PeptideFilteringFormElements.targetProtein, _form.getTargetProtein());
-                setupURL.addParameter(PeptideFilteringFormElements.targetSeqId, _form.getTargetSeqId());
+                if (_form.getTargetSeqId() != null)
+                {
+                    setupURL.addParameter(PeptideFilteringFormElements.targetSeqId, _form.getTargetSeqId());
+                }
 
                 root.addChild("Spectra Count Options", setupURL);
                 StringBuilder title = new StringBuilder("Spectra Counts: ");

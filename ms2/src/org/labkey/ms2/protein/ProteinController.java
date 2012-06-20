@@ -98,7 +98,7 @@ public class ProteinController extends SpringActionController
             settings.setAllowChooseView(true);
             _setName = settings.getQueryName();
 
-            QueryView queryView = new QueryView(schema, settings)
+            QueryView queryView = new QueryView(schema, settings, errors)
             {
                 public DataView createDataView()
                 {
