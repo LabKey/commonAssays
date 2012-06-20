@@ -42,6 +42,8 @@ import java.util.*;
  */
 public class Search implements EntryPoint
 {
+    public static final String VALIDATION_FAILURE_PREFIX = "Validation failure: ";
+
     private static final    String                  INPUT_WIDTH = "575px";
     private                 VerticalPanel           subPanel = new VerticalPanel();
     private                 FormPanel               searchFormPanel = new FormPanel();
@@ -585,7 +587,15 @@ public class Search implements EntryPoint
                 String errorString = results.substring(results.indexOf("ERROR=") + 6);
                 errorString  = errorString.trim();
                 appendError(errorString);
-                setReadOnly(false, true);
+                if (errorString.startsWith(VALIDATION_FAILURE_PREFIX) && Boolean.TRUE.equals(saveProtocolCheckBox.getValue()))
+                {
+                    // The server didn't like our protocol definition. Refresh so we get a read-only view of it.
+                    getSearchService().getSearchServiceResult(searchEngine, path, fileNames, new SearchServiceAsyncCallback());
+                }
+                else
+                {
+                    setReadOnly(false, true);
+                }
             }
             else if(results.indexOf("User does not have permission") != -1)
             {

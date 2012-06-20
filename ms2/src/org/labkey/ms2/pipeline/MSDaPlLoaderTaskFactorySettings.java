@@ -28,6 +28,10 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
     private String _cloneName;
     private String _submitURL;
     private String _statusBaseURL;
+    private String _projectDetailsURL;
+    private String _checkAccessURL;
+    private String _retryURL;
+    private String _checkFastaURL;
     private String _username;
     private String _password;
     private String _pipeline;
@@ -111,5 +115,45 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
     public void setPathMapper(PathMapper pathMapper)
     {
         _pathMapper = pathMapper;
+    }
+
+    public String getProjectDetailsURL()
+    {
+        return _projectDetailsURL;
+    }
+
+    public void setProjectDetailsURL(String projectDetailsURL)
+    {
+        _projectDetailsURL = projectDetailsURL;
+    }
+
+    public String getCheckAccessURL()
+    {
+        return _checkAccessURL;
+    }
+
+    public void setCheckAccessURL(String checkAccessURL)
+    {
+        _checkAccessURL = checkAccessURL;
+    }
+
+    public String getRetryURL()
+    {
+        return _retryURL;
+    }
+
+    public void setRetryURL(String retryURL)
+    {
+        _retryURL = retryURL;
+    }
+
+    public String getCheckFastaURL()
+    {
+        return _checkFastaURL;
+    }
+
+    public void setCheckFastaURL(String checkFastaURL)
+    {
+        _checkFastaURL = checkFastaURL;
     }
 }

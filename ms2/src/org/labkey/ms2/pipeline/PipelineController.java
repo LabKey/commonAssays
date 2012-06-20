@@ -32,6 +32,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.pipeline.client.Search;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
@@ -460,7 +461,7 @@ public class PipelineController extends SpringActionController
             }
             catch (PipelineValidationException e)
             {
-                errors.reject(ERROR_MSG, e.getMessage());
+                errors.reject(ERROR_MSG, Search.VALIDATION_FAILURE_PREFIX + e.getMessage());
                 return false;
             }
             catch (IOException e)

@@ -16,13 +16,13 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
@@ -33,9 +33,9 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.file.PathMapper;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
-import org.labkey.ms2.pipeline.sequest.UWSequestSearchTask;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -64,6 +64,10 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
     {
         private String _submitURL;
         private String _statusBaseURL;
+        private String _checkFastaURL;
+        private String _projectDetailsURL;
+        private String _checkAccessURL;
+        private String _retryURL;
         private String _username;
         private String _password;
         private String _pipeline;
@@ -116,7 +120,98 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         @Override
         public void validateParameters(PipelineJob job) throws PipelineValidationException
         {
-            getProjectId(job.getParameters());
+            if (_submitURL == null)
+            {
+                throw new PipelineValidationException("No submitURL set for MSDaPl configuration in ms2Config.xml");
+            }
+            if (_checkAccessURL == null)
+            {
+                throw new PipelineValidationException("No checkAccessURL set for MSDaPl configuration in ms2Config.xml");
+            }
+            if (_retryURL == null)
+            {
+                throw new PipelineValidationException("No retryURL set for MSDaPl configuration in ms2Config.xml");
+            }
+            if (_projectDetailsURL == null)
+            {
+                throw new PipelineValidationException("No projectDetailsURL set for MSDaPl configuration in ms2Config.xml");
+            }
+            if (_statusBaseURL == null)
+            {
+                throw new PipelineValidationException("No statusBaseURL set for MSDaPl configuration in ms2Config.xml");
+            }
+            if (_checkFastaURL == null)
+            {
+                throw new PipelineValidationException("No checkFastaURL set for MSDaPl configuration in ms2Config.xml");
+            }
+
+            int projectId = getProjectId(job.getParameters());
+
+            try
+            {
+                // First validate that the project exists
+                validateProjectId(projectId);
+                validateUserAccess(projectId, job.getUser().getEmail());
+                validateFasta(job.getParameters().get(ParameterNames.SEQUENCE_DB));
+            }
+            catch (HttpException e)
+            {
+                throw new PipelineValidationException(e);
+            }
+            catch (IOException e)
+            {
+                throw new PipelineValidationException(e);
+            }
+        }
+
+        private void validateProjectId(int projectId) throws IOException, PipelineValidationException
+        {
+            String url = _projectDetailsURL + projectId;
+            HttpClient client = new HttpClient();
+            GetMethod method = new GetMethod(url);
+            int statusCode = client.executeMethod(method);
+            if (statusCode == 404)
+            {
+                throw new PipelineValidationException("No such MSDaPl project id: " + projectId);
+            }
+            else if (statusCode != 200)
+            {
+                throw new PipelineValidationException("Unexpected MSDaPl status code when issuing request to '" + url + "': " + statusCode);
+            }
+        }
+
+        private void validateUserAccess(int projectId, String email) throws IOException, PipelineValidationException
+        {
+            String url = _checkAccessURL + "?projectId=" + projectId + "&email=" + PageFlowUtil.encode(email);
+            HttpClient client = new HttpClient();
+            GetMethod method = new GetMethod(url);
+            int statusCode = client.executeMethod(method);
+            if (statusCode != 200)
+            {
+                throw new PipelineValidationException("Unexpected MSDaPl status code when issuing request to '" + url + "': " + statusCode);
+            }
+            String response = method.getResponseBodyAsString();
+            if (!response.toLowerCase().startsWith("access allowed"))
+            {
+                throw new PipelineValidationException(email + " does not have access to MSDaPl project " + projectId + ". Message was: '" + response + "'");
+            }
+        }
+
+        private void validateFasta(String fastaName) throws IOException, PipelineValidationException
+        {
+            String url = _checkFastaURL + "?name=" + PageFlowUtil.encode(fastaName);
+            HttpClient client = new HttpClient();
+            GetMethod method = new GetMethod(url);
+            int statusCode = client.executeMethod(method);
+            if (statusCode != 200)
+            {
+                throw new PipelineValidationException("Unexpected MSDaPl status code when issuing request to '" + url + "': " + statusCode);
+            }
+            String response = method.getResponseBodyAsString();
+            if (!response.toLowerCase().startsWith("found"))
+            {
+                throw new PipelineValidationException("Unknown FASTA file - not yet imported into YRC. Message was: '" + response + "'");
+            }
         }
 
         @Override
@@ -127,6 +222,14 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
                 _submitURL = trimURL(settings.getSubmitURL());
             if (settings.getStatusBaseURL() != null)
                 _statusBaseURL = trimURL(settings.getStatusBaseURL());
+            if (settings.getCheckAccessURL() != null)
+                _checkAccessURL = trimURL(settings.getCheckAccessURL());
+            if (settings.getRetryURL() != null)
+                _retryURL = trimURL(settings.getRetryURL());
+            if (settings.getProjectDetailsURL() != null)
+                _projectDetailsURL = trimURL(settings.getProjectDetailsURL());
+            if (settings.getCheckFastaURL() != null)
+                _checkFastaURL = trimURL(settings.getCheckFastaURL());
             if (settings.getUsername() != null)
                 _username = settings.getUsername();
             if (settings.getPassword() != null)
@@ -198,6 +301,7 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
             comments = comments + " - " + getJob().getStatusHref().getURIString();
         }
         postBody.put("comments", comments);
+        postBody.put("userEmail", getJob().getUser().getEmail());
 
         try
         {
