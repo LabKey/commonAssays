@@ -166,7 +166,7 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
 
         private void validateProjectId(int projectId) throws IOException, PipelineValidationException
         {
-            String url = _projectDetailsURL + projectId;
+            String url = _projectDetailsURL + "/" + projectId;
             HttpClient client = new HttpClient();
             GetMethod method = new GetMethod(url);
             int statusCode = client.executeMethod(method);
@@ -182,10 +182,14 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
 
         private void validateUserAccess(int projectId, String email) throws IOException, PipelineValidationException
         {
-            String url = _checkAccessURL + "?projectId=" + projectId + "&email=" + PageFlowUtil.encode(email);
+            String url = _checkAccessURL + "?projectId=" + projectId + "&userEmail=" + PageFlowUtil.encode(email);
             HttpClient client = new HttpClient();
             GetMethod method = new GetMethod(url);
             int statusCode = client.executeMethod(method);
+            if (statusCode == 404)
+            {
+                throw new PipelineValidationException("Got a 404 response code from MSDaPl. User account for '" + email+  "' most likely does not exist");
+            }
             if (statusCode != 200)
             {
                 throw new PipelineValidationException("Unexpected MSDaPl status code when issuing request to '" + url + "': " + statusCode);
