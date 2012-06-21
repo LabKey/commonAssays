@@ -111,14 +111,15 @@ public class ProtocolComposite extends SearchFormComposite
 
     public void setProtocolListBoxContents(List<String> protocols, String defaultProtocol)
     {
-        if(protocolListBox.getItemCount() != protocols.size() + 1)
+        if (protocolListBox.getItemCount() == 0 && (protocols == null || protocols.isEmpty()))
         {
-            if(protocols.size() == 0)
-            {
-                protocolListBox.clear();
-                protocolListBox.addItem(NEW_PROTOCOL, "new");
-                return;
-            }
+            protocolListBox.clear();
+            protocolListBox.addItem(NEW_PROTOCOL, "new");
+            return;
+        }
+
+        if(protocols != null && protocolListBox.getItemCount() != protocols.size() + 1)
+        {
             _protocols = protocols;
             protocolListBox.clear();
             Collections.sort(protocols);
