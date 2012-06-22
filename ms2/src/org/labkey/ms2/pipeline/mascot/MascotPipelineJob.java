@@ -51,7 +51,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     {
         super(protocol, MascotCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         _mascotServer = appProps.getMascotServer();
         _mascotHTTPProxy = appProps.getMascotHTTPProxy();
         _mascotUserAccount = appProps.getMascotUserAccount();

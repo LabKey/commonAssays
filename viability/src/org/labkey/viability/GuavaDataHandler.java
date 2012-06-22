@@ -388,7 +388,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         @Test
         public void testGuava() throws Exception
         {
-            AppProps props = AppProps.getInstance();
+            AppProps.Interface props = AppProps.getInstance();
             String projectRootPath =  props.getProjectRoot();
             File projectRoot = new File(projectRootPath);
 
@@ -424,7 +424,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         @Test
         public void testExpressPlus() throws Exception
         {
-            AppProps props = AppProps.getInstance();
+            AppProps.Interface props = AppProps.getInstance();
             String projectRootPath =  props.getProjectRoot();
             File projectRoot = new File(projectRootPath);
 

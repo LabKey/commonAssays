@@ -666,7 +666,7 @@ public class LuminexExcelParser
 
         private LuminexExcelParser createParser(String fileName)
         {
-            AppProps props = AppProps.getInstance();
+            AppProps.Interface props = AppProps.getInstance();
             if (!props.isDevMode()) // We can only run the excel tests if we're in dev mode and have access to our samples
                 return null;
 

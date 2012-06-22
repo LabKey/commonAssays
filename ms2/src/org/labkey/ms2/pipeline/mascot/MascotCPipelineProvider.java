@@ -126,7 +126,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
     }
 
     public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException {
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
             throw new IOException("Mascot server has not been specified in site customization.");
 
@@ -146,7 +146,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public List<String> getTaxonomyList() throws IOException
     {
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
             throw new IOException("Mascot server has not been specified in site customization.");
 
@@ -228,7 +228,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public Map<String, String> getEnzymes() throws IOException 
     {
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
             throw new IOException("Mascot server has not been specified in site customization.");
 
@@ -245,7 +245,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public Map<String, String> getResidue0Mods() throws IOException
     {
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
             throw new IOException("Mascot server has not been specified in site customization.");
 
@@ -289,7 +289,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public void ensureEnabled() throws PipelineValidationException
     {
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         String mascotServer = appProps.getMascotServer();
         if ((!appProps.hasMascotServer() || 0==mascotServer.length()))
             throw new PipelineValidationException("Mascot server has not been specified in site customization.");

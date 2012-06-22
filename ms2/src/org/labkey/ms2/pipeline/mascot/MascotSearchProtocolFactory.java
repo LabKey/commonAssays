@@ -53,7 +53,7 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
 
     public MascotSearchProtocol createProtocolInstance(String name, String description, String xml)
     {
-        AppProps appProps = AppProps.getInstance();
+        AppProps.Interface appProps = AppProps.getInstance();
         String mascotServer = appProps.getMascotServer();
         String mascotHTTPProxy = appProps.getMascotHTTPProxy();
         if (!appProps.hasMascotServer() || 0 == mascotServer.length())

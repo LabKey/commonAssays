@@ -565,8 +565,7 @@ abstract public class FlowJoWorkspace extends Workspace
     {
         private File projectRoot()
         {
-            AppProps props = AppProps.getInstance();
-            String projectRootPath =  props.getProjectRoot();
+            String projectRootPath =  AppProps.getInstance().getProjectRoot();
             if (projectRootPath == null)
                 projectRootPath = System.getProperty("user.dir") + "/..";
             return new File(projectRootPath);
