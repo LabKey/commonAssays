@@ -15,12 +15,17 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.settings.AppProps;
 import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -289,48 +294,42 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
                 "13. Elastase/Tryp/Chymo    1      ALIVKRWFY   P\n";
     }
 
-    public static class TestCase extends AbstractSequestTestCase
+    public static class TestCase extends Assert
     {
-        @Override
-        public SequestParamsBuilder createParamsBuilder()
+        private File _root;
+
+        @Before
+        public void setUp()
         {
-            return new UWSequestParamsBuilder(ip.getInputParameters(), root);
+            _root = new File("fakeroot");
+        }
+
+        public void fail(List<String> messages)
+        {
+            fail(StringUtils.join(messages, '\n'));
         }
 
         @Test
         public void testEnzyme()
         {
-            // No enzyme
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"protein, cleavage site\">[X]|[X]</note>" +
-                "</bioml>");
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap("protein, cleavage site", "[X]|[X]"), _root);
             List<String> parserError = spb.initEnzymeInfo();
             if (!parserError.isEmpty()) fail(parserError);
             assertEquals("enzyme_number", "0", spb.getProperties().getParam("enzyme_number").getValue());
 
             // Bad enzyme
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"protein, cleavage site\">[AA]|[B]</note>" +
-                "</bioml>");
+            spb = new UWSequestParamsBuilder(Collections.singletonMap("protein, cleavage site", "[AA]|[B]"), _root);
             parserError = spb.initEnzymeInfo();
             assertEquals("Should have one error", 1, parserError.size());
 
             // Typsin
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"protein, cleavage site\">[KR]|{P}</note>" +
-                "</bioml>");
+            spb = new UWSequestParamsBuilder(Collections.singletonMap("protein, cleavage site", "[KR]|{P}"), _root);
             parserError = spb.initEnzymeInfo();
             if (!parserError.isEmpty()) fail(parserError);
             assertEquals("enzyme_number", "1", spb.getProperties().getParam("enzyme_number").getValue());
 
             // AspN
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"protein, cleavage site\">[X]|[D]</note>" +
-                "</bioml>");
+            spb = new UWSequestParamsBuilder(Collections.singletonMap("protein, cleavage site", "[X]|[D]"), _root);
             parserError = spb.initEnzymeInfo();
             if (!parserError.isEmpty()) fail(parserError);
             assertEquals("enzyme_number", "10", spb.getProperties().getParam("enzyme_number").getValue());
@@ -339,13 +338,12 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testUWSpecificParams() throws SequestParamsException
         {
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"pipeline, database\">Bovine_mini.fasta</note>" +
-                "<note type=\"input\" label=\"sequest, min_peaks\">50</note>" +
-                "<note type=\"input\" label=\"sequest, max_precursor_charge\">4</note>" +
-                "</bioml>");
-            spb.initXmlValues();
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("pipeline, database", "Bovine_mini.fasta");
+            params.put("sequest, min_peaks", "50");
+            params.put("sequest, max_precursor_charge", "4");
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(params, _root);
+            spb.initPassThroughs();
             assertEquals("min_peaks", "50", spb.getPropertyValue("min_peaks"));
             assertEquals("max_precursor_charge", "4", spb.getPropertyValue("max_precursor_charge"));
         }
@@ -353,10 +351,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testVariableTermModification() throws SequestParamsException
         {
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"residue, potential modification mass\">50.43@[,90.12@]</note>" +
-                "</bioml>");
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap("residue, potential modification mass", "50.43@[,90.12@]"), _root);
             spb.initDynamicMods();
             assertEquals("variable_N_terminus", "50.43", spb.getPropertyValue("variable_N_terminus"));
             assertEquals("variable_C_terminus", "90.12", spb.getPropertyValue("variable_C_terminus"));
@@ -365,10 +360,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testStaticTermModification() throws SequestParamsException
         {
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"residue, modification mass\">50.43@[,90.12@]</note>" +
-                "</bioml>");
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap("residue, modification mass", "50.43@[,90.12@]"), _root);
             spb.initStaticMods();
             assertEquals("add_N_terminus", "50.43", spb.getPropertyValue("add_N_terminus"));
             assertEquals("add_C_terminus", "90.12", spb.getPropertyValue("add_C_terminus"));

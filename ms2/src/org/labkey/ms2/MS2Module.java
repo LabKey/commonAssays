@@ -339,8 +339,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public Set<Class> getIntegrationTests()
     {
         return new HashSet<Class>(Arrays.asList(
-            SequestParamsBuilder.TestCase.class,
-            UWSequestParamsBuilder.TestCase.class
+            SequestParamsBuilder.TestCase.class
         ));
     }
 
@@ -360,7 +359,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             BooleanParamsValidator.TestCase.class,
             RealNumberParamsValidator.TestCase.class,
             PositiveDoubleParamsValidator.TestCase.class,
-            NaturalNumberParamsValidator.TestCase.class
+            NaturalNumberParamsValidator.TestCase.class,
+            UWSequestParamsBuilder.TestCase.class
         ));
     }
 
