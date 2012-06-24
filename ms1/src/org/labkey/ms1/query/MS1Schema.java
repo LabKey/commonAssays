@@ -182,10 +182,10 @@ public class MS1Schema extends UserSchema
                 ExpRun run = ExperimentService.get().getExpRun(runId);
                 members.add(new CrosstabMember(Integer.valueOf(runId), colDim , null == run ? null : run.getName()));
             }
-            cti = new CrosstabTableInfo(settings, members);
+            cti = new CrosstabTable(settings, members);
         }
         else
-            cti = new CrosstabTableInfo(settings);
+            cti = new CrosstabTable(settings);
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>(cti.getDefaultVisibleColumns());   // Make a copy so we can modify
         defaultCols.remove(FieldKey.fromParts(firstFeature.getName()));

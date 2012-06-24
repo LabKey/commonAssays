@@ -964,7 +964,7 @@ public class MS2Schema extends UserSchema
 
         baseTable.addCondition(filterSQL, "ProteinGroupId");
 
-        CrosstabTableInfo result;
+        CrosstabTable result;
         CrosstabSettings settings = new CrosstabSettings(baseTable);
         CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First Protein Group");
         CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run Protein Group Count");
@@ -1004,26 +1004,26 @@ public class MS2Schema extends UserSchema
                 {
                     for (MS2Fraction fraction : run.getFractions())
                     {
-                        members.add(new CrosstabMember(fraction.getFraction(), colDim, fraction.getFileName()));
+                        members.add(new CrosstabMember(fraction.getFraction(), colDim.getFieldKey(), fraction.getFileName()));
                     }
                 }
                 else
                 {
-                    members.add(new CrosstabMember(run.getRun(), colDim, run.getDescription()));
+                    members.add(new CrosstabMember(run.getRun(), colDim.getFieldKey(), run.getDescription()));
                 }
             }
-            result = new CrosstabTableInfo(settings, members);
+            result = new CrosstabTable(settings, members);
         }
         else
         {
-            result = new CrosstabTableInfo(settings);
+            result = new CrosstabTable(settings);
         }
         if (form != null)
         {
             result.setOrAggFitlers(form.isOrCriteriaForEachRun());
         }
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
-        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
+        defaultCols.add(FieldKey.fromParts(CrosstabTable.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, groupCountMeasure)));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "Group"));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "GroupProbability"));
@@ -1172,7 +1172,7 @@ public class MS2Schema extends UserSchema
             colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
         }
 
-        CrosstabTableInfo result;
+        CrosstabTable result;
 
         if(null != _runs)
         {
@@ -1192,11 +1192,11 @@ public class MS2Schema extends UserSchema
                     members.add(new CrosstabMember(run.getRun(), colDim, run.getDescription()));
                 }
             }
-            result = new CrosstabTableInfo(settings, members);
+            result = new CrosstabTable(settings, members);
         }
         else
         {
-            result = new CrosstabTableInfo(settings);
+            result = new CrosstabTable(settings);
         }
         if (form != null)
         {
@@ -1204,7 +1204,7 @@ public class MS2Schema extends UserSchema
         }
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("SeqId"));
-        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
+        defaultCols.add(FieldKey.fromParts(CrosstabTable.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(proteinGroupMeasure.getName(), "Group"));
         defaultCols.add(FieldKey.fromParts(proteinGroupMeasure.getName(), "GroupProbability"));
         result.setDefaultVisibleColumns(defaultCols);
@@ -1341,16 +1341,16 @@ public class MS2Schema extends UserSchema
             {
                 members.add(new CrosstabMember(run.getRun(), colDim, run.getDescription()));
             }
-            result = new CrosstabTableInfo(settings, members);
+            result = new CrosstabTable(settings, members);
         }
         else
         {
-            result = new CrosstabTableInfo(settings);
+            result = new CrosstabTable(settings);
         }
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts(rowDim.getName()));
-        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
+        defaultCols.add(FieldKey.fromParts(CrosstabTable.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(scansMeasure.getName()));
         defaultCols.add(FieldKey.fromParts(avgPepProphMeasure.getName()));
         result.setDefaultVisibleColumns(defaultCols);

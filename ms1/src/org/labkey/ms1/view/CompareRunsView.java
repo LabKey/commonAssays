@@ -15,7 +15,7 @@
  */
 package org.labkey.ms1.view;
 
-import org.labkey.api.data.CrosstabTableInfo;
+import org.labkey.api.data.CrosstabTable;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.AggregateColumnInfo;
@@ -63,7 +63,7 @@ public class CompareRunsView extends ComparisonCrosstabView
     {
         DataView view = super.createDataView();
         view.getRenderContext().setViewContext(getViewContext());
-        String sortString = CrosstabTableInfo.getDefaultSortString() + "," + FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "_Peptide";
+        String sortString = CrosstabTable.getDefaultSortString() + "," + FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "_Peptide";
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;
     }
