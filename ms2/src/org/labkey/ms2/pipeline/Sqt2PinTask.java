@@ -88,17 +88,19 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                     if (decoyWriter != null) { try { decoyWriter.close(); } catch (IOException ignored) {} }
                 }
 
+                File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");
+
                 List<String> args = new ArrayList<String>();
                 args.add(PipelineJobService.get().getExecutablePath("sqt2pin", null, null, getJob().getLogger()));
+                args.add("-o");
+                args.add(output.getName());
                 args.add(targetListFile.getName());
                 args.add(decoyListFile.getName());
 
                 ProcessBuilder pb = new ProcessBuilder(args);
                 pb.directory(_wd.getDir());
 
-                File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");
-
-                job.runSubProcess(pb, _wd.getDir(), output, 10, false);
+                job.runSubProcess(pb, _wd.getDir());
 
                 action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
 
