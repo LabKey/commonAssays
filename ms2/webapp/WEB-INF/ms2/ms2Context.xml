@@ -436,9 +436,6 @@
                     <property name="key" value="results" />
                     <property name="function" value="output" />
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
-                    <property name="switchName" value="M"/>
-                </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="percolator, target result filename"/>
                     <property name="switchName" value="o"/>
