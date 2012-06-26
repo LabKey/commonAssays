@@ -68,7 +68,7 @@ public class NabModule extends DefaultModule
         return true;
     }
 
-    public void startup(ModuleContext moduleContext)
+    public void doStartup(ModuleContext moduleContext)
     {
         PlateService.get().registerDetailsLinkResolver(new PlateService.PlateDetailsResolver()
         {

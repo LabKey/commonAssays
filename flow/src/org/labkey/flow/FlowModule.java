@@ -155,7 +155,7 @@ public class FlowModule extends DefaultModule
         return false;
     }
 
-    public void startup(ModuleContext moduleContext)
+    public void doStartup(ModuleContext moduleContext)
     {
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider(this));
         FlowDataType.register();

@@ -68,7 +68,7 @@ public class LuminexModule extends DefaultModule
         return Collections.emptyList();
     }
 
-    public void startup(ModuleContext moduleContext)
+    public void doStartup(ModuleContext moduleContext)
     {
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new LuminexDataHandler());
