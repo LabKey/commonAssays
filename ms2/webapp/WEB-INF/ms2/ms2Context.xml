@@ -430,12 +430,6 @@
                     <property name="versionParamName" value="percolator, version"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
-                    <property name="switchName" value="E"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="searchResults" />
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                     <property name="switchName" value="X"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
@@ -623,6 +617,9 @@
                     <property name="parameter" value="percolator, decoy output"/>
                     <property name="switchName" value="B"/>
                     <property name="help" value="Output results for decoys into a tab-delimited file. (-B)"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="searchResults" />
                 </bean>
             </list>
         </property>
