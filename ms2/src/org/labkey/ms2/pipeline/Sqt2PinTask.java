@@ -92,6 +92,9 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
 
                 List<String> args = new ArrayList<String>();
                 args.add(PipelineJobService.get().getExecutablePath("sqt2pin", null, null, getJob().getLogger()));
+                args.add("-M");
+                args.add("-p");
+                args.add("*:1:#:2:@:3:^:4:~:5:$:6");
                 args.add("-o");
                 args.add(output.getName());
                 args.add(targetListFile.getName());
