@@ -48,7 +48,7 @@
             }
             for (SpectraCountConfiguration spectraConfig : SpectraCountConfiguration.VALID_CONFIGS)
             {
-                %><input type="radio" <%= spectraConfig == selectedConfig  ? "checked=\"true\"" : "" %> name="spectraConfig" value="<%= spectraConfig.getTableName()%>" /><%= h(spectraConfig.getDescription())%><br/><%
+                %><input type="radio" <%= spectraConfig == selectedConfig  ? "checked=\"true\"" : "" %> name="spectraConfig" id="<%= spectraConfig.getTableName() %>" value="<%= spectraConfig.getTableName()%>" /><%= h(spectraConfig.getDescription())%><br/><%
             }
             %>
         </div>
