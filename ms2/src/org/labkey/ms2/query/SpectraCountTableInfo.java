@@ -246,6 +246,9 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", MIN(pd.trimmedpeptide) as TrimmedPeptide\n");
         }
 
+        // SQLServer can't GROUP BY a TEXT field, so convert to VARCHAR
+        String protSequenceSQL = getSqlDialect().isSqlServer() ? "CAST(s.ProtSequence AS VARCHAR(MAX))" : "s.ProtSequence";
+
         if (_config.isGroupedByCharge())
         {
             sql.append(", pd.Charge\n");
@@ -261,13 +264,13 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 sql.append(", pd.SeqId AS SequenceId");
             }
-            sql.append(", s.ProtSequence");
+            sql.append(", ").append(protSequenceSQL).append(" AS ProtSequence");
             sql.append(", MIN(fs.LookupString) AS FastaName");
         }
         else if (_form.getTargetSeqId() != null)
         {
             sql.append(", s.SeqId\n");
-            sql.append(", s.ProtSequence\n");
+            sql.append(", ").append(protSequenceSQL).append(" AS ProtSequence\n");
         }
 
         sql.append(", COUNT(distinct pd.charge) AS ChargeStatesObsv\n");
@@ -392,12 +395,14 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 sql.append(", pd.SeqId");
             }
-            sql.append(", s.ProtSequence");
+            sql.append(", ");
+            sql.append(protSequenceSQL);
         }
         else if (_form.getTargetSeqId() != null)
         {
             sql.append(", s.SeqId");
-            sql.append(", s.ProtSequence");
+            sql.append(", ");
+            sql.append(protSequenceSQL);
         }
         return sql;
     }

@@ -31,7 +31,6 @@
     String peptideViewName = form.getPeptideCustomViewName(HttpView.currentContext());
 %>
 <script type="text/javascript" src="<%=AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
-
 <form action="<%= bean.getTargetURL() %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <p>
@@ -59,7 +58,33 @@
     <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="<%= MS2Controller.ProphetFilterType.customView %>" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
         Peptides that meet the filter criteria in a custom view:
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
-        <%= PageFlowUtil.textLink("Create or Edit View", (ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
+
+        <script type="text/javascript">
+            function viewSavedCallback(arg1, viewInfo)
+            {
+                // Get the name of the newly saved view
+                var viewName = viewInfo.views[0].name;
+                // Make sure we're set to use the custom view
+                document.getElementById("customViewRadioButton").checked = true;
+                var viewNamesSelect = document.getElementById("<%= peptideViewSelectId%>");
+                // Check if it already exists in our list
+                for (var i = 0; i < viewNamesSelect.options.length; i++)
+                {
+                    if (viewNamesSelect.options[i].value == viewName)
+                    {
+                        // If so, select it
+                        viewNamesSelect.options[i].selected = true;
+                        return;
+                    }
+                }
+                // Otherwise, add it as a new option
+                viewNamesSelect.options[viewNamesSelect.options.length] = new Option(viewName, viewName, false, true);
+                
+            }
+        </script>
+
+
+        <%= PageFlowUtil.textLink("Create or Edit View", (ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + ", viewSavedCallback); return false;", "editPeptidesViewLink") %>
 
         <br/>
         <br/>

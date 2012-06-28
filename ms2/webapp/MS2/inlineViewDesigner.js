@@ -5,13 +5,21 @@
  */
 var viewDesigners = {};
 
-function showViewDesigner(queryName, renderTo, viewSelectId)
+function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
 {
     if (viewDesigners[viewSelectId])
     {
         viewDesigners[viewSelectId].getEl().remove();
         viewDesigners[viewSelectId] = undefined;
         return;
+    }
+
+    if (!saveCallback)
+    {
+        saveCallback = function()
+        {
+            window.location.reload();
+        };
     }
 
     LABKEY.initializeViewDesigner(function ()
@@ -39,10 +47,7 @@ function showViewDesigner(queryName, renderTo, viewSelectId)
 
                 viewDesigners[viewSelectId] = this.customizeView;
 
-                this.customizeView.on("viewsave", function()
-                {
-                    window.location.reload();
-                }, this);
+                this.customizeView.on("viewsave", saveCallback, this);
                 // Need to trigger a relayout that makes the split pane visible
                 this.customizeView.setWidth(this.customizeView.getWidth());
             }
