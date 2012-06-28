@@ -185,12 +185,12 @@ public class SpectraCountTableInfo extends VirtualTable
         {
             proteinColumn = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
             defaultCols.add(FieldKey.fromParts(proteinColumn.getName()));
-
         }
         else
         {
             proteinColumn = new ExprColumn(this, "Protein", new SQLFragment("NULL"), JdbcType.INTEGER);
         }
+        proteinColumn.setDescription("The protein associated with the peptide identification. Only available if a grouping by protein information, or a target protein has been specified.");
         addColumn(proteinColumn);
         proteinColumn.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
         {
