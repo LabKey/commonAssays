@@ -67,19 +67,25 @@
                 // Make sure we're set to use the custom view
                 document.getElementById("customViewRadioButton").checked = true;
                 var viewNamesSelect = document.getElementById("<%= peptideViewSelectId%>");
-                // Check if it already exists in our list
-                for (var i = 0; i < viewNamesSelect.options.length; i++)
+                if (!viewNamesSelect)
                 {
-                    if (viewNamesSelect.options[i].value == viewName)
-                    {
-                        // If so, select it
-                        viewNamesSelect.options[i].selected = true;
-                        return;
-                    }
+                    window.location.reload();
                 }
-                // Otherwise, add it as a new option
-                viewNamesSelect.options[viewNamesSelect.options.length] = new Option(viewName, viewName, false, true);
-                
+                else
+                {
+                    // Check if it already exists in our list
+                    for (var i = 0; i < viewNamesSelect.options.length; i++)
+                    {
+                        if (viewNamesSelect.options[i].value == viewName)
+                        {
+                            // If so, select it
+                            viewNamesSelect.options[i].selected = true;
+                            return;
+                        }
+                    }
+                    // Otherwise, add it as a new option
+                    viewNamesSelect.options[viewNamesSelect.options.length] = new Option(viewName, viewName, false, true);
+                }
             }
         </script>
 
