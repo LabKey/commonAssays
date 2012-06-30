@@ -49,6 +49,9 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     public static final String DEFAULT_PLATE = "default";
     public static final String BACKGROUND_WELL_GROUP = "Background Wells";
 
+    public static final String MEAN_STAT = "mean";
+    public static final String MEDIAN_STAT = "median";
+
     public String getAssayType()
     {
         return "ELISpot";
@@ -114,7 +117,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     {
         return new WellGroup.Type[]{
                 WellGroup.Type.SPECIMEN, WellGroup.Type.ANTIGEN,
-                WellGroup.Type.CONTROL, WellGroup.Type.REPLICATE};
+                WellGroup.Type.CONTROL};
     }
 
     @Override
@@ -147,9 +150,9 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
      * specimen wellgroup. Background wells are specified on the plate template control type using the
      * background well wellgroup.
      */
-    public static Map<String, Double> getBackgroundValues(Container container, Plate plate)
+    public static Map<String, Map<String, Double>> getBackgroundValues(Container container, Plate plate)
     {
-        Map<String, Double> backgroundMap = new HashMap<String, Double>();
+        Map<String, Map<String, Double>> backgroundMap = new HashMap<String, Map<String, Double>>();
         WellGroup backgroundGroup = null;
 
         for (WellGroup group : plate.getWellGroups(WellGroup.Type.CONTROL))
@@ -184,9 +187,15 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
                 {
                     statsData = Arrays.copyOf(statsData, i);
                     Stats.DoubleStats stats = new Stats.DoubleStats(statsData);
+                    Map<String, Double> values = new HashMap<String, Double>();
 
                     if (!Double.isNaN(stats.getMedian()))
-                        backgroundMap.put(group.getName(), stats.getMedian());
+                        values.put(MEDIAN_STAT, stats.getMedian());
+
+                    if (!Double.isNaN(stats.getMean()))
+                        values.put(MEAN_STAT, stats.getMean());
+
+                    backgroundMap.put(group.getName(), values);
                 }
             }
         }
@@ -201,6 +210,12 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
         groupMap.put(WellGroup.Type.CONTROL.name(), Collections.singletonList(BACKGROUND_WELL_GROUP));
 
         return groupMap;
+    }
+
+    @Override
+    public boolean showEditorWarningPanel()
+    {
+        return false;
     }
 }
 

@@ -141,8 +141,8 @@ public class ElispotUpgradeCode implements UpgradeCode
     }
 
     /**
-     * Recompute sample level statistics so that spot counts are normalized per million cells and take into account
-     * the antigen well group cell/well property.
+     * Subtract background well mean/median values from the antigen well group mean/median values. We need to add a
+     * run level property to selectively enable background well subtraction.
      *
      * invoked from elispot-12.10-12.11.sql
      *

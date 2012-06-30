@@ -50,14 +50,13 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String ELISPOT_ANTIGEN_ROW_LSID_PREFIX = "ElispotAssayAntigenRow";
 
     public static final String SFU_PROPERTY_NAME = "SpotCount";
-    public static final String RAW_SFU_PROPERTY_NAME = "RawSpotCount";
     public static final String NORMALIZED_SFU_PROPERTY_NAME = "NormalizedSpotCount";
     public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
     public static final String WELLGROUP_LOCATION_PROPERTY = "WellgroupLocation";
     public static final String WELL_ROW_PROPERTY = "WellRow";
     public static final String WELL_COLUMN_PROPERTY = "WellColumn";
     public static final String ANTIGEN_WELLGROUP_PROPERTY_NAME = "AntigenWellgroupName";
-    public static final String BACKGROUND_WELL_PROPERTY = "BackgroundValue";
+    public static final String BACKGROUND_WELL_PROPERTY = "Background";
 
     public interface ElispotDataFileParser
     {
@@ -146,7 +145,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         PropertyType type = PropertyType.STRING;
         String format = null;
 
-        if (propertyName.equals(SFU_PROPERTY_NAME) || propertyName.equals(RAW_SFU_PROPERTY_NAME))
+        if (propertyName.equals(SFU_PROPERTY_NAME))
         {
             type = PropertyType.DOUBLE;
             format = "0.0";

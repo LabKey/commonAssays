@@ -178,33 +178,37 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                 if (rec) {
                     // sample group map
                     var sampleGroupName = rec.data.wellProperties.WellgroupName;
-                    var sampleCls = 'labkey-sampleGroup-' + sampleGroupName.replace(/\s/g, '-');
 
-                    this.sampleGroups[sampleGroupName] = {
-                        label : sampleGroupName,
-                        cls : sampleCls
-                    };
+                    if (sampleGroupName) {
 
-                    // antigen group map
-                    var antigenGroupName = rec.data.wellProperties.AntigenWellgroupName;
-                    var antigenName = rec.data.wellProperties.AntigenName;
-                    var antigenLabel = antigenGroupName;
+                        var sampleCls = 'labkey-sampleGroup-' + sampleGroupName.replace(/\s/g, '-');
 
-                    if (antigenName && antigenName.length > 0)
-                        antigenLabel = antigenGroupName + ' (' + antigenName + ')';
-                    var antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
+                        this.sampleGroups[sampleGroupName] = {
+                            label : sampleGroupName,
+                            cls : sampleCls
+                        };
 
-                    this.antigenGroups[antigenGroupName] = {
-                        label : antigenLabel,
-                        cls : antigenCls
+                        // antigen group map
+                        var antigenGroupName = rec.data.wellProperties.AntigenWellgroupName;
+                        var antigenName = rec.data.wellProperties.AntigenName;
+                        var antigenLabel = antigenGroupName;
+
+                        if (antigenName && antigenName.length > 0)
+                            antigenLabel = antigenGroupName + ' (' + antigenName + ')';
+                        var antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
+
+                        this.antigenGroups[antigenGroupName] = {
+                            label : antigenLabel,
+                            cls : antigenCls
+                        }
+
+                        cols.push({
+                            name        : rec.data.title,
+                            position    : rec.data.position,
+                            sCls        : sampleCls,
+                            aCls        : antigenCls
+                        });
                     }
-
-                    cols.push({
-                        name        : rec.data.title,
-                        position    : rec.data.position,
-                        sCls        : sampleCls,
-                        aCls        : antigenCls
-                    });
                 }
             }
             rows.push({label:label, cols:cols});

@@ -17,7 +17,6 @@
 package org.labkey.elispot;
 
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
@@ -48,7 +47,6 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUploadXarContext;
@@ -122,17 +120,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     for (ExpMaterial material : run.getMaterialInputs().keySet())
                         materialMap.put(material.getName(), material);
 
-                    DomainProperty backgroundRunProp = runProperties.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME);
-                    boolean subtractBackground = false;
-
-                    if (backgroundRunProp != null)
-                        subtractBackground = NumberUtils.toInt(runPropValues.get(backgroundRunProp), 0) > 0;
-
-                    Map<String, Double> backgroundValueMap = Collections.emptyMap();
-
-                    if (subtractBackground)
-                        backgroundValueMap = ElispotPlateTypeHandler.getBackgroundValues(container, plate);
-
                     for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                     {
                         ExpMaterial material = materialMap.get(group.getName());
@@ -143,17 +130,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 Well well = plate.getWell(pos.getRow(), pos.getColumn());
                                 Map<String, Object> row = new LinkedHashMap<String, Object>();
 
-                                // subtract background well value from the raw spot count
-                                double spotCount = well.getValue();
-                                if (backgroundValueMap.containsKey(group.getName()))
-                                {
-                                    spotCount -= backgroundValueMap.get(group.getName());
-                                    spotCount = Math.max(spotCount, 0);
-                                }
-
                                 row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-                                row.put(SFU_PROPERTY_NAME, spotCount);
-                                row.put(RAW_SFU_PROPERTY_NAME, well.getValue());
+                                row.put(SFU_PROPERTY_NAME, well.getValue());
                                 row.put(WELLGROUP_PROPERTY_NAME, group.getName());
                                 row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());
                                 row.put(WELL_ROW_PROPERTY, pos.getRow());
@@ -347,7 +325,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                 materialMap.put(material.getName(), material);
 
             DomainProperty antigenNameProp = antigenDomain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME);
-            Map<String, Double> backgroundValueMap = Collections.emptyMap();
+            Map<String, Map<String, Double>> backgroundValueMap = Collections.emptyMap();
 
             if (subtractBackground)
                 backgroundValueMap = ElispotPlateTypeHandler.getBackgroundValues(container, plate);
@@ -362,6 +340,21 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     Set<String> antigenNames = new HashSet<String>();
                     Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(dataLsid, material.getName());
                     Map<String, ObjectProperty> dataRow = OntologyManager.getPropertyObjects(container, rowLsid.toString());
+
+                    // background mean/median values on a per specimen basis
+                    double bkMeanValue = 0;
+                    double bkMedianValue = 0;
+
+                    if (backgroundValueMap.containsKey(group.getName()))
+                    {
+                        Map<String, Double> values = backgroundValueMap.get(group.getName());
+
+                        if (values.containsKey(ElispotPlateTypeHandler.MEAN_STAT))
+                            bkMeanValue = values.get(ElispotPlateTypeHandler.MEAN_STAT);
+
+                        if (values.containsKey(ElispotPlateTypeHandler.MEDIAN_STAT))
+                            bkMedianValue = values.get(ElispotPlateTypeHandler.MEDIAN_STAT);
+                    }
 
                     for (WellGroup antigenGroup : group.getOverlappingGroups(WellGroup.Type.ANTIGEN))
                     {
@@ -389,10 +382,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
                                     if (isSpotCountValid(value))
                                     {
-                                        if (cellsPerWell > 0)
-                                            statsData[i++] = (value * 1000000) / cellsPerWell;
-                                        else
-                                            statsData[i++] = value;
+                                        statsData[i++] = value;
                                     }
                                 }
                             }
@@ -418,22 +408,35 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 antigenNames.add(antigenName);
                                 if (!Double.isNaN(stats.getMean()))
                                 {
+                                    // subtract off the background value, and normalize by 10^6/cellPerWell
+                                    double meanValue = stats.getMean() - bkMeanValue;
+                                    meanValue = Math.max(meanValue, 0);
+
+                                    if (cellsPerWell > 0)
+                                        meanValue = (meanValue * 1000000) / cellsPerWell;
+
                                     ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(container,
                                             run.getProtocol(),
                                             rowLsid.toString(),
                                             antigenName + "_Mean",
-                                            stats.getMean(),
+                                            meanValue,
                                             PropertyType.DOUBLE, "0.0");
                                     antigenResults.add(mean);
                                 }
 
                                 if (!Double.isNaN(stats.getMedian()))
                                 {
+                                    double medianValue = stats.getMedian() - bkMedianValue;
+                                    medianValue = Math.max(medianValue, 0);
+
+                                    if (cellsPerWell > 0)
+                                        medianValue = (medianValue * 1000000) / cellsPerWell;
+
                                     ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(container,
                                             run.getProtocol(),
                                             rowLsid.toString(),
                                             antigenName + "_Median",
-                                            stats.getMedian(),
+                                            medianValue,
                                             PropertyType.DOUBLE, "0.0");
                                     antigenResults.add(median);
                                 }
@@ -441,19 +444,23 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                         }
                     }
 
-                    // add the background well value
-                    double bkValue = 0;
-                    if (backgroundValueMap.containsKey(group.getName()))
-                        bkValue = backgroundValueMap.get(group.getName());
-
-                    ObjectProperty backgroundValue = ElispotDataHandler.getAntigenResultObjectProperty(container,
+                    // add the background well values (not normalized)
+                    ObjectProperty backgroundMeanValue = ElispotDataHandler.getAntigenResultObjectProperty(container,
                             run.getProtocol(),
                             rowLsid.toString(),
-                            ElispotDataHandler.BACKGROUND_WELL_PROPERTY,
-                            bkValue,
+                            ElispotDataHandler.BACKGROUND_WELL_PROPERTY + "_Mean",
+                            bkMeanValue,
                             PropertyType.DOUBLE, "0.0");
 
-                    antigenResults.add(backgroundValue);
+                    ObjectProperty backgroundMedianValue = ElispotDataHandler.getAntigenResultObjectProperty(container,
+                            run.getProtocol(),
+                            rowLsid.toString(),
+                            ElispotDataHandler.BACKGROUND_WELL_PROPERTY + "_Median",
+                            bkMedianValue,
+                            PropertyType.DOUBLE, "0.0");
+
+                    antigenResults.add(backgroundMeanValue);
+                    antigenResults.add(backgroundMedianValue);
 
                     if (!antigenResults.isEmpty())
                     {
@@ -475,68 +482,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                         }
                         OntologyManager.ensureObject(container, rowLsid.toString(),  dataLsid);
                         OntologyManager.insertProperties(container, rowLsid.toString(), antigenResults.toArray(new ObjectProperty[antigenResults.size()]));
-                    }
-                }
-            }
-            ExperimentService.get().getSchema().getScope().commitTransaction();
-        }
-        finally
-        {
-            ExperimentService.get().getSchema().getScope().closeConnection();
-        }
-    }
-
-    /**
-     * Subtracts the background value from the raw spot counts and then recalculate the statistics downstream of the spot counts:
-     * normalized count, antigen well mean and median.
-     *
-     * This method exists as a way to modify the plate design background wells, and quickly recompute counts without having to reload
-     * the run. Since the normal transform/validation workflow is not invoked, this method cannot be used if there is a transform
-     * script configured for the assay provider.
-     */
-    public static void subtractBackgroundValues(ExpRun run, Plate plate) throws SQLException, ValidationException, ExperimentException
-    {
-        try {
-            AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
-            List<File> scripts = provider.getValidationAndAnalysisScripts(run.getProtocol(), AssayProvider.Scope.ALL);
-            if (!scripts.isEmpty())
-                throw new ExperimentException("Background subtraction cannot be run for assays that are configured with " +
-                        "transform scripts. Runs must be deleted and re-uploaded in order to have background subtraction run.");
-
-            ExperimentService.get().getSchema().getScope().ensureTransaction();
-
-            Container container = run.getContainer();
-            Map<String, Double> backgroundValueMap = ElispotPlateTypeHandler.getBackgroundValues(container, plate);
-
-            ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
-            if (data.length != 1)
-                throw new ExperimentException("Elispot should only upload a single file per run.");
-
-            String runLsid = data[0].getLSID();
-
-            for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
-            {
-                for (Position pos : group.getPositions())
-                {
-                    Well well = plate.getWell(pos.getRow(), pos.getColumn());
-
-                    // subtract background well value from the raw spot count
-                    double spotCount = well.getValue();
-                    if (isSpotCountValid(spotCount))
-                    {
-                        String dataRowLsid = ElispotDataHandler.getDataRowLsid(runLsid, well.getRow(), well.getColumn()).toString();
-
-                        if (backgroundValueMap.containsKey(group.getName()))
-                        {
-                            spotCount -= backgroundValueMap.get(group.getName());
-                            spotCount = Math.max(spotCount, 0);
-                        }
-                        ObjectProperty sfuProp = getObjectProperty(container, run.getProtocol(), dataRowLsid, SFU_PROPERTY_NAME, spotCount);
-                        ObjectProperty rsfuProp = getObjectProperty(container, run.getProtocol(), dataRowLsid, RAW_SFU_PROPERTY_NAME, well.getValue());
-
-                        OntologyManager.deleteProperty(sfuProp.getObjectURI(), sfuProp.getPropertyURI(), container, container);
-                        OntologyManager.deleteProperty(rsfuProp.getObjectURI(), rsfuProp.getPropertyURI(), container, container);
-                        OntologyManager.insertProperties(container, dataRowLsid, sfuProp, rsfuProp);
                     }
                 }
             }
