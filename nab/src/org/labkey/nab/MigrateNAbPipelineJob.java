@@ -265,7 +265,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
 
         for (int i = 0; i < legacyLSIDs.size(); i += batchSize)
         {
-            List<String> subList = legacyLSIDs.subList(i, Math.min(i + batchSize, legacyLSIDs.size() - 1));
+            List<String> subList = legacyLSIDs.subList(i, Math.min(i + batchSize, legacyLSIDs.size()));
             SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(AssayPublishService.SOURCE_LSID_PROPERTY_NAME, subList));
             result.addAll(Arrays.asList((Map<String, Object>[])Table.select(datasetTableInfo, Table.ALL_COLUMNS, filter, null, Map.class)));
         }

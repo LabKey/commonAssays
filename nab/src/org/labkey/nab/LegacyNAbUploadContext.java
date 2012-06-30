@@ -15,10 +15,13 @@
  */
 package org.labkey.nab;
 
+import junit.framework.Assert;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -208,7 +211,12 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             }
             else if (NabAssayProvider.INCUBATION_TIME_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
             {
-                result.put(property, _legacyRun.getIncubationTime());
+                String value = _legacyRun.getIncubationTime();
+                if ( value != null && PropertyType.INTEGER.getTypeUri().equals(property.getRangeURI()))
+                {
+                    value = parseIncubationTime(value);
+                }
+                result.put(property, value);
             }
             else if (NabAssayProvider.PLATE_NUMBER_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
             {
@@ -252,6 +260,46 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             }
         }
         return result;
+    }
+
+    private static String parseIncubationTime(String value)
+    {
+        if (value == null || value.trim().length() == 0)
+        {
+            return null;
+        }
+        try
+        {
+            value = new Integer(value).toString();
+        }
+        catch (NumberFormatException e)
+        {
+            StringBuilder digits = new StringBuilder();
+            int index = 0;
+            while (index < value.length())
+            {
+                char c = value.charAt(index++);
+                if (Character.isDigit(c))
+                {
+                    digits.append(c);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (digits.length() == 0)
+            {
+                throw new NumberFormatException("Unable to parse IncubationTime value '" + value + "'");
+            }
+            int num = Integer.parseInt(digits.toString());
+            if (value.indexOf("day") != -1)
+            {
+                num *= 24;
+            }
+            value = Integer.toString(num);
+        }
+        return value;
     }
 
     @Override
@@ -373,5 +421,31 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
     public void setFile(File dataFile)
     {
         _dataFile = dataFile;
+    }
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testIncubationTimeParsing()
+        {
+            assertEquals("25", parseIncubationTime("25.5"));
+            assertEquals("25", parseIncubationTime("25.3"));
+            assertEquals(null, parseIncubationTime(null));
+            assertEquals("", parseIncubationTime(""));
+            assertEquals("12", parseIncubationTime("12:15"));
+            assertEquals("48", parseIncubationTime("2 days"));
+            assertEquals("48", parseIncubationTime("48"));
+            assertEquals("48", parseIncubationTime("48hrs"));
+            assertEquals("48", parseIncubationTime("48 hrs"));
+            assertEquals("48", parseIncubationTime("48 Hrs"));
+            assertEquals("48", parseIncubationTime("48 Hours"));
+            assertEquals("48", parseIncubationTime("48Hrs."));
+            try
+            {
+                parseIncubationTime("aa");
+                fail("Shouldn't have parsed successfully");
+            }
+            catch (NumberFormatException ignored) {}
+        }
     }
 }
