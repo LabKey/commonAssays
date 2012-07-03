@@ -54,6 +54,8 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
     private static final String ACTION_NAME = "Load MSDaPl";
 
     private static final String PROJECT_ID_PARAMETER_NAME = "msdapl, project id";
+    private static final String NO_MSDAPL_LOAD = "none";
+    private static final int NO_MSDAPL_LOAD_PROJECT_ID = -1;
 
     public MSDaPlLoaderTask(Factory factory, PipelineJob job)
     {
@@ -118,6 +120,20 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         }
 
         @Override
+        public boolean isParticipant(PipelineJob job) throws IOException
+        {
+            try
+            {
+                return getProjectId(job.getParameters()) != NO_MSDAPL_LOAD_PROJECT_ID;
+            }
+            catch (PipelineValidationException e)
+            {
+                // If we somehow got to this stage, let the task run and give an error message 
+                return true;
+            }
+        }
+
+        @Override
         public void validateParameters(PipelineJob job) throws PipelineValidationException
         {
             if (_submitURL == null)
@@ -146,6 +162,10 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
             }
 
             int projectId = getProjectId(job.getParameters());
+            if (projectId == NO_MSDAPL_LOAD_PROJECT_ID)
+            {
+                return;
+            }
 
             try
             {
@@ -267,13 +287,23 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         {
             throw new PipelineValidationException("No value specified for '" + PROJECT_ID_PARAMETER_NAME + "'");
         }
+        paramValue = paramValue.trim();
+        if (NO_MSDAPL_LOAD.equalsIgnoreCase(paramValue))
+        {
+            return NO_MSDAPL_LOAD_PROJECT_ID;
+        }
         try
         {
-            return Integer.parseInt(paramValue);
+            int projectId = Integer.parseInt(paramValue);
+            if (projectId < 0)
+            {
+                throw new PipelineValidationException("Expected value of '" + PROJECT_ID_PARAMETER_NAME + "' to be non-negative, but got: " + projectId);
+            }
+            return projectId;
         }
         catch (NumberFormatException e)
         {
-            throw new PipelineValidationException("Expected a number for '" + PROJECT_ID_PARAMETER_NAME + "', but got: " + paramValue);
+            throw new PipelineValidationException("Expected a number or '" + NO_MSDAPL_LOAD + "' for '" + PROJECT_ID_PARAMETER_NAME + "', but got: " + paramValue);
         }
     }
     public SequestPipelineJob getJob()
