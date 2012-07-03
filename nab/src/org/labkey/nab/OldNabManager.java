@@ -61,8 +61,8 @@ public class OldNabManager extends AbstractNabManager
     private static OldNabManager _instance;
     private static Logger _log = Logger.getLogger(OldNabManager.class);
 
-    private static final int START_ROW = 6; //0 based, row 7 inthe workshet
-    private static final int START_COL = 0;
+    public static final int START_ROW = 6; //0 based, row 7 in the workshet
+    public static final int START_COL = 0;
 
     public enum PlateProperty
     {

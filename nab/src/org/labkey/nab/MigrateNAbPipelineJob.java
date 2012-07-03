@@ -16,11 +16,16 @@
 
 package org.labkey.nab;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
@@ -36,6 +41,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.study.DataSet;
+import org.labkey.api.study.Plate;
+import org.labkey.api.study.PlateService;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.TimepointType;
@@ -52,6 +59,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +67,6 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -285,73 +292,116 @@ public class MigrateNAbPipelineJob extends PipelineJob
         try
         {
             String fileName = context.getLegacyRun().getName();
-            // Legacy NAb stores the Excel file as an Attachment (BLOB), so grab it and write it to disk 
-            in = AttachmentService.get().getInputStream(context.getLegacyRun().getPlate(), fileName);
-            if (in == null)
+            File dataFile = AssayFileWriter.findUniqueFileName(fileName, migratedNAbDir);
+
+            // Legacy NAb stores the Excel file as an Attachment (BLOB), so grab it and write it to disk
+            try
             {
-                getLogger().error("Could not migrate run id " + rowId + " (" + fileName + " because data file is not available");
-                return Collections.emptyMap();
-            }
-            else
-            {
-                File dataFile = AssayFileWriter.findUniqueFileName(fileName, migratedNAbDir);
+                in = AttachmentService.get().getInputStream(context.getLegacyRun().getPlate(), fileName);
                 writeFile(dataFile, in);
-                context.setFile(dataFile);
-
-                ExpRun run = AssayService.get().createExperimentRun(fileName, getInfo().getContainer(), protocol, dataFile);
-                provider.getRunCreator().saveExperimentRun(context, null, run, false);
-
-                // Set the Created and CreatedBy values to their values in the legacy run. Do this via direct SQL
-                // since all of the normal APIs set them based on the current user and time.
-                SQLFragment runFixupSQL = new SQLFragment("UPDATE " + ExperimentService.get().getTinfoExperimentRun() +
-                        " SET Created = ?, CreatedBy = ? WHERE RowId = ?");
-                runFixupSQL.add(created);
-                runFixupSQL.add(createdBy);
-                runFixupSQL.add(run.getRowId());
-                Table.execute(ExperimentService.get().getSchema(), runFixupSQL);
-
-                // Get the mapping from specimen name ("Specimen 1", "Specimen 2", etc) to LSID that would have been
-                // copied to a study dataset
-                Map<String, String> legacyLSIDs = context.getSpecimensToLSIDs();
-
-                // Now figure out the mapping from specimen name to Id for the newly created run
-                AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
-                TableInfo resultsTableInfo = provider.createDataTable(schema, protocol, false);
-                FieldKey runFK = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
-                FieldKey rowIdFK = provider.getTableMetadata(protocol).getResultRowIdFieldKey();
-                FieldKey specimenNameFK = FieldKey.fromParts("Properties", NabDataHandler.WELLGROUP_NAME_PROPERTY);
-
-                // Do the query to get the new run's info
-                Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(resultsTableInfo, Arrays.asList(rowIdFK, specimenNameFK));
-                ColumnInfo rowIdCol = cols.get(rowIdFK);
-                ColumnInfo specimenNameCol = cols.get(specimenNameFK);
-                Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK.toString(), run.getRowId()), null).getArray(Map.class);
-
-                // Figure out the RowId for the new assay run 
-                Map<String, Integer> result = new HashMap<String, Integer>();
-
-                for (Map.Entry<String, String> entry : legacyLSIDs.entrySet())
-                {
-                    String name = entry.getKey();
-                    String legacyLsid = entry.getValue();
-                    Integer newRowId = findRowId(newDataRows, name, specimenNameCol, rowIdCol);
-                    if (newRowId != null)
-                    {
-                        result.put(legacyLsid, newRowId);
-                    }
-                    else
-                    {
-                        throw new IllegalStateException("Could not find new RowId for LSID " + legacyLsid);
-                    }
-                }
-
-                return result;
             }
+            catch (FileNotFoundException e)
+            {
+                getLogger().warn("Could not find original data file for run id " + rowId + " (" + fileName + "), creating a new file");
+                extractNAbFileFromDatabase(rowId, context, dataFile);
+            }
+
+            context.setFile(dataFile);
+
+            ExpRun run = AssayService.get().createExperimentRun(fileName, getInfo().getContainer(), protocol, dataFile);
+            provider.getRunCreator().saveExperimentRun(context, null, run, false);
+
+            // Set the Created and CreatedBy values to their values in the legacy run. Do this via direct SQL
+            // since all of the normal APIs set them based on the current user and time.
+            SQLFragment runFixupSQL = new SQLFragment("UPDATE " + ExperimentService.get().getTinfoExperimentRun() +
+                    " SET Created = ?, CreatedBy = ? WHERE RowId = ?");
+            runFixupSQL.add(created);
+            runFixupSQL.add(createdBy);
+            runFixupSQL.add(run.getRowId());
+            Table.execute(ExperimentService.get().getSchema(), runFixupSQL);
+
+            // Get the mapping from specimen name ("Specimen 1", "Specimen 2", etc) to LSID that would have been
+            // copied to a study dataset
+            Map<String, String> legacyLSIDs = context.getSpecimensToLSIDs();
+
+            // Now figure out the mapping from specimen name to Id for the newly created run
+            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
+            TableInfo resultsTableInfo = provider.createDataTable(schema, protocol, false);
+            FieldKey runFK = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
+            FieldKey rowIdFK = provider.getTableMetadata(protocol).getResultRowIdFieldKey();
+            FieldKey specimenNameFK = FieldKey.fromParts("Properties", NabDataHandler.WELLGROUP_NAME_PROPERTY);
+
+            // Do the query to get the new run's info
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(resultsTableInfo, Arrays.asList(rowIdFK, specimenNameFK));
+            ColumnInfo rowIdCol = cols.get(rowIdFK);
+            ColumnInfo specimenNameCol = cols.get(specimenNameFK);
+            Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK.toString(), run.getRowId()), null).getArray(Map.class);
+
+            // Figure out the RowId for the new assay run
+            Map<String, Integer> result = new HashMap<String, Integer>();
+
+            for (Map.Entry<String, String> entry : legacyLSIDs.entrySet())
+            {
+                String name = entry.getKey();
+                String legacyLsid = entry.getValue();
+                Integer newRowId = findRowId(newDataRows, name, specimenNameCol, rowIdCol);
+                if (newRowId != null)
+                {
+                    result.put(legacyLsid, newRowId);
+                }
+                else
+                {
+                    throw new IllegalStateException("Could not find new RowId for LSID " + legacyLsid);
+                }
+            }
+
+            return result;
         }
         finally
         {
             if (in != null) { try { in.close(); } catch (IOException ignored) {} }
         }
+    }
+
+    private void extractNAbFileFromDatabase(int rowId, LegacyNAbUploadContext context, File dataFile)
+            throws SQLException, IOException
+    {
+        // Pull the plate (with its well data) from the database
+        Plate plate = PlateService.get().getPlate(context.getContainer(), rowId);
+        Workbook workbook = ExcelWriter.ExcelDocumentType.xls.createWorkbook();
+        // Create a mostly empty first sheet, since NAb expects the well data on the second sheet
+        Sheet firstSheet = workbook.createSheet("List ; Plates 1 - 1");
+        Cell infoCell = firstSheet.createRow(0).createCell(0, Cell.CELL_TYPE_STRING);
+        infoCell.setCellValue(message(rowId, context));
+
+        Sheet dataSheet = workbook.createSheet("Plate");
+        Cell infoCell2 = dataSheet.createRow(0).createCell(0, Cell.CELL_TYPE_STRING);
+        infoCell2.setCellValue(message(rowId, context));
+        // NAb expects the data to start at A7 (column 0, row 6)
+        for (int rowNum = 0; rowNum < plate.getRows(); rowNum++)
+        {
+            Row row = dataSheet.createRow(rowNum + OldNabManager.START_ROW);
+            for (int colNum = 0; colNum < plate.getColumns(); colNum++)
+            {
+                Cell cell = row.createCell(colNum + OldNabManager.START_COL, Cell.CELL_TYPE_NUMERIC);
+                cell.setCellValue(plate.getWell(rowNum, colNum).getValue());
+            }
+        }
+        // Write it to disk
+        FileOutputStream fOut = new FileOutputStream(dataFile);
+        try
+        {
+            workbook.write(fOut);
+        }
+        finally
+        {
+            fOut.close();
+        }
+    }
+
+    private String message(int rowId, LegacyNAbUploadContext context)
+    {
+        return "File reconstructed by extracting NAb run data from " + context.getContainer().getPath() +", legacy RunId " + rowId + ". This is not the original instrument output file.";
     }
 
     private Integer findRowId(Map<String, Object>[] newDataRows, String name, ColumnInfo specimenNameCol, ColumnInfo rowIdCol)
