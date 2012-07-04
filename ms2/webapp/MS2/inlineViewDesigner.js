@@ -5,14 +5,21 @@
  */
 var viewDesigners = {};
 
+var LOAD_IN_PROGRESS = "LOAD_IN_PROGRESS";
+
 function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
 {
     if (viewDesigners[viewSelectId])
     {
+        if (viewDesigners[viewSelectId] === LOAD_IN_PROGRESS)
+        {
+            return;
+        }
         viewDesigners[viewSelectId].getEl().remove();
         viewDesigners[viewSelectId] = undefined;
         return;
     }
+    viewDesigners[viewSelectId] = LOAD_IN_PROGRESS;
 
     if (!saveCallback)
     {
