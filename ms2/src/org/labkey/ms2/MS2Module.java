@@ -116,10 +116,11 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
     public static final String MS2_RUNS_NAME = "MS2 Runs";
+    public static final String MS2_MODULE_NAME = "MS2";
 
     public String getName()
     {
-        return "MS2";
+        return MS2_MODULE_NAME;
     }
 
     public double getVersion()

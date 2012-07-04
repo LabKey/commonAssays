@@ -22,12 +22,14 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.MS1Module;
 
 import java.util.*;
 
@@ -49,9 +51,12 @@ public class MS1Schema extends UserSchema
     static public void register()
     {
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider() {
+            @Override
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new MS1Schema(schema.getUser(), schema.getContainer());
+                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS1Module.NAME)))
+                    return new MS1Schema(schema.getUser(), schema.getContainer());
+                return null;
             }
         });
     }

@@ -23,6 +23,7 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
@@ -33,6 +34,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.ProteinGroupProteins;
@@ -90,7 +92,9 @@ public class MS2Schema extends UserSchema
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new MS2Schema(schema.getUser(), schema.getContainer());
+                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
+                    return new MS2Schema(schema.getUser(), schema.getContainer());
+                return  null;
             }
         });
     }

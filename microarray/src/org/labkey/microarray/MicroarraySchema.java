@@ -31,6 +31,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -72,7 +73,9 @@ public class MicroarraySchema extends SimpleUserSchema
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider() {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new MicroarraySchema(schema.getUser(), schema.getContainer());
+                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MicroarrayModule.NAME)))
+                    return new MicroarraySchema(schema.getUser(), schema.getContainer());
+                return null;
             }
         });
     }

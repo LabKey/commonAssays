@@ -16,12 +16,14 @@
 
 package org.labkey.ms2.protein.query;
 
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
+import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 
@@ -44,14 +46,18 @@ public class CustomAnnotationSchema extends UserSchema
         DefaultSchema.registerProvider(SCHEMA_WITHOUT_SEQUENCES_NAME, new DefaultSchema.SchemaProvider() {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), false);
+                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
+                    return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), false);
+                return null;
             }
         });
 
         DefaultSchema.registerProvider(SCHEMA_WITH_SEQUENCES_NAME, new DefaultSchema.SchemaProvider() {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), true);
+                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
+                    return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), true);
+                return null;
             }
         });
     }
