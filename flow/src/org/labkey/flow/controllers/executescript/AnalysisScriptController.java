@@ -1099,7 +1099,11 @@ public class AnalysisScriptController extends BaseFlowController
 
             // Get an experiment based on the parent folder name
             int suffix = 0;
-            String runName = FileUtil.getBaseName(pipelineFile);
+            String runName;
+            if (pipelineFile.getName().equalsIgnoreCase(AnalysisSerializer.STATISTICS_FILENAME))
+                runName = FileUtil.getBaseName(runFilePathRoot);
+            else
+                runName = FileUtil.getBaseName(pipelineFile);
             while (true)
             {
                 String experimentName = runName + (suffix == 0 ? "" : suffix);
