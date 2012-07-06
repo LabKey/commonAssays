@@ -58,14 +58,14 @@ public class FlowSettings
     static public String getWorkingDirectoryPath()
     {
         Container container = ContainerManager.getRoot();
-        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW);
+        Map<String, String> map = PropertyManager.getProperties(container, PROPCAT_FLOW);
         return map.get(PROPNAME_WORKINGDIRECTORY);
     }
 
     static public void setWorkingDirectoryPath(String path) throws Exception
     {
         Container container = ContainerManager.getRoot();
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container.getId(), PROPCAT_FLOW, path != null);
+        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, path != null);
         if (map == null)
         {
             assert path == null;
@@ -78,7 +78,7 @@ public class FlowSettings
     static public boolean isNormalizationEnabled()
     {
         Container container = ContainerManager.getRoot();
-        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW);
+        Map<String, String> map = PropertyManager.getProperties(container, PROPCAT_FLOW);
         String value = StringUtils.trimToNull(map.get(PROPNAME_NORMALIZATION_ENABLED));
         if (value == null)
             return false;
@@ -89,7 +89,7 @@ public class FlowSettings
     static public void setNormalizationEnabled(Boolean enabled)
     {
         Container container = ContainerManager.getRoot();
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container.getId(), PROPCAT_FLOW, enabled != null);
+        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, enabled != null);
         if (map == null)
         {
             assert enabled == null;
@@ -105,7 +105,7 @@ public class FlowSettings
     public static void setDeleteFiles(boolean deleteFiles)
     {
         Container container = ContainerManager.getRoot();
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container.getId(), PROPCAT_FLOW, !deleteFiles);
+        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, !deleteFiles);
         if (map == null)
             return;
 
@@ -120,7 +120,7 @@ public class FlowSettings
     static public boolean isDeleteFiles()
     {
         Container container = ContainerManager.getRoot();
-        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW);
+        Map<String, String> map = PropertyManager.getProperties(container, PROPCAT_FLOW);
         String value = StringUtils.trimToNull(map.get(PROPNAME_DELETE_FILES));
         if (value == null)
             return true;

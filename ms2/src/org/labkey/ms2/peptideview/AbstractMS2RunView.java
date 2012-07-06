@@ -184,21 +184,21 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public void savePeptideColumnNames(String type, String columnNames) throws SQLException
     {
-        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user.getUserId(), ContainerManager.getRoot().getId(), "ColumnNames", true);
+        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user.getUserId(), ContainerManager.getRoot(), "ColumnNames", true);
         defaultColumnLists.put(type + _columnPropertyName, columnNames);
         PropertyManager.saveProperties(defaultColumnLists);
     }
 
     public void saveProteinColumnNames(String type, String columnNames) throws SQLException
     {
-        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user.getUserId(), ContainerManager.getRoot().getId(), "ProteinColumnNames", true);
+        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user.getUserId(), ContainerManager.getRoot(), "ProteinColumnNames", true);
         defaultColumnLists.put(type + "Protein", columnNames);
         PropertyManager.saveProperties(defaultColumnLists);
     }
 
     private @Nullable String getSavedPeptideColumnNames() throws SQLException
     {
-        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), "ColumnNames");
+        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot(), "ColumnNames");
         return defaultColumnLists.get(_runs[0].getType() + "Peptides");
     }
 
@@ -491,7 +491,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     private @Nullable String getSavedProteinColumnNames() throws SQLException
     {
-        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), "ProteinColumnNames");
+        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot(), "ProteinColumnNames");
         return defaultColumnLists.get(_runs[0].getType() + "Protein");
     }
 

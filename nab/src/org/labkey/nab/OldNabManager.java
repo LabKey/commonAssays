@@ -106,7 +106,7 @@ public class OldNabManager extends AbstractNabManager
         {
             Map<String, String> properties =
                     PropertyManager.getWritableProperties(context.getUser().getUserId(),
-                            context.getContainer().getId(), Luc5Assay.class.getName(), true);
+                            context.getContainer(), Luc5Assay.class.getName(), true);
             if (form != null)
                 settingsToMap(form, properties);
             else
@@ -126,7 +126,7 @@ public class OldNabManager extends AbstractNabManager
         Container c = context.getContainer();
         User user = context.getUser();
 
-        Map<String, String> properties = PropertyManager.getProperties(user.getUserId(), c.getId(), Luc5Assay.class.getName());
+        Map<String, String> properties = PropertyManager.getProperties(user.getUserId(), c, Luc5Assay.class.getName());
 
         if (!properties.isEmpty())
         {
