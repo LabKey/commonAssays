@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.controllers.protocol;
 
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.ColumnInfo;
@@ -211,10 +212,13 @@ public class EditICSMetadataForm extends ProtocolForm
             ret.put(new FieldKey(keyword, column.getName()), "Keyword " + column.getLabel());
         }
 
-        FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample", "Property");
-        if (getProtocol().getSampleSet() != null)
+        FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample");
+        ExpSampleSet sampleSet = getProtocol().getSampleSet();
+        if (sampleSet != null)
         {
-            for (DomainProperty pd : getProtocol().getSampleSet().getPropertiesForType())
+            if (sampleSet.hasNameAsIdCol())
+                ret.put(new FieldKey(sampleProperty, "Name"), "Sample Name");
+            for (DomainProperty pd : sampleSet.getPropertiesForType())
             {
                 ret.put(new FieldKey(sampleProperty, pd.getName()), "Sample " + pd.getName());
             }

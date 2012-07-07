@@ -38,6 +38,7 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpMaterialRunInput;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
@@ -63,6 +64,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
@@ -78,6 +80,7 @@ import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
+import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
@@ -201,7 +204,7 @@ public class FlowSchema extends UserSchema
             case FCSFiles:
                 return createFCSFileTable(type.toString());
             case FCSAnalyses:
-                return createFCSAnalysisTable(type.toString(), FlowDataType.FCSAnalysis);
+                return createFCSAnalysisTable(type.toString(), FlowDataType.FCSAnalysis, true);
             case CompensationControls:
                 return createCompensationControlTable(type.toString());
             case Runs:
@@ -804,7 +807,7 @@ public class FlowSchema extends UserSchema
 
             FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
             ICSMetadata metadata = protocol != null ? protocol.getICSMetadata() : null;
-            if (metadata == null || !metadata.hasBackground())
+            if (metadata == null || !metadata.hasCompleteBackground())
                 colBackground.setHidden(true);
 
             addMethod(columnAlias, new BackgroundMethod(FlowSchema.this, colBackground));
@@ -1253,6 +1256,7 @@ public class FlowSchema extends UserSchema
                         break;
                 }
             }
+
             return ret.iterator();
         }
     }
@@ -1285,10 +1289,10 @@ public class FlowSchema extends UserSchema
     }
 
 
-    public ExpDataTable createFCSAnalysisTable(String name, FlowDataType type)
+    public ExpDataTable createFCSAnalysisTable(String name, FlowDataType type, boolean includeCopiedToStudyColumns)
     {
         if (null != DbSchema.get("flow").getTable("object").getColumn("compid"))
-            return createFCSAnalysisTableNEW(name, type);
+            return createFCSAnalysisTableNEW(name, type, includeCopiedToStudyColumns);
 
         FlowDataTable ret = createDataTable(name, type);
         ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.toString());
@@ -1333,12 +1337,15 @@ public class FlowSchema extends UserSchema
             ret.addReportColumns(report, FlowTableType.FCSAnalyses);
         }
 
+        if (includeCopiedToStudyColumns)
+            addCopiedToStudyColumns(ret);
+
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
         return ret;
     }
 
 
-    public ExpDataTable createFCSAnalysisTableNEW(String alias, FlowDataType type)
+    public ExpDataTable createFCSAnalysisTableNEW(String alias, FlowDataType type, boolean includeCopiedToStudyColumns)
     {
         FlowDataTable ret = createDataTable(alias, type);
 
@@ -1390,14 +1397,34 @@ public class FlowSchema extends UserSchema
             ret.addReportColumns(report, FlowTableType.FCSAnalyses);
         }
 
+        if (includeCopiedToStudyColumns)
+            addCopiedToStudyColumns(ret);
+
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
         return ret;
+    }
+
+    private Collection<FieldKey> addCopiedToStudyColumns(AbstractTableInfo ret)
+    {
+        List<FieldKey> copiedToStudyColumns = new ArrayList<FieldKey>(10);
+        FlowProtocol protocol = getProtocol();
+        if (protocol == null)
+            protocol = FlowProtocol.getForContainer(getContainer());
+        ExpProtocol expProtocol = protocol.getProtocol();
+        FlowAssayProvider provider = (FlowAssayProvider)AssayService.get().getProvider(expProtocol);
+        if (provider != null)
+        {
+            Set<String> studyColumnNames = provider.addCopiedToStudyColumns(ret, expProtocol, getUser(), false);
+            for (String columnName : studyColumnNames)
+                copiedToStudyColumns.add(new FieldKey(null, columnName));
+        }
+        return copiedToStudyColumns;
     }
 
 
     public ExpDataTable createCompensationControlTable(String alias)
     {
-        ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl);
+        ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl, false);
         List<FieldKey> defColumns = new ArrayList<FieldKey>(ret.getDefaultVisibleColumns());
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Count, null).toString()));
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Freq_Of_Parent, null).toString()));
@@ -1696,7 +1723,7 @@ public class FlowSchema extends UserSchema
             String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
             
             ICSMetadata ics = _protocol.getICSMetadata();
-            if (!ics.hasBackground())
+            if (!ics.hasCompleteBackground())
                 return null;
 
             // BACKGROUND            

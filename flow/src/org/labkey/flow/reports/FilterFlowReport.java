@@ -134,7 +134,7 @@ public abstract class FilterFlowReport extends FlowReport
         if (metadata == null || metadata.isEmpty())
             return;
 
-        if (metadata.hasStudyMeta())
+        if (metadata.hasCompleteStudyMeta())
         {
             if (metadata.getParticipantColumn() != null)
                 sb.append("flow.metadata.study.participantColumn <- \"").append(oldLegalName(metadata.getParticipantColumn())).append("\"\n");
@@ -146,7 +146,7 @@ public abstract class FilterFlowReport extends FlowReport
                 sb.append("flow.metadata.study.dateColumn <- \"").append(oldLegalName(metadata.getDateColumn())).append("\"\n");
         }
 
-        if (metadata.hasBackground())
+        if (metadata.hasCompleteBackground())
         {
             String comma = "";
             sb.append("flow.metadata.matchColumns <- c(");

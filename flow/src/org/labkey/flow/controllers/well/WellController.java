@@ -302,7 +302,7 @@ public class WellController extends BaseFlowController
                     int objectId = getIntParam(FlowParam.objectId);
                     if (objectId == 0)
                         return null;
-                    FlowObject obj = FlowDataObject.fromAttrObjectId(objectId);
+                    FlowDataObject obj = FlowDataObject.fromAttrObjectId(objectId);
                     if (!(obj instanceof FlowWell))
                         return null;
                     well = (FlowWell) obj;
@@ -339,6 +339,7 @@ public class WellController extends BaseFlowController
     {
         response.setDateHeader("Expires", expires);
         response.setContentType(contentType);
+        response.reset();
         response.getOutputStream().write(bytes);
     }
 

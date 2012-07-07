@@ -16,10 +16,12 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.ConvertHelper;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -51,7 +53,9 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunsForm;
 import org.labkey.flow.data.FlowDataObject;
@@ -61,12 +65,14 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.FlowQueryView;
+import org.labkey.flow.webparts.AnalysesWebPart;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: kevink
@@ -266,7 +272,13 @@ public class FlowAssayProvider extends AbstractAssayProvider
     {
         FlowSchema flowSchema = new FlowSchema(schema.getUser(), schema.getContainer());
         //assert protocol == flowSchema.getProtocol();
-        return (ContainerFilterable)flowSchema.getTable(FlowTableType.FCSAnalyses);
+        return flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+    }
+
+    // Make public so FlowSchema can use this method.
+    public Set<String> addCopiedToStudyColumns(AbstractTableInfo table, ExpProtocol protocol, User user, boolean setVisibleColumns)
+    {
+        return super.addCopiedToStudyColumns(table, protocol, user, setVisibleColumns);
     }
 
     @Override
@@ -360,7 +372,13 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public ModelAndView createBatchesView(ViewContext context, ExpProtocol protocol)
     {
-        throw new UnsupportedOperationException();
+        Portal.WebPart wp = new Portal.WebPart();
+        wp.setIndex(1);
+        wp.setRowId(-1);
+        AnalysesWebPart view = new AnalysesWebPart(context, wp);
+        view.setFrame(WebPartView.FrameType.NONE);
+        view.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
+        return view;
     }
 
     @Override

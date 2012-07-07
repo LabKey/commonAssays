@@ -73,6 +73,8 @@ public class JoinSampleSetForm extends ProtocolForm
         ExpSampleSet sampleSet = getProtocol().getSampleSet();
         if (sampleSet != null)
         {
+            if (sampleSet.hasNameAsIdCol())
+                ret.put("Name", "Name");
             for (DomainProperty property : sampleSet.getPropertiesForType())
             {
                 ret.put(property.getName(), property.getName());

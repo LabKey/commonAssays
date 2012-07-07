@@ -47,27 +47,40 @@ public class ICSMetadata
     /** Returns true if study metadata and background metadata have not been completely set. */
     public boolean isEmpty()
     {
-        return !hasStudyMeta() && !hasBackground();
+        return participantColumn == null &&
+                visitColumn == null &&
+                dateColumn == null &&
+                (matchColumns == null || matchColumns.size() == 0) &&
+                (background == null || background.size() == 0);
     }
 
     /** Returns true if study metadata and background metadata have been completely set. */
     public boolean isComplete()
     {
-        return hasStudyMeta() && hasBackground();
+        return hasCompleteStudyMeta() && hasCompleteBackground();
     }
 
-    /** Returns true if any the study metadata is complete. */
-    public boolean hasStudyMeta()
+    /** Returns true if PTID and Visit/Date study metadata is complete. */
+    public boolean hasCompleteStudyMeta()
     {
-        if (participantColumn == null)
-            return false;
-        if (visitColumn == null && dateColumn == null)
-            return false;
-        return true;
+        return participantColumn != null && (visitColumn != null || dateColumn != null);
+    }
+
+    /** Returns true if PTID or Visit/Date study metadata is partially specified. */
+    public boolean hasPartialStudyMeta()
+    {
+        return participantColumn != null || visitColumn != null || dateColumn != null;
     }
 
     /** Returns true if the background metadata is complete. */
-    public boolean hasBackground()
+    public boolean hasCompleteBackground()
+    {
+        return (matchColumns != null && matchColumns.size() > 0) &&
+               (background != null && background.size() > 0);
+    }
+
+    /** Returns true if the background metadata is partially specified. */
+    public boolean hasPartialBackground()
     {
         if (matchColumns == null || matchColumns.size() == 0)
             return false;
@@ -79,7 +92,7 @@ public class ICSMetadata
     public List<String> getErrors()
     {
         List<String> errors = new ArrayList<String>();
-        if (hasStudyMeta())
+        if (hasPartialStudyMeta())
         {
             if (getParticipantColumn() == null)
                 errors.add("Sample metadata requires Participant column");
@@ -87,7 +100,7 @@ public class ICSMetadata
                 errors.add("Sample metadata requires Visit or Date column");
         }
 
-        if (hasBackground())
+        if (hasPartialBackground())
         {
             if (getMatchColumns() == null || getMatchColumns().size() == 0)
                 errors.add("Background metadata requires at least one match column");
@@ -170,7 +183,7 @@ public class ICSMetadata
         ICSMetadataDocument xDoc = ICSMetadataDocument.Factory.newInstance();
         ICSMetadataType xMetadata = xDoc.addNewICSMetadata();
 
-        if (hasStudyMeta())
+        if (hasPartialStudyMeta())
         {
             ICSMetadataType.Study xStudy = xMetadata.addNewStudy();
 
@@ -184,7 +197,7 @@ public class ICSMetadata
                 xStudy.setDateColumn(getDateColumn().toString());
         }
 
-        if (hasBackground())
+        if (hasPartialBackground())
         {
             ICSMetadataType.Background xBackground = xMetadata.addNewBackground();
 
