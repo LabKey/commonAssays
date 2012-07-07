@@ -531,7 +531,7 @@ public class ProteinManager
                 map.put("Mass", PeptideGenerator.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES));
                 map.put("OrgId", organism.getOrgId());
                 map.put("Hash", hashSequence(sequence));
-                map.put("Description", description.length() > 200 ? description.substring(0, 196) + "..." : description);
+                map.put("Description", description == null ? null : (description.length() > 200 ? description.substring(0, 196) + "..." : description));
                 map.put("BestName", name);
                 map.put("Length", sequence.length());
                 map.put("InsertDate", new Date());
