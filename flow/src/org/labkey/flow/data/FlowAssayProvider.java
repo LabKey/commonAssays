@@ -70,6 +70,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -298,7 +299,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public List<Pair<Domain, Map<DomainProperty, Object>>> getDomains(ExpProtocol protocol)
     {
-        throw new UnsupportedOperationException();
+        return Collections.emptyList();
     }
 
     @Override
