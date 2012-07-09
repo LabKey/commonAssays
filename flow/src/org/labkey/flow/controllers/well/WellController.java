@@ -33,8 +33,8 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.SecurityPolicy;
+import org.labkey.api.security.SecurityPolicyManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -262,7 +262,7 @@ public class WellController extends BaseFlowController
             //as the old permissions-checking code did not do this. We need to consider
             //whether the pipeline root's parent really is the container, or if we should
             //be checking a different (more specific) permission.
-            SecurityPolicy policy = SecurityManager.getPolicy(r, false);
+            SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, false);
             if (!policy.hasPermission(getViewContext().getUser(), ReadPermission.class))
                 return new HtmlView("<span class='error'>You don't have permission to the FCS file.</span>");
 

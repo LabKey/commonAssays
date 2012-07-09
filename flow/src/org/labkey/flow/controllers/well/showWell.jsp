@@ -62,6 +62,7 @@
 <%@ page import="java.util.regex.Pattern" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
+<%@ page import="org.labkey.api.security.SecurityPolicyManager" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
@@ -474,7 +475,7 @@ else
         //as the old permissions-checking code did not do this. We need to consider
         //whether the pipeline root's parent really is the container, or if we should
         //be checking a different (more specific) permission.
-        SecurityPolicy policy = SecurityManager.getPolicy(r, false);
+        SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, false);
         if (user != null && !user.isGuest() && policy.hasPermission(user, ReadPermission.class))
         {
             URI rel = URIUtil.relativize(r.getUri(), fileURI);
