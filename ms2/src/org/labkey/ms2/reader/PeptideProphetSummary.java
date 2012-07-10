@@ -85,6 +85,7 @@ public class PeptideProphetSummary extends SensitivitySummary
 
     private PeptideProphetSummary(net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary summary)
     {
+        this();
         net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.RocErrorData[] datas = summary.getRocErrorDataArray();
 
         for (net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.RocErrorData data : datas)
@@ -343,6 +344,14 @@ public class PeptideProphetSummary extends SensitivitySummary
 
     public static byte[] toByteArray(float[] x)
     {
+        if (x == null)
+        {
+            return null;
+        }
+        if (x.length == 0)
+        {
+            return new byte[0];
+        }
         int floatCount = x.length;
         ByteBuffer bb = ByteBuffer.allocate(floatCount * 4);
         bb.order(ByteOrder.LITTLE_ENDIAN);
@@ -355,6 +364,14 @@ public class PeptideProphetSummary extends SensitivitySummary
 
     public static byte[] toByteArray(int[] x)
     {
+        if (x == null)
+        {
+            return null;
+        }
+        if (x.length == 0)
+        {
+            return new byte[0];
+        }
         int floatCount = x.length;
         ByteBuffer bb = ByteBuffer.allocate(floatCount * 4);
         bb.order(ByteOrder.LITTLE_ENDIAN);
