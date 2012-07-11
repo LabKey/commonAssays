@@ -348,26 +348,26 @@ public class FlowAssayProvider extends AbstractAssayProvider
     public ResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
     {
         // UNDONE: Create query view over flow.FCSAnalyses
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         // UNDONE: Create query view over flow.Runs
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public boolean hasCustomView(IAssayDomainType domainType, boolean details)
     {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
     public ModelAndView createBeginView(ViewContext context, ExpProtocol protocol)
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
@@ -385,7 +385,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public ModelAndView createBatchDetailsView(ViewContext context, ExpProtocol protocol, ExpExperiment batch)
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
@@ -399,19 +399,19 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public ModelAndView createRunDetailsView(ViewContext context, ExpProtocol protocol, ExpRun run)
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol)
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public ModelAndView createResultDetailsView(ViewContext context, ExpProtocol protocol, ExpData data, Object dataRowId)
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
@@ -423,7 +423,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public Class<? extends Controller> getDesignerAction()
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
