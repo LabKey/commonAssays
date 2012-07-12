@@ -72,7 +72,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
     private Collection<String> _runErrors = new ArrayList<String>();
 
-    public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName) throws ServletException
+    public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName)
     {
         super(new MS2Schema(context.getUser(), context.getContainer()));
         setSettings(createSettings(context, tableName));

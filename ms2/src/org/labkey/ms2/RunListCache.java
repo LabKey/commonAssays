@@ -33,7 +33,7 @@ public class RunListCache
 {
     private static final String NO_RUNS_MESSAGE = "Run list is empty. Please reselect the runs.";
 
-    public static List<MS2Run> getCachedRuns(int index, boolean requireSameType, ViewContext ctx) throws RunListException, ServletException
+    public static List<MS2Run> getCachedRuns(int index, boolean requireSameType, ViewContext ctx) throws RunListException
     {
         ExpExperiment group = ExperimentService.get().getExpExperiment(index);
         if (group == null || !group.getContainer().equals(ctx.getContainer()))

@@ -1912,22 +1912,22 @@ public class MS2Controller extends SpringActionController
             _pivotType = pivotType;
         }
 
-        private static void validateTargetProtein(PeptideFilteringComparisonForm form, ViewContext context)
+        public void validateTargetProtein(ViewContext context)
         {
-            form.setMatchingProtNames(null);
-            form.setMatchingSeqIds(null);
-            form.setTargetProteinMsg(null);
+            setMatchingProtNames(null);
+            setMatchingSeqIds(null);
+            setTargetProteinMsg(null);
 
-            if (form.getTargetProtein() != null)
+            if (getTargetProtein() != null)
             {
                 ArrayList<Integer> matchingIds = new ArrayList<Integer>();
                 StringBuffer sbIds = new StringBuffer();
                 StringBuffer sbNames = new StringBuffer();
-                if (form.getTargetSeqId() == null) // new search)
+                if (getTargetSeqId() == null) // new search)
                 {
                     Results rsMatches = null;
                     SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(context.getUser(), context.getContainer()));
-                    tableInfo.addProteinNameFilter(form.getTargetProtein(), false);
+                    tableInfo.addProteinNameFilter(getTargetProtein(), false);
                     List<ColumnInfo> cols = new ArrayList<ColumnInfo>();
                     cols.add(tableInfo.getColumn("SeqId"));
                     cols.add(tableInfo.getColumn("BestName"));
@@ -1967,33 +1967,33 @@ public class MS2Controller extends SpringActionController
                     }
                     if (matchingIds.size() == 1)
                     {
-                        form.setTargetProtein(sbNames.toString());
-                        form.setTargetSeqId(matchingIds.get(0));
+                        setTargetProtein(sbNames.toString());
+                        setTargetSeqId(matchingIds.get(0));
                     }
                     else
                     {
                         if (matchingIds.size() == 0)
-                            form.setTargetProteinMsg("No matching protein found. ");
+                            setTargetProteinMsg("No matching protein found. ");
                         else if (matchingIds.size() >= MAX_MATCHING_PROTEINS)
-                            form.setTargetProteinMsg(" More than " + MAX_MATCHING_PROTEINS + " returned.  Try a more specific search string");
+                            setTargetProteinMsg(" More than " + MAX_MATCHING_PROTEINS + " returned.  Try a more specific search string");
                         else
                         {
-                            form.setTargetProteinMsg("Matching proteins found: ");
-                            form.setMatchingProtNames(sbNames.toString());
-                            form.setMatchingSeqIds(sbIds.toString());
+                            setTargetProteinMsg("Matching proteins found: ");
+                            setMatchingProtNames(sbNames.toString());
+                            setMatchingSeqIds(sbIds.toString());
                         }
                     }
                 }
                 else
                 {
                     // use the seqId it came in with
-                    sbNames.append(form.getTargetProtein());
-                    sbIds.append(form.getTargetSeqId());
+                    sbNames.append(getTargetProtein());
+                    sbIds.append(getTargetSeqId());
                 }
             }
             else    // no protein name entered  or name cleared
             {
-                form.setTargetSeqId(null);
+                setTargetSeqId(null);
             }
         }
     }
@@ -2101,7 +2101,7 @@ public class MS2Controller extends SpringActionController
         public void validate(PeptideFilteringComparisonForm form, BindException errors)
         {
             super.validate(form, errors);
-            PeptideFilteringComparisonForm.validateTargetProtein(form, getViewContext());
+            form.validateTargetProtein(getViewContext());
         }
 
         public ComparePeptideQueryAction()
@@ -2603,7 +2603,7 @@ public class MS2Controller extends SpringActionController
         public void validate(SpectraCountForm form, BindException errors)
         {
             super.validate(form, errors);
-            PeptideFilteringComparisonForm.validateTargetProtein(form, getViewContext());
+            form.validateTargetProtein(getViewContext());
         }
 
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception

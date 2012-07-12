@@ -17,6 +17,7 @@
 package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.query.ExpRunTable;
@@ -30,6 +31,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Fraction;
@@ -38,6 +40,8 @@ import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.ProteinGroupProteins;
+import org.labkey.ms2.RunListCache;
+import org.labkey.ms2.RunListException;
 import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
 
@@ -306,7 +310,27 @@ public class MS2Schema extends UserSchema
         SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(name);
         if (config != null)
         {
-            return createSpectraCountTable(config, null, null);
+            MS2Controller.SpectraCountForm form = null;
+            ViewContext context = null;
+            if (HttpView.hasCurrentView())
+            {
+                form = new MS2Controller.SpectraCountForm();
+                context = HttpView.currentContext();
+                BaseViewAction.defaultBindParameters(form, null, HttpView.getBindPropertyValues());
+                form.validateTargetProtein(context);
+
+                _runs = Collections.emptyList();
+
+                if (form.getRunList() != null)
+                {
+                    try
+                    {
+                        _runs = RunListCache.getCachedRuns(form.getRunList(), false, context);
+                    }
+                    catch (RunListException ignored) {}
+                }
+            }
+            return createSpectraCountTable(config, context, form);
         }
 
         return null;

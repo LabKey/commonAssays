@@ -267,7 +267,7 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", ").append(protSequenceSQL).append(" AS ProtSequence");
             sql.append(", MIN(fs.LookupString) AS FastaName");
         }
-        else if (_form.getTargetSeqId() != null)
+        else if (_form != null && _form.getTargetSeqId() != null)
         {
             sql.append(", s.SeqId\n");
             sql.append(", ").append(protSequenceSQL).append(" AS ProtSequence\n");
@@ -362,7 +362,7 @@ public class SpectraCountTableInfo extends VirtualTable
                 sql.append(" ON (s.seqid = fs.seqid)\n");
             }
         }
-        else if (_form.getTargetSeqId() != null)
+        else if (_form != null && _form.getTargetSeqId() != null)
         {
             sql.append("INNER JOIN ");
             sql.append(ProteinManager.getTableInfoSequences(), "s");
@@ -398,7 +398,7 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", ");
             sql.append(protSequenceSQL);
         }
-        else if (_form.getTargetSeqId() != null)
+        else if (_form != null && _form.getTargetSeqId() != null)
         {
             sql.append(", s.SeqId");
             sql.append(", ");

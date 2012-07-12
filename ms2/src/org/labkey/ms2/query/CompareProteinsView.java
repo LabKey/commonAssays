@@ -28,7 +28,7 @@ import javax.servlet.ServletException;
  */
 public class CompareProteinsView extends AbstractRunCompareView
 {
-    public CompareProteinsView(ViewContext context, int runListIndex, boolean forExport) throws ServletException
+    public CompareProteinsView(ViewContext context, int runListIndex, boolean forExport)
     {
         super(context, runListIndex, forExport, MS2Schema.HiddenTableType.CompareProteinProphet.toString());
     }
