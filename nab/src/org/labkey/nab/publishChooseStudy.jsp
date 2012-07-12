@@ -53,5 +53,5 @@
             </td>
         </tr>
     </table>
-     <%= generateSubmitButton("Next") %> <%= generateButton("Cancel", "begin.view") %>
+     <%= generateSubmitButton("Next") %> <%= generateButton("Cancel", NabController.BeginAction.class) %>
 </form>

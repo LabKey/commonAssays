@@ -40,6 +40,6 @@
     Execute the background report?
     <p>
     <%= generateSubmitButton("Execute Report") %>
-    <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? generateButton("Cancel", buildURL(ReportsController.BeginAction.class)) : generateButton("Cancel", form.getReturnUrl())%>
+    <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? generateButton("Cancel", ReportsController.BeginAction.class) : generateButton("Cancel", form.getReturnUrl())%>
 </form>
 
