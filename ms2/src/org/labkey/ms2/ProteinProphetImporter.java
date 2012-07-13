@@ -105,6 +105,7 @@ public class ProteinProphetImporter
         PreparedStatement proteinStmt = null;
         PreparedStatement peptideIndexStmt = null;
         PreparedStatement proteinIndexStmt = null;
+        PreparedStatement proteinIndex2Stmt = null;
 
         ProtXmlReader.ProteinGroupIterator iterator = null;
         boolean success = false;
@@ -213,8 +214,13 @@ public class ProteinProphetImporter
             insertStartTime = System.currentTimeMillis();
             log.info("Starting to move data into ms2.ProteinGroupMemberships");
 
+            // Create an index to use for the join with prot.fastasequences
             proteinIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + " ON " + proteinsTempTableName + "(LookupString)");
             proteinIndexStmt.execute();
+
+            // Create an index to use for the GROUP BY
+            proteinIndex2Stmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + "2 ON " + proteinsTempTableName + "(ProteinGroupId, Probability)");
+            proteinIndex2Stmt.execute();
 
             String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
                     "(ProteinGroupId, Probability, SeqId) " +
@@ -269,6 +275,7 @@ public class ProteinProphetImporter
             if (groupStmt != null) { try { groupStmt.close(); } catch (SQLException e) {} }
             if (proteinStmt != null) { try { proteinStmt.close(); } catch (SQLException e) {} }
             if (proteinIndexStmt != null) { try { proteinIndexStmt.close(); } catch (SQLException e) {} }
+            if (proteinIndex2Stmt != null) { try { proteinIndex2Stmt.close(); } catch (SQLException e) {} }
             if (peptideIndexStmt != null) { try { peptideIndexStmt.close(); } catch (SQLException e) {} }
             MS2Manager.getSchema().getScope().closeConnection();
 
