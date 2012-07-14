@@ -52,7 +52,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                             if(!btn.record)
                                 return;
 
-                            Ext.Msg.confirm('Import', 'This will replace all records in the current form with the GEO export from the selected folder.  Do you want to do this?', onConfirm, this);
+                            Ext4.Msg.confirm('Import', 'This will replace all records in the current form with the GEO export from the selected folder.  Do you want to do this?', onConfirm, this);
 
                             function onConfirm(input){
                                 if(input != 'yes')
