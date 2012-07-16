@@ -4723,7 +4723,7 @@ public class MS2Controller extends SpringActionController
         User user = ctx.getUser();
         Container c = ctx.getContainer();
 
-        QueryDefinition queryDef = QueryService.get().createQueryDef(user, c, MS2Schema.SCHEMA_NAME, MS2Schema.TableType.Peptides.toString());
+        QueryDefinition queryDef = QueryService.get().createQueryDef(user, c, MS2Schema.SCHEMA_NAME, run.getRunType().getPeptideTableName());
         String viewName = currentUrl.getParameter(MS2Manager.getDataRegionNamePeptides() + "." + "viewName");
         CustomView view = queryDef.getCustomView(user, ctx.getRequest(), viewName);
         if (view != null && view.hasFilterOrSort() && currentUrl.getParameter(MS2Manager.getDataRegionNamePeptides() + "." + QueryParam.ignoreFilter) == null)
