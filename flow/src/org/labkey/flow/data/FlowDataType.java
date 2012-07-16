@@ -25,6 +25,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.persist.ObjectType;
 
 abstract public class FlowDataType extends AssayDataType
@@ -62,7 +63,11 @@ abstract public class FlowDataType extends AssayDataType
             {
                 FlowDataObject fdo = FlowDataObject.fromLSID(lsid.toString());
                 if (fdo != null)
-                    return fdo.urlShow().toString();
+                {
+                    ActionURL url = fdo.urlShow();
+                    if (url != null)
+                        return url.toString();
+                }
 
                 return null;
             }
