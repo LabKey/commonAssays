@@ -187,6 +187,8 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 continue;
 
             boolean editable = rdp == null || rdp.editableInUploadWizard;
+            // UNDONE: Issue 15513: add flag on defaultable values to not copy previous run value when performing a re-run
+            boolean copyReRunValue = editable && !resultDomainProperty.getName().equalsIgnoreCase("Unreliable");
             boolean copyable = editable;
 
             List<DisplayColumn> columns = new ArrayList<DisplayColumn>(rows.size());
@@ -213,7 +215,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 // third, if the field is editable get the property's default value from a previous run
                 String lowerPoolID = poolID.replaceAll(" ", "").toLowerCase();
                 Map<String, Object> reRun = reRunResults.get(lowerPoolID);
-                if (editable && reRun != null && reRun.containsKey(propertyName))
+                if (copyReRunValue && reRun != null && reRun.containsKey(propertyName))
                     initialValue = reRun.get(propertyName);
 
                 // finally, get the value as entered by the user in the case of errorReshow
