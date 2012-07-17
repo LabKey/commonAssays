@@ -400,21 +400,15 @@ public class ViabilityAssaySchema extends AssaySchema
                 groupFrag.append("  SUM(" + columnMap.get(volume).getAlias() + ") as OriginalCells,\n");
                 groupFrag.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") as SpecimenMatchCount,\n");
 
-                if (getDbSchema().getSqlDialect().isSqlServer())
+                if (getDbSchema().getSqlDialect().supportsGroupConcat())
                 {
-                    // XXX: SpecimenMatches column isn't supported on SQLServer yet
-//                    fromSQL.append("  (REPLACE(");
-//                    fromSQL.append("(SELECT ").append(columnMap.get(globalUniqueId).getAlias()).append(" as [data()]");
-//                    fromSQL.append(" FOR XML PATH ('')), ' ', ',')) as SpecimenMatches\n");
-                    groupFrag.append(" NULL as SpecimenMatches\n");
-                }
-                else if (getDbSchema().getSqlDialect().isPostgreSQL())
-                {
-                    groupFrag.append("  array_to_string(viability.array_accum(").append(columnMap.get(globalUniqueId).getAlias()).append("), ',') as SpecimenMatches\n");
+                    SQLFragment guid = new SQLFragment(columnMap.get(globalUniqueId).getAlias());
+                    SQLFragment specimenMatches = getDbSchema().getSqlDialect().getGroupConcat(guid, true, true);
+                    groupFrag.append("  ").append(specimenMatches).append(" as SpecimenMatches\n");
                 }
                 else
                 {
-                    throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
+                    groupFrag.append(" NULL as SpecimenMatches\n");
                 }
 
                 groupFrag.append("FROM (\n");
