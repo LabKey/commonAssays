@@ -299,7 +299,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 // Convert to pepXML using out2xml
                 List<String> out2XMLArgs = new ArrayList<String>();
-                String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", "tpp", tppVersion, getJob().getLogger());
+                String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", null, "tpp", tppVersion, getJob().getLogger());
                 out2XMLArgs.add(out2XMLPath);
                 String enzyme =
                     new SequestParamsBuilder(params, null).getSupportedEnzyme(params.get(ParameterNames.ENZYME));
@@ -452,7 +452,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         if (!dirOutputDta.mkdir())
             throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
         ArrayList<String> mzXML2SearchArgs = new ArrayList<String>();
-        mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", tppVersion, getJob().getLogger()));
+        mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", null, "tpp", tppVersion, getJob().getLogger()));
         mzXML2SearchArgs.add("-dta");
         mzXML2SearchArgs.add("-O" + dirOutputDta.getName());
         Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();

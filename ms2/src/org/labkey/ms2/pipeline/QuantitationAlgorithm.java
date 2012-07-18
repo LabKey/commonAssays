@@ -74,7 +74,7 @@ public enum QuantitationAlgorithm
             // We can support viewerPath.jar paths with spaces by wrapping in \" - not sure why this same
             // trick doesn't work with the path to the java executable, but it must be different xinteract internal
             // handling of arguments
-            String viewerAppPath = PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver);
+            String viewerAppPath = PipelineJobService.get().getJarPath("viewerApp.jar", null, "msinspect", ver);
             if (viewerAppPath.contains(" "))
             {
                 viewerAppPath = "\\\"" + viewerAppPath + "\\\"";

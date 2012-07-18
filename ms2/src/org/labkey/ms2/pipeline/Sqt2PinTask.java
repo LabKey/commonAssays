@@ -23,8 +23,6 @@ import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
-import org.labkey.api.pipeline.TaskFactory;
-import org.labkey.api.pipeline.TaskFactorySettings;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.pipeline.WorkDirectoryTask;
@@ -106,7 +104,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                 File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");
 
                 List<String> args = new ArrayList<String>();
-                args.add(PipelineJobService.get().getExecutablePath("sqt2pin", null, null, getJob().getLogger()));
+                args.add(PipelineJobService.get().getExecutablePath("sqt2pin", null, null, null, getJob().getLogger()));
                 args.add("-M");
                 args.add("-p");
                 args.add("*:1:#:2:@:3:^:4:~:5:$:6");

@@ -338,7 +338,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<String>();
-            String xinteractPath = PipelineJobService.get().getExecutablePath("xinteract", "tpp", ver, getJob().getLogger());
+            String xinteractPath = PipelineJobService.get().getExecutablePath("xinteract", null, "tpp", ver, getJob().getLogger());
             File xinteractFile = new File(xinteractPath);
             interactCmd.add(xinteractPath);
 
