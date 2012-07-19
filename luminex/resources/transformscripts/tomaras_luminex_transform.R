@@ -23,10 +23,10 @@
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
 #  - 3.0.20120323 : Changes for LabKey server 12.1
-#  - 4.0.20120509 : Changes for LabKey server 12.2
+#  - 3.1.20120629 : Issue 15279: Luminex Positivity Calculation incorrect for titrated unknowns incorrect
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "4.0.20120509";
+transformVersion = "3.1.20120629";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -91,6 +91,18 @@ getRunPropertyValue <- function(runProps, colName)
         }
     }
     value;
+}
+
+# for Issue 15279 - use just the min dilution per visit for positivity calculation
+getVisitsByMinDilution <- function(visitDat)
+{
+	tempVisitDat = data.frame();
+	for (v in unique(visitDat$visit))
+	{
+		v.dat = subset(visitDat, visit = v);
+		tempVisitDat = (v.dat[v.dat$dilution == min(v.dat$dilution),]);
+	}
+	tempVisitDat
 }
 
 compareNumbersForEquality <- function(val1, val2, epsilon)
@@ -729,11 +741,14 @@ if (!is.na(calc.positivity) & calc.positivity == "1")
             # for any participants that do not have baseline data, just compare against the threshold
             if (!is.na(threshold))
             {
-                fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID), select=c("fiBackground", "fiBackgroundBlank"));
+                fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID) & !is.na(dilution), select=c("fiBackground", "fiBackgroundBlank"));
                 if (nrow(fi.dat) > 0)
                 {
-                    visits.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID), select=c("name", "participantID", "visitID"));
-                    visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
+                    # Issue 15279, for titrated unknowns, just use the smallest/minimum dilution for the positivity calculation
+                    visit.dilution.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID) & !is.na(dilution), select=c("name", "participantID", "visitID", "dilution"));
+                    visit.diliution.fi.agg = aggregate(fi.dat, by = list(analyte=visit.dilution.dat$name, ptid=visit.dilution.dat$participantID, visit=visit.dilution.dat$visitID, dilution=visit.dilution.dat$dilution), FUN = mean);
+                    visits.fi.agg = getVisitsByMinDilution(visit.diliution.fi.agg);
+
                     if (!is.na(base.visit) & any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
                     {
                         # if there is a baseline visit supplied, make sure the fold change is not null as well
@@ -753,7 +768,7 @@ if (!is.na(calc.positivity) & calc.positivity == "1")
                                 if (!compareNumbersForEquality(visit, base.visit, 1e-10))
                                 {
                                     # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
-                                    runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v];
+                                    runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v] & run.data$dilution == visits.fi.agg$dilution[v];
                                     if (!is.na(visits.fi.agg$fiBackground[v]) & !is.na(visits.fi.agg$fiBackgroundBlank[v]))
                                     {
                                         if ((visits.fi.agg$fiBackground[v] > threshold) & (visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) &
@@ -774,7 +789,7 @@ if (!is.na(calc.positivity) & calc.positivity == "1")
                         for (v in 1:nrow(visits.fi.agg))
                         {
                             # since there is no baseline data for this participant, compare each visit FI-Bkgd and FI-Bkgd-Blank values against the threshold
-                            runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v];
+                            runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v] & run.data$dilution == visits.fi.agg$dilution[v];
                             if (!is.na(visits.fi.agg$fiBackground[v]) & !is.na(visits.fi.agg$fiBackgroundBlank[v]))
                             {
                                 if (visits.fi.agg$fiBackground[v] > threshold & visits.fi.agg$fiBackgroundBlank[v] > threshold)
