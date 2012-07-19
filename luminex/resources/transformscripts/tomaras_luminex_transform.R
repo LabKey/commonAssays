@@ -24,9 +24,10 @@
 #  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
 #  - 3.0.20120323 : Changes for LabKey server 12.1
 #  - 3.1.20120629 : Issue 15279: Luminex Positivity Calculation incorrect for titrated unknowns incorrect
+#  - 4.0.20120509 : Changes for LabKey server 12.2
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "3.1.20120629";
+transformVersion = "4.0.20120509";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
