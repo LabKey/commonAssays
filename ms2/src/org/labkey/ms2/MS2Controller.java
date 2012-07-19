@@ -57,6 +57,7 @@ import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParam;
@@ -79,6 +80,7 @@ import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
+import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
@@ -3970,29 +3972,21 @@ public class MS2Controller extends SpringActionController
             ColumnInfo containerColumnInfo = MS2Manager.getTableInfoRuns().getColumn("Container");
             ContainerDisplayColumn cdc = new ContainerDisplayColumn(containerColumnInfo, true);
             cdc.setCaption("Folder");
-
-            ActionURL containerURL = getViewContext().cloneActionURL().setAction(ShowListAction.class);
-
-            // We don't want ActionURL to encode ${ContainerPath}, so set a dummy value and use string substitution
-            String urlString = containerURL.setExtraPath("ContainerPath").getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/");
-            cdc.setURLExpression(StringExpressionFactory.create(urlString, false));
             rgn.addDisplayColumn(cdc);
 
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
-                    if (null != ctx.get("ContainerPath") && !((Boolean)ctx.get("deleted")).booleanValue())
+                    if (null != ctx.get("Container") && !((Boolean)ctx.get("deleted")).booleanValue())
                         super.renderGridCellContents(ctx, out);
                     else
                         out.write(getFormattedValue(ctx));
                 }
             };
             ActionURL showRunURL = MS2Controller.getShowRunURL(getUser(), ContainerManager.getRoot());
-            StringBuilder sb = new StringBuilder(showRunURL.getLocalURIString());
-            int i = sb.lastIndexOf("/");
-            sb.replace(i, i, "\\$\\{ContainerPath}/");
-            sb.append("run=${Run}");
-            descriptionColumn.setURLExpression(StringExpressionFactory.create(sb.toString(), false));
+            DetailsURL showRunDetailsURL = new DetailsURL(showRunURL, "run", FieldKey.fromParts("Run"));
+            showRunDetailsURL.setContainerContext(new ContainerContext.FieldKeyContext(FieldKey.fromParts("Container")));
+            descriptionColumn.setURLExpression(showRunDetailsURL);
             rgn.addDisplayColumn(descriptionColumn);
 
             rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
