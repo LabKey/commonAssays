@@ -174,11 +174,13 @@ public class LuminexController extends SpringActionController
     public class LeveyJenningsReportAction extends SimpleViewAction<TitrationForm>
     {
         private String _titration;
+        private ExpProtocol _protocol;
 
         @Override
         public ModelAndView getView(TitrationForm form, BindException errors) throws Exception
         {
             _titration = form.getTitration();
+            _protocol = form.getProtocol();
 
             VBox result = new VBox();
             AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
@@ -192,7 +194,7 @@ public class LuminexController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            return result.addChild(_titration + " Levey-Jennings Report");
+            return result.addChild(_protocol.getName() + " Levey-Jennings Report: " + _titration);
         }
     }    
 }
