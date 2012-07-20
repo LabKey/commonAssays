@@ -34,6 +34,8 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryException;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
@@ -546,5 +548,19 @@ public class PeptidesTableInfo extends FilteredTable
         });
         deltaScanColumn.setFk(null);
         table.addColumn(deltaScanColumn);
+    }
+
+    @Override
+    public void overlayMetadata(String tableName, UserSchema schema, Collection<QueryException> errors)
+    {
+        if (!MS2Schema.TableType.Peptides.toString().equalsIgnoreCase(getPublicName()))
+        {
+            super.overlayMetadata(MS2Schema.TableType.Peptides.toString(), schema, errors);
+        }
+
+        super.overlayMetadata(tableName, schema, errors);
+
+
+        super.overlayMetadata(tableName, schema, errors);
     }
 }
