@@ -69,11 +69,17 @@
             this information to combine multiple assays together.
             <br><br>
             Select the columns that identify the sample using FCSFile keywords or sample properties.
-            The participant column is required, but only one of either the visit column or the date column is required.
+            Select either a specimen ID column or a participant column and one of visit or date columns.
         </td></tr>
     </table>
     <br>
     <table>
+        <tr>
+            <td>Specimen ID column</td>
+            <td>
+                <select name="ff_specimenIdColumn"><labkey:options value="<%=form.specimenIdColumn%>" map="<%=keywordSampleOptions%>" /></select>
+            </td>
+        </tr>
         <tr>
             <td>Participant column</td>
             <td>

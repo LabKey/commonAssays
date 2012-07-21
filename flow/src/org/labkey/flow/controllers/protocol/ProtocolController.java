@@ -266,6 +266,7 @@ public class ProtocolController extends BaseFlowController
         {
             // Populate a new ICSMetadata from the form posted values.
             metadata = new ICSMetadata();
+            metadata.setSpecimenIdColumn(form.getSpecimenIdColumn());
             metadata.setParticipantColumn(form.getParticipantColumn());
             metadata.setVisitColumn(form.getVisitColumn());
             metadata.setDateColumn(form.getDateColumn());

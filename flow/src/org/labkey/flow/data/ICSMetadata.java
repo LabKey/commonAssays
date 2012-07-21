@@ -33,9 +33,11 @@ import java.util.*;
  */
 public class ICSMetadata
 {
+    FieldKey specimenIdColumn;
     FieldKey participantColumn;
     FieldKey visitColumn;
     FieldKey dateColumn;
+
     List<FieldKey> matchColumns; // columns shared between background and stimulated wells
     List<FilterInfo> background;
 
@@ -47,7 +49,8 @@ public class ICSMetadata
     /** Returns true if study metadata and background metadata have not been completely set. */
     public boolean isEmpty()
     {
-        return participantColumn == null &&
+        return specimenIdColumn == null &&
+                participantColumn == null &&
                 visitColumn == null &&
                 dateColumn == null &&
                 (matchColumns == null || matchColumns.size() == 0) &&
@@ -60,16 +63,16 @@ public class ICSMetadata
         return hasCompleteStudyMeta() && hasCompleteBackground();
     }
 
-    /** Returns true if PTID and Visit/Date study metadata is complete. */
+    /** Returns true if SpecimenID or PTID and Visit/Date study metadata is complete. */
     public boolean hasCompleteStudyMeta()
     {
-        return participantColumn != null && (visitColumn != null || dateColumn != null);
+        return specimenIdColumn != null || (participantColumn != null && (visitColumn != null || dateColumn != null));
     }
 
-    /** Returns true if PTID or Visit/Date study metadata is partially specified. */
+    /** Returns true if SpecimenID or PTID or Visit/Date study metadata is partially specified. */
     public boolean hasPartialStudyMeta()
     {
-        return participantColumn != null || visitColumn != null || dateColumn != null;
+        return specimenIdColumn != null || participantColumn != null || visitColumn != null || dateColumn != null;
     }
 
     /** Returns true if the background metadata is complete. */
@@ -94,10 +97,13 @@ public class ICSMetadata
         List<String> errors = new ArrayList<String>();
         if (hasPartialStudyMeta())
         {
-            if (getParticipantColumn() == null)
-                errors.add("Sample metadata requires Participant column");
-            if (getVisitColumn() == null && getDateColumn() == null)
-                errors.add("Sample metadata requires Visit or Date column");
+            if (getSpecimenIdColumn() == null)
+            {
+                if (getParticipantColumn() == null)
+                    errors.add("Sample metadata requires Participant column");
+                if (getVisitColumn() == null && getDateColumn() == null)
+                    errors.add("Sample metadata requires Visit or Date column");
+            }
         }
 
         if (hasPartialBackground())
@@ -109,6 +115,16 @@ public class ICSMetadata
         }
 
         return errors;
+    }
+
+    public FieldKey getSpecimenIdColumn()
+    {
+        return specimenIdColumn;
+    }
+
+    public void setSpecimenIdColumn(FieldKey specimenIdColumn)
+    {
+        this.specimenIdColumn = specimenIdColumn;
     }
 
     public FieldKey getParticipantColumn()
@@ -187,6 +203,9 @@ public class ICSMetadata
         {
             ICSMetadataType.Study xStudy = xMetadata.addNewStudy();
 
+            if (getSpecimenIdColumn() != null)
+                xStudy.setSpecimenIdColumn(getSpecimenIdColumn().toString());
+
             if (getParticipantColumn() != null)
                 xStudy.setParticipantColumn(getParticipantColumn().toString());
 
@@ -256,6 +275,9 @@ public class ICSMetadata
         if (xMetadata.isSetStudy())
         {
             ICSMetadataType.Study xStudy = xMetadata.getStudy();
+
+            if (xStudy.getSpecimenIdColumn() != null)
+                result.setSpecimenIdColumn(FieldKey.fromString(xStudy.getSpecimenIdColumn()));
 
             if (xStudy.getParticipantColumn() != null)
                 result.setParticipantColumn(FieldKey.fromString(xStudy.getParticipantColumn()));

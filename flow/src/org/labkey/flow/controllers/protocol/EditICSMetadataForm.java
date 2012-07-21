@@ -41,6 +41,7 @@ public class EditICSMetadataForm extends ProtocolForm
     public static final int BACKGROUND_COLUMNS_MAX = 5;
 
     // from form posted values
+    public String ff_specimenIdColumn;
     public String ff_participantColumn;
     public String ff_visitColumn;
     public String ff_dateColumn;
@@ -50,6 +51,7 @@ public class EditICSMetadataForm extends ProtocolForm
     public String[] ff_backgroundFilterValue;
 
     // from FlowProtocol's ICSMetadata
+    public FieldKey specimenIdColumn;
     public FieldKey participantColumn;
     public FieldKey visitColumn;
     public FieldKey dateColumn;
@@ -64,6 +66,9 @@ public class EditICSMetadataForm extends ProtocolForm
 
         if (icsmetadata != null)
         {
+            if (icsmetadata.getSpecimenIdColumn() != null)
+                specimenIdColumn = icsmetadata.getSpecimenIdColumn();
+
             if (icsmetadata.getParticipantColumn() != null)
                 participantColumn = icsmetadata.getParticipantColumn();
 
@@ -94,6 +99,11 @@ public class EditICSMetadataForm extends ProtocolForm
             // default the form to include Run
             matchColumn[0] = new FieldKey(null, "Run");
         }
+    }
+
+    public void setFf_specimenIdColumn(String ff_specimenIdColumn)
+    {
+        this.ff_specimenIdColumn = ff_specimenIdColumn;
     }
 
     public void setFf_participantColumn(String ff_participantColumn)
@@ -129,6 +139,12 @@ public class EditICSMetadataForm extends ProtocolForm
     public void setFf_backgroundFilterValue(String[] ff_backgroundFilterValue)
     {
         this.ff_backgroundFilterValue = ff_backgroundFilterValue;
+    }
+
+    /** Get specimen ID FieldKey from form posted value. */
+    public FieldKey getSpecimenIdColumn()
+    {
+        return ff_specimenIdColumn == null ? null : FieldKey.fromString(ff_specimenIdColumn);
     }
 
     /** Get participant FieldKey from form posted value. */

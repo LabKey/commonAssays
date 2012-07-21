@@ -104,6 +104,14 @@ public class FlowAssayProvider extends AbstractAssayProvider
             _metadata = fp.getICSMetadata();
         }
 
+        public FieldKey getSpecimenIDFieldKey()
+        {
+            if (_metadata != null && _metadata.getSpecimenIdColumn() != null)
+                return _metadata.getSpecimenIdColumn();
+
+            return super.getSpecimenIDFieldKey();
+        }
+
         @Override
         public FieldKey getParticipantIDFieldKey()
         {
