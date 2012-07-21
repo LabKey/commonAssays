@@ -84,7 +84,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         TableInfo tinfo = queryView.createTable();
 
         Sort sort = new Sort();
-        SimpleFilter filter = context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, 0, sort);
+        SimpleFilter filter = context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort);
 
         FieldKey desiredFK;
         if (queryView.getSelectedNestingOption() != null)
@@ -129,7 +129,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         TableInfo tinfo = queryView.createTable();
 
         Sort sort = new Sort();
-        return Collections.singletonMap("Filter", context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, 0, sort));
+        return Collections.singletonMap("Filter", context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort));
     }
 
     public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception

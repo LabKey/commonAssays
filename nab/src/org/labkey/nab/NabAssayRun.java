@@ -137,7 +137,7 @@ public abstract class NabAssayRun extends Luc5Assay
         ResultSet rs = null;
         try
         {
-            rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(selectCols.values()), null, filter, null, 1, 0);
+            rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(selectCols.values()), null, filter, null, 1, Table.NO_OFFSET);
             if (!rs.next())
             {
                 throw new NotFoundException("Run " + _run.getRowId() + " was not found.");
