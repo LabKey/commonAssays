@@ -93,7 +93,7 @@ public class PeptidesView extends QueryView
             sep = ",";
         }
         sql.append(")))");
-        filter.addWhereClause(sql.toString(), null, "Fraction");
+        filter.addWhereClause(sql.toString(), null, FieldKey.fromParts("Fraction"));
 
         List<FieldKey> defCols = new ArrayList<FieldKey>();
         defCols.add(FieldKey.fromParts("Fraction", "Run", "Description"));

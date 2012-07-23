@@ -23,6 +23,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.study.assay.AssaySchema;
 
@@ -37,7 +38,7 @@ public abstract class AbstractLuminexTable extends FilteredTable
     protected final LuminexSchema _schema;
     private final boolean _needsFilter;
 
-    private static final String CONTAINER_FAKE_COLUMN_NAME = "Container";
+    private static final FieldKey CONTAINER_FAKE_COLUMN_NAME = FieldKey.fromParts("Container");
 
     public AbstractLuminexTable(TableInfo table, LuminexSchema schema, boolean filter)
     {

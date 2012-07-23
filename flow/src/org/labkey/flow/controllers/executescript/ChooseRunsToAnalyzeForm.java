@@ -22,6 +22,7 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.action.SpringActionController;
@@ -230,7 +231,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             }
             else
             {
-                ret.addWhereClause(sql.toString(), new Object[0], "RowId");
+                ret.addWhereClause(sql.toString(), new Object[0], FieldKey.fromParts("RowId"));
             }
             return ret;
         }

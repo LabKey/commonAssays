@@ -268,7 +268,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
         runConditionSQL.add(protocol.getLSID());
-        result.addCondition(runConditionSQL, "RunId");
+        result.addCondition(runConditionSQL, FieldKey.fromParts("RunId"));
         result.getColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()

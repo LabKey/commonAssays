@@ -16,6 +16,7 @@
 
 package org.labkey.ms1.query;
 
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.exp.query.ExpSchema;
@@ -60,7 +61,7 @@ public class FilesTableInfo extends FilteredTable
         sf.add(false);
         sf.append(filter.getSQLFragment(getSchema(), "Container", _expSchema.getContainer()));
         sf.append(")");
-        addCondition(sf, "Imported", "Deleted", "ExpDataFileId");
+        addCondition(sf, FieldKey.fromParts("Imported"), FieldKey.fromParts("Deleted"), FieldKey.fromParts("ExpDataFileId"));
     }
 
     private ExpSchema _expSchema;

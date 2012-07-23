@@ -571,20 +571,33 @@ public class ProteinManager
 
     public static class ChargeFilter extends SimpleFilter.FilterClause
     {
-        private String _columnName;
+        private FieldKey _fieldKey;
         private Float[] _values;
 
         // At least one value must be non-null
+        @Deprecated // Use FieldKey version instead.
         public ChargeFilter(String columnName, Float[] values)
         {
-            _columnName = columnName;
+            this(FieldKey.fromString(columnName), values);
+        }
+
+        // At least one value must be non-null
+        public ChargeFilter(FieldKey fieldKey, Float[] values)
+        {
+            _fieldKey = fieldKey;
             _values = values;
         }
 
-
+        @Deprecated // Use getFieldKeys() instead.
         public List<String> getColumnNames()
         {
-            return Arrays.asList(_columnName, "Charge");
+            return Arrays.asList(_fieldKey.toString(), "Charge");
+        }
+
+        @Override
+        public List<FieldKey> getFieldKeys()
+        {
+            return Arrays.asList(_fieldKey, FieldKey.fromParts("Charge"));
         }
 
         @Override
@@ -593,11 +606,14 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
-        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
-            SQLFragment sql = new SQLFragment();
+            ColumnInfo colInfo = columnMap != null ? columnMap.get(_fieldKey) : null;
+            String name = colInfo != null ? colInfo.getAlias() : _fieldKey.getName();
+            String alias = dialect.getColumnSelectName(name);
 
-            sql.append(_columnName);
+            SQLFragment sql = new SQLFragment();
+            sql.append(alias);
             sql.append(" >= CASE Charge");
 
             for (int i = 0; i < _values.length; i++)
@@ -627,7 +643,7 @@ public class ProteinManager
                     sb.append(sep);
                     sep = ", ";
                     sb.append('+').append(i + 1).append(':');
-                    sb.append(formatter.format(_columnName));
+                    sb.append(formatter.format(_fieldKey));
                     sb.append(" >= ").append(generalFormat.format(_values[i]));
                 }
             }
@@ -650,7 +666,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
-        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sql = new SQLFragment();
             switch(_termini)
@@ -684,9 +700,15 @@ public class ProteinManager
             return "(StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%-')";
         }
 
+        @Deprecated // Use FieldKey version instead.
         public List<String> getColumnNames()
         {
             return Arrays.asList("StrippedPeptide");
+        }
+
+        public List<FieldKey> getFieldKeys()
+        {
+            return Arrays.asList(FieldKey.fromParts("StrippedPeptide"));
         }
 
         @Override
@@ -905,7 +927,7 @@ public class ProteinManager
     }
 
     public static class SequenceFilter extends SimpleFilter.FilterClause
-     {
+    {
         int _seqid;
         String _sequence;
         String _bestName;
@@ -924,7 +946,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
-        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
             sqlf.append(dialect.getStringIndexOfFunction("TrimmedPeptide", "?"));
@@ -933,18 +955,24 @@ public class ProteinManager
             return sqlf;
         }
 
+        @Deprecated // Use FieldKey version instead.
         public List<String> getColumnNames()
         {
             return Arrays.asList("TrimmedPeptide");
         }
 
-         @Override
-         protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
-         {
-             sb.append("Matches sequence of ");
-             sb.append(_bestName);
-         }
-     }
+        public List<FieldKey> getFieldKeys()
+        {
+            return Arrays.asList(FieldKey.fromParts("TrimmedPeptide"));
+        }
+
+        @Override
+        protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+        {
+            sb.append("Matches sequence of ");
+            sb.append(_bestName);
+        }
+    }
 
     public static class ProteinGroupFilter extends SimpleFilter.FilterClause
     {
@@ -963,7 +991,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
-        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
             sqlf.append(" RowId IN (SELECT pm.PeptideId FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm ");
@@ -971,9 +999,14 @@ public class ProteinManager
             sqlf.append(" WHERE pg.GroupNumber = " + _groupNum + "  and pg.IndistinguishableCollectionId = " + _indistinguishableProteinId + " ) ");
             return sqlf;
         }
+        @Deprecated // Use getFieldKeys() instead.
         public List<String> getColumnNames()
         {
             return Arrays.asList("RowId");
+        }
+        public List<FieldKey> getFieldKeys()
+        {
+            return Arrays.asList(FieldKey.fromParts("RowId"));
         }
          @Override
          protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
@@ -989,9 +1022,9 @@ public class ProteinManager
 
     public static void addRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
     {
-        String columnName = runTableName == null ? "Run" : runTableName + ".Run";
+        FieldKey fieldKey = new FieldKey(runTableName == null ? null : FieldKey.fromParts(runTableName), "Run");
         StringBuilder sb = new StringBuilder();
-        sb.append(columnName);
+        sb.append(fieldKey.toSQLString());
         sb.append(" IN (");
         String separator = "";
         for (MS2Run run : runs)
@@ -1001,7 +1034,7 @@ public class ProteinManager
             sb.append(run.getRun());
         }
         sb.append(")");
-        filter.addWhereClause(sb.toString(), new Object[0], columnName);
+        filter.addWhereClause(sb.toString(), new Object[0], fieldKey);
     }
 
 

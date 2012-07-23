@@ -286,7 +286,8 @@ public class PeptidesTableInfo extends FilteredTable
 
     private void addRunFilter()
     {
-        getFilter().deleteConditions("Fraction/Run");
+        FieldKey fractionRunFieldKey = FieldKey.fromParts("Fraction", "Run");
+        getFilter().deleteConditions(fractionRunFieldKey);
 
         SQLFragment sql = new SQLFragment();
         sql.append("Fraction IN (SELECT Fraction FROM ");
@@ -327,7 +328,7 @@ public class PeptidesTableInfo extends FilteredTable
             _schema.appendRunInClause(sql);
         }
         sql.append("))");
-        addCondition(sql, "Fraction/Run");
+        addCondition(sql, fractionRunFieldKey);
     }
 
     private void addFeatureInfoColumn()

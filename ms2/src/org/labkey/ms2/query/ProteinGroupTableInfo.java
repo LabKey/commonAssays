@@ -194,7 +194,7 @@ public class ProteinGroupTableInfo extends FilteredTable
             SimpleFilter filter = new SimpleFilter();
             if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
             {
-                filter.addClause(new CompareType.CompareClause("PeptideProphet", CompareType.GTE, form.getPeptideProphetProbability()));
+                filter.addClause(new CompareType.CompareClause(FieldKey.fromParts("PeptideProphet"), CompareType.GTE, form.getPeptideProphetProbability()));
             }
             peptidesSQL = _schema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
@@ -202,7 +202,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         condition.append("RowId IN (SELECT ProteinGroupId FROM " + MS2Manager.getTableInfoPeptideMemberships() + " WHERE PeptideId IN (");
         condition.append(peptidesSQL);
         condition.append("))");
-        addCondition(condition, "RowId");
+        addCondition(condition, FieldKey.fromParts("RowId"));
     }
 
     public void addProteinsColumn()

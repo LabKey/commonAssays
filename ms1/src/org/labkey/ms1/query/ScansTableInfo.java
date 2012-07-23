@@ -20,6 +20,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.ms1.MS1Manager;
@@ -54,7 +55,7 @@ public class ScansTableInfo extends FilteredTable
         //does not, so we need to use a SQL fragment here that uses a sub-select.
         SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=?)",
                                             container.getId(), true, false);
-        addCondition(sf, "FileId");
+        addCondition(sf, FieldKey.fromParts("FileId"));
 
     }
 

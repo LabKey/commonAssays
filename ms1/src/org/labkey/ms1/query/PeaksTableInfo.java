@@ -89,7 +89,7 @@ public class PeaksTableInfo extends FilteredTable
         //does not, so we need to use a SQL fragment here that uses a sub-select.
         SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=?)",
                                             container.getId(), true, false);
-        addCondition(sf, "ScanId");
+        addCondition(sf, FieldKey.fromParts("ScanId"));
 
     }
 
@@ -99,7 +99,7 @@ public class PeaksTableInfo extends FilteredTable
                                             container.getId(), true, false, runId, scanFirst, scanLast);
 
         getFilter().deleteConditions("ScanId");
-        addCondition(sf, "ScanId");
+        addCondition(sf, FieldKey.fromParts("ScanId"));
     }
 
     private MS1Schema _schema;

@@ -325,7 +325,7 @@ public class SpectraCountTableInfo extends VirtualTable
             SimpleFilter filter = new SimpleFilter();
             if (_form != null && _form.isPeptideProphetFilter() && _form.getPeptideProphetProbability() != null)
             {
-                filter.addClause(new CompareType.CompareClause("PeptideProphet", CompareType.GTE, _form.getPeptideProphetProbability()));
+                filter.addCondition(FieldKey.fromParts("PeptideProphet"), _form.getPeptideProphetProbability(), CompareType.GTE);
             }
             if (_form != null && _form.getTargetSeqId() != null)
             {

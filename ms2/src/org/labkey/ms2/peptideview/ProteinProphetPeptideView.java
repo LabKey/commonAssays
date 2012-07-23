@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import com.google.common.collect.Iterables;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.MS2Run;
@@ -335,14 +336,14 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         {
             coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), getSingleRun());
             // Can't use addCondition below because it's too dumb to handle alias.columnName
-            coverageFilter.addWhereClause("pgm.SeqId = ?", new Object[]{form.getSeqIdInt()}, "SeqId");
+            coverageFilter.addWhereClause("pgm.SeqId = ?", new Object[]{form.getSeqIdInt()}, FieldKey.fromParts("SeqId"));
         }
         else if (form.getGroupNumber() != 0)
         {
             coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), getSingleRun());
             // Can't use addCondition below because it's too dumb to handle alias.columnName
-            coverageFilter.addWhereClause("pg.GroupNumber = ?", new Object[]{form.getGroupNumber()}, "GroupNumber");
-            coverageFilter.addWhereClause("pg.IndistinguishableCollectionId = ?", new Object[]{form.getIndistinguishableCollectionId()}, "IndistinguishableCollectionId");
+            coverageFilter.addWhereClause("pg.GroupNumber = ?", new Object[]{form.getGroupNumber()}, FieldKey.fromParts("GroupNumber"));
+            coverageFilter.addWhereClause("pg.IndistinguishableCollectionId = ?", new Object[]{form.getIndistinguishableCollectionId()}, FieldKey.fromParts("IndistinguishableCollectionId"));
         }
 
         if (coverageFilter != null)

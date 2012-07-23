@@ -458,7 +458,7 @@ public class MS2Schema extends UserSchema
                     appendRunInClause(sql);
                     sql.append(")))");
 
-                    result.addCondition(sql, "SeqId");
+                    result.addCondition(sql, FieldKey.fromParts("SeqId"));
                 }
                 return result;
             }
@@ -471,7 +471,7 @@ public class MS2Schema extends UserSchema
             sql.append(" WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run IN ");
             appendRunInClause(sql);
             sql.append(")");
-            result.addCondition(sql, "ProteinGroupId");
+            result.addCondition(sql, FieldKey.fromParts("ProteinGroupId"));
         }
 
         if (form != null)
@@ -506,14 +506,14 @@ public class MS2Schema extends UserSchema
                 sql.append("WHERE pg.GroupProbability >= ");
                 sql.append(form.getProteinProphetProbability());
                 sql.append(")");
-                result.addCondition(sql, "ProteinGroupId");
+                result.addCondition(sql, FieldKey.fromParts("ProteinGroupId"));
             }
             else if (form.isCustomViewProteinGroupFilter())
             {
                 SQLFragment sql = new SQLFragment("ProteinGroupID IN (");
                 getProteinGroupSelectSQL(form, context, sql);
                 sql.append(")");
-                result.addCondition(sql, "ProteinGroupId");
+                result.addCondition(sql, FieldKey.fromParts("ProteinGroupId"));
             }
         }
 
@@ -605,13 +605,14 @@ public class MS2Schema extends UserSchema
             @Override
             protected void applyContainerFilter(ContainerFilter filter)
             {
-                clearConditions("Container");
+                FieldKey containerFieldKey = FieldKey.fromParts("Container");
+                clearConditions(containerFieldKey);
                 SQLFragment sql = new SQLFragment("Run IN (SELECT r.Run FROM ");
                 sql.append(MS2Manager.getTableInfoRuns(), "r");
                 sql.append(" WHERE ");
                 sql.append(filter.getSQLFragment(getSchema(), "r.Container", MS2Schema.this.getContainer()));
                 sql.append(")");
-                addCondition(sql, "Container");
+                addCondition(sql, containerFieldKey);
             }
         };
         result.setContainerFilter(result.getContainerFilter());
@@ -621,7 +622,7 @@ public class MS2Schema extends UserSchema
         notDeletedSQL.append(MS2Manager.getTableInfoRuns(), "r");
         notDeletedSQL.append(" WHERE r.Deleted = ?)");
         notDeletedSQL.add(false);
-        result.addCondition(notDeletedSQL, "Run");
+        result.addCondition(notDeletedSQL, FieldKey.fromParts("Run"));
 
         SQLFragment fractionNameSQL = new SQLFragment("CASE WHEN " + dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + " > 0 THEN " + dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1") + " ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
 
@@ -814,15 +815,15 @@ public class MS2Schema extends UserSchema
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(tableInfo, fieldKeys);
 
         Collection<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(columnMap.values());
-        Set<String> unresolvedColumns = new HashSet<String>();
+        Set<FieldKey> unresolvedColumns = new HashSet<FieldKey>();
         reqCols = QueryService.get().ensureRequiredColumns(tableInfo, reqCols, filter, null, unresolvedColumns);
 
         SQLFragment innerSelect = Table.getSelectSQL(tableInfo, reqCols, null, null);
 
-        Map<String, ColumnInfo> map = new HashMap<String, ColumnInfo>(reqCols.size());
+        Map<FieldKey, ColumnInfo> map = new HashMap<FieldKey, ColumnInfo>(reqCols.size());
         for(ColumnInfo col : reqCols)
         {
-            map.put(col.getName(), col);
+            map.put(col.getFieldKey(), col);
         }
 
         SQLFragment sql = new SQLFragment();
@@ -990,7 +991,7 @@ public class MS2Schema extends UserSchema
         filterSQL.append(selectSQL);
         filterSQL.append(") x)");
 
-        baseTable.addCondition(filterSQL, "ProteinGroupId");
+        baseTable.addCondition(filterSQL, FieldKey.fromParts("ProteinGroupId"));
 
         CrosstabTable result;
         CrosstabSettings settings = new CrosstabSettings(baseTable);
@@ -1164,7 +1165,7 @@ public class MS2Schema extends UserSchema
             }
         }
         addPeptideFilters(form, context, baseTable, filter);
-        filter.addClause(new SimpleFilter.InClause("ProteinGroupId/ProteinProphetFileId/Run", runIds, false));
+        filter.addClause(new SimpleFilter.InClause(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"), runIds, false));
         settings.setSourceTableFilter(filter);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
@@ -1245,7 +1246,7 @@ public class MS2Schema extends UserSchema
         {
             if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
             {
-                filter.addClause(new CompareType.CompareClause("PeptideMemberships/PeptideId/PeptideProphet", CompareType.GTE, form.getPeptideProphetProbability()));
+                filter.addClause(new CompareType.CompareClause(FieldKey.fromParts("PeptideMemberships", "PeptideId", "PeptideProphet"), CompareType.GTE, form.getPeptideProphetProbability()));
             }
             else if (form.isCustomViewPeptideFilter())
             {
@@ -1265,7 +1266,7 @@ public class MS2Schema extends UserSchema
                         {
                             value = CompareType.convertParamValue(col, value);
                         }
-                        filter.addClause(new CompareType.CompareClause(fieldKey.toString(), filterInfo.getOp(), value));
+                        filter.addClause(new CompareType.CompareClause(fieldKey, filterInfo.getOp(), value));
                     }
                 }
                 catch (URISyntaxException e)
@@ -1290,7 +1291,7 @@ public class MS2Schema extends UserSchema
                 runIds.add(run.getRun());
             }
         }
-        filter.addClause(new SimpleFilter.InClause("Run", runIds, false));
+        filter.addClause(new SimpleFilter.InClause(FieldKey.fromParts("Run"), runIds, false));
         settings.setSourceTableFilter(filter);
         // add link from peptide to peptide details ?
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("Peptide"));
@@ -1402,7 +1403,7 @@ public class MS2Schema extends UserSchema
             whereSQL = new SQLFragment( "( RowId IN ( ");
             whereSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId")), null));
             whereSQL.append(") ) ");
-            baseTable.addCondition(whereSQL, "RowId");
+            baseTable.addCondition(whereSQL, FieldKey.fromParts("RowId"));
         }
 
         if (form != null && form.getTargetSeqId() != null)
@@ -1431,7 +1432,7 @@ public class MS2Schema extends UserSchema
                         appendRunInClause(sql);
                         sql.append(")))");
 
-                        result.addCondition(sql, "SeqId");
+                        result.addCondition(sql, FieldKey.fromParts("SeqId"));
                     }
                     return result;
                 }

@@ -25,7 +25,10 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
@@ -65,6 +68,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
@@ -660,10 +664,10 @@ public class FlowSchema extends UserSchema
             return addExpColumn(col);
         }
 
-        public void addCondition(SQLFragment condition, String... columnNames)
+        public void addCondition(SQLFragment condition, FieldKey... fieldKeys)
         {
             // NOTE: since this is being pushed down we can't use object id here
-            _expData.addCondition(condition,columnNames);
+            _expData.addCondition(condition, fieldKeys);
         }
 
         public void addRowIdCondition(SQLFragment rowidCondition)
@@ -997,9 +1001,9 @@ public class FlowSchema extends UserSchema
             throw new UnsupportedOperationException();
         }
 
-        public void addCondition(SQLFragment condition, String... columnNames)
+        public void addCondition(SQLFragment condition, FieldKey... fieldKeys)
         {
-            _filter.addWhereClause(condition.getSQL(), condition.getParams().toArray(), columnNames);
+            _filter.addWhereClause(condition.getSQL(), condition.getParams().toArray(), fieldKeys);
         }
 
         public void addRowIdCondition(SQLFragment rowidCondition)
@@ -1752,7 +1756,7 @@ public class FlowSchema extends UserSchema
             SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
             if (filter.getClauses().size() > 0)
             {
-                Map<String, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
+                Map<FieldKey, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
                 SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), columnMap);
                 SQLFragment t = new SQLFragment("SELECT * FROM (");
                 t.append(bgSQL);

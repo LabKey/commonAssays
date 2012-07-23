@@ -292,11 +292,11 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
         protocolIDFilter.add(_schema.getProtocol().getRowId());
-        addCondition(protocolIDFilter,"ProtocolID");
+        addCondition(protocolIDFilter, FieldKey.fromParts("ProtocolID"));
 
         SQLFragment containerFilter = new SQLFragment("Container = ?");
         containerFilter.add(_schema.getContainer().getId());
-        addCondition(containerFilter, "Container");
+        addCondition(containerFilter, FieldKey.fromParts("Container"));
     }
 
     @Override

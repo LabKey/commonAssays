@@ -161,7 +161,7 @@ public class LuminexSchema extends AssaySchema
                 filter.append(" WHERE a.DataId ");
                 filter.append(createDataFilterInClause());
                 filter.append(")");
-                result.addCondition(filter, "RunId");
+                result.addCondition(filter, FieldKey.fromParts("RunId"));
                 return result;
             }
             if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -169,7 +169,7 @@ public class LuminexSchema extends AssaySchema
                 ExpDataTable result = createDataTable();
                 SQLFragment filter = new SQLFragment("RowId");
                 filter.append(createDataFilterInClause());
-                result.addCondition(filter, "RowId");
+                result.addCondition(filter, FieldKey.fromParts("RowId"));
                 return result;
             }
             if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -177,7 +177,7 @@ public class LuminexSchema extends AssaySchema
                 FilteredTable result = createWellExclusionTable(true);
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
-                result.addCondition(filter, "DataId");
+                result.addCondition(filter, FieldKey.fromParts("DataId"));
                 return result;
             }
             if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -188,7 +188,7 @@ public class LuminexSchema extends AssaySchema
                 filter.append(" WHERE a.DataId ");
                 filter.append(createDataFilterInClause());
                 filter.append(")");
-                result.addCondition(filter, "RunId");
+                result.addCondition(filter, FieldKey.fromParts("RunId"));
                 return result;
             }
             if (GUIDE_SET_CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -205,7 +205,7 @@ public class LuminexSchema extends AssaySchema
                 filter.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
                 filter.append(createDataFilterInClause());
                 filter.append(")");
-                result.addCondition(filter, "RunId");
+                result.addCondition(filter, FieldKey.fromParts("RunId"));
                 return result;
             }
             if (ANALYTE_TITRATION_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))

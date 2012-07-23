@@ -102,7 +102,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
         columns.add(desiredCol);
 
-        QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<String>());
+        QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<FieldKey>());
 
         SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
 

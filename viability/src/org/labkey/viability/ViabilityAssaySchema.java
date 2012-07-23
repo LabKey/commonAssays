@@ -324,7 +324,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
             SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
             protocolIDFilter.add(getProtocol().getRowId());
-            addCondition(protocolIDFilter,"ProtocolID");
+            addCondition(protocolIDFilter, FieldKey.fromParts("ProtocolID"));
         }
 
         @Override
@@ -520,7 +520,8 @@ public class ViabilityAssaySchema extends AssaySchema
         @Override
         protected void applyContainerFilter(ContainerFilter containerFilter)
         {
-            getFilter().deleteConditions("ResultID");
+            FieldKey resultIdFieldKey = FieldKey.fromParts("ResultID");
+            getFilter().deleteConditions(resultIdFieldKey);
 
             SQLFragment filter = new SQLFragment(
                     "ResultID IN (" +
@@ -532,7 +533,7 @@ public class ViabilityAssaySchema extends AssaySchema
             filter.append(containerFilter.getSQLFragment(getSchema(), "result.Container", getContainer()));
 
             filter.append(")");
-            addCondition(filter, "ResultID");
+            addCondition(filter, resultIdFieldKey);
         }
     }
 }

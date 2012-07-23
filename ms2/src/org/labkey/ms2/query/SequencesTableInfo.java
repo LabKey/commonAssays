@@ -323,6 +323,6 @@ public class SequencesTableInfo extends FilteredTable
             }
         }
         sql.append(")");
-        addCondition(sql, "SeqId");
+        addCondition(sql, FieldKey.fromParts("SeqId"));
     }
 }
