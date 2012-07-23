@@ -554,13 +554,10 @@ public class PeptidesTableInfo extends FilteredTable
     @Override
     public void overlayMetadata(String tableName, UserSchema schema, Collection<QueryException> errors)
     {
-        if (!MS2Schema.TableType.Peptides.toString().equalsIgnoreCase(getPublicName()))
+        if (!MS2Schema.TableType.Peptides.toString().equalsIgnoreCase(tableName))
         {
             super.overlayMetadata(MS2Schema.TableType.Peptides.toString(), schema, errors);
         }
-
-        super.overlayMetadata(tableName, schema, errors);
-
 
         super.overlayMetadata(tableName, schema, errors);
     }
