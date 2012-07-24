@@ -1022,9 +1022,9 @@ public class ProteinManager
 
     public static void addRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
     {
-        FieldKey fieldKey = new FieldKey(runTableName == null ? null : FieldKey.fromParts(runTableName), "Run");
+        String columnName = runTableName == null ? "Run" : runTableName + ".Run";
         StringBuilder sb = new StringBuilder();
-        sb.append(fieldKey.toSQLString());
+        sb.append(columnName);
         sb.append(" IN (");
         String separator = "";
         for (MS2Run run : runs)
@@ -1034,7 +1034,7 @@ public class ProteinManager
             sb.append(run.getRun());
         }
         sb.append(")");
-        filter.addWhereClause(sb.toString(), new Object[0], fieldKey);
+        filter.addWhereClause(sb.toString(), new Object[0], FieldKey.fromString(columnName));
     }
 
 
