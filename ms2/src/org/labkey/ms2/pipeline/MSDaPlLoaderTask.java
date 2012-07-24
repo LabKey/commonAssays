@@ -136,6 +136,8 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         @Override
         public void validateParameters(PipelineJob job) throws PipelineValidationException
         {
+            super.validateParameters(job);
+
             if (_submitURL == null)
             {
                 throw new PipelineValidationException("No submitURL set for MSDaPl configuration in ms2Config.xml");
