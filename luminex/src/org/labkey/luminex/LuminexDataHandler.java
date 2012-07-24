@@ -1372,30 +1372,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)
             throws ExperimentException
     {
-        Map<String, ObjectProperty> mergedProperties = new HashMap<String, ObjectProperty>();
-        mergedProperties.putAll(expRun.getObjectProperties());
-        ExpExperiment batch = AssayService.get().findBatch(expRun);
-        if (batch != null)
+        try
         {
-            mergedProperties.putAll(batch.getObjectProperties());
+            return AssayService.get().createResolver(user, expRun, expRun.getProtocol(), provider, null);
         }
-        for (ObjectProperty objectProperty : mergedProperties.values())
+        catch (IOException e)
         {
-            if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
-            {
-                ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
-                Container targetStudy = provider.getTargetStudy(expRun);
-                try
-                {
-                    return resolverType.createResolver(expRun, targetStudy, user);
-                }
-                catch (IOException e)
-                {
-                    throw new ExperimentException(e);
-                }
-            }
+            throw new ExperimentException(e);
         }
-        return null;
     }
 
     /** @return Name->Titration */
