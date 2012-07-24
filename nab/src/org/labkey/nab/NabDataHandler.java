@@ -138,12 +138,8 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                     // only need one set of interpolated ICs as they would be identical for all fit types
                     for (Integer cutoff : assayResults.getCutoffs())
                     {
-                        double value = dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getRenderedCurveFitType());
-                        if (!Double.isNaN(value))
-                        {
-                            saveICValue(POINT_IC_PREFIX + cutoff, value,
-                                dilution, protocol, container, cutoffFormats, props, assayResults.getRenderedCurveFitType());
-                        }
+                        saveICValue(POINT_IC_PREFIX + cutoff, dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getRenderedCurveFitType()),
+                            dilution, protocol, container, cutoffFormats, props, assayResults.getRenderedCurveFitType());
                     }
                     props.put(FIT_ERROR_PROPERTY, dilution.getFitError());
                     props.put(NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID());
@@ -171,6 +167,11 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 outOfRange = ">";
                 icValue = dilution.getMaxDilution(type);
             }
+
+            // Issue 15590: don't attempt to store values that are NaN
+            if (Double.isNaN(icValue))
+                return;
+            
             results.put(name, icValue);
             results.put(name + OORDisplayColumnFactory.OORINDICATOR_COLUMN_SUFFIX, outOfRange);
         }
