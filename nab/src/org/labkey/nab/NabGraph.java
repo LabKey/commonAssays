@@ -275,6 +275,11 @@ public class NabGraph
                 double dilution = summary.getDilution(well);
                 pointSeries.add(dilution, percentage);
             }
+
+            // issue 15448: since x-axis will be plotted on log scale, skip any series with dilution/concentration of <= zero (doesn't make sense for this assay)
+            if (pointSeries.getMinX() <= 0)
+                continue;
+
             pointDataset.addSeries(pointSeries);
             int pointDatasetCount = pointDataset.getSeriesCount();
             Color currentColor;
