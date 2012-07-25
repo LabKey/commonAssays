@@ -184,7 +184,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresNoPermission
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<CreateForm>
     {
         public ModelAndView getView(CreateForm form, BindException errors) throws Exception
@@ -203,7 +203,7 @@ public class NabController extends SpringActionController
         }
     }
 
-    @RequiresNoPermission
+    @RequiresPermissionClass(ReadPermission.class)
     public class CreateAction extends SimpleViewAction<CreateForm>
     {
         public ModelAndView getView(CreateForm form, BindException errors) throws Exception
