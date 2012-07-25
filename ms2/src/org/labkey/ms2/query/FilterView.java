@@ -75,25 +75,12 @@ public class FilterView extends QueryView
             options.put(view.getName(), label);
         }
 
-        int count = options.size();
-        boolean currentMissing = false;
-        if (viewName != null && !options.containsKey(viewName))
-        {
-            count ++;
-            currentMissing = true;
-        }
-        if (count <= 1)
+        if (options.size() <= 1)
             return null;
         String id = h(param(QueryParam.viewName));
         out.write("<select id=\"" + id + "\" name=\"" + id + "\"");
         out.write("onchange=\"document.getElementById('" + _radioButtonID + "').checked=true;\"");
         out.write(">");
-        if (currentMissing)
-        {
-            out.write("<option selected value=\"" + h(viewName) + "\">");
-            out.write("&lt;" + h(viewName) + ">");
-            out.write("</option>");
-        }
         for (Map.Entry<?, String> entry : options.entrySet())
         {
             out.write("\n<option");
