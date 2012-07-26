@@ -87,7 +87,8 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     @Override
     public Map<DomainProperty, Object> getDefaultValues(Domain domain, String disambiguationId) throws ExperimentException
     {
-        if (!isResetDefaultValues() && LuminexUploadWizardAction.AnalyteStepHandler.NAME.equals(getUploadStep()))
+        //  Issue 14851: added check for isMultiRunUpload to if statement for case when "Save and Import Another Run" gets default values for the Run properties 
+        if (!isMultiRunUpload() && !isResetDefaultValues() && LuminexUploadWizardAction.AnalyteStepHandler.NAME.equals(getUploadStep()))
         {
             Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
             DomainProperty[] analyteColumns = analyteDomain.getProperties();
