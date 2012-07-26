@@ -465,6 +465,7 @@ public class LuminexExcelParser
                     else if ("Well".equalsIgnoreCase(columnName))
                     {
                         String trimmedValue = StringUtils.trimToNull(value);
+                        trimmedValue = trimmedValue.replaceAll("\\s+", ",");
                         dataRow.setWell(trimmedValue);
                         boolean summary = trimmedValue != null && trimmedValue.contains(",");
                         dataRow.setSummary(summary);
