@@ -356,12 +356,6 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         ExpProtocol _protocol;
 
-        public ViabilityRunListQueryView(ExpProtocol protocol, UserSchema schema, QuerySettings settings, AssayRunType assayRunFilter)
-        {
-            super(protocol, schema, settings, assayRunFilter);
-            _protocol = protocol;
-        }
-
         public ViabilityRunListQueryView(ExpProtocol protocol, ViewContext context)
         {
             super(protocol, context);
