@@ -224,31 +224,36 @@ public class ProteinManager
             return new Protein[0];
 
         int hits = peptide.getProteinHits();
-        SQLFragment sql= new SQLFragment();
-        Object[] params;
-        if (hits ==1)
+        SQLFragment sql = new SQLFragment();
+        if (hits == 1 && peptide.getSeqId() != null)
         {
-            sql.append("SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences());
-            sql.append(" WHERE SeqId = (SELECT SeqId FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ? AND LookupString = ?)" );
-            params = new Object[]{fastaId, peptide.getProtein()};
-        }
+            sql.append("SELECT SeqId, ProtSequence AS Sequence, Mass, Description, ? AS BestName, BestGeneName FROM ");
+            sql.append(getTableInfoSequences(), "s");
+            sql.append(" WHERE SeqId = ?");
+            sql.add(peptide.getProtein());
+            sql.add(peptide.getSeqId());
+    }
         else
         {
-            //TODO:  make search tryptic so that number that match = ProteinHits
-            int MAX_PROTEIN_HITS = 20;  //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
-            sql.append("SELECT  SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() );
-            sql.append(" WHERE SeqId IN (SELECT SeqId FROM " + getTableInfoFastaSequences() + " WHERE FastaId=?) AND ProtSequence " + getSqlDialect().getCharClassLikeOperator() + " ?" );
-            sql = getSchema().getSqlDialect().limitRows(sql, MAX_PROTEIN_HITS);
-            params = new Object[]{fastaId, "%" + peptide.getTrimmedPeptide() + "%"};
+            // TODO: make search tryptic so that number that match = ProteinHits.
+            sql.append("SELECT s.SeqId, s.ProtSequence AS Sequence, s.Mass, s.Description, fs.LookupString AS BestName, s.BestGeneName FROM ");
+            sql.append(getTableInfoSequences(), "s");
+            sql.append(", ");
+            sql.append(getTableInfoFastaSequences(), "fs");
+            sql.append(" WHERE fs.SeqId = s.SeqId AND fs.FastaId = ? AND ProtSequence ");
+            sql.append(getSqlDialect().getCharClassLikeOperator());
+            sql.append(" ?" );
+            sql.add(fastaId);
+            sql.add("%" + peptide.getTrimmedPeptide() + "%");
+
+            //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
+            sql = getSchema().getSqlDialect().limitRows(sql, Math.max(20, hits));
         }
 
-        // TODO: Retrieve and set the lookupString on each protein so the names in the details match the names in the results
-        Protein[] proteins = Table.executeQuery(getSchema(), sql.getSQL(), params, Protein.class);
+        Protein[] proteins = Table.executeQuery(getSchema(), sql, Protein.class);
 
-        if (proteins.length > 0)
-            return proteins;
-
-        _log.error("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
+        if (proteins.length == 0)
+            _log.error("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
 
         return proteins;
     }
