@@ -5972,7 +5972,7 @@ public class MS2Controller extends SpringActionController
 
             if (status == null)
             {
-                response.setStatus(400);    // Bad request.
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 status = "ERROR->File not found";
             }
 
