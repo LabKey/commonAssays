@@ -192,7 +192,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 // Create a makedb.params to control the index creation
                 File fileWorkParams = _wd.newFile(MAKE_DB_PARAMS);
-                SequestParamsBuilder builder = new SequestParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory(), SequestParams.Variant.makedb, null);
+                SequestParamsBuilder builder = new ThermoSequestParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory(), SequestParams.Variant.makedb, null);
                 builder.initXmlValues();
                 builder.writeFile(fileWorkParams);
 
@@ -264,7 +264,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             // Write out sequest.params file
             File fileWorkParams = _wd.newFile(SEQUEST_PARAMS);
 
-            SequestParamsBuilder builder = new SequestParamsBuilder(params, getJob().getSequenceRootDirectory(), SequestParams.Variant.thermosequest, sequenceFiles);
+            SequestParamsBuilder builder = new ThermoSequestParamsBuilder(params, getJob().getSequenceRootDirectory(), SequestParams.Variant.thermosequest, sequenceFiles);
             builder.initXmlValues();
             builder.writeFile(fileWorkParams);
 
@@ -302,7 +302,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", null, "tpp", tppVersion, getJob().getLogger());
                 out2XMLArgs.add(out2XMLPath);
                 String enzyme =
-                    new SequestParamsBuilder(params, null).getSupportedEnzyme(params.get(ParameterNames.ENZYME));
+                    new ThermoSequestParamsBuilder(params, null).getSupportedEnzyme(params.get(ParameterNames.ENZYME));
                 Out2XmlParams out2XmlParams = new Out2XmlParams();
                 out2XMLArgs.add(dirOutputDta.getName());
                 out2XMLArgs.add("1");

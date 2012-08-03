@@ -18,9 +18,9 @@ package org.labkey.ms1.view;
 import org.labkey.api.data.*;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.DataView;
@@ -44,9 +44,9 @@ public class PeptidesView extends QueryView
     private boolean _searchSubfolders = true;
     private PeptideFilter _pepFilter;
 
-    public PeptidesView(String schemaName, String queryName, User user, Container container)
+    public PeptidesView(UserSchema schema, String queryName)
     {
-        super(QueryService.get().getUserSchema(user, container, schemaName));
+        super(schema);
 
         QuerySettings settings = getSchema().getSettings(getViewContext(), DATAREGION_NAME, queryName);
         settings.setAllowChooseQuery(false);

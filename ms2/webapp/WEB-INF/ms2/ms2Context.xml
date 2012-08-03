@@ -1227,10 +1227,10 @@
     </bean>
 
     <bean id="matchesFileType" class="org.labkey.api.util.FileType">
-        <constructor-arg value=".matches.ms2" />
+        <constructor-arg value=".matches.cms2" />
     </bean>
     <bean id="nomatchesFileType" class="org.labkey.api.util.FileType">
-        <constructor-arg value=".nomatches.ms2" />
+        <constructor-arg value=".nomatches.cms2" />
     </bean>
 
     <!-- Tasks registered in experiment module -->

@@ -185,6 +185,24 @@ public abstract class Workspace implements Serializable
         return _groupInfos.get(groupId);
     }
 
+    public GroupInfo getAllSamplesGroup()
+    {
+        GroupInfo allSamplesGroup = getGroup("0");
+        if (allSamplesGroup == null || !allSamplesGroup.isAllSamples())
+        {
+            for (GroupInfo groupInfo : getGroups())
+            {
+                if (groupInfo.isAllSamples())
+                {
+                    allSamplesGroup = groupInfo;
+                    break;
+                }
+            }
+        }
+
+        return allSamplesGroup;
+    }
+
     public Analysis getGroupAnalysis(GroupInfo group)
     {
         return _groupAnalyses.get(group.getGroupName());
@@ -243,18 +261,7 @@ public abstract class Workspace implements Serializable
     /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
     public List<String> getAllSampleIDs()
     {
-        GroupInfo allSamplesGroup = getGroup("0");
-        if (allSamplesGroup == null || !allSamplesGroup.isAllSamples())
-        {
-            for (GroupInfo groupInfo : getGroups())
-            {
-                if (groupInfo.isAllSamples())
-                {
-                    allSamplesGroup = groupInfo;
-                    break;
-                }
-            }
-        }
+        GroupInfo allSamplesGroup = getAllSamplesGroup();
 
         List<String> allSampleIDs = null;
         if (allSamplesGroup != null)

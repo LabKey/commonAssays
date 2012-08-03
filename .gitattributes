@@ -1281,12 +1281,15 @@ ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/AbstractMultipleValueParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractSequestSearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/BooleanParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/ConverterFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/IInputXMLConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/IParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/ListParamsValidator.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/MultipleDoubleParamsValidator.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/MultipleIntegerParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Mzxml2SearchConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Mzxml2SearchParam.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Mzxml2SearchParams.java -text
@@ -1314,6 +1317,7 @@ ms2/src/org/labkey/ms2/pipeline/sequest/SequestRun.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchTask.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/ThermoSequestParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/UWSequestParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/UWSequestSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/setSequestDefaults.jsp -text

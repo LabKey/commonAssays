@@ -54,7 +54,6 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -62,6 +61,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.Boolean;
 import java.lang.Number;
 import java.sql.ResultSet;
@@ -620,17 +620,17 @@ public class NabAssayController extends SpringActionController
 
     private NabAssayRun getCachedRun(ExpRun run)
     {
-        Pair<NabAssayRun, Date> cache = (Pair<NabAssayRun, Date>) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
-        if (cache == null)
+        NAbRunWrapper cache = (NAbRunWrapper) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
+        if (cache == null || cache.getRun() == null)
             return null;
-        NabAssayRun assay = cache.getKey();
+        NabAssayRun assay = cache.getRun();
         Date customViewModified = getCustomViewModifiedDate(run);
         // There's no custom view, so it can't have been modified since we cached the run:
         if (customViewModified == null)
             return assay;
         // Check the view modification time against the time we cached the run.  If the view has been changed since
         // the run was cached, return null.
-        Date cachedDate = cache.getValue();
+        Date cachedDate = cache.getDate();
         if (cachedDate.after(customViewModified))
             return assay;
         return null;
@@ -649,7 +649,7 @@ public class NabAssayController extends SpringActionController
             {
                 assay = getDataHandler(run).getAssayResults(run, getUser(), fit);
                 if (assay != null && fit == null)
-                    getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new Pair<NabAssayRun, Date>(assay, new Date()));
+                    getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new NAbRunWrapper(assay, new Date()));
             }
             catch (SinglePlateNabDataHandler.MissingDataFileException e)
             {
@@ -1211,6 +1211,34 @@ public class NabAssayController extends SpringActionController
             ExcelWriter xl = new SampleTemplateWriter(getViewContext().getContainer(), getUser(), sampleDomain, sampleGroups);
             xl.setFilenamePrefix("metadata");
             xl.write(response);
+        }
+    }
+
+    /** Avoid serializing the NAb run, since many of its child objects aren't serializable themselves */
+    public static class NAbRunWrapper implements Serializable
+    {
+        private transient NabAssayRun _run;
+        private transient Date _date;
+
+        public NAbRunWrapper(NabAssayRun run, Date date)
+        {
+            _run = run;
+            _date = date;
+        }
+
+        public NAbRunWrapper()
+        {
+            // For serialization
+        }
+
+        public NabAssayRun getRun()
+        {
+            return _run;
+        }
+
+        public Date getDate()
+        {
+            return _date;
         }
     }
 }

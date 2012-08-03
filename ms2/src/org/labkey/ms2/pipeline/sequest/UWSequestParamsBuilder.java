@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.settings.AppProps;
 import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
@@ -62,17 +61,96 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
     public UWSequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
         super(sequestInputParams, sequenceRoot, SequestParams.Variant.uwsequest, null);
-        init();
     }
 
     public UWSequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant, List<File> databaseFiles)
     {
         super(sequestInputParams, sequenceRoot, variant, databaseFiles);
-        init();
     }
 
-    private void init()
+    protected void initSubclass()
     {
+        _params.addProperty(new SequestParam(
+            20,
+            "0",
+            "num_threads",
+            "0=poll CPU to set num threads; else specify num threads directly (max 32)",
+            ConverterFactory.getSequestBasicConverter(),
+            new NonNegativeIntegerParamsValidator(),
+            true
+        )).setInputXmlLabels("sequest, num_threads");
+
+        _params.addProperty(new SequestParam(
+                  61,                                                       //sortOrder
+                  "0",                                                      //The value of the property
+                  "theoretical_fragment_ions",                                           // the sequest.params property name
+                  "0=default peak shape, 1=M peak only",                                                       // the input.xml label
+                   ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+                   new BooleanParamsValidator(),
+                   true
+        )).setInputXmlLabels("sequest, theoretical_fragment_ions");
+
+        _params.addProperty(new SequestParam(
+                  92,                                                       //sortOrder
+                  "0",                                                      //The value of the property
+                  "skip_researching",                                           // the sequest.params property name
+                  "for '.out' file output only, 0=search everything again (default), 1=don't search if .out exists",                                                       // the input.xml label
+                   ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+                   new BooleanParamsValidator(),
+                   true
+        )).setInputXmlLabels("sequest, skip_researching");
+
+        _params.addProperty(new SequestParam(
+                  91,                                                       //sortOrder
+                  "600.0 5000.0",                                                      //The value of the property
+                  "digest_mass_range",                                           // the sequest.params property name
+                  "MH+ peptide mass range to analyze",                                                       // the input.xml label
+                   ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+                   new MultipleDoubleParamsValidator(0, 1000000, 2),
+                   true
+        )).setInputXmlLabels("sequest, digest_mass_range");
+
+        _params.addProperty(new SequestParam(
+            171,                                                       //sortOrder
+            "0",                                            //The value of the property
+            "clip_nterm_methionine",                                // the sequest.params property name
+            "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine", // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+            new BooleanParamsValidator(),
+            true
+        )).setInputXmlLabels("sequest, clip_nterm_methionine");
+
+        _params.addProperty(new SequestParam(
+                  208,                                                       //sortOrder
+                  "5",                                                      //The value of the property
+                  "minimum_peaks",                                           // the sequest.params property name
+                  "minimum num. of peaks in spectrum to search (default 5)",                                                       // the input.xml label
+                   ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+                   new NaturalNumberParamsValidator(),
+                   true
+        )).setInputXmlLabels("sequest, minimum_peaks");
+
+        _params.addProperty(new SequestParam(
+                  209,                                                       //sortOrder
+                  "0",                                                      //The value of the property
+                  "minimum_intensity",                                           // the sequest.params property name
+                  "minimum intensity value to read in",                                                       // the input.xml label
+                   ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+                   new NaturalNumberParamsValidator(),
+                   true
+        )).setInputXmlLabels("sequest, minimum_intensity");
+
+        _params.addProperty(new SequestParam(
+            211,                                                       //sortOrder
+            "1.5",                                            //The value of the property
+            "remove_precursor_tolerance",                                // the sequest.params property name
+            "+- Da tolerance for precursor removal",       // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            ParamsValidatorFactory.getRealNumberParamsValidator(),
+            true
+        )).setInputXmlLabels("sequest, remove_precursor_tolerance");
+
+
         _params.addProperty(new SequestParam(
                   131,                                                       //sortOrder
                   "1",                                                      //The value of the property
@@ -84,14 +162,24 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         )).setInputXmlLabels(ParameterNames.ENZYME);
 
         _params.addProperty(new SequestParam(
-                        251,                                                       //sortOrder
-                        "5",                                            //The value of the property
-                        "min_peaks",                                // the sequest.params property name
-                        "Only search spectra with at least this many peaks. Default 5.",       // the sequest.params comment
-                        ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                        new NaturalNumberParamsValidator(),
-                        true
-        )).setInputXmlLabels("sequest, min_peaks" );
+            151,                                                       //sortOrder
+            "0 0 0 0 0 0",                                                        //The value of the property
+            "diff_search_type",                                     // the sequest.params property name
+            "0=variable mod, 1=binary mod",                                                       // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+            new MultipleIntegerParamsValidator(0, 1, 6),
+            true
+        )).setInputXmlLabels("sequest, diff_search_type");
+
+        _params.addProperty(new SequestParam(
+            152,                                                       //sortOrder
+            "4 4 4 4 4 4",                                                        //The value of the property
+            "diff_search_count",                                     // the sequest.params property name
+            "max num of modified AA per each variable mod in a peptide",                                                       // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+            new MultipleIntegerParamsValidator(0, 50, 6),
+            true
+        )).setInputXmlLabels("sequest, diff_search_count");
 
         _params.addProperty(new SequestParam(
                         252,                                                       //sortOrder
@@ -114,34 +202,35 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         )).setInputXmlLabels("sequest, isotope_error" );
 
         _params.addProperty(new SequestParam(
-                        254,                                                       //sortOrder
-                        "Da",                                            //The value of the property
-                        "mass_tolerance_units",                                // the sequest.params property name
-                        "Define the mass window around the spectrum precursor mass in units of daltons or in parts-per-million. Default daltons.",       // the sequest.params comment
-                        ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                        new ListParamsValidator("Da", "PPM"),
-                        true
-        )).setInputXmlLabels("sequest, mass_tolerance_units" );
-
-        _params.addProperty(new SequestParam(
                         255,                                                       //sortOrder
-                        "mass",                                            //The value of the property
+                        "0",                                            //The value of the property
                         "precursor_tolerance_type",                                // the sequest.params property name
-                        "Define the mass window around the spectrum precursor mass in units of daltons or in parts-per-million. Default daltons.",       // the sequest.params comment
+                        "0=MH+ (default), 1=precursor m/z",       // the sequest.params comment
                         ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                        new ListParamsValidator("mass", "mz"),
+                        new ListParamsValidator("0", "1"),
                         true
         )).setInputXmlLabels("sequest, precursor_tolerance_type" );
 
         _params.addProperty(new SequestParam(
-                        256,                                                       //sortOrder
-                        "0",                                            //The value of the property
-                        "highres_fragment_ions",                                // the sequest.params property name
-                        "MS/MS spectra are high resolution and show isotopic peaks. Default false.",       // the sequest.params comment
-                        ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                        new BooleanParamsValidator(),
-                        true
-        )).setInputXmlLabels("sequest, highres_fragment_ions" );
+            571,                                                       //sortOrder
+            "0.0",                                            //The value of the property
+            "add_U_user_amino_acid",                                // the sequest.params property name
+            "added to U - avg.   0.0000, mono.   0.00000",       // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            new RealNumberParamsValidator(),
+            true
+        )).setInputXmlLabels().setInputXmlLabels("sequest, add_U_user_amino_acid");
+
+        _params.addProperty(new SequestParam(
+            572,                                                       //sortOrder
+            "0.0",                                            //The value of the property
+            "add_J_user_amino_acid",                                // the sequest.params property name
+            "added to J - avg.   0.0000, mono.   0.00000",       // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            new RealNumberParamsValidator(),
+            true
+        )).setInputXmlLabels().setInputXmlLabels("sequest, add_J_user_amino_acid");
+
 
         _params.addProperty(new SequestParam(
                         257,                                                       //sortOrder
@@ -185,7 +274,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
                         262,                                                       //sortOrder
-                        "1",                                            //The value of the property
+                        "-1",                                            //The value of the property
                         "variable_C_terminus_distance",                                // the sequest.params property name
                         "Apply c-term modifications to peptides based on their distance from the protein terminus. -1=all peptides, 0=peptide only at protein terminus, N=proteins no more than N residues from the protein terminus.",       // the sequest.params comment
                         ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
@@ -195,7 +284,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
                         263,                                                       //sortOrder
-                        "1",                                            //The value of the property
+                        "-1",                                            //The value of the property
                         "variable_N_terminus_distance",                                // the sequest.params property name
                         "Apply n-term modifications to peptides based on their distance from the protein terminus. -1=all peptides, 0=peptide only at protein terminus, N=proteins no more than N residues from the protein terminus.",       // the sequest.params comment
                         ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
@@ -225,7 +314,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
     }
 
     @Override
-    List<String> initDynamicTermMods(char term, String massString)
+    protected List<String> initDynamicTermMods(char term, String massString)
     {
         if (term != '[' && term != ']')
         {
@@ -275,7 +364,6 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         String result = super.getSequestParamsText();
 
         return result +
-                "print_duplicate_references = 1         ; 0=no, 1=yes\n" +
                 "\n" +
                 "[SEQUEST_ENZYME_INFO]\n" +
                 "0.  No_Enzyme              0      -           -\n" +
@@ -340,11 +428,9 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         {
             Map<String, String> params = new HashMap<String, String>();
             params.put("pipeline, database", "Bovine_mini.fasta");
-            params.put("sequest, min_peaks", "50");
             params.put("sequest, max_precursor_charge", "4");
             UWSequestParamsBuilder spb = new UWSequestParamsBuilder(params, _root);
             spb.initPassThroughs();
-            assertEquals("min_peaks", "50", spb.getPropertyValue("min_peaks"));
             assertEquals("max_precursor_charge", "4", spb.getPropertyValue("max_precursor_charge"));
         }
 
@@ -360,10 +446,26 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testStaticTermModification() throws SequestParamsException
         {
-            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap("residue, modification mass", "50.43@[,90.12@]"), _root);
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap(ParameterNames.STATIC_MOD, "50.43@[,90.12@]"), _root);
             spb.initStaticMods();
-            assertEquals("add_N_terminus", "50.43", spb.getPropertyValue("add_N_terminus"));
-            assertEquals("add_C_terminus", "90.12", spb.getPropertyValue("add_C_terminus"));
+            assertEquals("add_Nterm_peptide", "50.43", spb.getPropertyValue("add_Nterm_peptide"));
+            assertEquals("add_Cterm_peptide", "90.12", spb.getPropertyValue("add_Cterm_peptide"));
+        }
+
+        @Test
+        public void testGenerateFile() throws SequestParamsException
+        {
+            Map<String, String> paramMap = new HashMap<String, String>();
+
+            paramMap.put(ParameterNames.STATIC_MOD, "50.43@[,90.12@]");
+            paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
+            paramMap.put("sequest, digest_mass_range", "400.0 5900.0");
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(paramMap, _root);
+            spb.initXmlValues();
+            String text = spb.getSequestParamsText();
+            assertTrue(text.contains("database_name ="));
+            assertTrue(text.contains("num_threads = 0"));
+            assertTrue(text.contains("digest_mass_range = 400.0 5900.0"));
         }
     }
 }

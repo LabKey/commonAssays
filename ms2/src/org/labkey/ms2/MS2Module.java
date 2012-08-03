@@ -57,13 +57,16 @@ import org.labkey.ms2.pipeline.comet.CometCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
+import org.labkey.ms2.pipeline.sequest.MultipleDoubleParamsValidator;
+import org.labkey.ms2.pipeline.sequest.MultipleIntegerParamsValidator;
 import org.labkey.ms2.pipeline.sequest.NaturalNumberParamsValidator;
 import org.labkey.ms2.pipeline.sequest.NonNegativeIntegerParamsValidator;
 import org.labkey.ms2.pipeline.sequest.PositiveDoubleParamsValidator;
 import org.labkey.ms2.pipeline.sequest.RealNumberParamsValidator;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
-import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
+import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
 import org.labkey.ms2.pipeline.sequest.UWSequestParamsBuilder;
+import org.labkey.ms2.pipeline.sequest.UWSequestSearchTask;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
@@ -340,7 +343,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public Set<Class> getIntegrationTests()
     {
         return new HashSet<Class>(Arrays.asList(
-            SequestParamsBuilder.TestCase.class
+            ThermoSequestParamsBuilder.TestCase.class
         ));
     }
 
@@ -361,7 +364,10 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             RealNumberParamsValidator.TestCase.class,
             PositiveDoubleParamsValidator.TestCase.class,
             NaturalNumberParamsValidator.TestCase.class,
-            UWSequestParamsBuilder.TestCase.class
+            MultipleIntegerParamsValidator.TestCase.class,
+            MultipleDoubleParamsValidator.TestCase.class,
+            UWSequestParamsBuilder.TestCase.class,
+            UWSequestSearchTask.TestCase.class
         ));
     }
 

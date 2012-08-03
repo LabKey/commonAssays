@@ -643,8 +643,8 @@ public class MS1Controller extends SpringActionController
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
             TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getViewContext().getUser(), getViewContext().getContainer());
-            PeptidesView pepView = new PeptidesView(peptidesTable.getPublicSchemaName(), peptidesTable.getPublicName(),
-                    getViewContext().getUser(), getViewContext().getContainer());
+            PeptidesView pepView = new PeptidesView(MS2Service.get().createSchema(getViewContext().getUser(), getViewContext().getContainer()), peptidesTable.getPublicName()
+            );
             pepView.setSearchSubfolders(form.isSubfolders());
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 pepView.setPeptideFilter(new PeptideFilter(form.getPepSeq(), form.isExact()));

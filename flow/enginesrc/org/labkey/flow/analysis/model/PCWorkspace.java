@@ -85,7 +85,7 @@ public class PCWorkspace extends FlowJoWorkspace
         }
     }
 
-    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, boolean warnOnMissingStats)
+    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
     {
         String strCount = elPopulation.getAttribute("count");
         if (results != null)
@@ -98,14 +98,14 @@ public class PCWorkspace extends FlowJoWorkspace
             else
             {
                 if (warnOnMissingStats)
-                    warning(analysis.getName(), subset, "Count statistic missing");
+                    warning(sampleId, analysis.getName(), subset, "Count statistic missing");
             }
         }
         for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
         {
             for (Element elStat : getElementsByTagName(elSubpopulations, "Statistic"))
             {
-                readStat(elStat, subset, results, analysis, warnOnMissingStats,
+                readStat(elStat, subset, results, analysis, sampleId, warnOnMissingStats,
                         "name", "id", "percent");
             }
         }
@@ -173,7 +173,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return new PolygonGate(axes.get(0), axes.get(1), new Polygon(X, Y));
     }
 
-    protected Population readBoolean(Element elBoolNode, SubsetSpec parentSubset)
+    protected Population readBoolean(Element elBoolNode, SubsetSpec parentSubset, String sampleId)
     {
         Population ret = new Population();
         PopulationName name = PopulationName.fromString(elBoolNode.getAttribute("name"));
@@ -208,7 +208,7 @@ public class PCWorkspace extends FlowJoWorkspace
         }
         else
         {
-            warning(name, parentSubset, "No dependent gates found for boolean gate");
+            warning(sampleId, name, parentSubset, "No dependent gates found for boolean gate");
         }
 
         return ret;
@@ -251,7 +251,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return "1".equals(elGate.getAttribute("negated")) || "0".equals(elGate.getAttribute("eventsInside"));
     }
 
-    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         Population ret = new Population();
         PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
@@ -260,11 +260,11 @@ public class PCWorkspace extends FlowJoWorkspace
 
         readGates(elPopulation, parentSubset, ret, analysis);
 
-        readStats(subset, elPopulation, results, analysis, warnOnMissingStats);
+        readStats(subset, elPopulation, results, analysis, sampleId, warnOnMissingStats);
 
         for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
         {
-            List<Population> subpops = readSubpopulations(elSubpopulations, subset, analysis, results, warnOnMissingStats);
+            List<Population> subpops = readSubpopulations(elSubpopulations, subset, analysis, results, sampleId, warnOnMissingStats);
             for (Population pop : subpops)
                 ret.addPopulation(pop);
         }
@@ -272,21 +272,21 @@ public class PCWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected List<Population> readSubpopulations(Element elSubpopulations, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    protected List<Population> readSubpopulations(Element elSubpopulations, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         List<Population> subpops = new LinkedList<Population>();
         for (Element elPopulation : getElements(elSubpopulations))
         {
             String tagName = elPopulation.getTagName();
             if ("Population".equals(tagName))
-                subpops.add(readPopulation(elPopulation, parentSubset, analysis, results, warnOnMissingStats));
+                subpops.add(readPopulation(elPopulation, parentSubset, analysis, results, sampleId, warnOnMissingStats));
             else if ("AndNode".equals(tagName) || "OrNode".equals(tagName) || "NotNode".equals(tagName))
-                subpops.add(readBoolean(elPopulation, parentSubset));
+                subpops.add(readBoolean(elPopulation, parentSubset, sampleId));
         }
         return subpops;
     }
 
-    protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         Analysis ret = new Analysis();
         PopulationName name = PopulationName.fromString(elAnalysis.getAttribute("name"));
@@ -294,11 +294,11 @@ public class PCWorkspace extends FlowJoWorkspace
         ret.setSettings(_settings);
         ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
 
-        readStats(null, elAnalysis, results, ret, warnOnMissingStats);
+        readStats(null, elAnalysis, results, ret, sampleId, warnOnMissingStats);
 
         for (Element elSubpopulations : getElementsByTagName(elAnalysis, "Subpopulations"))
         {
-            List<Population> subpops = readSubpopulations(elSubpopulations, null, ret, results, warnOnMissingStats);
+            List<Population> subpops = readSubpopulations(elSubpopulations, null, ret, results, sampleId, warnOnMissingStats);
             for (Population pop : subpops)
                 ret.addPopulation(pop);
         }
@@ -316,9 +316,19 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected Analysis readSampleAnalysis(Element elSampleNode)
     {
-        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
-        Analysis ret = readAnalysis(elSampleNode, results, true);
+        // Don't read analysis if sample has been marked as 'deleted'
+        boolean deleted = "1".equals(elSampleNode.getAttribute("deleted"));
+        if (deleted)
+            return null;
+
+        // Don't read analysis if sampleID isn't in "All Samples" group.
         String sampleId = elSampleNode.getAttribute("sampleID");
+        GroupInfo allSamplesGroup = getAllSamplesGroup();
+        if (allSamplesGroup != null && !allSamplesGroup.getSampleIds().contains(sampleId))
+            return null;
+
+        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
+        Analysis ret = readAnalysis(elSampleNode, results, sampleId, true);
         _sampleAnalyses.put(sampleId, ret);
         addSampleAnalysisResults(results, sampleId);
         return ret;
@@ -357,7 +367,7 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected Analysis readGroupAnalysis(Element elGroup)
     {
-        Analysis analysis = readAnalysis(elGroup, null, false);
+        Analysis analysis = readAnalysis(elGroup, null, null, false);
         _groupAnalyses.put(analysis.getName(), analysis);
 
         return analysis;

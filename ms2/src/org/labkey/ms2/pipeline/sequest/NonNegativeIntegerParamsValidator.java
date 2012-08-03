@@ -30,13 +30,11 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
 {
     public String validate(Param spp)
     {
-        String parserError = "";
         int i;
         String value = spp.getValue();
         if (value == null)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
-            return parserError;
+            return spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
         }
         try
         {
@@ -44,12 +42,11 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
         }
         catch (NumberFormatException e)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
-            return parserError;
+            return spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
         }
         if (i < 0)
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
-        return parserError;
+            return spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
+        return "";
     }
 
     //JUnit TestCase

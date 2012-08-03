@@ -17,10 +17,16 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
+import org.labkey.api.pipeline.ToolExecutionException;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.pipeline.cmd.TaskPath;
 import org.labkey.api.util.DateUtil;
@@ -34,9 +40,13 @@ import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -45,6 +55,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 
 /**
@@ -173,7 +185,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         {
             return Arrays.asList(getJob().getSequenceFiles());
         }
-        
+
         File indexFileBase = getIndexFileWithoutExtension();
         File indexFile = new File(indexFileBase.getParentFile(), indexFileBase.getName() + INDEX_FILE_TYPE.getDefaultSuffix());
 
@@ -252,7 +264,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             File sequestLogFileWork = SEQUEST_OUTPUT_FILE_TYPE.getFile(_wd.getDir(), getJob().getBaseName());
 
             _wd.newFile(sequestLogFileWork.getName());
-            
+
             List<String> sequestArgs = performSearch(_wd.getDir(), params, sequenceFiles, fileMzXMLWork, fileWorkParams, sequestLogFileWork);
             File decoyResults = null;
             if (!decoySequenceFiles.isEmpty())
@@ -309,6 +321,8 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         }
     }
 
+    private static final Pattern SEQUEST_VERSION = Pattern.compile(".*(\\d\\d\\d\\d\\.\\d+\\.\\d+).*");
+
     private List<String> performSearch(File workingDir, Map<String, String> params, List<File> sequenceFiles, File fileMzXMLWork, File paramsFile, File resultsFile)
             throws IOException, PipelineJobException
     {
@@ -316,17 +330,30 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         builder.initXmlValues();
         builder.writeFile(paramsFile);
 
+        String version = getJob().getParameters().get("sequest, version");
+        String sequestPath = PipelineJobService.get().getExecutablePath("sequest", _factory.getSequestInstallDir(), "sequest", version, getJob().getLogger());
+        if (sequestPath.endsWith("/sequest"))
+        {
+            // Sequest versions have the binaries themselves being renamed, not the parent directories,
+            // so hack off the trailing "/sequest" on the path
+            sequestPath = sequestPath.substring(0, sequestPath.length() - "/sequest".length());
+        }
+        String sequestVersion = determineSequestVersion(sequestPath, workingDir);
+        if (sequestVersion != null)
+        {
+            getJob().info("Running Sequest " + sequestVersion);
+        }
+
         // Perform Sequest search
         List<String> sequestArgs = new ArrayList<String>();
-        File sequestExecutable = new File(_factory.getSequestInstallDir(), "sequest");
-        sequestArgs.add(sequestExecutable.getAbsolutePath());
+        sequestArgs.add(sequestPath);
         sequestArgs.addAll(_factory.getSequestOptions());
         sequestArgs.add(FileUtil.relativize(workingDir, fileMzXMLWork, false));
         ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
         Writer writer = new FileWriter(resultsFile);
         try
         {
-            writeParams(writer, paramsFile, getJob().getLogger(), getJob().getSequenceFiles()[0]);
+            writeParams(writer, paramsFile, getJob().getLogger(), getJob().getSequenceFiles()[0], sequestVersion);
         }
         finally
         {
@@ -334,6 +361,51 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         }
         getJob().runSubProcess(sequestPB, workingDir, resultsFile, 10, true);
         return sequestArgs;
+    }
+
+    private String determineSequestVersion(String sequestPath, File workingDir) throws PipelineJobException, IOException
+    {
+        File versionFile = new File(workingDir, "sequest.version");
+        ProcessBuilder versionPB = new ProcessBuilder(sequestPath);
+        try
+        {
+            getJob().runSubProcess(versionPB, workingDir, versionFile, 0, false);
+        }
+        catch (ToolExecutionException ignored)
+        {
+            // Sequest returns a non-zero exit code when invoked without arguments
+        }
+
+        if (versionFile.exists())
+        {
+            FileInputStream headerIn = new FileInputStream(versionFile);
+            try
+            {
+                return parseSequestVersion(new InputStreamReader(headerIn));
+            }
+            finally
+            {
+                try { headerIn.close(); } catch (IOException ignored) {}
+                versionFile.delete();
+            }
+        }
+        return null;
+    }
+
+    private String parseSequestVersion(Reader innerReader) throws IOException
+    {
+        BufferedReader reader = new BufferedReader(innerReader);
+        String line;
+        while ((line = reader.readLine()) != null)
+        {
+            Matcher matcher = SEQUEST_VERSION.matcher(line);
+            if (matcher.matches())
+            {
+                return matcher.group(1).replace(".", "");
+            }
+        }
+
+        return null;
     }
 
     private static final String version = "H\tSQTGenerator SEQUEST\nH\tSQTGeneratorVersion\t2.7\n";
@@ -346,7 +418,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
     private static final String license = " Licensed to Finnigan Corp., A Division of ThermoQuest Corp.";
 
 
-    private static void writeParams(Writer writer, File paramsFile, Logger logger, File fastaFile) throws IOException
+    private static void writeParams(Writer writer, File paramsFile, Logger logger, File fastaFile, String sequestVersion) throws IOException
     {
         int ixcorr = 0;
         float[] aa_mass = new float[256];
@@ -514,7 +586,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                     szMaxDiffMod = "";
                     for (String s : ss)
                     {
-                        if (!Character.isDigit(s.charAt(0)))
+                        if (s.isEmpty() || !Character.isDigit(s.charAt(0)))
                         {
                             break;
                         }
@@ -667,6 +739,10 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             if (0 == ixcorr)
             {
                 writer.write(String.format("%s%s", version, version2));
+                if (sequestVersion != null)
+                {
+                    writer.write("H\tSEQUESTVersion\t" + sequestVersion + "\n");
+                }
                 writer.write(version3);
                 writer.write("H\tComment\tSEQUEST ref. Eng,J.K.; McCormack A.L.; Yates J.R.\n");
                 writer.write(version4);
@@ -798,7 +874,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         String diffModMass;
         int diffModCharIndex = -1;
         char diffModChar;
-        // Start at 2 so we skip the parameter name and the = 
+        // Start at 2 so we skip the parameter name and the =
         for (int i = 2; i < values.length; i++)
         {
             diffModMass = values[i];
@@ -845,10 +921,32 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         }
     }
 
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testParse() throws IOException
+        {
+            Mockery context = new Mockery();
+            context.setImposteriser(ClassImposteriser.INSTANCE);
+            PipelineJob job = context.mock(PipelineJob.class);
+            Factory factory = context.mock(Factory.class);
+            UWSequestSearchTask task = new UWSequestSearchTask(factory, job);
+            assertEquals("2011011", task.parseSequestVersion(new StringReader("SEQUEST ver. UW 2011.01.1 MacCoss Lab, Genome Sciences")));
+
+            assertEquals("20120112", task.parseSequestVersion(new StringReader("SEQUEST ver. UW 2012.01.12 MacCoss Lab, Genome Sciences")));
+
+            assertEquals("2012012", task.parseSequestVersion(new StringReader(" SEQUEST version UW2012.01.2 MacCoss Lab, Genome Sciences")));
+
+            assertEquals(null, task.parseSequestVersion(new StringReader("SEQUEST ver. UW 202.01.12 MacCoss Lab, Genome Sciences")));
+            assertEquals(null, task.parseSequestVersion(new StringReader("SEQUEST ver. ")));
+            assertEquals(null, task.parseSequestVersion(new StringReader("")));
+        }
+    }
+
     public static void main(String... args) throws Exception
     {
         FileWriter writer = new FileWriter("c:/temp/headers.txt");
-        writeParams(writer, new File("c:/temp/sequestProduction.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/149Proteins.fsa"));
+        writeParams(writer, new File("c:/temp/sequestProduction.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/149Proteins.fsa"), "2050059");
         writer.close();
     }
 }

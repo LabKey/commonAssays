@@ -403,6 +403,8 @@ public class DataFrame
                 aliases.add(compName);
                 aliases.add(canonicalFieldName(compName));
 
+                aliases.add(composeName(_baseName, "Comp-", null));
+
                 aliases.add(composeName(linLogBaseName, CompensationMatrix.PREFIX, CompensationMatrix.SUFFIX));
             }
 

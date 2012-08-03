@@ -315,14 +315,14 @@ abstract public class FlowJoWorkspace extends Workspace
         }
     }
 
-    protected void readStat(Element elStat, SubsetSpec subset, @Nullable AttributeSet results, Analysis analysis, boolean warnOnMissingStats,
+    protected void readStat(Element elStat, SubsetSpec subset, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats,
                             String statisticAttr, String parameterAttr, String percentileAttr)
     {
         String statistic = elStat.getAttribute(statisticAttr);
         StatisticSpec.STAT stat = STATS.get(statistic);
         if (stat == null)
         {
-            warnOnce(analysis.getName(), subset, statistic + " statistic not yet supported.");
+            warnOnce(sampleId, analysis.getName(), subset, statistic + " statistic not yet supported.");
             return;
         }
 
@@ -330,7 +330,7 @@ abstract public class FlowJoWorkspace extends Workspace
         {
             if (elStat.hasAttribute("ancestor") && !"Total".equals(elStat.getAttribute("ancestor")))
             {
-                warnOnce(analysis.getName(), subset, "Frequency of arbitrary ancestor populations not supported.");
+                warnOnce(sampleId, analysis.getName(), subset, "Frequency of arbitrary ancestor populations not supported.");
                 return;
             }
         }
@@ -347,7 +347,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 String percentile = StringUtils.trimToNull(elStat.getAttribute(percentileAttr));
                 if (percentile == null)
                 {
-                    warnOnce(analysis.getName(), subset, "Percentile stat requires '" + percentileAttr + "' attribute.");
+                    warnOnce(sampleId, analysis.getName(), subset, "Percentile stat requires '" + percentileAttr + "' attribute.");
                     return;
                 }
                 else
@@ -372,7 +372,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 }
                 catch (NumberFormatException nfe)
                 {
-                    warning(analysis.getName(), subset, stat.getLongName() + " statistic value invalid double value: " + strValue);
+                    warning(sampleId, analysis.getName(), subset, stat.getLongName() + " statistic value invalid double value: " + strValue);
                     return;
                 }
 
@@ -385,7 +385,7 @@ abstract public class FlowJoWorkspace extends Workspace
             else
             {
                 if (warnOnMissingStats)
-                    warning(analysis.getName(), subset, stat.getLongName() + " statistic value missing");
+                    warning(sampleId, analysis.getName(), subset, stat.getLongName() + " statistic value missing");
             }
         }
     }
@@ -419,10 +419,10 @@ abstract public class FlowJoWorkspace extends Workspace
 
     protected void warnOnce(String msg)
     {
-        warnOnce(null, null, msg);
+        warnOnce(null, null, null, msg);
     }
 
-    protected void warnOnce(PopulationName name, SubsetSpec subset, String msg)
+    protected void warnOnce(String sampleId, PopulationName name, SubsetSpec subset, String msg)
     {
         for (String warning : getWarnings())
         {
@@ -430,12 +430,24 @@ abstract public class FlowJoWorkspace extends Workspace
                 return;
         }
 
-        warning(name, subset, msg);
+        warning(sampleId, name, subset, msg);
     }
 
-    protected void warning(PopulationName name, SubsetSpec subset, String msg)
+    protected void warning(String sampleId, PopulationName name, SubsetSpec subset, String msg)
     {
         StringBuilder sb = new StringBuilder();
+        if (sampleId != null)
+        {
+            String label = sampleId;
+            SampleInfo sampleInfo = getSample(sampleId);
+            if (sampleInfo != null)
+                label = sampleInfo.getLabel();
+            sb.append("Sample ").append(label);
+            if (!label.equals(sampleId))
+                sb.append(" (").append(sampleId).append(")");
+            sb.append(": ");
+        }
+
         if (name != null)
             sb.append(name.toString()).append(": ");
 

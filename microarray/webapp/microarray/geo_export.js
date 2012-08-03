@@ -14,15 +14,6 @@ Ext4.define('Microarray.GeoExportPanel', {
         items.push(this.getProtocolsTab());
         items.push(this.getCommentsTab());
 
-        LABKEY.Assay.getByType({
-            type: 'Microarray',
-            failure: LABKEY.Utils.onError,
-            scope: this,
-            success: function(result){
-                this.assayTypes = result;
-            }
-        });
-
         Ext4.apply(this, {
             itemId: 'geoExportPanel',
             defaults: {
@@ -233,51 +224,40 @@ Ext4.define('Microarray.GeoExportPanel', {
                 itemId: 'selectRuns',
                 listeners: {
                     beforerender: function(panel){
-                        var result = panel.up('#geoExportPanel').assayTypes;
                         var combo = panel.down('#sourceAssay');
                         var store = combo.store;
-
                         var value = combo.getValue();
-                        var toAdd = [];
-                        Ext4.each(result, function(assay){
-                            toAdd.push(store.model.create({
-                                name: assay.name,
-                                rowid: assay.id
-                            }));
-                        }, this);
-
-                        if(!toAdd.length){
-                            toAdd.push(store.model.create({
-                                name: 'No Microarray Assays Defined'
-                            }));
+                        if(!combo.store.getCount()){
+                            alert('No microarray assays have been defined in this folder');
                         }
 
-                        store.add(toAdd);
-                        if(value){
-                            combo.setValue(value);
-                        }
-                        store.fireEvent('datachanged', store);
+                        combo.setValue(value);
                     }
                 },
                 bodyStyle: 'padding: 5px;',
                 items: [{
-                    xtype: 'combo',
+                    xtype: 'labkey-combo',
                     fieldLabel: 'Source Assay',
                     width: 400,
                     queryMode: 'local',
                     itemId: 'sourceAssay',
                     disabled: !LABKEY.Security.currentUser.canUpdate,
-                    displayField: 'name',
-                    valueField: 'rowid',
-                    store: Ext4.create('Ext.data.Store', {
-                        fields: ['name', 'rowid'],
-                        data: []
+                    displayField: 'Name',
+                    valueField: 'RowId',
+                    store: Ext4.create('LABKEY.ext4.Store', {
+                        schemaName: 'assay',
+                        queryName: 'AssayList',
+                        columns: 'Name,RowId,Type',
+                        filterArray: [
+                            LABKEY.Filter.create('LSID', ':MicroarrayAssayProtocol.', LABKEY.Filter.Types.CONTAINS)
+                        ],
+                        autoLoad: true
                     }),
                     listeners: {
                         buffer: 50,
                         change: function(field, value){
                             var panel = field.up('#Samples').down('#chooseRunsPanel');
-                            var recIdx = field.store.find('rowid', value);
+                            var recIdx = field.store.find('RowId', value);
                             var sqlPanel = panel.up('#Samples');
 
                             //remove the grid of runs
@@ -286,7 +266,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                                 sqlPanel.remove(grid);
 
                             if(recIdx > -1){
-                                panel.addGridPanel(field.store.getAt(recIdx).get('name'));
+                                panel.addGridPanel(field.store.getAt(recIdx).get('Name'));
                             }
                             else {
                                 var runGrid = panel.down('#runsGrid');
@@ -316,6 +296,36 @@ Ext4.define('Microarray.GeoExportPanel', {
                             panel.up('#Samples').down('#run_ids').setValue(null);
                         }
                     }
+                },{
+                    xtype: 'labkey-combo',
+                    fieldLabel: 'Sample Set',
+                    width: 400,
+                    queryMode: 'local',
+                    itemId: 'sourceSampleSet',
+                    disabled: !LABKEY.Security.currentUser.canUpdate,
+                    displayField: 'Name',
+                    valueField: 'Name',
+                    store: Ext4.create('LABKEY.ext4.Store', {
+                        schemaName: 'exp',
+                        queryName: 'SampleSets',
+                        autoLoad: true,
+                        listeners: {
+                            scope: this,
+                            exception: LABKEY.Utils.onError,
+                            delay: 100, //
+                            load: function(store){
+                                var active;
+                                var field = this.down('#sourceSampleSet');
+                                if(!field.getValue() && store.getCount()){
+                                    store.each(function(r){
+                                        if(r.get('Active')){
+                                            field.setValue(r.get('Name'));
+                                        }
+                                    }, this);
+                                }
+                            }
+                        }
+                    })
                 }]
             },{
                 xtype: 'panel',
@@ -352,7 +362,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                             }
                         }),
                         listeners: {
-                            render: function(grid){
+                            afterrender: function(grid){
                                 var panel = grid.up('panel').up('panel');
                                 var run_ids = panel.down('#run_ids').getValue();
                                 if(run_ids){
@@ -406,8 +416,11 @@ Ext4.define('Microarray.GeoExportPanel', {
                     },{
                         border: false,
                         style: 'padding: 5px;',
-                        html: 'NOTE: In order to filter you custom query to show only the selected run IDs you must include the substitution ${RUN_IDS} in your SQL.  This will automtatically be converted to contain the Run IDs.  For example:<br><br>' +
-                            'SELECT * \nFROM assay."Microarray Results" r \nWHERE r.Run.RowId in (${RUN_IDS})'
+                        html: 'NOTE: In order to filter you custom query to show only the selected run IDs you must include the substitution ${RUN_IDS} in your SQL.  This will automtatically be converted to contain the Run IDs.  Other supported substitutions include:' +
+                            '<br>${ASSAY_NAME}, which will match the name of the assay, chosen using the dropdown menu above' +
+                            '<br>${SAMPLE_SET_NAME}, which will match the name of the sample set, chosen using the dropdown above' +
+                            '<br><br>An example SQL statement could look like: <br><br>' +
+                            'SELECT r.RowId, s.Study, r.Name <br>FROM assay."${ASSAY_NAME} Data" r <br>LEFT JOIN samples."${SAMPLE_SET_NAME}" s ON (s.RowId = r.SampleId)<br>WHERE r.Run.RowId IN (${RUN_IDS})'
                     },{
                         xtype: 'displayfield',
                         itemId: 'run_ids',
@@ -445,7 +458,13 @@ Ext4.define('Microarray.GeoExportPanel', {
             applyRecord: function(panel, rec){
                 var field = this.down('#' + rec.get('prop_name'));
                 if(field && field.setValue)
-                    field.setValue(rec.get('value'));
+                {
+                    var val = rec.get('value');
+                    if(val && rec.get('prop_name') == 'sourceAssay')
+                        val = parseInt(val);
+
+                    field.setValue(val);
+                }
                 else {
                     console.log('not found: ' + rec.get('prop_name'));
                 }
@@ -459,7 +478,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                 var value;
                 var recordIdx;
                 var record;
-                var fields = ['sourceAssay', 'custom_sql', 'run_ids'];
+                var fields = ['sourceAssay', 'sourceSampleSet', 'custom_sql', 'run_ids'];
                 Ext4.each(fields, function(prop_name){
                     field = this.down('#' + prop_name);
                     value = field.getValue();
@@ -509,10 +528,17 @@ Ext4.define('Microarray.GeoExportPanel', {
                     return;
                 }
 
-                if(!grid.store || !grid.store.hasLoaded()){
+                if(!grid.store || grid.store.loading){
                     this.mon(grid.store, 'load', function(){
                         me.setRunIds(ids);
                     }, this, {single: true, delay: 100});
+                    return;
+                }
+
+                if(!grid.getView().viewReady){
+                    grid.getView().on('viewready', function(view){
+                        this.setRunIds(ids);
+                    }, this, {single: true});
                     return;
                 }
 
@@ -533,10 +559,13 @@ Ext4.define('Microarray.GeoExportPanel', {
     generateSql: function(){
         var samplePanel = this.down('#Samples');
 
-        if(!samplePanel.down('#sourceAssay').getValue()){
+        var assayField = samplePanel.down('#sourceAssay');
+        if(!assayField.getValue()){
             alert("You must choose an assay");
             return;
         }
+
+        var assayName = assayField.store.getById(assayField.getValue()).get('Name');
 
         var sql = samplePanel.down('#custom_sql').getValue();
         if(!sql){
@@ -557,6 +586,21 @@ Ext4.define('Microarray.GeoExportPanel', {
             return;
         }
         sql = sql.replace(re, runIds.join(","));
+
+        re = new RegExp(/\${ASSAY_NAME}/i);
+        if(sql.match(re) && !assayName){
+            alert('SQL contain ${ASSAY_NAME}, but no assay was selected');
+            return;
+        }
+        sql = sql.replace(re, assayName);
+
+        re = new RegExp(/\${SAMPLE_SET_NAME}/i);
+        var sampleSet = samplePanel.down('#sourceSampleSet').getValue();
+        if(sql.match(re) && !sampleSet){
+            alert('SQL contain ${SAMPLE_SET_NAME}, but no sample set was selected');
+            return;
+        }
+        sql = sql.replace(re, sampleSet);
 
         return sql;
     },
@@ -614,7 +658,6 @@ Ext4.define('Microarray.GeoExportPanel', {
                                 listeners: {
                                     scope: this,
                                     beforeload: function(operation){
-                                        console.log('beforeload');
                                         var grid = this.down('#resultGrid');
                                         var store = grid.store;
                                         var sql = this.down('#custom_sql').getValue();
