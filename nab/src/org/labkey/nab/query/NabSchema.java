@@ -95,7 +95,7 @@ public class NabSchema extends AssaySchema
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return new EnumTableInfo<SampleInfo.Method>(SampleInfo.Method.class, getDbSchema(), "List of possible sample preparation methods for the NAb assay.");
+            return new EnumTableInfo<SampleInfo.Method>(SampleInfo.Method.class, getDbSchema(), "List of possible sample preparation methods for the NAb assay.", false);
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -105,7 +105,7 @@ public class NabSchema extends AssaySchema
                 {
                     return e.getLabel();
                 }
-            }, "List of possible curve fitting methods for the NAb assay.");
+            }, false, "List of possible curve fitting methods for the NAb assay.");
         }
 
         for (ExpProtocol protocol : getProtocols())

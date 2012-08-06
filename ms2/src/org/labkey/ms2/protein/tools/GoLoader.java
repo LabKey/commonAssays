@@ -380,9 +380,9 @@ public abstract class GoLoader
         {
             try
             {
-                _goLoaded = !Table.isEmpty(ProteinManager.getTableInfoGoTerm());
+                _goLoaded = new TableSelector(ProteinManager.getTableInfoGoTerm()).getRowCount() != 0;
             }
-            catch(SQLException e)
+            catch(RuntimeSQLException e)
             {
                 _log.error("isGoLoaded", e);
                 _goLoaded = false;    // Don't try this again if there's a SQL error
