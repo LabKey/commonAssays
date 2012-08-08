@@ -1476,7 +1476,7 @@ public class MascotClientImpl implements SearchClient
                     +(parameters.getProperty("password","").length()>0 ? "***" : "")
                     +","+_proxyURL+")="+mascotRequestURL;
             if (getLogger() == _log)
-                getLogger().debug(msg, x);
+                getLogger().info(msg, x);
             else
                 getLogger().error(msg, x);
             if (x instanceof MalformedURLException)

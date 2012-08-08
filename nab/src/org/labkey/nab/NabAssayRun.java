@@ -291,21 +291,13 @@ public abstract class NabAssayRun extends Luc5Assay
             Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
             String wellGroupName = getWellGroupName(material);
             String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName).toString();
-            Map<String, ObjectProperty> outputProperties;
-            try
+            Map<String, ObjectProperty> outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
+            for (ObjectProperty prop : outputProperties.values())
             {
-                outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
-                for (ObjectProperty prop : outputProperties.values())
-                {
-                    PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(prop.getPropertyURI(), prop.getContainer());
-                    dataProperties.put(pd, prop.value());
-                }
+                PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(prop.getPropertyURI(), prop.getContainer());
+                dataProperties.put(pd, prop.value());
             }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-            
+
             samplePropertyMap.put(wellGroupName, new NabResultProperties(sampleProperties,  dataProperties));
         }
         return samplePropertyMap;

@@ -568,14 +568,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
     public void deleteData(ExpData data, Container container, User user)
     {
-        try
-        {
-            OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
     }
 
     public String getPropertyName(String prefix, int cutoff, DilutionCurve.FitType type)

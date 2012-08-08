@@ -284,15 +284,8 @@ public class FlowReportManager
         if (uri == null)
             return null;
 
-        try
-        {
-            OntologyObject obj = OntologyManager.getOntologyObject(container, uri);
-            return obj == null ? null : obj.getObjectId();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        OntologyObject obj = OntologyManager.getOntologyObject(container, uri);
+        return obj == null ? null : obj.getObjectId();
     }
 
     public static Integer ensureReportOntologyObjectId(FlowReport report, Container container)
@@ -331,17 +324,9 @@ public class FlowReportManager
     // so we can just delete that object and it's children to remove all results.
     public static void deleteReportResults(FlowReport report, Container container)
     {
-        try
-        {
-            // Delete all owned objects of the report's exp.object
-            Integer objectId = getReportOntologyObjectId(report, container);
-            if (objectId != null)
-                OntologyManager.deleteOntologyObjects(new Integer[] { objectId }, container, true);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        // Delete all owned objects of the report's exp.object
+        Integer objectId = getReportOntologyObjectId(report, container);
+        if (objectId != null)
+            OntologyManager.deleteOntologyObjects(container, true, objectId);
     }
-
 }

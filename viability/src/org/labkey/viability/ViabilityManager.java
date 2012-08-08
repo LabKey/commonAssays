@@ -250,9 +250,9 @@ public class ViabilityManager
     }
 
     /** Delete the properties for objectID, but not the object itself. */
-    private static void deleteProperties(Container c, int objectID) throws SQLException
+    private static void deleteProperties(Container c, int objectID)
     {
-        OntologyManager.deleteProperties(objectID, c);
+        OntologyManager.deleteProperties(c, objectID);
     }
 
     /**
@@ -290,19 +290,19 @@ public class ViabilityManager
                     new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
                     new SimpleFilter("DataID", dataIDs, CompareType.IN), null);
 
-            Integer[] objectIDs = new Integer[rows.length];
+            int[] objectIDs = new int[rows.length];
 
             for (int i = 0; i < rows.length; i++)
             {
                 Map<String, Object> row = rows[i];
                 Integer resultID = (Integer)row.get("RowID");
-                objectIDs[i] = (Integer)row.get("ObjectID");
+                objectIDs[i] = ((Integer)row.get("ObjectID")).intValue();
 
                 deleteSpecimens(resultID.intValue());
                 Table.delete(ViabilitySchema.getTableInfoResults(), resultID);
             }
 
-            OntologyManager.deleteOntologyObjects(objectIDs, c, true);
+            OntologyManager.deleteOntologyObjects(c, true, objectIDs);
         }
         catch (SQLException ex)
         {

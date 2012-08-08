@@ -87,15 +87,8 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
         Analyte analyte = getAnalyte(analyteName);
-        try
-        {
-            Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-            return getProperties(domain, OntologyManager.getPropertyObjects(_run.getContainer(), analyte.getLsid()));
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        return getProperties(domain, OntologyManager.getPropertyObjects(_run.getContainer(), analyte.getLsid()));
     }
 
     @Override

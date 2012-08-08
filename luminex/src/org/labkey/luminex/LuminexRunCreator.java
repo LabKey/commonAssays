@@ -98,17 +98,10 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
 
     private void removeExistingAnalyteProperties(Container container, Analyte analyte) throws ExperimentException
     {
-        try
+        OntologyObject analyteObject = OntologyManager.getOntologyObject(container, analyte.getLsid());
+        if (analyteObject != null)
         {
-            OntologyObject analyteObject = OntologyManager.getOntologyObject(container, analyte.getLsid());
-            if (analyteObject != null)
-            {
-                OntologyManager.deleteProperties(analyteObject.getObjectId(), container);
-            }
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
+            OntologyManager.deleteProperties(container, analyteObject.getObjectId());
         }
     }
 }

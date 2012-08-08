@@ -374,10 +374,6 @@ public class ProteinManager
                 OntologyManager.deleteDomain(set.getLsid(), c);
             }
         }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
         catch (DomainNotFoundException e)
         {
             throw new RuntimeException(e);

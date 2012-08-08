@@ -98,29 +98,22 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> imple
         ExpRun reRun = getReRun();
         if (reRun != null)
         {
-            try
+            ExpMaterial selected = null;
+            for (Map.Entry<ExpMaterial, String> entry : reRun.getMaterialInputs().entrySet())
             {
-                ExpMaterial selected = null;
-                for (Map.Entry<ExpMaterial, String> entry : reRun.getMaterialInputs().entrySet())
+                if (entry.getValue().equals(scope))
                 {
-                    if (entry.getValue().equals(scope))
-                    {
-                        selected = entry.getKey();
-                        break;
-                    }
+                    selected = entry.getKey();
+                    break;
                 }
-                if (selected == null)
-                    throw new NotFoundException("NAb run input " + scope + " could not be found for run " + getReRunId() + ".");
-                Map<String, Object> values = OntologyManager.getProperties(getContainer(), selected.getLSID());
-                Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
-                for (DomainProperty property : domain.getProperties())
-                    ret.put(property, values.get(property.getPropertyURI()));
-                return ret;
             }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            if (selected == null)
+                throw new NotFoundException("NAb run input " + scope + " could not be found for run " + getReRunId() + ".");
+            Map<String, Object> values = OntologyManager.getProperties(getContainer(), selected.getLSID());
+            Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
+            for (DomainProperty property : domain.getProperties())
+                ret.put(property, values.get(property.getPropertyURI()));
+            return ret;
         }
         else
             return super.getDefaultValues(domain, scope);
@@ -132,51 +125,44 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> imple
         ExpRun reRun = getReRun();
         if (reRun != null)
         {
-            try
+            Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
+            String batchDomainURI = NabAssayProvider.getDomainURIForPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_BATCH);
+            if (batchDomainURI.equals(domain.getTypeURI()))
             {
-                Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
-                String batchDomainURI = NabAssayProvider.getDomainURIForPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_BATCH);
-                if (batchDomainURI.equals(domain.getTypeURI()))
+                // we're getting batch values
+                ExpExperiment batch = AssayService.get().findBatch(reRun);
+                if (batch != null)
                 {
-                    // we're getting batch values
-                    ExpExperiment batch = AssayService.get().findBatch(reRun);
-                    if (batch != null)
+                    Map<String, ObjectProperty> batchProperties = batch.getObjectProperties();
+                    for (DomainProperty property : domain.getProperties())
                     {
-                        Map<String, ObjectProperty> batchProperties = batch.getObjectProperties();
-                        for (DomainProperty property : domain.getProperties())
-                        {
-                            ObjectProperty value = batchProperties.get(property.getPropertyURI());
-                            ret.put(property, value != null ? value.value() : null);
-                        }
+                        ObjectProperty value = batchProperties.get(property.getPropertyURI());
+                        ret.put(property, value != null ? value.value() : null);
                     }
                 }
-                else
-                {
-                    // we're getting run values
-                    Map<String, Object> values = OntologyManager.getProperties(getContainer(), reRun.getLSID());
-                    for (DomainProperty property : domain.getProperties())
-                        ret.put(property, values.get(property.getPropertyURI()));
-
-                    // bad hack here to temporarily create domain properties for name and comments.  These need to be
-                    // repopulated just like the rest of the domain properties, but they aren't actually part of the
-                    // domain- they're hard columns on the ExperimentRun table.  Since the DomainProperty objects are
-                    // just used to calculate the input form element names, this hack works to pre-populate the values.
-                    DomainProperty nameProperty = domain.addProperty();
-                    nameProperty.setName("Name");
-                    ret.put(nameProperty, reRun.getName());
-                    nameProperty.delete();
-
-                    DomainProperty commentsProperty = domain.addProperty();
-                    commentsProperty.setName("Comments");
-                    ret.put(commentsProperty, reRun.getComments());
-                    commentsProperty.delete();
-                }
-                return ret;
             }
-            catch (SQLException e)
+            else
             {
-                throw new RuntimeSQLException(e);
+                // we're getting run values
+                Map<String, Object> values = OntologyManager.getProperties(getContainer(), reRun.getLSID());
+                for (DomainProperty property : domain.getProperties())
+                    ret.put(property, values.get(property.getPropertyURI()));
+
+                // bad hack here to temporarily create domain properties for name and comments.  These need to be
+                // repopulated just like the rest of the domain properties, but they aren't actually part of the
+                // domain- they're hard columns on the ExperimentRun table.  Since the DomainProperty objects are
+                // just used to calculate the input form element names, this hack works to pre-populate the values.
+                DomainProperty nameProperty = domain.addProperty();
+                nameProperty.setName("Name");
+                ret.put(nameProperty, reRun.getName());
+                nameProperty.delete();
+
+                DomainProperty commentsProperty = domain.addProperty();
+                commentsProperty.setName("Comments");
+                ret.put(commentsProperty, reRun.getComments());
+                commentsProperty.delete();
             }
+            return ret;
         }
         else
             return super.getDefaultValues(domain);
