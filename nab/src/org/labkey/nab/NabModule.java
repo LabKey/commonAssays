@@ -99,9 +99,9 @@ public class NabModule extends DefaultModule
         // implementations, it's less confusing to the user if the NAB tab keeps them from switching
         // from the new implementation to the old, so we swap out the pageflow of the tab URL:
         ViewContext context = HttpView.getRootContext();
-        String pageFlow = context != null ? context.getActionURL().getPageFlow() : null;
+        String pageFlow = context != null ? context.getActionURL().getController() : null;
         if ("assay".equals(pageFlow) || "NabAssay".equals(pageFlow))
-            defaultURL.setPageFlow("assay");
+            defaultURL.setController("assay");
 
         return defaultURL;
     }

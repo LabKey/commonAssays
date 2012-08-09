@@ -18,6 +18,7 @@ package org.labkey.flow.data;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ProtocolImplementation;
 import org.labkey.api.exp.api.ExperimentService;
@@ -47,7 +48,7 @@ public class FlowProtocolImplementation extends ProtocolImplementation
     }
 
     @Override
-    public void onRunDeleted(Container container, User user) throws SQLException
+    public void onRunDeleted(Container container, User user)
     {
         SQLFragment sql = new SQLFragment();
         sql.append("DELETE FROM exp.data WHERE rowid IN (\n");
@@ -62,6 +63,6 @@ public class FlowProtocolImplementation extends ProtocolImplementation
         sql.append("    NOT EXISTS (SELECT fo.dataid FROM flow.object fo WHERE fo.dataid = d.rowid AND fo.container = ?)\n").add(container.getId());
         sql.append(")\n");
 
-        Table.execute(ExperimentService.get().getSchema(), sql);
+        new SqlExecutor(ExperimentService.get().getSchema(), sql).execute();
     }
 }

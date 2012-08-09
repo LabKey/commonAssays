@@ -404,27 +404,20 @@ public class ReportsController extends BaseFlowController
 
     public static FlowReport getReport(ViewContext context, IdForm form) throws Exception
     {
-        try
+        if (null == form.getReportId())
         {
-            if (null == form.getReportId())
-            {
-                throw new NotFoundException();
-            }
-            Report r = form.getReportId().getReport();
-            if (null == r || !(r instanceof FlowReport))
-            {
-                throw new NotFoundException();
-            }
-            if (!r.getDescriptor().getContainerId().equals(context.getContainer().getId()))
-            {
-                throw new NotFoundException();
-            }
-            return (FlowReport)r;
+            throw new NotFoundException();
         }
-        catch (SQLException x)
+        Report r = form.getReportId().getReport();
+        if (null == r || !(r instanceof FlowReport))
         {
-            throw new RuntimeSQLException(x);
+            throw new NotFoundException();
         }
+        if (!r.getDescriptor().getContainerId().equals(context.getContainer().getId()))
+        {
+            throw new NotFoundException();
+        }
+        return (FlowReport)r;
     }
 
 

@@ -56,15 +56,7 @@ public class FlowReportManager
 {
     public static Collection<FlowReport> getFlowReports(Container c, User user)
     {
-        Report[] all;
-        try
-        {
-            all = ReportService.get().getReports(user, c);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Report[] all = ReportService.get().getReports(user, c);
 
         TreeMap<String, FlowReport> reports = new CaseInsensitiveTreeMap<FlowReport>();
 
