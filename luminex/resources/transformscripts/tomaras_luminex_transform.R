@@ -25,9 +25,10 @@
 #  - 3.0.20120323 : Changes for LabKey server 12.1
 #  - 3.1.20120629 : Issue 15279: Luminex Positivity Calculation incorrect for titrated unknowns incorrect
 #  - 4.0.20120509 : Changes for LabKey server 12.2
+#  - 4.1.20120806 : Issue 15709: Luminex tranform : QC Control plots not displayed when EC50 value out of acceptable range 
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "4.0.20120509";
+transformVersion = "4.1.20120806";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -363,7 +364,7 @@ if (nrow(titration.data) > 0)
 
                             ec50 = maxValueConversion(as.numeric(coef(fit))[4]);
                             if (ec50 > 10e6) {
-                                stop("EC50 value over the acceptable level (10e6).")
+                                print("EC50 value over the acceptable level (10e6).")
                             } else {
                                 run.data[runDataIndex,]$EC50_4pl = ec50
                             }
@@ -415,7 +416,7 @@ if (nrow(titration.data) > 0)
                             }
                             ec50 = unname(getConc(fit, y))[3];
                             if (is.nan(ec50) | ec50 > 10e6) {
-                                stop("EC50 value out of acceptable range (either outside standards MFI or greater than 10e6).")
+                                print("EC50 value out of acceptable range (either outside standards MFI or greater than 10e6).")
                             } else {
                                 run.data[runDataIndex,]$EC50_5pl = ec50;
                             }
