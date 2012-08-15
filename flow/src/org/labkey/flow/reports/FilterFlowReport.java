@@ -52,6 +52,7 @@ import org.labkey.flow.query.FlowTableType;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 
+import javax.script.ScriptEngine;
 import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -548,9 +549,9 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         @Override
-        protected String getScriptProlog(ViewContext context, File inputFile)
+        protected String getScriptProlog(ScriptEngine engine, ViewContext context, File inputFile)
         {
-            String labkeyProlog = super.getScriptProlog(context, inputFile);
+            String labkeyProlog = super.getScriptProlog(engine, context, inputFile);
 
             StringBuffer reportProlog = new StringBuffer(labkeyProlog);
             reportProlog.append("report.parameters <- list(");
