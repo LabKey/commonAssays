@@ -49,6 +49,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
@@ -72,6 +73,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.nab.query.NabSchema;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -206,6 +208,12 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         method.setRequired(true);
         method.setShownInUpdateView(false);
         return result;
+    }
+
+    @Override
+    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
+    {
+        return super.getDataCollectors(uploadedFiles, context, false);
     }
 
     protected void addPassThroughRunProperties(Domain runDomain)
@@ -492,5 +500,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     {
         return new AssayPipelineProvider(NabModule.class,
                 new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import NAb");
+    }
+
+    @Override
+    public boolean supportsReRun()
+    {
+        return true;
     }
 }

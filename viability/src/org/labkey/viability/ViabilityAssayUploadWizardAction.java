@@ -160,8 +160,6 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean errorReshow, String uploadStepName, ViabilityAssayRunUploadForm form, BindException errors)
     {
         InsertView view = super.createInsertView(baseTable, lsidCol, properties, errorReshow, uploadStepName, form, errors);
-        if (form.getReRunId() != null)
-            view.getDataRegion().addHiddenFormField("reRunId", "" + form.getReRunId());
         if (form.isDelete())
             view.getDataRegion().addHiddenFormField("delete", "" + form.isDelete());
         return view;

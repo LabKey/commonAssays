@@ -63,10 +63,4 @@ public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvide
     {
         _antigenProperties = antigenProperties;
     }
-
-    @Override
-    public Integer getReRunId()
-    {
-        return null;
-    }
 }

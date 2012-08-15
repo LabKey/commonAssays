@@ -19,6 +19,7 @@ package org.labkey.nab;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.study.assay.AssayService;
@@ -44,8 +45,6 @@ import java.io.File;
  */
 public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> implements PlateUploadForm<NabAssayProvider>
 {
-    private ExpRun _reRun;
-    private Integer _reRunId;
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
     private PlateSamplePropertyHelper _samplePropertyHelper;
 
@@ -59,16 +58,6 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> imple
         _samplePropertyHelper = helper;
     }
 
-    public Integer getReRunId()
-    {
-        return _reRunId;
-    }
-
-    public void setReRunId(Integer reRunId)
-    {
-        _reRunId = reRunId;
-    }
-
     public Map<String, Map<DomainProperty, String>> getSampleProperties()
     {
         return _sampleProperties;
@@ -77,19 +66,6 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> imple
     public void setSampleProperties(Map<String, Map<DomainProperty, String>> sampleProperties)
     {
         _sampleProperties = sampleProperties;
-    }
-
-    public ExpRun getReRun()
-    {
-        if (_reRunId != null)
-        {
-            _reRun = ExperimentService.get().getExpRun(_reRunId);
-            if (_reRun == null)
-            {
-                throw new NotFoundException("NAb run " + _reRunId + " could not be found.");
-            }
-        }
-        return _reRun;
     }
 
     @Override
@@ -117,55 +93,6 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> imple
         }
         else
             return super.getDefaultValues(domain, scope);
-    }
-
-    @Override
-    public Map<DomainProperty, Object> getDefaultValues(Domain domain) throws ExperimentException
-    {
-        ExpRun reRun = getReRun();
-        if (reRun != null)
-        {
-            Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
-            String batchDomainURI = NabAssayProvider.getDomainURIForPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_BATCH);
-            if (batchDomainURI.equals(domain.getTypeURI()))
-            {
-                // we're getting batch values
-                ExpExperiment batch = AssayService.get().findBatch(reRun);
-                if (batch != null)
-                {
-                    Map<String, ObjectProperty> batchProperties = batch.getObjectProperties();
-                    for (DomainProperty property : domain.getProperties())
-                    {
-                        ObjectProperty value = batchProperties.get(property.getPropertyURI());
-                        ret.put(property, value != null ? value.value() : null);
-                    }
-                }
-            }
-            else
-            {
-                // we're getting run values
-                Map<String, Object> values = OntologyManager.getProperties(getContainer(), reRun.getLSID());
-                for (DomainProperty property : domain.getProperties())
-                    ret.put(property, values.get(property.getPropertyURI()));
-
-                // bad hack here to temporarily create domain properties for name and comments.  These need to be
-                // repopulated just like the rest of the domain properties, but they aren't actually part of the
-                // domain- they're hard columns on the ExperimentRun table.  Since the DomainProperty objects are
-                // just used to calculate the input form element names, this hack works to pre-populate the values.
-                DomainProperty nameProperty = domain.addProperty();
-                nameProperty.setName("Name");
-                ret.put(nameProperty, reRun.getName());
-                nameProperty.delete();
-
-                DomainProperty commentsProperty = domain.addProperty();
-                commentsProperty.setName("Comments");
-                ret.put(commentsProperty, reRun.getComments());
-                commentsProperty.delete();
-            }
-            return ret;
-        }
-        else
-            return super.getDefaultValues(domain);
     }
 
     @Override @NotNull

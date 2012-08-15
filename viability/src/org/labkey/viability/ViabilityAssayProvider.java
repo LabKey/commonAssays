@@ -465,11 +465,17 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             // By passing an empty set of previously uploaded files, the PreviouslyUploadedDataCollector will be added
             // to the list, but won't be visible.  The FileUploadDataCollector will be first in the list of visible
             // collectors and will therefore be selected in the AssayDataCollectorDisplayColumn's dataUpload.jsp.
-            return super.getDataCollectors(Collections.<String, File>emptyMap(), context);
+            return super.getDataCollectors(Collections.<String, File>emptyMap(), context, false);
         }
         else
         {
-            return super.getDataCollectors(uploadedFiles, context);
+            return super.getDataCollectors(uploadedFiles, context, true);
         }
+    }
+
+    @Override
+    public boolean supportsReRun()
+    {
+        return true;
     }
 }

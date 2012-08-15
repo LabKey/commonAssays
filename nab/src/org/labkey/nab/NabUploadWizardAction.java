@@ -50,15 +50,6 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     }
 
     @Override
-    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean errorReshow, String uploadStepName, NabRunUploadForm form, BindException errors)
-    {
-        InsertView view = super.createInsertView(baseTable, lsidCol, properties, errorReshow, uploadStepName, form, errors);
-        if (form.getReRunId() != null)
-            view.getDataRegion().addHiddenFormField("reRunId", "" + form.getReRunId());
-        return view;
-    }
-
-    @Override
     protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
         NabAssayProvider provider = newRunForm.getProvider();

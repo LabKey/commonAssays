@@ -53,8 +53,6 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     public static String INPUT_PREFIX = "_pool_";
     private static String FRONTIER_SCIENCE_BARCODE_PREFIX = "\u221fFSQ";
 
-    private ExpRun _reRun;
-    private Integer _reRunId;
     private boolean _delete;
     
     private String[] _poolIDs;
@@ -63,9 +61,6 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
 
     public String[] getPoolIds() { return _poolIDs; }
     public void setPoolIds(String[] poolIDs) { _poolIDs = poolIDs; }
-
-    public Integer getReRunId() { return _reRunId; }
-    public void setReRunId(Integer reRunId) { _reRunId = reRunId; }
 
     public boolean isDelete() { return _delete; }
     public void setDelete(boolean delete) { _delete = delete; }
@@ -213,17 +208,6 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
             properties.put(dp.getName(), value);
         }
         return properties;
-    }
-
-    private ExpRun getReRun()
-    {
-        if (_reRunId != null)
-        {
-            _reRun = ExperimentService.get().getExpRun(_reRunId);
-            if (_reRun == null)
-                throw new NotFoundException("Viability run " + _reRunId + " could not be found");
-        }
-        return _reRun;
     }
 
     /**
