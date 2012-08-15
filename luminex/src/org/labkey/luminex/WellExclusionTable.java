@@ -83,6 +83,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                 return schema.createWellExclusionAnalyteTable();
             }
         }, "AnalyteId"));
+        getColumn("Analytes").setUserEditable(false);
 
         SQLFragment joinSQL = new SQLFragment(" FROM ");
         joinSQL.append(LuminexSchema.getTableInfoDataRow(), "dr");
