@@ -129,7 +129,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
 
-    protected void registerLsidHandler()
+    public void registerLsidHandler()
     {
         LsidManager.get().registerHandler(_runLSIDPrefix, new LsidManager.ExpRunLsidHandler()
         {

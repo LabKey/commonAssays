@@ -128,7 +128,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return new HtmlView("The MAGE-ML data file is an XML file that contains the results of the microarray run.");
     }
 
-    protected void registerLsidHandler()
+    public void registerLsidHandler()
     {
         // Since we don't usually load the actual data from microarray runs, send the user to the text
         // view of the experiment run so that they can download the files directly to analyte locally

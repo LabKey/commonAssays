@@ -100,7 +100,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return new LuminexSchema(user, container, protocol);
     }
 
-    protected void registerLsidHandler()
+    public void registerLsidHandler()
     {
         super.registerLsidHandler();
         LsidManager.get().registerHandler(LUMINEX_DATA_ROW_LSID_PREFIX, new LsidManager.ExpObjectLsidHandler()

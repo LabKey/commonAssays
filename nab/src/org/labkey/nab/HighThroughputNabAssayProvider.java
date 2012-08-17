@@ -68,7 +68,7 @@ public class HighThroughputNabAssayProvider extends NabAssayProvider
         // add no extra properties
     }
 
-    protected void registerLsidHandler()
+    public void registerLsidHandler()
     {
         // don't register parent's handler
     }

@@ -58,9 +58,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunsForm;
-import org.labkey.flow.data.FlowDataObject;
-import org.labkey.flow.data.FlowProtocol;
-import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowPipelineProvider;
@@ -247,7 +244,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    protected void registerLsidHandler()
+    public void registerLsidHandler()
     {
         // Do not register a run LSID handler.
         // Flow ExpData LSID handlers are registered in the FlowDataType constructor.
