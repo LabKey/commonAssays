@@ -15,7 +15,6 @@
  */
 package org.labkey.elispot;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DeferredUpgrade;
 import org.labkey.api.data.UpgradeCode;
@@ -47,7 +46,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: Jan 9, 2012
  * Time: 1:26:14 PM
