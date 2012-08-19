@@ -190,7 +190,7 @@
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                                                 <property name="parameter" value="hardklor, charge state method"/>
-                                                <property name="switchName" value="cmd"/>
+                                                <property name="switchName" value="cdm"/>
                                                 <property name="help" value="Charge state determination method. B=basic assumes all charge states are possible, F=fast fourier transform, P=Patterson algorithm, Q=quickcharge uses inverse peak distances, S=Senko method combines F and P. Default B."/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
@@ -199,7 +199,7 @@
                                                 <property name="help" value="Minimum charge state to predict. Default 1."/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                                                <property name="parameter" value="hardklor, max charge state"/>
+                                                <property name="parameter" value="hardklor, max charge"/>
                                                 <property name="switchName" value="chMax"/>
                                                 <property name="help" value="Maximum charge state to predict. Default 3."/>
                                             </bean>

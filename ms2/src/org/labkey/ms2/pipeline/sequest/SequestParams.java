@@ -241,9 +241,9 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             210,                                                       //sortOrder
             "0",                                            //The value of the property
             "remove_precursor_peak",                                // the sequest.params property name
-            "0=no, 1=yes",       // the sequest.params comment
+            "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD)",       // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-            ParamsValidatorFactory.getBooleanParamsValidator(),
+            new ListParamsValidator("0", "1", "2"),
             true
         ).setInputXmlLabels("sequest, remove_precursor_peak"));
 

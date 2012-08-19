@@ -22,7 +22,7 @@
 <%
     MS2Controller.RenameBean bean = ((JspView<MS2Controller.RenameBean>) HttpView.currentView()).getModelBean();
 %>
-<form action="<%=MS2Controller.RenameRunAction.class%>" method="post">
+<form action="<%=h(buildURL(MS2Controller.RenameRunAction.class))%>" method="post">
 <%=generateReturnUrlFormField(bean.returnURL)%>
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>"/>
 <table class="labkey-data-region">

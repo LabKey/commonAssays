@@ -29,13 +29,13 @@
 
     MS2Run[] runs = form.getRuns();
 %>
-<form method=get action="<%=h(ScoringController.CompareAction.class)%>">
+<form method=get action="<%=h(buildURL(ScoringController.CompareAction.class))%>">
 <labkey:errors/>
 <% if (runs.length > 0)
 { %>
 <table>
     <tr><td colspan=2 class="labkey-header-large">
-    Choose discrimate values to display in ROC chart.<br>
+    Choose discriminate values to display in ROC chart.<br>
     </td></tr>
     <tr><td valign="top">
 <table>

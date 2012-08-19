@@ -91,6 +91,16 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         )).setInputXmlLabels("sequest, theoretical_fragment_ions");
 
         _params.addProperty(new SequestParam(
+            71,                                                       //sortOrder
+            "0.11",                                                    //The value of the property
+            "fragment_bin_startoffset",                                 // the sequest.params property name
+            "offset position to start the binning",// the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
+            ParamsValidatorFactory.getRealNumberParamsValidator(),
+            false
+        )).setInputXmlLabels("spectrum, fragment_bin_startoffset");
+
+        _params.addProperty(new SequestParam(
                   92,                                                       //sortOrder
                   "0",                                                      //The value of the property
                   "skip_researching",                                           // the sequest.params property name
@@ -195,9 +205,9 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
                         253,                                                       //sortOrder
                         "0",                                            //The value of the property
                         "isotope_error",                                // the sequest.params property name
-                        "When true, search multiple windows around -1, 0, +1, +2, +3 (da?) of parrent mass. Default 0 (false).",       // the sequest.params comment
+                        "0=off, 1= on -1/0/1/2/3 (standard C13 error), 2= -8/-4/0/4/8 (for +4/+8 labeling)",       // the sequest.params comment
                         ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                        new BooleanParamsValidator(),
+                        new ListParamsValidator("0", "1", "2"),
                         true
         )).setInputXmlLabels("sequest, isotope_error" );
 
