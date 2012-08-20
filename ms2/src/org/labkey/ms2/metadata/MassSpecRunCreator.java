@@ -62,7 +62,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
             {
                 batch = super.saveExperimentRun(context, batch, run, forceSaveBatchProps);
                 form.clearUploadedData();
-                form.getSelectedDataCollector().uploadComplete(form);
+                form.getSelectedDataCollector().uploadComplete(form, run);
             }
             return batch;
         }

@@ -30,6 +30,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.RuntimeSQLException;
 
+import java.io.File;
 import java.util.*;
 import java.sql.SQLException;
 
