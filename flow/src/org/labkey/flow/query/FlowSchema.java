@@ -1671,8 +1671,8 @@ public class FlowSchema extends UserSchema
                     c.getId(), typeid);
             String create =
 //                    "CREATE INDEX ix_" + shortName + " ON " + name + " (TypeId,ExperimentId);\n" +
-                    "CREATE UNIQUE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
-                    "CREATE UNIQUE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
+                    "CREATE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
+                    "CREATE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
             Table.execute(flow, create);
             long end = System.currentTimeMillis();
             return name;
