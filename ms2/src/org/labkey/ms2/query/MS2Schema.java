@@ -843,7 +843,7 @@ public class MS2Schema extends UserSchema
         return sql;
     }
 
-    protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys, Integer targetSeqId)
+    public SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys, Integer targetSeqId)
     {
         QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.PeptidesFilter.toString());
         SimpleFilter filter = new SimpleFilter();

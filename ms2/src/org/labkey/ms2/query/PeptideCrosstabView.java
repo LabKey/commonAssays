@@ -16,12 +16,16 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.CrosstabTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.AggregateColumnInfo;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
 import org.labkey.ms2.MS2Controller;
 
 /**
@@ -30,9 +34,19 @@ import org.labkey.ms2.MS2Controller;
  */
 public class PeptideCrosstabView extends AbstractQueryCrosstabView
 {
+    private MS2Controller.PeptideFilteringComparisonForm _form;
+    private boolean _addExportProteinCoverage = false;
+
+    public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url, boolean addExportProteinCoverage)
+    {
+        this(schema, form, url);
+        _addExportProteinCoverage = addExportProteinCoverage;
+    }
+
     public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url)
     {
         super(schema, form, url, MS2Schema.HiddenTableType.PeptideCrosstab);
+        _form = form;
     }
 
     protected TableInfo createTable()
@@ -49,5 +63,22 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
     protected FieldKey getComparisonColumn()
     {
         return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "COUNT_RowId");
-     }
+    }
+
+    @Override
+    protected void populateButtonBar(DataView view, ButtonBar bar)
+    {
+        super.populateButtonBar(view, bar);
+
+        if (_addExportProteinCoverage)
+        {
+            ActionURL url = getViewContext().getActionURL().clone();
+            url.setAction(MS2Controller.ExportComparisonProteinCoverageMapAction.class);
+
+            ActionButton exportProteinCoverage = new ActionButton(url, "Export Protein Coverage");
+            exportProteinCoverage.setActionType(ActionButton.Action.POST);
+            exportProteinCoverage.setDisplayPermission(ReadPermission.class);
+            bar.add(exportProteinCoverage);
+        }
+    }
 }

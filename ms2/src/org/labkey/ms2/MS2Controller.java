@@ -174,6 +174,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2179,7 +2180,7 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
             schema.setRuns(runs);
-            return new PeptideCrosstabView(schema, form, getViewContext().getActionURL());
+            return new PeptideCrosstabView(schema, form, getViewContext().getActionURL(), true);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -4714,11 +4715,15 @@ public class MS2Controller extends SpringActionController
      */
     private static SimpleFilter getAllPeptidesFilter(ViewContext ctx, ActionURL currentUrl, MS2Run run )
     {
+        return getAllPeptidesFilter(ctx, currentUrl, run, MS2Manager.getDataRegionNamePeptides() + "." + "viewName", run.getRunType().getPeptideTableName());
+    }
+    private static SimpleFilter getAllPeptidesFilter(ViewContext ctx, ActionURL currentUrl, MS2Run run, String viewNameParam, String tableName )
+    {
         User user = ctx.getUser();
         Container c = ctx.getContainer();
 
-        QueryDefinition queryDef = QueryService.get().createQueryDef(user, c, MS2Schema.SCHEMA_NAME, run.getRunType().getPeptideTableName());
-        String viewName = currentUrl.getParameter(MS2Manager.getDataRegionNamePeptides() + "." + "viewName");
+        QueryDefinition queryDef = QueryService.get().createQueryDef(user, c, MS2Schema.SCHEMA_NAME, tableName);
+        String viewName = currentUrl.getParameter(viewNameParam);
         CustomView view = queryDef.getCustomView(user, ctx.getRequest(), viewName);
         if (view != null && view.hasFilterOrSort() && currentUrl.getParameter(MS2Manager.getDataRegionNamePeptides() + "." + QueryParam.ignoreFilter) == null)
         {
@@ -4768,31 +4773,17 @@ public class MS2Controller extends SpringActionController
                 throw new NotFoundException("Could not find protein with SeqId " + form.getSeqIdInt());
             ms2Run = validateRun(form);
 
-            ActionURL targetURL=getViewContext().getActionURL().clone();
-
-            SimpleFilter allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
-            QueryPeptideMS2RunView qpmv = new QueryPeptideMS2RunView(getViewContext(), ms2Run);
-            NestableQueryView qv = qpmv.createGridView(allPeptidesQueryFilter);
-            String[] peptides = Table.executeArray(qv.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
-
-            protein.setPeptides(peptides);
-            protein.setShowEntireFragmentInCoverage(false);
-
             HttpServletResponse resp = getViewContext().getResponse();
             resp.reset();
             resp.setContentType("text/html");
             String filename = FileUtil.makeFileNameWithTimestamp(protein.getBestName(), "htm");
             resp.setHeader("Content-disposition", "attachment; filename=\"" + filename +"\"");
 
-            protein.setForCoverageMapExport(true);
-            boolean allpeptides = ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser());
             PrintWriter pw = resp.getWriter();
             pw.write("<html><body>");
-            pw.write("<p> Protein: &nbsp; " + protein.getBestName() + (allpeptides ? "  (all matching peptides) " : "  (search engine matches) ") + "<br/> ");
-            pw.write("Run: &nbsp; " + (null!=ms2Run.getDescription()?  ms2Run.getDescription() : ms2Run.getRun()) +  "<br/> ");
-            pw.write("Peptide Filter: &nbsp; " + allPeptidesQueryFilter.getFilterText() + "</p> ");
-
-            pw.write(protein.getCoverageMap(ms2Run, null).toString());
+            ActionURL targetURL = getViewContext().getActionURL().clone();
+            SimpleFilter filter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
+            pw.write(getProteinExportHtml(protein, ms2Run, targetURL, filter));
             pw.write("</body></html>");
             resp.flushBuffer();
 
@@ -4802,6 +4793,156 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ExportComparisonProteinCoverageMapAction extends SimpleViewAction<PeptideFilteringComparisonForm>
+    {
+        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
+            ViewContext context = getViewContext();
+            MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
+
+            // get the selected list of MS2Runs from the RunListCache
+            List<MS2Run> runs;
+            try
+            {
+                runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
+            }
+            catch (RunListException e)
+            {
+                e.addErrors(errors);
+                return new SimpleErrorView(errors);
+            }
+
+            // clear the URL of parameters that don't belong based on the selected peptideFilterType
+            ActionURL targetURL = getViewContext().getActionURL().clone();
+            if (!form.isPeptideProphetFilter())
+                targetURL.deleteParameter(PeptideFilteringFormElements.peptideProphetProbability);
+            if (!form.isCustomViewPeptideFilter())
+                targetURL.deleteParameter(PEPTIDES_FILTER_VIEW_NAME);
+
+            // query to get the run/seqId pairs for the comparison filters
+            SQLFragment sql = new SQLFragment();
+            sql.append("SELECT x.SeqId, x.Run FROM ");
+            sql.append(MS2Manager.getTableInfoPeptides(), "x");
+            sql.append(" WHERE x.Run IN (");
+            String sep = "";
+            for (MS2Run run : runs)
+            {
+                sql.append(sep).append(run.getRun());
+                sep = ",";
+            }
+            sql.append(") ");
+            if (form.isCustomViewPeptideFilter() && form.getPeptideCustomViewName(context) != null)
+            {
+                // add the custom view filters from the viewName provided
+                sql.append(" AND RowId IN (");
+                sql.append(schema.getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId")), null));
+                sql.append(")");
+            }
+            else if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+            {
+                // add the PeptideProphet probability filter to the where clause and the target URL
+                sql.append(" AND x.PeptideProphet >= ");
+                sql.append(form.getPeptideProphetProbability());
+                targetURL.addParameter(MS2Manager.getDataRegionNamePeptides() + ".PeptideProphet~gte", form.getPeptideProphetProbability().toString());
+            }
+            if (form.getTargetProtein() != null)
+            {
+                // add the target protein filter to the where clause
+                // TODO: add the filter clause
+            }
+            sql.append(" GROUP BY x.SeqId, x.Run ORDER BY x.Run, x.SeqId");
+            SeqRunIdPair[] idPairs = new SqlSelector(MS2Manager.getSchema(), sql).getArray(SeqRunIdPair.class);
+
+            HttpServletResponse resp = getViewContext().getResponse();
+            resp.reset();
+            resp.setContentType("text/html");
+            String filename = FileUtil.makeFileNameWithTimestamp("ProteinCoverage", "htm");
+            resp.setHeader("Content-disposition", "attachment; filename=\"" + filename +"\"");
+
+            PrintWriter pw = resp.getWriter();
+            pw.write("<html><body>");
+
+            // write out the protein HTML info (i.e. header and coverage map) for each run/seqId pair in the result set
+            if (idPairs.length == 0)
+            {
+                pw.write("No matching proteins.");
+            }
+            else
+            {
+                for (SeqRunIdPair ids : idPairs)
+                {
+                    MS2Run ms2Run = validateRun(ids.getRun());
+                    Protein protein = ProteinManager.getProtein(ids.getSeqId());
+                    if (protein == null)
+                        throw new NotFoundException("Could not find protein with SeqId " + ids.getSeqId());
+
+                    ActionURL tempURL = targetURL.clone();
+                    SimpleFilter filter = getAllPeptidesFilter(getViewContext(), tempURL, ms2Run, PEPTIDES_FILTER_VIEW_NAME, PEPTIDES_FILTER);
+                    pw.write(getProteinExportHtml(protein, ms2Run, tempURL, filter));
+                }
+            }
+
+            pw.write("</body></html>");
+            resp.flushBuffer();
+
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+    private String getProteinExportHtml(Protein protein, MS2Run ms2Run, ActionURL targetURL, SimpleFilter allPeptidesQueryFilter) throws Exception
+    {
+        QueryPeptideMS2RunView qpmv = new QueryPeptideMS2RunView(getViewContext(), ms2Run);
+        NestableQueryView qv = qpmv.createGridView(allPeptidesQueryFilter);
+
+        String[] peptides = new TableSelector(qv.getTable(), Collections.singleton("Peptide"), allPeptidesQueryFilter, new Sort("Peptide")).getArray(String.class);
+        protein.setPeptides(peptides);
+        protein.setShowEntireFragmentInCoverage(false);
+        protein.setForCoverageMapExport(true);
+        boolean allpeptides = ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body>");
+        sb.append("<p> Protein: &nbsp; " + protein.getBestName() + (allpeptides ? "  (all matching peptides) " : "  (search engine matches) ") + "<br/> ");
+        sb.append("Run: &nbsp; " + (null!=ms2Run.getDescription()?  ms2Run.getDescription() : ms2Run.getRun()) +  "<br/> ");
+        sb.append("Peptide Filter: &nbsp; " + allPeptidesQueryFilter.getFilterText() + "</p> ");
+        // TODO: add aggregate summary stats
+        sb.append(protein.getCoverageMap(ms2Run, null).toString());
+
+        return sb.toString();
+    }
+
+    public static class SeqRunIdPair
+    {
+        private int _seqId;
+        private int _run;
+
+        public void setSeqId(int seqId)
+        {
+            _seqId = seqId;
+        }
+
+        public int getSeqId()
+        {
+            return _seqId;
+        }
+
+        public void setRun(int run)
+        {
+            _run = run;
+        }
+
+        public int getRun()
+        {
+            return _run;
         }
     }
 
