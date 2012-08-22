@@ -4781,9 +4781,13 @@ public class MS2Controller extends SpringActionController
 
             PrintWriter pw = resp.getWriter();
             pw.write("<html><body>");
+            // setup filter for querying the peptides for a given seqId
             ActionURL targetURL = getViewContext().getActionURL().clone();
-            SimpleFilter filter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
-            pw.write(getProteinExportHtml(protein, ms2Run, targetURL, filter));
+            SimpleFilter singleSeqIdFilter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
+            // setup filter for querying the peptides for the run
+            targetURL = getViewContext().getActionURL().clone().deleteParameter("seqId");
+            SimpleFilter allPeptidesFilter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
+            pw.write(getProteinExportHtml(protein, ms2Run, singleSeqIdFilter, getPeptideCountsForFilter(getViewContext(), ms2Run, allPeptidesFilter), null));
             pw.write("</body></html>");
             resp.flushBuffer();
 
@@ -4803,6 +4807,9 @@ public class MS2Controller extends SpringActionController
         {
             ViewContext context = getViewContext();
             MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
+            SimpleFilter.FilterClause targetProteinClause = null;
+            
+            form.validateTargetProtein(context);
 
             // get the selected list of MS2Runs from the RunListCache
             List<MS2Run> runs;
@@ -4849,10 +4856,12 @@ public class MS2Controller extends SpringActionController
                 sql.append(form.getPeptideProphetProbability());
                 targetURL.addParameter(MS2Manager.getDataRegionNamePeptides() + ".PeptideProphet~gte", form.getPeptideProphetProbability().toString());
             }
-            if (form.getTargetProtein() != null)
+            if (form.getTargetSeqId() != null)
             {
                 // add the target protein filter to the where clause
-                // TODO: add the filter clause
+                targetProteinClause = new ProteinManager.SequenceFilter(form.getTargetSeqId());
+                sql.append(" AND ");
+                sql.append(targetProteinClause.toSQLFragment(null, schema.getDbSchema().getSqlDialect()));
             }
             sql.append(" GROUP BY x.SeqId, x.Run ORDER BY x.Run, x.SeqId");
             SeqRunIdPair[] idPairs = new SqlSelector(MS2Manager.getSchema(), sql).getArray(SeqRunIdPair.class);
@@ -4873,6 +4882,8 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
+                Map<Integer, Pair<Integer, Integer>> runAllPeptideCounts = new HashMap<Integer, Pair<Integer, Integer>>();
+                Map<Integer, Pair<Integer, Integer>> runTargetPeptideCounts = new HashMap<Integer, Pair<Integer, Integer>>();
                 for (SeqRunIdPair ids : idPairs)
                 {
                     MS2Run ms2Run = validateRun(ids.getRun());
@@ -4880,9 +4891,24 @@ public class MS2Controller extends SpringActionController
                     if (protein == null)
                         throw new NotFoundException("Could not find protein with SeqId " + ids.getSeqId());
 
-                    ActionURL tempURL = targetURL.clone();
-                    SimpleFilter filter = getAllPeptidesFilter(getViewContext(), tempURL, ms2Run, PEPTIDES_FILTER_VIEW_NAME, PEPTIDES_FILTER);
-                    pw.write(getProteinExportHtml(protein, ms2Run, tempURL, filter));
+                    if (!runAllPeptideCounts.containsKey(ids.getRun()))
+                    {
+                        // get the total and distinct counts of all peptides for this run
+                        ActionURL tempURL = targetURL.clone();
+                        SimpleFilter peptidesFilter = getAllPeptidesFilter(getViewContext(), tempURL, ms2Run, PEPTIDES_FILTER_VIEW_NAME, PEPTIDES_FILTER);
+                        runAllPeptideCounts.put(ids.getRun(), getPeptideCountsForFilter(getViewContext(), ms2Run, peptidesFilter));
+
+                        // get the total and distinct counts of peptides for the target protein
+                        if (targetProteinClause != null)
+                        {
+                            peptidesFilter.addClause(targetProteinClause);
+                            runTargetPeptideCounts.put(ids.getRun(), getPeptideCountsForFilter(getViewContext(), ms2Run, peptidesFilter));
+                        }
+                    }
+
+                    ActionURL tempURL= targetURL.clone().addParameter("seqId", ids.getSeqId());
+                    SimpleFilter singleSeqIdFilter = getAllPeptidesFilter(getViewContext(), tempURL, ms2Run, PEPTIDES_FILTER_VIEW_NAME, PEPTIDES_FILTER);
+                    pw.write(getProteinExportHtml(protein, ms2Run, singleSeqIdFilter, runAllPeptideCounts.get(ids.getRun()), runTargetPeptideCounts.get(ids.getRun())));
                 }
             }
 
@@ -4898,23 +4924,44 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private String getProteinExportHtml(Protein protein, MS2Run ms2Run, ActionURL targetURL, SimpleFilter allPeptidesQueryFilter) throws Exception
+    private Pair<Integer, Integer> getPeptideCountsForFilter(ViewContext context, MS2Run ms2Run, SimpleFilter filter) throws Exception
     {
-        QueryPeptideMS2RunView qpmv = new QueryPeptideMS2RunView(getViewContext(), ms2Run);
-        NestableQueryView qv = qpmv.createGridView(allPeptidesQueryFilter);
+        String[] peptides = getPeptidesForFilter(context, ms2Run, filter);
+        Set<String> distinct = new HashSet<String>(Arrays.asList(peptides));
+        return new Pair<Integer, Integer>(peptides.length, distinct.size());
+    }
 
-        String[] peptides = new TableSelector(qv.getTable(), Collections.singleton("Peptide"), allPeptidesQueryFilter, new Sort("Peptide")).getArray(String.class);
+    private String[] getPeptidesForFilter(ViewContext context, MS2Run ms2Run, SimpleFilter filter) throws Exception
+    {
+        QueryPeptideMS2RunView qpmv = new QueryPeptideMS2RunView(context, ms2Run);
+        NestableQueryView qv = qpmv.createGridView(filter);
+        return new TableSelector(qv.getTable(), Collections.singleton("Peptide"), filter, new Sort("Peptide")).getArray(String.class);
+    }
+
+    private String getProteinExportHtml(Protein protein, MS2Run ms2Run, SimpleFilter singleSeqIdQueryFilter, Pair<Integer, Integer> runCounts, Pair<Integer, Integer> targetCounts) throws Exception
+    {
+        // query for the peptides associated with the specified seqId and run
+        String[] peptides = getPeptidesForFilter(getViewContext(), ms2Run, singleSeqIdQueryFilter);
         protein.setPeptides(peptides);
         protein.setShowEntireFragmentInCoverage(false);
         protein.setForCoverageMapExport(true);
-        boolean allpeptides = ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser());
+        boolean showAllPeptides = ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser());
 
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>");
-        sb.append("<p> Protein: &nbsp; " + protein.getBestName() + (allpeptides ? "  (all matching peptides) " : "  (search engine matches) ") + "<br/> ");
+        sb.append("<p> Protein: &nbsp; " + protein.getBestName() + (showAllPeptides ? "  (all matching peptides) " : "  (search engine matches) ") + "<br/> ");
         sb.append("Run: &nbsp; " + (null!=ms2Run.getDescription()?  ms2Run.getDescription() : ms2Run.getRun()) +  "<br/> ");
-        sb.append("Peptide Filter: &nbsp; " + allPeptidesQueryFilter.getFilterText() + "</p> ");
-        // TODO: add aggregate summary stats
+        sb.append("Peptide Filter: &nbsp; " + singleSeqIdQueryFilter.getFilterText() + "<br/> ");
+        sb.append("Peptide Counts:<br/>");
+        // display the counts of the number of peptides (total and distinct) that match the target protein sequence
+        if (targetCounts != null)
+        {
+            sb.append(targetCounts.first + " Total peptide" + (targetCounts.first != 1 ? "s" : "") + " matching sequence<br/>");
+            sb.append(targetCounts.second + " Distinct peptide" + (targetCounts.second != 1 ? "s" : "") + " matching sequence<br/>");
+        }
+        // display the counts of the number of peptides (total and distinct) that meet the filters set on the URL (besides the protein sequence match)
+        sb.append(runCounts.first + " Total qualifying peptide" + (runCounts.first != 1 ? "s" : "") + " in run<br/>");
+        sb.append(runCounts.second + " Distinct qualifying peptide" + (runCounts.first != 1 ? "s" : "") + " in run</p>");
         sb.append(protein.getCoverageMap(ms2Run, null).toString());
 
         return sb.toString();
