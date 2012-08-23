@@ -348,9 +348,9 @@ public class LuminexSchema extends AssaySchema
         result.addCondition(nonCVFlagFilter);
 
         // disable insert/update for this table
-        result.setImportURL(TableInfo.LINK_DISABLER);
-        result.setInsertURL(TableInfo.LINK_DISABLER);
-        result.setUpdateURL(TableInfo.LINK_DISABLER);        
+        result.setImportURL(AbstractTableInfo.LINK_DISABLER);
+        result.setInsertURL(AbstractTableInfo.LINK_DISABLER);
+        result.setUpdateURL(AbstractTableInfo.LINK_DISABLER);
 
         return result;
     }
@@ -374,9 +374,9 @@ public class LuminexSchema extends AssaySchema
         result.addCondition(cvFlagFilter);
 
         // disable insert/update for this table
-        result.setImportURL(TableInfo.LINK_DISABLER);
-        result.setInsertURL(TableInfo.LINK_DISABLER);
-        result.setUpdateURL(TableInfo.LINK_DISABLER);
+        result.setImportURL(AbstractTableInfo.LINK_DISABLER);
+        result.setInsertURL(AbstractTableInfo.LINK_DISABLER);
+        result.setUpdateURL(AbstractTableInfo.LINK_DISABLER);
 
         return result;
     }
