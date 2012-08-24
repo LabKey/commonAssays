@@ -209,7 +209,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
                         roleName = null;
                     }
                     
-                    ExpData outputData = DefaultAssayRunCreator.createData(run.getContainer(), file, file.getName(), DATA_TYPE);
+                    ExpData outputData = DefaultAssayRunCreator.createData(run.getContainer(), file, file.getName(), DATA_TYPE, true);
                     if (outputData.getSourceApplication() != null)
                     {
                         info("File " + file.getName() + " is already associated with another run");

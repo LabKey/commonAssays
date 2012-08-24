@@ -55,7 +55,7 @@ public class MageMLDataCreatorTask extends WorkDirectoryTask<MageMLDataCreatorTa
 
         for (File mage : mageFiles)
         {
-            ExpData data = DefaultAssayRunCreator.createData(getJob().getContainer(), mage, mage.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
+            ExpData data = DefaultAssayRunCreator.createData(getJob().getContainer(), mage, mage.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE, true);
             data.save(getJob().getUser());
         }
 

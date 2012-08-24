@@ -84,7 +84,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
                         if (mageMLFile.getName().startsWith(MicroarrayModule.TIFF_INPUT_TYPE.getFileType().getBaseName(file) + "_"))
                         {
                             // Found a match, add it as an input to this run
-                            ExpData tiffData = createData(context.getContainer(), file, file.getName(), MicroarrayModule.TIFF_INPUT_TYPE);
+                            ExpData tiffData = createData(context.getContainer(), file, file.getName(), MicroarrayModule.TIFF_INPUT_TYPE, true);
                             inputDatas.put(tiffData, MicroarrayModule.TIFF_INPUT_TYPE.getRole());
                         }
                     }
@@ -110,7 +110,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
         try
         {
             File mageMLFile = getMageMLFile(context);
-            ExpData mageData = DefaultAssayRunCreator.createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
+            ExpData mageData = DefaultAssayRunCreator.createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE, true);
 
             outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
             addRelatedOutputDatas(context.getContainer(), outputDatas, mageMLFile, MicroarrayModule.RELATED_INPUT_TYPES);
