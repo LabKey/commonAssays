@@ -1684,6 +1684,7 @@ public class MS2Controller extends SpringActionController
         private String _targetProteinMsg;
         private String _matchingSeqIds;
         private String _matchingProtNames;
+        private boolean _exportAsWebPage = false;
 
         public String getTargetProteinMsg()
         {
@@ -1734,6 +1735,17 @@ public class MS2Controller extends SpringActionController
         {
             _matchingProtNames = matchingProtNames;
         }
+
+        public boolean isExportAsWebPage()
+        {
+            return _exportAsWebPage;
+        }
+
+        public void setExportAsWebPage(boolean exportAsWebPage)
+        {
+            _exportAsWebPage = exportAsWebPage;
+        }
+
         public String getPeptideFilterType()
         {
             return _peptideFilterType;
@@ -4875,7 +4887,7 @@ public class MS2Controller extends SpringActionController
             resp.reset();
             resp.setContentType("text/html");
             String filename = FileUtil.makeFileNameWithTimestamp("ProteinCoverage", "htm");
-            resp.setHeader("Content-disposition", "attachment; filename=\"" + filename +"\"");
+            resp.setHeader("Content-disposition", (form.isExportAsWebPage() ? "inline" : "attachment") + "; filename=\"" + filename +"\"");
 
             PrintWriter pw = resp.getWriter();
             pw.write("<html><body>");
