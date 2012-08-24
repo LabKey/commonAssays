@@ -367,7 +367,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             MultipleIntegerParamsValidator.TestCase.class,
             MultipleDoubleParamsValidator.TestCase.class,
             UWSequestParamsBuilder.TestCase.class,
-            UWSequestSearchTask.TestCase.class
+            UWSequestSearchTask.TestCase.class,
+            ProteinCoverageMapBuilder.TestCase.class
         ));
     }
 

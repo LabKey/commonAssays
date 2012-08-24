@@ -1152,6 +1152,7 @@ ms2/src/org/labkey/ms2/PeptideQuantitation.java -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/PlainTextRenderer.java -text
 ms2/src/org/labkey/ms2/Protein.java -text
+ms2/src/org/labkey/ms2/ProteinCoverageMapBuilder.java -text
 ms2/src/org/labkey/ms2/ProteinDisplayColumn.java -text
 ms2/src/org/labkey/ms2/ProteinGroupProteins.java -text
 ms2/src/org/labkey/ms2/ProteinGroupWithQuantitation.java -text

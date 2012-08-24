@@ -176,7 +176,7 @@ public class Protein
     /*
         Formats and returns an html table showing where peptides matched a specific portion of a protein.
         done in 3 passes. first pass builds up an array of SequencePos objects, one for each AA of the protein
-        sequence.  Second paas loops through the range objectds which are the peptide evidence for the
+        sequence.  Second pass loops through the range objectds which are the peptide evidence for the
         protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
         objects and accumlates their html output.
      */
@@ -717,7 +717,7 @@ public class Protein
             return uniquePeptides;
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
         MS2Modification[] mods = new MS2Modification[0];
-        if (run != null)
+        if (run != null && run.getRun() > -1)
             mods = MS2Manager.getModifications(run);
 
         for (String peptide : _peptides)
