@@ -97,7 +97,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
             "offset position to start the binning",// the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
             ParamsValidatorFactory.getRealNumberParamsValidator(),
-            false
+            true
         )).setInputXmlLabels("spectrum, fragment_bin_startoffset");
 
         _params.addProperty(new SequestParam(

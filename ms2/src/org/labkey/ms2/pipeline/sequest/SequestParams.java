@@ -139,7 +139,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             "for trap data leave at 1.0, for accurate mass data use values < 1.0",// the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
             ParamsValidatorFactory.getRealNumberParamsValidator(),
-            false
+            true
         ).setInputXmlLabels("spectrum, fragment mass error"));
 
 
