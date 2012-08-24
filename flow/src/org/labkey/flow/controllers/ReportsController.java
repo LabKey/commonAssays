@@ -28,22 +28,20 @@ import org.labkey.api.reports.report.ReportIdentifier;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.*;
-import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
 import org.labkey.flow.reports.FlowReportJob;
 import org.labkey.flow.reports.FlowReportManager;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -408,7 +406,7 @@ public class ReportsController extends BaseFlowController
         {
             throw new NotFoundException();
         }
-        Report r = form.getReportId().getReport();
+        Report r = form.getReportId().getReport(context);
         if (null == r || !(r instanceof FlowReport))
         {
             throw new NotFoundException();

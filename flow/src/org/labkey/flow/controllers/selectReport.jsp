@@ -15,21 +15,17 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.collections.CaseInsensitiveTreeMap" %>
 <%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.reports.Report" %>
-<%@ page import="org.labkey.api.reports.ReportService" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
 <%@ page import="org.labkey.api.reports.report.ReportIdentifier" %>
 <%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReportManager" %>
+<%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
@@ -51,7 +47,7 @@
     %></select>
 
     <% if (canEdit && id != null) { %>
-    <%=generateButton("Edit", id.getReport().getEditReportURL(context))%>
+    <%=generateButton("Edit", id.getReport(context).getEditReportURL(context))%>
     <% } %>
     
 <script type="text/javascript">
