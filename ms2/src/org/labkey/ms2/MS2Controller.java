@@ -4785,7 +4785,7 @@ public class MS2Controller extends SpringActionController
 
             HttpServletResponse resp = getViewContext().getResponse();
             resp.reset();
-            resp.setContentType("text/html");
+            resp.setContentType("text/html; charset=UTF-8");
             String filename = FileUtil.makeFileNameWithTimestamp(protein.getBestName(), "htm");
             resp.setHeader("Content-disposition", "attachment; filename=\"" + filename +"\"");
 
@@ -4885,7 +4885,7 @@ public class MS2Controller extends SpringActionController
 
             HttpServletResponse resp = getViewContext().getResponse();
             resp.reset();
-            resp.setContentType("text/html");
+            resp.setContentType("text/html; charset=UTF-8");
             String filename = FileUtil.makeFileNameWithTimestamp("ProteinCoverage", "htm");
             resp.setHeader("Content-disposition", (form.isExportAsWebPage() ? "inline" : "attachment") + "; filename=\"" + filename +"\"");
 
