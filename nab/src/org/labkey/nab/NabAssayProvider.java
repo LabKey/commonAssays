@@ -501,10 +501,4 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return new AssayPipelineProvider(NabModule.class,
                 new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import NAb");
     }
-
-    @Override
-    public boolean supportsReRun()
-    {
-        return true;
-    }
 }

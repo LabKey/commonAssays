@@ -472,10 +472,4 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             return super.getDataCollectors(uploadedFiles, context, true);
         }
     }
-
-    @Override
-    public boolean supportsReRun()
-    {
-        return true;
-    }
 }
