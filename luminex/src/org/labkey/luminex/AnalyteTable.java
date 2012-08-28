@@ -41,6 +41,7 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class AnalyteTable extends AbstractLuminexTable
     {
         super(LuminexSchema.getTableInfoAnalytes(), schema, filter);
         setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.ANALYTE_TABLE_NAME));
+        setPublicSchemaName(AssaySchema.NAME);
         
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
         addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey("RowId")

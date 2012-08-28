@@ -45,6 +45,7 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 
@@ -67,8 +68,11 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     public LuminexDataTable(LuminexSchema schema)
     {
         super(LuminexSchema.getTableInfoDataRow(), schema.getContainer());
-
         final ExpProtocol protocol = schema.getProtocol();
+
+        setName(AssaySchema.getResultsTableName(protocol));
+        setPublicSchemaName(AssaySchema.NAME);
+
         _provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
 
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
@@ -153,7 +157,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
         analyteTitrationColumn.setIsUnselectable(true);
-        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
+        LookupForeignKey fk = new LookupForeignKey()
         {
             @Override
             public TableInfo getLookupTableInfo()

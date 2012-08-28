@@ -76,6 +76,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 return _schema.createAnalyteTable(false);
             }
         });
+        setTitleColumn(analyteCol.getName());
         ColumnInfo titrationCol = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
         LookupForeignKey titrationFk = new LookupForeignKey("RowId")
         {

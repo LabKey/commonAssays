@@ -289,7 +289,7 @@ public class LuminexSchema extends AssaySchema
 
     public ExpDataTable createDataTable()
     {
-        final ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Data.toString(), this);
+        final ExpDataTable ret = ExperimentService.get().createDataTable(AssaySchema.getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME), AssayService.get().createSchema(getUser(), getContainer()));
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
