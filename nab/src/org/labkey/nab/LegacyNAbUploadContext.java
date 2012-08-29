@@ -40,7 +40,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -340,7 +339,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
 
     @NotNull
     @Override
-    public Map<String, File> getUploadedData() throws IOException, ExperimentException
+    public Map<String, File> getUploadedData() throws ExperimentException
     {
         return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, _dataFile);
     }

@@ -16,8 +16,6 @@
 
 package org.labkey.elispot;
 
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
@@ -25,13 +23,8 @@ import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -44,8 +37,6 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.Position;
-import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
@@ -54,7 +45,6 @@ import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.Stats;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
@@ -62,13 +52,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
