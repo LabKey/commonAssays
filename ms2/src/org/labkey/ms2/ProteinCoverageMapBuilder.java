@@ -1,8 +1,5 @@
 package org.labkey.ms2;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.CompareType;
@@ -11,14 +8,11 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
-import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -36,9 +30,7 @@ public class ProteinCoverageMapBuilder
     private Protein _protein;
     private MS2Run _ms2Run;
     private SimpleFilter _peptideFilter; // filter with clauses to get peptides for the given seqId
-    private SimpleFilter _allPeptideFilter; // filter with clauses to get all peptides for the given run
     private Pair<Integer, Integer> _allPeptideCounts; // counts of the number of peptides (total and distinct) that meet the filters set on the URL (besides the protein sequence match)
-    private SimpleFilter _targetPeptideFilter; // filter with clauses to get peptides for the target protein
     private Pair<Integer, Integer> _targetPeptideCounts; // counts of the number of peptides (total and distinct) that match the target protein sequence
     private boolean _showAllPeptides;
 
@@ -49,11 +41,6 @@ public class ProteinCoverageMapBuilder
         _ms2Run = ms2Run;
         _peptideFilter = peptideFilter;
         _showAllPeptides = showAllpeptides;
-
-        // setup filter for querying the all peptides for the run (i.e. without the seqId filter)
-        _allPeptideFilter = new SimpleFilter();
-        _allPeptideFilter.addAllClauses(_peptideFilter);
-        _allPeptideFilter.deleteConditions(FieldKey.fromParts("SeqId"));
     }
 
     public Pair<Integer, Integer> getPeptideCountsForFilter(SimpleFilter filter)
@@ -88,33 +75,30 @@ public class ProteinCoverageMapBuilder
         _protein.setPeptides(peptides);
     }
 
-    public void setTargetPeptideFilter(SimpleFilter filter)
-    {
-        _targetPeptideFilter = filter;
-    }
-
     public void setTargetPeptideCounts(Pair<Integer, Integer> targetPeptideCounts)
     {
-        if (targetPeptideCounts != null)
-        {
-            _targetPeptideCounts = targetPeptideCounts;
-        }
-        else
-        {
-            _targetPeptideCounts = getPeptideCountsForFilter(_targetPeptideFilter);
-        }
+         _targetPeptideCounts = targetPeptideCounts;
+    }
+    public void setTargetPeptideCounts(SimpleFilter filter)
+    {
+        _targetPeptideCounts = getPeptideCountsForFilter(filter);
     }
 
     public void setAllPeptideCounts(Pair<Integer, Integer> allPeptideCounts)
     {
-        if (allPeptideCounts != null)
+        _allPeptideCounts = allPeptideCounts;
+    }
+    public void setAllPeptideCounts()
+    {
+        // setup filter for querying the all peptides for the run (i.e. without the seqId filter clauses)
+        SimpleFilter filter = new SimpleFilter();
+        for (SimpleFilter.FilterClause clause : _peptideFilter.getClauses())
         {
-            _allPeptideCounts = allPeptideCounts;
+            if (clause.isUrlClause())
+                filter.addClause(clause);
         }
-        else
-        {
-            _allPeptideCounts = getPeptideCountsForFilter(_allPeptideFilter);
-        }
+        filter.deleteConditions(FieldKey.fromParts("SeqId"));
+        _allPeptideCounts = getPeptideCountsForFilter(filter);
     }
 
     public String getProteinExportHtml()
