@@ -16,7 +16,9 @@
 
 package org.labkey.ms2;
 
+import junit.framework.Assert;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import java.util.*;
 
@@ -768,6 +770,48 @@ public class Protein
         public PeptideCounts getCounts()
         {
             return pepcounts;
+        }
+    }
+
+    /**
+     * Returns the set of peptides that are distinct based on their amino acid sequence. Any leading or trailing amino
+     * acids are trimmed off, and any modification characters are ignored.
+     */
+    public static Set<String> getDistinctTrimmedPeptides(String[] peptides)
+    {
+        Set<String> result = new HashSet<String>();
+        for (String peptide : peptides)
+        {
+            StringBuilder trimmedPeptide = new StringBuilder();
+            String[] sections = peptide.split("\\.");
+            // Should either be of the form "X.AAAAAA.X" or just "AAAAAA". We only care about the "AAAAAA" part
+            assert sections.length == 3 || sections.length == 1;
+            peptide = sections.length == 3 ? sections[1] : sections[0];
+            peptide = peptide.toUpperCase();
+            for (int i = 0; i < peptide.length(); i++)
+            {
+                // Ignore anything that's not an amino acid
+                char c = peptide.charAt(i);
+                if (c >= 'A' && c <= 'Z')
+                {
+                    trimmedPeptide.append(c);
+                }
+            }
+            result.add(trimmedPeptide.toString());
+        }
+        return result;
+    }
+
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testDistinctPeptides()
+        {
+            assertEquals(1, getDistinctTrimmedPeptides(new String[] {"ABCDE", "ABCDE", "X.ABCDE.R"}).size());
+            assertEquals(1, getDistinctTrimmedPeptides(new String[] {"ABCD$E", "AB^CDE", "X.ABCDE.R"}).size());
+            assertEquals(3, getDistinctTrimmedPeptides(new String[] {"ABCDE", "ABCE", "X.ABCDEF.R"}).size());
+            assertEquals(3, getDistinctTrimmedPeptides(new String[] {"F.ABCDE.-", "ABCE", "X.ABCDEF.R"}).size());
         }
     }
 }

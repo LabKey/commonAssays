@@ -4702,7 +4702,7 @@ public class MS2Controller extends SpringActionController
                 List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
                 sqlSummaries.add(new Pair<String, String>("Peptide Filter", allPeptidesQueryFilter.getFilterText()));
                 sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(targetURL, MS2Manager.getDataRegionNamePeptides()).getSortText()));
-                Set<String> distinctPeptides = new HashSet<String>(Arrays.asList(peptides));
+                Set<String> distinctPeptides = Protein.getDistinctTrimmedPeptides(peptides);
                 sqlSummaries.add(new Pair<String, String>("Peptide Counts", peptides.length + " total, " + distinctPeptides.size() + " distinct"));
                 CurrentFilterView peptideCountsView = new CurrentFilterView(null, sqlSummaries);
                 peptideCountsView.setFrame(FrameType.NONE);
