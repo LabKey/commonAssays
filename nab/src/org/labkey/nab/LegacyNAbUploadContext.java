@@ -23,6 +23,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformResult;
@@ -420,6 +421,11 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
     public void setFile(File dataFile)
     {
         _dataFile = dataFile;
+    }
+
+    @Override
+    public void uploadComplete(ExpRun run) throws ExperimentException
+    {
     }
 
     public static class TestCase extends Assert
