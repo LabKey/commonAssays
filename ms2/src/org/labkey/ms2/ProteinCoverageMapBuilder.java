@@ -46,8 +46,7 @@ public class ProteinCoverageMapBuilder
     public Pair<Integer, Integer> getPeptideCountsForFilter(SimpleFilter filter)
     {
         String[] peptides = getPeptidesForFilter(filter);
-        // TODO: update this to use Protein.getDistinctTrimmedPeptides() after 12.2 merge for issue 15864
-        Set<String> distinct = new HashSet<String>(Arrays.asList(peptides));
+        Set<String> distinct = Protein.getDistinctTrimmedPeptides(peptides);
         return new Pair<Integer, Integer>(peptides.length, distinct.size());
     }
 
