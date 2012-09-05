@@ -3557,14 +3557,7 @@ public class MS2Controller extends SpringActionController
                 {
                     tableInfo.addContainerCondition(_context.getContainer(), _context.getUser(), true);
                 }
-                try
-                {
-                    _seqId = ArrayUtils.toPrimitive(Table.executeArray(tableInfo, tableInfo.getColumn("SeqId"), null, null, Integer.class));
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
+                _seqId = ArrayUtils.toPrimitive(new TableSelector(tableInfo.getColumn("SeqId")).getArray(Integer.class));
             }
             return _seqId;
         }

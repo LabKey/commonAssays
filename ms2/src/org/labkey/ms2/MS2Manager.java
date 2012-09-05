@@ -39,6 +39,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.AbstractFileXarSource;
 import org.labkey.api.exp.ExperimentException;
@@ -1115,15 +1116,9 @@ public class MS2Manager
 
     public static MS2Peptide getPeptide(long peptideId)
     {
-        try
-        {
-            Filter filter = new SimpleFilter("RowId", peptideId);
-            return Table.selectObject(getTableInfoPeptides(), filter, null, MS2Peptide.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Filter filter = new SimpleFilter("RowId", peptideId);
+
+        return new TableSelector(getTableInfoPeptides(), filter, null).getObject(MS2Peptide.class);
     }
 
     public static PeptideQuantitation getQuantitation(long peptideId)

@@ -416,7 +416,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         SimpleFilter filter = getPeptideFilter(url);
         filter = ProteinManager.reduceToValidColumns(filter, MS2Manager.getTableInfoPeptides());
 
-        return Table.executeArray(MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptides().getColumn("RowId"), filter, sort, Long.class);
+        return new TableSelector(MS2Manager.getTableInfoPeptides().getColumn("RowId"), filter, sort).getArray(Long.class);
     }
 
     protected MS2Run getSingleRun()
