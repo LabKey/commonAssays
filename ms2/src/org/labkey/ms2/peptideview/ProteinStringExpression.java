@@ -16,11 +16,13 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.StringExpression;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: arauch
@@ -52,6 +54,11 @@ public class ProteinStringExpression implements StringExpression, Cloneable
     public void render(Writer out, Map ctx) throws IOException
     {
         out.write(eval(ctx));
+    }
+
+    public boolean canRender(Set<FieldKey> fieldKeys)
+    {
+        return fieldKeys.contains(FieldKey.fromParts("SeqId"));
     }
 
     public ProteinStringExpression copy()
