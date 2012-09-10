@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.PositionImpl;
@@ -117,7 +118,7 @@ public class LuminexWellGroup implements WellGroup
                 wellRole = well.getDataRow().getWellRole();
 
                 if (well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME) != null)
-                    excluded = (Boolean)well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME);
+                    excluded = ConvertHelper.convert(well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME), Boolean.class);
             }
             LuminexDataRow fakeDataRow = new LuminexDataRow();
             fakeDataRow.setExpConc(entry.getKey().getExpConc());

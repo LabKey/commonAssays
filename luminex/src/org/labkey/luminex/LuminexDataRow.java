@@ -16,9 +16,11 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.ObjectFactory;
 
 import java.util.Date;
@@ -538,7 +540,7 @@ public class LuminexDataRow
 
         // look for the FlaggedAsExcluded property to set the data row exclusion state
         if (properties.containsKey(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME))
-            setExcluded((Boolean)properties.get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME));
+            setExcluded(ConvertHelper.convert(properties.get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME), Boolean.class));
     }
 
     public Map<String, Object> toMap(Analyte analyte)
