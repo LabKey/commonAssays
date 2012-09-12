@@ -25,10 +25,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
-import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
@@ -68,7 +65,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
@@ -1081,6 +1077,55 @@ public class FlowSchema extends UserSchema
             return ((AbstractTableInfo)_expData).getContainerFieldKey();
         }
 
+        @Override
+        public Collection<ColumnInfo> getExtendedColumns(boolean hidden)
+        {
+            LinkedHashSet<ColumnInfo> ret = new LinkedHashSet<ColumnInfo>(super.getExtendedColumns(hidden));
+
+            // Add Keyword, Statistics, Background, Sample, and Report columns
+            addAllColumns(ret, getColumn("Keyword"), hidden);
+            addAllColumns(ret, getColumn("Statistic"), hidden);
+            addAllColumns(ret, getColumn("Background"), hidden);
+
+            // Include FCSFile and Sample columns
+            ColumnInfo fcsFileCol = getColumn("FCSFile");
+            if (fcsFileCol != null)
+            {
+                addAllColumns(ret, fcsFileCol, hidden);
+
+                TableInfo fcsFileTable = fcsFileCol.getFkTableInfo();
+                if (fcsFileTable != null)
+                    addAllColumns(ret, fcsFileTable.getColumn("Sample"), hidden);
+            }
+            else if (getColumn("Sample") != null)
+            {
+                addAllColumns(ret, getColumn("Sample"), hidden);
+            }
+
+            // iterating the reports can be expensive. can we hold onto a column reference for the reports?
+            for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
+            {
+                FieldKey fieldKey = new FieldKey(null, report.getDescriptor().getReportName());
+                addAllColumns(ret, getColumn(fieldKey), hidden);
+            }
+
+            return Collections.unmodifiableCollection(ret);
+        }
+
+        private void addAllColumns(Collection<ColumnInfo> ret, ColumnInfo lookupColumn, boolean hidden)
+        {
+            if (lookupColumn == null)
+                return;
+
+            if (lookupColumn != null)
+            {
+                TableInfo lookupTable = lookupColumn.getFkTableInfo();
+                if (lookupTable != null)
+                {
+                    ret.addAll(lookupTable.getExtendedColumns(hidden));
+                }
+            }
+        }
     }
 
 
