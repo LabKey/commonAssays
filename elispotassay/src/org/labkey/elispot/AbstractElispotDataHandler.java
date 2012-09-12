@@ -18,6 +18,7 @@ package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
@@ -87,8 +88,8 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                 if (!row.containsKey(WELL_ROW_PROPERTY) || !row.containsKey(WELL_COLUMN_PROPERTY))
                     throw new ExperimentException("The row must contain values for well row and column locations : " + WELL_ROW_PROPERTY + ", " + WELL_COLUMN_PROPERTY);
 
-                int rowPos = (Integer)row.get(WELL_ROW_PROPERTY);
-                int colPos = (Integer)row.get(WELL_COLUMN_PROPERTY);
+                int rowPos = ConvertHelper.convert(row.get(WELL_ROW_PROPERTY), Integer.class);
+                int colPos = ConvertHelper.convert(row.get(WELL_COLUMN_PROPERTY), Integer.class);
                 String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData[0].getLSID(), rowPos, colPos).toString();
 
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
