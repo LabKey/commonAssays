@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2006 U (http://www.altova.com) by Nicholas Shulman (Labkey) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://cpas.fhcrc.org/flow/script/xml" targetNamespace="http://cpas.fhcrc.org/flow/script/xml" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:complexType name="ScriptDef">
+		<xs:sequence>
+            <xs:element name="settings" type="SettingsDef" minOccurs="0" />
+            <xs:element name="compensationCalculation" type="CompensationCalculationDef" minOccurs="0"/>
+			<xs:element name="analysis" type="AnalysisDef" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="script" type="ScriptDef"/>
+	<xs:complexType name="GateDef">
+		<xs:choice minOccurs="1" maxOccurs="1">
+			<xs:element name="interval" type="IntervalDef"/>
+			<xs:element name="polygon" type="PolygonDef"/>
+            <xs:element name="ellipse" type="EllipseDef"/>
+            <xs:element name="and" type="GateListDef" />
+            <xs:element name="or" type="GateListDef" />
+            <xs:element name="not" type="GateDef" />
+            <xs:element name="subset" type="SubsetDef" />
+        </xs:choice>
+		<xs:attribute name="name" type="xs:string"/>
+	</xs:complexType>
+    <xs:complexType name="GateListDef">
+        <xs:choice minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="interval" type="IntervalDef" />
+            <xs:element name="polygon" type="PolygonDef" />
+            <xs:element name="ellipse" type="EllipseDef"/>
+            <xs:element name="and" type="GateListDef" />
+            <xs:element name="or" type="GateListDef" />
+            <xs:element name="not" type="GateDef" />
+            <xs:element name="subset" type="SubsetDef" />
+        </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="CriteriaDef">
+		<xs:attribute name="keyword" type="xs:string" use="required"/>
+		<xs:attribute name="pattern" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="GraphDef">
+		<xs:attribute name="subset" type="xs:string" use="optional"/>
+		<xs:attribute name="xAxis" type="xs:string" use="optional"/>
+		<xs:attribute name="yAxis" type="xs:string" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="PopulationDef">
+		<xs:sequence>
+			<xs:element name="gate" type="GateDef" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="population" type="PopulationDef" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="StatisticDef">
+		<xs:attribute name="subset" type="xs:string" use="optional"/>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="parameter" type="xs:string" use="optional"/>
+	</xs:complexType>
+	<xs:element name="statistic" type="StatisticDef"/>
+	<xs:complexType name="IntervalDef">
+		<xs:attribute name="axis" type="xs:string" use="required"/>
+		<xs:attribute name="min" type="xs:double" use="required"/>
+		<xs:attribute name="max" type="xs:double" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="PolygonDef">
+		<xs:sequence>
+			<xs:element name="point" type="PointDef" minOccurs="3" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="xAxis" type="xs:string" use="required"/>
+		<xs:attribute name="yAxis" type="xs:string" use="required"/>
+	</xs:complexType>
+    <xs:complexType name="EllipseDef">
+        <xs:sequence>
+            <xs:element name="focus" type="PointDef" minOccurs="2" maxOccurs="2" />
+        </xs:sequence>
+        <xs:attribute name="xAxis" type="xs:string" use="required" />
+        <xs:attribute name="yAxis" type="xs:string" use="required" />
+        <xs:attribute name="distance" type="xs:double" use="required" />
+    </xs:complexType>
+    <xs:complexType name="PointDef">
+		<xs:attribute name="x" type="xs:double" use="required"/>
+		<xs:attribute name="y" type="xs:double" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="ChannelDef">
+		<xs:sequence>
+			<xs:element name="positive" type="ChannelSubsetDef"/>
+			<xs:element name="negative" type="ChannelSubsetDef"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="ChannelSubsetDef">
+		<xs:sequence>
+			<xs:element name="criteria" type="CriteriaDef"/>
+		</xs:sequence>
+		<xs:attribute name="subset" type="xs:string" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="CompensationCalculationDef">
+		<xs:sequence>
+			<xs:element name="population" type="PopulationDef" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="channel" type="ChannelDef" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="generateGraphs" type="xs:boolean" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="AnalysisDef">
+		<xs:sequence>
+			<xs:element name="population" type="PopulationDef" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="subset" type="SubsetDef" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="statistic" type="StatisticDef" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="graph" type="GraphDef" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="SubsetDef">
+        <xs:attribute name="subset" type="xs:string" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="SettingsDef">
+        <xs:sequence>
+            <xs:element name="parameter" type="ParameterDef" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="filters" type="FiltersDef" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ParameterDef">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="minValue" type="xs:double" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="FiltersDef">
+        <xs:sequence>
+            <xs:element name="filter" type="FilterDef" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="FilterDef">
+        <xs:sequence>
+            <xs:element name="field" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="op" type="OpDef" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="value" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="OpDef">
+        <xs:annotation>
+            <xs:documentation>Corresponds to org.labkey.api.data.CompareType</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="eq">
+                <xs:annotation>
+                    <xs:documentation>Equals</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="neqornull">
+                <xs:annotation>
+                    <xs:documentation>Does Not Equal</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="isblank">
+                <xs:annotation>
+                    <xs:documentation>Is Blank</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="isnonblank">
+                <xs:annotation>
+                    <xs:documentation>Is Not Blank</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="gt">
+                <xs:annotation>
+                    <xs:documentation>Is Greater Than</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="lt">
+                <xs:annotation>
+                    <xs:documentation>Is Less Than</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="gte">
+                <xs:annotation>
+                    <xs:documentation>Is Greater Than or Equal To</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="lte">
+                <xs:annotation>
+                    <xs:documentation>Is Less Than or Equal To</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="contains">
+                <xs:annotation>
+                    <xs:documentation>Contains</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="doesnotcontains">
+                <xs:annotation>
+                    <xs:documentation>Does Not Contains</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="doesnotstartswith">
+                <xs:annotation>
+                    <xs:documentation>Does Not Starts With</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="startswith">
+                <xs:annotation>
+                    <xs:documentation>Starts With</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="in">
+                <xs:annotation>
+                    <xs:documentation>Equals One Of (e.g. 'a;b;c')</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

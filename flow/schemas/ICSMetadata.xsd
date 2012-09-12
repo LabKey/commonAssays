@@ -1,0 +1,77 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:flow="http://cpas.fhcrc.org/flow/script/xml"
+           xmlns:study="http://labkey.org/study/xml"
+           xmlns="http://flow.labkey.org/icsmetadata/xml/"
+           targetNamespace="http://flow.labkey.org/icsmetadata/xml/"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+    <xs:import namespace="http://cpas.fhcrc.org/flow/script/xml" schemaLocation="flowPipelineScript.xsd"/>
+    <xs:import namespace="http://labkey.org/study/xml" schemaLocation="../../../../schemas/study.xsd"/>
+    <xs:element name="ICSMetadata" type="ICSMetadataType"/>
+    <xs:complexType name="ICSMetadataType">
+        <xs:sequence>
+            <xs:element name="study" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="specimenIdColumn" type="xs:string" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Selects the specimen id column.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="participantColumn" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Selects the participant column.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="visitColumn" type="xs:string" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Optionally selects the visit column.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="dateColumn" type="xs:string" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Optionally selects the date column.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="background" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="matchColumns">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Selects the columns that match between both the foreground and background wells.
+                                </xs:documentation>
+                            </xs:annotation>
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="field" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                        <!-- deprecated -->
+                        <xs:element name="backgroundColumn" type="flow:FilterDef" minOccurs="0"/>
+                        <xs:element name="backgroundFilter" type="flow:FiltersDef">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Specify the column and value filter(s) which uniquely
+                                    identify the background wells from the foreground wells.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

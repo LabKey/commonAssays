@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema 
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:data-type="http://www.isac-net.org/std/Gating-ML/v1.5/datatypes"
+    xmlns:transforms="http://www.isac-net.org/std/Gating-ML/v1.5/transformations"
+	    
+    targetNamespace="http://www.isac-net.org/std/Gating-ML/v1.5/datatypes"
+    elementFormDefault="qualified" 
+    attributeFormDefault="qualified" 
+    version="1.5.080120">
+
+    <import namespace="http://www.newportinstruments.com/CytometryML/Schemas/about"
+      schemaLocation="about.xsd" />
+  
+    <annotation>
+        <appinfo source="http://flowcyt.sourceforge.net/">
+            Definition of data types reused in XML-based standards such as Gating-ML XML schema.
+        </appinfo>
+        
+        <documentation xml:lang="en" source="http://www.flowcyt.org/gating">
+          <about:about 
+            xmlns:about="http://www.newportinstruments.com/CytometryML/Schemas/about"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.newportinstruments.com/CytometryML/Schemas/about about.xsd"
+            Subject="Shared data types"
+            Release_Date="2008-01-20"
+            Copyright_Holder="International Society for Analytical Cytology (ISAC)"
+            Keywords="cytometry data types XML"
+            Latest_Location="http://flowcyt.sourceforge.net/gating/">
+            <about:Maintainer Email="jspidlen@bccrc.ca">
+              <about:PreferredGivenName>Josef</about:PreferredGivenName>
+              <about:FamilyName>Spidlen</about:FamilyName>
+              <about:qualification>Ph.D.</about:qualification>
+            </about:Maintainer>
+            <about:Author>
+              <about:PreferredGivenName>Josef</about:PreferredGivenName>
+              <about:FamilyName>Spidlen</about:FamilyName>
+              <about:qualification>Ph.D.</about:qualification>
+            </about:Author>
+            <about:Source>http://flowcyt.sourceforge.net/gating/</about:Source>
+            <about:Description>
+              Shared data types
+              ******************
+              This XML schema contains definition of shared data types reused in XML-based standards such as Gating-ML. 
+            </about:Description>
+            <about:Status_Disclaimer>
+              This document is an unapproved draft of a proposed standard that is intended for an internal 
+              review by the International Society for Analytical Cytology (ISAC) Data Standards Task Force 
+              (ISAC DSTF). As such, this document is subject to change and must not be utilized for any 
+              conformance/compliance purposes.
+              This is a DRAFT proposal that has been formally tested to comply with the W3C XML schema 
+              version 1.0 specification but no position is taken in respect to whether a particular software 
+              implementing this schema works according to medical or other regulations.
+            </about:Status_Disclaimer>
+            <about:Document_Status>DRAFT</about:Document_Status>
+            <about:Patent_Disclaimer>
+              Attention is called to the possibility that implementation of this specification may require 
+              use of subject matter covered by patent rights. By publication of this standard, no position 
+              is taken with respect to the existence or validity of any patent rights in connection therewith. 
+              ISAC shall not be responsible for identifying patents or patent applications for which a license 
+              may be required to implement an ISAC standard or for conducting inquiries into the legal 
+              validity or scope of those patents that are brought to its attention.
+            </about:Patent_Disclaimer>
+            <about:Permisions>
+              Copyright (c) 2008 ISAC (International Society for Analytical Cytology). 
+              Free of charge distribution and read-only usage permited. 
+              Modification and all other rights reserved. For all other uses please contact ISAC.
+            </about:Permisions>
+            <about:Acknowledgement>
+              The work is supported by NIH R01 EB-5034. Thanks also to Robert C. Leif, Wayne Moore, and other 
+              ISAC DSTF members for their contributions. 
+            </about:Acknowledgement>
+          </about:about>
+        </documentation>
+    </annotation>
+
+    <simpleType name="UFloat64_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Unsigned float64, i.e, a double (float64) that is greater or equal 0.
+            </documentation>
+        </annotation>
+        <restriction base="double">
+            <minInclusive value="0.0" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="PFloat64_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Positive float64, i.e., a double (float64) that is greater than 0.
+            </documentation>
+        </annotation>
+        <restriction base="double">
+            <minExclusive value="0.0" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="Float64_Gt1_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                A double (float64) that is greater than 1.
+            </documentation>
+        </annotation>
+        <restriction base="double">
+            <minExclusive value="1.0" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="Float64_GtE0_LtE1_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                A double (float64) that is greater or equal 0 and less or equal 1
+            </documentation>
+        </annotation>
+        <restriction base="double">
+            <minInclusive value="0.0" />
+            <maxInclusive value="1.0" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="NonEmptyName_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                A complex type with a non empty string attribute caled name. This type is used to reference parameters from FCS files.  
+            </documentation>
+        </annotation>
+        <attribute name="name" use="required" >
+            <simpleType><restriction base="string"><minLength value="1" /></restriction></simpleType>
+        </attribute>
+    </complexType>
+  
+  <complexType name="ValueAttribute_Type">
+    <annotation>
+      <documentation>
+        A single value attribute of the type double (float64)
+      </documentation>
+    </annotation>
+    <attribute name="value" type="double" use="required" id="value" />
+  </complexType>
+  
+  
+  <complexType name="UValueAttribute_Type">
+    <annotation>
+      <documentation>
+        A single value attribute of the type double (float64) that is >= 0;
+      </documentation>
+    </annotation>
+    <complexContent>
+      <restriction base="data-type:ValueAttribute_Type">
+        <attribute name="value" type="data-type:UFloat64_Type" use="required" />    
+      </restriction>
+    </complexContent>
+  </complexType>
+    
+    <group name="Parameter_Group">
+        <annotation>
+            <documentation xml:lang="en">
+                A parameter from a list mode data file is referenced by its name that is specified in a name attribute.
+                (The name shall correspond to the value of the $PnN keyword in FCS data files).
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="parameter" type="data-type:NonEmptyName_Type" />
+        </sequence>
+    </group>
+    
+</schema>

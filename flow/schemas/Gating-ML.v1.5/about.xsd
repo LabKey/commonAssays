@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema 
+  xmlns="http://www.w3.org/2001/XMLSchema" 
+  xmlns:about="http://www.newportinstruments.com/CytometryML/Schemas/about" 
+  targetNamespace="http://www.newportinstruments.com/CytometryML/Schemas/about" 
+  elementFormDefault="qualified" attributeFormDefault="unqualified" xml:lang="en-US" version="0.30">
+  
+	<annotation>
+		<appinfo source="http://www.newportinstruments.com/cytometryml/cytometryml.htm"/>
+		<documentation>
+		  This is the root schema, which is imported by all of the other schema. 
+      It provides the about_Type data-type that will be used for configuration management. 
+      The about_Type includes a URL that provides the address of Supplementary_Info which 
+      would be located on a separate web page.
+      This supplementary information could include some of the authors and a change list.
+	  </documentation>
+	</annotation>
+	<!--**************************************************-->
+	<annotation>
+		<documentation>
+		  Since about_Type when extended in other schemas to include fixed values was not valid 
+		  under XML schema 1.0, an XML page has been generated from the about_Type and has been 
+		  included in an  appinfo element. The first line of the XML page, ?xml version="1.0"?, 
+		  had to be omitted in order to permit validation of the about schema. However, the 
+		  about_Type is usable for XHTML web pages and XML files.
+		</documentation>
+		<appinfo>
+			<about:about 
+			  Subject="Schema metadata and/or configuration management." 
+			  Version="0.30"
+			  Latest_Location="file:///CytometryML/Schemas/about.xsd" 
+			  Regulatory_Status="Under_Development" 
+			  Copyright_Holder="Newport Instruments" 
+			  Release_Date="2008-01-07" 
+			  Supplementary_Info="URI" 
+			  Keywords="Subject Description Source Version Regulatory Copyright Maintainer Release Date Keyword" 
+			  Verification_Value="unverified" 
+			  xmlns:about="http://www.newportinstruments.com/CytometryML/Schemas/about" 
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			  xsi:schemaLocation="http://www.newportinstruments.com/CytometryML/Schemas/about about.xsd">
+
+			  <about:Maintainer Maintainer_Is_Creator="true" Email="rleif@rleif.com">
+					<about:PreferredGivenName>Robert</about:PreferredGivenName>
+					<about:MiddleName>Cary</about:MiddleName>
+					<about:FamilyName>Leif</about:FamilyName>
+					<about:qualification>Ph.D.</about:qualification>
+				</about:Maintainer>
+				<about:Author>
+					<about:PreferredGivenName>Josef</about:PreferredGivenName>
+					<about:FamilyName>Spidlen</about:FamilyName>
+					<about:qualification>Ph.D.</about:qualification>
+				</about:Author>
+				<about:Source>
+				  about:about; Some of the elements and attributes are loosely based on the Dublin Core.
+				</about:Source>
+				<about:Description>
+				  This schema includes the elements and attributes (metadata)
+				  that are necessary to manage the configuration of a schema.
+				</about:Description>
+				<about:Status_Disclaimer>
+				  This is a DRAFT proposal that has not been formally 
+				  tested to comply with the W3C XML schema version 1.0 specification. No position
+				  is taken in respect to whether a particular software implementing this schema
+				  works according to medical or other regulations.
+				</about:Status_Disclaimer>
+				<about:Document_Status>Draft</about:Document_Status>
+				<about:Patent_Disclaimer>
+				  Attention is called to the possibility that implementation of this 
+				  specification may require use of subject matter covered by patent rights. 
+				  By publication of this standard, no position is taken with respect to the existence 
+				  or validity of any patent rights in connection therewith.
+				  Neither ISAC nor Newport Instruments shall not be responsible for identifying patents 
+				  or patent applications for which a license may be required to implement an ISAC standard 
+				  or for conducting inquiries into the legal 
+				  validity or scope of those patents that are brought to its attention.
+				</about:Patent_Disclaimer>
+				<about:Permisions>
+				  Copyright 2002-2008 Newport Instruments. One print or electronic copy may be made 
+				  for personal use only. Systematic or multiple reproduction, distribution to multiple 
+				  locations via electronic or other means, or duplication of any material in this document 
+				  for a fee or for commercial purposes require permission of the copyright holder. 
+				  For all other uses, please contact Robert C. Leif, Ph.D. at rleif@rleif.com 
+				  Since this is, at present, a research project, this schema should not be used in 
+				  a medical device."
+				</about:Permisions>
+				<about:Acknowledgement>
+				  Supported by Newport Instruments internal development funds.
+				</about:Acknowledgement>
+			</about:about>
+		</appinfo>
+	</annotation>
+	<annotation>
+		<documentation>
+		  Initially, the id attributes were included as a means to permit the 
+		  complexTypes present in XSD schemas to be simply referenced by RDF. 
+		  A solution that includes the use of an id attribute has been suggested 
+		  in the document below to permit the use of derived simpleTypes. This and 
+		  the other schemas will follow this suggestion and extend it to complexTypes. 
+		  This turns out to not be necessary because the simpleTypes of the elements 
+		  within a complexType have always been visible in the CytometryML schemas; 
+		  and therefore can be referenced by RDF. The length of the reference to the 
+		  elements based on the complexTypes may have been superseded by the use of CURIES.
+		  XML Schema Datatypes in RDF and OWL, W3C Working Group Note 14 March 2006
+		  This version: http://www.w3.org/TR/2006/NOTE-swbp-xsch-datatypes-20060314/
+		  Latest version: http://www.w3.org/TR/swbp-xsch-datatypes/
+		</documentation>
+	</annotation>
+	<!--***********************************************************-->
+	<simpleType name="Version_Type" id="Version_Type">
+		<restriction base="string">
+			<pattern value="[0-9]{1,2}\.[0-9\.]{2}"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<annotation>
+		<documentation>The Email_Address_Type including the pattern is from PerfectXML
+		 http://www.perfectxml.com/Answers.asp?ID=3. / characters had to be inserted before 
+		 dashes '-' to escape them.
+		</documentation>
+	</annotation>
+	<simpleType name="Email_Address_Type" id="Email_Address_Type">
+		<restriction base="string">
+			<pattern value="([\.a-zA-Z0-9_\-])+@([a-zA-Z0-9_\-])+(([a-zA-Z0-9_\-])*\.([a-zA-Z0-9_\-])+)+"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Regulatory_Status_Type" id="Regulatory_Status_Type">
+		<restriction base="string">
+			<enumeration value="Under_Development"/>
+			<enumeration value="For Discussion_Only"/>
+			<enumeration value="Alpha_Test"/>
+			<enumeration value="Beta_Test"/>
+			<enumeration value="Research_Only"/>
+			<enumeration value="In_Clinical_Trial"/>
+			<enumeration value="In_Medical_Use"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Copyright_Holder_Type" id="Copyright_Holder_Type">
+		<restriction base="string"/>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Copyright_Uri_Type" id="Copyright_Uri_Type">
+		<restriction base="anyURI"/>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Bd_16_Type" id="Bd_16_Type">
+		<restriction base="token">
+			<minLength value="0"/>
+			<maxLength value="16"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Bd_50_Type" id="Bd_50_Type">
+		<restriction base="token">
+			<minLength value="1"/>
+			<maxLength value="50"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Bd_64_Type" id="Bd_64_Type">
+		<restriction base="token">
+			<minLength value="1"/>
+			<maxLength value="64"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Narrative_Type" id="Narrative_Type">
+		<restriction base="string">
+			<minLength value="10"/>
+			<maxLength value="1000"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Keyword_Type" id="Keyword_Type">
+		<restriction base="token">
+			<minLength value="1"/>
+			<maxLength value="32"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Keywords_Type" id="Keywords_Type">
+		<restriction>
+			<simpleType>
+				<list itemType="about:Keyword_Type"/>
+			</simpleType>
+			<maxLength value="10"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<simpleType name="Verification_Type" id="Verification_Type">
+		<annotation>
+			<documentation>
+			  This is a string that will be created by the manufacturer
+			  or others to verify that the schema is identical to the one sent out or downloaded.
+			  The algorithm employed by the manufacturer or similar party can be secret.
+			  An example would be a cyclic redundancy check, CRC, value.
+			</documentation>
+		</annotation>
+		<restriction base="token">
+			<minLength value="5"/>
+			<maxLength value="64"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<!-- The long strings are often optional -->
+	<simpleType name="Bd_1024_Type" id="Bd_1024_Type">
+		<restriction base="string">
+			<minLength value="0"/>
+			<maxLength value="1024"/>
+		</restriction>
+	</simpleType>
+	<!--***********************************************************-->
+	<!--***********************************************************-->
+	<annotation>
+		<documentation>
+		  Since about is the top level schema, it cannot import any of the other schemas 
+		  including DICOM and Person_Name. Therefore a Person_Name_Type that does not reference 
+		  DICOM had to specially be created for about. For all other uses, the Person_Name_Type 
+		  in the Person_Name schema should be used.
+		</documentation>
+	</annotation>
+	<complexType name="Person_Name_Type">
+		<sequence>
+			<element name="PreferredGivenName" type="about:Bd_50_Type"/>
+			<!--First Name-->
+			<element name="MiddleName" type="about:Bd_50_Type" minOccurs="0" maxOccurs="3"/>
+			<element name="FamilyName" type="about:Bd_50_Type"/>
+			<element name="qualification" type="about:Bd_16_Type" minOccurs="0" maxOccurs="3"/>
+			<element name="Generation" type="about:Bd_16_Type" minOccurs="0"/>
+		</sequence>
+	</complexType>
+	<!--***********************************************************-->
+	<annotation>
+		<documentation>This is an extension of Person_Name_Type</documentation>
+	</annotation>
+	<complexType name="Maintainer_Type" id="Maintainer_Type">
+		<complexContent>
+			<extension base="about:Person_Name_Type">
+				<attribute name="Maintainer_Is_Creator" type="boolean"/>
+				<attribute name="Email" type="about:Email_Address_Type" use="required"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!--***********************************************************-->
+	<annotation>
+		<documentation>This is an extension of Person_Name_Type</documentation>
+	</annotation>
+	<complexType name="Author_Type" id="Author_Type">
+		<complexContent>
+			<extension base="about:Person_Name_Type">
+				<attribute name="Email" type="about:Email_Address_Type" use="optional"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!--***********************************************************-->
+	<!--***********************************************************-->
+	<annotation>
+		<documentation>
+		  The complex type about_Type should be usable for XML and XHTML web pages. The use of 
+		  attributes, where reasonable, will result in simpler text for the web pages. The 
+		  Maintainer_Type must be part of the about_Type, since the user should be provided 
+		  with a contact, who can provide help.
+		</documentation>
+	</annotation>
+	<!-- the about element is used to generate XML pages that include the metadata and/or configuration management information-->
+	<element name="about" type="about:about_Type"/>
+	<complexType name="about_Type" id="about_Type">
+		<sequence>
+			<element name="Maintainer" type="about:Maintainer_Type"/>
+			<element name="Author" type="about:Person_Name_Type" minOccurs="0" maxOccurs="100"/>
+			<element name="Source" type="about:Narrative_Type" minOccurs="0" maxOccurs="100"/>
+			<element name="Description" type="about:Narrative_Type"/>
+			<element name="Status_Disclaimer" type="about:Bd_1024_Type" minOccurs="0"/>
+			<element name="Document_Status" type="about:Bd_1024_Type" minOccurs="0"/>
+			<element name="Patent_Disclaimer" type="about:Narrative_Type" minOccurs="0"/>
+			<element name="Permisions" type="about:Narrative_Type"/>
+			<element name="Acknowledgement" type="about:Bd_1024_Type" minOccurs="0" maxOccurs="50"/>
+		</sequence>
+		<attribute name="Subject" type="about:Bd_64_Type"/>
+		<attribute name="Version" type="about:Version_Type"/>
+		<attribute name="Latest_Location" type="anyURI"/>
+		<attribute name="Regulatory_Status" type="about:Regulatory_Status_Type"/>
+		<attribute name="Copyright_Holder" type="about:Copyright_Holder_Type"/>
+		<attribute name="Copyright_Uri" type="about:Copyright_Uri_Type" use="optional"/>
+		<attribute name="Permissions" type="about:Narrative_Type"/>
+		<attribute name="Release_Date" type="date"/>
+		<attribute name="Supplementary_Info" type="anyURI" use="optional"/>
+		<attribute name="Keywords" type="about:Keywords_Type" use="optional"/>
+		<attribute name="Verification_Value" type="about:Verification_Type" use="optional"/>
+	</complexType>
+	<!--***********************************************************-->	
+</schema>

@@ -329,6 +329,13 @@ flow/resources/web/Flow/unflagFCSAnalysis.gif -text
 flow/resources/web/Flow/unflagFCSFile.gif -text
 flow/resources/web/Flow/unflagSample.gif -text
 flow/resources/web/Flow/util.js -text
+flow/schemas/Gating-ML.v1.5/DataTypes.v1.5.xsd -text
+flow/schemas/Gating-ML.v1.5/Gating-ML.v1.5.xsd -text
+flow/schemas/Gating-ML.v1.5/Transformations.v1.5.xsd -text
+flow/schemas/Gating-ML.v1.5/about.xsd -text
+flow/schemas/ICSMetadata.xsd -text
+flow/schemas/flowData.xsd -text
+flow/schemas/flowPipelineScript.xsd -text
 flow/src/META-INF/positivity.R -text
 flow/src/META-INF/qc.R -text
 flow/src/META-INF/ranalysis.r -text

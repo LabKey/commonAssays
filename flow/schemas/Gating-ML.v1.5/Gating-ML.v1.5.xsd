@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema 
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:gating="http://www.isac-net.org/std/Gating-ML/v1.5/gating"
+    xmlns:transforms="http://www.isac-net.org/std/Gating-ML/v1.5/transformations"
+    xmlns:data-type="http://www.isac-net.org/std/Gating-ML/v1.5/datatypes"
+	
+    targetNamespace="http://www.isac-net.org/std/Gating-ML/v1.5/gating" 
+    
+    elementFormDefault="qualified"
+    attributeFormDefault="qualified" 
+    version="1.5.080120">
+
+    <import namespace="http://www.isac-net.org/std/Gating-ML/v1.5/transformations"
+        schemaLocation="Transformations.v1.5.xsd" />
+        
+    <import namespace="http://www.isac-net.org/std/Gating-ML/v1.5/datatypes"
+        schemaLocation="DataTypes.v1.5.xsd" />
+  
+    <import namespace="http://www.newportinstruments.com/CytometryML/Schemas/about"
+        schemaLocation="about.xsd" />
+
+    <annotation>
+      <appinfo source="http://flowcyt.sourceforge.net/"> 
+        Gating-ML: Gating Description Specification
+      </appinfo>
+      
+      <documentation xml:lang="en" source="http://flowcyt.sourceforge.net/">
+        <about:about 
+          xmlns:about="http://www.newportinstruments.com/CytometryML/Schemas/about"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.newportinstruments.com/CytometryML/Schemas/about about.xsd"
+          Subject="Gating Description in Cytometry"
+          Release_Date="2008-01-20"
+          Copyright_Holder="International Society for Analytical Cytology (ISAC)"
+          Keywords="cytometry gating filetering"
+          Latest_Location="http://flowcyt.sourceforge.net/gating/">
+          <about:Maintainer Email="jspidlen@bccrc.ca">
+            <about:PreferredGivenName>Josef</about:PreferredGivenName>
+            <about:FamilyName>Spidlen</about:FamilyName>
+            <about:qualification>Ph.D.</about:qualification>
+          </about:Maintainer>
+          <about:Author>
+            <about:PreferredGivenName>Josef</about:PreferredGivenName>
+            <about:FamilyName>Spidlen</about:FamilyName>
+            <about:qualification>Ph.D.</about:qualification>
+          </about:Author>
+          <about:Source>http://flowcyt.sourceforge.net/gating/</about:Source>
+          <about:Description>
+            Gating-ML - Gating Description in Cytometry:
+            ********************************************
+            Gating is a process commonly used in cytometry for selecting populations of interests 
+            by defining the characteristics of particles for further data acquisition or analysis. 
+            This XML schema represents a proposal on how to form unambiguous XML-based gate 
+            definitions that can facilitate the interchange and validation of data/analysis between 
+            different software packages. This XML Schema is a part of the Gating-ML specification.
+            This XML schema imports a schema for parameter transformation descriptions so that
+            these can be included in Gating-ML and gates can be applied on transformed data. 
+          </about:Description>
+          <about:Status_Disclaimer>
+            This document is an unapproved draft of a proposed standard that is intended for an internal 
+            review by the International Society for Analytical Cytology (ISAC) Data Standards Task Force 
+            (ISAC DSTF). As such, this document is subject to change and must not be utilized for any 
+            conformance/compliance purposes.
+            This is a DRAFT proposal that has been formally tested to comply with the W3C XML schema 
+            version 1.0 specification but no position is taken in respect to whether a particular software 
+            implementing this schema works according to medical or other regulations.
+          </about:Status_Disclaimer>
+          <about:Document_Status>DRAFT</about:Document_Status>
+          <about:Patent_Disclaimer>
+            Attention is called to the possibility that implementation of this specification may require 
+            use of subject matter covered by patent rights. By publication of this standard, no position 
+            is taken with respect to the existence or validity of any patent rights in connection therewith. 
+            ISAC shall not be responsible for identifying patents or patent applications for which a license 
+            may be required to implement an ISAC standard or for conducting inquiries into the legal 
+            validity or scope of those patents that are brought to its attention.
+          </about:Patent_Disclaimer>
+          <about:Permisions>
+            Copyright (c) 2008 ISAC (International Society for Analytical Cytology). 
+            Free of charge distribution and read-only usage permited. 
+            Modification and all other rights reserved. For all other uses please contact ISAC.
+          </about:Permisions>
+          <about:Acknowledgement>
+            The work is supported by NIH R01 EB-5034. Thanks also to Robert C. Leif, Wayne Moore, and other 
+            ISAC DSTF members for their contributions. 
+          </about:Acknowledgement>
+        </about:about>
+      </documentation>
+
+    </annotation>
+
+
+    <element name="Gating-ML" type="gating:Gating-ML_Type" id="Gating-ML">
+        <annotation>
+            <documentation xml:lang="en">
+                Gating-ML is the main element of an XML corresponding to this schema 
+            </documentation>
+        </annotation>
+    </element>
+
+
+    <group name="Gates_Group">
+        <annotation>
+            <documentation xml:lang="en"> 
+                The group gates include a choice from all the types of gates. 
+            </documentation>
+        </annotation>
+        <choice>
+            <element name="RectangleGate" type="gating:RectangleGate_Type" />
+            <element name="PolygonGate" type="gating:PolygonGate_Type" />
+            <element name="PolytopeGate" type="gating:PolytopeGate_Type" />
+            <element name="EllipsoidGate" type="gating:EllipsoidGate_Type" />
+            <element name="BooleanGate" type="gating:BooleanGate_Type" />
+            <element name="DecisionTreeGate" type="gating:DecisionTreeGate_Type" />
+        </choice>
+    </group>
+
+
+    <complexType name="Gating-ML_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Type of the Gating-ML element: 
+                Gates, transformations, and spillover matrices may be included.
+            </documentation>
+        </annotation>
+        <sequence minOccurs="1" maxOccurs="unbounded">
+            <choice>
+                <group ref="gating:Gates_Group" />
+                <group ref="transforms:Transformation_Group" />                
+                <group ref="transforms:SpilloverMatrix_Group" />
+            </choice>
+        </sequence>
+    </complexType>
+
+
+    <complexType name="AbstractGate_Type" abstract="true">
+        <annotation>
+            <documentation xml:lang="en">
+                Abstract type to be used as a common parent of all types of gates. 
+                Attributes: 
+                - id shall be used for reference purposes while specifying any type of gate. 
+                - parent_id may be used to identify a parent gate. If a parent_id is specified, 
+                this gate is a subset of the parent gate. Events in this gate shall be computed 
+                as logical AND (intersection) of this definition AND parent definition. Also, 
+                denominator-based statistics (e.g., percentage) are typically computed 
+                relativelly to the parent gate.
+            </documentation>
+        </annotation>
+        <attribute name="id" type="ID" use="required" id="id" />
+        <attribute name="parent_id" type="IDREF" use="optional" id="parent_id" />
+    </complexType>
+
+
+    <complexType name="RectangleGate_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Type of the RectangleGate element: 
+                
+                Each parameter of a rectangular gate shall be described by a dimension element. 
+                The gate is applied on parameters as specified by sub-elements of the dimension elements. 
+                These may either be parameters from a list mode data file or results of parameter transformations. 
+                There may be any number of dimension elements; each specifying one dimension (parameter) of the gate. 
+                Each dimension specifies a range between the min and max attributes (double numbers).
+                If max is absent then it is considered as unlimited.
+                If min is absent then it is considered as -unlimited (minus unlimited).
+                The boundary is considered as MinInclusive-MaxExclusive.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:AbstractGate_Type">
+                <sequence>
+                    <element name="dimension" type="gating:RectangleGateDimension_Type" maxOccurs="unbounded" id="dimension" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="PolygonGate_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Type of the PolygonGate element: 
+                
+                There are exactly 2 dimensions that are described by 2 dimension elements. These may either 
+                be parameters from a list mode data file or results of parameter transformations. They are 
+                specified by sub-elements of the dimension elements and they specify the plane, in which the 
+                polygon gate is created. At least 3 vertex elements follow after the dimension subelements. 
+                A vertex element represents a single vertex of the polygon. Each vertex element includes 2 
+                coordinate subelements, each of which specifies a coordinate of the vertex by a value attribute. 
+                The first coordinate corresponds to the first dimension specified; the second coordinate 
+                to the second dimension. The polygon is defined by the sequence of at least 3 vertices. The 
+                boundaries are drawn between the neighbor vertices and it is imlicitly closed. The boundaries 
+                are considered to be inclusive, i.e., a single event falling on an edge of a polygon describing 
+                a gate is considered to be in the gate. Considering simple polygons (polygons, which boundaries 
+                do not cross), the set of points in the plane enclosed by a polygon forms the interior of the 
+                polygon, the set of points on the polygon itself forms its boundary, and the set of points 
+                surrounding the polygon forms its exterior. Considering non simple polygons, i.e., polygons 
+                crossing boundaries, the alternate filling method is used to define to the interior and the 
+                exterior of a polygon. The algorithm involves using a ray, coming from the outside of the 
+                polygon, every crossing segment switches filling on or off. The first crossing will always mean 
+                that after that the filling of a segment will be on. The segments with filling switched on are 
+                creating the interior of a polygon. 
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:AbstractGate_Type">
+                <sequence>
+                    <element name="dimension" type="gating:Dimension_Type" minOccurs="2" maxOccurs="2" />
+                    <element name="vertex" type="gating:Point2D_Type" minOccurs="3" maxOccurs="unbounded" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="PolytopeGate_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Type of the PolytopeGate element: 
+                
+                A polytope is the generalization to any dimension of a polygon in two dimensions. 
+                Within this specification, a polytope gate is always a convex polytope. 
+                There is at least one dimension to be specified. Each dimension is described by a 
+                dimension element. Dimensions may either be parameters from a list mode data file 
+                or results of parameter transformations. They are specified by sub-elements of the 
+                dimension elements and they specify the space in which the polytope is created.
+                
+                Polytope gates in n dimensions (n >= 1) shall be specified as an intersection of m (m >= 1) 
+                half-spaces. To specify a polytope gate the PolytopeGate element shall be used as follows:
+                The inherited id attribute shall be used to identify the gate for further referencing 
+                purposes. The inherited parent_id attribute may be used to reference a parent gate. 
+                Dimensions shall be described by n dimension elements. Specified dimensions create the 
+                space in which the polytope is created, witch equals to the space where half-spaces are 
+                being described. Half-spaces shall be described by m halfspace elements immediately 
+                following the dimension elements. Each halfspace element shall include n+1 entry elements. 
+                Each entry element specifies a coefficient value by a value attribute.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:AbstractGate_Type">
+                <sequence>
+                    <element name="dimension" type="gating:Dimension_Type" minOccurs="1" maxOccurs="unbounded" />
+                    <element name="halfspace" type="gating:MatrixRow_Type" minOccurs="1" maxOccurs="unbounded" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="EllipsoidGate_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Type of the EllipsoidGate element: 
+                
+                There are at least two dimensions to be specified. Each dimension is described by a 
+                dimension element. Dimensions may either be parameters from a list mode data file 
+                or results of parameter transformations. They are specified by sub-elements of the 
+                dimension elements and they specify the space in which the ellipsoid is created.
+                The mean element shall follow to describe the mean vector (center of the ellipsoid). 
+                It shall include coordinate elements, each one specifying a coordinate of the mean 
+                point in space by a value attribute. The first coordinate corresponds to the first 
+                dimension, the second coordinate to the second dimension, etc. The number of coordinate 
+                elements specified for the mean element shall correspond to the number of dimension 
+                elements at the beginning of the ellipsoid gate definition. The covarianceMatrix element 
+                shall follow, including n row subelements, each of them having n entry subelements. 
+                Each entry element specifies its value by the value attribute. The Ellipsoid gate is 
+                specified as: {x: (x-mean)^T covarianceMatrix^-1 (x-mean) &lt;= distanceSquare}; 
+                see PDF specification for details.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:AbstractGate_Type">
+                <sequence>
+                    <element name="dimension" type="gating:Dimension_Type" minOccurs="2" maxOccurs="unbounded" />
+                    <element name="mean" type="gating:PointXD_Type" minOccurs="1" maxOccurs="1" />
+                    <element name="covarianceMatrix" type="gating:Matrix_Type" minOccurs="1" maxOccurs="1" />
+                  <element name="distanceSquare" type="data-type:UValueAttribute_Type"  minOccurs="1" maxOccurs="1" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="DecisionTreeGate_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Type of the DecisionTreeGate element: 
+                
+                This gate is not described geometrically, instead, a decision tree is stored for the gate; each 
+                event is filtered through this tree in order to define whether it is inside or outside of the gate.
+                
+                Computing decision trees: 
+                The decision tree is a binary tree. Each non-terminal node specifies a threshold (attribute) and
+                a subject for a particular comparison step. The subject of a comparison step may either be a 
+                parameter from a list mode data file or a result of a parameter transformation. The subject of
+                the comparison step is specified by the first sub-element of the "node" element (i.e., rootNode, 
+                nodeLT, or nodeGTE elements). For a given event the value of the specified parameter (or transformation 
+                result) is compared against the threshold. If it is less than the threshold, then the decision is passed to the 
+                "Less Than" node; if it is greater or equal to the threshold, then the decision is passed to the "Greater 
+                Than or Equal" node. The "Less Than" node may be either a non-terminal node (described by the nodeLT 
+                element) or a terminal leaf node (described by a leafLT element). In case it is a non-terminal node 
+                (nodeLT element) the computation continues as described above. In case it is a terminal leaf node 
+                the decision is made according the inside attribute of the leafLT element. If the value of the attribute 
+                is true, the event is considered to be in the gate. If the value of the attribute is false, the event is 
+                considered to be out of the gate. The same semantic applies for a "Greater Than or Equal" node. 
+                It also may be either a non-terminal node (described by the nodeGTE element) or a terminal leaf 
+                node (described by a leafGTE element). In case it s a non-terminal node (nodeGTE element) the 
+                computation continues as described above. In case it is a terminal leaf node the decision is made 
+                according the inside attribute of the leafGTE element. 
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:AbstractGate_Type">
+                <sequence>
+                    <element name="rootNode" type="gating:TreeNode_Type" id="rootNode" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="BooleanGate_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Type of the BooleanGate element: 
+                A Boolean gate is a gate created based on any other gates using basic Boolean logic 
+                operators, i.e., AND, OR, and NOT operators. NOT is considered as a unary operator.
+                The arity of AND and OR operators is considered to be n, n greater or equal 2. 
+                
+                The operators have the following semantitransforms: 
+                a) Consider a gate G created as NOT(G1). An event e is in the gate G if and only if e is 
+                    not in the gate G1. 
+                b) Consider a gate G created as AND(G1, G2, …, Gn), n greater or equal 2. An event 
+                    e is in the gate G if and only if e is in all gates Gi for i from 1 to n. 
+                c) Consider a gate G created as OR(G1, G2, …, Gn), n greater or equal 2. An event e 
+                    is in the gate G if and only if e is in any of the gates Gi. 
+                
+                There are two possibilities how to specify the operands of Boolean operations: 
+                a) It is possible to use the gateReference element with a ref attribute that specifies 
+                    another gate by its id (the id attribute of a gate defined somewhere else in the file). 
+                    A gate with the referenced id shall be present in the file, otherwise it is considered 
+                    as a wrong gate definition. 
+                b) An operand of a Boolean operation may be defined directly within the And/Or/Not 
+                    element. The same rules apply as when defining any other gate within the XML file 
+                    on the top level as described by this document.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:AbstractGate_Type">
+                <sequence>
+                    <choice>
+                        <element name="and" type="gating:TwoAndMoreOperands_BoolGate_Type" id="and" />
+                        <element name="or" type="gating:TwoAndMoreOperands_BoolGate_Type" id="or" />
+                        <element name="not" type="gating:OneOperand_BoolGate_Type" id="not" />
+                    </choice>
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+    
+    
+    <complexType name="Dimension_Type">
+         <annotation>
+             <documentation xml:lang="en">
+                   The type of a dimension: a parameter or a transformation.
+             </documentation>
+         </annotation>
+         <group ref="transforms:ParameterOrTransformation_Group" />
+    </complexType>
+    
+
+    <complexType name="RectangleGateDimension_Type">
+        <annotation>
+            <documentation>
+                A dimension type for a rectangle gate; the common dimension is extended 
+                by the min and max attributes.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="gating:Dimension_Type">
+                <attribute name="min" type="double" use="optional" id="min" />
+                <attribute name="max" type="double" use="optional" id="max" />
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="Point_Type">
+        <annotation>
+            <documentation>
+                A point is a sequence of coordinates.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="coordinate" type="data-type:ValueAttribute_Type" maxOccurs="unbounded" id="coordinate" />
+        </sequence>
+    </complexType>
+
+
+    <complexType name="Point2D_Type">
+        <annotation>
+            <documentation>
+                A 2D point is a sequence of two coordinates.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <restriction base="gating:Point_Type">
+                <sequence>
+                  <element name="coordinate" type="data-type:ValueAttribute_Type" minOccurs="2" maxOccurs="2" />
+                </sequence>
+            </restriction>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="PointXD_Type">
+      <annotation>
+          <documentation>
+            A 2 or more dimensional point is a sequence of two or more coordinates.
+          </documentation>
+       </annotation>
+      <complexContent>
+          <restriction base="gating:Point_Type">
+              <sequence>
+                <element name="coordinate" type="data-type:ValueAttribute_Type" minOccurs="2" maxOccurs="unbounded" />
+              </sequence>
+          </restriction>
+       </complexContent>
+    </complexType>
+  
+  
+    <complexType name="Matrix_Type">
+      <annotation>
+        <documentation>
+          Description of a matrix
+        </documentation>
+      </annotation>
+      <sequence>
+        <element name="row" type="gating:MatrixRow_Type" minOccurs="1" maxOccurs="unbounded" />
+      </sequence>
+    </complexType>
+  
+  
+    <complexType name="MatrixRow_Type">
+      <annotation>
+        <documentation>
+          Description of a row of a matrix
+        </documentation>
+      </annotation>
+      <sequence>
+        <element name="entry" type="data-type:ValueAttribute_Type" minOccurs="1" maxOccurs="unbounded" />
+      </sequence>
+    </complexType>
+
+
+    <group name="BoolGateOperands_Group">
+        <annotation>
+            <documentation xml:lang="en"> 
+                An operand of a Boolean gate can be specified as gateReference ref="#id attribute of another gate" 
+                or as an embedded specification of another gate. 
+            </documentation>
+        </annotation>
+        <choice>
+            <element name="gateReference" type="gating:GateReference_Type" id="gateReference" />
+            <group ref="gating:Gates_Group" />
+        </choice>
+    </group>
+
+
+    <complexType name="TwoAndMoreOperands_BoolGate_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                The type of Boolean gates with two or more parameters (AND and OR gates).
+            </documentation>
+        </annotation>
+        <sequence minOccurs="2" maxOccurs="unbounded">
+            <group ref="gating:BoolGateOperands_Group" />
+        </sequence>
+    </complexType>
+
+
+    <complexType name="OneOperand_BoolGate_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                The type of Boolean Gates with exactly one operand (NOT gate).
+            </documentation>
+        </annotation>
+        <sequence>
+            <group ref="gating:BoolGateOperands_Group" />
+        </sequence>
+    </complexType>
+
+
+    <complexType name="GateReference_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Type of a reference to another (already defined) gate. 
+                The attribute ref references a gate by its id.
+            </documentation>
+        </annotation>
+        <attribute name="ref" type="IDREF" use="required" id="ref" />
+    </complexType>
+
+
+    <complexType name="TreeNode_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                The type of a tree node has a threshold attribute and three sub-elements specifying
+                the subject for the comparison, the left ("less than") branch, and the right ("greater or
+                equal") branch. The computation continues based on the result of the comparison of 
+                the subject against the threshold.
+            </documentation>
+        </annotation>
+        <sequence>
+            <group ref="transforms:ParameterOrTransformation_Group" />
+            <group ref="gating:LessThan_TreeBranch_Group" />
+            <group ref="gating:GreaterThanOrEqual_TreeBranch_Group" />
+        </sequence>
+        <attribute name="threshold" type="double" use="required" id="threshold" />
+    </complexType>
+
+
+    <group name="LessThan_TreeBranch_Group">
+       <annotation>
+            <documentation xml:lang="en"> 
+                Either a nodeLT or e leafLT element.
+            </documentation>
+        </annotation>
+        <choice>
+            <element name="nodeLT" type="gating:TreeNode_Type" id="nodeLT" />
+            <element name="leafLT" type="gating:LeafNode_Type" id="leafLT" />
+        </choice>
+    </group>
+
+
+    <group name="GreaterThanOrEqual_TreeBranch_Group">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Either a nodeGTE or e leafGTE element.
+            </documentation>
+        </annotation>
+        <choice>
+            <element name="nodeGTE" type="gating:TreeNode_Type" id="nodeGTE" />
+            <element name="leafGTE" type="gating:LeafNode_Type" id="leafGTE" />
+        </choice>
+    </group>
+
+
+    <complexType name="LeafNode_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                LeafNode type: the inside attribute specifies whether an event is in the gate if 
+                membership computation ends in this leaf node.
+            </documentation>
+        </annotation>
+        <attribute name="inside" type="boolean" use="required" id="inside" />
+    </complexType>
+
+
+</schema>

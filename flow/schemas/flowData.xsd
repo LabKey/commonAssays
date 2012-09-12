@@ -1,0 +1,56 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://flow.labkey.org/flowdata/xml/" targetNamespace="http://flow.labkey.org/flowdata/xml/" elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <xs:element name="flowdata" type="FlowData" />
+    <xs:complexType name="FlowData">
+        <xs:sequence>
+            <xs:element name="keywords" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="keyword" minOccurs="0" maxOccurs="unbounded" type="Keyword" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="statistics" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="statistic" minOccurs="0" maxOccurs="unbounded" type="Statistic" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="graphs" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="graph" minOccurs="0" maxOccurs="unbounded" type="Graph" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="uri" type="xs:anyURI" />
+        <xs:attribute name="type" type="xs:string" use="required" />
+    </xs:complexType>
+    <xs:complexType name="Keyword">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="value" type="xs:string" />
+            <xs:element name="aliases" type="Aliases" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Statistic">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="value" type="xs:double" />
+            <xs:element name="aliases" type="Aliases" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Graph">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="data" type="xs:base64Binary" />
+            <xs:element name="aliases" type="Aliases" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Aliases">
+        <xs:sequence>
+            <xs:element name="alias" type="xs:string" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

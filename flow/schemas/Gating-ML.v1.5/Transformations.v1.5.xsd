@@ -1,0 +1,1337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema 
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:transforms="http://www.isac-net.org/std/Gating-ML/v1.5/transformations"
+    xmlns:data-type="http://www.isac-net.org/std/Gating-ML/v1.5/datatypes"
+    xmlns:mml="http://www.w3.org/1998/Math/MathML"
+	
+	targetNamespace="http://www.isac-net.org/std/Gating-ML/v1.5/transformations"
+    
+    elementFormDefault="qualified" 
+    attributeFormDefault="qualified" 
+    version="1.5.081016">
+
+    <import namespace="http://www.isac-net.org/std/Gating-ML/v1.5/datatypes"
+      schemaLocation="DataTypes.v1.5.xsd" />
+  
+    <import namespace="http://www.newportinstruments.com/CytometryML/Schemas/about"
+      schemaLocation="about.xsd" />
+      
+    <annotation>
+        <appinfo source="http://flowcyt.sourceforge.net/"> 
+            Transformation Descriptions within Gating-ML
+        </appinfo>
+        
+        <documentation xml:lang="en" source="http://flowcyt.sourceforge.net/">
+          <revision_history version="1.5.081016">
+            Changes since version 1.5.080120:
+            - MathML documentation for the EH transformation (inverse to hyperlog) has been corrected
+            - No "physical" changes to the schema (no need for update)
+          </revision_history>
+          <about:about 
+            xmlns:about="http://www.newportinstruments.com/CytometryML/Schemas/about"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.newportinstruments.com/CytometryML/Schemas/about about.xsd"
+            Subject="Transformation Descriptions within Gating-ML"
+            Release_Date="2008-10-16"
+            Copyright_Holder="International Society for Analytical Cytology (ISAC)"
+            Keywords="cytometry parameter transformation compensation spectral overlap"
+            Latest_Location="http://flowcyt.sourceforge.net/gating/">
+            <about:Maintainer Email="jspidlen@bccrc.ca">
+              <about:PreferredGivenName>Josef</about:PreferredGivenName>
+              <about:FamilyName>Spidlen</about:FamilyName>
+              <about:qualification>Ph.D.</about:qualification>
+            </about:Maintainer>
+            <about:Author>
+              <about:PreferredGivenName>Josef</about:PreferredGivenName>
+              <about:FamilyName>Spidlen</about:FamilyName>
+              <about:qualification>Ph.D.</about:qualification>
+            </about:Author>
+            <about:Source>http://flowcyt.sourceforge.net/gating/</about:Source>
+            <about:Description>
+              Various transformations are being performed while analyzing data on computer. 
+              This XML schema provides a detailed specification on how to describe parameter 
+              transformations that has been shown useful in cytometry. It includes compensation 
+              as well as transformations useful for visualization of cytometry data. Unambiguous 
+              description of these transformations facilitates the interchange and validation of 
+              data/analysis between different software packages. This XML schema is a part of the 
+              Gating-ML specification and it is imported into the Gating-ML XML schema. 
+              Compensation description is part of this specification. In flow cytometry, the emission 
+              spectral overlap of fluorescent labels makes it necessary to correct detected signals 
+              before using the values as a basis for other analyses. 
+            </about:Description>
+            <about:Status_Disclaimer>
+              This document is an unapproved draft of a proposed standard that is intended for an internal 
+              review by the International Society for Analytical Cytology (ISAC) Data Standards Task Force 
+              (ISAC DSTF). As such, this document is subject to change and must not be utilized for any 
+              conformance/compliance purposes.
+              This is a DRAFT proposal that has been formally tested to comply with the W3C XML schema 
+              version 1.0 specification but no position is taken in respect to whether a particular software 
+              implementing this schema works according to medical or other regulations.
+            </about:Status_Disclaimer>
+            <about:Document_Status>DRAFT</about:Document_Status>
+            <about:Patent_Disclaimer>
+              Attention is called to the possibility that implementation of this specification may require 
+              use of subject matter covered by patent rights. By publication of this standard, no position 
+              is taken with respect to the existence or validity of any patent rights in connection therewith. 
+              ISAC shall not be responsible for identifying patents or patent applications for which a license 
+              may be required to implement an ISAC standard or for conducting inquiries into the legal 
+              validity or scope of those patents that are brought to its attention.
+            </about:Patent_Disclaimer>
+            <about:Permisions>
+              Copyright (c) 2008 ISAC (International Society for Analytical Cytology). 
+              Free of charge distribution and read-only usage permited. 
+              Modification and all other rights reserved. For all other uses please contact ISAC.
+            </about:Permisions>
+            <about:Acknowledgement>
+              The work is supported by NIH R01 EB-5034. Thanks also to Robert C. Leif, Wayne Moore, and other 
+              ISAC DSTF members for their contributions. 
+            </about:Acknowledgement>
+          </about:about>
+        </documentation>
+    </annotation>
+    
+    
+    <element name="transformations" type="transforms:transformations_Type" id="transformations">
+        <annotation>
+            <documentation xml:lang="en" source="http://flowcyt.sf.net">
+                This element allows to use this XML schema independently of Gating-ML, i.e., if description 
+                of transformations is needed for other than gating purposes. In this case "transformations" 
+                will be the main element of an instance XML file.
+            </documentation>
+        </annotation>
+    </element>
+
+
+    <group name="Transformation_Group">
+        <annotation>
+            <documentation xml:lang="en">
+                Either a definition of a transformation or a reference of a transformation.
+            </documentation>
+        </annotation>
+        <sequence>
+            <choice>
+                <element name="transformation" id="transformation" type="transforms:ParameterTransformation_Type" />
+                <element name="transformationReference" id="transformationReference" type="transforms:TransformationReference_Type" />
+            </choice>
+        </sequence>
+    </group>
+
+
+    <complexType name="TransformationReference_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Type of a reference to another (already defined) transformation. 
+                The attribute ref references a transformation by its id.
+            </documentation>
+        </annotation>
+        <attribute name="ref" type="IDREF" use="required" id="ref" />
+    </complexType>
+
+
+    <complexType name="transformations_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                The type of the main transformations element. This XML schema is typically used as part of 
+                the Gating-ML specification. However, the transformations element allows describe transformations
+                independently on gating, i.e., to use transformation description for other than gating purposes.
+            </documentation>
+        </annotation>
+        <sequence>
+            <choice minOccurs="1" maxOccurs="unbounded">
+                <group ref="transforms:Transformation_Group" />
+                <group ref="transforms:SpilloverMatrix_Group" />
+            </choice>
+        </sequence>
+    </complexType>
+
+
+    <complexType name="ParameterTransformation_Type">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Parameter transformations are functions applied on one or more parameters to create a transformed 
+                parameter. All transformations have the option of receiving a transformation ID for further referencing 
+                purposes. The actual parameter transformation is specified as a sub-element.
+            </documentation>
+        </annotation>
+        
+        <sequence>
+            <choice>
+
+
+                <!-- 
+                    Polynomial of degree one in n variables/arguments
+                    (i.e., linear combination of n-arguments and a translation eventually)
+                    dg1polynomial(argument1, ..., argumentn, a1, ..., an, b) = a1 * argument1 + a2 * argument2 + ... + an * argumentn + b 
+                -->
+                <element name="dg1polynomial" type="transforms:NArgumentsTransformation_Type" id="dg1polynomial">
+                    <annotation>
+                        <documentation xml:lang="en"> 
+                          Polynomial of degree one in n variables/arguments
+                          (i.e., linear combination of n-arguments and a translation eventually)
+                          dg1polynomial(argument1, ..., argumentn, a1, ..., an, b) = a1 * argument1 + a2 * argument2 + ... + an * argumentn + b 
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                              <mml:declare type="function">
+                                <mml:ci id="dg1polynomial">dg1polynomial</mml:ci>
+                                <mml:lambda>
+                                  <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                  <mml:apply>
+                                    <mml:plus/>
+                                    <mml:ci>b</mml:ci>
+                                    <mml:apply>
+                                      <mml:sum/>
+                                      <bvar><ci>i</ci></bvar>
+                                      <mml:apply>
+                                        <mml:times/>
+                                        <mml:ci>ai</mml:ci>
+                                        <mml:ci>argumenti</mml:ci>
+                                      </mml:apply>
+                                    </mml:apply>
+                                  </mml:apply>
+                                </mml:lambda>
+                              </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+
+                <!-- 
+                  Ratio of two arguments
+                  ration(argument1, argument2) = argument1 / argument2
+                -->
+                <element name="ratio" type="transforms:TransformationWithTwoParameters_Type" id="ratio">
+                    <annotation>
+                        <documentation xml:lang="en"> 
+                            Ratio of two arguments
+                            ration(argument1, argument2) = argument1 / argument2
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                                <mml:declare type="function">
+                                    <mml:ci id="ratio">ratio</mml:ci>
+                                    <mml:lambda>
+                                      <mml:bvar><mml:ci>argument1</mml:ci></mml:bvar>
+                                      <mml:bvar><mml:ci>argument2</mml:ci></mml:bvar>
+                                      <mml:apply>
+                                        <mml:divide/>
+                                        <mml:ci>argument1</mml:ci>
+                                        <mml:ci>argument2</mml:ci>
+                                      </mml:apply>
+                                    </mml:lambda>
+                                </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+
+                
+                <!--
+                    Quadratic transformation of an argument:
+                    quadratic(argument, a) = a * argument^2 
+                -->
+                <element name="quadratic" type="transforms:TransformationWithAttributeA_Type" id="quadratic">
+                    <annotation>
+                        <documentation xml:lang="en"> 
+                            Quadratic transformation of an argument:
+                            quadratic(argument, a) = a * argument^2 
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                                <mml:declare type="function">
+                                    <mml:ci id="quadratic">quadratic</mml:ci>
+                                    <mml:lambda>
+                                      <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                      <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                      <mml:apply>
+                                        <mml:times/>
+                                        <mml:ci>a</mml:ci>
+                                        <mml:apply>
+                                          <mml:power/>
+                                          <mml:ci>argument</mml:ci>
+                                          <mml:cn>2</mml:cn>
+                                        </mml:apply>
+                                      </mml:apply>
+                                    </mml:lambda>
+                                </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+
+
+                <!--
+                    Square root transformation of an argument:
+                    sqrt(argument, a) = root(abs(argument/a))
+                    where 
+                    - abs is the absolute value of a number, 
+                    - root is the square root of a number. 
+                -->
+                <element name="sqrt" type="transforms:TransformationWithAttributeA_Type" id="sqrt">
+                    <annotation>
+                        <documentation xml:lang="en"> 
+                            Square root transformation of an argument:
+                            sqrt(argument, a) = root(abs(argument/a))
+                            where 
+                            - abs is the absolute value of a number, 
+                            - root is the square root of a number. 
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                                <mml:declare type="function">
+                                    <mml:ci id="sqrt">sqrt</mml:ci>
+                                    <mml:lambda>
+                                      <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                      <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                      <mml:apply>
+                                        <mml:root/>
+                                        <mml:degree>
+                                          <mml:cn>2</mml:cn>
+                                        </mml:degree>
+                                        <mml:apply>
+                                          <mml:abs/>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:ci>argument</mml:ci>
+                                            <mml:ci>a</mml:ci>
+                                          </mml:apply>
+                                        </mml:apply>
+                                      </mml:apply>
+                                    </mml:lambda>
+                                </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>    
+                </element>
+                
+                
+                <!-- 
+                  Logarithmical transformation of an argument:
+                  ln(argument, a, b) =
+                  - if (a * argument > 0) then ln(argument, a, b) = ln(a*argument) * b
+                  - else ln(argument, a, b) = 0
+                -->
+              <element name="ln" type="transforms:TransformationWithAttributesAB_Type" id="ln">
+                    <annotation>
+                        <documentation xml:lang="en"> 
+                            Logarithmical transformation of an argument:
+                            ln(argument, a, b) =
+                            - if (a * argument > 0) then ln(argument, a, b) = ln(a*argument) * b
+                            - else ln(argument, a, b) = 0
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                                <mml:declare type="function">
+                                    <mml:ci id="ln">ln</mml:ci>
+                                    <mml:lambda>
+                                      <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                      <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                      <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                      <mml:piecewise>
+                                        <mml:piece>
+                                          <mml:apply>
+                                            <mml:times/>
+                                            <mml:apply>
+                                              <mml:ln/>
+                                              <mml:apply>
+                                                <mml:times/>
+                                                <mml:ci>a</mml:ci>
+                                                <mml:ci>argument</mml:ci>
+                                              </mml:apply>
+                                            </mml:apply>
+                                            <mml:ci>b</mml:ci>
+                                          </mml:apply>
+                                          <mml:apply>
+                                            <mml:gt/>
+                                            <mml:apply>
+                                              <mml:times/>
+                                              <mml:ci>a</mml:ci>
+                                              <mml:ci>argument</mml:ci>
+                                            </mml:apply>
+                                            <mml:cn>0</mml:cn>
+                                          </mml:apply>
+                                        </mml:piece>
+                                        <mml:otherwise>
+                                          <mml:apply>
+                                            <mml:times/>
+                                            <mml:cn>0</mml:cn><mml:cn>0</mml:cn>
+                                          </mml:apply>
+                                        </mml:otherwise>
+                                      </mml:piecewise>
+                                    </mml:lambda>
+                                </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+                
+                
+                <!-- 
+                    Exponential transformation of an argument:
+                    exponential(argument, a, b) = (e^(argument/b)))/a
+                -->
+              <element name="exponential" type="transforms:TransformationWithAttributesAB_Type" id="exponential">
+                    <annotation>
+                        <documentation xml:lang="en">
+                          Exponential transformation of an argument:
+                          exponential(argument, a, b) = (e^(argument/b)))/a
+                        </documentation>
+                        <documentation>
+                          <mml:math>
+                            <mml:declare type="function">
+                              <mml:ci id="exponential">exponential</mml:ci>
+                              <mml:lambda>
+                                <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                <mml:apply>
+                                  <mml:divide/>
+                                  <mml:apply>
+                                    <mml:exp/>
+                                    <mml:apply>
+                                      <mml:divide/>
+                                      <mml:ci>argument</mml:ci>
+                                      <mml:ci>b</mml:ci>
+                                    </mml:apply>
+                                  </mml:apply>
+                                  <mml:ci>a</mml:ci>
+                                </mml:apply>
+                              </mml:lambda>
+                            </mml:declare>
+                          </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+                
+                
+                <!-- 
+                    Hyperbolic sin-based transformation of an argument
+                    sinh(argument, a, b) = SinH(argument/b)/a
+                    where SinH is the hyperbolic sine function as defined in mathematics.
+                -->
+                <element name="sinh" type="transforms:TransformationWithAttributesAB_Type" id="sinh">
+                    <annotation>
+                        <documentation xml:lang="en"> 
+                            Hyperbolic sin transformation of an argument 
+                            sinh(argument, a, b) = SinH(argument/b)/a
+                            where SinH is the hyperbolic sine function as defined in mathematics.
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                              <mml:declare type="function">
+                                <mml:ci id="sinh">sinh</mml:ci>
+                                <mml:lambda>
+                                  <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                  <mml:apply>
+                                    <mml:divide/>
+                                    <mml:apply>
+                                      <mml:sinh/>
+                                      <mml:apply>
+                                        <mml:divide/>
+                                        <mml:ci>argument</mml:ci>
+                                        <mml:ci>b</mml:ci>
+                                      </mml:apply>
+                                    </mml:apply>
+                                    <mml:ci>a</mml:ci>
+                                  </mml:apply>
+                                </mml:lambda>
+                              </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+
+
+                <!-- 
+                    Inverse hyperbolic sin-based transformation of an argument
+                    asinh(argument, a, b) = ASinH(a*argument)*b
+                    where ASinH is the inverse hyperbolic sine function as defined in mathematics.
+                -->
+                <element name="asinh" type="transforms:TransformationWithAttributesAB_Type" id="asinh">
+                    <annotation>
+                        <documentation xml:lang="en">
+                            Inverse hyperbolic sin-based transformation of an argument
+                            asinh(argument, a, b) = ASinH(a*argument)*b
+                            where ASinH is the inverse hyperbolic sine function as defined in mathematics.
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                              <mml:declare type="function">
+                                <mml:ci id="asinh">asinh</mml:ci>
+                                <mml:lambda>
+                                  <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                  <mml:apply>
+                                    <mml:times/>
+                                    <mml:apply>
+                                      <mml:arcsinh/>
+                                      <mml:apply>
+                                        <mml:times/>
+                                        <mml:ci>a</mml:ci>
+                                        <mml:ci>argument</mml:ci>
+                                      </mml:apply>
+                                    </mml:apply>
+                                    <mml:ci>b</mml:ci>
+                                  </mml:apply>
+                                </mml:lambda>
+                              </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>                    
+                </element>
+                
+
+                <!-- 
+                    Hyperlog transformation of an argument:
+                    - Bagwell, C.B., Hyperlog-a flexible log-like transform for negative, zero, and positive valued data. 
+                    Cytometry A, 2005. 64(1): p. 34-42. 
+                    http://www3.interscience.wiley.com/cgi-bin/abstract/109921021/ABSTRACT 
+                    
+                    hyperlog(argument, a, b) = root(EH(y, a, b) - argument), where 
+                    where root() is a standard root finding algorithm (e.g., Newton's method) that finds y such 
+                    as EH(y, a, b) = argument.
+                    
+                    EH(y, a, b) =
+                    - if(y >= 0) then EH(y, a, b) = 10^{y/a}+by/a-1 
+                    - else then EH(y, a, b) =-10^{-y/a}+by/a+1
+                    (a correspopnds to range over decades, i.e., r/d)
+                -->                
+                <element name="hyperlog" type="transforms:TransformationWithAttributesAB_Type" id="hyperlog" >
+                    <annotation>
+                        <documentation xml:lang="en">
+                          Hyperlog transformation of an argument:
+                          - Bagwell, C.B., Hyperlog-a flexible log-like transform for negative, zero, and positive valued data. 
+                          Cytometry A, 2005. 64(1): p. 34-42. 
+                          http://www3.interscience.wiley.com/cgi-bin/abstract/109921021/ABSTRACT 
+                          
+                          hyperlog(argument, a, b) = root(EH(y, a, b) - argument), where 
+                          where root() is a standard root finding algorithm (e.g., Newton's method) that finds y such 
+                          as EH(y, a, b) = argument.
+                          
+                          EH(y, a, b) =
+                          - if(y >= 0) then EH(y, a, b) = 10^{y/a}+by/a-1 
+                          - else then EH(y, a, b) =-10^{-y/a}+by/a+1
+                          (a correspopnds to range over decades, i.e., r/d)
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                              <mml:declare type="function">
+                                <mml:ci id="hyperlog">hyperlog</mml:ci>
+                                <mml:lambda>
+                                  <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                  <mml:apply>
+                                    <mml:inverse definitionURL="#EH" />
+                                    <mml:apply>
+                                      <mml:ci>EH</mml:ci>
+                                      <mml:ci>argument</mml:ci>
+                                      <mml:ci>a</mml:ci>
+                                      <mml:ci>b</mml:ci>
+                                    </mml:apply>
+                                  </mml:apply>
+                                </mml:lambda>
+                              </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+                
+                
+                <!-- 
+                    EH (inverse to hyperlog) transformation of an argument:
+                    - Bagwell, C.B., Hyperlog-a flexible log-like transform for negative, zero, and positive valued data. Cytometry A, 2005. 64(1): p. 34-42. 
+                    http://www3.interscience.wiley.com/cgi-bin/abstract/109921021/ABSTRACT
+                    
+                    EH(argument, a, b) =
+                    - if(argument >= 0) then EH(argument, a, b) = 10^{argument/a}+b*argument/a-1 
+                    - else then EH(argument, b, d, r) =-10^{-argument/a}+b*argument/a+1
+                    (a correspponds to range over decades, i.e., r/d)
+                -->
+              <element name="EH" type="transforms:TransformationWithAttributesAB_Type" id="EH">
+                    <annotation>
+                        <documentation xml:lang="en">
+                          EH (inverse to hyperlog) transformation of an argument:
+                          - Bagwell, C.B., Hyperlog-a flexible log-like transform for negative, zero, and positive valued data. Cytometry A, 2005. 64(1): p. 34-42. 
+                          http://www3.interscience.wiley.com/cgi-bin/abstract/109921021/ABSTRACT
+                          
+                          EH(argument, a, b) =
+                          - if(argument >= 0) then EH(argument, a, b) = 10^{argument/a}+b*argument/a-1 
+                          - else then EH(argument, b, d, r) =-10^{-argument/a}+b*argument/a+1
+                          (a correspponds to range over decades, i.e., r/d)                        
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                              <mml:declare type="function">
+                                <mml:ci id="EH">EH</mml:ci>
+                                <mml:lambda>
+                                  <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                  <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                  <mml:piecewise>
+                                    <mml:piece>
+                                      <mml:apply>
+                                        <mml:plus/>
+                                        <mml:apply>
+                                          <mml:power/>
+                                          <mml:cn>10</mml:cn>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:ci>argument</mml:ci>
+                                            <mml:ci>a</mml:ci>
+                                          </mml:apply>
+                                        </mml:apply>
+                                        <mml:apply>
+                                          <mml:minus/>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:apply>
+                                              <mml:times/>
+                                              <mml:ci>b</mml:ci>
+                                              <mml:ci>argument</mml:ci>
+                                            </mml:apply>
+                                            <mml:ci>a</mml:ci>
+                                          </mml:apply>
+                                          <mml:cn>1</mml:cn>
+                                        </mml:apply>
+                                      </mml:apply>
+                                      <mml:apply>
+                                        <mml:geq/>
+                                        <mml:ci>argument</mml:ci>
+                                        <mml:cn>0</mml:cn>
+                                      </mml:apply>
+                                    </mml:piece>
+                                    <mml:otherwise>
+                                      <mml:apply>
+                                        <mml:minus/>
+                                        <mml:apply>
+                                          <mml:plus/>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:apply>
+                                              <mml:times/>
+                                              <mml:ci>b</mml:ci>
+                                              <mml:ci>argument</mml:ci>
+                                            </mml:apply>
+                                            <mml:ci>a</mml:ci>
+                                          </mml:apply>
+                                          <mml:cn>1</mml:cn>
+                                        </mml:apply>
+                                        <mml:apply>
+                                          <mml:power/>
+                                          <mml:cn>10</mml:cn>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:apply>
+                                              <mml:minus/>
+                                              <mml:ci>argument</mml:ci>
+                                            </mml:apply>
+                                            <mml:ci>a</mml:ci>
+                                          </mml:apply>
+                                        </mml:apply>
+                                      </mml:apply>
+                                    </mml:otherwise>
+                                  </mml:piecewise>
+                                </mml:lambda>
+                              </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>                    
+                </element>
+                
+
+                <!-- 
+                    Split-scale transformation of an argument:
+                    split-scale(argument, base, maxValue, transitionChannelannel, r) = 
+                    - if(argument less then t) then split-scale(argument, base, maxValue, transitionChannelannel, r) = a * argument + b
+                    - else split-scale(argument, base, maxValue, transitionChannelannel, r) = log_{base}(c * argument) * r/d 
+                    base = 10; however, the transformation gives the same results for any base > 1;
+                    
+                    The split scale transformation is specified by the split element with the following attributes: 
+                    - maxValue:    Maximum value the transformation is applied to, e.g., 262144. 
+                    - transitionChannelannel: Where to split the linear vs. logarithmical transformation, e.g., one quarter of the maximum
+                    value after the transformation (e.g., 64 in case the max value after the transformation is 256). 
+                    - r Range of the logarithmical display, i.e., "maxChannelannel - transitionChannelannel" considering the maxChannelannel as 
+                    the maximum value to be obtained after the transformation. 
+                    
+                    The constants l, t, a, b, c, maxChannelannel, and d (needed to perform the transformation) are calculated as follows: 
+                    - l = log_{base}(e), i.e., log10(e) = approx. 0.434294482
+                    - maxChannelannel = r + transitionChannelannel, i.e., maxChannelannel is the maximum value to be obtained after the 
+                    transformation , e.g., 256 = 192 + 64 
+                    - b = transitionChannelannel / 2 
+                    - d = 2lr / transitionChannelannel 
+                    - t = base^(-2lr/transitionChannelannel + log_{base}(maxValue)) 
+                    - a = transitionChannelannel / (2t) 
+                    - c = (base^((at+b) * d/r)) / t
+                 -->
+                <element name="split-scale" type="transforms:SplitScaleTransformation_Type" id="split-scale">
+                    <annotation>
+                        <documentation xml:lang="en">
+                            Split-scale transformation of an argument:
+                            split-scale(argument, base, maxValue, transitionChannel, r) = 
+                            - if(argument less then t) then split-scale(argument, base, maxValue, transitionChannel, r) = a * argument + b
+                            - else split-scale(argument, base, maxValue, transitionChannel, r) = log_{base}(c * argument) * r/d 
+                            base = 10; however, the transformation gives the same results for any base > 1;
+                            
+                            The split scale transformation is specified by the split element with the following attributes: 
+                            - maxValue:    Maximum value the transformation is applied to, e.g., 262144. 
+                            - transitionChannel: Where to split the linear vs. logarithmical transformation, e.g., one quarter of the maximum
+                            value after the transformation (e.g., 64 in case the max value after the transformation is 256). 
+                            - r Range of the logarithmical display, i.e., "maxChannel - transitionChannel" considering the maxChannel as 
+                            the maximum value to be obtained after the transformation. 
+                            
+                            The constants l, t, a, b, c, maxChannel, and d (needed to perform the transformation) are calculated as follows: 
+                            - l = log_{base}(e), i.e., log10(e) = approx. 0.434294482
+                            - maxChannel = r + transitionChannel, i.e., maxChannel is the maximum value to be obtained after the 
+                            transformation , e.g., 256 = 192 + 64 
+                            - b = transitionChannel / 2 
+                            - d = 2lr / transitionChannel 
+                            - t = base^(-2lr/transitionChannel + log_{base}(maxValue)) 
+                            - a = transitionChannel / (2t) 
+                            - c = (base^((at+b) * d/r)) / t
+                        </documentation>
+                        <documentation>
+                            <mml:math>
+                                
+                                <mml:declare type="function">
+                                  <!-- l(base) = log_{base}(e) -->
+                                  <mml:ci id="l">l</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>base</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:log/>
+                                      <mml:logbase>
+                                        <mml:ci>base</mml:ci>
+                                      </mml:logbase>
+                                      <mml:exponentiale/>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!-- maxChannel(r, transitionChannel) = r + transitionChannel -->
+                                  <mml:ci id="maxChannel">maxChannel</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>r</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:plus/>
+                                      <mml:ci>r</mml:ci>
+                                      <mml:ci>transitionChannel</mml:ci>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!-- b(transitionChannel) = transitionChannel / 2 -->
+                                  <mml:ci id="b">b</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:divide/>
+                                      <mml:ci>transitionChannel</mml:ci>
+                                      <mml:cn>2</mml:cn>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!-- d(l, r, transitionChannel) = 2lr / transitionChannel -->
+                                  <mml:ci id="d">d</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>l</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>r</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:divide/>
+                                      <mml:apply>
+                                        <mml:times/>
+                                        <mml:cn>2</mml:cn>
+                                        <mml:apply>
+                                          <mml:times/>
+                                          <mml:ci>l</mml:ci>
+                                          <mml:ci>r</mml:ci>
+                                        </mml:apply>
+                                      </mml:apply>
+                                      <mml:ci>transitionChannel</mml:ci>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!-- t(base, l, r, transitionChannel, maxValue) = base^(-2lr/transitionChannel + log_{base}(maxValue)) -->
+                                  <mml:ci id="t">t</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>base</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>l</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>r</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>maxValue</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:power/>
+                                      <mml:ci>base</mml:ci>
+                                      <mml:apply>
+                                        <mml:minus/>
+                                        <mml:apply>
+                                          <mml:log/>
+                                          <mml:logbase>
+                                            <mml:ci>base</mml:ci>
+                                          </mml:logbase>
+                                          <mml:ci>maxValue</mml:ci>
+                                        </mml:apply>
+                                        <mml:apply>
+                                          <mml:divide/>
+                                          <mml:apply>
+                                            <mml:times/>
+                                            <mml:cn>2</mml:cn>
+                                            <mml:apply>
+                                              <mml:times/>
+                                              <mml:ci>l</mml:ci>
+                                              <mml:ci>r</mml:ci>
+                                            </mml:apply>
+                                          </mml:apply>
+                                          <mml:ci>transitionChannel</mml:ci>
+                                        </mml:apply>
+                                      </mml:apply>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!-- a(transitionChannel, t) = transitionChannel / (2t) -->
+                                  <mml:ci id="a">a</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>t</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:divide/>
+                                      <mml:ci>transitionChannel</mml:ci>
+                                      <mml:apply>
+                                        <mml:times/>
+                                        <mml:cn>2</mml:cn>
+                                        <mml:ci>t</mml:ci>
+                                      </mml:apply>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!-- c(base, a, b, d, r, t) = (base^((at+b) * d/r)) / t -->
+                                  <mml:ci id="c">c</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>base</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>a</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>b</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>d</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>r</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>t</mml:ci></mml:bvar>
+                                    <mml:apply>
+                                      <mml:divide/>
+                                      <mml:apply>
+                                        <mml:power/>
+                                        <mml:ci>base</mml:ci>
+                                        <mml:apply>
+                                          <mml:times/>
+                                          <mml:apply>
+                                            <mml:plus/>
+                                            <mml:apply>
+                                              <mml:times/>
+                                              <mml:ci>a</mml:ci>
+                                              <mml:ci>t</mml:ci>
+                                            </mml:apply>
+                                            <mml:ci>b</mml:ci>
+                                          </mml:apply>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:ci>d</mml:ci>
+                                            <mml:ci>r</mml:ci>
+                                          </mml:apply>
+                                        </mml:apply>
+                                      </mml:apply>
+                                      <mml:ci>t</mml:ci>
+                                    </mml:apply>
+                                  </mml:lambda>
+                                </mml:declare>
+                                
+                                <mml:declare type="function">
+                                  <!--
+                                    split-scale(argument, base, maxValue, transitionChannel, r) = 
+                                    - if(argument less then t) then split-scale(argument, base, maxValue, transitionChannel, r) = a * argument + b
+                                    - else split-scale(argument, base, maxValue, transitionChannel, r) = log_{base}(c * argument) * r/d
+                                    where base = 10, a, b,c, d, t are functions depending on argument, base, maxValue, transitionChannel, and r
+                                  -->
+                                  <mml:ci id="split-scale">split-scale</mml:ci>
+                                  <mml:lambda>
+                                    <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>base</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>maxValue</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                    <mml:bvar><mml:ci>r</mml:ci></mml:bvar>
+                                    
+                                    <mml:piecewise>
+                                      
+                                      <mml:piece>
+                                        <mml:apply>
+                                          <!-- a * argument + b -->
+                                          <!-- a(transitionChannel, t(base, l(base), r, transitionChannel, maxValue)) * argument + b(transitionChannel) -->
+                                          <mml:plus/>
+                                          <mml:apply>
+                                            <mml:times/>
+                                            <!-- a(transitionChannel, t(base, l(base), r, transitionChannel, maxValue)) -->
+                                            <mml:apply>  
+                                              <mml:ci definitionURL="#a" >a</mml:ci>
+                                              <mml:ci>transitionChannel</mml:ci>
+                                              <mml:apply>  
+                                                <mml:ci definitionURL="#t" >t</mml:ci>
+                                                <mml:ci>base</mml:ci>
+                                                <mml:apply>  
+                                                  <mml:ci definitionURL="#l" >l</mml:ci>
+                                                  <mml:ci>base</mml:ci>
+                                                </mml:apply>
+                                                <mml:ci>r</mml:ci>
+                                                <mml:ci>transitionChannel</mml:ci>
+                                                <mml:ci>maxValue</mml:ci>
+                                              </mml:apply>
+                                            </mml:apply>
+                                            <mml:ci>argument</mml:ci>
+                                          </mml:apply>
+                                          <mml:apply>
+                                            <mml:ci definitionURL="#b" >b</mml:ci>
+                                            <mml:ci>transitionChannel</mml:ci>
+                                          </mml:apply>
+                                        </mml:apply>
+                                        
+                                        <mml:apply>
+                                          <mml:lt/>
+                                          <mml:ci>argument</mml:ci>
+                                          <mml:apply>
+                                            <!-- t(base, l(base), r, transitionChannel, maxValue) -->
+                                            <mml:ci definitionURL="#t" >t</mml:ci>
+                                            <mml:ci>base</mml:ci>
+                                            <mml:apply>
+                                              <mml:ci definitionURL="#l" >l</mml:ci>
+                                              <mml:ci>base</mml:ci>
+                                            </mml:apply>
+                                            <mml:ci>r</mml:ci>
+                                            <mml:ci>transitionChannel</mml:ci>
+                                            <mml:ci>maxValue</mml:ci>
+                                          </mml:apply>
+                                        </mml:apply>
+                                      </mml:piece>
+                                      
+                                      <mml:otherwise>
+                                        <mml:apply>
+                                          <!-- log_{base}(c * argument) * r/d -->
+                                          <mml:times/>
+                                          <mml:apply>
+                                            <!-- log_{base}(c * argument) -->
+                                            <mml:log/>
+                                            <mml:logbase>
+                                              <mml:ci>base</mml:ci>
+                                            </mml:logbase>
+                                            <mml:apply>
+                                              <mml:times/>
+                                              <mml:apply>
+                                                <!-- c(base, a, b, d, r, t) -->
+                                                <!--
+                                                  c(
+                                                  base,
+                                                  a(transitionChannel, t(base, l(base), r, transitionChannel, maxValue)),
+                                                  b(transitionChannel), 
+                                                  d(l(base), r, transitionChannel),
+                                                  r,
+                                                  t(base, l(base), r, transitionChannel, maxValue)
+                                                  )
+                                                -->
+                                                <mml:ci definitionURL="#c" >c</mml:ci>
+                                                <mml:ci>base</mml:ci>
+                                                <mml:apply>
+                                                  <!-- a(transitionChannel, t(base, l(base), r, transitionChannel, maxValue)) -->
+                                                  <mml:ci definitionURL="#a" >a</mml:ci>
+                                                  <mml:ci>transitionChannel</mml:ci>
+                                                  <mml:apply>
+                                                    <mml:ci definitionURL="#t" >t</mml:ci>
+                                                    <mml:ci>base</mml:ci>
+                                                    <mml:apply>
+                                                      <mml:ci definitionURL="#l" >l</mml:ci>
+                                                      <mml:ci>base</mml:ci>
+                                                    </mml:apply>
+                                                    <mml:ci>r</mml:ci>
+                                                    <mml:ci>transitionChannel</mml:ci>
+                                                    <mml:ci>maxValue</mml:ci>
+                                                  </mml:apply>
+                                                </mml:apply>
+                                                <mml:apply>
+                                                  <!-- b(transitionChannel) -->
+                                                  <mml:ci definitionURL="#b" >b</mml:ci>
+                                                  <mml:ci>transitionChannel</mml:ci>
+                                                </mml:apply>
+                                                <mml:apply>
+                                                  <!-- d(l(base), r, transitionChannel) -->
+                                                  <mml:ci definitionURL="#d" >d</mml:ci>
+                                                  <mml:apply>
+                                                    <mml:ci definitionURL="#l" >l</mml:ci>
+                                                    <mml:ci>base</mml:ci>
+                                                  </mml:apply>
+                                                  <mml:ci>r</mml:ci>
+                                                  <mml:ci>transitionChannel</mml:ci>
+                                                </mml:apply>
+                                                <mml:ci>r</mml:ci>
+                                                <mml:apply>
+                                                  <!-- t(base, l(base), r, transitionChannel, maxValue) -->
+                                                  <mml:ci definitionURL="#t" >t</mml:ci>
+                                                  <mml:ci>base</mml:ci>
+                                                  <mml:apply>
+                                                    <mml:ci definitionURL="#l" >l</mml:ci>
+                                                    <mml:ci>base</mml:ci>
+                                                  </mml:apply>
+                                                  <mml:ci>r</mml:ci>
+                                                  <mml:ci>transitionChannel</mml:ci>
+                                                  <mml:ci>maxValue</mml:ci>
+                                                </mml:apply>
+                                              </mml:apply>
+                                              <mml:ci>argument</mml:ci>
+                                            </mml:apply>
+                                          </mml:apply>
+                                          <mml:apply>
+                                            <mml:divide/>
+                                            <mml:ci>r</mml:ci>
+                                            <mml:apply>
+                                              <!-- d(l(base), r, transitionChannel) -->
+                                              <mml:ci definitionURL="#d" >d</mml:ci>
+                                              <mml:apply>
+                                                <mml:ci definitionURL="#l" >l</mml:ci>
+                                                <mml:ci>base</mml:ci>
+                                              </mml:apply>
+                                              <mml:ci>r</mml:ci>
+                                              <mml:ci>transitionChannel</mml:ci>
+                                            </mml:apply>
+                                          </mml:apply>
+                                        </mml:apply>
+                                      </mml:otherwise>
+                                    </mml:piecewise>
+                                  </mml:lambda>
+                                </mml:declare>
+                            </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+
+
+                <!-- 
+                    Inverse split-scale transformation of an argument: 
+                    inverse-split-scale(argument, base, maxValue, transitionChannel, r) = 
+                    = root(split-scale(y, base, maxValue, transitionChannel, r) - argument)
+                    where root() is a standard root finding algorithm (e.g., Newton's method) that finds y such that 
+                    split-scale(y, base, maxValue, transitionChannel, r) = argument and split-scale is defined separately within this file.  
+                -->
+                <element name="inverse-split-scale" type="transforms:SplitScaleTransformation_Type" id="inverse-split-scale">
+                    <annotation>
+                        <documentation xml:lang="en">
+                            Inverse split-scale transformation of an argument: 
+                            inverse-split-scale(argument, base, maxValue, transitionChannel, r) = 
+                            = root(split-scale(y, base, maxValue, transitionChannel, r) - argument)
+                            where root() is a standard root finding algorithm (e.g., Newton's method) that finds y such that 
+                            split-scale(y, base, maxValue, transitionChannel, r) = argument and split-scale is defined separately within this file.  
+                        </documentation>
+                        <documentation>
+                          <mml:math>
+                            <mml:declare type="function">
+                              <mml:ci id="inverse-split-scale">inverse-split-scale</mml:ci>
+                              <mml:lambda>
+                                <mml:bvar><mml:ci>argument</mml:ci></mml:bvar>
+                                <mml:bvar><mml:ci>base</mml:ci></mml:bvar>
+                                <mml:bvar><mml:ci>maxValue</mml:ci></mml:bvar>
+                                <mml:bvar><mml:ci>transitionChannel</mml:ci></mml:bvar>
+                                <mml:bvar><mml:ci>r</mml:ci></mml:bvar>
+                                <mml:apply>
+                                  <mml:inverse definitionURL="#split-scale"/>
+                                  <mml:apply>
+                                  <mml:ci>split-scale</mml:ci>
+                                    <mml:ci>argument</mml:ci>
+                                    <mml:ci>base</mml:ci>
+                                    <mml:ci>maxValue</mml:ci>
+                                    <mml:ci>transitionChannel</mml:ci>
+                                    <mml:ci>r</mml:ci>
+                                  </mml:apply>
+                                </mml:apply>
+                              </mml:lambda>
+                            </mml:declare>
+                          </mml:math>
+                        </documentation>
+                    </annotation>
+                </element>
+
+
+                <!-- 
+                    Compensation: reference a single compensated argument 
+                -->
+                <element name="compensation" type="transforms:SingleCompensatedParameter_Type" id="compensation" >
+                    <annotation>
+                        <documentation xml:lang="en">
+                            Compensation is described by a spillover matrix. Spillover matrix defines a transformation from 
+                            n uncompensated source arguments to n compensated result arguments. The compensation
+                            element enables to reference a single compensated argument via specification of the identifier 
+                            of a spillover matrix plus a single source argument. The source argument is specified the same 
+                            way as source arguments for any other data transformation and it shall correspond to one of the 
+                            source arguments from the referenced spillover matrix.
+                        </documentation>
+                    </annotation>
+                </element>
+                
+            </choice>
+        </sequence>
+        
+        <attribute name="id" type="ID" use="optional" />
+        
+    </complexType> 
+    <!-- End of argumentTransformation_Type definition -->
+
+
+
+    <complexType name="AbstractTransformation_Type" abstract="true">
+        <annotation>
+            <documentation xml:lang="en"> 
+                Abstract type to be used as a common parent of all transformations.
+            </documentation>
+        </annotation>
+    </complexType>
+    
+
+    <complexType name="SingleParameterTransformation_Type" abstract="true">
+        <annotation>
+            <documentation xml:lang="en">
+                Abstract type to be used as a common parent of all single-parameter transformations. 
+                A sub-element represents the operand that the transformation is applied to. It can either 
+                be a parameter from a list mode data file or a result of another parameter transformation.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="transforms:AbstractTransformation_Type">
+                <sequence>
+                    <group ref="transforms:ParameterOrTransformation_Group" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+    
+
+    <complexType name="TransformationWithTwoParameters_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                A complex type accomodating two parameters.
+                This type is used for ratio of two parameters.
+            </documentation>
+         </annotation>
+        <complexContent>
+            <extension base="transforms:AbstractTransformation_Type">
+                <sequence>
+                    <group ref="transforms:ParameterOrTransformation_Group" minOccurs="2" maxOccurs="2" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+  
+      
+    <complexType name="NArgumentsTransformation_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                <!--  -->
+                A complex type accomodating two parameters and two attributes named a1, a2, both double (float64) data types.
+                This type is used for linear combination of two parameters.
+            </documentation>
+        </annotation>
+        <complexContent>
+          <extension base="transforms:AbstractTransformation_Type">
+            <sequence>
+              <group ref="transforms:ParameterOrTransformation_Group" minOccurs="1" maxOccurs="unbounded" />
+              <element name="coefficient" type="data-type:ValueAttribute_Type" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+          </extension>
+        </complexContent>
+    </complexType>
+    
+    
+    <complexType name="TransformationWithAttributeA_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                A single parameter transformation type extended with the an a attribute (double/float64)
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="transforms:SingleParameterTransformation_Type">
+                <attribute name="a" type="double" use="required" />
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="TransformationWithAttributesAB_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                A transformation type with two attributes: a and b both double (float64)
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="transforms:TransformationWithAttributeA_Type">
+                <attribute name="b" type="double" use="required" />
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="SplitScaleTransformation_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Single parameter transformation data type extended to include the following attributes:
+                r > 0 (double/float64), maxValue > 0 (double/float64), transitionChannel >= 0 (double/float64)
+                Data type useful for split-scale and its inverse (inverse-split-scale) transformation,where the semantic of the attributes is as follows:
+                - maxValue: Maximum value the transformation is applied to, e.g., 262144. 
+                - transitionChannel: Where to split the linear vs. logarithmical transformation, e.g., one quarter of the maximum
+                value after the transformation (e.g., 64 in case the max value after the transformation is 256). 
+                - r Range of the logarithmical display, i.e., "maxChannel - transitionChannel" considering the maxChannel as 
+                the maximum value to be obtained after the transformation.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="transforms:SingleParameterTransformation_Type">
+                <attribute name="r" type="data-type:PFloat64_Type" use="required" />
+                <attribute name="maxValue" type="data-type:PFloat64_Type" use="required" />
+                <attribute name="transitionChannel" type="data-type:UFloat64_Type" use="required" />
+            </extension>
+        </complexContent>
+    </complexType>
+
+
+    <complexType name="SingleCompensatedParameter_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Compensation is described by a spillover matrix. Spillover matrix defines a transformation from 
+                n uncompensated source parameters to n compensated result parameters. The compensation
+                element (this complex type) enables to reference a single compensated parameter 
+                via specification of the identifier of a spillover matrix plus a single source parameter. The source 
+                parameter is specified the same way as source parameters for any other data transformation and 
+                it shall correspond to one of the source parameters from the referenced spillover matrix.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="transforms:SingleParameterTransformation_Type">
+                <attribute name="spilloverMatrixRef" type="IDREF" use="required" />
+            </extension>
+        </complexContent>
+    </complexType>
+    
+    
+    <group name="SpilloverMatrix_Group">
+        <annotation>
+            <documentation xml:lang="en">
+                Group as a sequence of a single element (spilloverMatrix); implementation issue to 
+                be able to include spillover matrices in Gating-ML.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="spilloverMatrix" type="transforms:SpilloverMatrix_Type" />
+        </sequence>
+    </group>
+
+
+    <complexType name="SpilloverMatrix_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Each spilloverMatrix element specifies a single compensation, i.e., there 
+                may be one or more compensation descriptions within a single file. 
+                
+                Each spilloverMatrix element contains an id attribute giving it an identifier, which 
+                is unique within the XML. The id attribute of the spilloverMatrix element shall be 
+                used to reference a particular compensation within the file. 
+                
+                Each spilloverMatrix element shall include a parameters sub-element to state 
+                parameters that the compensation is applied to. These may be parameters from list-mode
+                data files as well as results of parameter transformations. There shall be a sequence of 
+                one or more spillover sub-elements after the parameters sub-element.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="parameters" type="transforms:Parameters_Type" />
+            <element name="spillover" type="transforms:Spillover_Type" minOccurs="1" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="id" type="ID" use="required" />
+    </complexType>
+    
+    
+    <complexType name="Parameters_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Source parameters for compensation; these may either be parameters from list-mode
+                data files or results of parameter transformations (or a mixture of these).
+            </documentation>
+        </annotation>
+        <group ref="transforms:ParameterOrTransformation_Group" minOccurs="1" maxOccurs="unbounded" />
+    </complexType>
+    
+    
+    <complexType name="Spillover_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                Each spillover element represents a row of the compensation matrix. Each spillover 
+                element shall include a sequence of coefficient sub-elements. If there are n parameters
+                for a particular spillover matrix then there shall be n spillover elements and each of them 
+                shall include n coefficient sub-elements. The rows and columns of a spillover matrix are 
+                considered to be in the same order as the parameters specified at the beginning of the 
+                spillover matrix specification.
+            </documentation>
+        </annotation>
+        <sequence>
+          <element name="coefficient" type="transforms:SpilloverCoefficient_Type" minOccurs="1" maxOccurs="unbounded" />    
+        </sequence>
+    </complexType>
+    
+    
+    <complexType name="SpilloverCoefficient_Type">
+        <annotation>
+            <documentation xml:lang="en">
+                For each spillover element (row of the matrix) there are n coefficient sub-elements, one per each 
+                column. A coefficient element includes a value attribute. The rows (spillover element) as well as 
+                columns (coefficient sub-element) are considered to be in the same order as the parameters 
+                specified at the beginning of the spillover matrix specification.
+                
+                Semantic notes:
+                ****************
+                Let's have a spillover element S corresponding to parameter X (i.e., S is the i-th spillover element
+                within the spillover matrix and X is the i-th parameter specified within the parameters element at the
+                beginning of the spillover matrix. Let's have a coefficient element E being a sub-element of S that 
+                corresponds to parameter Y (i.e., E is the j-th coefficient sub-element of S and Y is the j-th parameter 
+                specified within the parameters element at the beginning of the spillover matrix. Let's V be the value of
+                the value attribute of E. 
+                Described situation means that V is the ratio of the amount of X signal in the Y channel to the amount 
+                of X signal in the X channel for an X-stained cell. V is called the spillover coefficient between X and Y.
+                Please note that this is not a symmetric relation, i.e., the spillover coefficient between X and Y is not 
+                the same as the spillover coefficient between Y and X.
+            </documentation>
+        </annotation>
+        <attribute name="value" type="data-type:Float64_GtE0_LtE1_Type" use="required" />
+    </complexType>
+    
+    <group name="ParameterOrTransformation_Group">
+        <annotation>
+            <documentation xml:lang="en">
+                Either a parameter from a list mode data file or a result of a parameter transformation may appear 
+                anywhere where a source parameter is needed, i.e., a dimension for gates, a spillover matrix when 
+                describing compensation, or a any parameter transformation.
+            </documentation>
+        </annotation>
+        <choice>
+            <group ref="data-type:Parameter_Group" />
+            <group ref="transforms:Transformation_Group" />
+        </choice>
+    </group>
+
+
+</schema>
