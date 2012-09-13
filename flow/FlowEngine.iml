@@ -9,10 +9,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="Internal" />
-    <orderEntry type="module-library" exported="">
-      <library name="flow-schemas">
+    <orderEntry type="module-library">
+      <library name="schemas">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/schemas.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../build/modules/flow/explodedModule/lib/schemas.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
