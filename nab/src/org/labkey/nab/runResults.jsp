@@ -93,12 +93,7 @@
                 </tr>
                 <tr>
                     <td style="<%= labelStyle %>">Experiment Date</td>
-                    <%
-                        String expDate = null;
-                        if (assay.getExperimentDate() != null)
-                            expDate = formatDate(assay.getExperimentDate());
-                    %>
-                    <td><%= h(expDate) %></td>
+                    <td><%= h(formatDate(assay.getExperimentDate())) %></td>
                     <td colspan="4">&nbsp;</td>
                 </tr>
             </table>
