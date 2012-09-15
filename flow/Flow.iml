@@ -28,7 +28,7 @@
     <orderEntry type="module-library">
       <library name="schemas">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../build/deploy/modules/flow/lib/schemas.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../build/modules/flow/explodedModule/lib/schemas.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

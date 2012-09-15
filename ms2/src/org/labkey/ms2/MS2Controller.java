@@ -106,7 +106,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.data.xml.queryCustomView.ContainerFilterType;
 import org.labkey.ms2.compare.CompareDataRegion;
 import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
@@ -2961,7 +2960,7 @@ public class MS2Controller extends SpringActionController
 
             QueryView jobsView = PipelineService.get().getPipelineQueryView(getViewContext(), PipelineService.PipelineButtonOption.Standard);
             jobsView.getSettings().setBaseFilter(new SimpleFilter("Provider", ProteinAnnotationPipelineProvider.NAME));
-            jobsView.getSettings().setContainerFilterName(ContainerFilterType.ALL_FOLDERS.toString());
+            jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
             jobsView.setTitle("Protein Annotation Load Jobs");
 
             VBox result = new VBox(blastView, grid, annots, jobsView);
