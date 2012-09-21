@@ -471,7 +471,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM "' + this.assayName + ' AnalyteTitrationQCFlags" AS x '
                  + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.Titration.Name=\'' + this.titration + '\' '
                  + (this.isotype == '' ? '  AND x.Titration.Run.Isotype IS NULL ' : '  AND x.Titration.Run.Isotype=\'' + this.isotype + '\' ')
-                 + (this.conjugate == '' ? '  AND x.Titration.Run.Conjugate IS NULL ' : '  AND x.Titration.Run.Conjugate=\'' + this.conjugate + '\' '),
+                 + (this.conjugate == '' ? '  AND x.Titration.Run.Conjugate IS NULL ' : '  AND x.Titration.Run.Conjugate=\'' + this.conjugate + '\' ')
+                 + 'ORDER BY x.Run, x.FlagType, x.Enabled LIMIT 1000 ',
             sort: "Run,FlagType,Enabled",
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             success: function(data) {
