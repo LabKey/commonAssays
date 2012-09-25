@@ -21,8 +21,8 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.security.User;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Use with FeaturesView and TableInfo to filter on a given set of containers
@@ -50,7 +50,7 @@ public class ContainerFeaturesFilter implements FeaturesFilter
     {
         if(includeDescendants)
         {
-            Set<Container> containers = ContainerManager.getAllChildren(container, user);
+            List<Container> containers = ContainerManager.getAllChildren(container, user);
             containers.add(container);
             _containers = new Container[containers.size()];
             containers.toArray(_containers);

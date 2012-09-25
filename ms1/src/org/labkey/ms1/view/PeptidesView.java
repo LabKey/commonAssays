@@ -27,9 +27,9 @@ import org.labkey.api.view.DataView;
 import org.labkey.ms1.query.PeptideFilter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -78,7 +78,7 @@ public class PeptidesView extends QueryView
         filter.addClause(_pepFilter);
 
         //add a clause to filter on container(s)
-        Set<Container> containers = _searchSubfolders ?
+        Collection<Container> containers = _searchSubfolders ?
                 ContainerManager.getAllChildren(getViewContext().getContainer(), getViewContext().getUser())
                 : Collections.singleton(getViewContext().getContainer());
 

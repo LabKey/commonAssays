@@ -309,7 +309,7 @@ public class MS1Schema extends UserSchema
      */
     public String getContainerInList()
     {
-        Set<Container> containers = isRestrictContainer() ? new HashSet<Container>()
+        List<Container> containers = isRestrictContainer() ? new ArrayList<Container>()
                 : ContainerManager.getAllChildren(getContainer(), getUser());
         containers.add(getContainer());
 
