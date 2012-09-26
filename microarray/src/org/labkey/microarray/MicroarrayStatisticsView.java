@@ -28,14 +28,14 @@ public class MicroarrayStatisticsView extends JspView<MicroarrayStatisticsView.M
 {
     public static class MicroarraySummaryBean
     {
-        private final int _runCount;
+        private final long _runCount;
 
-        public MicroarraySummaryBean(int runCount)
+        public MicroarraySummaryBean(long runCount)
         {
             _runCount = runCount;
         }
 
-        public int getRunCount()
+        public long getRunCount()
         {
             return _runCount;
         }
@@ -46,7 +46,7 @@ public class MicroarrayStatisticsView extends JspView<MicroarrayStatisticsView.M
         super("/org/labkey/microarray/statistics.jsp");
 
         ExperimentRunType type = MicroarrayRunType.INSTANCE;
-        int runCount = type.getRunCount(ctx.getUser(), ctx.getContainer());
+        long runCount = type.getRunCount(ctx.getUser(), ctx.getContainer());
 
         setModelBean(new MicroarraySummaryBean(runCount));
     }

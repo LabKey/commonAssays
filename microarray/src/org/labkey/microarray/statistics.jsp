@@ -29,6 +29,6 @@ if (bean.getRunCount() == 1)
 }
 else
 { %>
-are <%= bean.getRunCount() %> hybs <%
+    are <%= bean.getRunCount() %> hybs <%
 } %>
 in this folder.
