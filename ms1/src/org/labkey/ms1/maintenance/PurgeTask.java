@@ -58,9 +58,21 @@ public class PurgeTask implements SystemMaintenance.MaintenanceTask
         }
     }
 
-    public String getMaintenanceTaskName()
+    public String getDescription()
     {
         return "MS1 Data File Purge Task";
+    }
+
+    @Override
+    public String getName()
+    {
+        return "PurgeMS1";
+    }
+
+    @Override
+    public boolean canDisable()
+    {
+        return true;
     }
 
     private Logger _log = Logger.getLogger(PurgeTask.class);
