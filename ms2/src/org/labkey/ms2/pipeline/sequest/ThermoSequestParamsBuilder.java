@@ -312,13 +312,29 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
         }
 
         @Test
-        public void testInitPeptideMassToleranceNormal()
+        public void testInitPeptideMassToleranceSymmetricWindow()
         {
             float expected = 30.0f;
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">" + expected + "</note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
+                "</bioml>");
+
+            List<String> parserError = spb.initPeptideMassTolerance();
+            if (!parserError.isEmpty()) fail(parserError);
+            Param sp = spb.getProperties().getParam("peptide_mass_tolerance");
+            float actual = Float.parseFloat(sp.getValue());
+            assertEquals("peptide_mass_tolerance", expected, actual, 0.00);
+        }
+
+        @Test
+        public void testInitPeptideMassToleranceSingleValue()
+        {
+            float expected = 30.0f;
+            parseParams("<?xml version=\"1.0\"?>" +
+                "<bioml>" +
+                "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error\">" + expected + "</note>" +
                 "</bioml>");
 
             List<String> parserError = spb.initPeptideMassTolerance();
@@ -486,7 +502,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
-            assertEquals("mass_type_fragment", "spectrum, fragment mass type contains no value.", parserError.get(0));
+            assertEquals("mass_type_fragment", "\"spectrum, fragment mass type\" contains no value.", parserError.get(0));
         }
 
         @Test
@@ -518,7 +534,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
-            assertEquals("mass_type_fragment", "spectrum, fragment mass type contains an invalid value(garbage).", parserError.get(0));
+            assertEquals("mass_type_fragment", "\"spectrum, fragment mass type\" contains an invalid value(garbage).", parserError.get(0));
         }
 
         @Test

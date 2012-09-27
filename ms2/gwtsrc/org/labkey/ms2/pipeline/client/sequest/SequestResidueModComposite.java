@@ -71,37 +71,20 @@ public class SequestResidueModComposite extends ResidueModComposite
     }
     
     protected String validate(ListBox box, int modType)
+    {
+        Map<String, String> modMap = getListBoxMap(box);
+        ListBox defaultModListBox;
+        if(modType == STATIC) defaultModListBox = modStaticListBox;
+        else defaultModListBox = modDynamicListBox;
+
+        for(Map.Entry<String, String> entry : modMap.entrySet())
         {
-            Map<String, String> modMap = getListBoxMap(box);
-            ListBox defaultModListBox;
-            if(modType == STATIC) defaultModListBox = modStaticListBox;
-            else defaultModListBox = modDynamicListBox;
-
-            for(String modName : modMap.keySet())
+            String error = validateModification(entry.getKey(), entry.getValue(), defaultModListBox);
+            if (error != null)
             {
-                if(find(modName, defaultModListBox) != -1) continue;
-                if (modName.charAt(modName.length() - 2) != '@' && modName.length() > 3)
-                {
-                    return "modification mass contained an invalid value(" + modName + ").";
-                }
-                char residue = modName.charAt(modName.length() - 1);
-                if (!isValidResidue(residue))
-                {
-                    return "modification mass contained an invalid residue(" + residue + ").";
-                }
-                String mass = modName.substring(0, modName.length() - 2);
-
-                try
-                {
-                    Float.parseFloat(mass);
-                }
-                catch (NumberFormatException e)
-                {
-                    return "modification mass contained an invalid mass value (" + mass + ")";
-                }
-
+                return error;
             }
-            return "";
         }
-
+        return "";
+    }
 }

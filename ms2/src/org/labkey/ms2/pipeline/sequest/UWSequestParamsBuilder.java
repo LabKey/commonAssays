@@ -470,12 +470,32 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
             paramMap.put(ParameterNames.STATIC_MOD, "50.43@[,90.12@]");
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("sequest, digest_mass_range", "400.0 5900.0");
+            paramMap.put("spectrum, parent monoisotopic mass error units", "mmu");
             UWSequestParamsBuilder spb = new UWSequestParamsBuilder(paramMap, _root);
             spb.initXmlValues();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("database_name ="));
             assertTrue(text.contains("num_threads = 0"));
             assertTrue(text.contains("digest_mass_range = 400.0 5900.0"));
+            assertTrue(text.contains("peptide_mass_units = 1"));
+        }
+
+        @Test
+        public void testAlternateXmlInputs() throws SequestParamsException
+        {
+            Map<String, String> paramMap = new HashMap<String, String>();
+            paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
+            paramMap.put("spectrum, fragment mass error", "500.0");
+            UWSequestParamsBuilder spb = new UWSequestParamsBuilder(paramMap, _root);
+            spb.initPassThroughs();
+            assertEquals("fragment_ion_tolerance", "500.0", spb.getPropertyValue("fragment_ion_tolerance"));
+
+            paramMap = new HashMap<String, String>();
+            paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
+            paramMap.put("sequest, fragment_ion_tolerance", "500.0");
+            spb = new UWSequestParamsBuilder(paramMap, _root);
+            spb.initPassThroughs();
+            assertEquals("fragment_ion_tolerance", "500.0", spb.getPropertyValue("fragment_ion_tolerance"));
         }
     }
 }

@@ -87,4 +87,16 @@ public class SequestParam extends Param
     {
         this.passThrough = passThrough;
     }
+
+    @Override
+    public SequestParam setInputXmlLabels(String... inputXmlLabel)
+    {
+        super.setInputXmlLabels(inputXmlLabel);
+        String autoLabel = "sequest, " + getName();
+        if (!getInputXmlLabels().contains(autoLabel))
+        {
+            this.inputXmlLabels.add(autoLabel);
+        }
+        return this;
+    }
 }

@@ -60,6 +60,7 @@
                 <ref bean="bullseyeCommand"/>
                 <ref bean="sqt2pinCommand"/>
                 <ref bean="percolatorCommand"/>
+                <ref bean="unimodFixupCommand"/>
             </list>
         </property>
         <property name="pipelines">
@@ -417,7 +418,7 @@
             <map>
                 <entry key="results">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg ref="resultsFileType" />
+                        <constructor-arg ref="preSubResultsFileType" />
                     </bean>
                 </entry>
             </map>
@@ -425,7 +426,7 @@
         <property name="converters">
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
-                    <property name="exePath" value="percolator"/>
+                    <property name="exePath" value="percolator_v${version}"/>
                     <property name="softwarePackage" value="percolator"/>
                     <property name="versionParamName" value="percolator, version"/>
                 </bean>
@@ -636,6 +637,74 @@
     <bean id="tppTaskJoin" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
         <constructor-arg type="java.lang.String" value="join"/>
+    </bean>
+
+    <!-- Part of the MacCoss UW Sequest pipeline -->
+    <bean id="unimodFixupCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="unimodFixupCommand"/>
+        <property name="statusName" value="MODIFICATION FIXUP"/>
+        <property name="groupParameterName" value="ModificationFixup" />
+        <property name="protocolActionName" value="ModificationFixup" />
+        <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="join" value="true" />
+        <property name="pipeToOutput" value="true" />
+        <property name="inputPaths">
+            <map>
+                <entry key="results">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="preSubResultsFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="output">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="resultsFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="exePath" value="/bin/sed"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:1\]/*/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:2\]/#/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:3\]/@/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:4\]/^/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:5\]/~/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:6\]/$/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\[UNIMOD:6\]/$/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="results" />
+                    <property name="function" value="input" />
+                </bean>
+            </list>
+        </property>
     </bean>
 
     <!-- Experiment derived tasks -->
@@ -1220,6 +1289,10 @@
 
     <bean id="hkFileType" class="org.labkey.api.util.FileType">
         <constructor-arg value=".hk" />
+    </bean>
+
+    <bean id="preSubResultsFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".presubPerc.xml" />
     </bean>
 
     <bean id="resultsFileType" class="org.labkey.api.util.FileType">

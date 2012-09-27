@@ -150,47 +150,47 @@ public class SearchFormUtil
         if( mod1Map == null)
         {
             mod1Map = new HashMap<String, String>();
-            mod1Map.put("Oxidation (M)", "15.994915@M");
-            mod1Map.put("Oxidation (W)", "15.994915@W");
-            mod1Map.put("Deamidation (N)", "0.984016@N");
-            mod1Map.put("Deamidation (Q)", "0.984016@Q");
-            mod1Map.put("Phospho (S)","79.966331@S");
-            mod1Map.put("Phospho (T)", "79.966331@T");
-            mod1Map.put("Phospho (Y)", "79.966331@Y");
-            mod1Map.put("Sulfo (Y)", "79.956815@Y");
-            mod1Map.put("Acetyl (K)", "42.010565@K");
-            mod1Map.put("Carbamyl (nt)", "43.005814@[");
-            mod1Map.put("Carbamyl (K)","43.005814@K");
-            mod1Map.put("Carbamidomethyl (nt)", "57.021464@[");
-            mod1Map.put("Carbamidomethyl (K)", "57.021464@K");
-            mod1Map.put("ICAT-D:2H(8) (C)", "8.0502@C");
-            mod1Map.put("ICAT-C:13C(9) (C)", "9.0302@C");
-            mod1Map.put("iTRAQ (N-term,K)", "144.102063@[,144.102063@K");
-            mod1Map.put("iTRAQ 8-plex (N-term,K)", "304.2@[,304.2@K");
-            mod1Map.put("Label:13C(6) (L)", "6.020129@L");
-            mod1Map.put("Label:13C(6)15N(2) (K)", "8.014199@K");
-            mod1Map.put("Label:13C(6) (R)", "6.020129@R");
-            mod1Map.put("Label:2H(4) (K)", "4.025107@K");
-            mod1Map.put("Nic-h4", "-4.026655@[,-4.026655@K");
-            mod1Map.put("Nic-d4", "4.026655@[,4.026655@K");
+            mod1Map.put("Oxidation (15.994915@M)", "15.994915@M");
+            mod1Map.put("Oxidation (15.994915@W)", "15.994915@W");
+            mod1Map.put("Deamidation (0.984016@N)", "0.984016@N");
+            mod1Map.put("Deamidation (0.984016@Q)", "0.984016@Q");
+            mod1Map.put("Phospho (79.966331@S)","79.966331@S");
+            mod1Map.put("Phospho (79.966331@T)", "79.966331@T");
+            mod1Map.put("Phospho (79.966331@Y)", "79.966331@Y");
+            mod1Map.put("Sulfo (79.956815@Y)", "79.956815@Y");
+            mod1Map.put("Acetyl (42.010565@K)", "42.010565@K");
+            mod1Map.put("Carbamyl (43.005814@N-term)", "43.005814@[");
+            mod1Map.put("Carbamyl (43.005814@K)","43.005814@K");
+            mod1Map.put("Carbamidomethyl (57.021464@N-term)", "57.021464@[");
+            mod1Map.put("Carbamidomethyl (57.021464@K)", "57.021464@K");
+            mod1Map.put("ICAT-D:2H(8) (8.0502@C)", "8.0502@C");
+            mod1Map.put("ICAT-C:13C(9) (9.0302@C)", "9.0302@C");
+            mod1Map.put("iTRAQ (144.102063@N-term,K)", "144.102063@[,144.102063@K");
+            mod1Map.put("iTRAQ 8-plex (304.2@N-term,K)", "304.2@[,304.2@K");
+            mod1Map.put("Label:13C(6) (6.020129@L)", "6.020129@L");
+            mod1Map.put("Label:13C(6)15N(2) (8.014199@K)", "8.014199@K");
+            mod1Map.put("Label:13C(6) (6.020129@R)", "6.020129@R");
+            mod1Map.put("Label:2H(4) (4.025107@K)", "4.025107@K");
+            mod1Map.put("Nic-h4 (-4.026655@N-term,K)", "-4.026655@[,-4.026655@K");
+            mod1Map.put("Nic-d4 (4.026655@N-term,K)", "4.026655@[,4.026655@K");
         }
         return mod1Map;
     }
 
-        public static Map<String, String> getDefaultStaticMods()
+    public static Map<String, String> getDefaultStaticMods()
     {
         if( mod0Map == null)
         {
             mod0Map = new HashMap<String, String>();
-            mod0Map.put("Carbamidomethyl (C)", "57.021464@C");
-            mod0Map.put("Carboxymethyl (C)", "58.005479@C");
-            mod0Map.put("ICAT-D (C)","442.224991@C");
-            mod0Map.put("ICAT-C (C)", "227.126991@C");
-            mod0Map.put("iTRAQ (N-term,K)", "144.102063@[,144.102063@K");
-            mod0Map.put("Propionamide (C)", "71.037114@C");
-            mod0Map.put("Pyridylethyl (C)", "105.057849@C");
-            mod0Map.put("Nic-h4", "105.021464@[,105.021464@K");
-            mod0Map.put("Nic-d4", "109.048119@[,109.048119@K");
+            mod0Map.put("Carbamidomethyl (57.021464@C)", "57.021464@C");
+            mod0Map.put("Carboxymethyl (58.005479@C)", "58.005479@C");
+            mod0Map.put("ICAT-D (442.224991@C)","442.224991@C");
+            mod0Map.put("ICAT-C (227.126991@C)", "227.126991@C");
+            mod0Map.put("iTRAQ (144.102063@N-term,K)", "144.102063@[,144.102063@K");
+            mod0Map.put("Propionamide (71.037114@C)", "71.037114@C");
+            mod0Map.put("Pyridylethyl (105.057849@C)", "105.057849@C");
+            mod0Map.put("Nic-h4 (105.021464@N-term,K)", "105.021464@[,105.021464@K");
+            mod0Map.put("Nic-d4 (109.048119@N-term,K)", "109.048119@[,109.048119@K");
         }
         return mod0Map;
     }

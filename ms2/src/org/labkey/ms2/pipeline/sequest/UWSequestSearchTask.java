@@ -331,7 +331,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         builder.writeFile(paramsFile);
 
         String version = getJob().getParameters().get("sequest, version");
-        String sequestPath = PipelineJobService.get().getExecutablePath("sequest", _factory.getSequestInstallDir(), "sequest", version, getJob().getLogger());
+        String sequestPath = PipelineJobService.get().getExecutablePath("sequest." + PipelineJobService.VERSION_SUBSTITUTION, _factory.getSequestInstallDir(), null, version, getJob().getLogger());
         if (sequestPath.endsWith("/sequest"))
         {
             // Sequest versions have the binaries themselves being renamed, not the parent directories,

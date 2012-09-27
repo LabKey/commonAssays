@@ -87,29 +87,13 @@ public class MascotResidueModComposite extends ResidueModComposite
     {
         Map<String, String> modMap = getListBoxMap(box);
 
-        for(String modName : modMap.keySet())
+        for(Map.Entry<String, String> entry : modMap.entrySet())
         {
-            if(find(modName, modStaticListBox) != -1) continue;
-            if (modName.charAt(modName.length() - 2) != '@' && modName.length() > 3)
+            String error = validateModification(entry.getKey(), entry.getValue(), modStaticListBox);
+            if (error != null)
             {
-                return "modification mass contained an invalid value(" + modName + ").";
+                return error;
             }
-            char residue = modName.charAt(modName.length() - 1);
-            if (!isValidResidue(residue))
-            {
-                return "modification mass contained an invalid residue(" + residue + ").";
-            }
-            String mass = modName.substring(0, modName.length() - 2);
-
-            try
-            {
-                Float.parseFloat(mass);
-            }
-            catch (NumberFormatException e)
-            {
-                return "modification mass contained an invalid mass value (" + mass + ")";
-            }
-
         }
         return "";
     }

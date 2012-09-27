@@ -19,6 +19,7 @@ package org.labkey.ms2.pipeline.sequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: billnelson@uky.edu
@@ -31,7 +32,7 @@ public abstract class Param implements Comparable<Param>
     private int sortOrder;
     private String value;
     private String name;
-    private List<String> inputXmlLabels;
+    protected List<String> inputXmlLabels;
     private IInputXMLConverter converter;
     private IParamsValidator validator;
 
@@ -100,13 +101,8 @@ public abstract class Param implements Comparable<Param>
     public Param setInputXmlLabels(String... inputXmlLabel)
     {
         inputXmlLabels.clear();
-        this.inputXmlLabels.addAll(Arrays.asList(inputXmlLabel));
+        inputXmlLabels.addAll(Arrays.asList(inputXmlLabel));
         return this;
-    }
-
-    public void setInputXmlLabels(List<String> inputXmlLabels)
-    {
-        this.inputXmlLabels = inputXmlLabels;
     }
 
     public List<String> getInputXmlLabels()
@@ -156,5 +152,17 @@ public abstract class Param implements Comparable<Param>
     public String toString()
     {
         return getClass().getName() + " - " + getName() + ": " + getValue(); 
+    }
+
+    public String findValue(Map<String, String> params)
+    {
+        for (String label : inputXmlLabels)
+        {
+            if (params.containsKey(label))
+            {
+                return params.get(label);
+            }
+        }
+        return null;
     }
 }

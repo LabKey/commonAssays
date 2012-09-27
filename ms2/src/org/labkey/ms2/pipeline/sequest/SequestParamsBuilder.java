@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
+import com.google.gwt.codegen.server.StringGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -23,6 +24,7 @@ import org.junit.Before;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.client.ParameterNames;
@@ -190,7 +192,16 @@ public abstract class SequestParamsBuilder
 
         if (plusValueString == null && minusValueString == null)
         {
-            return Collections.emptyList();
+            String valueString = sequestInputParams.get("spectrum, parent monoisotopic mass error");
+            if (valueString != null)
+            {
+                minusValueString = valueString;
+                plusValueString = valueString;
+            }
+            else
+            {
+                return Collections.emptyList();
+            }
         }
         if (plusValueString == null || minusValueString == null || !plusValueString.equals(minusValueString))
         {
@@ -627,17 +638,30 @@ public abstract class SequestParamsBuilder
 
     protected abstract List<String> initDynamicTermMods(char term, String mass);
 
+    protected Map.Entry<String, String> getParameterValue(String... parameterNames)
+    {
+        for (String parameterName : parameterNames)
+        {
+            if (sequestInputParams.containsKey(parameterName))
+            {
+                return new Pair<String, String>(parameterName, sequestInputParams.get(parameterName));
+            }
+        }
+        return new Pair<String, String>(parameterNames[0], null);
+    }
+
     List<String> initMassType()
     {
-        String massType = sequestInputParams.get("spectrum, fragment mass type");
+        Map.Entry<String, String> value = getParameterValue("spectrum, fragment mass type", "sequest, mass_type_fragment");
         String sequestValue;
+        String massType = value.getValue();
         if (massType == null)
         {
             return Collections.emptyList();
         }
         if (massType.equals(""))
         {
-            return Collections.singletonList("spectrum, fragment mass type contains no value.");
+            return Collections.singletonList("\"" + value.getKey() + "\" contains no value.");
         }
         if (massType.equalsIgnoreCase("average"))
         {
@@ -649,7 +673,7 @@ public abstract class SequestParamsBuilder
         }
         else
         {
-            return Collections.singletonList("spectrum, fragment mass type contains an invalid value(" + massType + ").");
+            return Collections.singletonList("\"" + value.getKey() + "\" contains an invalid value(" + massType + ").");
         }
         _params.getParam("mass_type_fragment").setValue(sequestValue);
         return Collections.emptyList();
@@ -660,13 +684,15 @@ public abstract class SequestParamsBuilder
         String pepMassUnit = sequestInputParams.get("spectrum, parent mass error units");
         if(pepMassUnit == null || pepMassUnit.equals(""))
         {
-            //Check depricated param
+            //Check deprecated param
             pepMassUnit = sequestInputParams.get("spectrum, parent monoisotopic mass error units");
             if(pepMassUnit == null || pepMassUnit.equals(""))
                 return Collections.emptyList();
         }
-        if(pepMassUnit.equalsIgnoreCase("daltons"))
+        if(pepMassUnit.equalsIgnoreCase("daltons") || pepMassUnit.equalsIgnoreCase("amu"))
             _params.getParam("peptide_mass_units").setValue("0");
+        else if(pepMassUnit.equalsIgnoreCase("mmu"))
+            _params.getParam("peptide_mass_units").setValue("1");
         else if(pepMassUnit.equalsIgnoreCase("ppm"))
             _params.getParam("peptide_mass_units").setValue("2");
         else
@@ -718,8 +744,7 @@ public abstract class SequestParamsBuilder
         Collection<SequestParam> passThroughs = _params.getPassThroughs();
         for (SequestParam passThrough : passThroughs)
         {
-            String label = passThrough.getInputXmlLabels().get(0);
-            String value = sequestInputParams.get(label);
+            String value = passThrough.findValue(sequestInputParams);
             if (value == null)
             {
                 continue;

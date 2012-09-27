@@ -54,7 +54,40 @@ public abstract class ResidueModComposite extends SearchFormComposite
     protected Label dynamicReadOnlyLabel = new Label();
     public  static final int STATIC = 0;
     public  static final int DYNAMIC = 1;
-    char[] validResidues = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'V', 'W','X', 'Y', 'Z',']','['};
+    private static final Map<Character, String> VALID_RESIDUES;
+
+    static
+    {
+        Map<Character, String> residues = new LinkedHashMap<Character, String>();
+        residues.put('A', "A - Alanine");
+        residues.put('B', "B - Asparagine");
+        residues.put('C', "C - Cysteine");
+        residues.put('D', "D - Aspartic acid");
+        residues.put('E', "E - Glutamic acid");
+        residues.put('F', "F - Phenylalanine");
+        residues.put('G', "G - Glycine");
+        residues.put('H', "H - Histidine");
+        residues.put('I', "I - Isoleucine");
+        residues.put('K', "K - Lysine");
+        residues.put('L', "L - Leucine");
+        residues.put('M', "M - Methionine");
+        residues.put('N', "N - Asparagine");
+        residues.put('O', "O - Pyrrolysine");
+        residues.put('P', "P - Proline");
+        residues.put('Q', "Q - Glutamine");
+        residues.put('R', "R - Argine");
+        residues.put('S', "S - Serine");
+        residues.put('T', "T - Threonine");
+        residues.put('V', "V - Valine");
+        residues.put('W', "W - Tryptophan");
+        residues.put('X', "X - All residues");
+        residues.put('Y', "Y - Tyrosine");
+        residues.put('Z', "Z - Glutamine");
+        residues.put(']', "C-Terminus");
+        residues.put('[', "N-Terminus");
+
+        VALID_RESIDUES = Collections.unmodifiableMap(residues);
+    };
 
 
     
@@ -131,7 +164,11 @@ public abstract class ResidueModComposite extends SearchFormComposite
         label.setStylePrimaryName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);
-        panel.add(new HelpPopup("Residue modifications", "<p>Residue modifications, often referred to as <a href=\"http://en.wikipedia.org/wiki/Posttranslational_modification\" target=\"_blank\">posttranslational modifications</a> (PTM) are the chemical modifications of a protein after its translation. Each modification will alter the mass of its associated amino acid.</p><p><a href=\"http://www.thegpm.org/tandem/api/rmm.html\" target=\"_blank\">Fixed modifications</a> are expected to be present for every amino acid of that type.</p><p><a href=\"http://www.thegpm.org/tandem/api/refpmm.html\" target=\"_blank\">Variable modifications</a> may or may not be present for a given amino acid.</p>"));
+        panel.add(new HelpPopup("Residue modifications",
+                "<p>Residue modifications, often referred to as <a href=\"http://en.wikipedia.org/wiki/Posttranslational_modification\" target=\"_blank\">posttranslational modifications</a> (PTM) are the chemical modifications of a protein after its translation. Each modification will alter the mass of its associated amino acid.</p>" +
+                "<p><a href=\"http://www.thegpm.org/tandem/api/rmm.html\" target=\"_blank\">Fixed modifications</a> are expected to be present for every amino acid of that type.</p>" +
+                "<p><a href=\"http://www.thegpm.org/tandem/api/refpmm.html\" target=\"_blank\">Variable modifications</a> may or may not be present for a given amino acid.</p>" +
+                "<p>'[' represents an N-terminus modification, and ']' represents a C-terminus modification.</p>"));
         return panel;
     }
 
@@ -158,11 +195,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
 
     protected boolean isValidResidue(char res)
     {
-        for (char validResidue : validResidues)
-        {
-            if (res == validResidue) return true;
-        }
-        return false;
+        return VALID_RESIDUES.containsKey(res);
     }
 
     public void clear()
@@ -391,50 +424,26 @@ public abstract class ResidueModComposite extends SearchFormComposite
         {
             String wt = molWt.getText();
             int index = residues.getSelectedIndex();
-            String res = residues.getItemText(index);
-            StringBuffer sb = new StringBuffer();
+            String res = residues.getValue(index);
+            StringBuilder sb = new StringBuilder();
             sb.append(wt);
             sb.append("@");
             sb.append(res);
-            int foundIndex = find(sb.toString(), box);
+            String mod = sb.toString();
+            String name = convertToDisplayValue(mod);
+            int foundIndex = find(name, box);
             if(foundIndex == -1)
             {
-                box.insertItem(sb.toString(), sb.toString(), 0);
+                box.insertItem(name, mod, 0);
             }
         }
 
         private void loadResidues(ListBox box)
         {
-            for(int i = 0; i < validResidues.length; i++ )
+            for (Map.Entry<Character, String> entry : VALID_RESIDUES.entrySet())
             {
-                box.addItem(Character.toString(validResidues[i]));
+                box.addItem(entry.getValue(), entry.getKey().toString());
             }
-            box.addItem("A");
-            box.addItem("B");
-            box.addItem("C");
-            box.addItem("D");
-            box.addItem("E");
-            box.addItem("F");
-            box.addItem("G");
-            box.addItem("H");
-            box.addItem("I");
-            box.addItem("K");
-            box.addItem("L");
-            box.addItem("M");
-            box.addItem("N");
-            box.addItem("O");
-            box.addItem("P");
-            box.addItem("Q");
-            box.addItem("R");
-            box.addItem("S");
-            box.addItem("T");
-            box.addItem("V");
-            box.addItem("W");
-            box.addItem("X");
-            box.addItem("Y");
-            box.addItem("Z");
-            box.addItem("[");
-            box.addItem("]");
         }
     }
 
@@ -480,7 +489,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         {
             Map<String, String> modsMap = getListBoxMap(staticListBox);
             Set<String> mods = modsMap.keySet();
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Fixed Modifications: ");
             int count = 0;
             for(Iterator it = mods.iterator(); it.hasNext(); count++)
@@ -531,7 +540,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             params.removeInputParameter(ParameterNames.STATIC_MOD);
             return;
         }
-        StringBuffer valuesString = new StringBuffer();
+        StringBuilder valuesString = new StringBuilder();
         for(String mod : mods.values())
         {
             if(valuesString.length() > 0)
@@ -548,7 +557,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             params.removeInputParameter(ParameterNames.DYNAMIC_MOD);
             return;
         }
-        StringBuffer valuesString = new StringBuffer();
+        StringBuilder valuesString = new StringBuilder();
         for(String mod : mods.values())
         {
             if(valuesString.length() > 0)
@@ -607,11 +616,26 @@ public abstract class ResidueModComposite extends SearchFormComposite
         }
         for (String mod : modsList)
         {
-            returnMap.put(mod, mod);
+            returnMap.put(convertToDisplayValue(mod), mod);
         }
         return returnMap;
     }
-    
+
+    private String convertToDisplayValue(String mod)
+    {
+        if (mod.length() > 2 && mod.charAt(mod.length() - 2) == '@')
+        {
+            String prefix = mod.substring(0, mod.length() - 1);
+            String suffix = mod.substring(mod.length() - 1).toUpperCase();
+            if (VALID_RESIDUES.containsKey(suffix.charAt(0)))
+            {
+                suffix = VALID_RESIDUES.get(suffix.charAt(0));
+            }
+            return prefix + suffix;
+        }
+        return mod;
+    }
+
     @Override
     public String syncXmlToForm(ParamParser params)
     {
@@ -637,5 +661,35 @@ public abstract class ResidueModComposite extends SearchFormComposite
     public Set<String> getHandledParameterNames()
     {
         return new HashSet<String>(Arrays.asList(ParameterNames.STATIC_MOD, ParameterNames.DYNAMIC_MOD));
+    }
+
+    protected String validateModification(String modName, String modValue, ListBox modListBox)
+    {
+        if(find(modName, modListBox) != -1) return null;
+        if (modValue.length() < 2)
+        {
+            return "invalid modification specified: '" + modValue + "'";
+        }
+        if (modValue.charAt(modValue.length() - 2) != '@' && modValue.length() > 3)
+        {
+            return "modification mass contained an invalid value(" + modValue + ").";
+        }
+        char residue = modValue.charAt(modValue.length() - 1);
+        if (!isValidResidue(residue))
+        {
+            return "modification mass contained an invalid residue(" + residue + ").";
+        }
+        String mass = modValue.substring(0, modValue.length() - 2);
+        float massF;
+
+        try
+        {
+            massF = Float.parseFloat(mass);
+        }
+        catch (NumberFormatException e)
+        {
+            return "modification mass contained an invalid mass value (" + mass + ")";
+        }
+        return null;
     }
 }
