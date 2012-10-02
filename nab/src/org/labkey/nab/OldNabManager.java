@@ -23,10 +23,8 @@ import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.attachments.AttachmentFile;
-import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
@@ -281,7 +279,7 @@ public class OldNabManager extends AbstractNabManager
         return form;
     }
 
-    public OldNabAssayRun saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, BiffException, ServletException, AttachmentService.DuplicateFilenameException
+    public OldNabAssayRun saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, BiffException, ServletException
     {
         return createLuc5Assay(container, user, plateTemplate, metadata, sampleInfos, cutoffs, datafile);
     }
@@ -428,12 +426,11 @@ public class OldNabManager extends AbstractNabManager
         return new OldNabAssayRun(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
     }
 
-    protected OldNabAssayRun createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, ServletException, BiffException, AttachmentService.DuplicateFilenameException
+    protected OldNabAssayRun createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, ServletException, BiffException
     {
-        InputStream attachmentStream = null;
         try
         {
-            attachmentStream = datafile.openInputStream();
+            InputStream attachmentStream = datafile.openInputStream();
             OldNabAssayRun assay = createLuc5Assay(container, user, plateTemplate, metadata,
                     sampleInfos, cutoffs, datafile.getFilename(), attachmentStream);
             PlateService.get().setDataFile(user, assay.getPlate(), datafile);
@@ -530,35 +527,28 @@ public class OldNabManager extends AbstractNabManager
 
     public List<String> isValidNabPlateTemplate(Container container, User user, String plateTemplate)
     {
-        try
+        PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, plateTemplate);
+        List<String> errors = new ArrayList<String>();
+        if (nabTemplate == null)
+            errors.add("Plate template " + plateTemplate + " no longer exists.");
+        else
         {
-            PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, plateTemplate);
-            List<String> errors = new ArrayList<String>();
-            if (nabTemplate == null)
-                errors.add("Plate template " + plateTemplate + " no longer exists.");
-            else
+            Set<String> controlGroups = new HashSet<String>();
+            int specimenCount = 0;
+            for (WellGroupTemplate groupTemplate : nabTemplate.getWellGroups())
             {
-                Set<String> controlGroups = new HashSet<String>();
-                int specimenCount = 0;
-                for (WellGroupTemplate groupTemplate : nabTemplate.getWellGroups())
-                {
-                    if (groupTemplate.getType() == WellGroup.Type.CONTROL)
-                        controlGroups.add(groupTemplate.getName());
-                    if (groupTemplate.getType() == WellGroup.Type.SPECIMEN)
-                        specimenCount++;
-                }
-                if (!controlGroups.contains(CELL_CONTROL_SAMPLE))
-                    errors.add("Plate template \"" + plateTemplate + "\" does not contain required cell control group with name \"" + CELL_CONTROL_SAMPLE + "\"");
-                if (!controlGroups.contains(VIRUS_CONTROL_SAMPLE))
-                    errors.add("Plate template \"" + plateTemplate + "\" does not contain required virus control group with name \"" + VIRUS_CONTROL_SAMPLE + "\"");
-                if (specimenCount == 0)
-                    errors.add("Plate template \"" + plateTemplate + "\" does not contain any specimen groups.");
+                if (groupTemplate.getType() == WellGroup.Type.CONTROL)
+                    controlGroups.add(groupTemplate.getName());
+                if (groupTemplate.getType() == WellGroup.Type.SPECIMEN)
+                    specimenCount++;
             }
-            return errors;
+            if (!controlGroups.contains(CELL_CONTROL_SAMPLE))
+                errors.add("Plate template \"" + plateTemplate + "\" does not contain required cell control group with name \"" + CELL_CONTROL_SAMPLE + "\"");
+            if (!controlGroups.contains(VIRUS_CONTROL_SAMPLE))
+                errors.add("Plate template \"" + plateTemplate + "\" does not contain required virus control group with name \"" + VIRUS_CONTROL_SAMPLE + "\"");
+            if (specimenCount == 0)
+                errors.add("Plate template \"" + plateTemplate + "\" does not contain any specimen groups.");
         }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return errors;
     }
 }
