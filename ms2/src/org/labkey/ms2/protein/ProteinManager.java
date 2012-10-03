@@ -1021,9 +1021,9 @@ public class ProteinManager
          }
      }
 
-    public static void addRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
+    public static void addRunCondition(SimpleFilter filter, @Nullable String runTableName, MS2Run... runs)
     {
-        String columnName = runTableName == null ? "Run" : runTableName + ".Run";
+        String columnName = (runTableName == null ? "Run" : runTableName + ".Run");
         StringBuilder sb = new StringBuilder();
         sb.append(columnName);
         sb.append(" IN (");
@@ -1039,7 +1039,8 @@ public class ProteinManager
     }
 
 
-    public static void replaceRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
+    // TODO: runTableName is null in all cases... remove parameter?
+    public static void replaceRunCondition(SimpleFilter filter, @Nullable String runTableName, MS2Run... runs)
     {
         String columnName = runTableName == null ? "Run" : runTableName + ".Run";
         filter.deleteConditions(columnName);
