@@ -16,8 +16,10 @@
 
 package org.labkey.flow.query;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
+import org.labkey.api.query.AliasManager;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.api.util.StringExpression;
@@ -51,6 +53,7 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
             }
         };
 
+        AliasManager am = new AliasManager(ret.getSchema());
         for (Map.Entry<T, Integer> attr : getAttributes().entrySet())
         {
             T attrName = attr.getKey();
@@ -58,6 +61,8 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 
             FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), attrId);
             ColumnInfo column = new ColumnInfo(new FieldKey(null, attrName.toString()), ret);
+            String alias = am.decideAlias(StringUtils.defaultString(preferred==null?null:preferred._name, attrName.toString()));
+            column.setAlias(alias);
             initColumn(attrName, preferred, column);
             ret.addColumn(column);
         }
