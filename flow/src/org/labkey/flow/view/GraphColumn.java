@@ -59,7 +59,7 @@ public class GraphColumn extends DataColumn
         Object boundValue = getColumnInfo().getValue(ctx);
         String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest()) + "px";
         Object displayValue = getColumnInfo().getDisplayField().getValue(ctx);
-        String graphTitle = PageFlowUtil.filter(displayValue.toString());
+        String graphTitle = PageFlowUtil.filter(displayValue);
 
         out.write("<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + ";\">");
         if (boundValue == null)
