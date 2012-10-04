@@ -40,7 +40,7 @@ public class MGFDocumentParser extends AbstractDocumentParser
         return "application/mgf";
     }
 
-    public boolean detect(WebdavResource resource, byte[] buf) throws IOException
+    public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
     {
         return resource.getName().toLowerCase().endsWith(".mgf") || getMediaType().equals(resource.getContentType());
     }

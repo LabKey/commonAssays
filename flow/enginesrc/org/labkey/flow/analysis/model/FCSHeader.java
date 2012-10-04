@@ -22,7 +22,6 @@ import org.labkey.api.search.SearchService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.webdav.WebdavResource;
-import org.labkey.flow.util.KeywordUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -36,6 +35,8 @@ import java.util.*;
  */
 public class FCSHeader
 {
+    public static final String CONTENT_TYPE = "application/vnd.isac.fcs";
+    
     private Map<String, String> keywords = new TreeMap<String,  String>();
     int dataLast;
     int dataOffset;
@@ -342,8 +343,15 @@ public class FCSHeader
             return "application/fcs";
         }
 
-        public boolean detect(WebdavResource resource, byte[] buf) throws IOException
+        public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
         {
+            if (contentType != null)
+            {
+                contentType = contentType.toLowerCase().trim();
+                if (contentType.equals(CONTENT_TYPE))
+                    return true;
+            }
+
             if (buf.length < 58)
                 return false;
             String header = new String(buf, 0, 58);

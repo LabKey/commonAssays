@@ -41,7 +41,7 @@ public class DatDocumentParser extends AbstractDocumentParser
         return "application/dat";
     }
 
-    public boolean detect(WebdavResource resource, byte[] buf) throws IOException
+    public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
     {
         if (resource.getName().toLowerCase().endsWith(".dat") || getMediaType().equals(resource.getContentType()))
         {
