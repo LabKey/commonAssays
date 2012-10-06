@@ -47,6 +47,8 @@ public class ProtocolFileBuilder
 {
     private static final String xdrTag = "DateTime";
     private static final String sidTag = "ImageDescription";
+    private static final String bitsPerSampleTag = "BitsPerSample";
+
     private static String sqlDesignId = "SELECT DesignId FROM GridTemplate";
     private static String sqlGridName = "SELECT GridName FROM GridTemplate WHERE DesignId = ?";
     private static String sqlProtocolName = "SELECT Protocol.Name FROM Protocol, GridTemplate WHERE Protocol.Id = GridTemplate.ProtocolId AND GridTemplate.GridName = ?";
@@ -139,6 +141,10 @@ public class ProtocolFileBuilder
                 if (name.equals(tagName))
                 {
                     value = field.getValueAsString(0);
+                    if (value != null)
+                    {
+                        value = value.trim();
+                    }
                 }
             }
             iis.close();
@@ -183,22 +189,24 @@ public class ProtocolFileBuilder
     {
         ResultSet rs = null;
         String queryName;
-        String tagValue = getTiffMetaTagValue(sidTag, image);
+        String description = getTiffMetaTagValue(sidTag, image);
+        String bitsPerSample = getTiffMetaTagValue(bitsPerSampleTag, image);
 
-        if (tagValue == null)
+        if (description == null)
             throw new PipelineJobException("The scan channel information could not be determined for the image " + image.getAbsolutePath());
 
-        if (tagValue.trim().equalsIgnoreCase("Green"))
+        if (description.equalsIgnoreCase("Red") || "32".equals(bitsPerSample))
+        {
+            // 32-bit images have both channels embedded in the same file
+            queryName = sqlProtocolName;
+        }
+        else if (description.equalsIgnoreCase("Green"))
         {
             queryName = sqlOneColorProtocolName;
         }
-        else if (tagValue.trim().equalsIgnoreCase("Red"))
-        {
-            queryName = sqlProtocolName;
-        }
         else
         {
-            throw new PipelineJobException("The scan channel information could not be determined from the tiff meta info: " + sidTag + " = " + tagValue);
+            throw new PipelineJobException("The scan channel information could not be determined from the tiff meta info: " + sidTag + " = " + description + ", " + bitsPerSampleTag + " = " + bitsPerSample);
         }
 
         try
@@ -210,7 +218,7 @@ public class ProtocolFileBuilder
             // this assumes there is only one row in the result set
             if (!rs.next())
             {
-                throw new PipelineJobException("No protocol found for scan channel " + tagValue + " with grid name " + gridName);
+                throw new PipelineJobException("No protocol found for scan channel " + description + " with grid name " + gridName);
             }
             return rs.getString(1);
         }
