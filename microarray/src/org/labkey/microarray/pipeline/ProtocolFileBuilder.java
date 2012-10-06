@@ -218,7 +218,7 @@ public class ProtocolFileBuilder
             // this assumes there is only one row in the result set
             if (!rs.next())
             {
-                throw new PipelineJobException("No protocol found for scan channel " + description + " with grid name " + gridName);
+                throw new PipelineJobException("No protocol found for scan channel " + description + " with grid name " + gridName + ". The template may not have a default protocol associated with it in the Feature Extractor application.");
             }
             return rs.getString(1);
         }
