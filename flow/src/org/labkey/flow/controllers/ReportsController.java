@@ -34,6 +34,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.*;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
 import org.labkey.flow.reports.FlowReportJob;
@@ -114,6 +115,14 @@ public class ReportsController extends BaseFlowController
     private abstract static class CreateOrUpdateAction<FORM extends ReturnUrlForm> extends FormApiAction<FORM>
     {
         FlowReport r;
+
+        @Override
+        public void validateForm(FORM form, Errors errors)
+        {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getViewContext().getContainer());
+            if (protocol == null)
+                errors.reject(ERROR_MSG, "No flow protocol in this container.  Please upload FCS files to create a flow protocol.");
+        }
 
         public abstract void initReport(FORM form) throws Exception;
 
