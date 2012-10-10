@@ -689,6 +689,12 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
+        public void setPublicSchemaName(String schemaName)
+        {
+            _expData.setPublicSchemaName(schemaName);
+        }
+
+        @Override
         public ContainerContext getContainerContext()
         {
             return _expData.getContainerContext();
@@ -1063,6 +1069,12 @@ public class FlowSchema extends UserSchema
         public void setDomain(Domain domain)
         {
             _expData.setDomain(domain);
+        }
+
+        @Override
+        public void setPublicSchemaName(String schemaName)
+        {
+            _expData.setPublicSchemaName(schemaName);
         }
 
         @Override

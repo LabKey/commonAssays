@@ -95,17 +95,23 @@ public class NabSchema extends AssaySchema
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return new EnumTableInfo<SampleInfo.Method>(SampleInfo.Method.class, getDbSchema(), "List of possible sample preparation methods for the NAb assay.", false);
+            EnumTableInfo<SampleInfo.Method> result = new EnumTableInfo<SampleInfo.Method>(SampleInfo.Method.class, getDbSchema(), "List of possible sample preparation methods for the NAb assay.", false);
+            result.setPublicSchemaName(SCHEMA_NAME);
+            result.setPublicName(SAMPLE_PREPARATION_METHOD_TABLE_NAME);
+            return result;
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return new EnumTableInfo<DilutionCurve.FitType>(DilutionCurve.FitType.class, getDbSchema(), new EnumTableInfo.EnumValueGetter<DilutionCurve.FitType>()
+            EnumTableInfo<DilutionCurve.FitType> result = new EnumTableInfo<DilutionCurve.FitType>(DilutionCurve.FitType.class, getDbSchema(), new EnumTableInfo.EnumValueGetter<DilutionCurve.FitType>()
             {
                 public String getValue(DilutionCurve.FitType e)
                 {
                     return e.getLabel();
                 }
             }, false, "List of possible curve fitting methods for the NAb assay.");
+            result.setPublicSchemaName(SCHEMA_NAME);
+            result.setPublicName(CURVE_FIT_METHOD_TABLE_NAME);
+            return result;
         }
 
         for (ExpProtocol protocol : getProtocols())
