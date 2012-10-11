@@ -103,11 +103,12 @@ public abstract class NabAssayRun extends Luc5Assay
         TableInfo runTableInfo = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
         for (ColumnInfo runColumn : runTableInfo.getColumns())
         {
-            // The DataOutputs column causes an UnauthorizedException if the user has permission to see the dataset
+            // These columns cause an UnauthorizedException if the user has permission to see the dataset
             // this run has been copied to, but not the run folder, because the column joins to the exp.Data query
             // which doesn't know anything about the extra permission the user has been granted by the copy to study linkage.
             // We don't need to show it in the details view, so just skip it.
-            if (!ExpRunTable.Column.DataOutputs.name().equalsIgnoreCase(runColumn.getName()))
+            if (!ExpRunTable.Column.DataOutputs.name().equalsIgnoreCase(runColumn.getName()) &&
+                !ExpRunTable.Column.RunGroups.name().equalsIgnoreCase(runColumn.getName()))
             {
                 // Fake up a property descriptor. Currently only name and label are actually used for rendering the page,
                 // but set a few more so that toString() works for debugging purposes
@@ -179,13 +180,24 @@ public abstract class NabAssayRun extends Luc5Assay
             if (runView != null)
             {
                 // If we have a saved view to use for the column list, use it
-                fieldKeysToShow = runView.getColumns();
+                fieldKeysToShow = new ArrayList<FieldKey>(runView.getColumns());
             }
             else
             {
                 // Otherwise, use the default list of columns
                 fieldKeysToShow = new ArrayList<FieldKey>(runTable.getDefaultVisibleColumns());
             }
+            // The list of available columns is reduced from the default set because the user may not have
+            // permission to join to all of the lookups. Remove any columns that aren't part of the acceptable set,
+            // which is built up by getFieldKeys()
+            for (Iterator<FieldKey> i = fieldKeysToShow.iterator(); i.hasNext();)
+            {
+                if (!fieldKeys.containsKey(i.next()))
+                {
+                    i.remove();
+                }
+            }
+
             Map<FieldKey, ColumnInfo> selectCols = QueryService.get().getColumns(runTable, fieldKeysToShow);
             _runDisplayProperties = getRunProperties(runTable, fieldKeys, selectCols);
         }
