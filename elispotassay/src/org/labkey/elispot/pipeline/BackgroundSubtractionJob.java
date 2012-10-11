@@ -28,7 +28,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.study.Plate;
-import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
@@ -36,18 +35,17 @@ import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewContext;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
-import org.labkey.elispot.ElispotPlateTypeHandler;
-import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,7 +110,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                     for (DomainProperty column : provider.getRunDomain(run.getProtocol()).getProperties())
                         runPropMap.put(column.getName(), column);
 
-                    Plate plate = initializePlate(provider, run, runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
+                    Plate plate = initializePlate((PlateBasedAssayProvider)provider, run, runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
 
                     if (plate != null)
                     {
@@ -169,9 +167,9 @@ public class BackgroundSubtractionJob extends PipelineJob
         }
     }
 
-    private Plate initializePlate(AssayProvider provider, ExpRun run, DomainProperty plateReaderProp) throws ExperimentException
+    private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, DomainProperty plateReaderProp) throws ExperimentException
     {
-        PlateTemplate template = ((ElispotAssayProvider)provider).getPlateTemplate(run.getContainer(), run.getProtocol());
+        PlateTemplate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
         ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
         Plate plate = null;
 
@@ -182,7 +180,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
             if (dataFile.exists())
             {
-                ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(plateReader.toString(), getContainer());
+                PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReader.toString(), getContainer(), provider);
                 plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
             }
             else

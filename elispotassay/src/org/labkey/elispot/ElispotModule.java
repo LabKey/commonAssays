@@ -25,11 +25,12 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.elispot.pipeline.ElispotPipelineProvider;
-import org.labkey.elispot.plate.ElispotPlateReaderService;
-import org.labkey.elispot.plate.ExcelPlateReader;
-import org.labkey.elispot.plate.TextPlateReader;
+import org.labkey.api.study.assay.plate.ExcelPlateReader;
+import org.labkey.api.study.assay.plate.TextPlateReader;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -72,10 +73,12 @@ public class ElispotModule extends DefaultModule
     {
         PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElispotDataHandler());
-        AssayService.get().registerAssayProvider(new ElispotAssayProvider());
 
-        ElispotPlateReaderService.registerProvider(new ExcelPlateReader());
-        ElispotPlateReaderService.registerProvider(new TextPlateReader());
+        PlateBasedAssayProvider provider = new ElispotAssayProvider();
+        AssayService.get().registerAssayProvider(provider);
+
+        PlateReaderService.registerPlateReader(provider, new ExcelPlateReader());
+        PlateReaderService.registerPlateReader(provider, new TextPlateReader());
 
         PipelineService.get().registerPipelineProvider(new ElispotPipelineProvider(this));
     }

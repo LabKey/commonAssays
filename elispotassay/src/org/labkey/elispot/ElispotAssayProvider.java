@@ -35,15 +35,15 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.util.Pair;
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.elispot.plate.ElispotPlateReaderService;
-import org.labkey.elispot.plate.ExcelPlateReader;
-import org.labkey.elispot.plate.TextPlateReader;
+import org.labkey.api.study.assay.plate.ExcelPlateReader;
+import org.labkey.api.study.assay.plate.TextPlateReader;
 import org.labkey.elispot.query.ElispotRunDataTable;
 
 import java.util.*;
@@ -190,13 +190,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     private ListDefinition createPlateReaderList(Container c, User user)
     {
-        ListDefinition readerList = ElispotPlateReaderService.getPlateReaderList(c);
+        ListDefinition readerList = PlateReaderService.getPlateReaderList(this, c);
         if (readerList == null)
         {
-            readerList = ElispotPlateReaderService.createPlateReaderList(c, user);
+            readerList = PlateReaderService.createPlateReaderList(c, user, this);
 
-            DomainProperty nameProperty = readerList.getDomain().getPropertyByName(ElispotPlateReaderService.PLATE_READER_PROPERTY);
-            DomainProperty typeProperty = readerList.getDomain().getPropertyByName(ElispotPlateReaderService.READER_TYPE_PROPERTY);
+            DomainProperty nameProperty = readerList.getDomain().getPropertyByName(PlateReaderService.PLATE_READER_PROPERTY);
+            DomainProperty typeProperty = readerList.getDomain().getPropertyByName(PlateReaderService.READER_TYPE_PROPERTY);
 
             try {
                 addItem(readerList, user, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty);
@@ -306,5 +306,11 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return new AssayPipelineProvider(ElispotModule.class,
                 new PipelineProvider.FileTypesEntryFilter(ElispotDataHandler.ELISPOT_DATA_TYPE.getFileType()),
                 this, "Import ELISpot");
+    }
+
+    @Override
+    public String getPlateReaderListName()
+    {
+        return "ElispotPlateReader";
     }
 }

@@ -34,7 +34,7 @@ import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroupTemplate;
@@ -43,9 +43,10 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
-import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
@@ -350,7 +351,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
-                    ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getContainer());
+                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getContainer(), provider);
                     plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
                 }
 

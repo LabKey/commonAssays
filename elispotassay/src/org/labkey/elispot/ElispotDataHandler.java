@@ -50,10 +50,11 @@ import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUploadXarContext;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.Stats;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -112,7 +113,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                 if (_context instanceof AssayUploadXarContext)
                 {
                     Map<DomainProperty, String> runPropValues = ((AssayUploadXarContext)_context).getContext().getRunProperties();
-                    ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(runPropValues.get(readerProp), _info.getContainer());
+                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropValues.get(readerProp), _info.getContainer(), provider);
                     Plate plate = initializePlate(_dataFile, template, reader);
 
                     List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
@@ -168,7 +169,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return datas;
     }
 
-    public static Plate initializePlate(File dataFile, PlateTemplate template, ElispotPlateReaderService.I reader) throws ExperimentException
+    public static Plate initializePlate(File dataFile, PlateTemplate template, PlateReader reader) throws ExperimentException
     {
         if (reader != null)
         {

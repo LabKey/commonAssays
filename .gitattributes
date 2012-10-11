@@ -108,9 +108,6 @@ elispotassay/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
 elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/pipeline/BackgroundSubtractionJob.java -text
 elispotassay/src/org/labkey/elispot/pipeline/ElispotPipelineProvider.java -text
-elispotassay/src/org/labkey/elispot/plate/ElispotPlateReaderService.java -text
-elispotassay/src/org/labkey/elispot/plate/ExcelPlateReader.java -text
-elispotassay/src/org/labkey/elispot/plate/TextPlateReader.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunAntigenTable.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
