@@ -93,7 +93,7 @@ public class FlowModule extends DefaultModule
 
     protected void init()
     {
-        DefaultSchema.registerProvider(FlowSchema.SCHEMANAME.toString(), new DefaultSchema.SchemaProvider()
+        DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {

@@ -279,7 +279,7 @@ public class CompensationController extends BaseFlowController
     UserSchema getFlowSchema()
     {
         if (null == _flowUserSchema)
-            _flowUserSchema = (UserSchema) DefaultSchema.get(getUser(), getContainer()).getSchema(FlowSchema.SCHEMANAME.toString());
+            _flowUserSchema = (UserSchema) DefaultSchema.get(getUser(), getContainer()).getSchema(FlowSchema.SCHEMANAME);
         return _flowUserSchema;
     }
 

@@ -63,7 +63,7 @@ public enum FlowTableType
 
     public ActionURL urlFor(User user, Container container, QueryAction action)
     {
-        ActionURL url = QueryService.get().urlFor(user, container, action, FlowSchema.SCHEMANAME.toString(), toString());
+        ActionURL url = QueryService.get().urlFor(user, container, action, FlowSchema.SCHEMANAME, toString());
         if (action == QueryAction.executeQuery)
             url.setAction(FlowController.QueryAction.class);
         return url;

@@ -112,7 +112,7 @@ import java.util.TreeSet;
 
 public class FlowSchema extends UserSchema
 {
-    static public final IdentifierString SCHEMANAME = new IdentifierString("flow",false);
+    static public final String SCHEMANAME = "flow";
     static public final String SCHEMA_DESCR = "Contains data about flow cytometry experiment runs";
     private FlowExperiment _experiment;
     private FlowRun _run;
@@ -165,7 +165,7 @@ public class FlowSchema extends UserSchema
 
     private FlowSchema(User user, Container container, FlowProtocol protocol)
     {
-        super(SCHEMANAME.toString(), SCHEMA_DESCR, user, container, ExperimentService.get().getSchema());
+        super(SCHEMANAME, SCHEMA_DESCR, user, container, ExperimentService.get().getSchema());
         _protocol = protocol;
     }
 
