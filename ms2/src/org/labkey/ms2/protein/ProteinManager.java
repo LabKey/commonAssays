@@ -1035,7 +1035,7 @@ public class ProteinManager
             sb.append(run.getRun());
         }
         sb.append(")");
-        filter.addWhereClause(sb.toString(), new Object[0], FieldKey.fromString(columnName));
+        filter.addWhereClause(sb.toString(), new Object[0], FieldKey.fromString("Run"));
     }
 
 
