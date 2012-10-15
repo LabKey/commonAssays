@@ -16,10 +16,8 @@
 
 package org.labkey.elisa;
 
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -27,13 +25,11 @@ import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.plate.PlateReaderService;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.elisa.plate.BioTekPlateReader;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 public class ElisaModule extends DefaultModule
 {
@@ -52,7 +48,7 @@ public class ElisaModule extends DefaultModule
     @Override
     public boolean hasScripts()
     {
-        return true;
+        return false;
     }
 
     @Override
