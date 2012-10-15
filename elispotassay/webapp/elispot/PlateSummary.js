@@ -195,7 +195,9 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
                         if (antigenName && antigenName.length > 0)
                             antigenLabel = antigenGroupName + ' (' + antigenName + ')';
-                        var antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
+                        var antigenCls = 'labkey-antigenGroup-';
+                        if (antigenGroupName && antigenGroupName.length > 0)
+                            antigenCls = antigenCls.concat(antigenGroupName.replace(/\s/g, '-'));
 
                         this.antigenGroups[antigenGroupName] = {
                             label : antigenLabel,
