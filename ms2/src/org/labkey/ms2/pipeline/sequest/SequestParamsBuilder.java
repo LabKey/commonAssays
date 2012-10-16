@@ -601,7 +601,6 @@ public abstract class SequestParamsBuilder
 
     private List<String> parseMods(String mods, ArrayList<Character> residues, ArrayList<String> masses)
     {
-        Float massF;
         if (mods == null || mods.equals("")) return Collections.emptyList();
 
         StringTokenizer st = new StringTokenizer(mods, ",");
@@ -624,13 +623,13 @@ public abstract class SequestParamsBuilder
 
             try
             {
-                massF = Float.parseFloat(mass);
+                Float.parseFloat(mass);
             }
             catch (NumberFormatException e)
             {
                 return Collections.singletonList("modification mass contained an invalid mass value (" + mass + ")");
             }
-            masses.add(massF.toString());
+            masses.add(mass);
         }
         return Collections.emptyList();
     }
