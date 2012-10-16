@@ -465,7 +465,6 @@ flow/src/org/labkey/flow/reports/editPositivityReport.jsp -text
 flow/src/org/labkey/flow/reports/editQCReport.jsp -text
 flow/src/org/labkey/flow/reports/statPicker.jsp -text
 flow/src/org/labkey/flow/script/AbstractExternalAnalysisJob.java -text
-flow/src/org/labkey/flow/script/AddRunsJob.java -text
 flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text
 flow/src/org/labkey/flow/script/BaseHandler.java -text
@@ -478,6 +477,7 @@ flow/src/org/labkey/flow/script/FlowTaskSet.java -text
 flow/src/org/labkey/flow/script/FlowThreadPool.java -text
 flow/src/org/labkey/flow/script/ImportResultsJob.java -text
 flow/src/org/labkey/flow/script/KeywordsHandler.java -text
+flow/src/org/labkey/flow/script/KeywordsJob.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
 flow/src/org/labkey/flow/script/RScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text

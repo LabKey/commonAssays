@@ -28,13 +28,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddRunsJob extends ScriptJob
+/**
+ * Create a Keyword run for directory containing FCS files not previously imported.
+ */
+public class KeywordsJob extends ScriptJob
 {
-    private static final Logger _log = Logger.getLogger(AddRunsJob.class);
+    private static final Logger _log = Logger.getLogger(KeywordsJob.class);
 
     private final List<File> _paths;
 
-    public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, PipeRoot root) throws Exception
+    public KeywordsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, PipeRoot root) throws Exception
     {
         super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, null, FlowProtocolStep.keywords, root);
 

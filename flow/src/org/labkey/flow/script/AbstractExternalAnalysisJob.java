@@ -19,7 +19,6 @@ package org.labkey.flow.script;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -45,26 +44,20 @@ import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowWell;
-import org.labkey.flow.data.FlowWorkspace;
 import org.labkey.flow.data.SampleKey;
-import org.labkey.flow.persist.AttrObject;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.util.KeywordUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,13 +150,13 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             // Create a new keyword run job for the selected FCS file directory
             if (isCreateKeywordRun())
             {
-                AddRunsJob addruns = new AddRunsJob(getInfo(), _protocol, Collections.singletonList(getRunFilePathRoot()), PipelineService.get().findPipelineRoot(getContainer()));
-                addruns.setLogFile(getLogFile());
-                addruns.setLogLevel(getLogLevel());
-                addruns.setSubmitted();
+                KeywordsJob keywordsJob = new KeywordsJob(getInfo(), _protocol, Collections.singletonList(getRunFilePathRoot()), PipelineService.get().findPipelineRoot(getContainer()));
+                keywordsJob.setLogFile(getLogFile());
+                keywordsJob.setLogLevel(getLogLevel());
+                keywordsJob.setSubmitted();
 
-                List<FlowRun> runs = addruns.go();
-                if (addruns.hasErrors())
+                List<FlowRun> runs = keywordsJob.go();
+                if (keywordsJob.hasErrors())
                 {
                     getLogger().error("Failed to import keywords from '" + getRunFilePathRoot() + "'.");
                     setStatus(PipelineJob.ERROR_STATUS);

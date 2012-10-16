@@ -336,7 +336,7 @@ public class AnalysisScriptController extends BaseFlowController
                 files = form.getValidatedFiles(form.getContainer());
 
             ViewBackgroundInfo vbi = getViewBackgroundInfo();
-            AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files, pr);
+            KeywordsJob job = new KeywordsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files, pr);
             return HttpView.redirect(executeScript(job));
         }
 
