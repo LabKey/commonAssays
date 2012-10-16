@@ -16,6 +16,7 @@
 
 package org.labkey.elisa;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
@@ -25,9 +26,7 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
@@ -45,11 +44,11 @@ import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.study.assay.PlateBasedAssayProvider;
-import org.labkey.api.study.assay.plate.ExcelPlateReader;
 import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.elisa.actions.ElisaRunUploadForm;
 import org.labkey.elisa.plate.BioTekPlateReader;
 
 import java.io.File;
@@ -141,34 +140,45 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 if (context instanceof AssayUploadXarContext)
                 {
                     try {
+                        // collect the standard concentration values
+                        AssayRunUploadContext runContext = ((AssayUploadXarContext)context).getContext();
+                        Map<String, Double> concentrations = getStandardConcentrations(runContext);
 
                         WellGroup controlGroup = controlGroups.get(0);
                         SimpleRegression regression = new SimpleRegression(true);
-                        double[] concentrations = {100, 50, 25, 12.5, 6.25, 0};
-                        int i = 0;
+
                         for (WellGroup replicate : controlGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
                         {
                             double mean = replicate.getMean();
-                            double concentration = concentrations[i++];
+                            double conc = -1;
 
-                            regression.addData(mean, concentration);
+                            String key = replicate.getPositionDescription();
+                            if (concentrations.containsKey(key))
+                            {
+                                conc = concentrations.get(key);
+                                regression.addData(mean, conc);
+                            }
+
+                            // save the individual well values for the control group
+                            for (Position position : replicate.getPositions())
+                            {
+                                Map<String, Object> row = new HashMap<String, Object>();
+
+                                Well well = plate.getWell(position.getRow(), position.getColumn());
+                                row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
+                                row.put(ElisaAssayProvider.WELLGROUP_PROPERTY_NAME, replicate.getPositionDescription());
+                                row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY_NAME, well.getValue());
+
+                                if (conc != -1)
+                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME, conc);
+
+                                results.add(row);
+                            }
                         }
                         // add the coefficient of determination to the run
                         DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY_NAME);
                         if (cod != null)
                             data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
-
-                        for (Position position : controlGroup.getPositions())
-                        {
-                            Map<String, Object> row = new HashMap<String, Object>();
-
-                            Well well = plate.getWell(position.getRow(), position.getColumn());
-                            row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
-                            row.put(ElisaAssayProvider.WELLGROUP_PROPERTY_NAME, controlGroup.getPositionDescription());
-                            row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY_NAME, well.getValue());
-
-                            results.add(row);
-                        }
 
                         for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                         {
@@ -203,5 +213,31 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         datas.put(DATA_TYPE, results);
 
         return datas;
+    }
+
+    private Map<String, Double> getStandardConcentrations(AssayRunUploadContext context) throws ExperimentException
+    {
+        Map<String, Double> concentrations = new HashMap<String, Double>();
+        if (context instanceof ElisaRunUploadForm)
+        {
+            Map<String, Map<DomainProperty, String>> props = ((ElisaRunUploadForm)context).getConcentrationProperties();
+
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : props.entrySet())
+            {
+                for (DomainProperty dp : entry.getValue().keySet())
+                {
+                    double conc = 0;
+                    if (ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME.equals(dp.getName()))
+                    {
+                        conc = NumberUtils.toDouble(entry.getValue().get(dp), 0);
+                    }
+                    concentrations.put(entry.getKey(), conc);
+                }
+            }
+
+            return concentrations;
+        }
+        else
+            throw new ExperimentException("The form is not an instance of ElisaRunUploadForm, concentration values were not accesible.");
     }
 }

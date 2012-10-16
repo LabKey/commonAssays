@@ -7,6 +7,7 @@ import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.elisa.ElisaAssayProvider;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,7 +31,7 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
     {
         super(domainProperties);
         _template = template;
-        _controlNames = new HashSet<String>();
+        _controlNames = new TreeSet<String>();
 
         if (template != null)
         {
@@ -79,9 +81,23 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
         return !AbstractAssayProvider.SPECIMENID_PROPERTY_NAME.equals(pd.getName()) && !AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME.equals(pd.getName());
     }
 
-
     public List<String> getSampleNames()
     {
         return Arrays.asList(_controlNames.toArray(new String[_controlNames.size()]));
+    }
+
+    @Override
+    public void setDomainProperties(DomainProperty[] domainProperties)
+    {
+        for (DomainProperty prop : domainProperties)
+        {
+            // only interested in the concentration property
+            if (ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME.equals(prop.getName()))
+            {
+                domainProperties = new DomainProperty[]{prop};
+                break;
+            }
+        }
+        super.setDomainProperties(domainProperties);
     }
 }

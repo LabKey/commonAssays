@@ -17,6 +17,8 @@
 package org.labkey.elisa;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.exp.ChangePropertyDescriptorException;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
@@ -29,6 +31,7 @@ import org.labkey.api.exp.api.IAssayDomainType;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.qc.PlateBasedDataExchangeHandler;
@@ -179,6 +182,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         absProp.setFormat("0.000");
         DomainProperty concProp = addProperty(dataDomain, CONCENTRATION_PROPERTY_NAME,  CONCENTRATION_PROPERTY_CAPTION, PropertyType.DOUBLE, "Well group value measuring the concentration.");
         concProp.setFormat("0.000");
+        concProp.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
 
         return new Pair<Domain, Map<DomainProperty, Object>>(dataDomain, Collections.<DomainProperty, Object>emptyMap());
     }
@@ -200,13 +204,17 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
 
         if (!domainMap.containsKey(ExpProtocol.ASSAY_DOMAIN_DATA))
-        {
             domainMap.put(ExpProtocol.ASSAY_DOMAIN_DATA, new HashSet<String>());
-        }
+
+        if (!domainMap.containsKey(ExpProtocol.ASSAY_DOMAIN_RUN))
+            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, new HashSet<String>());
+
+        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
+
+        runProperties.add(CORRELATION_COEFFICIENT_PROPERTY_NAME);
 
         Set<String> dataProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_DATA);
 
-        dataProperties.add(CORRELATION_COEFFICIENT_PROPERTY_NAME);
         dataProperties.add(WELL_PROPERTY_NAME);
         dataProperties.add(WELLGROUP_PROPERTY_NAME);
         dataProperties.add(ABSORBANCE_PROPERTY_NAME);
@@ -281,6 +289,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public Domain getConcentrationWellGroupDomain(ExpProtocol protocol)
     {
-        return getDomainByPrefix(protocol, ASSAY_DOMAIN_CONCENTRATION_WELLGROUP);
+        return getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
     }
 }

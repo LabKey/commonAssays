@@ -16,6 +16,7 @@ public class ElisaRunUploadForm extends PlateUploadFormImpl<ElisaAssayProvider>
 {
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
     private PlateSamplePropertyHelper _samplePropertyHelper;
+    private Map<String, Map<DomainProperty, String>> _concentrationProperties;
 
     public PlateSamplePropertyHelper getSamplePropertyHelper()
     {
@@ -35,5 +36,15 @@ public class ElisaRunUploadForm extends PlateUploadFormImpl<ElisaAssayProvider>
     public void setSampleProperties(Map<String, Map<DomainProperty, String>> sampleProperties)
     {
         _sampleProperties = sampleProperties;
+    }
+
+    public Map<String, Map<DomainProperty, String>> getConcentrationProperties()
+    {
+        return _concentrationProperties;
+    }
+
+    public void setConcentrationProperties(Map<String, Map<DomainProperty, String>> concentrationProperties)
+    {
+        _concentrationProperties = concentrationProperties;
     }
 }
