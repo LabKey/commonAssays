@@ -1081,7 +1081,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             assertEquals("term_diff_search_options", expected1, actual);
 
             sp.setValue(defaultValue);
-            expected1 = "-88.0 42.0";
+            expected1 = "-88 42.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">+ 42.0 @[,-88 @ ]</note>" +
@@ -1094,7 +1094,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             assertEquals("term_diff_search_options", expected1, actual);
 
             sp.setValue(defaultValue);
-            expected1 = "-88.0 0.0";
+            expected1 = "-88 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">-88@]</note>" +
@@ -1160,7 +1160,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             char[] validResidues = spb.getValidResidues();
             for (char residue : validResidues)
             {
-                String expected1 = "227.0";
+                String expected1 = "227";
                 parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "<note type=\"input\" label=\"residue, modification mass\">+227@" + residue + "</note>" +
@@ -1187,7 +1187,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             for (char residue : validResidues)
             {
-                String expected1 = "-9.0";
+                String expected1 = "-9";
                 parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "<note type=\"input\" label=\"residue, modification mass\">- 9 @ " + residue + "</note>" +
@@ -1218,14 +1218,14 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, modification mass\">227@C,16@M</note>" +
                 "</bioml>");
 
-            String expected1 = "16.0";
+            String expected1 = "16";
             List<String> parserError = spb.initStaticMods();
             if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().startsWith("add_M_");
             String actual = sp.getValue();
             assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
 
-            expected1 = "227.0";
+            expected1 = "227";
             parserError = spb.initStaticMods();
             if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().startsWith("add_C_");

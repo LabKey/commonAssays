@@ -629,6 +629,10 @@ public abstract class SequestParamsBuilder
             {
                 return Collections.singletonList("modification mass contained an invalid mass value (" + mass + ")");
             }
+            if (mass.startsWith("+"))
+            {
+                mass = mass.substring(1);
+            }
             masses.add(mass);
         }
         return Collections.emptyList();
