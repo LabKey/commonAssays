@@ -52,46 +52,6 @@ public class ElisaController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
-    public class RunDetailsAction extends SimpleViewAction<GenericReportForm>
-    {
-        private GenericChartReport.RenderType _renderType;
-
-        @Override
-        public ModelAndView getView(GenericReportForm form, BindException errors) throws Exception
-        {
-            form.setAllowToggleMode(true);
-            _renderType = GenericChartReport.getRenderType(form.getRenderType());
-
-            if (_renderType != null)
-            {
-                form.setComponentId("generic-report-panel-" + UniqueID.getRequestScopedUID(getViewContext().getRequest()));
-                JspView view = new JspView<GenericReportForm>("/org/labkey/visualization/views/genericChartWizard.jsp", form);
-
-                view.setTitle(_renderType.getName() + " Report");
-                view.setFrame(WebPartView.FrameType.PORTAL);
-
-                if (getViewContext().hasPermission(InsertPermission.class))
-                {
-                    NavTree menu = new NavTree();
-                    menu.addChild("Manage Views", PageFlowUtil.urlProvider(ReportUrls.class).urlManageViews(getContainer()));
-                    view.setNavMenu(menu);
-                }
-                return view;
-            }
-            else
-                return new HtmlView("No renderer for specified type: " + PageFlowUtil.filter(form.getRenderType()));
-        }
-
-        @Override
-        public NavTree appendNavTrail(NavTree root)
-        {
-            if (null != _renderType)
-                root.addChild(_renderType.getName() + " Report");
-            return root;
-        }
-    }
-
     public static class GenericReportForm extends ReportUtil.JsonReportForm
     {
         private int _runId;

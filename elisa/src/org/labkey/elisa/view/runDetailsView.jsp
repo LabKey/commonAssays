@@ -55,6 +55,7 @@
     LABKEY.requiresExt4Sandbox(true);
     LABKEY.requiresScript("vis/genericChart/genericChartPanel.js");
     LABKEY.requiresVisualization();
+    LABKEY.requiresScript("elisa/runDetailsPanel.js");
 
 </script>
 
@@ -63,15 +64,16 @@
 
     Ext4.onReady(function(){
 
-        var panel = Ext4.create('LABKEY.ext4.GenericChartPanel', {
-            height          : 400,
+        var items = [];
+
+        items.push(Ext4.create('LABKEY.ext4.GenericChartPanel', {
+            height          : 500,
             schemaName      : <%=form.getSchemaName() != null ? q(form.getSchemaName()) : null %>,
             queryName       : <%=form.getQueryName() != null ? q(form.getQueryName()) : null %>,
-            dataRegionName  : '<%=form.getDataRegionName()%>',
-            renderType      : '<%=form.getRenderType()%>',
-            id              : '<%=form.getComponentId() %>',
-            baseUrl         : '<%=baseUrl%>',
-            renderTo        : '<%= renderId %>',
+            dataRegionName  : <%=q(form.getDataRegionName())%>,
+            renderType      : <%=q(form.getRenderType())%>,
+            id              : <%=q(form.getComponentId())%>,
+            baseUrl         : <%=q(baseUrl.getLocalURIString())%>,
             allowShare      : <%=c.hasPermission(ctx.getUser(), ShareReportPermission.class)%>,
             isDeveloper     : <%=ctx.getUser().isDeveloper()%>,
             hideSave        : <%=ctx.getUser().isGuest()%>,
@@ -79,6 +81,21 @@
             autoColumnXName  : <%=form.getAutoColumnXName() != null ? q(form.getAutoColumnXName()) : null%>,
             defaultNumberFormat: eval("<%=numberFormatFn%>"),
             allowEditMode: <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>
+        }));
+
+        items.push(Ext4.create('LABKEY.elisa.RunDetailsPanel', {
+
+            schemaName      : <%=form.getSchemaName() != null ? q(form.getSchemaName()) : null %>,
+            queryName       : <%=form.getQueryName() != null ? q(form.getQueryName()) : null %>,
+            dataRegionName  : <%=q(form.getDataRegionName())%>,
+            baseUrl         : <%=q(baseUrl.getLocalURIString())%>
+        }));
+
+        var panel = Ext4.create('Ext.panel.Panel', {
+
+            layout      : 'auto',
+            renderTo    : <%=q(renderId)%>,
+            items       : items
         });
 
         var _resize = function(w,h) {

@@ -258,9 +258,10 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     {
         VBox view = new VBox();
         ElisaController.GenericReportForm form = new ElisaController.GenericReportForm();
+        AssaySchema schema = createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
 
         form.setComponentId("generic-report-panel-" + UniqueID.getRequestScopedUID(context.getRequest()));
-        form.setSchemaName(AssaySchema.NAME);
+        form.setSchemaName(schema.getPath().toString());
         form.setQueryName(AssayService.get().getResultsTableName(protocol));
         form.setRenderType(GenericChartReport.RenderType.SCATTER_PLOT.getId());
         form.setRunId(run.getRowId());
