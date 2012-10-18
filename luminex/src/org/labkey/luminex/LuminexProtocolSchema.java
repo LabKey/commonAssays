@@ -28,6 +28,7 @@ import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
@@ -35,7 +36,7 @@ import org.labkey.api.util.PageFlowUtil;
 import java.sql.SQLException;
 import java.util.*;
 
-public class LuminexSchema extends AssaySchema
+public class LuminexProtocolSchema extends AssayProtocolSchema
 {
     public static final String ANALYTE_TABLE_NAME = "Analyte";
     public static final String CURVE_FIT_TABLE_NAME = "CurveFit";
@@ -54,63 +55,57 @@ public class LuminexSchema extends AssaySchema
 
     private List<String> _curveTypes;
 
-    public LuminexSchema(User user, Container container, ExpProtocol protocol)
+    public LuminexProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
-        super("Luminex", user, container, getSchema(), protocol);
+        super(user, container, protocol, targetStudy);
         assert protocol != null;
     }
 
-    public Set<String> getTableNames()
+    public Set<String> getTableNames(boolean protocolPrefixed)
     {
-        // return only additional tables not exposed in the assay schema.
-        return PageFlowUtil.set(
-                prefixTableName(ANALYTE_TABLE_NAME),
-                prefixTableName(TITRATION_TABLE_NAME),
-                prefixTableName(DATA_FILE_TABLE_NAME),
-                prefixTableName(WELL_EXCLUSION_TABLE_NAME),
-                prefixTableName(RUN_EXCLUSION_TABLE_NAME),
-                prefixTableName(CURVE_FIT_TABLE_NAME),
-                prefixTableName(GUIDE_SET_TABLE_NAME),
-                prefixTableName(GUIDE_SET_CURVE_FIT_TABLE_NAME),
-                prefixTableName(ANALYTE_TITRATION_TABLE_NAME),
-                prefixTableName(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME),
-                prefixTableName(CV_QC_FLAG_TABLE_NAME)
-        );
-    }
-
-    private String prefixTableName(String table)
-    {
-        return getProtocol().getName() + " " + table;
+        Set<String> result = new HashSet<String>(super.getTableNames(protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), ANALYTE_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), TITRATION_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), WELL_EXCLUSION_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), RUN_EXCLUSION_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), GUIDE_SET_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), GUIDE_SET_CURVE_FIT_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, protocolPrefixed));
+        result.add(getProviderTableName(getProtocol(), CV_QC_FLAG_TABLE_NAME, protocolPrefixed));
+        return result;
     }
 
     public static String getWellExclusionTableName(ExpProtocol protocol)
     {
-        return getProviderTableName(protocol, WELL_EXCLUSION_TABLE_NAME);
+        return getProviderTableName(protocol, WELL_EXCLUSION_TABLE_NAME, false);
     }
 
     public static String getRunExclusionTableName(ExpProtocol protocol)
     {
-        return getProviderTableName(protocol, RUN_EXCLUSION_TABLE_NAME);
+        return getProviderTableName(protocol, RUN_EXCLUSION_TABLE_NAME, false);
     }
 
     public static String getAnalyteTitrationTableName(ExpProtocol protocol)
     {
-        return getProviderTableName(protocol, ANALYTE_TITRATION_TABLE_NAME);
+        return getProviderTableName(protocol, ANALYTE_TITRATION_TABLE_NAME, false);
     }
 
     public static String getCurveFitTableName(ExpProtocol protocol)
     {
-        return getProviderTableName(protocol, CURVE_FIT_TABLE_NAME);
+        return getProviderTableName(protocol, CURVE_FIT_TABLE_NAME, false);
     }
 
     public static String getAnalyteTableName(ExpProtocol protocol)
     {
-        return getProviderTableName(protocol, ANALYTE_TABLE_NAME);
+        return getProviderTableName(protocol, ANALYTE_TABLE_NAME, false);
     }
 
     public static String getTitrationTableName(ExpProtocol protocol)
     {
-        return getProviderTableName(protocol, TITRATION_TABLE_NAME);
+        return getProviderTableName(protocol, TITRATION_TABLE_NAME, false);
     }
 
     public synchronized List<String> getCurveTypes()
@@ -118,27 +113,21 @@ public class LuminexSchema extends AssaySchema
         if (_curveTypes == null)
         {
             QueryDefinition queryDef = QueryService.get().createQueryDef(getUser(), _container, this, "query");
-            queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME).replace("\"", "\"\"") + "\"");
+            queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME, false).replace("\"", "\"\"") + "\"");
             queryDef.setContainerFilter(ContainerFilter.EVERYTHING);
 
-            try
-            {
-                ArrayList<QueryException> errors = new ArrayList<QueryException>();
-                TableInfo table = queryDef.getTable(this, errors, false);
-                String[] curveTypes = Table.executeArray(table, "CurveType", null, new Sort("CurveType"), String.class);
-                _curveTypes = Arrays.asList(curveTypes);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            ArrayList<QueryException> errors = new ArrayList<QueryException>();
+            TableInfo table = queryDef.getTable(this, errors, false);
+            String[] curveTypes = new TableSelector(table.getColumn("CurveType"), null, new Sort("CurveType")).getArray(String.class);
+            _curveTypes = Arrays.asList(curveTypes);
         }
         return _curveTypes;
     }
 
-    public TableInfo createTable(String name)
+    @Override
+    protected TableInfo createProviderTable(String name, boolean protocolPrefixed)
     {
-        String tableType = AssaySchema.getProviderTableType(getProtocol(), name);
+        String tableType = protocolPrefixed ? AssaySchema.getProviderTableType(getProtocol(), name) : name;
         if (tableType != null)
         {
             if (ANALYTE_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -217,7 +206,7 @@ public class LuminexSchema extends AssaySchema
                 return createCVQCFlagTable();
             }
         }
-        return null;
+        return super.createProviderTable(name, protocolPrefixed);
     }
 
     public AnalyteTitrationTable createAnalyteTitrationTable(boolean filter)
@@ -289,7 +278,7 @@ public class LuminexSchema extends AssaySchema
 
     public ExpDataTable createDataTable()
     {
-        final ExpDataTable ret = ExperimentService.get().createDataTable(AssaySchema.getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME), AssayService.get().createSchema(getUser(), getContainer()));
+        final ExpDataTable ret = ExperimentService.get().createDataTable(AssaySchema.getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, false), AssayService.get().createSchema(getUser(), getContainer(), null));
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
@@ -470,9 +459,9 @@ public class LuminexSchema extends AssaySchema
 
     public static class AnalyteForeignKey extends LookupForeignKey
     {
-        private final LuminexSchema _schema;
+        private final LuminexProtocolSchema _schema;
 
-        public AnalyteForeignKey(LuminexSchema schema)
+        public AnalyteForeignKey(LuminexProtocolSchema schema)
         {
             super("RowId");
             _schema = schema;
@@ -487,9 +476,9 @@ public class LuminexSchema extends AssaySchema
 
     public static class TitrationForeignKey extends LookupForeignKey
     {
-        private final LuminexSchema _schema;
+        private final LuminexProtocolSchema _schema;
 
-        public TitrationForeignKey(LuminexSchema schema)
+        public TitrationForeignKey(LuminexProtocolSchema schema)
         {
             super("RowId");
             _schema = schema;

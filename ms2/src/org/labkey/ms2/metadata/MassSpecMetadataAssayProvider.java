@@ -52,6 +52,7 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssaySchema;
@@ -72,7 +73,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -168,7 +168,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpRunTable createRunTable(final AssaySchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(final AssayProtocolSchema schema, ExpProtocol protocol)
     {
         ExpRunTable result = super.createRunTable(schema, protocol);
         SQLFragment searchCountSQL = new SQLFragment();
@@ -262,18 +262,18 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return getDomainByPrefix(protocol, FRACTION_DOMAIN_PREFIX);
     }
 
-    public ExpDataTable createDataTable(final AssaySchema schema, final ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    public ExpDataTable createDataTable(final AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
         final ExpDataTable result = new ExpSchema(schema.getUser(), schema.getContainer()).getDatasTable();
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
-        runConditionSQL.add(protocol.getLSID());
+        runConditionSQL.add(schema.getProtocol().getLSID());
         result.addCondition(runConditionSQL, FieldKey.fromParts("RunId"));
         result.getColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = AssayService.get().createRunTable(protocol, MassSpecMetadataAssayProvider.this, schema.getUser(), schema.getContainer());
+                ExpRunTable expRunTable = AssayService.get().createRunTable(schema.getProtocol(), MassSpecMetadataAssayProvider.this, schema.getUser(), schema.getContainer());
                 expRunTable.setContainerFilter(result.getContainerFilter());
                 return expRunTable;
             }
@@ -281,7 +281,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
         List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         cols.remove(FieldKey.fromParts(ExpDataTable.Column.DataFileUrl));
-        Domain fractionDomain = getFractionDomain(protocol);
+        Domain fractionDomain = getFractionDomain(schema.getProtocol());
         if (fractionDomain != null)
         {
             for (DomainProperty fractionProperty : fractionDomain.getProperties())
@@ -289,7 +289,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                 cols.add(getDataFractionPropertyFieldKey(fractionProperty));
             }
         }
-        for (DomainProperty runProperty : getRunDomain(protocol).getProperties())
+        for (DomainProperty runProperty : getRunDomain(schema.getProtocol()).getProperties())
         {
             cols.add(FieldKey.fromParts(ExpDataTable.Column.Run.toString(), runProperty.getName()));
         }

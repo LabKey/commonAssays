@@ -88,7 +88,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
     {
         try
         {
-            return Table.select(LuminexSchema.getTableInfoAnalytes(), Table.ALL_COLUMNS, new SimpleFilter("DataId", dataRowId), new Sort("RowId"), Analyte.class);
+            return Table.select(LuminexProtocolSchema.getTableInfoAnalytes(), Table.ALL_COLUMNS, new SimpleFilter("DataId", dataRowId), new Sort("RowId"), Analyte.class);
         }
         catch (SQLException e)
         {

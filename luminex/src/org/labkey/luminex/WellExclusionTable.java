@@ -68,9 +68,9 @@ import java.util.TreeSet;
  */
 public class WellExclusionTable extends AbstractExclusionTable
 {
-    public WellExclusionTable(final LuminexSchema schema, boolean filter)
+    public WellExclusionTable(final LuminexProtocolSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoWellExclusion(), schema, filter);
+        super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, filter);
 
         getColumn("DataId").setLabel("Data File");
         getColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey());
@@ -86,7 +86,7 @@ public class WellExclusionTable extends AbstractExclusionTable
         getColumn("Analytes").setUserEditable(false);
 
         SQLFragment joinSQL = new SQLFragment(" FROM ");
-        joinSQL.append(LuminexSchema.getTableInfoDataRow(), "dr");
+        joinSQL.append(LuminexProtocolSchema.getTableInfoDataRow(), "dr");
         joinSQL.append(" WHERE (dr.Description = ");
         joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
         joinSQL.append(".Description OR (dr.Description IS NULL AND ");
@@ -169,7 +169,7 @@ public class WellExclusionTable extends AbstractExclusionTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-        return new ExclusionUpdateService(this, getRealTable(), LuminexSchema.getTableInfoWellExclusionAnalyte(), "WellExclusionId")
+        return new ExclusionUpdateService(this, getRealTable(), LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "WellExclusionId")
         {
             private Set<ExpRun> _runsToRefresh = new HashSet<ExpRun>();
 
@@ -224,7 +224,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                     String type = rowMap.get("Type") == null ? null : rowMap.get("Type").toString();
 
                     SQLFragment dataRowSQL = new SQLFragment("SELECT COUNT(*) FROM ");
-                    dataRowSQL.append(LuminexSchema.getTableInfoDataRow(), "dr");
+                    dataRowSQL.append(LuminexProtocolSchema.getTableInfoDataRow(), "dr");
                     dataRowSQL.append(" WHERE dr.TitrationId IS NOT NULL AND dr.DataId = ? AND dr.Description ");
                     dataRowSQL.add(data.getRowId());
                     if (description == null)
@@ -249,7 +249,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                     }
 
 
-                    Integer count = Table.executeSingleton(LuminexSchema.getSchema(), dataRowSQL.getSQL(), dataRowSQL.getParamsArray(), Integer.class);
+                    Integer count = Table.executeSingleton(LuminexProtocolSchema.getSchema(), dataRowSQL.getSQL(), dataRowSQL.getParamsArray(), Integer.class);
                     if (count.intValue() > 0)
                     {
                         _runsToRefresh.add(run);

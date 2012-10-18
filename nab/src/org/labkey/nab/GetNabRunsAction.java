@@ -26,14 +26,13 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryParam;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
@@ -117,12 +116,13 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         }
     }
 
-    private List<ExpRun> getRuns(String tableName, GetNabRunsForm form, BindException errors)
+    private List<ExpRun> getRuns(ExpProtocol protocol, AssayProvider provider, GetNabRunsForm form, BindException errors)
     {
-        UserSchema assaySchema = QueryService.get().getUserSchema(form.getViewContext().getUser(),
-                form.getViewContext().getContainer(), AssaySchema.NAME);
+        User user = form.getViewContext().getUser();
+        Container container = form.getViewContext().getContainer();
+        AssayProtocolSchema assaySchema = provider.createProtocolSchema(user, container, protocol, null);
 
-        QuerySettings settings = assaySchema.getSettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT, tableName);
+        QuerySettings settings = assaySchema.getSettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT, assaySchema.getRunsTableName(false));
         //show all rows by default
        if (null == form.getMaxRows()
             && null == getViewContext().getRequest().getParameter(QueryView.DATAREGIONNAME_DEFAULT + "." + QueryParam.maxRows))
@@ -202,13 +202,11 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         if (!(provider instanceof NabAssayProvider))
             throw new IllegalArgumentException("Assay " + form.getAssayName() + " is not a NAb assay: it is of type " + provider.getName());
 
-        String tableName = AssayService.get().getRunsTableName(protocol);
-
         _properties.put("assayName", protocol.getName());
         _properties.put("assayDescription", protocol.getDescription());
         _properties.put("assayId", protocol.getRowId());
         NabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
-        for (ExpRun run : getRuns(tableName, form, errors))
+        for (ExpRun run : getRuns(protocol, provider, form, errors))
         {
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));

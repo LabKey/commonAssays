@@ -156,7 +156,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
 
     private ColumnInfo findColumn(String columnName)
     {
-        List<ColumnInfo> columns = LuminexSchema.getTableInfoAnalytes().getColumns();
+        List<ColumnInfo> columns = LuminexProtocolSchema.getTableInfoAnalytes().getColumns();
         for (ColumnInfo column : columns)
         {
             if (column.getName().equals(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME))

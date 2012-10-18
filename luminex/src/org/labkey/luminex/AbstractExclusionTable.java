@@ -50,7 +50,7 @@ import java.util.Set;
  */
 public abstract class AbstractExclusionTable extends AbstractLuminexTable
 {
-    protected AbstractExclusionTable(TableInfo realTable, LuminexSchema schema, boolean filter)
+    protected AbstractExclusionTable(TableInfo realTable, LuminexProtocolSchema schema, boolean filter)
     {
         super(realTable, schema, filter);
         wrapAllColumns(true);
@@ -214,7 +214,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
             {
                 for (Integer analyteId : analyteIds)
                 {
-                    Analyte analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), analyteId, Analyte.class);
+                    Analyte analyte = Table.selectObject(LuminexProtocolSchema.getTableInfoAnalytes(), analyteId, Analyte.class);
                     if (analyte == null)
                     {
                         throw new QueryUpdateServiceException("No such analyte: " + analyteId);

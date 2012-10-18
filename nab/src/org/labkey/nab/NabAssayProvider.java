@@ -44,7 +44,6 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -53,9 +52,8 @@ import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -70,8 +68,9 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
+import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabRunDataTable;
-import org.labkey.nab.query.NabSchema;
+import org.labkey.nab.query.NabProviderSchema;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,6 +90,9 @@ import java.util.Set;
  */
 public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 {
+    public static final String RESOURCE_NAME = "NAb";
+    public static final String NAME = "TZM-bl Neutralization (NAb)";
+
     public static final String CUSTOM_DETAILS_VIEW_NAME = "CustomDetailsView";
     public static final String[] CUTOFF_PROPERTIES = { "Cutoff1", "Cutoff2", "Cutoff3" };
     public static final String SAMPLE_METHOD_PROPERTY_NAME = "Method";
@@ -128,6 +130,17 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         super(protocolLSIDPrefix, runLSIDPrefix, dataType);
     }
 
+    @Override
+    public AssayProviderSchema createProviderSchema(User user, Container container, Container targetStudy)
+    {
+        return new NabProviderSchema(user, container, null);
+    }
+
+    @Override
+    public NabProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    {
+        return new NabProtocolSchema(user, container, protocol, this, targetStudy);
+    }
 
     public void registerLsidHandler()
     {
@@ -166,7 +179,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(AssayProtocolSchema schema, ExpProtocol protocol)
     {
         final ExpRunTable runTable = super.createRunTable(schema, protocol);
         ColumnInfo nameColumn = runTable.getColumn(ExpRunTable.Column.Name);
@@ -204,7 +217,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
         Container lookupContainer = c.getProject();
         DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.CURVE_FIT_METHOD_TABLE_NAME));
+        method.setLookup(new Lookup(lookupContainer, NabProviderSchema.SCHEMA_NAME, NabProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
         method.setRequired(true);
         method.setShownInUpdateView(false);
         return result;
@@ -244,7 +257,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(sampleWellGroupDomain, SAMPLE_INITIAL_DILUTION_PROPERTY_NAME, SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         addProperty(sampleWellGroupDomain, SAMPLE_DILUTION_FACTOR_PROPERTY_NAME, SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
+        method.setLookup(new Lookup(lookupContainer, NabProviderSchema.SCHEMA_NAME, NabProviderSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
         method.setRequired(true);
         return result;
     }
@@ -296,9 +309,14 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return ExperimentService.get().getExpData(dataRowParent.getObjectURI());
     }
 
+    public String getResourceName()
+    {
+        return RESOURCE_NAME;
+    }
+
     public String getName()
     {
-        return "TZM-bl Neutralization (NAb)";
+        return NAME;
     }
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
@@ -306,14 +324,14 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
     }
 
-    public NabRunDataTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    @Override
+    public NabRunDataTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        NabSchema nabSchema = new NabSchema(schema.getUser(), schema.getContainer());
-        nabSchema.setTargetStudy(schema.getTargetStudy());
-        NabRunDataTable table = nabSchema.createDataRowTable(protocol);
+        NabProtocolSchema protocolSchema = (NabProtocolSchema)schema;
+        NabRunDataTable table = protocolSchema.createResultsTable();
         if (includeCopiedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
+            addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);
         }
         return table;
     }
@@ -335,15 +353,15 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public static class NabResultsQueryView extends ResultsQueryView
     {
-        public NabResultsQueryView(ExpProtocol protocol, ViewContext context, AssayProvider provider)
+        public NabResultsQueryView(NabAssayProvider provider, ExpProtocol protocol, ViewContext context)
         {
-            super(protocol, context, getDefaultSettings(protocol, context));
+            super(protocol, context, getDefaultSettings(provider, protocol, context));
         }
 
-        private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context)
+        private static QuerySettings getDefaultSettings(NabAssayProvider provider, ExpProtocol protocol, ViewContext context)
         {
-            UserSchema schema = AssayService.get().createSchema(context.getUser(), context.getContainer());
-            String name = AssayService.get().getResultsTableName(protocol);
+            NabProtocolSchema schema = provider.createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
+            String name = schema.getResultsTableName(false);
             return schema.getSettings(context, name, name);
         }
 
@@ -432,7 +450,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public NabResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
     {
-        return new NabResultsQueryView(protocol, context, this);
+        return new NabResultsQueryView(this, protocol, context);
     }
 
     public static class NabRunListQueryView extends RunListDetailsQueryView

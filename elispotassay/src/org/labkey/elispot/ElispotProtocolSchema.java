@@ -16,57 +16,56 @@
 
 package org.labkey.elispot;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.elispot.query.ElispotRunAntigenTable;
 
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Set;
 
-public class ElispotSchema extends AssaySchema
+public class ElispotProtocolSchema extends AssayProtocolSchema
 {
-    private static final String DATA_ROW_TABLE_NAME = "DataRow";
     public static final String ANTIGEN_STATS_TABLE_NAME = "AntigenStats";
 
-    public ElispotSchema(User user, Container container, ExpProtocol protocol)
+    public ElispotProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @NotNull ElispotAssayProvider provider, @Nullable Container targetStudy)
     {
-        super(AssaySchema.NAME, user, container, ExperimentService.get().getSchema(), protocol);
+        super(user, container, protocol, targetStudy);
     }
 
-    public static String getAssayTableName(ExpProtocol protocol, String table)
+    @NotNull
+    @Override
+    public ElispotAssayProvider getProvider()
     {
-        return protocol.getName() + " " + table;
+        return (ElispotAssayProvider)super.getProvider();
     }
 
-    public Set<String> getTableNames()
+    public Set<String> getTableNames(boolean protocolPrefixed)
     {
-        return Collections.singleton(getAssayTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME));
+        Set<String> names = super.getTableNames(protocolPrefixed);
+        names.add(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, protocolPrefixed));
+        return names;
     }
 
-    public TableInfo createTable(String name)
+    public TableInfo createProviderTable(String name, boolean protocolPrefixed)
     {
-        String lname = name.toLowerCase();
-        String protocolPrefix = getProtocol().getName().toLowerCase() + " ";
-        if (lname.startsWith(protocolPrefix))
-        {
-            name = name.substring(protocolPrefix.length());
-            if (ANTIGEN_STATS_TABLE_NAME.equalsIgnoreCase(name))
-            {
-                return new ElispotRunAntigenTable(AssayService.get().createSchema(getUser(), getContainer()), getProtocol());
-            }
-        }
-        return null;
+        TableInfo table = super.createProviderTable(name, protocolPrefixed);
+        if (table != null)
+            return table;
+        
+        if (name.equals(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, protocolPrefixed)))
+            return new ElispotRunAntigenTable(this, getProtocol());
+
+        return super.createProviderTable(name, protocolPrefixed);
     }
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix) throws SQLException

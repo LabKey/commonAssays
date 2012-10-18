@@ -53,10 +53,10 @@ import java.util.TreeMap;
  */
 public class AnalyteTable extends AbstractLuminexTable
 {
-    public AnalyteTable(LuminexSchema schema, boolean filter)
+    public AnalyteTable(LuminexProtocolSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoAnalytes(), schema, filter);
-        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.ANALYTE_TABLE_NAME));
+        super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, filter);
+        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.ANALYTE_TABLE_NAME));
         setPublicSchemaName(AssaySchema.NAME);
         
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
@@ -80,7 +80,7 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable(LuminexSchema.getTableInfoAnalyteTitration());
+                FilteredTable result = new FilteredTable(LuminexProtocolSchema.getTableInfoAnalyteTitration());
                 ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
                 titrationColumn.setFk(new LookupForeignKey("RowId")
                 {
@@ -152,7 +152,7 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             public Analyte get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
             {
-                return Table.selectObject(LuminexSchema.getTableInfoAnalytes(), key, Analyte.class);
+                return Table.selectObject(LuminexProtocolSchema.getTableInfoAnalytes(), key, Analyte.class);
             }
 
             @Override
@@ -176,7 +176,7 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             protected Analyte update(User user, Container container, Analyte newAnalyte, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
             {
-                return Table.update(user, LuminexSchema.getTableInfoAnalytes(), newAnalyte, oldKey);
+                return Table.update(user, LuminexProtocolSchema.getTableInfoAnalytes(), newAnalyte, oldKey);
             }
         };
     }

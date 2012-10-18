@@ -32,12 +32,12 @@ import org.labkey.api.view.ActionURL;
  */
 public class TitrationTable extends AbstractLuminexTable
 {
-    private final LuminexSchema _schema;
+    private final LuminexProtocolSchema _schema;
 
-    public TitrationTable(LuminexSchema schema, boolean filter)
+    public TitrationTable(LuminexProtocolSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoTitration(), schema, filter);
-        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.TITRATION_TABLE_NAME));
+        super(LuminexProtocolSchema.getTableInfoTitration(), schema, filter);
+        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.TITRATION_TABLE_NAME, false));
         _schema = schema;
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
@@ -58,7 +58,7 @@ public class TitrationTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return QueryService.get().getUserSchema(_schema.getUser(), _schema.getContainer(), LuminexSchema.NAME).getTable(_schema.getRunsTableName(_schema.getProtocol()));
+                return _schema.createRunsTable();
             }
         };
         runFk.setPrefixColumnCaption(false);

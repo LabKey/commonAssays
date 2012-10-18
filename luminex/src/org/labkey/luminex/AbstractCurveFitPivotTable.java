@@ -28,7 +28,7 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
     private static final String CURVE_FIT_SUFFIX = "CurveFit";
     private final String _primaryCurveFitJoinColumn;
 
-    public AbstractCurveFitPivotTable(TableInfo table, LuminexSchema schema, boolean filter, String primaryCurveFitJoinColumn)
+    public AbstractCurveFitPivotTable(TableInfo table, LuminexProtocolSchema schema, boolean filter, String primaryCurveFitJoinColumn)
     {
         super(table, schema, filter);
         _primaryCurveFitJoinColumn = primaryCurveFitJoinColumn;

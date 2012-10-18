@@ -63,9 +63,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.reports.report.view.ReportUtil;
-import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -81,9 +79,9 @@ import org.labkey.api.study.Study;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayPublishService;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
@@ -978,7 +976,8 @@ public class NabController extends SpringActionController
                 AssayProvider provider = AssayService.get().getProvider(protocol);
                 if (provider instanceof NabAssayProvider && !(provider instanceof HighThroughputNabAssayProvider))
                 {
-                    TableInfo tableInfo = AssayService.get().createSchema(getUser(), getContainer()).getTable(AssaySchema.getRunsTableName(protocol));
+                    AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), protocol, null);
+                    TableInfo tableInfo = schema.createRunsTable();
 
                     // Figure out the set of standard NAb property names
                     NabAssayProvider nabProvider = (NabAssayProvider)provider;

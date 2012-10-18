@@ -77,7 +77,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
         Map<ColumnInfo, String> properties = new HashMap<ColumnInfo, String>();
-        ColumnInfo col = LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+        ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
         value = StringUtils.trimToNull(value);
         properties.put(col, value);
@@ -94,10 +94,10 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             DomainProperty[] analyteColumns = analyteDomain.getProperties();
             try
             {
-                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
+                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
                 sql.add(getContainer().getId());
                 sql.add(disambiguationId);
-                String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class);
+                String objectURI = Table.executeSingleton(LuminexProtocolSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class);
                 if (objectURI != null)
                 {
                     Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);

@@ -48,11 +48,11 @@ import java.sql.SQLException;
  */
 public class GuideSetTable extends AbstractCurveFitPivotTable
 {
-    public GuideSetTable(final LuminexSchema schema, boolean filter)
+    public GuideSetTable(final LuminexProtocolSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoGuideSet(), schema, filter, "RowId");
+        super(LuminexProtocolSchema.getTableInfoGuideSet(), schema, filter, "RowId");
         wrapAllColumns(true);
-        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.GUIDE_SET_TABLE_NAME));
+        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME));
 
         ColumnInfo protocolCol = getColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");
@@ -65,12 +65,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return AssayService.get().createSchema(schema.getUser(), schema.getContainer()).getTable(AssaySchema.ASSAY_LIST_TABLE_NAME);
+                return AssayService.get().createSchema(schema.getUser(), schema.getContainer(), null).getTable(AssaySchema.ASSAY_LIST_TABLE_NAME);
             }
         });
 
         SQLFragment maxFISQL = new SQLFragment(" FROM ");
-        maxFISQL.append(LuminexSchema.getTableInfoAnalyteTitration(), "at");
+        maxFISQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
         maxFISQL.append(" WHERE at.GuideSetId = ");
         maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
         maxFISQL.append(".RowId AND at.IncludeInGuideSetCalculation = ?");
@@ -85,7 +85,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addColumn(maxFIAverageCol);
 
         SQLFragment maxFIStdDevSQL = new SQLFragment("(SELECT ");
-        maxFIStdDevSQL.append(LuminexSchema.getSchema().getSqlDialect().getStdDevFunction());
+        maxFIStdDevSQL.append(LuminexProtocolSchema.getSchema().getSqlDialect().getStdDevFunction());
         maxFIStdDevSQL.append("(at.MaxFI)");
         maxFIStdDevSQL.append(maxFISQL);
         ExprColumn maxFIStdDevCol = new ExprColumn(this, "MaxFIStdDev", maxFIStdDevSQL, JdbcType.DOUBLE);
@@ -160,7 +160,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
         {
             SQLFragment sql = new SQLFragment("SELECT * FROM ");
-            sql.append(LuminexSchema.getTableInfoGuideSet(), "gs");
+            sql.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
             sql.append(" WHERE ProtocolId = ?");
             sql.add(protocol.getRowId());
             sql.append(" AND AnalyteName");
@@ -176,7 +176,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
             try
             {
-                GuideSet[] matches = Table.executeQuery(LuminexSchema.getSchema(), sql, GuideSet.class);
+                GuideSet[] matches = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, GuideSet.class);
                 if (matches.length == 1)
                 {
                     return matches[0];
@@ -210,7 +210,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         @Override
         public GuideSet get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
         {
-            return Table.selectObject(LuminexSchema.getTableInfoGuideSet(), key, GuideSet.class);
+            return Table.selectObject(LuminexProtocolSchema.getTableInfoGuideSet(), key, GuideSet.class);
         }
 
         @Override
@@ -235,7 +235,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
             }
-            return Table.insert(user, LuminexSchema.getTableInfoGuideSet(), bean);
+            return Table.insert(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean);
         }
 
         @Override
@@ -254,7 +254,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                     throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/TitrationName/Conjugate/Isotype combination");
                 }
             }
-            return Table.update(user, LuminexSchema.getTableInfoGuideSet(), bean, oldKey);
+            return Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
         }
 
         private void validateProtocol(GuideSet bean) throws ValidationException
@@ -275,22 +275,22 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
         private void validateGuideSetValues(GuideSet bean) throws ValidationException
         {
-            int maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("AnalyteName").getScale();
+            int maxLength = LuminexProtocolSchema.getTableInfoGuideSet().getColumn("AnalyteName").getScale();
             if (bean.getAnalyteName() != null && bean.getAnalyteName().length() > maxLength)
             {
                 throw new ValidationException("AnalyteName value '" + bean.getAnalyteName() + "' is too long, maximum length is " + maxLength + " characters");
             }
-            maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("Conjugate").getScale();
+            maxLength = LuminexProtocolSchema.getTableInfoGuideSet().getColumn("Conjugate").getScale();
             if (bean.getConjugate() != null && bean.getConjugate().length() > maxLength)
             {
                 throw new ValidationException("Conjugate value '" + bean.getConjugate() + "' is too long, maximum length is " + maxLength + " characters");
             }
-            maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("Isotype").getScale();
+            maxLength = LuminexProtocolSchema.getTableInfoGuideSet().getColumn("Isotype").getScale();
             if (bean.getIsotype() != null && bean.getIsotype().length() > maxLength)
             {
                 throw new ValidationException("Isotype value '" + bean.getIsotype() + "' is too long, maximum length is " + maxLength + " characters");
             }
-            maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("TitrationName").getScale();
+            maxLength = LuminexProtocolSchema.getTableInfoGuideSet().getColumn("TitrationName").getScale();
             if (bean.getTitrationName() != null && bean.getTitrationName().length() > maxLength)
             {
                 throw new ValidationException("TitrationName value '" + bean.getTitrationName() + "' is too long, maximum length is " + maxLength + " characters");

@@ -16,17 +16,17 @@
 
 package org.labkey.nab.query;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
@@ -41,31 +41,47 @@ import java.util.*;
  * Date: Oct 3, 2007
  * Time: 4:22:26 PM
  */
-public class NabSchema extends AssaySchema
+public class NabProviderSchema extends AssayProviderSchema
 {
     public static final String SCHEMA_NAME = "Nab";
 
     public static final String SAMPLE_PREPARATION_METHOD_TABLE_NAME = "SamplePreparationMethod";
     public static final String CURVE_FIT_METHOD_TABLE_NAME = "CurveFitMethod";
-    private static final String DATA_ROW_TABLE_NAME = "Data";
-    private List<ExpProtocol> _protocols;
 
     static public void register()
     {
-        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider() {
+        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider()
+        {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new NabSchema(schema.getUser(), schema.getContainer());
+                // UNDONE: Hide this schema
+                // Nab top-level schema for backwards compatibility <12.3.  Moved to assay schema.
+                return new NabProviderSchema(schema.getUser(), schema.getContainer(), null);
             }
         });
     }
 
-    public NabSchema(User user, Container container)
+    public NabProviderSchema(User user, Container container, @Nullable Container targetStudy)
     {
-        super(SCHEMA_NAME, user, container, ExperimentService.get().getSchema(), null);
+        this(user, container, (NabAssayProvider)AssayService.get().getProvider(NabAssayProvider.NAME), targetStudy);
+    }
+
+    public NabProviderSchema(User user, Container container, NabAssayProvider provider, @Nullable Container targetStudy)
+    {
+        super(user, container, provider, targetStudy);
     }
 
     public Set<String> getTableNames()
+    {
+        return getTableNames(false);
+    }
+
+    public Set<String> getVisibleTableNames()
+    {
+        return getTableNames(true);
+    }
+
+    private Set<String> getTableNames(boolean visible)
     {
         Set<String> names = new TreeSet<String>(new Comparator<String>()
         {
@@ -75,20 +91,18 @@ public class NabSchema extends AssaySchema
             }
         });
 
-        for (ExpProtocol protocol : getProtocols())
+        if (!visible)
         {
-            AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider != null && provider instanceof NabAssayProvider)
-                names.add(getTableName(protocol));
+            // For backwards compatibility <12.3.  Data tables moved to NabProtocolSchema (assay.Nab.<protocol> schema)
+            for (ExpProtocol protocol : getProtocols())
+            {
+                names.add(AssaySchema.getProviderTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME, true));
+            }
         }
+
         names.add(SAMPLE_PREPARATION_METHOD_TABLE_NAME);
         names.add(CURVE_FIT_METHOD_TABLE_NAME);
         return names;
-    }
-
-    private static String getTableName(ExpProtocol protocol)
-    {
-        return protocol.getName() + " " + DATA_ROW_TABLE_NAME;
     }
 
     public TableInfo createTable(String name)
@@ -114,27 +128,16 @@ public class NabSchema extends AssaySchema
             return result;
         }
 
+        // For backwards compatibility <12.3.  Data tables moved to NabProtocolSchema (assay.Nab.<protocol> schema)
         for (ExpProtocol protocol : getProtocols())
         {
-            AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider != null && provider instanceof NabAssayProvider)
+            String tableName = AssaySchema.getProviderTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME, true);
+            if (tableName.equalsIgnoreCase(name))
             {
-                if (getTableName(protocol).equalsIgnoreCase(name))
-                {
-                    return createDataRowTable(protocol);
-                }
+                return createDataRowTable(protocol);
             }
         }
-        return null;
-    }
-
-    private List<ExpProtocol> getProtocols()
-    {
-        if (_protocols == null)
-        {
-            _protocols = AssayService.get().getAssayProtocols(getContainer());
-        }
-        return _protocols;
+        return super.createTable(name);
     }
 
     public NabRunDataTable createDataRowTable(ExpProtocol protocol)

@@ -35,11 +35,19 @@ public class HighThroughputNabAssayProvider extends NabAssayProvider
         super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, HighThroughputNabDataHandler.NAB_HIGH_THROUGHPUT_DATA_TYPE);
     }
 
+    @Override
     public String getName()
     {
         return "TZM-bl Neutralization (NAb), High-throughput";
     }
 
+    @Override
+    public String getResourceName()
+    {
+        return "HighThroughputNAb";
+    }
+
+    @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("The high-throughput NAb data file is a specially formatted file with a .csv or .xls extension.");

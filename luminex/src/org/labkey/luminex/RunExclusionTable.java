@@ -43,9 +43,9 @@ import java.util.Map;
  */
 public class RunExclusionTable extends AbstractExclusionTable
 {
-    public RunExclusionTable(final LuminexSchema schema, boolean filter)
+    public RunExclusionTable(final LuminexProtocolSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoRunExclusion(), schema, filter);
+        super(LuminexProtocolSchema.getTableInfoRunExclusion(), schema, filter);
 
         getColumn("RunId").setLabel("Assay ID");
         getColumn("RunId").setFk(new LookupForeignKey("RowId")
@@ -53,8 +53,7 @@ public class RunExclusionTable extends AbstractExclusionTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                AssaySchema assaySchema = AssayService.get().createSchema(schema.getUser(), schema.getContainer());
-                return assaySchema.getTable(AssaySchema.getRunsTableName(schema.getProtocol()));
+                return schema.createRunsTable();
             }
         });
 
@@ -87,7 +86,7 @@ public class RunExclusionTable extends AbstractExclusionTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-        return new ExclusionUpdateService(this, getRealTable(), LuminexSchema.getTableInfoRunExclusionAnalyte(), "RunId")
+        return new ExclusionUpdateService(this, getRealTable(), LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "RunId")
         {
             @NotNull
             @Override

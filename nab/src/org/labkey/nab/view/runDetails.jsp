@@ -44,7 +44,7 @@
     }
 %>
     <tr class="labkey-wp-header">
-        <th>Run Summary<%= assay.getRunName() != null ? ": " + h(assay.getRunName()) : "" %></th>
+        <th>Run Summary<%= h(assay.getRunName() != null ? ": " + assay.getRunName() : "") %></th>
     </tr>
     <tr>
         <td><% me.include(bean.getRunPropertiesView(), out); %></td>

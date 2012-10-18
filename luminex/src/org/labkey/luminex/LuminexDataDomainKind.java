@@ -41,7 +41,7 @@ public class LuminexDataDomainKind extends AssayDomainKind
     public Set<String> getReservedPropertyNames(Domain domain)
     {
         Set<String> result = getAssayReservedPropertyNames();
-        result.addAll(LuminexSchema.getTableInfoDataRow().getColumnNameSet());
+        result.addAll(LuminexProtocolSchema.getTableInfoDataRow().getColumnNameSet());
         return result;
     }
 }

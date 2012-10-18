@@ -54,6 +54,7 @@ import org.labkey.api.study.Position;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
@@ -136,14 +137,14 @@ public class ElispotController extends SpringActionController
             plateView.setTitle("Plate Summary Information Run: " + form.getRowId());
             plateView.setFrame(WebPartView.FrameType.PORTAL);
 
-            String tableName = ElispotSchema.getAssayTableName(_protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+            String tableName = AssaySchema.getProviderTableName(_protocol, ElispotProtocolSchema.ANTIGEN_STATS_TABLE_NAME, false);
 
             // create the query view for antigen information
             QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
             settings.setAllowChooseQuery(false);
             settings.setAllowChooseView(true);
 
-            QueryView queryView = new QueryView(new ElispotSchema(getViewContext().getUser(), getViewContext().getContainer(), _protocol), settings, errors);
+            QueryView queryView = new QueryView(new ElispotProtocolSchema(getViewContext().getUser(), getViewContext().getContainer(), _protocol, (ElispotAssayProvider)AssayService.get().getProvider(_protocol), null), settings, errors);
             queryView.setShadeAlternatingRows(true);
             queryView.setShowBorders(true);
             queryView.setShowDetailsColumn(false);
@@ -171,7 +172,7 @@ public class ElispotController extends SpringActionController
 
         private boolean hasRunFilter(ExpProtocol protocol, ActionURL url)
         {
-            String tableName = ElispotSchema.getAssayTableName(_protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+            String tableName = AssaySchema.getProviderTableName(_protocol, ElispotProtocolSchema.ANTIGEN_STATS_TABLE_NAME, false);
             SimpleFilter urlFilter = new SimpleFilter(getViewContext().getActionURL(), tableName);
             List<SimpleFilter.FilterClause> clauses = urlFilter.getClauses();
 
@@ -267,7 +268,7 @@ public class ElispotController extends SpringActionController
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
-        String name = ElispotSchema.getAssayTableName(protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+        String name = AssaySchema.getProviderTableName(protocol, ElispotProtocolSchema.ANTIGEN_STATS_TABLE_NAME, false);
         url.addFilter(name, provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, rowId);
     }
 

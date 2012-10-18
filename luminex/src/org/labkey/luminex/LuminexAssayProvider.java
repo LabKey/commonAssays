@@ -95,9 +95,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssaySchema getProviderSchema(User user, Container container, ExpProtocol protocol)
+    public LuminexProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
-        return new LuminexSchema(user, container, protocol);
+        return new LuminexProtocolSchema(user, container, protocol, targetStudy);
     }
 
     public void registerLsidHandler()
@@ -139,7 +139,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpRunTable createRunTable(final AssaySchema schema, final ExpProtocol protocol)
+    public ExpRunTable createRunTable(final AssayProtocolSchema schema, final ExpProtocol protocol)
     {
         final ExpRunTable result = super.createRunTable(schema, protocol);
 
@@ -255,15 +255,14 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
     }
 
-    public LuminexDataTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    public LuminexDataTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
-        luminexSchema.setTargetStudy(schema.getTargetStudy());
+        LuminexProtocolSchema luminexSchema = new LuminexProtocolSchema(schema.getUser(), schema.getContainer(), schema.getProtocol(), schema.getTargetStudy());
         LuminexDataTable table = luminexSchema.createDataRowTable();
 
         if (includeCopiedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
+            addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);
         }
         return table;
     }
@@ -368,7 +367,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         if (dataRowIdInt == null)
             throw new IllegalArgumentException("Luminex data rows must have integer primary keys.  PK provided: " + dataRowId);
-        LuminexDataRow dataRow = Table.selectObject(LuminexSchema.getTableInfoDataRow(), dataRowIdInt, LuminexDataRow.class);
+        LuminexDataRow dataRow = Table.selectObject(LuminexProtocolSchema.getTableInfoDataRow(), dataRowIdInt, LuminexDataRow.class);
         if (dataRow == null)
         {
             return null;
@@ -480,7 +479,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
 
-        String currentRunId = viewContext.getRequest().getParameter(protocol.getName() + " Data.Data/Run/RowId~eq");
+        String currentRunId = viewContext.getRequest().getParameter("Data.Data/Run/RowId~eq");
 
         // add header link for the Excluded Data Report
         ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.ExcludedDataAction.class);
@@ -491,8 +490,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         if (null != currentRunId)
         {
-            url.addParameter(protocol.getName() + " WellExclusion.DataId/Run/RowId~eq", currentRunId);
-            url.addParameter(protocol.getName() + " RunExclusion.RunId~eq", currentRunId);
+            url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
+            url.addParameter("RunExclusion.RunId~eq", currentRunId);
         }
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
 
@@ -504,7 +503,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         if (null != currentRunId)
         {
-            url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
+            url.addParameter("AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
         }
         // just show titrations that are either standards or qc controls
         url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
@@ -520,10 +519,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             // Clear out the guide sets that are FK'd to the protocol
             SQLFragment deleteGuideSetSQL = new SQLFragment("DELETE FROM ");
-            deleteGuideSetSQL.append(LuminexSchema.getTableInfoGuideSet());
+            deleteGuideSetSQL.append(LuminexProtocolSchema.getTableInfoGuideSet());
             deleteGuideSetSQL.append(" WHERE ProtocolId = ?");
             deleteGuideSetSQL.add(protocol.getRowId());
-            Table.execute(LuminexSchema.getSchema(), deleteGuideSetSQL);
+            Table.execute(LuminexProtocolSchema.getSchema(), deleteGuideSetSQL);
         }
         catch (SQLException e)
         {

@@ -39,7 +39,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.AliasedColumn;
-import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -62,16 +61,16 @@ import java.util.Set;
  */
 public class LuminexDataTable extends FilteredTable implements UpdateableTableInfo
 {
-    private final LuminexSchema _schema;
+    private final LuminexProtocolSchema _schema;
     private LuminexAssayProvider _provider;
     public static final String FLAGGED_AS_EXCLUDED_COLUMN_NAME = "FlaggedAsExcluded";
 
-    public LuminexDataTable(LuminexSchema schema)
+    public LuminexDataTable(LuminexProtocolSchema schema)
     {
-        super(LuminexSchema.getTableInfoDataRow(), schema.getContainer());
+        super(LuminexProtocolSchema.getTableInfoDataRow(), schema.getContainer());
         final ExpProtocol protocol = schema.getProtocol();
 
-        setName(AssaySchema.getResultsTableName(protocol));
+        setName(AssaySchema.getResultsTableName(protocol, false));
         setPublicSchemaName(AssaySchema.NAME);
 
         _provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
@@ -197,9 +196,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append("SELECT ");
         exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for replicate group'"), repGroupCaseStatement));
         exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
-        exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusion(), "we");
+        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we");
         exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusionAnalyte(), "wea");
+        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea");
         exclusionUnionSQL.append(" WHERE we.RowId = wea.WellExclusionId AND ");
         exclusionUnionSQL.append(" (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL)) AND ");
         exclusionUnionSQL.append("(we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL)) AND ");
@@ -208,9 +207,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append("UNION SELECT ");
         exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for analyte'"), analyteCaseStatement));
         exclusionUnionSQL.append(" AS Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
-        exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusion(), "re");
+        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoRunExclusion(), "re");
         exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusionAnalyte(), "rea");
+        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "rea");
         exclusionUnionSQL.append(", ");
         exclusionUnionSQL.append(ExperimentService.get().getTinfoData(), "d");
         exclusionUnionSQL.append(", ");
@@ -293,7 +292,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         setDefaultVisibleColumns(defaultCols);
 
-        getColumn("Analyte").setFk(new LuminexSchema.AnalyteForeignKey(_schema));
+        getColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_schema));
 
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
         protocolIDFilter.add(_schema.getProtocol().getRowId());
@@ -332,7 +331,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     @Override
     public TableInfo getSchemaTableInfo()
     {
-        return LuminexSchema.getTableInfoDataRow();
+        return LuminexProtocolSchema.getTableInfoDataRow();
     }
 
     @Override

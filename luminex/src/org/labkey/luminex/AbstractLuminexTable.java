@@ -27,20 +27,18 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.study.assay.AssaySchema;
 
-import java.util.Collection;
-
 /**
  * User: jeckels
  * Date: 7/8/11
  */
 public abstract class AbstractLuminexTable extends FilteredTable
 {
-    protected final LuminexSchema _schema;
+    protected final LuminexProtocolSchema _schema;
     private final boolean _needsFilter;
 
     private static final FieldKey CONTAINER_FAKE_COLUMN_NAME = FieldKey.fromParts("Container");
 
-    public AbstractLuminexTable(TableInfo table, LuminexSchema schema, boolean filter)
+    public AbstractLuminexTable(TableInfo table, LuminexProtocolSchema schema, boolean filter)
     {
         super(table, schema.getContainer());
         _schema = schema;
@@ -64,7 +62,7 @@ public abstract class AbstractLuminexTable extends FilteredTable
     @Override
     public String getPublicSchemaName()
     {
-        return AssaySchema.NAME;
+        return _schema.getSchemaName();
     }
 
     public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType)

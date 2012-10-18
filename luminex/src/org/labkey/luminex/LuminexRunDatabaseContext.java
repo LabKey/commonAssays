@@ -56,7 +56,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
 
         // Cache the list of analytes since we'll need them to service a number of the methods
         SQLFragment sql = new SQLFragment("SELECT a.* FROM ");
-        sql.append(LuminexSchema.getTableInfoAnalytes(), "a");
+        sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
         sql.append(", ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
         sql.append(" WHERE a.DataId = d.RowId AND d.RunId = ?");
@@ -65,7 +65,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
 
         try
         {
-            Analyte[] analytes = Table.executeQuery(LuminexSchema.getSchema(), sql, Analyte.class);
+            Analyte[] analytes = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Analyte.class);
             for (Analyte analyte : analytes)
             {
                 _analytes.put(analyte.getName(), analyte);
@@ -96,7 +96,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     {
         Map<ColumnInfo, String> properties = new HashMap<ColumnInfo, String>();
         Analyte analyte = getAnalyte(analyteName);
-        ColumnInfo col = LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+        ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         Integer value = analyte.getPositivityThreshold();
         properties.put(col, value != null ? value.toString() : null);
         return properties;
@@ -119,16 +119,16 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         Analyte analyte = getAnalyte(analyteName);
 
         SQLFragment sql = new SQLFragment("SELECT t.Name FROM ");
-        sql.append(LuminexSchema.getTableInfoTitration(), "t");
+        sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
         sql.append(", ");
-        sql.append(LuminexSchema.getTableInfoAnalyteTitration(), "at");
+        sql.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
         sql.append(" WHERE t.RowId = at.TitrationId AND t.Standard = ? AND at.AnalyteId = ?");
         sql.add(Boolean.TRUE);
         sql.add(analyte.getRowId());
 
         try
         {
-            String[] titrationNames = Table.executeArray(LuminexSchema.getSchema(), sql, String.class);
+            String[] titrationNames = Table.executeArray(LuminexProtocolSchema.getSchema(), sql, String.class);
             return PageFlowUtil.set(titrationNames);
         }
         catch (SQLException e)
@@ -141,14 +141,14 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     public List<Titration> getTitrations() throws ExperimentException
     {
         SQLFragment sql = new SQLFragment("SELECT t.* FROM ");
-        sql.append(LuminexSchema.getTableInfoTitration(), "t");
+        sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
         sql.append(" WHERE t.RunId = ?");
         sql.add(_run.getRowId());
         sql.append(" ORDER BY t.Name");
 
         try
         {
-            Titration[] titrations = Table.executeQuery(LuminexSchema.getSchema(), sql, Titration.class);
+            Titration[] titrations = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Titration.class);
             return Arrays.asList(titrations);
         }
         catch (SQLException e)

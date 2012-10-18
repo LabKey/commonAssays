@@ -47,6 +47,7 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayTableMetadata;
@@ -58,7 +59,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -66,16 +66,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ViabilityAssaySchema extends AssaySchema
+public class ViabilityAssaySchema extends AssayProtocolSchema
 {
     public enum UserTables
     {
-        Results, ResultSpecimens
+        ResultSpecimens
     }
 
-    public ViabilityAssaySchema(User user, Container container, ExpProtocol protocol)
+    public ViabilityAssaySchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
-        super(AssaySchema.NAME, user, container, getSchema(), protocol);
+        super(user, container, protocol, targetStudy);
         assert protocol != null;
     }
 
@@ -89,29 +89,19 @@ public class ViabilityAssaySchema extends AssaySchema
         return getSchema().getSqlDialect();
     }
 
-    public Set<String> getTableNames()
+    public Set<String> getTableNames(boolean prefix)
     {
-        return Collections.singleton(prefixTableName(UserTables.ResultSpecimens));
+        Set<String> result = super.getTableNames(prefix);
+        result.add(AssaySchema.getProviderTableName(getProtocol(), UserTables.ResultSpecimens.name(), prefix));
+        return result;
     }
 
-    private String prefixTableName(UserTables table)
+    public TableInfo createProviderTable(String name, boolean prefixed)
     {
-        return getProtocol().getName() + " " + table.name();
-    }
+        if (name.equalsIgnoreCase(UserTables.ResultSpecimens.name()))
+            return createResultSpecimensTable();
 
-    public TableInfo createTable(String name)
-    {
-        String lname = name.toLowerCase();
-        String protocolPrefix = getProtocol().getName().toLowerCase() + " ";
-        if (lname.startsWith(protocolPrefix))
-        {
-            name = name.substring(protocolPrefix.length());
-    //        if (name.equalsIgnoreCase(UserTables.Results.name()))
-    //            return createResultsTable();
-            if (name.equalsIgnoreCase(UserTables.ResultSpecimens.name()))
-                return createResultSpecimensTable();
-        }
-        return null;
+        return super.createProviderTable(name, prefixed);
     }
 
     public FilteredTable createResultsTable()

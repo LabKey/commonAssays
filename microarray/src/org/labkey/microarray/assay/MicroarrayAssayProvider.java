@@ -41,9 +41,9 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayResultTable;
 import org.labkey.api.study.assay.AssayRunCreator;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -142,10 +142,10 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         });
     }
 
-    public AssayResultTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    public AssayResultTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        AssayResultTable result = new AssayResultTable(schema, protocol, this, includeCopiedToStudyColumns);
-        if (getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
+        AssayResultTable result = new AssayResultTable(schema, includeCopiedToStudyColumns);
+        if (getDomainByPrefix(schema.getProtocol(), ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
         {
             List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
             Iterator<FieldKey> iterator = cols.iterator();
@@ -189,7 +189,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
-    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(AssayProtocolSchema schema, ExpProtocol protocol)
     {
         ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable();
         if (isEditableRuns(protocol))

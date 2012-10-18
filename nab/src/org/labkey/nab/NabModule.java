@@ -28,7 +28,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.nab.query.NabSchema;
+import org.labkey.nab.query.NabProviderSchema;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class NabModule extends DefaultModule
         addController("nab", NabController.class);
         addController("nabassay", NabAssayController.class);
 
-        NabSchema.register();
+        NabProviderSchema.register();
     }
 
     protected Collection<WebPartFactory> createWebPartFactories()

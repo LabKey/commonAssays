@@ -128,12 +128,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return new HtmlView("The Elispot data file is the output file from the plate reader that has been selected.");
     }
 
-    public ElispotRunDataTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    @Override
+    public ElispotRunDataTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        ElispotRunDataTable table = new ElispotRunDataTable(schema, protocol);
+        ElispotRunDataTable table = new ElispotRunDataTable(schema, schema.getProtocol());
         if (includeCopiedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
+            addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);
         }
         return table;
     }
@@ -253,7 +254,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElispotResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
     {
-        UserSchema schema = AssayService.get().createSchema(context.getUser(), context.getContainer());
+        UserSchema schema = AssayService.get().createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
         String name = AssayService.get().getResultsTableName(protocol);
         QuerySettings settings = schema.getSettings(context, name, name);
         return new ElispotResultsQueryView(protocol, context, settings);
@@ -296,9 +297,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public AssaySchema getProviderSchema(User user, Container container, ExpProtocol protocol)
+    public ElispotProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
-        return new ElispotSchema(user, container, protocol);
+        return new ElispotProtocolSchema(user, container, protocol, this, targetStudy);
     }
 
     public PipelineProvider getPipelineProvider()

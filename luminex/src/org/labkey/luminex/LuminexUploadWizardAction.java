@@ -103,7 +103,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 vbox.addView(top);
             }
 
-            InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
+            InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
             view.setTitle("Analyte Properties");
 
             for (String analyte : analyteNames)
@@ -170,7 +170,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 List<DisplayColumn> posThresholdCols = new ArrayList<DisplayColumn>();
                 for (String analyte : analyteNames)
                 {
-                    ColumnInfo info = new ColumnInfo(LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
+                    ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
                     final String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                     info.setName(inputName);
                     info.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -532,7 +532,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             try
             {
-                LuminexSchema.getSchema().getScope().ensureTransaction();
+                LuminexProtocolSchema.getSchema().getScope().ensureTransaction();
                 if (!form.isResetDefaultValues())
                 {
                     for (String analyte : form.getAnalyteNames())
@@ -608,7 +608,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                     PropertyManager.saveProperties(defaultWellRoleValues);
 
-                    LuminexSchema.getSchema().getScope().commitTransaction();
+                    LuminexProtocolSchema.getSchema().getScope().commitTransaction();
                     getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
                     form.resetUploadAttemptID();
                     return afterRunCreation(form, run, errors);
@@ -629,7 +629,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
             finally
             {
-                LuminexSchema.getSchema().getScope().closeConnection();
+                LuminexProtocolSchema.getSchema().getScope().closeConnection();
             }
 
             return getAnalytesView(form.getAnalyteNames(), form, true, errors);

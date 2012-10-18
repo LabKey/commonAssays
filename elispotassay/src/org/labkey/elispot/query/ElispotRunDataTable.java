@@ -37,7 +37,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.elispot.ElispotDataHandler;
-import org.labkey.elispot.ElispotSchema;
+import org.labkey.elispot.ElispotProtocolSchema;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
     {
-        return ElispotSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX);
+        return ElispotProtocolSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX);
     }
 
     public String getInputMaterialPropertyName()

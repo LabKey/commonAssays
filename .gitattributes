@@ -68,8 +68,8 @@ elispotassay/src/org/labkey/elispot/ElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotManager.java -text
 elispotassay/src/org/labkey/elispot/ElispotModule.java -text
 elispotassay/src/org/labkey/elispot/ElispotPlateTypeHandler.java -text
+elispotassay/src/org/labkey/elispot/ElispotProtocolSchema.java -text
 elispotassay/src/org/labkey/elispot/ElispotRunUploadForm.java -text
-elispotassay/src/org/labkey/elispot/ElispotSchema.java -text
 elispotassay/src/org/labkey/elispot/ElispotUpgradeCode.java -text
 elispotassay/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
 elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
@@ -648,6 +648,7 @@ luminex/src/org/labkey/luminex/LuminexExcelParser.java -text
 luminex/src/org/labkey/luminex/LuminexImportHelper.java -text
 luminex/src/org/labkey/luminex/LuminexModule.java -text
 luminex/src/org/labkey/luminex/LuminexOORIndicator.java -text
+luminex/src/org/labkey/luminex/LuminexProtocolSchema.java -text
 luminex/src/org/labkey/luminex/LuminexReplicate.java -text
 luminex/src/org/labkey/luminex/LuminexResultsDataRegion.java -text
 luminex/src/org/labkey/luminex/LuminexRunAsyncContext.java -text
@@ -655,7 +656,6 @@ luminex/src/org/labkey/luminex/LuminexRunContext.java -text
 luminex/src/org/labkey/luminex/LuminexRunCreator.java -text
 luminex/src/org/labkey/luminex/LuminexRunDatabaseContext.java -text
 luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
-luminex/src/org/labkey/luminex/LuminexSchema.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
 luminex/src/org/labkey/luminex/LuminexWellGroup.java -text
@@ -1533,8 +1533,9 @@ nab/src/org/labkey/nab/multiRunGraph.jsp -text
 nab/src/org/labkey/nab/publishChooseStudy.jsp -text
 nab/src/org/labkey/nab/publishVerify.jsp -text
 nab/src/org/labkey/nab/query/NabDataLinkDisplayColumn.java -text
+nab/src/org/labkey/nab/query/NabProtocolSchema.java -text
+nab/src/org/labkey/nab/query/NabProviderSchema.java -text
 nab/src/org/labkey/nab/query/NabRunDataTable.java -text
-nab/src/org/labkey/nab/query/NabSchema.java -text
 nab/src/org/labkey/nab/runResults.jsp -text
 nab/src/org/labkey/nab/view/controlSummary.jsp -text
 nab/src/org/labkey/nab/view/cutoffDilutions.jsp -text

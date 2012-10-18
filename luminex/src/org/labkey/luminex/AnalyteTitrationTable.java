@@ -62,10 +62,10 @@ import java.util.Set;
  */
 public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 {
-    public AnalyteTitrationTable(LuminexSchema schema, boolean filter)
+    public AnalyteTitrationTable(LuminexProtocolSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoAnalyteTitration(), schema, filter, "AnalyteId");
-        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.ANALYTE_TITRATION_TABLE_NAME));
+        super(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, filter, "AnalyteId");
+        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME));
 
         ColumnInfo analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
         analyteCol.setFk(new LookupForeignKey("RowId")
@@ -164,7 +164,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         SQLFragment sql = new SQLFragment("AnalyteId IN (SELECT RowId FROM ");
-        sql.append(LuminexSchema.getTableInfoAnalytes(), "a");
+        sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
         sql.append(" WHERE DataId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
         sql.append(" WHERE ");
@@ -199,12 +199,12 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             {
                 SimpleFilter filter = new SimpleFilter("AnalyteId", key.getKey());
                 filter.addCondition("TitrationId", key.getValue());
-                return Table.selectObject(LuminexSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
+                return Table.selectObject(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
             }
 
             protected Analyte getAnalyte(int rowId)
             {
-                Analyte analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), rowId, Analyte.class);
+                Analyte analyte = Table.selectObject(LuminexProtocolSchema.getTableInfoAnalytes(), rowId, Analyte.class);
                 if (analyte == null)
                 {
                     throw new IllegalStateException("Unable to find referenced analyte: " + rowId);
@@ -214,7 +214,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
             protected Titration getTitration(int rowId)
             {
-                Titration titration = Table.selectObject(LuminexSchema.getTableInfoTitration(), rowId, Titration.class);
+                Titration titration = Table.selectObject(LuminexProtocolSchema.getTableInfoTitration(), rowId, Titration.class);
                 if (titration == null)
                 {
                     throw new IllegalStateException("Unable to find referenced titration: " + rowId);
@@ -262,7 +262,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                 SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", bean.getAnalyteId());
                 curveFitFilter.addCondition("TitrationId", bean.getTitrationId());
-                CurveFit[] curveFits = Table.select(LuminexSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, curveFitFilter, null, CurveFit.class);
+                CurveFit[] curveFits = Table.select(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, curveFitFilter, null, CurveFit.class);
                 
                 LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _schema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), Arrays.asList(curveFits));
             }
@@ -291,7 +291,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 for (Integer guideSetId : guideSetIds)
                 {
                     SimpleFilter guideSetFilter = new SimpleFilter("GuideSetId", guideSetId);
-                    AnalyteTitration[] guideSetAnalyteTitrations = Table.select(LuminexSchema.getTableInfoAnalyteTitration(), Table.ALL_COLUMNS, guideSetFilter, null, AnalyteTitration.class);
+                    AnalyteTitration[] guideSetAnalyteTitrations = Table.select(LuminexProtocolSchema.getTableInfoAnalyteTitration(), Table.ALL_COLUMNS, guideSetFilter, null, AnalyteTitration.class);
                     analyteTitrationsForUpdate.addAll(Arrays.asList(guideSetAnalyteTitrations));
                 }
 
@@ -310,7 +310,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                 if (newGuideSetId != null)
                 {
-                    GuideSet guideSet = Table.selectObject(LuminexSchema.getTableInfoGuideSet(), newGuideSetId.intValue(), GuideSet.class);
+                    GuideSet guideSet = Table.selectObject(LuminexProtocolSchema.getTableInfoGuideSet(), newGuideSetId.intValue(), GuideSet.class);
                     if (guideSet == null)
                     {
                         throw new ValidationException("No such guideSetId: " + newGuideSetId);
@@ -334,11 +334,11 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                 Object[] keys = new Object[2];
 
-                boolean analyteFirst = LuminexSchema.getTableInfoAnalyteTitration().getPkColumnNames().get(0).equalsIgnoreCase("AnalyteId");
+                boolean analyteFirst = LuminexProtocolSchema.getTableInfoAnalyteTitration().getPkColumnNames().get(0).equalsIgnoreCase("AnalyteId");
                 keys[0] = analyteFirst ? oldKey.getKey() : oldKey.getValue();
                 keys[1] = analyteFirst ? oldKey.getValue() : oldKey.getKey();
 
-                return Table.update(user, LuminexSchema.getTableInfoAnalyteTitration(), bean, keys);
+                return Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), bean, keys);
             }
 
             @Override

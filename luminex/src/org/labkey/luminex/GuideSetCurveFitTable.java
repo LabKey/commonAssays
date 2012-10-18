@@ -32,12 +32,12 @@ import org.labkey.api.study.assay.AssaySchema;
  */
 public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilterable
 {
-    private final LuminexSchema _schema;
+    private final LuminexProtocolSchema _schema;
     private final String _curveType;
     private @NotNull ContainerFilter _containerFilter = ContainerFilter.CURRENT;
 
     /** @param curveType the type of curve to filter the results to. Null means don't filter */
-    public GuideSetCurveFitTable(LuminexSchema schema, String curveType)
+    public GuideSetCurveFitTable(LuminexProtocolSchema schema, String curveType)
     {
         super(schema.getDbSchema());
         _schema = schema;
@@ -93,7 +93,7 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         curveTypeColumn.setJdbcType(JdbcType.VARCHAR);
         addColumn(curveTypeColumn);
 
-        setName(AssaySchema.getProviderTableName(schema.getProtocol(), LuminexSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME));
+        setName(AssaySchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME));
     }
 
     @NotNull
@@ -110,12 +110,12 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_schema.getTable(LuminexSchema.getAnalyteTitrationTableName(_schema.getProtocol()));
+        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_schema.getTable(LuminexProtocolSchema.getAnalyteTitrationTableName(_schema.getProtocol()));
         analyteTitrationTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
-        CurveFitTable curveFitTable = (CurveFitTable)_schema.getTable(LuminexSchema.getCurveFitTableName(_schema.getProtocol()));
+        CurveFitTable curveFitTable = (CurveFitTable)_schema.getTable(LuminexProtocolSchema.getCurveFitTableName(_schema.getProtocol()));
         curveFitTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(curveFitTable, "cf");
 

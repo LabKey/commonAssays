@@ -87,13 +87,13 @@ public class LuminexController extends SpringActionController
             _protocol = form.getProtocol();
 
             AbstractAssayView result = new AbstractAssayView();
-            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
-            QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexSchema.getRunExclusionTableName(form.getProtocol()), LuminexSchema.getRunExclusionTableName(form.getProtocol()));
+            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer(), null);
+            QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.getRunExclusionTableName(form.getProtocol()), LuminexProtocolSchema.getRunExclusionTableName(form.getProtocol()));
             QueryView runsView = createQueryView(runsSetting, schema, errors);
             runsView.setTitle("Excluded Analytes");
             result.setupViews(runsView, false, form.getProvider(), form.getProtocol());
 
-            QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexSchema.getWellExclusionTableName(form.getProtocol()), LuminexSchema.getWellExclusionTableName(form.getProtocol()));
+            QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.getWellExclusionTableName(form.getProtocol()), LuminexProtocolSchema.getWellExclusionTableName(form.getProtocol()));
             QueryView wellsView = createQueryView(wellsSetting, schema, errors);
             wellsView.setTitle("Excluded Wells");
             result.addView(wellsView);
@@ -134,8 +134,8 @@ public class LuminexController extends SpringActionController
             _protocol = form.getProtocol();
 
             AbstractAssayView result = new AbstractAssayView();
-            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
-            QuerySettings settings = new QuerySettings(getViewContext(), LuminexSchema.getAnalyteTitrationTableName(form.getProtocol()), LuminexSchema.getAnalyteTitrationTableName(form.getProtocol()));
+            AssaySchema schema = AssayService.get().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+            QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.getAnalyteTitrationTableName(form.getProtocol()), LuminexProtocolSchema.getAnalyteTitrationTableName(form.getProtocol()));
             settings.setAllowChooseQuery(false);
             QueryView view = new QueryView(schema, settings, errors)
             {

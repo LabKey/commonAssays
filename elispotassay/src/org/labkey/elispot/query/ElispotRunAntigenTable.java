@@ -21,9 +21,8 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.elispot.ElispotDataHandler;
-import org.labkey.elispot.ElispotSchema;
+import org.labkey.elispot.ElispotProtocolSchema;
 
 import java.sql.SQLException;
 
@@ -44,7 +43,7 @@ public class ElispotRunAntigenTable extends ElispotRunDataTable
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
     {
-        return ElispotSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX);
+        return ElispotProtocolSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX);
     }
 
     public String getInputMaterialPropertyName()

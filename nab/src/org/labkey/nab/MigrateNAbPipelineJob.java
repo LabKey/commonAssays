@@ -47,9 +47,9 @@ import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.assay.AssayFileWriter;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayPublishKey;
 import org.labkey.api.study.assay.AssayPublishService;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -325,8 +325,8 @@ public class MigrateNAbPipelineJob extends PipelineJob
             Map<String, String> legacyLSIDs = context.getSpecimensToLSIDs();
 
             // Now figure out the mapping from specimen name to Id for the newly created run
-            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
-            TableInfo resultsTableInfo = provider.createDataTable(schema, protocol, false);
+            AssayProtocolSchema schema = AssayService.get().createProtocolSchema(getUser(), getContainer(), protocol, null);
+            TableInfo resultsTableInfo = provider.createDataTable(schema, false);
             FieldKey runFK = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
             FieldKey rowIdFK = provider.getTableMetadata(protocol).getResultRowIdFieldKey();
             FieldKey specimenNameFK = FieldKey.fromParts("Properties", NabDataHandler.WELLGROUP_NAME_PROPERTY);

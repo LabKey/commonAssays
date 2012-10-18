@@ -41,9 +41,9 @@ import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunCreator;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.query.ResultsQueryView;
@@ -274,7 +274,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    public ContainerFilterable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(schema.getUser(), schema.getContainer());
         //assert protocol == flowSchema.getProtocol();
@@ -288,7 +288,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(AssayProtocolSchema schema, ExpProtocol protocol)
     {
         FlowSchema flowSchema = new FlowSchema(schema.getUser(), schema.getContainer());
         //assert protocol == flowSchema.getProtocol();

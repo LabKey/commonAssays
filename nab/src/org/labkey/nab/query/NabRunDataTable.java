@@ -41,7 +41,7 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
     {
-        List<PropertyDescriptor>pds = Arrays.asList(NabSchema.getExistingDataProperties(protocol));
+        List<PropertyDescriptor>pds = Arrays.asList(NabProviderSchema.getExistingDataProperties(protocol));
 
         Collections.sort(pds, new Comparator<PropertyDescriptor>()
         {

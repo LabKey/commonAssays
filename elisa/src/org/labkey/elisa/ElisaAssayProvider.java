@@ -17,8 +17,6 @@
 package org.labkey.elisa;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ChangePropertyDescriptorException;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
@@ -43,6 +41,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
 import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayTableMetadata;
@@ -194,9 +193,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public FilteredTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        return new ElisaResultsTable(schema, protocol, this, includeCopiedToStudyColumns);
+        return new ElisaResultsTable(schema, this, includeCopiedToStudyColumns);
     }
 
     protected Map<String, Set<String>> getRequiredDomainProperties()

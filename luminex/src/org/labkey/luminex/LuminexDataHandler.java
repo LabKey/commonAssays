@@ -441,7 +441,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throws SQLException, ValidationException
     {
         // Do a query to find all of the rows that have already been inserted 
-        LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, expRun.getContainer()), protocol, false);
+        LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createProtocolSchema(user, expRun.getContainer(), protocol, null), false);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("Data", dataIds));
         // Pull back as a map so that we get custom properties as well
         Map[] databaseMaps = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, Map.class);
@@ -491,12 +491,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             analyte.setRowId(existingAnalyte.getRowId());
             // Retain the LSID so we don't lose the custom property values
             analyte.setLsid(existingAnalyte.getLsid());
-            analyte = Table.update(user, LuminexSchema.getTableInfoAnalytes(), analyte, analyte.getRowId());
+            analyte = Table.update(user, LuminexProtocolSchema.getTableInfoAnalytes(), analyte, analyte.getRowId());
         }
         else
         {
             analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + expRun.getRowId() + "." + analyte.getName()).toString());
-            analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
+            analyte = Table.insert(user, LuminexProtocolSchema.getTableInfoAnalytes(), analyte);
         }
         return analyte;
     }
@@ -505,12 +505,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private Map<String, Analyte> getExistingAnalytes(ExpRun expRun) throws SQLException
     {
         SQLFragment sql = new SQLFragment("SELECT a.* FROM ");
-        sql.append(LuminexSchema.getTableInfoAnalytes(), "a");
+        sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
         sql.append(", ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
         sql.append(" WHERE a.DataId = d.RowId AND d.RunId = ?");
         sql.add(expRun.getRowId());
-        Analyte[] databaseAnalytes = Table.executeQuery(LuminexSchema.getSchema(), sql, Analyte.class);
+        Analyte[] databaseAnalytes = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Analyte.class);
         Map<String, Analyte> existingAnalytes = new HashMap<String, Analyte>();
         for (Analyte databaseAnalyte : databaseAnalytes)
         {
@@ -671,7 +671,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         SimpleFilter filter = new SimpleFilter("AnalyteId", analyte.getRowId());
         filter.addCondition("TitrationId", titration.getRowId());
 
-        AnalyteTitration analyteTitration = Table.selectObject(LuminexSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
+        AnalyteTitration analyteTitration = Table.selectObject(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
         boolean newRow = analyteTitration == null;
         if (analyteTitration == null)
         {
@@ -692,14 +692,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 analyteTitration.setGuideSetId(currentGuideSet.getRowId());
             }
 
-            Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
+            Table.insert(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteTitration);
         }
         else
         {
             Map<String, Object> keys = new CaseInsensitiveHashMap<Object>();
             keys.put("AnalyteId", analyte.getRowId());
             keys.put("TitrationId", titration.getRowId());
-            Table.update(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration, keys);
+            Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteTitration, keys);
         }
 
         // Insert the curve fit values (EC50 and AUC)
@@ -708,7 +708,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // Look up any existing curve fits that might already be in the database
             SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", analyte.getRowId());
             curveFitFilter.addCondition("TitrationId", titration.getRowId());
-            CurveFit[] existingCurveFits = Table.select(LuminexSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null, CurveFit.class);
+            CurveFit[] existingCurveFits = Table.select(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null, CurveFit.class);
 
             // Keep track of the curve fits that should be part of this run
             List<CurveFit> newCurveFits = new ArrayList<CurveFit>();
@@ -765,7 +765,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 CurveFit newFit = findMatch(existingCurveFit, newCurveFits);
                 if (newFit == null)
                 {
-                    Table.delete(LuminexSchema.getTableInfoCurveFit(), existingCurveFit.getRowId());
+                    Table.delete(LuminexProtocolSchema.getTableInfoCurveFit(), existingCurveFit.getRowId());
                 }
             }
 
@@ -1183,11 +1183,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         if (matchingFit != null)
         {
             fit.setRowId(matchingFit.getRowId());
-            return Table.update(user, LuminexSchema.getTableInfoCurveFit(), fit, fit.getRowId());
+            return Table.update(user, LuminexProtocolSchema.getTableInfoCurveFit(), fit, fit.getRowId());
         }
         else
         {
-            return Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+            return Table.insert(user, LuminexProtocolSchema.getTableInfoCurveFit(), fit);
         }
     }
 
@@ -1232,7 +1232,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, @NotNull AnalyteTitration analyteTitration, @NotNull Analyte analyte, @NotNull Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
             throws SQLException
     {
-        LuminexSchema schema = new LuminexSchema(user, expRun.getContainer(), protocol);
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), protocol, null);
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
         ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
@@ -1393,7 +1393,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             SimpleFilter filter = new SimpleFilter("Name", titration.getName());
             filter.addCondition("RunId", expRun.getRowId());
-            Titration[] exitingTitrations = Table.select(LuminexSchema.getTableInfoTitration(), Table.ALL_COLUMNS, filter, null, Titration.class);
+            Titration[] exitingTitrations = Table.select(LuminexProtocolSchema.getTableInfoTitration(), Table.ALL_COLUMNS, filter, null, Titration.class);
             assert exitingTitrations.length <= 1;
 
             if (exitingTitrations.length > 0)
@@ -1404,7 +1404,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 titration.setRunId(expRun.getRowId());
 
-                titration = Table.insert(user, LuminexSchema.getTableInfoTitration(), titration);
+                titration = Table.insert(user, LuminexProtocolSchema.getTableInfoTitration(), titration);
             }
             result.put(titration.getName(), titration);
         }
@@ -1758,55 +1758,55 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Object[] params = ids.toArray(new Integer[ids.size()]);
             String idSQL = StringUtils.repeat("?", ", ", ids.size());
             // Clean up data row properties
-            Table.execute(LuminexSchema.getSchema(),
+            Table.execute(LuminexProtocolSchema.getSchema(),
                     "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
-                    LuminexSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
+                    LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
                     " o WHERE o.ObjectURI = dr.LSID AND dr.DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexSchema.getSchema(),
+            Table.execute(LuminexProtocolSchema.getSchema(),
                     "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " +
-                    LuminexSchema.getTableInfoDataRow() + " WHERE DataId IN (" + idSQL + "))", params);
+                    LuminexProtocolSchema.getTableInfoDataRow() + " WHERE DataId IN (" + idSQL + "))", params);
 
             // Clean up analyte properties
-            Table.execute(LuminexSchema.getSchema(),
+            Table.execute(LuminexProtocolSchema.getSchema(),
                     "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
-                    LuminexSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
-                    " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE a.RowId = dr.AnalyteId AND o.ObjectURI = " +
+                    LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
+                    " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE a.RowId = dr.AnalyteId AND o.ObjectURI = " +
                     "a.LSID AND dr.DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexSchema.getSchema(),
+            Table.execute(LuminexProtocolSchema.getSchema(),
                     "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT a.LSID FROM " +
-                    LuminexSchema.getTableInfoDataRow() + " dr, " + LuminexSchema.getTableInfoAnalytes() +
+                    LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + LuminexProtocolSchema.getTableInfoAnalytes() +
                     " a WHERE dr.AnalyteId = a.RowId AND dr.DataId IN (" + idSQL + "))", params);
 
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoDataRow() +
                     " WHERE DataId IN (" + idSQL + ")", params);
 
             // Clean up exclusions
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoWellExclusionAnalyte() +
-                    " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoWellExclusion() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
+                    " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
                     " WHERE DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoWellExclusion() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
                     " WHERE DataId IN (" + idSQL + ")", params);
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoRunExclusionAnalyte() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
                     " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                     " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
                     " WHERE RowId IN (" + idSQL + ")))", params);
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoRunExclusion() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
                     " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                     " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
                     " WHERE RowId IN (" + idSQL + ")))", params);
 
             // Clean up curve fits
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoCurveFit() +
-                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoAnalytes() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +
+                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
                     " WHERE DataId IN (" + idSQL + "))", params);
 
             // Clean up analytes and titrations
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalyteTitration() +
-                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoAnalytes() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteTitration() +
+                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
                     " WHERE DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
                     " WHERE DataId IN (" + idSQL + ")", params);
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoTitration() +
+            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
                     " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                     " pa, " + ExperimentService.get().getTinfoData() +
                     " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
@@ -1868,7 +1868,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
      */
     private Set<Object> getExcludedWellKeys(ExpRun run, ExpProtocol protocol, ViewBackgroundInfo info)
     {
-        LuminexSchema schema = new LuminexSchema(info.getUser(), info.getContainer(), protocol);
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(info.getUser(), info.getContainer(), protocol, null);
         LuminexDataTable table = new LuminexDataTable(schema);
         AssayProvider provider = AssayService.get().getProvider(protocol);
 

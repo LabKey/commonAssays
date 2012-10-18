@@ -87,7 +87,7 @@ public class LuminexModule extends DefaultModule
     @NotNull
     public Set<DbSchema> getSchemasToTest()
     {
-        return PageFlowUtil.set(LuminexSchema.getSchema());
+        return PageFlowUtil.set(LuminexProtocolSchema.getSchema());
     }
 
     @NotNull

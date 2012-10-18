@@ -30,6 +30,7 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.SchemaKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
@@ -108,6 +109,7 @@ public abstract class NabAssayRun extends Luc5Assay
             // which doesn't know anything about the extra permission the user has been granted by the copy to study linkage.
             // We don't need to show it in the details view, so just skip it.
             if (!ExpRunTable.Column.DataOutputs.name().equalsIgnoreCase(runColumn.getName()) &&
+                !ExpRunTable.Column.JobId.name().equalsIgnoreCase(runColumn.getName()) &&
                 !ExpRunTable.Column.RunGroups.name().equalsIgnoreCase(runColumn.getName()))
             {
                 // Fake up a property descriptor. Currently only name and label are actually used for rendering the page,
@@ -174,7 +176,14 @@ public abstract class NabAssayRun extends Luc5Assay
             TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
             
             CustomView runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
-                   AssaySchema.NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+                SchemaKey.fromParts("assay", _provider.getResourceName(), _protocol.getName()).toString(), AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+
+            if (runView == null)
+            {
+                // Try with the old schema/query name
+                runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
+                        AssaySchema.NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+            }
 
             Collection<FieldKey> fieldKeysToShow;
             if (runView != null)

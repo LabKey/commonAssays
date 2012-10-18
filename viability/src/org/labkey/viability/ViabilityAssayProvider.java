@@ -27,9 +27,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -203,9 +201,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssaySchema getProviderSchema(User user, Container container, ExpProtocol protocol)
+    public AssayProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
-        return new ViabilityAssaySchema(user, container, protocol);
+        return new ViabilityAssaySchema(user, container, protocol, targetStudy);
     }
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
@@ -213,10 +211,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
     }
 
-    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    public ContainerFilterable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), protocol);
-        viabilitySchema.setTargetStudy(schema.getTargetStudy());
+        ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), schema.getProtocol(), schema.getTargetStudy());
         ContainerFilterable table = viabilitySchema.createResultsTable();
         // UNDONE: add copy to study columns when copy to study is implemented
         //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
@@ -405,7 +402,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             ExpProtocol protocol = getProtocol();
 
             // UCK. Getting query filter parameter from url.
-            PropertyValue pv = getViewContext().getBindPropertyValues().getPropertyValue(protocol.getName() + " Data.Run/RowId~eq");
+            PropertyValue pv = getViewContext().getBindPropertyValues().getPropertyValue("Data.Run/RowId~eq");
             if (pv != null && pv.getValue() != null)
             {
                 Object value = pv.getValue();

@@ -33,10 +33,10 @@ import org.labkey.api.query.LookupForeignKey;
  */
 public class CurveFitTable extends AbstractLuminexTable
 {
-    public CurveFitTable(LuminexSchema schema, boolean filterTable)
+    public CurveFitTable(LuminexProtocolSchema schema, boolean filterTable)
     {
-        super(LuminexSchema.getTableInfoCurveFit(), schema, filterTable);
-        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.CURVE_FIT_TABLE_NAME));
+        super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, filterTable);
+        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.CURVE_FIT_TABLE_NAME));
         wrapAllColumns(true);
         ColumnInfo titrationCol = getColumn("TitrationId");
         titrationCol.setLabel("Titration");
@@ -95,7 +95,7 @@ public class CurveFitTable extends AbstractLuminexTable
     protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         SQLFragment sql = new SQLFragment("TitrationId IN (SELECT t.RowId FROM ");
-        sql.append(LuminexSchema.getTableInfoTitration(), "t");
+        sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
         sql.append(" WHERE t.RunId IN (SELECT r.RowId FROM ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
         sql.append(" WHERE ");
