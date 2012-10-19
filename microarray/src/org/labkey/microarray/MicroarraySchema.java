@@ -107,6 +107,13 @@ public class MicroarraySchema extends SimpleUserSchema
     public ExpRunTable createRunsTable()
     {
         ExpRunTable result = _expSchema.getRunsTable();
+        configureRunsTable(result);
+
+        return result;
+    }
+
+    public void configureRunsTable(ExpRunTable result)
+    {
         result.getColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
 
         result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
@@ -148,8 +155,6 @@ public class MicroarraySchema extends SimpleUserSchema
         result.setDefaultVisibleColumns(defaultCols);
 
         result.setDescription("Contains a row per microarray analysis result loaded in this folder.");
-
-        return result;
     }
 
     public static DbSchema getSchema()

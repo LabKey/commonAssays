@@ -29,18 +29,13 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
     @Override
     public ExpRunTable createRunsTable()
     {
-        ExpRunTable result = new MicroarraySchema(getUser(), getContainer()).createRunsTable();
+        ExpRunTable result = super.createRunsTable();
+
+        new MicroarraySchema(getUser(), getContainer()).configureRunsTable(result);
         if (getProvider().isEditableRuns(getProtocol()))
         {
             result.addAllowablePermission(UpdatePermission.class);
         }
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
-        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Flag.name()));
-        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Links.name()));
-        defaultCols.add(FieldKey.fromParts(MicroarraySchema.THUMBNAIL_IMAGE_COLUMN_NAME));
-        defaultCols.add(FieldKey.fromParts(MicroarraySchema.QC_REPORT_COLUMN_NAME));
-        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Name.name()));
-        result.setDefaultVisibleColumns(defaultCols);
 
         return result;
     }
