@@ -16,10 +16,10 @@
 
 package org.labkey.flow.data;
 
-import org.labkey.api.data.AbstractTableInfo;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.ExperimentException;
@@ -30,13 +30,11 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.IAssayDomainType;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -59,8 +57,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunsForm;
-import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -71,7 +67,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * User: kevink
@@ -262,8 +257,9 @@ public class FlowAssayProvider extends AbstractAssayProvider
         return null;
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new FlowAssayTableMetadata(this, protocol);
     }
@@ -275,25 +271,9 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        FlowSchema flowSchema = new FlowSchema(schema.getUser(), schema.getContainer());
-        //assert protocol == flowSchema.getProtocol();
-        return (FilteredTable)flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
-    }
-
-    // Make public so FlowSchema can use this method.
-    public Set<String> addCopiedToStudyColumns(AbstractTableInfo table, ExpProtocol protocol, User user, boolean setVisibleColumns)
-    {
-        return super.addCopiedToStudyColumns(table, protocol, user, setVisibleColumns);
-    }
-
-    @Override
-    public ExpRunTable createRunTable(AssayProtocolSchema schema, ExpProtocol protocol)
-    {
-        FlowSchema flowSchema = new FlowSchema(schema.getUser(), schema.getContainer());
-        //assert protocol == flowSchema.getProtocol();
-        return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs);
+        return new FlowProtocolSchema(user, container, protocol, targetStudy);
     }
 
     @Override

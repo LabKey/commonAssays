@@ -2,11 +2,15 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProvider;
 
 /**
  * User: kevink
@@ -22,8 +26,31 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public NabRunDataTable createResultsTable()
+    public NabRunDataTable createDataTable(boolean includeCopiedToStudyColumns)
     {
-        return new NabRunDataTable(this, getProtocol());
+        NabRunDataTable table = new NabRunDataTable(this, getProtocol());
+
+        if (includeCopiedToStudyColumns)
+        {
+            addCopiedToStudyColumns(table, true);
+        }
+        return table;
+    }
+
+    @Override
+    public ExpRunTable createRunsTable()
+    {
+        final ExpRunTable runTable = super.createRunsTable();
+        ColumnInfo nameColumn = runTable.getColumn(ExpRunTable.Column.Name);
+        // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
+        // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
+        nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
+            }
+        });
+        return runTable;
     }
 }

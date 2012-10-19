@@ -326,7 +326,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
 
             // Now figure out the mapping from specimen name to Id for the newly created run
             AssayProtocolSchema schema = AssayService.get().createProtocolSchema(getUser(), getContainer(), protocol, null);
-            TableInfo resultsTableInfo = provider.createDataTable(schema, false);
+            TableInfo resultsTableInfo = schema.createDataTable(false);
             FieldKey runFK = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
             FieldKey rowIdFK = provider.getTableMetadata(protocol).getResultRowIdFieldKey();
             FieldKey specimenNameFK = FieldKey.fromParts("Properties", NabDataHandler.WELLGROUP_NAME_PROPERTY);

@@ -410,7 +410,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataIds.add(sourceFile.getRowId());
             }
 
-            saveDataRows(expRun, user, protocol, provider, rows, dataIds);
+            saveDataRows(expRun, user, protocol, rows, dataIds);
 
             if (inputMaterials.isEmpty())
             {
@@ -437,11 +437,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** Saves the data rows, updating if they already exist, inserting if not */
-    private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, LuminexAssayProvider provider, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
+    private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
             throws SQLException, ValidationException
     {
         // Do a query to find all of the rows that have already been inserted 
-        LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createProtocolSchema(user, expRun.getContainer(), protocol, null), false);
+        LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(false);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("Data", dataIds));
         // Pull back as a map so that we get custom properties as well
         Map[] databaseMaps = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, Map.class);

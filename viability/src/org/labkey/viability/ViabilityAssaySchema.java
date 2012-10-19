@@ -104,8 +104,11 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         return super.createProviderTable(name);
     }
 
-    public FilteredTable createResultsTable()
+    @Override
+    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
     {
+        // UNDONE: add copy to study columns when copy to study is implemented
+        //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
         return new ResultsTable();
     }
 
@@ -114,7 +117,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         return new ResultSpecimensTable();
     }
 
-    public ExpDataTable createDataTable()
+    public ExpDataTable createDataFileTable()
     {
         ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Data.toString(), this);
         ret.addColumn(ExpDataTable.Column.RowId);
@@ -198,7 +201,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    ExpDataTable dataTable = ViabilityAssaySchema.this.createDataTable();
+                    ExpDataTable dataTable = ViabilityAssaySchema.this.createDataFileTable();
                     dataTable.setContainerFilter(getContainerFilter());
                     return dataTable;
                 }

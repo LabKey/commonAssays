@@ -16,6 +16,8 @@
 
 package org.labkey.elisa;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
@@ -101,8 +103,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         super("ElisaAssayProtocol", "ElisaAssayRun", ElisaDataHandler.DATA_TYPE);
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(
                 this,
@@ -193,9 +196,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new ElisaResultsTable(schema, this, includeCopiedToStudyColumns);
+        return new ElisaProtocolSchema(user, container, protocol, targetStudy);
     }
 
     protected Map<String, Set<String>> getRequiredDomainProperties()

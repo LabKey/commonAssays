@@ -16,6 +16,8 @@
 
 package org.labkey.elispot;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
@@ -100,8 +102,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return NAME;
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(
                 this,
@@ -126,17 +129,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("The Elispot data file is the output file from the plate reader that has been selected.");
-    }
-
-    @Override
-    public ElispotRunDataTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
-    {
-        ElispotRunDataTable table = new ElispotRunDataTable(schema, schema.getProtocol());
-        if (includeCopiedToStudyColumns)
-        {
-            addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);
-        }
-        return table;
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
@@ -297,7 +289,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public ElispotProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public ElispotProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new ElispotProtocolSchema(user, container, protocol, this, targetStudy);
     }

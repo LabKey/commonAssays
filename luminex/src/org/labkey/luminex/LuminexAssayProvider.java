@@ -16,6 +16,8 @@
 
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -95,7 +97,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public LuminexProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public LuminexProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new LuminexProtocolSchema(user, container, protocol, targetStudy);
     }
@@ -127,8 +129,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         });
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(
                 this,
@@ -136,104 +139,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 null,
                 FieldKey.fromParts("Data", "Run"),
                 FieldKey.fromParts("RowId"));
-    }
-
-    @Override
-    public ExpRunTable createRunTable(final AssayProtocolSchema schema, final ExpProtocol protocol)
-    {
-        final ExpRunTable result = super.createRunTable(schema, protocol);
-
-        // Render any PDF outputs we found as direct download links since they should be plots of standard curves
-        ColumnInfo curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
-        curvesColumn.setWidth("30");
-        curvesColumn.setReadOnly(true);
-        curvesColumn.setShownInInsertView(false);
-        curvesColumn.setShownInUpdateView(false);
-        curvesColumn.setDescription("Link to titration curves in PDF format. Available if assay design is configured to generate them.");
-        List<FieldKey> visibleColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
-        visibleColumns.add(Math.min(visibleColumns.size(), 3), curvesColumn.getFieldKey());
-        result.setDefaultVisibleColumns(visibleColumns);
-
-        DisplayColumnFactory factory = new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new DataColumn(colInfo)
-                {
-                    /** RowId -> Name */
-                    private Map<FieldKey, FieldKey> _pdfColumns = new HashMap<FieldKey, FieldKey>();
-
-                    {
-                        TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
-                        // Check for data outputs that are PDFs
-                        for (ColumnInfo columnInfo : outputTable.getColumns())
-                        {
-                            if (columnInfo.getName().toLowerCase().endsWith("pdf"))
-                            {
-                                _pdfColumns.put(
-                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
-                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void addQueryFieldKeys(Set<FieldKey> keys)
-                    {
-                        keys.addAll(_pdfColumns.keySet());
-                        keys.addAll(_pdfColumns.values());
-                    }
-
-                    @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                    {
-                        Map<Integer, String> pdfs = new HashMap<Integer, String>();
-                        for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
-                        {
-                            Number rowId = (Number)ctx.get(entry.getKey());
-                            if (rowId != null)
-                            {
-                                pdfs.put(rowId.intValue(), (String)ctx.get(entry.getValue()));
-                            }
-                        }
-
-                        if (pdfs.size() == 1)
-                        {
-                            for (Map.Entry<Integer, String> entry : pdfs.entrySet())
-                            {
-                                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(schema.getContainer());
-                                url.addParameter("rowId", entry.getKey().toString());
-                                out.write("<a href=\"" + url + "\">");
-                                out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                                out.write("</a>");
-                            }
-                        }
-                        else if (pdfs.size() > 1)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            for (Map.Entry<Integer, String> entry : pdfs.entrySet())
-                            {
-                                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(schema.getContainer());
-                                url.addParameter("rowId", entry.getKey().toString());
-                                sb.append("<a href=\"");
-                                sb.append(url);
-                                sb.append("\">");
-                                sb.append(PageFlowUtil.filter(entry.getValue()));
-                                sb.append("</a><br/>");
-                            }
-
-                            out.write("<a onclick=\"return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");\">");
-                            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                            out.write("</a>");
-                        }
-                    }
-                };
-            }
-        };
-        curvesColumn.setDisplayColumnFactory(factory);
-
-        return result;
     }
 
     @Override
@@ -253,18 +158,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             protocol.setObjectProperties(null);
             return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
         }
-    }
-
-    public LuminexDataTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
-    {
-        LuminexProtocolSchema luminexSchema = new LuminexProtocolSchema(schema.getUser(), schema.getContainer(), schema.getProtocol(), schema.getTargetStudy());
-        LuminexDataTable table = luminexSchema.createDataRowTable();
-
-        if (includeCopiedToStudyColumns)
-        {
-            addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);
-        }
-        return table;
     }
 
     @Override

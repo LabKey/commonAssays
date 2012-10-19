@@ -17,6 +17,7 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
@@ -139,7 +140,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public NabProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new NabProtocolSchema(user, container, protocol, targetStudy);
     }
@@ -169,8 +170,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         });
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(
                 this,
@@ -178,23 +180,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 FieldKey.fromParts("Properties", SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
                 FieldKey.fromParts("ObjectId"));
-    }
-
-    @Override
-    public ExpRunTable createRunTable(AssayProtocolSchema schema, ExpProtocol protocol)
-    {
-        final ExpRunTable runTable = super.createRunTable(schema, protocol);
-        ColumnInfo nameColumn = runTable.getColumn(ExpRunTable.Column.Name);
-        // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
-        // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
-        nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
-            }
-        });
-        return runTable;
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
@@ -324,17 +309,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
-    }
-
-    @Override
-    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
-    {
-        FilteredTable table = schema.createResultsTable();
-        if (includeCopiedToStudyColumns)
-        {
-            addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);
-        }
-        return table;
     }
 
     public ActionURL getImportURL(Container container, ExpProtocol protocol)

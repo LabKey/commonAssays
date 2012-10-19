@@ -1,15 +1,12 @@
 package org.labkey.elisa.query;
 
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayResultTable;
-import org.labkey.api.study.assay.AssaySchema;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,10 +15,7 @@ import org.labkey.api.study.assay.AssaySchema;
  */
 public class ElisaResultsTable extends AssayResultTable
 {
-    protected AssaySchema _schema;
-    protected ExpProtocol _protocol;
-
-    public ElisaResultsTable(AssayProtocolSchema schema, AssayProvider provider, boolean includeCopiedToStudyColumns)
+    public ElisaResultsTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
         super(schema, includeCopiedToStudyColumns);
 

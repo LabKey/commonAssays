@@ -29,6 +29,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.elispot.query.ElispotRunAntigenTable;
+import org.labkey.elispot.query.ElispotRunDataTable;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -95,4 +96,14 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
+    @Override
+    public ElispotRunDataTable createDataTable(boolean includeCopiedToStudyColumns)
+    {
+        ElispotRunDataTable table = new ElispotRunDataTable(this, getProtocol());
+        if (includeCopiedToStudyColumns)
+        {
+            addCopiedToStudyColumns(table, true);
+        }
+        return table;
+    }
 }

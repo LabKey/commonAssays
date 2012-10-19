@@ -17,6 +17,8 @@
 package org.labkey.microarray.assay;
 
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -30,12 +32,10 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayRunDetailsAction;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
@@ -60,7 +60,6 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
-import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.web.servlet.mvc.Controller;
@@ -98,8 +97,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE);
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(
                 this,
@@ -142,27 +142,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         });
     }
 
-    public AssayResultTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
-    {
-        AssayResultTable result = new AssayResultTable(schema, includeCopiedToStudyColumns);
-        if (getDomainByPrefix(schema.getProtocol(), ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
-        {
-            List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
-            Iterator<FieldKey> iterator = cols.iterator();
-            while (iterator.hasNext())
-            {
-                FieldKey key = iterator.next();
-                if ("Run".equals(key.getParts().get(0)))
-                {
-                    iterator.remove();
-                }
-            }
-            result.setDefaultVisibleColumns(cols);
-        }
-
-        return result;
-    }
-
     protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
@@ -189,22 +168,10 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
-    public ExpRunTable createRunTable(AssayProtocolSchema schema, ExpProtocol protocol)
+    @Override
+    public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable();
-        if (isEditableRuns(protocol))
-        {
-            result.addAllowablePermission(UpdatePermission.class);
-        }
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
-        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Flag.name()));
-        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Links.name()));
-        defaultCols.add(FieldKey.fromParts(MicroarraySchema.THUMBNAIL_IMAGE_COLUMN_NAME));
-        defaultCols.add(FieldKey.fromParts(MicroarraySchema.QC_REPORT_COLUMN_NAME));
-        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Name.name()));
-        result.setDefaultVisibleColumns(defaultCols);
-
-        return result;
+        return new MicroarrayProtocolSchema(user, container, protocol, targetStudy);
     }
 
     public ActionURL getImportURL(Container container, ExpProtocol protocol)

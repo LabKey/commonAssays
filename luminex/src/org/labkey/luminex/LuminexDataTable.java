@@ -83,7 +83,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpDataTable result = _schema.createDataTable();
+                ExpDataTable result = _schema.createDataFileTable();
                 result.setContainerFilter(getContainerFilter());
                 return result;
             }

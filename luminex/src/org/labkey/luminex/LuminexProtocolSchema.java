@@ -19,6 +19,7 @@ package org.labkey.luminex;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -27,11 +28,16 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 public class LuminexProtocolSchema extends AssayProtocolSchema
@@ -152,7 +158,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             }
             if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                ExpDataTable result = createDataTable();
+                ExpDataTable result = createDataFileTable();
                 SQLFragment filter = new SQLFragment("RowId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("RowId"));
@@ -273,7 +279,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    public ExpDataTable createDataTable()
+    public ExpDataTable createDataFileTable()
     {
         final ExpDataTable ret = ExperimentService.get().createDataTable(AssaySchema.getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, false), AssayService.get().createSchema(getUser(), getContainer(), null));
         ret.addColumn(ExpDataTable.Column.RowId);
@@ -313,9 +319,15 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return ret;
     }
 
-    public LuminexDataTable createDataRowTable()
+    @Override
+    public LuminexDataTable createDataTable(boolean includeCopiedToStudyColumns)
     {
-        return new LuminexDataTable(this);
+        LuminexDataTable table = new LuminexDataTable(this);
+        if (includeCopiedToStudyColumns)
+        {
+            addCopiedToStudyColumns(table, true);
+        }
+        return table;
     }
 
     public ExpQCFlagTable createAnalyteTitrationQCFlagTable()
@@ -451,6 +463,104 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         FilteredTable result = new FilteredTable(getTableInfoRunExclusionAnalyte());
         result.wrapAllColumns(true);
         result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
+        return result;
+    }
+
+    @Override
+    public ExpRunTable createRunsTable()
+    {
+        final ExpRunTable result = super.createRunsTable();
+
+        // Render any PDF outputs we found as direct download links since they should be plots of standard curves
+        ColumnInfo curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
+        curvesColumn.setWidth("30");
+        curvesColumn.setReadOnly(true);
+        curvesColumn.setShownInInsertView(false);
+        curvesColumn.setShownInUpdateView(false);
+        curvesColumn.setDescription("Link to titration curves in PDF format. Available if assay design is configured to generate them.");
+        List<FieldKey> visibleColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        visibleColumns.add(Math.min(visibleColumns.size(), 3), curvesColumn.getFieldKey());
+        result.setDefaultVisibleColumns(visibleColumns);
+
+        DisplayColumnFactory factory = new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DataColumn(colInfo)
+                {
+                    /** RowId -> Name */
+                    private Map<FieldKey, FieldKey> _pdfColumns = new HashMap<FieldKey, FieldKey>();
+
+                    {
+                        TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
+                        // Check for data outputs that are PDFs
+                        for (ColumnInfo columnInfo : outputTable.getColumns())
+                        {
+                            if (columnInfo.getName().toLowerCase().endsWith("pdf"))
+                            {
+                                _pdfColumns.put(
+                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
+                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void addQueryFieldKeys(Set<FieldKey> keys)
+                    {
+                        keys.addAll(_pdfColumns.keySet());
+                        keys.addAll(_pdfColumns.values());
+                    }
+
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        Map<Integer, String> pdfs = new HashMap<Integer, String>();
+                        for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
+                        {
+                            Number rowId = (Number)ctx.get(entry.getKey());
+                            if (rowId != null)
+                            {
+                                pdfs.put(rowId.intValue(), (String)ctx.get(entry.getValue()));
+                            }
+                        }
+
+                        if (pdfs.size() == 1)
+                        {
+                            for (Map.Entry<Integer, String> entry : pdfs.entrySet())
+                            {
+                                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
+                                url.addParameter("rowId", entry.getKey().toString());
+                                out.write("<a href=\"" + url + "\">");
+                                out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                                out.write("</a>");
+                            }
+                        }
+                        else if (pdfs.size() > 1)
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            for (Map.Entry<Integer, String> entry : pdfs.entrySet())
+                            {
+                                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
+                                url.addParameter("rowId", entry.getKey().toString());
+                                sb.append("<a href=\"");
+                                sb.append(url);
+                                sb.append("\">");
+                                sb.append(PageFlowUtil.filter(entry.getValue()));
+                                sb.append("</a><br/>");
+                            }
+
+                            out.write("<a onclick=\"return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");\">");
+                            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                            out.write("</a>");
+                        }
+                    }
+                };
+            }
+        };
+        curvesColumn.setDisplayColumnFactory(factory);
+
         return result;
     }
 

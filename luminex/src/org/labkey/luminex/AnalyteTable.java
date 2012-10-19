@@ -64,7 +64,7 @@ public class AnalyteTable extends AbstractLuminexTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createDataTable();
+                return _schema.createDataFileTable();
             }
         });
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);

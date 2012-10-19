@@ -29,6 +29,7 @@ cbcassay/src/org/labkey/cbcassay/CBCAssayModule.java -text
 cbcassay/src/org/labkey/cbcassay/CBCAssayProvider.java -text
 cbcassay/src/org/labkey/cbcassay/CBCAssaySchema.java -text
 cbcassay/src/org/labkey/cbcassay/CBCDataHandler.java -text
+cbcassay/src/org/labkey/cbcassay/CBCProtocolSchema.java -text
 cbcassay/src/org/labkey/cbcassay/CBCResultsQueryView.java -text
 cbcassay/src/org/labkey/cbcassay/CBCRunUploadForm.java -text
 cbcassay/src/org/labkey/cbcassay/EditResultsQueryView.java -text
@@ -45,6 +46,7 @@ elisa/src/org/labkey/elisa/ElisaController.java -text
 elisa/src/org/labkey/elisa/ElisaDataHandler.java -text
 elisa/src/org/labkey/elisa/ElisaModule.java -text
 elisa/src/org/labkey/elisa/ElisaPlateTypeHandler.java -text
+elisa/src/org/labkey/elisa/ElisaProtocolSchema.java -text
 elisa/src/org/labkey/elisa/actions/ElisaRunUploadForm.java -text
 elisa/src/org/labkey/elisa/actions/ElisaUploadWizardAction.java -text
 elisa/src/org/labkey/elisa/actions/PlateConcentrationPropertyHelper.java -text
@@ -428,6 +430,7 @@ flow/src/org/labkey/flow/data/FlowObject.java -text
 flow/src/org/labkey/flow/data/FlowProperty.java -text
 flow/src/org/labkey/flow/data/FlowProtocol.java -text
 flow/src/org/labkey/flow/data/FlowProtocolImplementation.java -text
+flow/src/org/labkey/flow/data/FlowProtocolSchema.java -text
 flow/src/org/labkey/flow/data/FlowProtocolStep.java -text
 flow/src/org/labkey/flow/data/FlowRun.java -text
 flow/src/org/labkey/flow/data/FlowRunWorkspace.java -text
@@ -719,6 +722,7 @@ microarray/src/org/labkey/microarray/MicroarrayUploadWizardAction.java -text
 microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text
+microarray/src/org/labkey/microarray/assay/MicroarrayProtocolSchema.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayRunCreator.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text
 microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
@@ -1178,6 +1182,7 @@ ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayForm.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayProvider.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataController.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataDataCollector.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataProtocolSchema.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataUploadAction.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecRunCreator.java -text
 ms2/src/org/labkey/ms2/metadata/MsFractionPropertyHelper.java -text

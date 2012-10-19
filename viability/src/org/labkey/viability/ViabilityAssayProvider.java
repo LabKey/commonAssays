@@ -16,6 +16,8 @@
 
 package org.labkey.viability;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
@@ -195,14 +197,15 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return "Imports Guava ViaCount and ExpressPlus cell count and viability data.";
     }
 
+    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new ResultsAssayTableMetadata(this, protocol);
     }
 
     @Override
-    public AssayProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new ViabilityAssaySchema(user, container, protocol, targetStudy);
     }
@@ -210,15 +213,6 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
-    }
-
-    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
-    {
-        ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), schema.getProtocol(), schema.getTargetStudy());
-        FilteredTable table = viabilitySchema.createResultsTable();
-        // UNDONE: add copy to study columns when copy to study is implemented
-        //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
-        return table;
     }
 
     public ExpData getDataForDataRow(Object resultRowId, ExpProtocol protocol)
