@@ -16,7 +16,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
 {
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
 
-    public NabProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @NotNull AssayProvider provider, @Nullable Container targetStudy)
+    public NabProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         super(user, container, protocol, targetStudy);
     }

@@ -27,6 +27,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -211,10 +212,10 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
     }
 
-    public ContainerFilterable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
         ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), schema.getProtocol(), schema.getTargetStudy());
-        ContainerFilterable table = viabilitySchema.createResultsTable();
+        FilteredTable table = viabilitySchema.createResultsTable();
         // UNDONE: add copy to study columns when copy to study is implemented
         //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
         return table;

@@ -36,6 +36,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -274,11 +275,11 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ContainerFilterable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(schema.getUser(), schema.getContainer());
         //assert protocol == flowSchema.getProtocol();
-        return flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+        return (FilteredTable)flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
     }
 
     // Make public so FlowSchema can use this method.

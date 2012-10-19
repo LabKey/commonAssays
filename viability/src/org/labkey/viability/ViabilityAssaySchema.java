@@ -89,19 +89,19 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         return getSchema().getSqlDialect();
     }
 
-    public Set<String> getTableNames(boolean prefix)
+    public Set<String> getTableNames()
     {
-        Set<String> result = super.getTableNames(prefix);
-        result.add(AssaySchema.getProviderTableName(getProtocol(), UserTables.ResultSpecimens.name(), prefix));
+        Set<String> result = super.getTableNames();
+        result.add(AssaySchema.getProviderTableName(getProtocol(), UserTables.ResultSpecimens.name(), false));
         return result;
     }
 
-    public TableInfo createProviderTable(String name, boolean prefixed)
+    public TableInfo createProviderTable(String name)
     {
         if (name.equalsIgnoreCase(UserTables.ResultSpecimens.name()))
             return createResultSpecimensTable();
 
-        return super.createProviderTable(name, prefixed);
+        return super.createProviderTable(name);
     }
 
     public FilteredTable createResultsTable()

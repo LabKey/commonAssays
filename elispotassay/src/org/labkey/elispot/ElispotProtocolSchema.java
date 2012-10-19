@@ -49,23 +49,23 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return (ElispotAssayProvider)super.getProvider();
     }
 
-    public Set<String> getTableNames(boolean protocolPrefixed)
+    public Set<String> getTableNames()
     {
-        Set<String> names = super.getTableNames(protocolPrefixed);
-        names.add(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, protocolPrefixed));
+        Set<String> names = super.getTableNames();
+        names.add(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, false));
         return names;
     }
 
-    public TableInfo createProviderTable(String name, boolean protocolPrefixed)
+    public TableInfo createProviderTable(String name)
     {
-        TableInfo table = super.createProviderTable(name, protocolPrefixed);
+        TableInfo table = super.createProviderTable(name);
         if (table != null)
             return table;
         
-        if (name.equals(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, protocolPrefixed)))
+        if (name.equalsIgnoreCase(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, false)))
             return new ElispotRunAntigenTable(this, getProtocol());
 
-        return super.createProviderTable(name, protocolPrefixed);
+        return super.createProviderTable(name);
     }
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix) throws SQLException

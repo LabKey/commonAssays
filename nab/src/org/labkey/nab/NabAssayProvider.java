@@ -17,6 +17,7 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -43,6 +44,7 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
@@ -139,7 +141,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public NabProtocolSchema createProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
-        return new NabProtocolSchema(user, container, protocol, this, targetStudy);
+        return new NabProtocolSchema(user, container, protocol, targetStudy);
     }
 
     public void registerLsidHandler()
@@ -325,10 +327,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public NabRunDataTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
-        NabProtocolSchema protocolSchema = (NabProtocolSchema)schema;
-        NabRunDataTable table = protocolSchema.createResultsTable();
+        FilteredTable table = schema.createResultsTable();
         if (includeCopiedToStudyColumns)
         {
             addCopiedToStudyColumns(table, schema.getProtocol(), schema.getUser(), true);

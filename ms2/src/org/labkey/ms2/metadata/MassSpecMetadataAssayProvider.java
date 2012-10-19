@@ -43,6 +43,7 @@ import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
@@ -55,7 +56,6 @@ import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
@@ -262,7 +262,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return getDomainByPrefix(protocol, FRACTION_DOMAIN_PREFIX);
     }
 
-    public ExpDataTable createDataTable(final AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(final AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
     {
         final ExpDataTable result = new ExpSchema(schema.getUser(), schema.getContainer()).getDatasTable();
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
@@ -296,7 +296,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         cols.add(0, FieldKey.fromParts(ExpDataTable.Column.Run.toString(), SEARCHES_COLUMN));
         result.setDefaultVisibleColumns(cols);
 
-        return result;
+        return (FilteredTable)result;
     }
 
     private FieldKey getDataFractionPropertyFieldKey(DomainProperty fractionProperty)

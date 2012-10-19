@@ -31,9 +31,7 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.util.PageFlowUtil;
 
-import java.sql.SQLException;
 import java.util.*;
 
 public class LuminexProtocolSchema extends AssayProtocolSchema
@@ -61,20 +59,20 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         assert protocol != null;
     }
 
-    public Set<String> getTableNames(boolean protocolPrefixed)
+    public Set<String> getTableNames()
     {
-        Set<String> result = new HashSet<String>(super.getTableNames(protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), ANALYTE_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), TITRATION_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), WELL_EXCLUSION_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), RUN_EXCLUSION_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), GUIDE_SET_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), GUIDE_SET_CURVE_FIT_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, protocolPrefixed));
-        result.add(getProviderTableName(getProtocol(), CV_QC_FLAG_TABLE_NAME, protocolPrefixed));
+        Set<String> result = super.getTableNames();
+        result.add(getProviderTableName(getProtocol(), ANALYTE_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), TITRATION_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), WELL_EXCLUSION_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), RUN_EXCLUSION_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), GUIDE_SET_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), GUIDE_SET_CURVE_FIT_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, false));
+        result.add(getProviderTableName(getProtocol(), CV_QC_FLAG_TABLE_NAME, false));
         return result;
     }
 
@@ -125,9 +123,8 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    protected TableInfo createProviderTable(String name, boolean protocolPrefixed)
+    protected TableInfo createProviderTable(String tableType)
     {
-        String tableType = protocolPrefixed ? AssaySchema.getProviderTableType(getProtocol(), name) : name;
         if (tableType != null)
         {
             if (ANALYTE_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -206,7 +203,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 return createCVQCFlagTable();
             }
         }
-        return super.createProviderTable(name, protocolPrefixed);
+        return super.createProviderTable(tableType);
     }
 
     public AnalyteTitrationTable createAnalyteTitrationTable(boolean filter)
