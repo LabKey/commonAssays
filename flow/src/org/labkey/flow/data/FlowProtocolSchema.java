@@ -1,6 +1,7 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FilteredTable;
@@ -29,10 +30,10 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
+    public ContainerFilterable createDataTable(boolean includeCopiedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
-        return (FilteredTable)flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+        return flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
     }
 }
