@@ -61,6 +61,7 @@ public class ElisaController extends SpringActionController
         private String _autoColumnYName;
         private String _autoColumnXName;
         private boolean _allowToggleMode = false; // view vs. edit mode
+        private String _runTableName;
 
         public int getRunId()
         {
@@ -130,6 +131,16 @@ public class ElisaController extends SpringActionController
         public void setAllowToggleMode(boolean allowToggleMode)
         {
             _allowToggleMode = allowToggleMode;
+        }
+
+        public String getRunTableName()
+        {
+            return _runTableName;
+        }
+
+        public void setRunTableName(String runTableName)
+        {
+            _runTableName = runTableName;
         }
 
         @Override

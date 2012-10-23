@@ -66,8 +66,19 @@
 
         var items = [];
 
+        items.push(Ext4.create('LABKEY.elisa.RunDetailsPanel', {
+
+            schemaName      : <%=q(form.getSchemaName())%>,
+            queryName       : <%=q(form.getQueryName())%>,
+            runTableName    : <%=q(form.getRunTableName())%>,
+            runId           : <%=form.getRunId()%>,
+            dataRegionName  : <%=q(form.getDataRegionName())%>,
+            baseUrl         : <%=q(baseUrl.getLocalURIString())%>
+        }));
+
         items.push(Ext4.create('LABKEY.ext4.GenericChartPanel', {
             height          : 500,
+            border          : true,
             schemaName      : <%=form.getSchemaName() != null ? q(form.getSchemaName()) : null %>,
             queryName       : <%=form.getQueryName() != null ? q(form.getQueryName()) : null %>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
@@ -83,17 +94,11 @@
             allowEditMode: <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>
         }));
 
-        items.push(Ext4.create('LABKEY.elisa.RunDetailsPanel', {
-
-            schemaName      : <%=form.getSchemaName() != null ? q(form.getSchemaName()) : null %>,
-            queryName       : <%=form.getQueryName() != null ? q(form.getQueryName()) : null %>,
-            dataRegionName  : <%=q(form.getDataRegionName())%>,
-            baseUrl         : <%=q(baseUrl.getLocalURIString())%>
-        }));
-
         var panel = Ext4.create('Ext.panel.Panel', {
 
             layout      : 'auto',
+            border      : false,
+            frame       : false,
             renderTo    : <%=q(renderId)%>,
             items       : items
         });

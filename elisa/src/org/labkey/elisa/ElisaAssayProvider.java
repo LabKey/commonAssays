@@ -266,6 +266,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         form.setComponentId("generic-report-panel-" + UniqueID.getRequestScopedUID(context.getRequest()));
         form.setSchemaName(schema.getPath().toString());
         form.setQueryName(AssayService.get().getResultsTableName(protocol));
+        form.setRunTableName(AssayService.get().getRunsTableName(protocol));
         form.setRenderType(GenericChartReport.RenderType.SCATTER_PLOT.getId());
         form.setRunId(run.getRowId());
         form.setDataRegionName(QueryView.DATAREGIONNAME_DEFAULT);

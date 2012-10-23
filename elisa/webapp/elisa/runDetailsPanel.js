@@ -11,7 +11,7 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
     constructor : function(config) {
 
         Ext4.applyIf(config, {
-            layout  : 'fit',
+            layout  : 'auto',
             border  : false,
             frame   : false,
             autoScroll : true,
@@ -23,9 +23,70 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
 
     initComponent : function() {
 
-        this.items = [];
+        this.items = [
+                this.createRunDetailView()
+                //this.createRunDataView()
+        ];
+
+        this.callParent([arguments]);
+    },
+
+    createRunDetailView : function() {
 
         Ext4.define('Elisa.model.RunDetail', {
+            extend : 'Ext.data.Model',
+            fields : [
+                {name : 'Name'},
+                {name : 'Created'},
+                {name : 'RSquared'}
+            ]
+        });
+
+        var config = {
+            model   : 'Elisa.model.RunDetail',
+            autoLoad: true,
+            proxy   : {
+                type   : 'ajax',
+                url    : LABKEY.ActionURL.buildURL('query', 'selectRows.api'),
+                extraParams : {
+                    schemaName : this.schemaName,
+                    queryName  : this.runTableName
+                },
+                reader : {
+                    type : 'json',
+                    root : 'rows'
+                }
+            },
+            filters : [{property:'RowId', value : this.runId}]
+        };
+
+        this.elisaDetailStore = Ext4.create('Ext.data.Store', config);
+
+        var tpl = new Ext4.XTemplate(
+            '<div>',
+                '<table>',
+                    '<tpl for=".">',
+                    '<tr><td style="padding-right: 10px;">Name</td><td>{Name}</td></tr>',
+                '<tr><td style="padding-right: 10px;">Coefficient of Determination</td><td>{[Ext.util.Format.number(values.RSquared, "0.00000")]}</td></tr>',
+                    '<tr><td style="padding-right: 10px;">Created</td><td>{Created}</td></tr>',
+                '</tpl></table>',
+            '</div>'
+        );
+
+        return Ext4.create('Ext.view.View', {
+            store   : this.elisaDetailStore,
+            loadMask: true,
+            tpl     : tpl,
+            ui      : 'custom',
+            flex    : 1,
+            padding : '20, 8',
+            scope   : this
+        });
+    },
+
+    createRunDataView : function() {
+
+        Ext4.define('Elisa.model.RunData', {
             extend : 'Ext.data.Model',
             fields : [
                 {name : 'WellgroupLocation'},
@@ -43,7 +104,7 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
         var filters = LABKEY.Filter.getFiltersFromUrl(filterUrl, this.dataRegionName);
 
         var config = {
-            model   : 'Elisa.model.RunDetail',
+            model   : 'Elisa.model.RunData',
             autoLoad: true,
             pageSize: 92,
             proxy   : {
@@ -68,11 +129,12 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
                 '<table width="100%">',
                     '<tr><td>Well Location</td><td>Well Group</td><td>Absorption</td><td>Concentration</td></tr>',
                     '<tpl for=".">',
-                    '<tr class="{[xindex % 2 === 0 ? "labkey-alternate-row" : "labkey-row"]}"><td>{WellLocation}</td><td>{WellgroupLocation}</td><td>{Absorption}</td><td>{Concentration}</td></tr>',
+                    '<tr class="{[xindex % 2 === 0 ? "labkey-alternate-row" : "labkey-row"]}"><td>{WellLocation}</td><td>{WellgroupLocation}</td><td>{Absorption}</td><td>{[Ext.util.Format.number(values.Concentration, "0.000")]}</td></tr>',
                 '</tpl></table>',
             '</div>'
         );
-        var dataView = Ext4.create('Ext.view.View', {
+
+        return Ext4.create('Ext.view.View', {
             store   : this.elisaDetailStore,
             loadMask: true,
             tpl     : tpl,
@@ -81,10 +143,5 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
             padding : '20, 8',
             scope   : this
         });
-
-        this.items.push(dataView);
-
-        this.callParent([arguments]);
     }
-
 });
