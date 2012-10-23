@@ -38,11 +38,6 @@ public class GraphColumn extends DataColumn
     }
 
 
-    public void renderDetailsCellContents(RenderContext ctx, Writer out) throws IOException
-    {
-        renderGraph(ctx, out);
-    }
-
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         renderGraph(ctx, out);
