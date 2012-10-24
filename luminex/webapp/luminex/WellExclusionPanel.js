@@ -181,7 +181,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             title += "<BR/><span style='color:red;font-style:italic;'>Uncheck all analytes to remove exclusions</span>";
         }
 
-        // grid of avaialble/excluded analytes
+        // grid of available/excluded analytes
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
             cls: 'extContainer',

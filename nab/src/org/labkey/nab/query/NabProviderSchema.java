@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
@@ -54,21 +55,16 @@ public class NabProviderSchema extends AssayProviderSchema
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                // UNDONE: Hide this schema
                 // Nab top-level schema for backwards compatibility <12.3.  Moved to assay schema.
-                return new NabProviderSchema(schema.getUser(), schema.getContainer(), null);
+                return new NabProviderSchema(schema.getUser(), schema.getContainer(), AssayService.get().getProvider(NabAssayProvider.NAME), null, true);
             }
         });
     }
 
-    public NabProviderSchema(User user, Container container, @Nullable Container targetStudy)
-    {
-        this(user, container, (NabAssayProvider)AssayService.get().getProvider(NabAssayProvider.NAME), targetStudy);
-    }
-
-    public NabProviderSchema(User user, Container container, NabAssayProvider provider, @Nullable Container targetStudy)
+    public NabProviderSchema(User user, Container container, AssayProvider provider, @Nullable Container targetStudy, boolean hidden)
     {
         super(user, container, provider, targetStudy);
+        _hidden = hidden;
     }
 
     public Set<String> getTableNames()

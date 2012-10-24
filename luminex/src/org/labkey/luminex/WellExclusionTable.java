@@ -24,6 +24,7 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
+import org.labkey.api.data.MultiValuedRenderContext;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
@@ -126,9 +127,9 @@ public class WellExclusionTable extends AbstractExclusionTable
                         Object result = getValue(ctx);
                         if (null != result)
                         {
-                            // get the list of unique wells (by splitting the comma separated string)
+                            // get the list of unique wells (by splitting the concatenated string)
                             TreeSet<String> uniqueWells = new TreeSet<String>();
-                            uniqueWells.addAll(Arrays.asList(result.toString().split(",")));
+                            uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMETER_REGEX)));
 
                             // put the unique wells back into a comma separated string
                             StringBuilder sb = new StringBuilder();

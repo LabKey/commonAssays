@@ -87,7 +87,7 @@ public class LuminexController extends SpringActionController
             _protocol = form.getProtocol();
 
             AbstractAssayView result = new AbstractAssayView();
-            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer(), null);
+            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), _protocol, null);
             QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.getRunExclusionTableName(form.getProtocol()), LuminexProtocolSchema.getRunExclusionTableName(form.getProtocol()));
             QueryView runsView = createQueryView(runsSetting, schema, errors);
             runsView.setTitle("Excluded Analytes");

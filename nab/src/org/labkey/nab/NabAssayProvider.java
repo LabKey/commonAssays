@@ -136,7 +136,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public AssayProviderSchema createProviderSchema(User user, Container container, Container targetStudy)
     {
-        return new NabProviderSchema(user, container, null);
+        return new NabProviderSchema(user, container, this, targetStudy, false);
     }
 
     @Override
