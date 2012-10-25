@@ -43,11 +43,12 @@ import javax.imageio.ImageIO;
 
 public class FCSAnalyzer
 {
-    static public final SubsetSpec compSubset = new SubsetSpec(null, PopulationName.fromString("comp"));
-    static private FCSAnalyzer instance;
-    static private Logger _log = Logger.getLogger(FCSAnalyzer.class);
-    static private int GRAPH_HEIGHT = 300;
-    static private int GRAPH_WIDTH = 300;
+    public static final SubsetSpec compSubset = new SubsetSpec(null, PopulationName.fromString("comp"));
+
+    private static final Logger _log = Logger.getLogger(FCSAnalyzer.class);
+    private static final FCSAnalyzer _instance = new FCSAnalyzer();
+    private static final int GRAPH_HEIGHT = 300;
+    private static final int GRAPH_WIDTH = 300;
 
     static public class Result<T>
     {
@@ -90,13 +91,9 @@ public class FCSAnalyzer
         }
     }
 
-    synchronized static public FCSAnalyzer get()
+    public static FCSAnalyzer get()
     {
-        if (instance == null)
-        {
-            instance = new FCSAnalyzer();
-        }
-        return instance;
+        return _instance;
     }
 
     FCSCache _cache = new FCSCache();

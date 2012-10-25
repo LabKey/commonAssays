@@ -28,7 +28,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
  */
 public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
 {
-    public static XTandemSearchProtocolFactory instance = new XTandemSearchProtocolFactory();
+    private static final XTandemSearchProtocolFactory instance = new XTandemSearchProtocolFactory();
 
     public static XTandemSearchProtocolFactory get()
     {

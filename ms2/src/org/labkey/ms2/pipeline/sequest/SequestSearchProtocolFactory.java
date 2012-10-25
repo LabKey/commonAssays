@@ -26,7 +26,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
  */
 public class SequestSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
 {
-    public static SequestSearchProtocolFactory instance = new SequestSearchProtocolFactory();
+    private static final SequestSearchProtocolFactory instance = new SequestSearchProtocolFactory();
 
     public static SequestSearchProtocolFactory get()
     {

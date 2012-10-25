@@ -29,7 +29,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
  */
 public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
 {
-    public static MascotSearchProtocolFactory instance = new MascotSearchProtocolFactory();
+    private static final MascotSearchProtocolFactory instance = new MascotSearchProtocolFactory();
 
     public static MascotSearchProtocolFactory get()
     {
