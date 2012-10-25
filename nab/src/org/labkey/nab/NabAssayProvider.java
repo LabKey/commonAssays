@@ -57,6 +57,7 @@ import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProviderSchema;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -204,7 +205,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
         Container lookupContainer = c.getProject();
         DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, NabProviderSchema.SCHEMA_NAME, NabProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
+        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), NabProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
         method.setRequired(true);
         method.setShownInUpdateView(false);
         return result;
@@ -244,7 +245,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(sampleWellGroupDomain, SAMPLE_INITIAL_DILUTION_PROPERTY_NAME, SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         addProperty(sampleWellGroupDomain, SAMPLE_DILUTION_FACTOR_PROPERTY_NAME, SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, NabProviderSchema.SCHEMA_NAME, NabProviderSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
+        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), NabProviderSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
         method.setRequired(true);
         return result;
     }
