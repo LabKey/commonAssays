@@ -96,10 +96,11 @@ public class ProteinServiceImpl implements ProteinService
         return Collections.unmodifiableList(_peptideSearchViewProviders);
     }
 
-    public WebPartView getProteinCoverageView(int seqId, String[] peptides, int aaRowWidth)
+    public WebPartView getProteinCoverageView(int seqId, String[] peptides, int aaRowWidth, boolean showEntireFragmentInCoverage)
     {
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
+        bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setPeptides(peptides);
         bean.aaRowWidth = aaRowWidth;
         return new JspView<MS2Controller.ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);

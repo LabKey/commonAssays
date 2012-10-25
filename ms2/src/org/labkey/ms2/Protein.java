@@ -18,6 +18,7 @@ package org.labkey.ms2;
 
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.util.*;
@@ -45,18 +46,19 @@ public class Protein
 
     private boolean _forCoverageMapExport = false;
 
-    private String PEPTIDE_START_TD="<td class=\"%s\" colspan=%d > %s </td>";
-    private String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#99ccff\" align=\"center\" > %s </td>";
-    private String PEPTIDE_START_CLASS =" peptide-marker ";
-    private String PEPTIDE_MULTIPLE_CLASS =" peptide-marker-multiple ";
-    private String COLUMN_DIVIDER_CLASS=" tenth-col ";
-    private String PEPTIDE_MIDDLE_TD ="";
-    private String PEPTIDE_NONE_TD="<td %s />";
-    private String PEPTIDE_NONE_CLASS= "";
-    private String SEQUENCE_CELL_TD="<td %s >%s</td>";
-    private String SEQUENCE_CELL_CLASS="";
-    private String TABLE_TAG="<div><table id=\"peptideMap\" width=\"%d\" class=\"protein-coverage-map\"  >";
-    private String TABLE_TAG_EXPORT="<div><table id=\"peptideMap\" border=\"1\"  >";
+    private static final String PEPTIDE_START_TD="<td class=\"%s\" colspan=%d > %s </td>";
+    private static final String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#99ccff\" align=\"center\" > %s </td>";
+    private static final String PEPTIDE_START_CLASS =" peptide-marker ";
+    private static final String PEPTIDE_MULTIPLE_CLASS =" peptide-marker-multiple ";
+    private static final String COLUMN_DIVIDER_CLASS=" tenth-col ";
+    private static final String PEPTIDE_MIDDLE_TD ="";
+    private static final String PEPTIDE_NONE_TD="<td %s />";
+    private static final String PEPTIDE_NONE_CLASS= "";
+    private static final String SEQUENCE_CELL_TD="<td %s >%s</td>";
+    private static final String SEQUENCE_CELL_CLASS="";
+    private static final String TABLE_TAG="<div><table id=\"peptideMap\" width=\"%d\" class=\"protein-coverage-map\"  >";
+    private static final String TABLE_TAG_EXPORT="<div><table id=\"peptideMap\" border=\"1\"  >";
+
     public static final int DEFAULT_WRAP_COLUMNS = 100;
 
     public Protein()
@@ -182,16 +184,13 @@ public class Protein
         protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
         objects and accumlates their html output.
      */
-    public StringBuffer getCoverageMap(MS2Run run, String showRunViewUrl)
+    public StringBuffer getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
         return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS);
     }
 
-    public StringBuffer getCoverageMap(MS2Run run, String showRunViewUrl, int wrapCols)
+    public StringBuffer getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols)
     {
-        if(_showEntireFragmentInCoverage)
-            return new StringBuffer();
-
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
 
