@@ -328,46 +328,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ResultsQueryView createResultsQueryView(final ViewContext context, final ExpProtocol protocol)
-    {
-        UserSchema schema = QueryService.get().getUserSchema(context.getUser(), context.getContainer(), AssaySchema.NAME);
-        String name = AssayService.get().getResultsTableName(protocol);
-        QuerySettings settings = schema.getSettings(context, name, name);
-        return new ResultsQueryView(protocol, context, settings)
-        {
-            @Override
-            protected DataRegion createDataRegion()
-            {
-                ResultsDataRegion rgn = new LuminexResultsDataRegion(_provider, _protocol);
-                initializeDataRegion(rgn);
-                return rgn;
-            }
-
-            @Override
-            public DataView createDataView()
-            {
-                DataView result = super.createDataView();
-                String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
-
-                // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
-                if (showControls() && runId != null)
-                {
-                    ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
-                    excludeAnalytes.setScript("LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
-                            + "LABKEY.requiresCss('luminex/Exclusion.css');"
-                            + "analyteExclusionWindow('" + protocol.getName() + "', " + runId + ");");
-                    excludeAnalytes.setDisplayPermission(UpdatePermission.class);
-
-                    // todo: move the JS and CSS inclusion to the page level
-
-                    result.getDataRegion().getButtonBar(DataRegion.MODE_GRID).add(excludeAnalytes);
-                }
-                return result;
-            }
-        };
-    }
-
-    @Override
     public List<NavTree> getHeaderLinks(ViewContext viewContext, ExpProtocol protocol, ContainerFilter containerFilter)
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);

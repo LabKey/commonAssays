@@ -65,7 +65,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     public AnalyteTitrationTable(LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, filter, "AnalyteId");
-        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME));
+        setName(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
 
         ColumnInfo analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
         analyteCol.setFk(new LookupForeignKey("RowId")

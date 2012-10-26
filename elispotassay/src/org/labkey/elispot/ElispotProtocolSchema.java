@@ -26,10 +26,20 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.RunListDetailsQueryView;
+import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.study.query.RunListQueryView;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.elispot.query.ElispotRunAntigenTable;
 import org.labkey.elispot.query.ElispotRunDataTable;
+import org.springframework.validation.BindException;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -53,7 +63,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
     public Set<String> getTableNames()
     {
         Set<String> names = super.getTableNames();
-        names.add(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, false));
+        names.add(ANTIGEN_STATS_TABLE_NAME);
         return names;
     }
 
@@ -63,7 +73,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         if (table != null)
             return table;
         
-        if (name.equalsIgnoreCase(getProviderTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME, false)))
+        if (name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))
             return new ElispotRunAntigenTable(this, getProtocol());
 
         return super.createProviderTable(name);
@@ -105,5 +115,49 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
             addCopiedToStudyColumns(table, true);
         }
         return table;
+    }
+
+    @Override
+    protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        return new ElispotResultsQueryView(getProtocol(), context, settings);
+    }
+
+    private static final class ElispotResultsQueryView extends ResultsQueryView
+    {
+        public ElispotResultsQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
+        {
+            super(protocol, context, settings);
+        }
+
+        public DataView createDataView()
+        {
+            DataView view = super.createDataView();
+            view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+            return view;
+        }
+    }
+
+    @Override
+    protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        return new RunListDetailsQueryView(getProtocol(), context,
+                ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString())
+        {
+            @Override
+            protected void populateButtonBar(DataView view, ButtonBar bar)
+            {
+                super.populateButtonBar(view, bar);
+
+                ActionURL url = new ActionURL(ElispotController.BackgroundSubtractionAction.class, getContainer());
+                ActionButton btn = new ActionButton(url, "Subtract Background");
+
+                btn.setRequiresSelection(true);
+                btn.setDisplayPermission(InsertPermission.class);
+                btn.setActionType(ActionButton.Action.POST);
+
+                bar.add(btn);
+            }
+        };
     }
 }

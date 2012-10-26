@@ -29,7 +29,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -45,6 +44,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.beans.PropertyValue;
 
@@ -339,40 +339,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
+    public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol, BindException errors)
     {
-        return new ViabilityRunListQueryView(protocol, context);
-    }
-
-    private class ViabilityRunListQueryView extends RunListQueryView
-    {
-        ExpProtocol _protocol;
-
-        public ViabilityRunListQueryView(ExpProtocol protocol, ViewContext context)
-        {
-            super(protocol, context);
-            _protocol = protocol;
-        }
-
-        @Override
-        public List<DisplayColumn> getDisplayColumns()
-        {
-            ActionURL reRunURL = getImportURL(getContainer(), _protocol);
-            reRunURL.addParameter("reRunId", "${RowId}");
-
-            DisplayColumn reRunDisplayCol = new UrlColumn(StringExpressionFactory.createURL(reRunURL), "rerun");
-            reRunDisplayCol.setNoWrap(true);
-
-            List<DisplayColumn> cols = super.getDisplayColumns();
-            cols.add(0, reRunDisplayCol);
-            return cols;
-        }
-    }
-
-    @Override
-    public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol)
-    {
-        return new AssayResultsView(protocol, false)
+        return new AssayResultsView(protocol, false, errors)
         {
             @Override
             protected ModelAndView createHeaderView(QueryView queryView, boolean minimizeLinks, AssayProvider provider, ExpProtocol protocol)

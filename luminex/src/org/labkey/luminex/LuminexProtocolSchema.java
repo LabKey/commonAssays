@@ -28,13 +28,17 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
+import org.springframework.validation.BindException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -68,48 +72,18 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public Set<String> getTableNames()
     {
         Set<String> result = super.getTableNames();
-        result.add(getProviderTableName(getProtocol(), ANALYTE_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), TITRATION_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), WELL_EXCLUSION_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), RUN_EXCLUSION_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), GUIDE_SET_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), GUIDE_SET_CURVE_FIT_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, false));
-        result.add(getProviderTableName(getProtocol(), CV_QC_FLAG_TABLE_NAME, false));
+        result.add(ANALYTE_TABLE_NAME);
+        result.add(TITRATION_TABLE_NAME);
+        result.add(DATA_FILE_TABLE_NAME);
+        result.add(WELL_EXCLUSION_TABLE_NAME);
+        result.add(RUN_EXCLUSION_TABLE_NAME);
+        result.add(CURVE_FIT_TABLE_NAME);
+        result.add(GUIDE_SET_TABLE_NAME);
+        result.add(GUIDE_SET_CURVE_FIT_TABLE_NAME);
+        result.add(ANALYTE_TITRATION_TABLE_NAME);
+        result.add(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME);
+        result.add(CV_QC_FLAG_TABLE_NAME);
         return result;
-    }
-
-    public static String getWellExclusionTableName(ExpProtocol protocol)
-    {
-        return getProviderTableName(protocol, WELL_EXCLUSION_TABLE_NAME, false);
-    }
-
-    public static String getRunExclusionTableName(ExpProtocol protocol)
-    {
-        return getProviderTableName(protocol, RUN_EXCLUSION_TABLE_NAME, false);
-    }
-
-    public static String getAnalyteTitrationTableName(ExpProtocol protocol)
-    {
-        return getProviderTableName(protocol, ANALYTE_TITRATION_TABLE_NAME, false);
-    }
-
-    public static String getCurveFitTableName(ExpProtocol protocol)
-    {
-        return getProviderTableName(protocol, CURVE_FIT_TABLE_NAME, false);
-    }
-
-    public static String getAnalyteTableName(ExpProtocol protocol)
-    {
-        return getProviderTableName(protocol, ANALYTE_TABLE_NAME, false);
-    }
-
-    public static String getTitrationTableName(ExpProtocol protocol)
-    {
-        return getProviderTableName(protocol, TITRATION_TABLE_NAME, false);
     }
 
     public synchronized List<String> getCurveTypes()
@@ -117,7 +91,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         if (_curveTypes == null)
         {
             QueryDefinition queryDef = QueryService.get().createQueryDef(getUser(), _container, this, "query");
-            queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME, false).replace("\"", "\"\"") + "\"");
+            queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + CURVE_FIT_TABLE_NAME+ "\"");
             queryDef.setContainerFilter(ContainerFilter.EVERYTHING);
 
             ArrayList<QueryException> errors = new ArrayList<QueryException>();
@@ -281,7 +255,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public ExpDataTable createDataFileTable()
     {
-        final ExpDataTable ret = ExperimentService.get().createDataTable(AssaySchema.getProviderTableName(getProtocol(), DATA_FILE_TABLE_NAME, false), AssayService.get().createSchema(getUser(), getContainer(), null));
+        final ExpDataTable ret = ExperimentService.get().createDataTable(DATA_FILE_TABLE_NAME, AssayService.get().createSchema(getUser(), getContainer(), null));
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
@@ -596,5 +570,44 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         {
             return _schema.createTitrationTable(false);
         }
+    }
+
+
+    @Override
+    protected ResultsQueryView createDataQueryView(final ViewContext context, QuerySettings settings, BindException errors)
+    {
+        return new ResultsQueryView(getProtocol(), context, settings)
+        {
+            @Override
+            protected DataRegion createDataRegion()
+            {
+                ResultsDataRegion rgn = new LuminexResultsDataRegion(_provider, _protocol);
+                initializeDataRegion(rgn);
+                return rgn;
+            }
+
+            @Override
+            public DataView createDataView()
+            {
+                DataView result = super.createDataView();
+                String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
+
+                // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
+                if (showControls() && runId != null)
+                {
+                    ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
+                    excludeAnalytes.setScript("LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
+                            + "LABKEY.requiresCss('luminex/Exclusion.css');"
+                            + "analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
+                    excludeAnalytes.setDisplayPermission(UpdatePermission.class);
+
+                    // todo: move the JS and CSS inclusion to the page level
+
+                    result.getDataRegion().getButtonBar(DataRegion.MODE_GRID).add(excludeAnalytes);
+                }
+                return result;
+            }
+        };
+
     }
 }

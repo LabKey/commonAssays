@@ -56,7 +56,7 @@ public class AnalyteTable extends AbstractLuminexTable
     public AnalyteTable(LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, filter);
-        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.ANALYTE_TABLE_NAME));
+        setName(LuminexProtocolSchema.ANALYTE_TABLE_NAME);
         setPublicSchemaName(AssaySchema.NAME);
         
         addColumn(wrapColumn(getRealTable().getColumn("Name")));

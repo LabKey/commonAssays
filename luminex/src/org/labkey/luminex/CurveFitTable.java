@@ -36,7 +36,7 @@ public class CurveFitTable extends AbstractLuminexTable
     public CurveFitTable(LuminexProtocolSchema schema, boolean filterTable)
     {
         super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, filterTable);
-        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.CURVE_FIT_TABLE_NAME));
+        setName(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
         wrapAllColumns(true);
         ColumnInfo titrationCol = getColumn("TitrationId");
         titrationCol.setLabel("Titration");

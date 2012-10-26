@@ -229,54 +229,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
     }
 
-    private static final class ElispotResultsQueryView extends ResultsQueryView
-    {
-        public ElispotResultsQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
-        {
-            super(protocol, context, settings);
-        }
-
-        public DataView createDataView()
-        {
-            DataView view = super.createDataView();
-            view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
-            return view;
-        }
-    }
-
-    public ElispotResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
-    {
-        UserSchema schema = AssayService.get().createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
-        String name = AssayService.get().getResultsTableName(protocol);
-        QuerySettings settings = schema.getSettings(context, name, name);
-        return new ElispotResultsQueryView(protocol, context, settings);
-    }
-
-    public RunListDetailsQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
-    {
-        RunListDetailsQueryView view = new RunListDetailsQueryView(protocol, context,
-                ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString())
-        {
-            @Override
-            protected void populateButtonBar(DataView view, ButtonBar bar)
-            {
-                super.populateButtonBar(view, bar);
-
-                ActionURL url = new ActionURL(ElispotController.BackgroundSubtractionAction.class, getContainer());
-                ActionButton btn = new ActionButton(url, "Subtract Background");
-
-                btn.setRequiresSelection(true);
-                btn.setDisplayPermission(InsertPermission.class);
-                btn.setActionType(ActionButton.Action.POST);
-
-                bar.add(btn);
-            }
-        };
-
-        return view;
-
-    }
-
     public String getDescription()
     {
         return "Imports raw data files from CTL and AID instruments.";

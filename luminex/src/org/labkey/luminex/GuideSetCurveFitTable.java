@@ -93,7 +93,7 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         curveTypeColumn.setJdbcType(JdbcType.VARCHAR);
         addColumn(curveTypeColumn);
 
-        setName(AssaySchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME));
+        setName(LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME);
     }
 
     @NotNull
@@ -110,12 +110,12 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_schema.getTable(LuminexProtocolSchema.getAnalyteTitrationTableName(_schema.getProtocol()));
+        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_schema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
         analyteTitrationTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
-        CurveFitTable curveFitTable = (CurveFitTable)_schema.getTable(LuminexProtocolSchema.getCurveFitTableName(_schema.getProtocol()));
+        CurveFitTable curveFitTable = (CurveFitTable)_schema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
         curveFitTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(curveFitTable, "cf");
 

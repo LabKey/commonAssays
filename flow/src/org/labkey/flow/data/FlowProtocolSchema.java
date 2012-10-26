@@ -20,10 +20,15 @@ import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.study.query.RunListQueryView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
+import org.springframework.validation.BindException;
 
 /**
  * User: jeckels
@@ -50,5 +55,19 @@ public class FlowProtocolSchema extends AssayProtocolSchema
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
         return flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+    }
+
+    @Override
+    protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        // UNDONE: Create query view over flow.FCSAnalyses
+        return null;
+    }
+
+    @Override
+    protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        // UNDONE: Create query view over flow.Runs
+        return null;
     }
 }

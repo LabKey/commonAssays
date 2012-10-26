@@ -270,50 +270,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return null;
     }
 
-    @Override
-    public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
-    {
-        MicroarrayRunListQueryView queryView = new MicroarrayRunListQueryView(context, protocol);
-
-        if (hasCustomView(ExpProtocol.AssayDomainTypes.Run, true))
-        {
-            ActionURL runDetailsURL = new ActionURL(AssayRunDetailsAction.class, context.getContainer());
-            runDetailsURL.addParameter("rowId", protocol.getRowId());
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("runId", "RowId");
-
-            AbstractTableInfo ati = (AbstractTableInfo)queryView.getTable();
-            ati.setDetailsURL(new DetailsURL(runDetailsURL, params));
-            queryView.setShowDetailsColumn(true);
-        }
-
-        queryView.setShowUpdateColumn(true);
-        queryView.setShowAddToRunGroupButton(true);
-
-        return queryView;
-    }
-
-    private class MicroarrayRunListQueryView extends RunListQueryView
-    {
-        public MicroarrayRunListQueryView(ViewContext context, ExpProtocol protocol)
-        {
-            super(protocol, context);
-        }
-
-        protected void populateButtonBar(DataView view, ButtonBar bar)
-        {
-            super.populateButtonBar(view, bar);
-
-            ActionURL url = new ActionURL();
-            url.setPath("/microarray/geo_export.view");
-
-            ViewContext context = HttpView.currentContext();
-            url.setContainer(context.getContainer());
-            ActionButton btn = new ActionButton(url, "Create GEO Export");
-            bar.add(btn);
-        }
-    }
-
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(MicroarrayModule.class,

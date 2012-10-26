@@ -31,6 +31,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.UrlColumn;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -46,14 +47,20 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.SpecimenForeignKey;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.springframework.validation.BindException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -92,7 +99,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
     public Set<String> getTableNames()
     {
         Set<String> result = super.getTableNames();
-        result.add(AssaySchema.getProviderTableName(getProtocol(), UserTables.ResultSpecimens.name(), false));
+        result.add(UserTables.ResultSpecimens.name());
         return result;
     }
 
@@ -530,4 +537,36 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             addCondition(filter, resultIdFieldKey);
         }
     }
+
+    @Override
+    protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        return new ViabilityRunListQueryView(getProtocol(), context);
+    }
+
+    private class ViabilityRunListQueryView extends RunListQueryView
+    {
+        ExpProtocol _protocol;
+
+        public ViabilityRunListQueryView(ExpProtocol protocol, ViewContext context)
+        {
+            super(protocol, context);
+            _protocol = protocol;
+        }
+
+        @Override
+        public List<DisplayColumn> getDisplayColumns()
+        {
+            ActionURL reRunURL = getProvider().getImportURL(getContainer(), _protocol);
+            reRunURL.addParameter("reRunId", "${RowId}");
+
+            DisplayColumn reRunDisplayCol = new UrlColumn(StringExpressionFactory.createURL(reRunURL), "rerun");
+            reRunDisplayCol.setNoWrap(true);
+
+            List<DisplayColumn> cols = super.getDisplayColumns();
+            cols.add(0, reRunDisplayCol);
+            return cols;
+        }
+    }
+
 }

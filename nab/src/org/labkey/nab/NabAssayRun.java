@@ -34,6 +34,7 @@ import org.labkey.api.query.SchemaKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.NotFoundException;
@@ -176,13 +177,13 @@ public abstract class NabAssayRun extends Luc5Assay
             TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
             
             CustomView runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
-                SchemaKey.fromParts("assay", _provider.getResourceName(), _protocol.getName()).toString(), AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+                SchemaKey.fromParts("assay", _provider.getResourceName(), _protocol.getName()).toString(), AssayProtocolSchema.RUNS_TABLE_NAME, NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
 
             if (runView == null)
             {
                 // Try with the old schema/query name
                 runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
-                        AssaySchema.NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+                        AssaySchema.NAME, AssaySchema.getLegacyProtocolTableName(_protocol, AssayProtocolSchema.RUNS_TABLE_NAME), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
             }
 
             Collection<FieldKey> fieldKeysToShow;

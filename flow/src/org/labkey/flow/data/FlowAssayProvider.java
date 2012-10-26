@@ -45,7 +45,6 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -60,6 +59,7 @@ import org.labkey.flow.controllers.run.RunsForm;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.webparts.AnalysesWebPart;
+import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -331,20 +331,6 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
-    {
-        // UNDONE: Create query view over flow.FCSAnalyses
-        return null;
-    }
-
-    @Override
-    public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
-    {
-        // UNDONE: Create query view over flow.Runs
-        return null;
-    }
-
-    @Override
     public boolean hasCustomView(IAssayDomainType domainType, boolean details)
     {
         return false;
@@ -389,7 +375,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol)
+    public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol, BindException errors)
     {
         return null;
     }

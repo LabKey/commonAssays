@@ -55,6 +55,7 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -611,11 +612,28 @@ public class NabAssayController extends SpringActionController
 
     private Date getCustomViewModifiedDate(ExpRun run)
     {
-        CustomView runView = QueryService.get().getCustomView(getUser(), getContainer(),
-               AssaySchema.NAME, AssayService.get().getRunsTableName(run.getProtocol()), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
-        if (runView != null)
-            return runView.getModified();
-        return null;
+        ExpProtocol protocol = run.getProtocol();
+        // There are two potential places the view could be saved
+        CustomView runView1 = QueryService.get().getCustomView(getUser(), getContainer(),
+               AssaySchema.NAME, AssaySchema.getLegacyProtocolTableName(protocol, AssayProtocolSchema.RUNS_TABLE_NAME), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+        CustomView runView2 = QueryService.get().getCustomView(getUser(), getContainer(),
+               getProvider(run).createProtocolSchema(getUser(), getContainer(), protocol, null).getSchemaName(), AssayProtocolSchema.RUNS_TABLE_NAME, NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+
+        // Find the newest view and return its modified date
+        Date d1 = runView1 == null ? null : runView1.getModified();
+        Date d2 = runView2 == null ? null : runView2.getModified();
+        if (d1 == null)
+        {
+            // If there's no first date, the second must be fine (even if it's null)
+            return d2;
+        }
+        if (d2 == null)
+        {
+            // If there's not second date, the first must be fine (even if it's null)
+            return d1;
+        }
+        // Otherwise, return the more recent of the two
+        return d1.compareTo(d2) > 0 ? d1 : d2;
     }
 
     private NabAssayRun getCachedRun(ExpRun run)
@@ -868,7 +886,7 @@ public class NabAssayController extends SpringActionController
             if (_queryView == null)
             {
                 NabAssayProvider provider = (NabAssayProvider)AssayService.get().getProvider(_protocol);
-                QueryView dataView = new NabAssayProvider.NabResultsQueryView(provider, _protocol, _context)
+                QueryView dataView = new NabProtocolSchema.NabResultsQueryView(provider, _protocol, _context)
                 {
                     public DataView createDataView()
                     {

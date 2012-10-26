@@ -88,12 +88,12 @@ public class LuminexController extends SpringActionController
 
             AbstractAssayView result = new AbstractAssayView();
             LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), _protocol, null);
-            QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.getRunExclusionTableName(form.getProtocol()), LuminexProtocolSchema.getRunExclusionTableName(form.getProtocol()));
+            QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME);
             QueryView runsView = createQueryView(runsSetting, schema, errors);
             runsView.setTitle("Excluded Analytes");
             result.setupViews(runsView, false, form.getProvider(), form.getProtocol());
 
-            QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.getWellExclusionTableName(form.getProtocol()), LuminexProtocolSchema.getWellExclusionTableName(form.getProtocol()));
+            QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME);
             QueryView wellsView = createQueryView(wellsSetting, schema, errors);
             wellsView.setTitle("Excluded Wells");
             result.addView(wellsView);
@@ -135,7 +135,7 @@ public class LuminexController extends SpringActionController
 
             AbstractAssayView result = new AbstractAssayView();
             AssaySchema schema = AssayService.get().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
-            QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.getAnalyteTitrationTableName(form.getProtocol()), LuminexProtocolSchema.getAnalyteTitrationTableName(form.getProtocol()));
+            QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             settings.setAllowChooseQuery(false);
             QueryView view = new QueryView(schema, settings, errors)
             {

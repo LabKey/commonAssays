@@ -92,7 +92,7 @@ public class NabProviderSchema extends AssayProviderSchema
             // For backwards compatibility <12.3.  Data tables moved to NabProtocolSchema (assay.Nab.<protocol> schema)
             for (ExpProtocol protocol : getProtocols())
             {
-                names.add(AssaySchema.getProviderTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME, true));
+                names.add(AssaySchema.getLegacyProtocolTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME));
             }
         }
 
@@ -127,7 +127,7 @@ public class NabProviderSchema extends AssayProviderSchema
         // For backwards compatibility <12.3.  Data tables moved to NabProtocolSchema (assay.Nab.<protocol> schema)
         for (ExpProtocol protocol : getProtocols())
         {
-            String tableName = AssaySchema.getProviderTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME, true);
+            String tableName = AssaySchema.getLegacyProtocolTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME);
             if (tableName.equalsIgnoreCase(name))
             {
                 return createDataRowTable(protocol);

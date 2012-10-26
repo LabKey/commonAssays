@@ -52,7 +52,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     {
         super(LuminexProtocolSchema.getTableInfoGuideSet(), schema, filter, "RowId");
         wrapAllColumns(true);
-        setName(LuminexProtocolSchema.getProviderTableName(schema.getProtocol(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME));
+        setName(LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
 
         ColumnInfo protocolCol = getColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");

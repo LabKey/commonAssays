@@ -122,7 +122,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         Container container = form.getViewContext().getContainer();
         AssayProtocolSchema assaySchema = provider.createProtocolSchema(user, container, protocol, null);
 
-        QuerySettings settings = assaySchema.getSettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT, assaySchema.getRunsTableName(false));
+        QuerySettings settings = assaySchema.getSettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT, AssayProtocolSchema.RUNS_TABLE_NAME);
         //show all rows by default
        if (null == form.getMaxRows()
             && null == getViewContext().getRequest().getParameter(QueryView.DATAREGIONNAME_DEFAULT + "." + QueryParam.maxRows))
