@@ -1134,7 +1134,11 @@ public class FlowSchema extends UserSchema
                 TableInfo lookupTable = lookupColumn.getFkTableInfo();
                 if (lookupTable != null)
                 {
-                    ret.addAll(lookupTable.getExtendedColumns(hidden));
+                    for (ColumnInfo col : lookupTable.getExtendedColumns(hidden))
+                    {
+                        col.setFieldKey(new FieldKey(lookupColumn.getFieldKey(), col.getName()));
+                        ret.add(col);
+                    }
                 }
             }
         }
