@@ -67,7 +67,6 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.IdentifierString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -1559,7 +1558,7 @@ public class FlowSchema extends UserSchema
     }
 
 
-    protected QuerySettings createQuerySettings(String dataRegionName)
+    protected QuerySettings createQuerySettings(String dataRegionName, String queryName, String viewName)
     {
         return new FlowQuerySettings(dataRegionName);
     }
