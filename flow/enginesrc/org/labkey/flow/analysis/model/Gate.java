@@ -128,7 +128,7 @@ public abstract class Gate implements Serializable
     @Override
     public int hashCode()
     {
-        int result = _id != null ? _id.hashCode() : 0;
+        int result = 0;//_id != null ? _id.hashCode() : 0;
         result = 31 * result + (_name != null ? _name.hashCode() : 0);
         return result;
     }
@@ -141,7 +141,7 @@ public abstract class Gate implements Serializable
 
         Gate gate = (Gate) o;
 
-        if (_id != null ? !_id.equals(gate._id) : gate._id != null) return false;
+        //if (_id != null ? !_id.equals(gate._id) : gate._id != null) return false;
         if (_name != null ? !_name.equals(gate._name) : gate._name != null) return false;
 
         return true;
