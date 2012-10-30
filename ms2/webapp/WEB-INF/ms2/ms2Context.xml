@@ -409,7 +409,7 @@
             <map>
                 <entry key="searchResults">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg ref="pinFileType" />
+                        <constructor-arg ref="subPinFileType" />
                     </bean>
                 </entry>
             </map>
@@ -648,9 +648,10 @@
         <property name="switchFormat" ref="unixDefaultSwitch"/>
         <property name="join" value="true" />
         <property name="pipeToOutput" value="true" />
+        <property name="removeInput" value="true" />
         <property name="inputPaths">
             <map>
-                <entry key="results">
+                <entry key="input">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg ref="preSubResultsFileType" />
                     </bean>
@@ -700,7 +701,7 @@
                     <property name="value" value="s/\[UNIMOD:6\]/$/g"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="results" />
+                    <property name="key" value="input" />
                     <property name="function" value="input" />
                 </bean>
             </list>
@@ -1213,6 +1214,51 @@
         </property>
     </bean>
 
+    <bean id="sqt2pinFixupCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="sqt2pinFixupCommand"/>
+        <property name="statusName" value="SQT2PIN FIXUP"/>
+        <property name="groupParameterName" value="Sqt2pinFixup" />
+        <property name="protocolActionName" value="Sqt2pinFixup" />
+        <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="join" value="true" />
+        <property name="pipeToOutput" value="true" />
+        <property name="removeInput" value="true"/>
+        <property name="location" value="cluster"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="input">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="pinFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="output">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="subPinFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="exePath" value="/bin/sed"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="e"/>
+                    <property name="value" value="s/\*/-/g"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="input" />
+                    <property name="function" value="input" />
+                </bean>
+           </list>
+       </property>
+   </bean>
+
     <!-- Utility beans -->
     <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
     <bean id="unixCompactSwitch" class="org.labkey.api.pipeline.cmd.UnixCompactSwitchFormat"/>
@@ -1289,6 +1335,10 @@
 
     <bean id="hkFileType" class="org.labkey.api.util.FileType">
         <constructor-arg value=".hk" />
+    </bean>
+
+    <bean id="subPinFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".sub.pin.xml" />
     </bean>
 
     <bean id="preSubResultsFileType" class="org.labkey.api.util.FileType">
