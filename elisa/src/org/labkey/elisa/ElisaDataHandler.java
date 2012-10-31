@@ -196,7 +196,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
                         // add the coefficient of determination to the run
                         DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY_NAME);
-                        if (cod != null)
+                        if (cod != null && !Double.isNaN(regression.getRSquare()))
                             data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
 
                         for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))

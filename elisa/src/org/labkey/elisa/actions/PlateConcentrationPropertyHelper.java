@@ -93,7 +93,7 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
 
     protected boolean isCopyable(DomainProperty pd)
     {
-        return !AbstractAssayProvider.SPECIMENID_PROPERTY_NAME.equals(pd.getName()) && !AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME.equals(pd.getName());
+        return false;
     }
 
     public List<String> getSampleNames()
