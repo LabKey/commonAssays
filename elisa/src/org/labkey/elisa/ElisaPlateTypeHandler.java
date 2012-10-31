@@ -24,6 +24,7 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import java.util.List;
 public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
 {
     public static final String DEFAULT_PLATE = "default";
+    public static final String UNDILUTED_PLATE = "undiluted";
     public static final String STANDARDS_CONTROL_SAMPLE = "Standards";
 
     @Override
@@ -46,7 +48,7 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
     @Override
     public List<String> getTemplateTypes()
     {
-        return Collections.singletonList(DEFAULT_PLATE);
+        return Arrays.asList(DEFAULT_PLATE, UNDILUTED_PLATE);
     }
 
     @Override
@@ -56,27 +58,58 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
 
         template.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
-                PlateService.get().createPosition(container, template.getRows() - 1, 1));
+                PlateService.get().createPosition(container, template.getRows() - 3, 1));
 
-        for (int sample = 0; sample < (template.getColumns())/2; sample++)
+        if (DEFAULT_PLATE.equals(templateTypeName))
         {
-            int firstCol = (sample * 2);
-
-            if (firstCol > 0)
+            for (int sample = 0; sample < (template.getColumns())/2; sample++)
             {
-            // create the overall specimen group, consisting of two adjacent columns:
-            template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
-                    PlateService.get().createPosition(container, 0, firstCol),
-                    PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
+                int firstCol = (sample * 2);
+
+                if (firstCol > 0)
+                {
+                    // create the overall specimen group, consisting of two adjacent columns:
+                    template.addWellGroup("Specimen " + sample, WellGroup.Type.SPECIMEN,
+                            PlateService.get().createPosition(container, 0, firstCol),
+                            PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
+                }
+
+                for (int replicate = 0; replicate < template.getRows(); replicate++)
+                {
+                    String specimenName = firstCol == 0 ? "Standard" : ("Specimen " + sample + 1);
+
+                    template.addWellGroup(specimenName + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
+                            PlateService.get().createPosition(container, replicate, firstCol),
+                            PlateService.get().createPosition(container, replicate, firstCol + 1));
+                }
             }
-
-            for (int replicate = 0; replicate < template.getRows(); replicate++)
+        }
+        else if (UNDILUTED_PLATE.equals(templateTypeName))
+        {
+            int specimen = 1;
+            for (int column = 0; column < (template.getColumns())/2; column++)
             {
-                String specimenName = firstCol == 0 ? "Standard" : ("Specimen " + sample + 1);
+                int firstCol = (column * 2);
 
-                template.addWellGroup(specimenName + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
-                        PlateService.get().createPosition(container, replicate, firstCol),
-                        PlateService.get().createPosition(container, replicate, firstCol + 1));
+                for (int row = 0; row < template.getRows(); row++)
+                {
+                    // column group 1 through rows 6 are the control well groups
+                    String wellName;
+
+                    if (firstCol == 0 && row <= 5)
+                        wellName = "Standard, Replicate " + (row + 1);
+                    else
+                    {
+                        template.addWellGroup("Specimen " + specimen, WellGroup.Type.SPECIMEN,
+                                PlateService.get().createPosition(container, row, firstCol),
+                                PlateService.get().createPosition(container, row, firstCol + 1));
+
+                        wellName = "Specimen " + (specimen++) + ", Replicate 1";
+                    }
+                    template.addWellGroup(wellName, WellGroup.Type.REPLICATE,
+                            PlateService.get().createPosition(container, row, firstCol),
+                            PlateService.get().createPosition(container, row, firstCol + 1));
+                }
             }
         }
         return template;

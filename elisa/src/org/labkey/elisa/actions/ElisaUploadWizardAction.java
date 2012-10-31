@@ -67,10 +67,18 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     }
 
     @Override
+    protected InsertView createRunInsertView(ElisaRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
+    {
+        InsertView view = super.createRunInsertView(form, errorReshow, errors);
+        view.getDataRegion().setHorizontalGroups(false);
+
+        return view;
+    }
+
+    @Override
     protected RunStepHandler getRunStepHandler()
     {
         return new PlateBasedRunStepHandler() {
-
             @Override
             protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
             {

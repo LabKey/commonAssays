@@ -25,6 +25,7 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
@@ -147,6 +148,17 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                         WellGroup controlGroup = controlGroups.get(0);
                         SimpleRegression regression = new SimpleRegression(true);
 
+                        Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
+                        for (ExpMaterial material : data.getRun().getMaterialInputs().keySet())
+                            materialMap.put(material.getName(), material);
+
+                        Map<Position, String> specimenGroupMap = new HashMap<Position, String>();
+                        for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))
+                        {
+                            for (Position pos : sample.getPositions())
+                                specimenGroupMap.put(pos, sample.getName());
+                        }
+
                         for (WellGroup replicate : controlGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
                         {
                             double mean = replicate.getMean();
@@ -168,6 +180,12 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
                                 row.put(ElisaAssayProvider.WELLGROUP_PROPERTY_NAME, replicate.getPositionDescription());
                                 row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY_NAME, well.getValue());
+                                if (specimenGroupMap.containsKey(position))
+                                {
+                                    ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
+                                    if (material != null)
+                                        row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
+                                }
 
                                 if (conc != -1)
                                     row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME, conc);
@@ -175,6 +193,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 results.add(row);
                             }
                         }
+
                         // add the coefficient of determination to the run
                         DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY_NAME);
                         if (cod != null)
@@ -192,6 +211,12 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                     row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
                                     row.put(ElisaAssayProvider.WELLGROUP_PROPERTY_NAME, replicate.getPositionDescription());
                                     row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY_NAME, well.getValue());
+                                    if (specimenGroupMap.containsKey(position))
+                                    {
+                                        ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
+                                        if (material != null)
+                                            row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
+                                    }
 
                                     // compute the concentration
                                     double concentration = regression.predict(well.getValue());

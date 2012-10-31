@@ -177,6 +177,12 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
         dataDomain.setDescription("The user is prompted to enter data values for row of data associated with a run, typically done as uploading a file.  This is part of the second step of the upload process.");
 
+        DomainProperty specimenLsid = addProperty(dataDomain, ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Specimen", PropertyType.STRING, "Specimen Data Lookup");
+        specimenLsid.setHidden(true);
+        specimenLsid.setShownInInsertView(false);
+        specimenLsid.setShownInDetailsView(false);
+        specimenLsid.setShownInUpdateView(false);
+
         addProperty(dataDomain, WELL_PROPERTY_NAME, WELL_PROPERTY_CAPTION, PropertyType.STRING, "Well location.");
         addProperty(dataDomain, WELLGROUP_PROPERTY_NAME, WELLGROUP_PROPERTY_CAPTION, PropertyType.STRING, "Well Group location.");
 
@@ -217,6 +223,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
         Set<String> dataProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_DATA);
 
+        dataProperties.add(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
         dataProperties.add(WELL_PROPERTY_NAME);
         dataProperties.add(WELLGROUP_PROPERTY_NAME);
         dataProperties.add(ABSORBANCE_PROPERTY_NAME);
