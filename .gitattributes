@@ -53,6 +53,7 @@ elisa/src/org/labkey/elisa/actions/PlateConcentrationPropertyHelper.java -text
 elisa/src/org/labkey/elisa/plate/BioTekPlateReader.java -text
 elisa/src/org/labkey/elisa/query/ElisaResultsTable.java -text
 elisa/src/org/labkey/elisa/view/runDetailsView.jsp -text
+elisa/webapp/elisa/runDataPanel.js -text
 elisa/webapp/elisa/runDetailsPanel.js -text
 elispotassay/module.properties -text
 elispotassay/resources/schemas/dbscripts/postgresql/elispot-11.30-12.10.sql -text

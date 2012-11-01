@@ -25,7 +25,6 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
 
         this.items = [
                 this.createRunDetailView()
-                //this.createRunDataView()
         ];
 
         this.callParent([arguments]);

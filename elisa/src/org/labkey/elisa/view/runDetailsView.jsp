@@ -56,6 +56,7 @@
     LABKEY.requiresScript("vis/genericChart/genericChartPanel.js");
     LABKEY.requiresVisualization();
     LABKEY.requiresScript("elisa/runDetailsPanel.js");
+    LABKEY.requiresScript("elisa/runDataPanel.js");
 
 </script>
 
@@ -92,6 +93,12 @@
             autoColumnXName  : <%=form.getAutoColumnXName() != null ? q(form.getAutoColumnXName()) : null%>,
             defaultNumberFormat: eval("<%=numberFormatFn%>"),
             allowEditMode: <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>
+        }));
+
+        items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {
+
+            schemaName      : <%=q(form.getSchemaName())%>,
+            queryName       : <%=q(form.getQueryName())%>
         }));
 
         var panel = Ext4.create('Ext.panel.Panel', {
