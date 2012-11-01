@@ -191,7 +191,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             File fileWorkInputXML = _wd.newFile("input.xml");
             getJobSupport().createParamParser().writeFromMap(params, fileWorkInputXML);
 
-            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
+            File fileMzXML = _factory.findInputFile(getJobSupport());
             File fileMGF = new File(_wd.getDir(), fileWorkMGF.getName());
 
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot using MzXML2Search

@@ -253,7 +253,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 
             List<File> sequenceFiles = getFASTAOrIndexFiles(actions);
 
-            File fileMzXML = _factory.findInputFile(getJob().getDataDirectory(), getJob().getBaseName());
+            File fileMzXML = _factory.findInputFile(getJob());
             File fileMzXMLWork = _wd.inputFile(fileMzXML, true);
 
             // Write out sequest.params file

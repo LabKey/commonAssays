@@ -330,11 +330,15 @@
                 <entry key="matches">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg ref="matchesFileType" />
+                        <!--Save this in the analysis directory instead of leaving it next to the original spectra file in the data directory -->
+                        <property name="forceToAnalysisDir" value="true" />
                     </bean>
                 </entry>
                 <entry key="nomatches">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg ref="nomatchesFileType" />
+                        <!--Save this in the analysis directory instead of leaving it next to the original spectra file in the data directory -->
+                        <property name="forceToAnalysisDir" value="true" />
                     </bean>
                 </entry>
             </map>

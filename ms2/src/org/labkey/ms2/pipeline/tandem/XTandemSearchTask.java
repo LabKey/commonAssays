@@ -141,7 +141,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             File fileJobTandemXML = null;
             boolean searchComplete = NetworkDrive.exists(fileOutputXML);
 
-            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
+            File fileMzXML = _factory.findInputFile(getJobSupport());
             File fileInputSpectra;
             WorkDirectory.CopyingResource lock = null;
             try

@@ -250,7 +250,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             boolean useGUIDFilename = getJob().getBaseName().length() > 20;
             String dtaDirName = useGUIDFilename ? GUID.makeGUID() : getJob().getBaseName();
             File dirOutputDta = new File(_wd.getDir(), dtaDirName);
-            File fileMzXML = _factory.findInputFile(getJob().getDataDirectory(), getJob().getBaseName());
+            File fileMzXML = _factory.findInputFile(getJob());
             String tppVersion = TPPTask.getTPPVersion(getJob());
 
             // out2xml will need the mzXML file in the parent directory of the DTA directory in order to look up

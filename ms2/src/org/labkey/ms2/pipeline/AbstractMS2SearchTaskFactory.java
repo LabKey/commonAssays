@@ -68,16 +68,28 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         return "SEARCH";
     }
 
-    public File findInputFile(File dataDirectory, String baseName) throws PipelineJobException
+    public File findInputFile(MS2SearchJobSupport support) throws PipelineJobException
     {
+        File analysisDirectory = support.getAnalysisDirectory();
+        File dataDirectory = support.getDataDirectory();
+        String baseName = support.getBaseName();
         for (FileType fileType : getInputTypes())
         {
-            File f = fileType.newFile(dataDirectory, baseName);
+            // Check if there's a version of the file in the analysis directory first. This ensures we grab the
+            // analysis-specific version of the spectra file, if it exists
+            File f = fileType.newFile(analysisDirectory, baseName);
+            if (NetworkDrive.exists(f))
+            {
+                return f;
+            }
+
+            // Otherwise, look in the data directory
+            f = fileType.newFile(dataDirectory, baseName);
             if (NetworkDrive.exists(f))
             {
                 return f;
             }
         }
-        throw new PipelineJobException("Could not find a '" + baseName + "' file in '" + dataDirectory + "' that matches input types: " + getInputTypes());
+        throw new PipelineJobException("Could not find a '" + baseName + "' file in '" + analysisDirectory + "' or '" + dataDirectory + "' that matches input types: " + getInputTypes());
     }
 }
