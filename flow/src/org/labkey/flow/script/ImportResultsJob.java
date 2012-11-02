@@ -31,16 +31,15 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.persist.AnalysisSerializer;
-import org.labkey.flow.persist.AttrObject;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSetHelper;
-import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
-import org.labkey.flow.persist.ObjectType;
 
 import java.io.*;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -57,14 +56,16 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
     public ImportResultsJob(ViewBackgroundInfo info,
                             PipeRoot root,
                             FlowExperiment experiment,
+                            AnalysisEngine analysisEngine,
                             File analysisPathRoot,
                             File originalImportedFile,
                             File runFilePathRoot,
+                            List<File> keywordDirs,
+                            Map<String, FlowFCSFile> resolvedFCSFiles,
                             String analysisRunName,
-                            boolean createKeywordRun,
                             boolean failOnError) throws Exception
     {
-        super(info, root, experiment, originalImportedFile, runFilePathRoot, null, createKeywordRun, failOnError);
+        super(info, root, experiment, analysisEngine, originalImportedFile, runFilePathRoot, keywordDirs, resolvedFCSFiles, null, failOnError);
 
         _analysisPathRoot = analysisPathRoot;
         if (!_analysisPathRoot.isDirectory())
@@ -116,7 +117,30 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             sampleLabels.add(sampleLabel);
 
             AttributeSet keywordAttrs = entry.getValue();
-            // UNDONE: set URI if runFilePathRoot/sample.fcs exists
+
+            // Set the keywords URI using the resolved FCS file or the FCS file in the runFilePathRoot directory
+            URI uri = null;
+            File file = null;
+            if (getResolvedFCSFiles() != null)
+            {
+                FlowFCSFile resolvedFCSFile = getResolvedFCSFiles().get(sampleLabel);
+                if (resolvedFCSFile != null)
+                {
+                    uri = resolvedFCSFile.getFCSURI();
+                    if (uri != null)
+                        file = new File(uri);
+                }
+            }
+            else if (getRunFilePathRoot() != null)
+            {
+                file = new File(getRunFilePathRoot(), sampleLabel);
+                uri = file.toURI();
+            }
+
+            // Don't set FCSFile uri unless the file actually exists on disk.
+            if (file != null && file.exists())
+                keywordAttrs.setURI(uri);
+
             AttributeSetHelper.prepareForSave(keywordAttrs, getContainer());
         }
 
@@ -135,9 +159,10 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         File statisticsFile = new File(_analysisPathRoot, AnalysisSerializer.STATISTICS_FILENAME);
 
-        return saveAnalysis(this, getUser(), getContainer(), getExperiment(),
+        return saveAnalysis(getUser(), getContainer(), getExperiment(),
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
                 getRunFilePathRoot(),
+                getResolvedFCSFiles(),
                 keywordsMap,
                 sampleCompMatrixMap,
                 resultsMap,

@@ -17,6 +17,7 @@
 package org.labkey.flow.data;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.DataType;
@@ -87,6 +88,16 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return fromData(ExperimentService.get().getExpData(id));
     }
 
+    static public List<FlowDataObject> fromRowIds(int... ids)
+    {
+        return fromDatas(ExperimentService.get().getExpDatas(ids));
+    }
+
+    static public List<FlowDataObject> fromRowIds(Collection<Integer> ids)
+    {
+        return fromDatas(ExperimentService.get().getExpDatas(ids));
+    }
+
     static public FlowDataObject fromLSID(String lsid)
     {
         return fromData(ExperimentService.get().getExpData(lsid));
@@ -133,6 +144,16 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
             if (obj != null)
                 list.add(obj);
         }
+    }
+
+    static public List<FlowDataObject> fromDataType(Container container, @Nullable FlowDataType type)
+    {
+        return fromDatas(ExperimentService.get().getExpDatas(container, type, null));
+    }
+
+    static public List<FlowDataObject> fromName(Container container, @Nullable FlowDataType type, @Nullable String name)
+    {
+        return fromDatas(ExperimentService.get().getExpDatas(container, type, name));
     }
 
     public FlowDataObject(ExpData data)
@@ -203,11 +224,6 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         if (experiment == null)
             return null;
         return experiment.getLSID();
-    }
-
-    static public List<FlowDataObject> getForContainer(Container container, FlowDataType type)
-    {
-        return fromDatas(ExperimentService.get().getExpDatas(container, type));
     }
 
     /**

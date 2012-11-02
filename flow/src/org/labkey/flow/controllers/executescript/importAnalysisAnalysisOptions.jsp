@@ -44,6 +44,7 @@
 <%@ page import="org.labkey.flow.analysis.model.SubsetExpressionGate" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -78,6 +79,7 @@
     opOptions.put(CompareType.DOES_NOT_START_WITH.getPreferredUrlKey(), CompareType.DOES_NOT_START_WITH.getDisplayValue());
     opOptions.put(CompareType.IN.getPreferredUrlKey(), CompareType.IN.getDisplayValue());
 
+    Map<String, String> groupOptions = new TreeMap<String, String>();
     Map<String, Set<String>> groups = new TreeMap<String, Set<String>>();
     for (Workspace.GroupInfo group : workspace.getGroups())
     {
@@ -89,7 +91,11 @@
                 groupSamples.add(sampleInfo.getLabel());
         }
         if (group.isAllSamples() || groupSamples.size() > 0)
-            groups.put(group.getGroupName().toString(), groupSamples);
+        {
+            String groupName = group.getGroupName().toString();
+            groups.put(groupName, groupSamples);
+            groupOptions.put(groupName, groupName + " (" + groupSamples.size() + " samples)");
+        }
     }
 
 %>
@@ -98,8 +104,11 @@
     var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
 
+<input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
-<input type="hidden" name="runFilePathRoot" id="runFilePathRoot" value="<%=h(form.getRunFilePathRoot())%>">
+<% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
+<input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
+<% } %>
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=h(form.getSelectAnalysisEngine())%>">
 
 <p>Analysis engine options.
@@ -117,7 +126,7 @@ if (protocol != null)
         Samples will be filtered by the current protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a>:
         <br>
         <div style="padding-left: 2em;">
-            <%=protocol.getFCSAnalysisFilter().getFilterText()%>
+            <%=h(protocol.getFCSAnalysisFilter().getFilterText())%>
         </div>
         <%
     }
@@ -169,12 +178,12 @@ if (protocol != null)
     </script>
     <label for="importGroupNames">Select a FlowJo group to import from the workspace.</label>
     <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
-        <labkey:options value="<%=form.getImportGroupNameList()%>" set="<%=groups.keySet()%>" />
+        <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
     </select>
 </div>
 
 <%
-    if ("rEngine".equals(form.getSelectAnalysisEngine()))
+    if (AnalysisEngine.R == form.getSelectAnalysisEngine())
     {
 %>
 <h3>Normalization Options</h3>
@@ -195,9 +204,9 @@ if (protocol != null)
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <input type="checkbox" name="rEngineNormalization" id="rEngineNormalization" onchange="onNormalizationChange();"
-        <%=normalizationEnabled && form.isrEngineNormalization() ? "checked" : ""%>
-        <%=normalizationEnabled ? "" : "disabled"%> >
-    <input type="hidden" name="<%=SpringActionController.FIELD_MARKER%>rEngineNormalization"/>
+        <%=text(normalizationEnabled && form.isrEngineNormalization() ? "checked" : "")%>
+        <%=text(normalizationEnabled ? "" : "disabled")%> >
+    <input type="hidden" name="<%=text(SpringActionController.FIELD_MARKER)%>rEngineNormalization"/>
     <label for="rEngineNormalization">Perform normalization using flowWorkspace R library? (experimental)</label>
 </div>
 
@@ -205,7 +214,7 @@ if (protocol != null)
     <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
     <em>NOTE:</em> The list of available samples is restricted to those in the imported group above.<br>
     <select name="rEngineNormalizationReference" id="rEngineNormalizationReference"
-        <%=normalizationEnabled ? "" : "disabled"%> >
+        <%=text(normalizationEnabled ? "" : "disabled")%> >
         <option value="">&lt;Select sample&gt;</option>
         <%
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();
@@ -219,7 +228,7 @@ if (protocol != null)
                         Set<String> groupSamples = groups.get(group);
                         for (String sample : groupSamples)
                         {
-        %><option value=<%=PageFlowUtil.filter(sample)%> <%=sample.equals(rEngineNormalizationReference) ? "selected" : ""%>><%=PageFlowUtil.filter(sample)%></option><%
+        %><option value=<%=PageFlowUtil.filter(sample)%> <%=text(sample.equals(rEngineNormalizationReference) ? "selected" : "")%>><%=PageFlowUtil.filter(sample)%></option><%
                         }
                     }
                 }
@@ -268,21 +277,21 @@ if (protocol != null)
         LABKEY.requiresCss('Ext.ux.form.LovCombo.css');
     </script>
     <script>
-        var jsonSubsetMap = <%=jsonSubsetMap.toString()%>;
+        var jsonSubsetMap = <%=text(jsonSubsetMap.toString())%>;
 
         Ext.onReady(function () {
             var combo = new Ext.ux.form.LovCombo({
                 id: "rEngineNormalizationSubsets",
                 renderTo: "rEngineNormalizationSubsetsDiv",
                 value: <%=PageFlowUtil.jsString(form.getrEngineNormalizationSubsets())%>,
-                disabled: <%=normalizationEnabled ? "false" : "true"%>,
+                disabled: <%=text(normalizationEnabled ? "false" : "true")%>,
                 width: 475,
                 triggerAction: "all",
                 mode: "local",
                 valueField: "myId",
                 displayField: "displayText",
                 allowBlank: false,
-                separator: "<%=ImportAnalysisForm.PARAMATER_SEPARATOR%>",
+                separator: "<%=text(ImportAnalysisForm.PARAMATER_SEPARATOR)%>",
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
                     data: jsonSubsetMap[importedGroup]
@@ -317,14 +326,14 @@ if (protocol != null)
                 id: "rEngineNormalizationParameters",
                 renderTo: "rEngineNormalizationParametersDiv",
                 value: <%=PageFlowUtil.jsString(form.getrEngineNormalizationParameters())%>,
-                disabled: <%=normalizationEnabled ? "false" : "true"%>,
+                disabled: <%=text(normalizationEnabled ? "false" : "true")%>,
                 width: 275,
                 triggerAction: "all",
                 mode: "local",
                 valueField: "myId",
                 displayField: "displayText",
                 allowBlank: false,
-                separator: "<%=ImportAnalysisForm.PARAMATER_SEPARATOR%>",
+                separator: "<%=text(ImportAnalysisForm.PARAMATER_SEPARATOR)%>",
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
                     data: <%=jsonParams%>

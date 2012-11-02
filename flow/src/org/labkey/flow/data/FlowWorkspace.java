@@ -23,11 +23,8 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.persist.AttrObject;
-import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +43,7 @@ public class FlowWorkspace extends FlowDataObject
 {
     public static List<FlowWorkspace> getWorkspaces(Container container)
     {
-        return (List)FlowDataObject.getForContainer(container, FlowDataType.Workspace);
+        return (List)FlowDataObject.fromDataType(container, FlowDataType.Workspace);
     }
 
     public static FlowWorkspace fromWorkspaceId(int id)

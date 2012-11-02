@@ -28,7 +28,6 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.util.*;
-import java.sql.SQLException;
 import java.io.File;
 import java.io.Serializable;
 
@@ -173,7 +172,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     static public List<FlowCompensationMatrix> getCompensationMatrices(Container container)
     {
-        return (List) FlowDataObject.getForContainer(container, FlowDataType.CompensationMatrix);
+        return (List) FlowDataObject.fromDataType(container, FlowDataType.CompensationMatrix);
     }
     static public List<FlowCompensationMatrix> getUploadedCompensationMatrices(Container container)
     {

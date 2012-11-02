@@ -27,8 +27,14 @@ abstract public class FlowProperty
     static public final SystemProperty FCSAnalysisName = new SystemProperty(PROPERTY_BASE + "FCSAnalysisName", PropertyType.STRING);
     static public final SystemProperty FCSAnalysisFilter = new SystemProperty(PROPERTY_BASE + "FCSAnalysisFilter", PropertyType.STRING);
     static public final SystemProperty ICSMetadata = new SystemProperty(PROPERTY_BASE + "ICSMetadata", PropertyType.STRING);
+
+    // Property on FlowRun ExpRun object: name of analysis engine (AnalysisEngine)
+    static public final SystemProperty AnalysisEngine = new SystemProperty(PROPERTY_BASE + "AnalysisEngine", PropertyType.STRING);
+
+    // Property on FlowFCSFile ExpData object: true when the FlowFCSFile was created from an external analysis (extracted from FlowJo workspace or analysis archive)
+    //static public final SystemProperty ExtraKeywordsFCSFile = new SystemProperty(PROPERTY_BASE + "ExtraKeywordsFCSFile", PropertyType.BOOLEAN);
+
     static public void register()
     {
-
     }
 }

@@ -29,6 +29,11 @@
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ResolvedSamplesData" %>
+<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
+<%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -38,8 +43,11 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 %>
 
+<input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
-<input type="hidden" name="runFilePathRoot" id="runFilePathRoot" value="<%=h(form.getRunFilePathRoot())%>">
+<% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
+<input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
+<% } %>
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=h(form.getSelectAnalysisEngine())%>">
 
 <%--
@@ -56,8 +64,8 @@
 <input type="hidden" name="rEngineNormalizationSubsets" value="<%=h(form.getrEngineNormalizationSubsets())%>"/>
 <input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
-<p>The statistics in this workspace that have been calculated by FlowJo will be imported to <%=FlowModule.getLongProductName()%>.<br><br>
-    <%=FlowModule.getLongProductName()%> organizes results into different "analysis folders".  The same set of FCS file should only
+<p>The statistics in this workspace that have been calculated by FlowJo will be imported to <%=h(FlowModule.getLongProductName())%>.<br><br>
+    <%=h(FlowModule.getLongProductName())%> organizes results into different "analysis folders".  The same set of FCS file should only
     be analyzed once in a given analysis folder.  If you want to analyze the same FCS file in two different ways,
     those results should be put into different analysis folders.</p>
 <hr/>
@@ -67,26 +75,55 @@
     Map<Integer, String> disabledAnalyses = new HashMap<Integer, String>();
     if (pipeRoot != null)
     {
-        File runFilePathRoot = null;
-        if (form.getRunFilePathRoot() != null)
+        List<File> keywordDirs = new ArrayList<File>();
+        if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
         {
-            runFilePathRoot = pipeRoot.resolvePath(form.getRunFilePathRoot());
+            for (String dir : form.getKeywordDir())
+            {
+                File keywordDir = pipeRoot.resolvePath(dir);
+                if (keywordDir != null)
+                    keywordDirs.add(keywordDir);
+            }
         }
         else if (form.getExistingKeywordRunId() > 0)
         {
             FlowRun keywordsRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
-            runFilePathRoot = new File(keywordsRun.getPath());
+            keywordDirs.add(new File(keywordsRun.getPath()));
+        }
+        else if (form.getResolvedSamples().getRows() != null && !form.getResolvedSamples().getRows().isEmpty())
+        {
+            // Ugh. Need to include the file root for the resolved files.  For now, just take the run file path of the first run found.
+            for (ResolvedSamplesData.ResolvedSample resolved : form.getResolvedSamples().getRows().values())
+            {
+                if (resolved.isSelected() && resolved.hasMatchedFile())
+                {
+                    FlowWell fcsFile = FlowWell.fromWellId(resolved.getMatchedFile().intValue());
+                    if (fcsFile != null)
+                    {
+                        FlowRun run = fcsFile.getRun();
+                        File file = run.getExperimentRun().getFilePathRoot();
+                        if (file != null)
+                        {
+                            keywordDirs.add(file);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
-        if (runFilePathRoot != null)
+        if (keywordDirs.size() > 0)
         {
-            String relativeRunFilePathRoot = pipeRoot.relativePath(runFilePathRoot);
             for (FlowExperiment analysis : analyses)
             {
-                if (analysis.hasRun(runFilePathRoot, null))
-                    disabledAnalyses.put(analysis.getExperimentId(), "The '" + analysis.getName() + "' analysis folder already contains the FCS files from '" + relativeRunFilePathRoot + "'.");
-                else if (firstNonDisabledAnalysis == null)
-                    firstNonDisabledAnalysis = analysis;
+                for (File keywordDir : keywordDirs)
+                {
+                    String relativeKeywordDir = pipeRoot.relativePath(keywordDir);
+                    if (analysis.hasRun(keywordDir, null))
+                        disabledAnalyses.put(analysis.getExperimentId(), "The '" + analysis.getName() + "' analysis folder already contains the FCS files from '" + relativeKeywordDir + "'.");
+                    else if (firstNonDisabledAnalysis == null)
+                        firstNonDisabledAnalysis = analysis;
+                }
             }
         }
     }
@@ -137,8 +174,8 @@
                             String disabledReason = disabledAnalyses.get(analysis.getExperimentId());
                     %>
                     <option value="<%=h(analysis.getExperimentId())%>"
-                            <%=disabledReason == null && analysis.getExperimentId() == selectedId ? "selected":""%>
-                            <%=disabledReason != null ? "disabled=\"disabled\" title=\"" + h(disabledReason) + "\"":""%>>
+                            <%=text(disabledReason == null && analysis.getExperimentId() == selectedId ? "selected":"")%>
+                            <%=text(disabledReason != null ? "disabled=\"disabled\" title=\"" + h(disabledReason) + "\"":"")%>>
                         <%=h(analysis.getName())%>
                     </option>
                     <%

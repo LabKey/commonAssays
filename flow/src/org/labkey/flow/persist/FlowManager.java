@@ -27,6 +27,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.ExperimentProperty;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.ResultSetUtil;
@@ -35,6 +36,7 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
+import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
@@ -822,15 +824,12 @@ public class FlowManager
             TableInfo table = schema.getTable(FlowTableType.FCSFiles);
             List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-            SimpleFilter filter = null;
 
-/*        // sum of run.count where protocol = 'Keyword'
+            // filter to those wells that were imported from a Keywords run
+            // ignoring 'fake' FCSFiles created while importing a FlowJo workspace.
             SimpleFilter filter = new SimpleFilter();
-            filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
-            TableInfo table = schema.getTable(FlowTableType.Runs);
-            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("FCSFileCount", Aggregate.Type.SUM));
-            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("FCSFileCount"));
-*/
+            filter.addCondition(FieldKey.fromParts("Original"), true, CompareType.EQUAL);
+
             Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
             //TODO: multiple aggregates
             Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
@@ -968,6 +967,8 @@ public class FlowManager
 
             if (o.getColumn("compid") != null)
             {
+                // Update FCSAnalysis and FCSFile rows to point to their inputs.
+                // The 'fake' workspace FCSFiles may have original FCSFile as inputs.
                 Table.execute(s,
                         "UPDATE flow.object SET "+
                         "compid = COALESCE(compid,"+
@@ -982,7 +983,7 @@ public class FlowManager
                         "    (SELECT MIN(DI.dataid) "+
                         "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
                         "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7))) " +
-                        "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid=3 AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", c.getId());
+                        "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid IN (1,3) AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", c.getId());
             }
             s.getScope().commitTransaction();
         }

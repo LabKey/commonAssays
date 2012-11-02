@@ -19,6 +19,7 @@ import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,15 +30,26 @@ import java.util.List;
  */
 public class ImportAnalysisForm
 {
+    public static final String NAME = "importAnalysis";
+    
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
     public static final String PARAMATER_SEPARATOR = "\ufe50";
+
     // unicode fullwidth comma
     //public static final String NORMALIZATION_PARAMATER_SEPARATOR = "\uff0c";
 
-    private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_WORKSPACE.getNumber();
+    public enum SelectFCSFileOption
+    {
+        None, Included, Previous, Browse
+    }
+
+    private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
     private WorkspaceData workspace = new WorkspaceData();
+    private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.Previous;
     private int existingKeywordRunId;
-    private String selectAnalysisEngine = "noEngine";
+    private ResolvedSamplesData resolved = new ResolvedSamplesData();
+
+    private AnalysisEngine selectAnalysisEngine = AnalysisEngine.FlowJoWorkspace;
 
     // general analysis options and R normalization configuration
     private String importGroupNames = Workspace.ALL_SAMPLES;
@@ -49,7 +61,8 @@ public class ImportAnalysisForm
     private boolean createAnalysis;
     private String newAnalysisName;
     private int existingAnalysisId;
-    private String runFilePathRoot;
+    // FCSFile directories selected in the pipeline browser for association with the imported workspace analysis.
+    private String[] keywordDir;
     private boolean confirm;
 
     public int getStep()
@@ -77,17 +90,32 @@ public class ImportAnalysisForm
         return workspace;
     }
 
+    public ResolvedSamplesData getResolvedSamples()
+    {
+        return resolved;
+    }
+
+    public SelectFCSFileOption getSelectFCSFilesOption()
+    {
+        return selectFCSFilesOption;
+    }
+
+    public void setSelectFCSFilesOption(SelectFCSFileOption selectFCSFilesOption)
+    {
+        this.selectFCSFilesOption = selectFCSFilesOption;
+    }
+
     public int getExistingKeywordRunId()
     {
         return existingKeywordRunId;
     }
 
-    public String getSelectAnalysisEngine()
+    public AnalysisEngine getSelectAnalysisEngine()
     {
         return selectAnalysisEngine;
     }
 
-    public void setSelectAnalysisEngine(String selectAnalysisEngine)
+    public void setSelectAnalysisEngine(AnalysisEngine selectAnalysisEngine)
     {
         this.selectAnalysisEngine = selectAnalysisEngine;
     }
@@ -192,14 +220,14 @@ public class ImportAnalysisForm
         this.existingAnalysisId = existingAnalysisId;
     }
 
-    public String getRunFilePathRoot()
+    public String[] getKeywordDir()
     {
-        return runFilePathRoot;
+        return this.keywordDir;
     }
 
-    public void setRunFilePathRoot(String runFilePathRoot)
+    public void setKeywordDir(String[] keywordDir)
     {
-        this.runFilePathRoot = runFilePathRoot;
+        this.keywordDir = keywordDir;
     }
 
     public boolean isConfirm()

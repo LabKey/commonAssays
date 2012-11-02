@@ -54,14 +54,14 @@
             if (step.getNumber() > 1) {
                 %>
                 <td valign="middle">
-                    <img src="<%=context.getContextPath()%>/_.gif" style="background:<%=futureStep ? "silver" : "black"%>; width:40px; height:1px"/>
+                    <img src="<%=h(context.getContextPath())%>/_.gif" style="background:<%=text(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
                 </td>
                 <%
             }
             %>
-            <td width="60" style="text-align:center;color:<%=futureStep ? "silver" : "black"%>" valign="top">
-                <span style="font-size:1.1em;font-weight:<%=currentStep ? "bold":"normal"%>;"><%=step.getNumber()%></span><br/>
-                <span style="font-weight:<%=currentStep ? "bold":"normal"%>"><%=step.getTitle()%></span>
+            <td width="70" style="text-align:center;color:<%=text(futureStep ? "silver" : "black")%>" valign="top">
+                <span style="font-size:1.1em;font-weight:<%=text(currentStep ? "bold":"normal")%>;"><%=step.getNumber()%></span><br/>
+                <span style="font-weight:<%=text(currentStep ? "bold":"normal")%>"><%=h(step.getTitle())%></span>
                 <%--
                 <form name="step_<%=step.name()%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="step" value="<%=step.getNumber()-1%>">
@@ -80,7 +80,7 @@
 
 <labkey:errors/>
 
-<form name="importAnalysis" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
+<form name="<%=text(ImportAnalysisForm.NAME)%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="step" value="<%=form.getStep()%>">
     <%
         Iterator i = form.getWorkspace().getHiddenFields().entrySet().iterator();
@@ -88,7 +88,18 @@
         {
             Map.Entry entry = (Map.Entry)i.next();
             String key = "workspace." + entry.getKey();
-            %><input type="hidden" id="<%=key%>" name="<%=key%>" value="<%=h(entry.getValue())%>"><%
+            %><input type="hidden" id="<%=h(key)%>" name="<%=h(key)%>" value="<%=h(entry.getValue())%>"><%
+        }
+
+        if (form.getStep() > AnalysisScriptController.ImportAnalysisStep.RESOLVE_FCSFILES.getNumber())
+        {
+            i = form.getResolvedSamples().getHiddenFields().entrySet().iterator();
+            while (i.hasNext())
+            {
+                Map.Entry entry = (Map.Entry)i.next();
+                String key = "resolvedSamples." + entry.getKey();
+            %><input type="hidden" id="<%=h(key)%>" name="<%=h(key)%>" value="<%=h(entry.getValue())%>"><%
+            }
         }
     %>
 
@@ -102,12 +113,16 @@
         JspView<ImportAnalysisForm> view = null;
         switch (form.getWizardStep())
         {
-            case SELECT_WORKSPACE:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisSelectWorkspace.jsp", form);
+            case SELECT_ANALYSIS:
+                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp", form);
                 break;
 
             case SELECT_FCSFILES:
                 view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp", form);
+                break;
+
+            case RESOLVE_FCSFILES:
+                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisResolveFCSFiles.jsp", form);
                 break;
 
             case ANALYSIS_ENGINE:

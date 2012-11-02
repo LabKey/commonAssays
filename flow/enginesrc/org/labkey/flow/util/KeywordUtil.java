@@ -36,6 +36,8 @@ public class KeywordUtil
             "\\$BYTEORD|\\$DATATYPE|\\$MODE|\\$NEXTDATA|" +
             "\\$P\\d+.*|\\$PAR|\\$TOT|" +
             "P\\d+DISPLAY|" +
+            "P\\d+BS|" +
+            "P\\d+MS|" +
             "\\$ABRT|\\$BTIM|\\$ETIM|" +
             "\\$CSMODE|\\$CSVBITS|" +
             "\\$CSV\\d+FLAG|" +
@@ -51,7 +53,7 @@ public class KeywordUtil
             "CREATOR|" +
             "\\$CYT|\\$SYS|" +
             "FSC ASF|" +
-            "THREASHOLD|" +
+            "THRESHOLD|" +
             "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
 
     private static final Set<String> sideScatterNames = Sets.newCaseInsensitiveHashSet(

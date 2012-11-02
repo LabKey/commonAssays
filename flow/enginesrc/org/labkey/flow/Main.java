@@ -73,11 +73,9 @@ public class Main
 
     private static Workspace readWorkspace(File file, boolean printWarnings)
     {
-        InputStream is = null;
         try
         {
-            is = new FileInputStream(file);
-            Workspace workspace = Workspace.readWorkspace(file.getPath(), is);
+            Workspace workspace = Workspace.readWorkspace(file);
             if (printWarnings && workspace.getWarnings().size() > 0)
             {
                 for (String warning : workspace.getWarnings())
@@ -88,10 +86,6 @@ public class Main
         catch (Exception e)
         {
             throw new RuntimeException(e);
-        }
-        finally
-        {
-            if (is != null) try { is.close(); } catch (IOException ioe) { }
         }
     }
 

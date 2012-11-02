@@ -311,7 +311,7 @@ abstract public class FlowJoWorkspace extends Workspace
             String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
             if (null == name)
                 continue;
-            sample._keywords.put(name, elKeyword.getAttribute("value"));
+            sample.putKeyword(name, elKeyword.getAttribute("value"));
         }
     }
 

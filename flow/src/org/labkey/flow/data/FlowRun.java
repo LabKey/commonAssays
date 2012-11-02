@@ -27,8 +27,8 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.controllers.run.RunController;
-import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.query.FlowSchema;
@@ -268,6 +268,22 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     {
         File file = getExperimentRun().getFilePathRoot();
         return file == null ? null : file.getPath();
+    }
+
+    public AnalysisEngine getExternalAnalysis()
+    {
+        String value = (String)getProperty(FlowProperty.AnalysisEngine);
+        if (value == null)
+            return null;
+
+        try
+        {
+            return AnalysisEngine.valueOf(value);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return null;
+        }
     }
 
     public FlowWorkspace getWorkspace()

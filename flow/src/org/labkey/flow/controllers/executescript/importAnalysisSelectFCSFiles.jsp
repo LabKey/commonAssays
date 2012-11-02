@@ -55,7 +55,7 @@
         int i = 0;
         for (; i < len; i++)
         {
-            %><%=warnings.get(i)%><br><%
+            %><%=h(warnings.get(i))%><br><%
         }
         if (i < warnings.size()) {
             %><em>not showing <%=warnings.size() - i%> more warnings ...</em><%
@@ -63,43 +63,63 @@
         %></p><%
     }
 %>
+<script type="text/javascript">
+    function clearExistingRunIdCombo()
+    {
+        var combo = document.forms.importAnalysis.existingKeywordRunId;
+        if (combo && combo.tagName.toLowerCase() == "select")
+            combo.selectedIndex = 0;
+    }
+
+    function clearFileBrowserSelection(selectedValue)
+    {
+        if (fileBrowser && fileBrowser.rendered)
+        {
+            fileBrowser.grid.getSelectionModel().clearSelections();
+            selectRecord(null);
+            fileBrowser.setDisabled(selectedValue != "<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>");
+        }
+    }
+
+    function clearSelections(selectedValue)
+    {
+        //clearExistingRunIdCombo();
+        clearFileBrowserSelection(selectedValue);
+        return true;
+    }
+</script>
 
 <p><em>Optionally</em>, you can browse the pipeline for the FCS files used in the workspace.
-    Once the workspace and FCS files are associated, you will be able to use <%=FlowModule.getLongProductName()%>
+    Once the workspace and FCS files are associated, you will be able to use <%=h(FlowModule.getLongProductName())%>
     to see additional graphs, or calculate additional statistics.
     The FCS files themselves will not be modified, and will remain in the file system.
 </p>
 <hr/>
-<input type="radio" name="selectFCSFilesOption" id="noFCSFiles" value="noFCSFiles" onclick="clearSelections();"/>
-<label for="noFCSFiles">Don't associate FCS Files with workspace.</label>
+
+<input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.None%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
+       <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.None ? "checked" : "")%>
+       onclick="clearSelections(this.value);" />
+<label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with workspace.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    <script type="text/javascript">
-        function clearExistingRunIdCombo()
-        {
-            var combo = document.forms.importAnalysis.existingKeywordRunId;
-            if (combo && combo.tagName.toLowerCase() == "select")
-                combo.selectedIndex = 0;
-        }
-
-        function clearRunFilePathRoot()
-        {
-            if (fileBrowser)
-            {
-                fileBrowser.grid.getSelectionModel().clearSelections();
-                selectRecord(null);
-            }
-        }
-
-        function clearSelections()
-        {
-            clearExistingRunIdCombo();
-            clearRunFilePathRoot();
-            return true;
-        }
-    </script>
     Statistics from the FlowJo workspace will be imported but no graphs will be generated.<br>
     <em>NOTE:</em> Choosing this option will advance past the analysis engine step.
 </div>
+
+<%
+    // XXX: Disable all other options if the archive includes FCS files.
+    if (form.getWorkspace().isIncludesFCSFiles())
+    {
+%>
+<input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>"
+       <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Included ? "checked" : "")%>
+       onclick="clearSelections(this.value);" />
+<label for="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>">Import FCS files included in the analysis archive.</label>
+<%
+    }
+%>
+
 <%
     FlowRun[] allKeywordRuns = FlowRun.getRunsForContainer(container, FlowProtocolStep.keywords);
     Map<FlowRun, String> keywordRuns = new LinkedHashMap<FlowRun, String>(allKeywordRuns.length);
@@ -120,52 +140,39 @@
                 keywordRuns.put(keywordRun, keywordRunPath);
         }
     }
-    if (!keywordRuns.isEmpty())
-    {
 %>
-<input type="radio" name="selectFCSFilesOption" id="previousFCSFiles" value="previousFCSFiles"/>
-<label id="previousFCSFiles">Previously imported FCS file run.</label>
-<div style="padding-left: 2em; padding-bottom: 1em;">
-    <select name="existingKeywordRunId" onchange="selectPreviousFCSFiles(this);">
-        <option value="0" selected="selected">&lt;Select FCS File run&gt;</option>
-        <% for (Map.Entry<FlowRun, String> entry : keywordRuns.entrySet()) { %>
-        <option value="<%=entry.getKey().getRunId()%>" title="<%=entry.getValue()%>"><%=entry.getKey().getName()%></option>
-        <% } %>
-    </select>
-    <script type="text/javascript">
-        function selectPreviousFCSFiles(select)
-        {
-            if (select.selectedIndex == 0)
-            {
-                document.getElementById("noFCSFiles").checked = true;
-            }
-            else
-            {
-                document.getElementById("previousFCSFiles").checked = true;
-                clearRunFilePathRoot();
-            }
-        }
-    </script>
+<input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
+        <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Previous ? "checked" : "")%>
+        <%=text(keywordRuns.isEmpty() ? "disabled" : "")%>
+       onclick="clearSelections(this.value);" />
+<label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" style="<%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</label>
+<div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">
+    <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the FlowJo workspace with previously imported FCS files.
 </div>
-<%
-    }
-%>
-<input type="radio" name="selectFCSFilesOption" id="browseFCSFiles" value="browseFCSFiles"/>
-<label for="browseFCSFiles">Browse the pipeline for a directory of FCS files.</label>
+
+<input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"
+        <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse ? "checked" : "")%>
+       onclick="clearSelections(this.value); renderFileBrowser();" />
+<label for="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>">Browse the pipeline for a directory of FCS files.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (hasPipelineRoot)
     {
-        String inputId = "runFilePathRoot";
+        String inputId = "keywordDir";
         String name = form.getWorkspace().getPath();
         if (name == null)
             name = form.getWorkspace().getName();
+
+        // UNDONE: support selecting multiple directories
+        String keywordDir = form.getKeywordDir() != null ? form.getKeywordDir()[0] : "";
     %>
     Select a <b>directory</b> containing the FCS files below if you want
     to associate the workspace <em>'<%=h(name)%>'</em> with a set of FCS files.
     <br>
     The sample's keywords stored in the workspace will be used instead of those from the FCS files.
     <br/><br/>
-    <input type="hidden" id="<%=inputId%>" name="<%=inputId%>" value="<%=form.getRunFilePathRoot() == null ? "" : form.getRunFilePathRoot()%>"/>
+    <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value="<%=h(keywordDir)%>"/>
 
 
     <div id="treeDiv" class="extContainer"></div>
@@ -185,9 +192,20 @@
             if (path)
             {
                 clearExistingRunIdCombo();
-                document.getElementById("browseFCSFiles").checked = true;
+                document.getElementById("<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>").checked = true;
             }
             // setTitle...
+        }
+
+        function renderFileBrowser()
+        {
+            if (!fileBrowser.rendered)
+            {
+                fileBrowser.render('treeDiv');
+                var path = <%=q(keywordDir)%>;
+                fileBrowser.start(path);
+            }
+            return true;
         }
 
         Ext.onReady(function()
@@ -230,8 +248,9 @@
                 return true;
             });
 
-            fileBrowser.render('treeDiv');
-            fileBrowser.start(<%=q(form.getRunFilePathRoot())%>);
+            <% if (form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse) { %>
+            renderFileBrowser();
+            <% } %>
         });
     </script>
     <%

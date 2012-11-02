@@ -45,7 +45,7 @@
         <input type="hidden" name="confirm" value="true">
         <p>
             The following directories within <em><%=h(form.getDisplayPath())%></em> contain the FCS files for your experiment runs.
-            <%=FlowModule.getLongProductName()%> will read the keywords from these FCS files into the database.  The FCS files
+            <%=h(FlowModule.getLongProductName())%> will read the keywords from these FCS files into the database.  The FCS files
             themselves will not be modified, and will remain in the file system.
         </p>
         <table class="labkey-indented"><%

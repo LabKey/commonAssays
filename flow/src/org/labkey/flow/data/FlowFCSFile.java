@@ -16,12 +16,54 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
+
+import java.util.List;
+import java.util.ListIterator;
 
 public class FlowFCSFile extends FlowWell
 {
     public FlowFCSFile(ExpData data)
     {
         super(data);
+    }
+
+    static public List<FlowFCSFile> fromName(Container container, String name)
+    {
+        return (List) FlowDataObject.fromName(container, FlowDataType.FCSFile, name);
+    }
+
+    static public List<FlowFCSFile> getOriginal(Container container)
+    {
+        List<FlowFCSFile> files = fromName(container, null);
+        ListIterator<FlowFCSFile> iter = files.listIterator();
+        while (iter.hasNext())
+            if (!iter.next().isOriginalFCSFile())
+                iter.remove();
+        return files;
+    }
+
+    /**
+     * Returns true if this FlowFCSFile well corresponds to an actual FCS file
+     * instead of an FCS file created by the external analysis import process used to attach extra keywords.
+     *
+     * @return true if this well is original and was not created during external analysis import.
+     * @see org.labkey.flow.data.FlowWell#getOriginalFCSFile()
+     */
+    public boolean isOriginalFCSFile()
+    {
+//        Boolean value = (Boolean)getProperty(FlowProperty.ExtraKeywordsFCSFile);
+//        if (value != null)
+//            return !value.booleanValue();
+
+        // UNDONE: Ideally we should add a column to flow.object to idenfity these wells.
+        // For now, use the fake data URI created by the external analysis import.
+        ExpData expData = getData();
+        String url = expData.getDataFileUrl();
+        if (url != null && !url.endsWith("/attributes.flowdata.xml"))
+            return true;
+
+        return false;
     }
 }

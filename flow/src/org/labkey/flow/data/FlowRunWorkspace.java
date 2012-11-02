@@ -51,6 +51,7 @@ public class FlowRunWorkspace extends Workspace
         {
             String key = Integer.toString(well.getWellId());
             SampleInfo info = new SampleInfo();
+            info.setSampleName(well.getName());
             info.setSampleId(key);
             FCSKeywordData fcs = FCSAnalyzer.get().readAllKeywords(FlowAnalyzer.getFCSRef(well));
             info.getKeywords().putAll(fcs.getAllKeywords());

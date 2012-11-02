@@ -16,12 +16,15 @@
 package org.labkey.flow.analysis.model;
 
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
+import org.labkey.api.collections.CaseInsensitiveTreeSet;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
@@ -29,6 +32,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -59,6 +63,7 @@ public abstract class Workspace implements Serializable
     protected List<String> _warnings = new LinkedList<String>();
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList<CompensationMatrix>();
     protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<AutoCompensationScript>();
+    protected Set<String> _keywords = new CaseInsensitiveTreeSet();
 
     protected Workspace()
     {
@@ -67,6 +72,24 @@ public abstract class Workspace implements Serializable
     static public Workspace readWorkspace(InputStream stream) throws Exception
     {
         return readWorkspace(null, stream);
+    }
+
+    static public Workspace readWorkspace(File file) throws Exception
+    {
+        InputStream is = null;
+        try
+        {
+            is = new FileInputStream(file);
+            return readWorkspace(file.getPath(), is);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+            if (is != null) try { is.close(); } catch (IOException ioe) { }
+        }
     }
 
     static public Workspace readWorkspace(String name, InputStream stream) throws Exception
@@ -380,6 +403,11 @@ public abstract class Workspace implements Serializable
         return _warnings;
     }
 
+    public Set<String> getKeywords()
+    {
+        return Collections.unmodifiableSet(_keywords);
+    }
+
     static public class CompensationChannelData
     {
         public String positiveKeywordName;
@@ -395,19 +423,33 @@ public abstract class Workspace implements Serializable
         Map<String, String> _keywords = new HashMap<String, String>();
         Map<String, Workspace.ParameterInfo> _parameters;
         String _sampleId;
+        String _sampleName;
         String _compensationId;
 
         public void setSampleId(String id)
         {
             _sampleId = id;
         }
+        public String getSampleId()
+        {
+            return _sampleId;
+        }
+        public void setSampleName(String name)
+        {
+            _sampleName = name;
+        }
+        public String getSampleName()
+        {
+            return _sampleName;
+        }
         public Map<String,String> getKeywords()
         {
             return _keywords;
         }
-        public String getSampleId()
+        public void putKeyword(String keyword, String value)
         {
-            return _sampleId;
+            _keywords.put(keyword, value);
+            Workspace.this._keywords.add(keyword);
         }
 
         public String getCompensationId()
@@ -422,10 +464,17 @@ public abstract class Workspace implements Serializable
 
         public String getLabel()
         {
-            String ret = getKeywords().get("$FIL");
+            String ret = _sampleName;
+            if (ret == null || ret.length() == 0)
+                ret = getFilename();
             if (ret == null)
                 return _sampleId;
             return ret;
+        }
+
+        public String getFilename()
+        {
+            return getKeywords().get("$FIL");
         }
 
         /** Returns true if the sample has already been compensated by the flow cytometer. */
@@ -476,13 +525,35 @@ public abstract class Workspace implements Serializable
             return _compensationMatrices.get(id - 1);
         }
 
+        public List<PopulationName> getGroupNames()
+        {
+            List<GroupInfo> groups = getGroups();
+            List<PopulationName> groupNames = new ArrayList<PopulationName>(groups.size());
+            for (GroupInfo group : groups)
+                groupNames.add(group.getGroupName());
+            return groupNames;
+        }
+
+        public List<GroupInfo> getGroups()
+        {
+            List<GroupInfo> groups = new ArrayList<GroupInfo>(4);
+            for (GroupInfo group : _groupInfos.values())
+            {
+                if (group.getSampleIds().contains(getSampleId()))
+                    groups.add(group);
+            }
+            return groups;
+        }
+
         public String toString()
         {
-            String $FIL = getKeywords().get("$FIL");
-            if ($FIL == null)
+            String name = _sampleName;
+            if (name == null || name.length() == 0)
+                name = getFilename();
+            if (name == null)
                 return _sampleId;
 
-            return $FIL + " (" + _sampleId + ")";
+            return name + " (" + _sampleId + ")";
         }
     }
 

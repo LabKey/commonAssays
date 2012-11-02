@@ -199,7 +199,7 @@ public class FlowOverview extends Overview
         {
             StringBuilder status = new StringBuilder();
             ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
-                    .addParameter("query.Run/ProtocolStep~eq", "Keywords");
+                    .addParameter("query.Original~eq", "true");
             status.append("<a href=\"").append(h(urlShowFCSFiles)).append("\">").append(_fcsFileCount).append(" FCS files</a> have been imported.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
                     .addParameter("query.FCSFileCount~neq", 0)

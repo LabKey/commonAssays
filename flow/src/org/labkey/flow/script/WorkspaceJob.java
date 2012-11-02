@@ -34,6 +34,8 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
+import org.labkey.flow.controllers.executescript.AnalysisEngine;
+import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.persist.AttributeSetHelper;
@@ -69,17 +71,18 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     private final String _workspaceName;
 
     public WorkspaceJob(ViewBackgroundInfo info,
+                        PipeRoot root,
                         FlowExperiment experiment,
                         WorkspaceData workspaceData,
                         File originalImportedFile,
                         File runFilePathRoot,
+                        List<File> keywordDirs,
+                        Map<String, FlowFCSFile> resolvedFCSFiles,
                         List<String> importGroupNames,
-                        boolean createKeywordRun,
-                        boolean failOnError,
-                        PipeRoot root)
+                        boolean failOnError)
             throws Exception
     {
-        super(info, root, experiment, originalImportedFile, runFilePathRoot, importGroupNames, createKeywordRun, failOnError);
+        super(info, root, experiment, AnalysisEngine.FlowJoWorkspace, originalImportedFile, runFilePathRoot, keywordDirs, resolvedFCSFiles, importGroupNames, failOnError);
 
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)
@@ -119,9 +122,10 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             ois = new ObjectInputStream(new FileInputStream(_workspaceFile));
             Workspace workspace = (Workspace)ois.readObject();
 
-            return createExperimentRun(this, getUser(), getContainer(), workspace,
+            return createExperimentRun(getUser(), getContainer(), workspace,
                     getExperiment(), _workspaceName, _workspaceFile, getOriginalImportedFile(),
-                    getRunFilePathRoot(), getImportGroupNames(), isFailOnError());
+                    getRunFilePathRoot(), getResolvedFCSFiles(),
+                    getImportGroupNames(), isFailOnError());
         }
         finally
         {
@@ -129,10 +133,11 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         }
     }
 
-    private FlowRun createExperimentRun(FlowJob job, User user, Container container,
+    private FlowRun createExperimentRun(User user, Container container,
                                         Workspace workspace, FlowExperiment experiment,
                                         String workspaceName, File workspaceFile, File originalImportedFile,
-                                        File runFilePathRoot, List<String> importGroupNames, boolean failOnError) throws Exception
+                                        File runFilePathRoot, Map<String, FlowFCSFile> resolvedFCSFiles,
+                                        List<String> importGroupNames, boolean failOnError) throws Exception
     {
         Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
@@ -142,17 +147,18 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         Map<Analysis, FlowScript> scripts = new HashMap();
         List<String> sampleLabels = new ArrayList<String>(workspace.getSampleCount());
 
-        if (extractAnalysis(job, container, workspace, runFilePathRoot, importGroupNames, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
+        if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, importGroupNames, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
             return null;
 
-        if (job.checkInterrupted())
+        if (checkInterrupted())
             return null;
 
         FlowManager.vacuum();
 
-        return saveAnalysis(job, user, container, experiment,
+        return saveAnalysis(user, container, experiment,
                 workspaceName, workspaceFile,
                 originalImportedFile, runFilePathRoot,
+                resolvedFCSFiles,
                 keywordsMap,
                 sampleCompMatrixMap,
                 resultsMap,
@@ -218,9 +224,10 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         return filterSamples(workspace, sampleIDs);
     }
 
-    private boolean extractAnalysis(FlowJob job, Container container,
+    private boolean extractAnalysis(Container container,
                                     Workspace workspace,
                                     File runFilePathRoot,
+                                    Map<String, FlowFCSFile> resolvedFCSFiles,
                                     List<String> importGroupNames,
                                     boolean failOnError,
                                     Map<String, AttributeSet> keywordsMap,
@@ -233,7 +240,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         List<String> sampleIDs = getSampleIDs(workspace, importGroupNames);
         if (sampleIDs == null || sampleIDs.isEmpty())
         {
-            job.addStatus("No samples to import");
+            addStatus("No samples to import");
             return false;
         }
 
@@ -242,25 +249,40 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         {
             Workspace.SampleInfo sample = workspace.getSample(sampleID);
             sampleLabels.add(sample.getLabel());
-            if (job.checkInterrupted())
+            if (checkInterrupted())
                 return true;
 
             iSample++;
             String description = "sample " + iSample + "/" + sampleIDs.size() + ":" + sample.getLabel();
-            job.addStatus("Preparing " + description);
+            addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
+
+            // Set the keywords URI using the resolved FCS file or the FCS file in the runFilePathRoot directory
             URI uri = null;
             File file = null;
-            if (runFilePathRoot != null)
+            if (resolvedFCSFiles != null)
+            {
+                FlowFCSFile resolvedFCSFile = resolvedFCSFiles.get(sample.getSampleId());
+                if (resolvedFCSFile == null)
+                    resolvedFCSFile = resolvedFCSFiles.get(sample.getLabel());
+                if (resolvedFCSFile != null)
+                {
+                    uri = resolvedFCSFile.getFCSURI();
+                    if (uri != null)
+                        file = new File(uri);
+                }
+            }
+            else if (runFilePathRoot != null)
             {
                 file = new File(runFilePathRoot, sample.getLabel());
                 uri = file.toURI();
-                // Don't set FCSFile uri unless the file actually exists on disk.
-                // We assume the FCS file exists in graph editor if the URI is set.
-                if (file.exists())
-                    attrs.setURI(uri);
             }
+            // Don't set FCSFile uri unless the file actually exists on disk.
+            // We assume the FCS file exists in graph editor if the URI is set.
+            if (file != null && file.exists())
+                attrs.setURI(uri);
+            
             attrs.setKeywords(sample.getKeywords());
             AttributeSetHelper.prepareForSave(attrs, container);
             keywordsMap.put(sample.getLabel(), attrs);
@@ -284,7 +306,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                     {
                         if (file.exists())
                         {
-                            job.addStatus("Generating graphs for " + description);
+                            addStatus("Generating graphs for " + description);
                             List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
                                     uri, comp, analysis, analysis.getGraphs());
                             for (FCSAnalyzer.GraphResult graphResult : graphResults)
@@ -292,9 +314,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                 if (graphResult.exception != null)
                                 {
                                     if (failOnError)
-                                        job.error("Error generating graph '" + graphResult.spec + "' for '" + sample.getLabel() + "'", graphResult.exception);
+                                        error("Error generating graph '" + graphResult.spec + "' for '" + sample.getLabel() + "'", graphResult.exception);
                                     else
-                                        job.warn("Error generating graph '" + graphResult.spec + "' for '" + sample.getLabel() + "'", graphResult.exception);
+                                        warn("Error generating graph '" + graphResult.spec + "' for '" + sample.getLabel() + "'", graphResult.exception);
                                 }
                                 else
                                 {
@@ -306,9 +328,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         {
                             String msg = "Can't generate graphs for sample. FCS File doesn't exist for " + description;
                             if (failOnError)
-                                job.error(msg);
+                                error(msg);
                             else
-                                job.warn(msg);
+                                warn(msg);
                         }
                     }
                 }

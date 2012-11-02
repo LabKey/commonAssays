@@ -31,7 +31,9 @@ import org.labkey.flow.FlowModule;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
+import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.persist.AnalysisSerializer;
@@ -75,13 +77,15 @@ public class RScriptJob extends FlowExperimentJob
     private final String _workspaceName;
     private final File _originalImportedFile;
     private final File _runFilePathRoot;
+    private final List<File> _keywordDirs;
+    // Map workspace sample id -> FlowFCSFile
+    private final Map<String, FlowFCSFile> _resolvedFCSFiles;
     private final List<String> _importGroupNames;
     private final boolean _performNormalization;
     private final String _normalizationReference;
     private final List<String> _normalizationSubsets;
     private final List<String> _normalizationParameters;
 
-    private final boolean _createKeywordRun;
     private final boolean _failOnError;
 
     public RScriptJob(ViewBackgroundInfo info,
@@ -90,24 +94,25 @@ public class RScriptJob extends FlowExperimentJob
                       WorkspaceData workspaceData,
                       File originalImportedFile,
                       File runFilePathRoot,
+                      List<File> keywordDirs,
+                      Map<String, FlowFCSFile> resolvedFCSFiles,
                       List<String> importGroupNames,
                       boolean performNormalization,
                       String normalizationReference,
                       List<String> normalizationSubsets,
                       List<String> normalizationParameters,
-                      boolean createKeywordRun,
                       boolean failOnError) throws Exception
     {
         super(info, root, experiment.getLSID(), FlowProtocol.ensureForContainer(info.getUser(), info.getContainer()), experiment.getName(), FlowProtocolStep.analysis);
         _experiment = experiment;
         _originalImportedFile = originalImportedFile;
         _runFilePathRoot = runFilePathRoot;
+        _keywordDirs = keywordDirs;
+        _resolvedFCSFiles = resolvedFCSFiles;
         _importGroupNames = importGroupNames;
         _performNormalization = performNormalization;
         _normalizationReference = normalizationReference;
-        _createKeywordRun = createKeywordRun;
         _failOnError = failOnError;
-        assert !_createKeywordRun || _runFilePathRoot != null;
 
         if (workspaceData.getPath() == null || originalImportedFile == null)
             throw new IllegalArgumentException("External R analysis requires workspace file from pipeline");
@@ -168,6 +173,8 @@ public class RScriptJob extends FlowExperimentJob
 
         replacements.put(WORKSPACE_PATH, _workspaceFile.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(FCSFILE_DIRECTORY, _runFilePathRoot.getAbsolutePath().replaceAll("\\\\", "/"));
+        // UNDONE: Add _keywordDirs replacement parameter, remove _runFilePathRoot replacement ?
+        // UNDONE: Add _resolvedFCSFiles replacement parameter
         replacements.put(R_ANALYSIS_DIRECTORY, rAnalysisDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(NORMALIZED_DIRECTORY, normalizedDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(RUN_NAME, _workspaceName);
@@ -248,9 +255,18 @@ public class RScriptJob extends FlowExperimentJob
         if (hasErrors())
             return;
 
-        ImportResultsJob importJob = new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(),
-                dir, _originalImportedFile, _runFilePathRoot,
-                analysisRunName, _createKeywordRun, _failOnError);
+        ImportResultsJob importJob = new ImportResultsJob(
+                getInfo(),
+                getPipeRoot(),
+                getExperiment(),
+                AnalysisEngine.R,
+                dir,
+                _originalImportedFile,
+                _runFilePathRoot,
+                _keywordDirs,
+                _resolvedFCSFiles,
+                analysisRunName,
+                _failOnError);
         importJob.setLogFile(getLogFile());
         importJob.setLogLevel(getLogLevel());
         importJob.setSubmitted();

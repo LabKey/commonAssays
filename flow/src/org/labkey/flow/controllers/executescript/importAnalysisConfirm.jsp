@@ -30,6 +30,18 @@
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.io.File" %>
 <%@ page import="org.labkey.flow.analysis.model.Workspace" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
+<%@ page import="org.labkey.flow.query.FlowSchema" %>
+<%@ page import="org.labkey.api.query.QueryAction" %>
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ResolvedSamplesData" %>
+<%@ page import="org.labkey.api.data.DataRegion" %>
+<%@ page import="org.labkey.api.query.QueryView" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -43,8 +55,11 @@
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 
+<input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
-<input type="hidden" name="runFilePathRoot" id="runFilePathRoot" value="<%=h(form.getRunFilePathRoot())%>">
+<% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
+<input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
+<% } %>
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=h(form.getSelectAnalysisEngine())%>">
 <input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=h(form.isCreateAnalysis())%>">
 
@@ -75,16 +90,16 @@
 <ul>
     <li style="padding-bottom:0.5em;">
         <b>Analysis Engine:</b>
-        <% if (form.getSelectAnalysisEngine() == null || form.getSelectAnalysisEngine().equals("noEngine")) { %>
+        <% if (form.getSelectAnalysisEngine() == null || AnalysisEngine.FlowJoWorkspace == form.getSelectAnalysisEngine()) { %>
             No analysis engine selected
-        <% } else if (form.getSelectAnalysisEngine().equals("rEngine")) { %>
-            External R analysis engine <%=(form.isrEngineNormalization() ? "with normalization" : "without normalization")%>
+        <% } else if (AnalysisEngine.R == form.getSelectAnalysisEngine()) { %>
+            External R analysis engine <%=text(form.isrEngineNormalization() ? "with normalization" : "without normalization")%>
         <% } %>
     </li>
     <li style="padding-bottom:0.5em;">
-        <b>Import Groups:</b> <%=form.getImportGroupNames() == null ? "<em>All Samples</em>" : h(StringUtils.join(form.getImportGroupNameList(), ", "))%>
+        <b>Import Groups:</b> <%=text(form.getImportGroupNames() == null ? "<em>All Samples</em>" : h(StringUtils.join(form.getImportGroupNameList(), ", ")))%>
     </li>
-    <% if ("rEngine".equals(form.getSelectAnalysisEngine()) && form.isrEngineNormalization()) { %>
+    <% if (AnalysisEngine.R == form.getSelectAnalysisEngine() && form.isrEngineNormalization()) { %>
     <li style="padding-bottom:0.5em;">
         <b>Normalization Options:</b>
         <table border="0" style="margin-left:1em;">
@@ -125,9 +140,9 @@
         <% } %>
     </li>
     <%
-        FlowRun keywordRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
-        if (keywordRun != null) {
-            String keywordRunPath = pipeRoot.relativePath(new File(keywordRun.getPath()));
+    FlowRun keywordRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
+    if (keywordRun != null) {
+        String keywordRunPath = pipeRoot.relativePath(new File(keywordRun.getPath()));
     %>
     <li style="padding-bottom:0.5em;">
         <b>Existing FCS File run:</b>
@@ -137,6 +152,25 @@
         <b>FCS File Path:</b> <%=h(keywordRunPath)%>
     </li>
     <%
+    } else if (!form.getResolvedSamples().getRows().isEmpty()) {
+    %>
+    <li style="padding-bottom:0.5em;">
+        <b>Existing FCS files:</b>
+        <%
+            Set<String> rowIds = new HashSet<String>();
+            for (ResolvedSamplesData.ResolvedSample sample : form.getResolvedSamples().getRows().values())
+            {
+                if (sample.isSelected() && sample.getMatchedFile() != null)
+                    rowIds.add(String.valueOf(sample.getMatchedFile()));
+            }
+            SimpleFilter filter = new SimpleFilter(new FieldKey(null, "RowId"), rowIds, CompareType.IN);
+            FlowSchema schema = new FlowSchema(context);
+            ActionURL url = schema.urlFor(QueryAction.executeQuery, FlowTableType.FCSFiles);
+            filter.applyToURL(url, QueryView.DATAREGIONNAME_DEFAULT);
+        %>
+        <a href="<%=url%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
+    </li>
+    <%
     } else {
     %>
     <li style="padding-bottom:0.5em;">
@@ -144,14 +178,14 @@
     </li>
     <li style="padding-bottom:0.5em;">
         <b>FCS File Path:</b>
-        <% if (form.getRunFilePathRoot() == null) { %>
+        <% if (form.getKeywordDir() == null || form.getKeywordDir().length == 0) { %>
         <i>none set</i>
         <% } else { %>
-        <%=h(form.getRunFilePathRoot())%>
+        <%=h(form.getKeywordDir()[0])%>
         <% } %>
     </li>
     <%
-        }
+    }
     %>
     <li style="padding-bottom:0.5em;">
         <%

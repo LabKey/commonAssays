@@ -46,6 +46,7 @@ public class PCWorkspace extends FlowJoWorkspace
         readParameterInfo(sampleInfo);
 
         Element elSampleNode = getElementByTagName(elSample, "SampleNode");
+        sampleInfo._sampleName = elSampleNode.getAttribute("name");
         sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
         if (elSampleNode.hasAttribute("compensationID"))
         {

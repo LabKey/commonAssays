@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +47,30 @@ public class FlowWell extends FlowDataObject
 
     static public FlowWell fromWellId(int id)
     {
-        FlowObject flowobj = fromRowId(id);
+        FlowDataObject flowobj = fromRowId(id);
         if (flowobj instanceof FlowWell)
             return (FlowWell)flowobj;
         return null;
+    }
+
+    static public List<FlowWell> fromWellIds(int... ids)
+    {
+        List<FlowWell> wells = new ArrayList<FlowWell>(ids.length);
+        List<FlowDataObject> flowobjs = fromRowIds(ids);
+        for (FlowDataObject flowobj : flowobjs)
+            if (flowobj instanceof FlowWell)
+                wells.add((FlowWell)flowobj);
+        return wells;
+    }
+
+    static public List<FlowWell> fromWellIds(Collection<Integer> ids)
+    {
+        List<FlowWell> wells = new ArrayList<FlowWell>(ids.size());
+        List<FlowDataObject> flowobjs = fromRowIds(ids);
+        for (FlowDataObject flowobj : flowobjs)
+            if (flowobj instanceof FlowWell)
+                wells.add((FlowWell)flowobj);
+        return wells;
     }
 
     static public FlowWell fromURL(ActionURL url) throws Exception
@@ -84,6 +105,30 @@ public class FlowWell extends FlowDataObject
             if (input.getDataType() == FlowDataType.FCSFile)
                 return (FlowFCSFile) FlowDataObject.fromData(input);
         }
+        return null;
+    }
+
+    /**
+     * If this FlowFCSFile was created by an external analysis import (FlowJo workspace keywords, R normalization keywords),
+     * try to get the original FCSFile well if possible.  The original FCSFile may be null if it doesn't exist or
+     * wasn't associated with the external analysis during import.
+     *
+     * @return Original FlowFCSFile well if possible.
+     * @see org.labkey.flow.data.FlowFCSFile#isOriginalFCSFile()
+     */
+    public FlowFCSFile getOriginalFCSFile()
+    {
+        if (getDataType() != FlowDataType.FCSFile)
+            return null;
+
+        // UNDONE: Use the pre-calculated column flow.object.fcsid instead
+        for (ExpData input : getProtocolApplication().getInputDatas())
+        {
+            if (input.getDataType() == FlowDataType.FCSFile)
+                return (FlowFCSFile) FlowDataObject.fromData(input);
+        }
+
+        // CONSIDER: Also find FlowFCSFile well with same URI as this well.
         return null;
     }
 

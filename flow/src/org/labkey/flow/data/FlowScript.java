@@ -92,7 +92,7 @@ public class FlowScript extends FlowDataObject
 
     static public FlowScript[] getScripts(Container container)
     {
-        ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script);
+        ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script, null);
         List<FlowScript> ret = new ArrayList<FlowScript>();
         for (ExpData data : datas)
         {

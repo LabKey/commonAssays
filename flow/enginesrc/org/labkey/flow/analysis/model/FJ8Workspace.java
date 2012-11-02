@@ -44,6 +44,7 @@ public class FJ8Workspace extends MacWorkspace
     protected SampleInfo readSample(Element elSample)
     {
         SampleInfo ret = new SampleInfo();
+        ret._sampleName = elSample.getAttribute("name");
         ret._sampleId = elSample.getAttribute("sampleID");
         if (elSample.hasAttribute("compensationID"))
         {

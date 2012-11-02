@@ -34,6 +34,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TempTableTracker;
+import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -56,6 +57,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
@@ -82,6 +84,7 @@ import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
@@ -381,6 +384,13 @@ public class FlowSchema extends UserSchema
                     return detach().createAnalysisScriptTable("Lookup", true);
                 }
             });
+
+            ColumnInfo colWorkspace = ret.addDataInputColumn("Workspace", InputRole.Workspace.toString());
+            ExpDataTable workspacesTable = ExperimentService.get().createDataTable("Datas", this);
+            workspacesTable.populate();
+            createDataTable("Workspace", FlowDataType.Workspace);
+            colWorkspace.setFk(new QueryForeignKey(workspacesTable, "RowId", "Name"));
+            colWorkspace.setHidden(true);
         }
         if (type != FlowDataType.CompensationMatrix && type != FlowDataType.FCSFile)
         {
@@ -401,6 +411,7 @@ public class FlowSchema extends UserSchema
         addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
         addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
         addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
+
         return ret;
     }
 
@@ -1179,6 +1190,10 @@ public class FlowSchema extends UserSchema
                 return detach().createRunTable("run", type);
             }
         });
+        if (_experiment != null)
+        {
+            ret.setExperiment(_experiment.getExpObject());
+        }
         if (_run != null)
         {
             ret.setRun(_run.getExpObject());
@@ -1328,6 +1343,7 @@ public class FlowSchema extends UserSchema
     public FlowDataTable createFCSFileTable(String name)
     {
         final FlowDataTable ret = createDataTable(name, FlowDataType.FCSFile);
+        ret.getColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
         ExpSampleSet ss = null;
@@ -1344,9 +1360,30 @@ public class FlowSchema extends UserSchema
         String bTRUE = _dbSchema.getSqlDialect().getBooleanTRUE();
         String bFALSE = _dbSchema.getSqlDialect().getBooleanFALSE();
 
+        // flow.object.uri -- not to be confused with exp.data.datafileurl
         ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN " + bTRUE +" ELSE " + bFALSE + " END)"), JdbcType.BOOLEAN);
         ret.addColumn(colHasFile);
         colHasFile.setHidden(true);
+
+        // Original input FCSFile (the FCSFile marked as a DataInput of this FCSFile)
+        ColumnInfo colFCSFile = new ExprColumn(ret, "OriginalFCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
+        ret.addColumn(colFCSFile);
+        colFCSFile.setHidden(true);
+        colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
+                FlowParam.wellId.toString(),
+                "RowId", "Name")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return detach().createFCSFileTable("FCSFile");
+            }
+        });
+
+        // UNDONE: Ideally we should add a column to flow.object to idenfity these wells.
+        // Returns true if this is an original FlowFCSFile (not a 'fake' FCSFile created by importing a FlowJo workspace)
+        ColumnInfo colOriginal = new ExprColumn(ret, "Original", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".datafileurl NOT LIKE '%/attributes.flowdata.xml' THEN " + bTRUE + " ELSE " + bFALSE + " END)"), JdbcType.BOOLEAN);
+        ret.addColumn(colOriginal);
+        colOriginal.setHidden(true);
 
         ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));
         return ret;
@@ -1522,6 +1559,12 @@ public class FlowSchema extends UserSchema
         ret.addInputRunCountColumn("RunCount");
         ret.getColumn(ExpDataTable.Column.Run.toString()).setHidden(true);
         ret.setDetailsURL(new DetailsURL(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
+        return ret;
+    }
+
+    public FlowDataTable createWorkspaceTable(String alias)
+    {
+        FlowDataTable ret = createDataTable(alias, FlowDataType.Workspace);
         return ret;
     }
 

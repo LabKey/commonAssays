@@ -40,6 +40,8 @@ public class WorkspaceData implements Serializable
     String path;
     String name;
     Workspace _object;
+    // UNDONE: Placeholder for when analysis archives (or ACS archives) include FCS files during import.
+    boolean _includesFCSFiles;
 
     public void setPath(String path)
     {
@@ -74,6 +76,16 @@ public class WorkspaceData implements Serializable
     public String getPath()
     {
         return path;
+    }
+
+    public boolean isIncludesFCSFiles()
+    {
+        return _includesFCSFiles;
+    }
+
+    public void setIncludesFCSFiles(boolean includesFCSFiles)
+    {
+        _includesFCSFiles = includesFCSFiles;
     }
 
     public void validate(Container container, Errors errors, HttpServletRequest request)

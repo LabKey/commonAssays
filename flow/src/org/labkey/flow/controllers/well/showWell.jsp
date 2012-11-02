@@ -79,6 +79,9 @@ Ext.QuickTips.init();
     User user = context.getUser();
     FlowWell well = getWell();
     FlowWell fcsFile = well.getFCSFile();
+    FlowWell originalFile = well.getOriginalFCSFile();
+    if (originalFile == null && fcsFile != null)
+        originalFile = fcsFile.getOriginalFCSFile();
     FlowScript script = well.getScript();
     FlowCompensationMatrix matrix = well.getCompensationMatrix();
 
@@ -369,7 +372,18 @@ else
 
 if (fcsFile != null && fcsFile != well)
 {
-    %><tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr><%
+    %><tr><td>FCS File:</td>
+        <td>
+            <a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a>
+    <% if (originalFile != null && originalFile != well && originalFile != fcsFile) { %>
+            (original <a href="<%=h(originalFile.urlShow())%>"><%=h(originalFile.getName())%></a>)
+    <% } %>
+        </td>
+    </tr><%
+}
+else if (originalFile != null && originalFile != well && originalFile != fcsFile)
+{
+    %><tr><td>Original FCS File:</td><td><a href="<%=h(originalFile.urlShow())%>"><%=h(originalFile.getName())%></a></td></tr><%
 }
     %><tr><td>Well Comment:</td>
         <td><%include(new SetCommentView(well), out);%></td>
