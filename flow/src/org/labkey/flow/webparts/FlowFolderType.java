@@ -18,22 +18,22 @@ package org.labkey.flow.webparts;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.Portal;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.BaseFlowController;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-public class FlowFolderType extends DefaultFolderType
+public class FlowFolderType extends MultiPortalFolderType
 {
     public FlowFolderType(FlowModule module)
     {
-        super("Flow", "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.");
+        super("Flow", "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.",
+                null, null, null, null);
         
         requiredParts = Collections.emptyList();
         preferredParts = Arrays.asList(

@@ -16,7 +16,7 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.Portal;
 import org.labkey.api.pipeline.PipelineService;
@@ -28,7 +28,7 @@ import java.util.Arrays;
  * User: jeckels
  * Date: Jan 2, 2008
  */
-public class MicroarrayFolderType extends DefaultFolderType
+public class MicroarrayFolderType extends MultiPortalFolderType
 {
     public MicroarrayFolderType(MicroarrayModule module)
     {

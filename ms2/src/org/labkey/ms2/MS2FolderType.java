@@ -17,7 +17,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
@@ -26,7 +26,7 @@ import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.util.Arrays;
 
-public class MS2FolderType extends DefaultFolderType
+public class MS2FolderType extends MultiPortalFolderType
 {
     public MS2FolderType(MS2Module module)
     {

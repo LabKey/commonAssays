@@ -16,7 +16,7 @@
 
 package org.labkey.ms1;
 
-import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.Portal;
 
@@ -28,7 +28,7 @@ import java.util.Arrays;
  * Date: Nov 2, 2007
  * Time: 11:11:50 AM
  */
-public class MS1FolderType extends DefaultFolderType
+public class MS1FolderType extends MultiPortalFolderType
 {
     public MS1FolderType(MS1Module module)
     {
