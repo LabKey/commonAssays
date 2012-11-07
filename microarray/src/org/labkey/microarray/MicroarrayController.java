@@ -110,57 +110,6 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
-        {
-            return new HtmlView("Test");
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root;
-        }
-    }
-
-    public static class ExtractionForm extends PipelinePathForm
-    {
-        private int _protocolId;
-        private String _protocolName;
-        private String _extractionEngine = "Agilent";
-
-        public int getProtocol()
-        {
-            return _protocolId;
-        }
-
-        public void setProtocol(int protocol)
-        {
-            _protocolId = protocol;
-        }
-
-        public String getExtractionEngine()
-        {
-            return _extractionEngine;
-        }
-
-        public void setExtractionEngine(String extractionEngine)
-        {
-            _extractionEngine = extractionEngine;
-        }
-
-        public String getProtocolName()
-        {
-            return _protocolName;
-        }
-
-        public void setProtocolName(String protocolName)
-        {
-            _protocolName = protocolName;
-        }
-    }
-
     /**
      * Basic approach:
      * 1. The user logs in to LabKey Server and selects the files they want to analyze, and clicks on a new "Launch in Analyst" button.
