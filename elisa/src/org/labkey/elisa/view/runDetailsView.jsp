@@ -29,6 +29,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.elisa.ElisaController" %>
+<%@ page import="com.google.gson.Gson" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ElisaController.GenericReportForm> me = (JspView<ElisaController.GenericReportForm>) HttpView.currentView();
@@ -48,6 +49,7 @@
     ActionURL filterUrl = ctx.cloneActionURL().deleteParameters();
     filterUrl.addFilter(QueryView.DATAREGIONNAME_DEFAULT, FieldKey.fromParts("Run", "RowId"), CompareType.EQUAL, form.getRunId());
     ActionURL baseUrl = ctx.cloneActionURL().addParameter("filterUrl", filterUrl.getLocalURIString());
+    Gson gson = new Gson();
 %>
 
 <script type="text/javascript">
@@ -92,7 +94,8 @@
             autoColumnYName  : <%=form.getAutoColumnYName() != null ? q(form.getAutoColumnYName()) : null%>,
             autoColumnXName  : <%=form.getAutoColumnXName() != null ? q(form.getAutoColumnXName()) : null%>,
             defaultNumberFormat: eval("<%=numberFormatFn%>"),
-            allowEditMode: <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>
+            allowEditMode   : <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>,
+            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=gson.toJson(form.getFitParams())%>}
         }));
 
         items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {

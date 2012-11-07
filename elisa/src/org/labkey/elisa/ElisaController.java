@@ -62,6 +62,7 @@ public class ElisaController extends SpringActionController
         private String _autoColumnXName;
         private boolean _allowToggleMode = false; // view vs. edit mode
         private String _runTableName;
+        private Double[] _fitParams = new Double[0];
 
         public int getRunId()
         {
@@ -141,6 +142,16 @@ public class ElisaController extends SpringActionController
         public void setRunTableName(String runTableName)
         {
             _runTableName = runTableName;
+        }
+
+        public Double[] getFitParams()
+        {
+            return _fitParams;
+        }
+
+        public void setFitParams(Double[] fitParams)
+        {
+            _fitParams = fitParams;
         }
 
         @Override

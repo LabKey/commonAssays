@@ -168,7 +168,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             if (concentrations.containsKey(key))
                             {
                                 conc = concentrations.get(key);
-                                regression.addData(mean, conc);
+                                regression.addData(conc, mean);
                             }
 
                             // save the individual well values for the control group
@@ -196,8 +196,14 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
                         // add the coefficient of determination to the run
                         DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY_NAME);
-                        if (cod != null && !Double.isNaN(regression.getRSquare()))
+                        DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS);
+                        if (cod != null && fitParams != null && !Double.isNaN(regression.getRSquare()))
+                        {
                             data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
+
+                            String params = String.valueOf(regression.getSlope()) + "&" + String.valueOf(regression.getIntercept());
+                            data.getRun().setProperty(context.getUser(), fitParams.getPropertyDescriptor(), params);
+                        }
 
                         for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                         {
@@ -219,7 +225,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                     }
 
                                     // compute the concentration
-                                    double concentration = regression.predict(well.getValue());
+                                    double concentration = (well.getValue() - regression.getIntercept()) / regression.getSlope();
                                     row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME, concentration);
 
                                     results.add(row);

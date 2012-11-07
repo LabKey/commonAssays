@@ -66,6 +66,7 @@ import org.labkey.elisa.actions.ElisaUploadWizardAction;
 import org.labkey.elisa.query.ElisaResultsTable;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -97,6 +98,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public static final String CORRELATION_COEFFICIENT_PROPERTY_NAME = "RSquared";
     public static final String CORRELATION_COEFFICIENT_CAPTION = "Coefficient of Determination";
+
+    public static final String CURVE_FIT_PARAMETERS = "CurveFitParams";
+    public static final String CURVE_FIT_PARAMETERS_CAPTION = "Fit Parameters";
 
     public ElisaAssayProvider()
     {
@@ -155,6 +159,12 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty fitProp = addProperty(domain, CORRELATION_COEFFICIENT_PROPERTY_NAME, CORRELATION_COEFFICIENT_CAPTION, PropertyType.DOUBLE, "Coefficient of Determination of the calibration curve.");
         fitProp.setFormat("0.000");
         fitProp.setShownInInsertView(false);
+
+        DomainProperty fitParams = addProperty(domain, CURVE_FIT_PARAMETERS, CURVE_FIT_PARAMETERS_CAPTION, PropertyType.STRING, "Curve fit parameters.");
+        fitParams.setShownInInsertView(false);
+        fitParams.setShownInDetailsView(false);
+        fitParams.setShownInUpdateView(false);
+        fitParams.setHidden(true);
 
         return result;
     }
@@ -220,6 +230,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
 
         runProperties.add(CORRELATION_COEFFICIENT_PROPERTY_NAME);
+        runProperties.add(CURVE_FIT_PARAMETERS);
 
         Set<String> dataProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_DATA);
 
@@ -282,6 +293,20 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         form.setAutoColumnXName(CONCENTRATION_PROPERTY_NAME);
         form.setAutoColumnYName(ABSORBANCE_PROPERTY_NAME);
 
+        Domain runDomain = getRunDomain(protocol);
+        DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS);
+        if (prop != null)
+        {
+            Object fitParams = run.getProperty(prop);
+            if (fitParams != null)
+            {
+                List<Double> params = new ArrayList<Double>();
+                for (String param : fitParams.toString().split("&"))
+                    params.add(Double.parseDouble(param));
+
+                form.setFitParams(params.toArray(new Double[params.size()]));
+            }
+        }
         JspView chartView = new JspView<ElisaController.GenericReportForm>("/org/labkey/elisa/view/runDetailsView.jsp", form);
 
         chartView.setTitle("Calibration Curve");

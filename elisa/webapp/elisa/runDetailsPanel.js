@@ -24,7 +24,7 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
     initComponent : function() {
 
         this.items = [
-                this.createRunDetailView()
+            this.createRunDetailView()
         ];
 
         this.callParent([arguments]);
@@ -37,7 +37,8 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
             fields : [
                 {name : 'Name'},
                 {name : 'Created'},
-                {name : 'RSquared'}
+                {name : 'RSquared'},
+                {name : 'CurveFitParams'}
             ]
         });
 
@@ -49,7 +50,8 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
                 url    : LABKEY.ActionURL.buildURL('query', 'selectRows.api'),
                 extraParams : {
                     schemaName : this.schemaName,
-                    queryName  : this.runTableName
+                    queryName  : this.runTableName,
+                    'query.columns' : 'Name,Created,RSquared,CurveFitParams'
                 },
                 reader : {
                     type : 'json',
@@ -66,10 +68,23 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
                 '<table>',
                     '<tpl for=".">',
                     '<tr><td style="padding-right: 10px;">Name</td><td>{Name}</td></tr>',
-                '<tr><td style="padding-right: 10px;">Coefficient of Determination</td><td>{[Ext.util.Format.number(values.RSquared, "0.00000")]}</td></tr>',
+                    '<tr><td style="padding-right: 10px;">Curve Fit Type</td><td>Linear</td></tr>',
+                    '<tr><td style="padding-right: 10px;">Curve Fit Parameters</td><td>{[this.formatFitParams(values)]}</td></tr>',
+                    '<tr><td style="padding-right: 10px;">Coefficient of Determination</td><td>{[Ext.util.Format.number(values.RSquared, "0.00000")]}</td></tr>',
                     '<tr><td style="padding-right: 10px;">Created</td><td>{Created}</td></tr>',
                 '</tpl></table>',
-            '</div>'
+            '</div>',
+            {
+                formatFitParams : function(data) {
+                    if (data.CurveFitParams)
+                    {
+                        var parts = data.CurveFitParams.split('&');
+                        return 'slope : ' + Ext.util.Format.number(parts[0], "0.00") + ' intercept : ' + Ext.util.Format.number(parts[1], "0.00");
+                    }
+                    else
+                        return 'error';
+                }
+            }
         );
 
         return Ext4.create('Ext.view.View', {
