@@ -35,6 +35,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
@@ -443,7 +444,7 @@ public class AnalysisScriptController extends BaseFlowController
 
     /**
      * This action acts as a bridge between FlowPipelineProvider and ImportAnalysisAction
-     * by setting the 'workspace.path' parameter and skipping the first wizard step.
+     * by setting the 'workspace.path' parameter and POSTs to the first wizard step.
      */
     @RequiresPermissionClass(UpdatePermission.class)
     public class ImportAnalysisFromPipelineAction extends SimpleViewAction<PipelinePathForm>
@@ -456,16 +457,21 @@ public class AnalysisScriptController extends BaseFlowController
             String workspacePath = "/" + root.relativePath(f).replace('\\', '/');
 
             ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
-            url.addParameter("workspace.path", workspacePath);
-            url.addParameter("step", String.valueOf(AnalysisScriptController.ImportAnalysisStep.SELECT_FCSFILES.getNumber()));
 
-            return HttpView.redirect(url);
+            List<Pair<String, String>> inputs = new ArrayList<Pair<String, String>>();
+            inputs.add(Pair.of("workspace.path", workspacePath));
+            inputs.add(Pair.of("step", String.valueOf(ImportAnalysisStep.SELECT_ANALYSIS.getNumber())));
+
+            getPageConfig().setTemplate(PageConfig.Template.None);
+            return new HttpPostRedirectView(url.getLocalURIString(), inputs);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
         }
+
+
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
