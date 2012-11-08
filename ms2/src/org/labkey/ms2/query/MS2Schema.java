@@ -624,7 +624,9 @@ public class MS2Schema extends UserSchema
         notDeletedSQL.add(false);
         result.addCondition(notDeletedSQL, FieldKey.fromParts("Run"));
 
-        SQLFragment fractionNameSQL = new SQLFragment("CASE WHEN " + dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + " > 0 THEN " + dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1") + " ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
+        SQLFragment fractionNameSQL = new SQLFragment("CASE WHEN ");
+        fractionNameSQL.append(dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName")));
+        fractionNameSQL.append(" > 0 THEN " + dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName")) + "- 1") + " ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
 
         ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, JdbcType.VARCHAR);
         fractionName.setLabel("Name");

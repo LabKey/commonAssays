@@ -163,7 +163,7 @@ public class SpectraCountTableInfo extends VirtualTable
             ColumnInfo indexColumn;
             if (form != null && form.getTargetSeqId() != null)
             {
-                SQLFragment indexSQL = new SQLFragment(getSqlDialect().getStringIndexOfFunction(ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide", ExprColumn.STR_TABLE_ALIAS + ".ProtSequence"));
+                SQLFragment indexSQL = new SQLFragment(getSqlDialect().getStringIndexOfFunction(new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ProtSequence")));
                 indexColumn = new ExprColumn(this, "PeptideIndex", indexSQL, JdbcType.INTEGER);
             }
             else

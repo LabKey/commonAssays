@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.collections.CsvSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
@@ -439,22 +440,22 @@ public abstract class MS2Importer
 
     static
     {
-        String searchString = MS2Manager.getSqlDialect().concatenate("CASE WHEN (PrevAA = ' ' OR PrevAA = '-') THEN '' ELSE CAST(PrevAA AS VARCHAR) END",
-                "TrimmedPeptide", "CASE WHEN (NextAA = ' ' OR NextAA = '-') THEN '' ELSE CAST(NextAA AS VARCHAR) END");
-        String positionText = MS2Manager.getSqlDialect().getStringIndexOfFunction(searchString, "ProtSequence");
+        SQLFragment searchSQL = MS2Manager.getSqlDialect().concatenate(new SQLFragment("CASE WHEN (PrevAA = ' ' OR PrevAA = '-') THEN '' ELSE CAST(PrevAA AS VARCHAR) END"),
+                new SQLFragment("TrimmedPeptide"), new SQLFragment("CASE WHEN (NextAA = ' ' OR NextAA = '-') THEN '' ELSE CAST(NextAA AS VARCHAR) END"));
+        SQLFragment positionSQL = MS2Manager.getSqlDialect().getStringIndexOfFunction(searchSQL, new SQLFragment("ProtSequence"));
 
         _updateSequencePositionSql = "UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SequencePosition = COALESCE(\n" +
                 "       CASE WHEN PrevAA = ' ' OR PrevAA = '-' THEN\n" +
                 "           CASE WHEN NextAA = ' ' OR NextAA = '-' THEN\n" +
-                "               CASE WHEN " + positionText + " = 1 AND " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) = " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN 1 END\n" +
+                "               CASE WHEN " + positionSQL + " = 1 AND " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) = " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN 1 END\n" +
                 "           ELSE\n" +
-                "               CASE WHEN " + positionText + " = 1 THEN 1 END\n" +
+                "               CASE WHEN " + positionSQL + " = 1 THEN 1 END\n" +
                 "           END\n" +
                 "       ELSE\n" +
                 "           CASE WHEN NextAA = ' ' OR NextAA = '-' THEN\n" +
-                "               CASE WHEN " + positionText + " = " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) - " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN " + positionText + " + 1 END\n" +
+                "               CASE WHEN " + positionSQL + " = " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) - " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN " + positionSQL + " + 1 END\n" +
                 "           ELSE\n" +
-                "               CASE WHEN " + positionText + " > 0 THEN " + positionText + " + 1 END\n" +
+                "               CASE WHEN " + positionSQL + " > 0 THEN " + positionSQL + " + 1 END\n" +
                 "           END\n" +
                 "       END\n" +
                 ", 0)\n" +
