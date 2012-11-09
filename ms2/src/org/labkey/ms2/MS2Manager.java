@@ -1435,6 +1435,15 @@ public class MS2Manager
         FRACTION_CACHE.remove(FRACTION_CACHE_PREFIX + fractionId);
     }
 
+    public static void clearFractionCache()
+    {
+        FRACTION_CACHE.clear();
+    }
+
+    public static void clearRunCache()
+    {
+        RUN_CACHE.clear();
+    }
 
     public static MS2Fraction writeHydro(MS2Fraction fraction, Map updateMap)
     {

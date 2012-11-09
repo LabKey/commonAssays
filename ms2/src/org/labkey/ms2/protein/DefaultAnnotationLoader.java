@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -48,7 +49,7 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
     public DefaultAnnotationLoader(File file, ViewBackgroundInfo info, PipeRoot pipeRoot) throws IOException
     {
         super(ProteinAnnotationPipelineProvider.NAME, info, pipeRoot);
-        _file = file;
+        _file = FileUtil.getAbsoluteCaseSensitiveFile(file);
         PipeRoot pipelineRoot = PipelineService.get().findPipelineRoot(ContainerManager.getSharedContainer());
         if (pipelineRoot == null)
         {

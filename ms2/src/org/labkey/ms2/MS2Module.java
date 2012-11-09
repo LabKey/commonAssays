@@ -16,6 +16,7 @@
 package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -27,6 +28,8 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.files.FileContentService;
+import org.labkey.api.files.TableUpdaterFileMoveListener;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
@@ -85,6 +88,7 @@ import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.beans.PropertyChangeEvent;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -273,6 +277,28 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ServiceRegistry.get(SearchService.class).addDocumentParser(new DatDocumentParser());
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
         }
+
+        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileMoveListener.Type.filePathForwardSlash)
+        {
+            @Override
+            public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+            {
+                super.fileMoved(srcFile, destFile, user, container);
+                MS2Manager.clearRunCache();
+            }
+        });
+        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileMoveListener.Type.uri)
+        {
+            @Override
+            public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+            {
+                super.fileMoved(srcFile, destFile, user, container);
+                MS2Manager.clearFractionCache();
+            }
+        });
+        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileMoveListener.Type.filePath));
+        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileMoveListener.Type.filePath));
+        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileMoveListener.Type.filePath));
     }
 
     @Override
