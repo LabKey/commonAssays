@@ -15,7 +15,7 @@ import java.util.Set;
  * User: kevink
  * Date: 10/21/12
  */
-public class ResolvedSamplesData
+public class SelectedSamples
 {
     // non-form posted values used to initialize the ResolvedConfirmGridView
     private Set<String> _keywords;
@@ -68,7 +68,7 @@ public class ResolvedSamplesData
         }
     }
 
-    public ResolvedSamplesData()
+    public SelectedSamples()
     {
     }
 

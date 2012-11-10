@@ -76,9 +76,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     private final File _runFilePathRoot;
     // Directories of FCS files to be imported.
     private final List<File> _keywordDirs;
-    // Map workspace sample label -> FlowFCSFile
-    private Map<String, FlowFCSFile> _resolvedFCSFiles;
-    private final List<String> _importGroupNames;
+    // Map workspace sample label -> FlowFCSFile (or null if we aren't resolving previously imported FCS files)
+    private Map<String, FlowFCSFile> _selectedFCSFiles;
+//    private final List<String> _importGroupNames;
     private final boolean _failOnError;
 
     // Result of the import
@@ -92,8 +92,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             File originalImportedFile,
             File runFilePathRoot,
             List<File> keywordDirs,
-            Map<String, FlowFCSFile> resolvedFCSFiles,
-            List<String> importGroupNames,
+            Map<String, FlowFCSFile> selectedFCSFiles,
+            //List<String> importGroupNames,
             boolean failOnError)
         throws Exception
     {
@@ -104,8 +104,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         _originalImportedFile = originalImportedFile;
         _runFilePathRoot = runFilePathRoot;
         _keywordDirs = keywordDirs;
-        _resolvedFCSFiles = resolvedFCSFiles;
-        _importGroupNames = importGroupNames;
+        _selectedFCSFiles = selectedFCSFiles;
+        //_importGroupNames = importGroupNames;
         _failOnError = failOnError;
     }
 
@@ -128,10 +128,10 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         return _run.urlShow();
     }
 
-    public List<String> getImportGroupNames()
-    {
-        return _importGroupNames;
-    }
+//    public List<String> getImportGroupNames()
+//    {
+//        return _importGroupNames;
+//    }
 
     public File getRunFilePathRoot()
     {
@@ -148,9 +148,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         return _originalImportedFile;
     }
 
-    public Map<String,FlowFCSFile> getResolvedFCSFiles()
+    public Map<String,FlowFCSFile> getSelectedFCSFiles()
     {
-        return _resolvedFCSFiles;
+        return _selectedFCSFiles;
     }
 
     public boolean isFailOnError()
@@ -169,6 +169,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             // Create a new keyword run job for the selected FCS file directory
             if (getKeywordDirectories() != null && getKeywordDirectories().size() > 0)
             {
+                // CONSIDER: Only import FCSFiles in keyword directories that are in selectedFCSFiles if not null
                 KeywordsJob keywordsJob = new KeywordsJob(getInfo(), _protocol, getKeywordDirectories(), PipelineService.get().findPipelineRoot(getContainer()));
                 keywordsJob.setLogFile(getLogFile());
                 keywordsJob.setLogLevel(getLogLevel());
@@ -186,22 +187,24 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                         info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "'");
                 }
 
-                // Consider the newly imported files as the resolved FCSFiles
+                // Consider the newly imported files as the resolved FCSFiles, but don't add any new selectedFCSFiles unless there are no selected files.
                 // NOTE: Duplicate samples are ignored.
-                if (_resolvedFCSFiles == null || _resolvedFCSFiles.isEmpty())
+                if (_selectedFCSFiles == null)
+                    _selectedFCSFiles = new HashMap<String, FlowFCSFile>();
+                boolean addNewFCSFiles = _selectedFCSFiles.isEmpty();
+                for (FlowRun run : runs)
                 {
-                    if (_resolvedFCSFiles == null)
-                        _resolvedFCSFiles = new HashMap<String, FlowFCSFile>();
-
-                    for (FlowRun run : runs)
+                    for (FlowWell well : run.getWells())
                     {
-                        for (FlowWell well : run.getWells())
+                        if (well instanceof FlowFCSFile)
                         {
-                            if (well instanceof FlowFCSFile)
+                            FlowFCSFile file = (FlowFCSFile)well;
+                            if (file.isOriginalFCSFile())
                             {
-                                FlowFCSFile file = (FlowFCSFile)well;
-                                if (file.isOriginalFCSFile())
-                                    _resolvedFCSFiles.put(well.getName(), (FlowFCSFile)well);
+                                // Only add newly imported FCS Files if there are no selected FCS Files or the selected FCS File isn't resolved yet.
+                                String wellName = well.getName();
+                                if (addNewFCSFiles || (_selectedFCSFiles.containsKey(wellName) && _selectedFCSFiles.get(wellName) == null))
+                                    _selectedFCSFiles.put(wellName, (FlowFCSFile)well);
                             }
                         }
                     }
@@ -279,7 +282,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     protected FlowRun saveAnalysis(User user, Container container, FlowExperiment experiment,
                                    String analysisName, File externalAnalysisFile, File originalImportedFile,
                                    File runFilePathRoot,
-                                   Map<String, FlowFCSFile> resolvedFCSFiles,
+                                   Map<String, FlowFCSFile> selectedFCSFiles,
                                    Map<String, AttributeSet> keywordsMap,
                                    Map<String, CompensationMatrix> sampleCompMatrixMap,
                                    Map<String, AttributeSet> resultsMap,
@@ -333,9 +336,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
                 iSample++;
                 FlowFCSFile resolvedFCSFile = null;
-                if (resolvedFCSFiles != null)
+                if (selectedFCSFiles != null)
                 {
-                    resolvedFCSFile = resolvedFCSFiles.get(sampleLabel);
+                    resolvedFCSFile = selectedFCSFiles.get(sampleLabel);
                     assert resolvedFCSFile == null || resolvedFCSFile.isOriginalFCSFile();
                 }
 

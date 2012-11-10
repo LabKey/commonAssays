@@ -48,6 +48,7 @@
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
+<input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 
 <p>Select analysis engine for workspace <em>'<%=h(workspaceName)%>'</em>.
 </p>

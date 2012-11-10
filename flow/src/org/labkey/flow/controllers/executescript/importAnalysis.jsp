@@ -91,13 +91,13 @@
             %><input type="hidden" id="<%=h(key)%>" name="<%=h(key)%>" value="<%=h(entry.getValue())%>"><%
         }
 
-        if (form.getStep() > AnalysisScriptController.ImportAnalysisStep.RESOLVE_FCSFILES.getNumber())
+        if (form.getStep() > AnalysisScriptController.ImportAnalysisStep.REVIEW_SAMPLES.getNumber())
         {
-            i = form.getResolvedSamples().getHiddenFields().entrySet().iterator();
+            i = form.getSelectedSamples().getHiddenFields().entrySet().iterator();
             while (i.hasNext())
             {
                 Map.Entry entry = (Map.Entry)i.next();
-                String key = "resolvedSamples." + entry.getKey();
+                String key = "selectedSamples." + entry.getKey();
             %><input type="hidden" id="<%=h(key)%>" name="<%=h(key)%>" value="<%=h(entry.getValue())%>"><%
             }
         }
@@ -121,8 +121,8 @@
                 view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp", form);
                 break;
 
-            case RESOLVE_FCSFILES:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisResolveFCSFiles.jsp", form);
+            case REVIEW_SAMPLES:
+                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp", form);
                 break;
 
             case ANALYSIS_ENGINE:

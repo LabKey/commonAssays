@@ -50,26 +50,19 @@ public class GateEditorForm extends FlowObjectForm<FlowObject>
         if (runId != 0)
             return runId;
         
-        try
+        int savedId = FlowPreference.editScriptRunId.getIntValue(getRequest());
+        if (savedId != 0)
         {
-            int savedId = FlowPreference.editScriptRunId.getIntValue(getRequest());
-            if (savedId != 0)
-            {
-                FlowRun run = FlowRun.fromRunId(savedId);
-                // ignore the saved run 'preference' if it is not in the current container
-                if (null != run && getContainer().getId().equals(run.getContainerId()))
-                    return savedId;
-            }
-            
-            FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            if (runs.length > 0)
-                return runs[0].getRunId();
-            return 0;
+            FlowRun run = FlowRun.fromRunId(savedId);
+            // ignore the saved run 'preference' if it is not in the current container
+            if (null != run && getContainer().getId().equals(run.getContainerId()))
+                return savedId;
         }
-        catch (SQLException e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
+
+        FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+        if (runs.length > 0)
+            return runs[0].getRunId();
+        return 0;
     }
 
     public void setRunId(int runId)

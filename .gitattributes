@@ -366,9 +366,9 @@ flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToAnalyzeForm.java 
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsView.java -text
 flow/src/org/labkey/flow/controllers/executescript/ImportAnalysisForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ImportRunsForm.java -text
-flow/src/org/labkey/flow/controllers/executescript/ResolvedConfirmGridView.java -text
-flow/src/org/labkey/flow/controllers/executescript/ResolvedSamplesData.java -text
+flow/src/org/labkey/flow/controllers/executescript/SamplesConfirmGridView.java -text
 flow/src/org/labkey/flow/controllers/executescript/ScriptOverview.java -text
+flow/src/org/labkey/flow/controllers/executescript/SelectedSamples.java -text
 flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp -text
@@ -377,7 +377,7 @@ flow/src/org/labkey/flow/controllers/executescript/importAnalysisAnalysisEngine.
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisAnalysisOptions.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/importAnalysisResolveFCSFiles.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/showScript.jsp -text

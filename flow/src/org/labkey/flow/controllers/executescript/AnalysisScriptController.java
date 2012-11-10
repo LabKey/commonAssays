@@ -42,7 +42,6 @@ import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PCWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -51,6 +50,7 @@ import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.controllers.executescript.ImportAnalysisForm.SelectFCSFileOption;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AnalysisSerializer;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.script.*;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -407,7 +407,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         SELECT_ANALYSIS("Select Analysis"),
         SELECT_FCSFILES("Select FCS Files"),
-        RESOLVE_FCSFILES("Resolve FCS Files"),
+        REVIEW_SAMPLES("Review Samples"),
         ANALYSIS_ENGINE("Analysis Engine"),
         ANALYSIS_OPTIONS("Analysis Options"),
         CHOOSE_ANALYSIS("Analysis Folder"),
@@ -519,8 +519,8 @@ public class AnalysisScriptController extends BaseFlowController
                         stepSelectFCSFiles(form, errors);
                         break;
 
-                    case RESOLVE_FCSFILES:
-                        stepResolveFCSFiles(form, errors);
+                    case REVIEW_SAMPLES:
+                        stepReviewSamples(form, errors);
                         break;
 
                     case ANALYSIS_ENGINE:
@@ -607,14 +607,25 @@ public class AnalysisScriptController extends BaseFlowController
             return null;
         }
 
+        // path may be:
+        // - absolute (run path)
+        // - a file-browser path (absolute but relative to pipe root)
+        // - a file-browser path (relative to pipe root)
         private File getDir(String path, Errors errors)
         {
             PipeRoot root = getPipeRoot();
-            File dir = root.resolvePath(path);
+            File dir = new File(path);
+            if (!dir.isAbsolute() || !root.isUnderRoot(dir))
+                dir = root.resolvePath(path);
 
             if (dir == null)
             {
                 errors.reject(ERROR_MSG, "The directory containing FCS files wasn't found.");
+                return null;
+            }
+            if (!root.isUnderRoot(dir))
+            {
+                errors.reject(ERROR_MSG, "The directory isn't under the current pipeline root");
                 return null;
             }
             if (!dir.isDirectory())
@@ -646,11 +657,17 @@ public class AnalysisScriptController extends BaseFlowController
             if (resolvedFCSFiles != null && !resolvedFCSFiles.isEmpty())
             {
                 // CONSIDER: Use common parent path of all resolvedFCSFile paths.  For now, just use first path.
-                FlowFCSFile fcsFile = resolvedFCSFiles.values().iterator().next();
-                FlowRun flowRun = fcsFile.getRun();
-                ExpRun expRun = flowRun != null ? flowRun.getExperimentRun() : null;
-                if (expRun != null)
-                    return expRun.getFilePathRoot();
+                for (Map.Entry<String, FlowFCSFile> entry : resolvedFCSFiles.entrySet())
+                {
+                    FlowFCSFile fcsFile = entry.getValue();
+                    if (fcsFile != null)
+                    {
+                        FlowRun flowRun = fcsFile.getRun();
+                        ExpRun expRun = flowRun != null ? flowRun.getExperimentRun() : null;
+                        if (expRun != null)
+                            return expRun.getFilePathRoot();
+                    }
+                }
             }
 
 //            if (workspacePath != null) // XXX: not the same as previous behavior
@@ -710,11 +727,11 @@ public class AnalysisScriptController extends BaseFlowController
 
         // Returns a map of workspace sample label -> FlowFCSFile from either
         // the resolved FCSFiles previously imported or from an existing keyword run.
-        private Map<String, FlowFCSFile> getResolvedFCSFiles(ImportAnalysisForm form, Errors errors) throws Exception
+        private Map<String, FlowFCSFile> getSelectedFCSFiles(ImportAnalysisForm form, Errors errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
             Workspace workspace = workspaceData.getWorkspaceObject();
-            Map<String, ResolvedSamplesData.ResolvedSample> rows = form.getResolvedSamples().getRows();
+            Map<String, SelectedSamples.ResolvedSample> rows = form.getSelectedSamples().getRows();
             if (rows.size() == 0)
                 return null;
 
@@ -740,29 +757,33 @@ public class AnalysisScriptController extends BaseFlowController
             }
             else
             {
-                if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StringUtils.isNotEmpty(form.getKeywordDir()[0]))
+                if (form.isResolving() && form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StringUtils.isNotEmpty(form.getKeywordDir()[0]))
                 {
-                    errors.reject(ERROR_MSG, "Can't select directory of FCS files and individual FCS files");
+                    errors.reject(ERROR_MSG, "Can't select directory of FCS files and resolve existing FCS files");
                     return null;
                 }
 
                 // Get the FlowFCSFile for the resolved samples and remap by sample label.
-                for (Map.Entry<String, ResolvedSamplesData.ResolvedSample> entry : rows.entrySet())
+                for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : rows.entrySet())
                 {
-                    ResolvedSamplesData.ResolvedSample resolvedSample = entry.getValue();
+                    SelectedSamples.ResolvedSample resolvedSample = entry.getValue();
                     if (resolvedSample.isSelected())
                     {
-                        FlowFCSFile file = (FlowFCSFile)FlowWell.fromWellId(resolvedSample.getMatchedFile());
-                        if (file == null)
+                        FlowFCSFile file = null;
+                        if (form.isResolving())
                         {
-                            errors.reject(ERROR_MSG, "Failed to find resolved FCS file with rowid '" + resolvedSample.getMatchedFile() + "'");
-                            return null;
-                        }
+                            file = (FlowFCSFile)FlowWell.fromWellId(resolvedSample.getMatchedFile());
+                            if (file == null)
+                            {
+                                errors.reject(ERROR_MSG, "Failed to find resolved FCS file with rowid '" + resolvedSample.getMatchedFile() + "'");
+                                return null;
+                            }
 
-                        if (!file.isOriginalFCSFile())
-                        {
-                            errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is a FCS files created from importing an external analysis.");
-                            return null;
+                            if (!file.isOriginalFCSFile())
+                            {
+                                errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is a FCS files created from importing an external analysis.");
+                                return null;
+                            }
                         }
 
                         Workspace.SampleInfo sampleInfo = workspace.getSample(entry.getKey());
@@ -788,10 +809,10 @@ public class AnalysisScriptController extends BaseFlowController
         {
             WorkspaceData workspaceData = form.getWorkspace();
             Workspace workspace = workspaceData.getWorkspaceObject();
-            List<Workspace.SampleInfo> samples = workspace.getSamples();
+            List<Workspace.SampleInfo> samples = workspace.getAllSamples();
             if (samples.size() == 0)
             {
-                errors.reject(ERROR_MSG, "The workspace doesn't have any samples");
+                errors.reject(ERROR_MSG, "The workspace doesn't contain samples");
                 return;
             }
 
@@ -806,27 +827,31 @@ public class AnalysisScriptController extends BaseFlowController
 
             // CONSIDER: Simplify -- if there are *any* keyword runs, use SelectFCSFileOption.Previous.
 
-            // first, try to find an existing run in the same directory as the workspace
+            // First, try to find an existing run in the same directory as the workspace.
+            // Default to selecting a previous run if there are any keyword runs.
             if (workspaceFile != null && form.getExistingKeywordRunId() == 0)
             {
-                FlowRun[] keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, workspaceFile.getParentFile());
-                if (keywordRuns != null && keywordRuns.length > 0)
-                {
-                    for (FlowRun keywordRun : keywordRuns)
-                    {
-                        FlowExperiment experiment = keywordRun.getExperiment();
-                        if (experiment != null && experiment.isKeywords())
-                        {
-                            form.setExistingKeywordRunId(keywordRun.getRunId());
-                            //form.setRunFilePathRoot(keywordRun.getPath());
-                            form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
-                            break;
-                        }
-                    }
-                }
+//                FlowRun[] keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, workspaceFile.getParentFile());
+//                if (keywordRuns != null && keywordRuns.length > 0)
+//                {
+//                    form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
+//                    for (FlowRun keywordRun : keywordRuns)
+//                    {
+//                        FlowExperiment experiment = keywordRun.getExperiment();
+//                        if (experiment != null && experiment.isKeywords())
+//                        {
+//                            form.setExistingKeywordRunId(keywordRun.getRunId());
+//                            //form.setRunFilePathRoot(keywordRun.getPath());
+//                            break;
+//                        }
+//                    }
+//                }
+                int fcsRunCount = FlowManager.get().getFCSRunCount(getContainer());
+                if (fcsRunCount > 0)
+                    form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
             }
 
-            // otherwise, guess the FCS files are in the same directory as the workspace
+            // Next, guess the FCS files are in the same directory as the workspace.
             if (form.getExistingKeywordRunId() == 0 && form.getKeywordDir() == null)
             {
                 if (workspaceFile != null)
@@ -852,9 +877,9 @@ public class AnalysisScriptController extends BaseFlowController
                             form.setKeywordDir(new String[] { keywordPath });
                             //form.setRunFilePathRoot(keywordPath);
                         }
+                        form.setSelectFCSFilesOption(SelectFCSFileOption.Browse);
                     }
                 }
-                form.setSelectFCSFilesOption(SelectFCSFileOption.Browse);
             }
 
             form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
@@ -873,8 +898,24 @@ public class AnalysisScriptController extends BaseFlowController
 
             if (fcsFilesOption == SelectFCSFileOption.None)
             {
-                // Skip Analysis engine step.  Analysis engine can only be selected when no FCS files are associated with the run
-                form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
+                // Don't associate FCS files with the workspace.
+                WorkspaceData workspaceData = form.getWorkspace();
+                Workspace workspace = workspaceData.getWorkspaceObject();
+                List<Workspace.SampleInfo> sampleInfos = workspace.getAllSamples();
+                Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
+                for (Workspace.SampleInfo sampleInfo : sampleInfos)
+                {
+                    SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(true, 0);
+                    rows.put(sampleInfo.getSampleId(), resolvedSample);
+                }
+
+                SelectedSamples samples = form.getSelectedSamples();
+                samples.setSamples(sampleInfos);
+                samples.setKeywords(workspace.getKeywords());
+                samples.setRows(rows);
+
+                //// Skip Analysis engine step.  Analysis engine can only be selected when no FCS files are associated with the run
+                form.setWizardStep(ImportAnalysisStep.REVIEW_SAMPLES);
             }
             else if (fcsFilesOption == SelectFCSFileOption.Included)
             {
@@ -887,12 +928,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                 // UNDONE: Extract FCSFiles into pipeline if needed...
 
-                // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Options step.
-                WorkspaceData workspaceData = form.getWorkspace();
-                if (workspaceData.getWorkspaceObject() instanceof PCWorkspace)
-                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
-                else
-                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
+                form.setWizardStep(ImportAnalysisStep.REVIEW_SAMPLES);
             }
             else if (fcsFilesOption == SelectFCSFileOption.Previous)
             {
@@ -903,36 +939,10 @@ public class AnalysisScriptController extends BaseFlowController
                 }
 
                 // Resolve samples from workspace with previously imported FCSFiles
-                WorkspaceData workspaceData = form.getWorkspace();
-                Workspace workspace = workspaceData.getWorkspaceObject();
-                List<Workspace.SampleInfo> samples = workspace.getSamples();
+                form.setResolving(true);
+                resolveSamples(form);
 
-                ResolvedSamplesData resolvedData = form.getResolvedSamples();
-
-                resolvedData.setSamples(samples);
-                resolvedData.setKeywords(workspace.getKeywords());
-
-                // If this is the intial visit, resolve the FCS files otherwise use the form POSTed resolved data.
-                if (resolvedData.getRows().isEmpty())
-                {
-                    Map<Workspace.SampleInfo, FlowFCSFile> resolved = resolveFCSFiles(samples, resolvedData.getRows());
-                    resolvedData.setResolved(resolved);
-
-                    Map<String, ResolvedSamplesData.ResolvedSample> rows = new HashMap<String, ResolvedSamplesData.ResolvedSample>();
-                    for (Workspace.SampleInfo sample : samples)
-                    {
-                        FlowFCSFile file = resolved.get(sample);
-                        ResolvedSamplesData.ResolvedSample resolvedSample;
-                        if (file != null)
-                            resolvedSample = new ResolvedSamplesData.ResolvedSample(true, file.getRowId());
-                        else
-                            resolvedSample = new ResolvedSamplesData.ResolvedSample(false, 0);
-                        rows.put(sample.getSampleId(), resolvedSample);
-                    }
-                    resolvedData.setRows(rows);
-                }
-
-                form.setWizardStep(ImportAnalysisStep.RESOLVE_FCSFILES);
+                form.setWizardStep(ImportAnalysisStep.REVIEW_SAMPLES);
             }
             else if (fcsFilesOption == SelectFCSFileOption.Browse)
             {
@@ -944,10 +954,10 @@ public class AnalysisScriptController extends BaseFlowController
                 if (keywordDirs != null && keywordDirs.size() > 1)
                     errors.reject(ERROR_MSG, "Only a single keyword directoy can currently be imported.");
 
-                File keywordDir = keywordDirs.get(0);
-
                 if (errors.hasErrors())
                     return;
+
+                File keywordDir = keywordDirs.get(0);
 
                 if (form.getExistingKeywordRunId() == 0)
                 {
@@ -967,31 +977,46 @@ public class AnalysisScriptController extends BaseFlowController
                     }
                 }
 
-                boolean found = false;
-                Workspace workspace = workspaceData.getWorkspaceObject();
-                List<Workspace.SampleInfo> samples = workspace.getSamples();
-                for (Workspace.SampleInfo sampleInfo : samples)
+                if (form.getExistingKeywordRunId() > 0)
                 {
-                    File sampleFile = new File(keywordDir, sampleInfo.getLabel());
-                    if (sampleFile.exists())
-                    {
-                        found = true;
-                        break;
-                    }
+                    // Resolve workspace samples against the previously imported FCS files.
+                    form.setResolving(true);
+                    resolveSamples(form);
                 }
-
-                if (!found)
-                {
-                    String msg = "None of the samples used by the workspace were found in the selected directory '" + form.getKeywordDir()[0] + "'.";
-                    errors.reject(ERROR_MSG, msg);
-                    return;
-                }
-
-                // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Options step.
-                if (workspaceData.getWorkspaceObject() instanceof PCWorkspace)
-                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
                 else
-                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
+                {
+                    // We don't have an existing keyword run, check that at least one sample in the
+                    // selected directory exists and mark those samples as selected for import.
+                    boolean found = false;
+                    Workspace workspace = workspaceData.getWorkspaceObject();
+                    List<Workspace.SampleInfo> sampleInfos = workspace.getAllSamples();
+                    Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
+                    for (Workspace.SampleInfo sampleInfo : sampleInfos)
+                    {
+                        File sampleFile = new File(keywordDir, sampleInfo.getLabel());
+                        boolean exists = sampleFile.exists();
+                        if (exists)
+                            found = true;
+                        SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(exists, 0);
+                        rows.put(sampleInfo.getSampleId(), resolvedSample);
+                    }
+
+                    if (!found)
+                    {
+                        String msg = "None of the samples used by the workspace were found in the selected directory '" + form.getKeywordDir()[0] + "'.";
+                        errors.reject(ERROR_MSG, msg);
+                        return;
+                    }
+
+                    SelectedSamples samples = form.getSelectedSamples();
+                    samples.setSamples(sampleInfos);
+                    samples.setKeywords(workspace.getKeywords());
+                    samples.setRows(rows);
+
+                    form.setResolving(false);
+                }
+
+                form.setWizardStep(ImportAnalysisStep.REVIEW_SAMPLES);
             }
             else
             {
@@ -1000,13 +1025,54 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        private Map<Workspace.SampleInfo, FlowFCSFile> resolveFCSFiles(List<Workspace.SampleInfo> samples, Map<String, ResolvedSamplesData.ResolvedSample> rows)
+        private void resolveSamples(ImportAnalysisForm form)
         {
-            Map<Workspace.SampleInfo, FlowFCSFile> resolved = new LinkedHashMap<Workspace.SampleInfo, FlowFCSFile>();
+            WorkspaceData workspaceData = form.getWorkspace();
+            Workspace workspace = workspaceData.getWorkspaceObject();
+            List<Workspace.SampleInfo> sampleInfos = workspace.getAllSamples();
 
-            List<FlowFCSFile> files = FlowFCSFile.fromName(getContainer(), null);
+            SelectedSamples selectedSamples = form.getSelectedSamples();
+            selectedSamples.setSamples(sampleInfos);
+            selectedSamples.setKeywords(workspace.getKeywords());
+
+            // If this is the intial visit, resolve the FCS files otherwise use the form POSTed resolved data.
+            if (selectedSamples.getRows().isEmpty())
+            {
+                List<FlowFCSFile> files;
+                if (form.getExistingKeywordRunId() > 0)
+                {
+                    FlowRun run = FlowRun.fromRunId(form.getExistingKeywordRunId());
+                    files = Arrays.asList(run.getFCSFiles());
+                }
+                else
+                {
+                    files = FlowFCSFile.fromName(getContainer(), null);
+                }
+
+                Map<Workspace.SampleInfo, FlowFCSFile> resolved = resolveSamples(sampleInfos, files);
+                selectedSamples.setResolved(resolved);
+
+                Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
+                for (Workspace.SampleInfo sample : sampleInfos)
+                {
+                    FlowFCSFile file = resolved.get(sample);
+                    SelectedSamples.ResolvedSample resolvedSample;
+                    if (file != null)
+                        resolvedSample = new SelectedSamples.ResolvedSample(true, file.getRowId());
+                    else
+                        resolvedSample = new SelectedSamples.ResolvedSample(false, 0);
+                    rows.put(sample.getSampleId(), resolvedSample);
+                }
+                selectedSamples.setRows(rows);
+            }
+        }
+
+        private Map<Workspace.SampleInfo, FlowFCSFile> resolveSamples(List<Workspace.SampleInfo> samples, List<FlowFCSFile> files)
+        {
             if (files.isEmpty())
-                return resolved;
+                return Collections.emptyMap();
+
+            Map<Workspace.SampleInfo, FlowFCSFile> resolved = new LinkedHashMap<Workspace.SampleInfo, FlowFCSFile>();
 
             MultiHashMap<String, FlowFCSFile> filesMap = new MultiHashMap<String, FlowFCSFile>();
             for (FlowFCSFile file : files)
@@ -1033,33 +1099,21 @@ public class AnalysisScriptController extends BaseFlowController
             return resolved;
         }
 
-        private void stepResolveFCSFiles(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepReviewSamples(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
             Workspace workspace = workspaceData.getWorkspaceObject();
 
             // Populate resolved samples data for error reshow
-            form.getResolvedSamples().setSamples(workspace.getSamples());
-            form.getResolvedSamples().setKeywords(workspace.getKeywords());
-
-            List<File> keywordDirs = getKeywordDirs(form, errors);
-            assert keywordDirs == null : "keyword directories should only be set when selecting a directory form the pipeline browser.";
-
-            if (form.getSelectFCSFilesOption() != SelectFCSFileOption.Previous)
-            {
-                assert false; // Wizard shouldn't allow user to get here
-                errors.reject(ERROR_MSG, "Can't resolve FCS files when choosing FCS files by '" + form.getSelectFCSFilesOption() + "'");
-            }
-
-            if (errors.hasErrors())
-                return;
+            form.getSelectedSamples().setSamples(workspace.getAllSamples());
+            form.getSelectedSamples().setKeywords(workspace.getKeywords());
 
             // Verify resolved FCSFiles
-            ResolvedSamplesData resolvedData = form.getResolvedSamples();
-            Map<String, ResolvedSamplesData.ResolvedSample> rows = resolvedData.getRows();
+            SelectedSamples resolvedData = form.getSelectedSamples();
+            Map<String, SelectedSamples.ResolvedSample> rows = resolvedData.getRows();
             if (rows == null || rows.isEmpty())
             {
-                errors.reject(ERROR_MSG, "No resolved samples.");
+                errors.reject(ERROR_MSG, "No selected samples.");
                 return;
             }
 
@@ -1067,10 +1121,10 @@ public class AnalysisScriptController extends BaseFlowController
             Set<String> selectedWithoutMatch = new LinkedHashSet<String>();
             boolean hasSelected = false;
             boolean hasMatched = false;
-            for (Map.Entry<String, ResolvedSamplesData.ResolvedSample> entry : rows.entrySet())
+            for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : rows.entrySet())
             {
                 String sampleId = entry.getKey();
-                ResolvedSamplesData.ResolvedSample resolvedSample = entry.getValue();
+                SelectedSamples.ResolvedSample resolvedSample = entry.getValue();
                 if (resolvedSample.isSelected())
                 {
                     hasSelected = true;
@@ -1078,25 +1132,28 @@ public class AnalysisScriptController extends BaseFlowController
                         selectedWithoutMatch.add(sampleId);
                 }
 
-                if (resolvedSample.getMatchedFile() != null && resolvedSample.getMatchedFile() > 0)
+                if (resolvedSample.hasMatchedFile())
                     hasMatched = true;
             }
-
-            if (!selectedWithoutMatch.isEmpty())
-                errors.reject(ERROR_MSG, "All selected rows must be matched to a previously imported FCS file.");
 
             if (!hasSelected)
                 errors.reject(ERROR_MSG, "Please select at least one sample to import.");
 
-            if (!hasMatched)
-                errors.reject(ERROR_MSG, "Please select a previously imported FCS file to associate with the imported samples");
+            if (form.isResolving())
+            {
+                if (!selectedWithoutMatch.isEmpty())
+                    errors.reject(ERROR_MSG, "All selected rows must be matched to a previously imported FCS file.");
+
+                if (!hasMatched)
+                    errors.reject(ERROR_MSG, "Please select a previously imported FCS file to associate with the imported samples");
+            }
 
             if (errors.hasErrors())
                 return;
 
-            // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Options step.
+            // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Folder step.
             if (workspaceData.getWorkspaceObject() instanceof PCWorkspace)
-                form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
+                form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
             else
                 form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
         }
@@ -1109,7 +1166,7 @@ public class AnalysisScriptController extends BaseFlowController
                 return;
 
             // Map of workspace sample label -> FlowFCSFile
-            Map<String, FlowFCSFile> resolvedFCSFiles = getResolvedFCSFiles(form, errors);
+            Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles(form, errors);
             if (errors.hasErrors())
                 return;
 
@@ -1125,7 +1182,7 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
-                if (keywordDirs == null && form.getExistingKeywordRunId() == 0 && resolvedFCSFiles == null)
+                if (keywordDirs == null && form.getExistingKeywordRunId() == 0 && selectedFCSFiles == null)
                 {
                     errors.reject(ERROR_MSG, "You must select FCS Files before selecting the '" + analysisEngine + "' engine.");
                     return;
@@ -1133,14 +1190,22 @@ public class AnalysisScriptController extends BaseFlowController
 
             }
 
-            // R Engine can only be used on Mac FlowJo workspaces currently.
-            if (analysisEngine == AnalysisEngine.R && workspaceData.getWorkspaceObject() instanceof PCWorkspace)
+            // Skip to choose analysis folder step.
+            form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
+
+            if (analysisEngine == AnalysisEngine.R)
             {
-                errors.reject(ERROR_MSG, "Java FlowJo workspaces can only be analyzed by the LabKey engine.");
-                return;
+                // R Engine can only be used on Mac FlowJo workspaces currently.
+                if (workspaceData.getWorkspaceObject() instanceof PCWorkspace)
+                {
+                    errors.reject(ERROR_MSG, "PC/Java FlowJo workspaces can only be analyzed by the LabKey engine.");
+                    return;
+                }
+
+                // Currently, only the R engine has any analysis options and only if normalization is turned on.
+                if (FlowSettings.isNormalizationEnabled())
+                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
             }
-            
-            form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
         }
 
         private void stepAnalysisOptions(ImportAnalysisForm form, BindException errors) throws Exception
@@ -1199,18 +1264,12 @@ public class AnalysisScriptController extends BaseFlowController
 
                 // All samples in group should have the same staining panel for normalization to succeed.
                 List<Workspace.SampleInfo> sampleInfos = new ArrayList<Workspace.SampleInfo>();
-                List<String> importGroupNames = form.getImportGroupNameList();
-                if (importGroupNames == null)
+                SelectedSamples selectedSamples = form.getSelectedSamples();
+                for (String sampleId : selectedSamples.getRows().keySet())
                 {
-                    sampleInfos = workspace.getSamples();
-                }
-                else
-                {
-                    for (Workspace.GroupInfo groupInfo : workspace.getGroups())
-                    {
-                        if (importGroupNames.contains(groupInfo.getGroupName().toString()))
-                            sampleInfos.addAll(groupInfo.getSampleInfos());
-                    }
+                    Workspace.SampleInfo sampleInfo = workspace.getSample(sampleId);
+                    if (sampleInfo != null)
+                        sampleInfos.add(sampleInfo);
                 }
 
                 if (sampleInfos.size() <= 1)
@@ -1226,7 +1285,7 @@ public class AnalysisScriptController extends BaseFlowController
                     Analysis analysis = workspace.getSampleAnalysis(sampleInfos.get(i));
                     if (!analysis.isSimilar(referenceAnalysis))
                     {
-                        String msg = "All samples in the selected import groups must have similar gating to perform normalization. Try selecting a different group to import.";
+                        String msg = "All samples selected for import must have similar gating to perform normalization. Try selecting a different set of samples to import.";
                         errors.reject(ERROR_MSG, msg);
                         return;
                     }
@@ -1305,15 +1364,16 @@ public class AnalysisScriptController extends BaseFlowController
             // Only allow importing keyword directories if there doesn't already exist a keyword run.
             assert keywordRun == null || keywordDirs != null;
 
-            // Map of workspace sample label -> FlowFCSFile
-            Map<String, FlowFCSFile> resolvedFCSFiles = getResolvedFCSFiles(form, errors);
+            // Get the list of selected samples and, if resolving, the resolved FlowFCSFile wells.
+            // Map of workspace sample label -> FlowFCSFile (if resolving)
+            Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles(form, errors);
             if (errors.hasErrors())
                 return;
 
-            // Either we are: not associating any FCSFiles, importing keyword directories, or we have resolved existing FCS files.
-            assert form.getSelectFCSFilesOption() == SelectFCSFileOption.None ||
-                    (form.getSelectFCSFilesOption() == SelectFCSFileOption.Previous && resolvedFCSFiles != null && keywordDirs == null) ||
-                    (form.getSelectFCSFilesOption() == SelectFCSFileOption.Browse && resolvedFCSFiles == null && keywordDirs != null);
+//            // Either we are: not associating any FCSFiles, importing keyword directories, or we have resolved existing FCS files.
+//            assert form.getSelectFCSFilesOption() == SelectFCSFileOption.None ||
+//                    (form.getSelectFCSFilesOption() == SelectFCSFileOption.Previous && resolvedFCSFiles != null && keywordDirs == null) ||
+//                    (form.getSelectFCSFilesOption() == SelectFCSFileOption.Browse && resolvedFCSFiles == null && keywordDirs != null);
 
             FlowExperiment experiment;
             if (form.isCreateAnalysis())
@@ -1352,7 +1412,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             // Choose a run path root for the imported analysis based upon the input FCS files.
-            File runFilePathRoot = getRunPathRoot(keywordRun, keywordDirs, resolvedFCSFiles, pipelineFile, errors);
+            File runFilePathRoot = getRunPathRoot(keywordRun, keywordDirs, selectedFCSFiles, pipelineFile, errors);
 
             AnalysisEngine analysisEngine = getAnalysisEngine(form, errors);
             if (errors.hasErrors())
@@ -1364,8 +1424,7 @@ public class AnalysisScriptController extends BaseFlowController
                 job = new WorkspaceJob(info, getPipeRoot(), experiment,
                         workspaceData, pipelineFile, runFilePathRoot,
                         keywordDirs,
-                        resolvedFCSFiles,
-                        form.getImportGroupNameList(),
+                        selectedFCSFiles,
                         false);
             }
             /*
@@ -1378,8 +1437,7 @@ public class AnalysisScriptController extends BaseFlowController
                 job = new RScriptJob(info, getPipeRoot(), experiment,
                         workspaceData, pipelineFile, runFilePathRoot,
                         keywordDirs,
-                        resolvedFCSFiles,
-                        form.getImportGroupNameList(),
+                        selectedFCSFiles,
                         form.isrEngineNormalization(),
                         form.getrEngineNormalizationReference(),
                         form.getrEngineNormalizationSubsetList(),

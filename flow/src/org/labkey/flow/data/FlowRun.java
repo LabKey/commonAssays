@@ -78,12 +78,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return getExpObject();
     }
 
-    public List<? extends FlowDataObject> getDatas(FlowDataType type) throws SQLException
+    public List<? extends FlowDataObject> getDatas(FlowDataType type)
     {
         return FlowDataObject.fromDatas(getExperimentRun().getOutputDatas(type));
     }
 
-    public boolean hasRealWells() throws SQLException
+    public boolean hasRealWells()
     {
         List<? extends FlowDataObject> all = getDatas(null);
         for (FlowDataObject obj : all)
@@ -109,14 +109,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     {
         if (null == _allDatas)
         {
-            try
-            {
-                _allDatas = getDatas(null);
-            }
-            catch (SQLException x)
-            {
-                throw new RuntimeSQLException(x);
-            }
+            _allDatas = getDatas(null);
         }
         
         List<FlowWell> wells = new ArrayList<FlowWell>();
@@ -164,12 +157,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     }
 
 
-    public FlowFCSFile[] getFCSFiles() throws SQLException
+    public FlowFCSFile[] getFCSFiles()
     {
         return getDatas(FlowDataType.FCSFile).toArray(new FlowFCSFile[0]);
     }
 
-    public FlowFCSAnalysis[] getFCSAnalyses() throws SQLException
+    public FlowFCSAnalysis[] getFCSAnalyses()
     {
         return getDatas(FlowDataType.FCSAnalysis).toArray(new FlowFCSAnalysis[0]);
     }
@@ -240,7 +233,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return ret;
     }
 
-    public String getAnalysisScript() throws SQLException
+    public String getAnalysisScript()
     {
         FlowScript script = getScript();
         if (script == null)
@@ -342,12 +335,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         });
     }
 
-    static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step) throws SQLException
+    static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step)
     {
         return getRunsForPath(container, step, null);
     }
 
-    static public FlowRun[] getRunsWithRealFCSFiles(Container container, FlowProtocolStep step) throws SQLException
+    static public FlowRun[] getRunsWithRealFCSFiles(Container container, FlowProtocolStep step)
     {
         FlowRun[] runs = FlowRun.getRunsForContainer(container, step);
         List<FlowRun> ret = new ArrayList<FlowRun>();
@@ -359,7 +352,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return ret.toArray(new FlowRun[ret.size()]);
     }
 
-    static public FlowRun[] getRunsForScript(Container container, FlowProtocolStep step, int scriptId) throws SQLException
+    static public FlowRun[] getRunsForScript(Container container, FlowProtocolStep step, int scriptId)
     {
         if (scriptId == 0)
             return new FlowRun[0];
@@ -373,7 +366,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return ret.toArray(new FlowRun[ret.size()]);
     }
 
-    static public FlowRun findMostRecent(Container container, FlowProtocolStep step) throws SQLException
+    static public FlowRun findMostRecent(Container container, FlowProtocolStep step)
     {
         FlowRun[] runs = getRunsForContainer(container, step);
         FlowRun max = null;
@@ -387,7 +380,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return max;
     }
 
-    static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot) throws SQLException
+    static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot)
     {
         List<FlowRun> ret = new ArrayList<FlowRun>();
         ExpProtocol childProtocol = null;

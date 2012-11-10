@@ -61,11 +61,11 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                             File originalImportedFile,
                             File runFilePathRoot,
                             List<File> keywordDirs,
-                            Map<String, FlowFCSFile> resolvedFCSFiles,
+                            Map<String, FlowFCSFile> selectedFCSFiles,
                             String analysisRunName,
                             boolean failOnError) throws Exception
     {
-        super(info, root, experiment, analysisEngine, originalImportedFile, runFilePathRoot, keywordDirs, resolvedFCSFiles, null, failOnError);
+        super(info, root, experiment, analysisEngine, originalImportedFile, runFilePathRoot, keywordDirs, selectedFCSFiles, failOnError);
 
         _analysisPathRoot = analysisPathRoot;
         if (!_analysisPathRoot.isDirectory())
@@ -118,12 +118,17 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
             AttributeSet keywordAttrs = entry.getValue();
 
+            // Only import the selected FCS files.
             // Set the keywords URI using the resolved FCS file or the FCS file in the runFilePathRoot directory
             URI uri = null;
             File file = null;
-            if (getResolvedFCSFiles() != null)
+            if (getSelectedFCSFiles() != null)
             {
-                FlowFCSFile resolvedFCSFile = getResolvedFCSFiles().get(sampleLabel);
+                // Don't import unless the sample label is selected.
+                if (!getSelectedFCSFiles().containsKey(sampleLabel))
+                    continue;
+
+                FlowFCSFile resolvedFCSFile = getSelectedFCSFiles().get(sampleLabel);
                 if (resolvedFCSFile != null)
                 {
                     uri = resolvedFCSFile.getFCSURI();
@@ -162,7 +167,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         return saveAnalysis(getUser(), getContainer(), getExperiment(),
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
                 getRunFilePathRoot(),
-                getResolvedFCSFiles(),
+                getSelectedFCSFiles(),
                 keywordsMap,
                 sampleCompMatrixMap,
                 resultsMap,

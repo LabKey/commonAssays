@@ -45,6 +45,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -59,49 +61,16 @@
 
     Workspace workspace = form.getWorkspace().getWorkspaceObject();
 
-    Set<String> keywordOptions = new LinkedHashSet<String>();
-    keywordOptions.add("");
-    for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
+    SelectedSamples selectedSamples = form.getSelectedSamples();
+    List<String> sampleIds = new ArrayList<String>(selectedSamples.getRows().size());
+    for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : selectedSamples.getRows().entrySet())
     {
-        for (String keyword : sampleInfo.getKeywords().keySet())
-        {
-            if (!KeywordUtil.isHidden(keyword))
-                keywordOptions.add(keyword);
-        }
+        if (entry.getValue().isSelected())
+            sampleIds.add(entry.getKey());
     }
-
-    Map<String, String> opOptions = new LinkedHashMap<String, String>();
-    opOptions.put(CompareType.EQUAL.getPreferredUrlKey(), CompareType.EQUAL.getDisplayValue());
-    opOptions.put(CompareType.NEQ_OR_NULL.getPreferredUrlKey(), CompareType.NEQ_OR_NULL.getDisplayValue());
-    opOptions.put(CompareType.CONTAINS.getPreferredUrlKey(), CompareType.CONTAINS.getDisplayValue());
-    opOptions.put(CompareType.DOES_NOT_CONTAIN.getPreferredUrlKey(), CompareType.DOES_NOT_CONTAIN.getDisplayValue());
-    opOptions.put(CompareType.STARTS_WITH.getPreferredUrlKey(), CompareType.STARTS_WITH.getDisplayValue());
-    opOptions.put(CompareType.DOES_NOT_START_WITH.getPreferredUrlKey(), CompareType.DOES_NOT_START_WITH.getDisplayValue());
-    opOptions.put(CompareType.IN.getPreferredUrlKey(), CompareType.IN.getDisplayValue());
-
-    Map<String, String> groupOptions = new TreeMap<String, String>();
-    Map<String, Set<String>> groups = new TreeMap<String, Set<String>>();
-    for (Workspace.GroupInfo group : workspace.getGroups())
-    {
-        Set<String> groupSamples = new TreeSet<String>();
-        for (String sampleID : group.getSampleIds())
-        {
-            Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
-            if (sampleInfo != null)
-                groupSamples.add(sampleInfo.getLabel());
-        }
-        if (group.isAllSamples() || groupSamples.size() > 0)
-        {
-            String groupName = group.getGroupName().toString();
-            groups.put(groupName, groupSamples);
-            groupOptions.put(groupName, groupName + " (" + groupSamples.size() + " samples)");
-        }
-    }
-
 %>
 <script>
-    var groups = <%=new JSONObject(groups)%>;
-    var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
+    var sampleIds = <%=new JSONArray(sampleIds)%>;
 </script>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
@@ -109,78 +78,12 @@
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
+<input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=h(form.getSelectAnalysisEngine())%>">
 
 <p>Analysis engine options.
 </p>
 <hr/>
-
-<h3>Which samples should be imported?</h3>
-<div style="padding-left: 2em; padding-bottom: 1em;">
-<%
-if (protocol != null)
-{
-    if (protocol.getFCSAnalysisFilterString() != null)
-    {
-        %>
-        Samples will be filtered by the current protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a>:
-        <br>
-        <div style="padding-left: 2em;">
-            <%=h(protocol.getFCSAnalysisFilter().getFilterText())%>
-        </div>
-        <%
-    }
-    else
-    {
-        %>No protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a> has been defined in this folder.<%
-    }
-}
-%>
-    <p>
-    <script>
-        function onGroupChanged(selectedGroup)
-        {
-            importedGroup = selectedGroup || "All Samples";
-
-            var rEngineNormalizationReferenceSelect = document.getElementById("rEngineNormalizationReference");
-            if (rEngineNormalizationReferenceSelect)
-            {
-                // Remove all but "<Select Sample>" option.
-                var value = rEngineNormalizationReferenceSelect.value;
-                while (rEngineNormalizationReferenceSelect.length > 1)
-                    rEngineNormalizationReferenceSelect.remove(1);
-
-                var group = groups[importedGroup];
-                if (group)
-                {
-                    for (var i = 0; i < group.length; i++)
-                    {
-                        var sample = group[i];
-                        var opt = document.createElement("option");
-                        opt.value = sample;
-                        opt.text = sample;
-                        if (value == sample)
-                            opt.selected = true;
-                        rEngineNormalizationReferenceSelect.add(opt, null);
-                    }
-                }
-            }
-
-            var rEngineNormalizationSubsets = Ext.getCmp('rEngineNormalizationSubsets');
-            if (rEngineNormalizationSubsets)
-            {
-                var value = rEngineNormalizationSubsets.getValue();
-
-                rEngineNormalizationSubsets.getStore().loadData(jsonSubsetMap[importedGroup]);
-                rEngineNormalizationSubsets.setValue(value);
-            }
-        }
-    </script>
-    <label for="importGroupNames">Select a FlowJo group to import from the workspace.</label>
-    <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
-        <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
-    </select>
-</div>
 
 <%
     if (AnalysisEngine.R == form.getSelectAnalysisEngine())
@@ -193,12 +96,39 @@ if (protocol != null)
 </p>
 <% } %>
 <script>
+    var normalizationReference = <%=PageFlowUtil.jsString(form.getrEngineNormalizationReference())%>;
+
     function onNormalizationChange()
     {
         var disable = !document.getElementById("rEngineNormalization").checked;
         document.getElementById("rEngineNormalizationReference").disabled = disable;
         Ext.getCmp("rEngineNormalizationSubsets").setDisabled(disable);
         Ext.getCmp("rEngineNormalizationParameters").setDisabled(disable);
+    }
+
+    function onNormalizationReferenceChanged(selectedReference)
+    {
+        if (selectedReference != normalizationReference)
+        {
+            normalizationReference = selectedReference;
+
+            var rEngineNormalizationSubsets = Ext.getCmp('rEngineNormalizationSubsets');
+            if (rEngineNormalizationSubsets)
+            {
+                var value = rEngineNormalizationSubsets.getValue();
+
+                if (normalizationReference)
+                {
+                    rEngineNormalizationSubsets.getStore().loadData(jsonSubsetMap[normalizationReference]);
+                    rEngineNormalizationSubsets.setValue(value);
+                }
+                else
+                {
+                    rEngineNormalizationSubsets.getStore().clearData();
+                    rEngineNormalizationSubsets.clearValue();
+                }
+            }
+        }
     }
 </script>
 
@@ -212,25 +142,19 @@ if (protocol != null)
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
-    <em>NOTE:</em> The list of available samples is restricted to those in the imported group above.<br>
+    <em>NOTE:</em> The list of available samples is restricted to those selected in a previous step.<br>
     <select name="rEngineNormalizationReference" id="rEngineNormalizationReference"
-        <%=text(normalizationEnabled ? "" : "disabled")%> >
+        <%=text(normalizationEnabled ? "" : "disabled")%> onchange="onNormalizationReferenceChanged(this.value);" >
         <option value="">&lt;Select sample&gt;</option>
         <%
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();
-            if (form.getImportGroupNames() != null && form.getImportGroupNames().length() > 0)
+            for (String sampleId : sampleIds)
             {
-                List<String> importGroupNames = form.getImportGroupNameList();
-                for (String group : groups.keySet())
+                Workspace.SampleInfo sampleInfo = workspace.getSample(sampleId);
+                if (sampleInfo != null)
                 {
-                    if (importGroupNames.contains(group))
-                    {
-                        Set<String> groupSamples = groups.get(group);
-                        for (String sample : groupSamples)
-                        {
-        %><option value=<%=PageFlowUtil.filter(sample)%> <%=text(sample.equals(rEngineNormalizationReference) ? "selected" : "")%>><%=PageFlowUtil.filter(sample)%></option><%
-                        }
-                    }
+                    boolean selected = sampleInfo.getSampleId().equals(rEngineNormalizationReference);
+        %><option value=<%=PageFlowUtil.filter(sampleInfo.getSampleId())%> <%=text(selected ? "selected" : "")%>><%=PageFlowUtil.filter(sampleInfo.getLabel())%></option><%
                 }
             }
         %>
@@ -256,21 +180,25 @@ if (protocol != null)
     %>
     <%
         JSONObject jsonSubsetMap = new JSONObject();
-        for (Map.Entry<PopulationName, Analysis> groupAnalysis : workspace.getGroupAnalyses().entrySet())
+        for (String sampleId : sampleIds)
         {
-            JSONArray jsonSubsets = new JSONArray();
-
-            Analysis analysis = groupAnalysis.getValue();
-            for (Population child : analysis.getPopulations())
+            Workspace.SampleInfo sampleInfo = workspace.getSample(sampleId);
+            Analysis analysis = sampleInfo != null ? workspace.getSampleAnalysis(sampleInfo) : null;
+            if (analysis != null)
             {
-                addPopulation(jsonSubsets, null, child);
-            }
+                JSONArray jsonSubsets = new JSONArray();
 
-            jsonSubsetMap.put(groupAnalysis.getKey().toString(), jsonSubsets);
+                for (Population child : analysis.getPopulations())
+                {
+                    addPopulation(jsonSubsets, null, child);
+                }
+
+                jsonSubsetMap.put(sampleId, jsonSubsets);
+            }
         }
     %>
     <label for="rEngineNormalizationSubsets">Select subsets to be normalized.  At least one subset must be selected.</label><br>
-    <em>NOTE:</em> The list of available subsets is restricted to those in the imported group above and excludes boolean subsets.<br>
+    <em>NOTE:</em> The list of available subsets is restricted to those in the reference sample and excludes boolean subsets.<br>
     <div id="rEngineNormalizationSubsetsDiv"></div>
     <script>
         LABKEY.requiresScript('Ext.ux.form.LovCombo.js');
@@ -294,7 +222,7 @@ if (protocol != null)
                 separator: "<%=text(ImportAnalysisForm.PARAMATER_SEPARATOR)%>",
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
-                    data: jsonSubsetMap[importedGroup]
+                    data: normalizationReference && jsonSubsetMap[normalizationReference] || []
                 })
             });
         });

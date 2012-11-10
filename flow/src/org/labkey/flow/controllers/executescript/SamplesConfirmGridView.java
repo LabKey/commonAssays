@@ -25,7 +25,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.view.GridView;
-import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowRun;
@@ -36,9 +35,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,9 +46,9 @@ import java.util.Set;
  * User: kevink
  * Date: 10/20/12
  */
-public class ResolvedConfirmGridView extends GridView
+public class SamplesConfirmGridView extends GridView
 {
-    /*package*/ static String DATAREGION_NAME = "ResolveConfirm";
+    /*package*/ public static String DATAREGION_NAME = "SamplesConfirm";
 
     static FieldKey MATCHED_FLAG_FIELD_KEY = new FieldKey(null, "MatchedFlag");
     static FieldKey MATCHED_FILE_FIELD_KEY = new FieldKey(null, "MatchedFile");
@@ -61,20 +58,23 @@ public class ResolvedConfirmGridView extends GridView
 
     Map<Integer, FlowRun> _runs = new HashMap<Integer, FlowRun>();
 
-    public ResolvedConfirmGridView(ResolvedSamplesData data, Errors errors)
+    public SamplesConfirmGridView(SelectedSamples data, boolean resolving, Errors errors)
     {
-        this(data.getKeywords(), data.getSamples(), data.getRows(), data.getResolved(), errors);
+        this(data.getKeywords(), data.getSamples(), resolving, data.getRows(), data.getResolved(), errors);
     }
 
-    public ResolvedConfirmGridView(Collection<String> keywords, List<Workspace.SampleInfo> samples, Map<String, ResolvedSamplesData.ResolvedSample> rows, Map<Workspace.SampleInfo, FlowFCSFile> resolved, Errors errors)
+    public SamplesConfirmGridView(Collection<String> keywords, List<Workspace.SampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Map<Workspace.SampleInfo, FlowFCSFile> resolved, Errors errors)
     {
-        super(new ResolveConfirmDataRegion(), errors);
+        super(new SamplesConfirmDataRegion(), errors);
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
         List<String> columns = new ArrayList<String>();
-        columns.add(MATCHED_FLAG_FIELD_KEY.getName());
-        columns.add(MATCHED_FILE_FIELD_KEY.getName());
+        if (resolving)
+        {
+            columns.add(MATCHED_FLAG_FIELD_KEY.getName());
+            columns.add(MATCHED_FILE_FIELD_KEY.getName());
+        }
         columns.add(SAMPLE_ID_FIELD_KEY.getName());
         columns.add(SAMPLE_NAME_FIELD_KEY.getName());
         columns.add(GROUP_NAMES_FIELD_KEY.getName());
@@ -92,9 +92,13 @@ public class ResolvedConfirmGridView extends GridView
             int i = 0;
 
             // MatchedFlag and MatchedFile
-            ResolvedSamplesData.ResolvedSample matched = rows.get(sample.getSampleId());
-            row[i++] = matched != null && matched.hasMatchedFile();
-            row[i++] = matched != null && matched.hasMatchedFile() ? matched.getMatchedFile() : null;
+            SelectedSamples.ResolvedSample matched = null;
+            if (resolving)
+            {
+                matched = rows.get(sample.getSampleId());
+                row[i++] = matched != null && matched.hasMatchedFile();
+                row[i++] = matched != null && matched.hasMatchedFile() ? matched.getMatchedFile() : null;
+            }
 
             // SampleId and SampleName
             row[i++] = sample.getSampleId();
@@ -134,12 +138,13 @@ public class ResolvedConfirmGridView extends GridView
         Results results = new ResultsImpl(rs);
         setResults(results);
 
-        ResolveConfirmDataRegion dr = (ResolveConfirmDataRegion)getDataRegion();
+        SamplesConfirmDataRegion dr = (SamplesConfirmDataRegion)getDataRegion();
         dr.setName(DATAREGION_NAME);
         dr.setShowFilters(false);
         dr.setSortable(false);
         dr.setShowPagination(true);
 
+        dr.resolving = resolving;
         dr.sampleCount = samples.size();
         dr.matchedCount = matchedList.size();
         dr.unmatchedCount = unmatchedList.size();
@@ -149,7 +154,7 @@ public class ResolvedConfirmGridView extends GridView
         //dr.setRecordSelectorValueColumns(SAMPLE_ID_FIELD_KEY.getName());
         dr.setShowRecordSelectors(true);
         Set<String> selected = new HashSet<String>();
-        for (Map.Entry<String, ResolvedSamplesData.ResolvedSample> row : rows.entrySet())
+        for (Map.Entry<String, SelectedSamples.ResolvedSample> row : rows.entrySet())
         {
             if (row.getValue().isSelected())
                 selected.add(row.getKey());
@@ -157,27 +162,33 @@ public class ResolvedConfirmGridView extends GridView
         getRenderContext().setAllSelected(selected);
 
         ButtonBar buttonBar = new ButtonBar();
-        ActionButton button = new ActionButton("Update Matches");
-        button.setActionType(ActionButton.Action.POST);
-        // Set the form's step to the previous step and submit.
-        button.setScript(
-                "document.forms[\"" + ImportAnalysisForm.NAME + "\"].elements[\"step\"].value = " + AnalysisScriptController.ImportAnalysisStep.SELECT_FCSFILES.getNumber() + "; " +
-                "document.forms[\"" + ImportAnalysisForm.NAME + "\"].submit();", false);
-        buttonBar.add(button);
         dr.setButtonBar(buttonBar);
-        dr.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
 
-        // Add MatchedFlag column
-        DisplayColumn dc = new MatchedFlagDisplayColumn();
-        dr.addDisplayColumn(dc);
+        DisplayColumn dc;
+        if (resolving)
+        {
+            ActionButton button = new ActionButton("Update Matches");
+            button.setActionType(ActionButton.Action.POST);
+            // Set the form's step to the previous step and submit.
+            button.setScript(
+                    "document.forms[\"" + ImportAnalysisForm.NAME + "\"].elements[\"step\"].value = " + AnalysisScriptController.ImportAnalysisStep.SELECT_FCSFILES.getNumber() + "; " +
+                    "document.forms[\"" + ImportAnalysisForm.NAME + "\"].submit();", false);
+            buttonBar.add(button);
+            dr.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
 
-        // Add Matched column
-        ColumnInfo matchCol = new ColumnInfo(MATCHED_FILE_FIELD_KEY, null, JdbcType.INTEGER);
-        matchCol.setLabel("Matched FCS File");
-        matchCol.setFk(new FCSFilesFilesForeignKey(FlowFCSFile.getOriginal(getViewContext().getContainer())));
-        matchCol.setInputType("select");
-        dc = new MatchedFileDisplayColumn(matchCol);
-        dr.addDisplayColumn(dc);
+            // Add MatchedFlag column
+            dc = new MatchedFlagDisplayColumn();
+            dr.addDisplayColumn(dc);
+
+            // Add Matched column
+            ColumnInfo matchCol = new ColumnInfo(MATCHED_FILE_FIELD_KEY, null, JdbcType.INTEGER);
+            matchCol.setLabel("Matched FCS File");
+            matchCol.setFk(new FCSFilesFilesForeignKey(FlowFCSFile.getOriginal(getViewContext().getContainer())));
+            matchCol.setInputType("select");
+            dc = new MatchedFileDisplayColumn(matchCol);
+            dr.addDisplayColumn(dc);
+        }
+
 
         // Add SampleName column
         dc = new SimpleDisplayColumn("${" + SAMPLE_NAME_FIELD_KEY.getName() + "}");
@@ -198,8 +209,9 @@ public class ResolvedConfirmGridView extends GridView
         }
     }
 
-    private static class ResolveConfirmDataRegion extends DataRegion
+    private static class SamplesConfirmDataRegion extends DataRegion
     {
+        protected boolean resolving = false;
         protected int sampleCount = 0;
         protected int unmatchedCount = 0;
         protected int matchedCount = 0;
@@ -208,12 +220,15 @@ public class ResolvedConfirmGridView extends GridView
         @Override
         protected void renderHeaderScript(RenderContext ctx, Writer writer, Map<String, String> messages, boolean showRecordSelectors) throws IOException
         {
-            String matchedMsg;
-            if (matchedCount == sampleCount)
-                matchedMsg = String.format("Matched all %d samples.", sampleCount);
-            else
-                matchedMsg = String.format("Matched %d of %d samples.", matchedCount, sampleCount);
-            messages.put("matches", matchedMsg);
+            if (resolving)
+            {
+                String matchedMsg;
+                if (matchedCount == sampleCount)
+                    matchedMsg = String.format("Matched all %d samples.", sampleCount);
+                else
+                    matchedMsg = String.format("Matched %d of %d samples.", matchedCount, sampleCount);
+                messages.put("matches", matchedMsg);
+            }
             super.renderHeaderScript(ctx, writer, messages, showRecordSelectors);
         }
 
@@ -232,9 +247,9 @@ public class ResolvedConfirmGridView extends GridView
         @Override
         protected String getRecordSelectorName(RenderContext ctx)
         {
-            // Bind select checkbox to ImportAnalyisForm.resolvedSamples.select
+            // Bind select checkbox to ImportAnalyisForm.selectedSamples.select
             String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
-            return "resolvedSamples.rows[" + sampleId + "].selected";
+            return "selectedSamples.rows[" + sampleId + "].selected";
         }
 
         @Override
@@ -257,25 +272,32 @@ public class ResolvedConfirmGridView extends GridView
             // Add a hidden input for spring form binding -- if this value is posed, the row was unchecked.
             out.write("<input type=hidden name='");
             out.write(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx));
-            out.write("' value=\"0\"");
+            out.write("' value=\"0\">");
         }
 
         @Override
         protected boolean isErrorRow(RenderContext ctx, int rowIndex)
         {
-            // Render unmatched rows as errors
-            Boolean match = ctx.get(MATCHED_FLAG_FIELD_KEY, Boolean.class);
-            if (match != null && match)
-                return false;
+            if (resolving)
+            {
+                // Render unmatched rows as errors
+                Boolean match = ctx.get(MATCHED_FLAG_FIELD_KEY, Boolean.class);
+                if (match != null && match)
+                    return false;
 
-            // If the row isn't selected and won't be imported, don't render as an error.
-            String checkboxName = getRecordSelectorValue(ctx);
-            boolean checked = isRecordSelectorChecked(ctx, checkboxName);
-            if (!checked)
-                return false;
+                // If the row isn't selected and won't be imported, don't render as an error.
+                String checkboxName = getRecordSelectorValue(ctx);
+                boolean checked = isRecordSelectorChecked(ctx, checkboxName);
+                if (!checked)
+                    return false;
 
-            // Unmatched and row is selected for import.
-            return true;
+                // Unmatched and row is selected for import.
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }
@@ -361,9 +383,9 @@ public class ResolvedConfirmGridView extends GridView
         @Override
         public String getFormFieldName(RenderContext ctx)
         {
-            // Bind select combobox to ImportAnalyisForm.resolvedSamples.matchedFile
+            // Bind select combobox to ImportAnalyisForm.selectedSamples.matchedFile
             String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
-            return "resolvedSamples.rows[" + sampleId + "].matchedFile";
+            return "selectedSamples.rows[" + sampleId + "].matchedFile";
         }
 
         @Override

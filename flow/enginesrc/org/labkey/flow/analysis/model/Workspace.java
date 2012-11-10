@@ -236,6 +236,10 @@ public abstract class Workspace implements Serializable
         return _groupAnalyses;
     }
 
+    /**
+     * Usually using .getAllSamples() is preferred.
+     * Sometimes the workspace will contains samples that are no longer referenced by any existing group.
+     */
     public List<SampleInfo> getSamples()
     {
         return new ArrayList<SampleInfo>(_sampleInfos.values());
@@ -281,36 +285,47 @@ public abstract class Workspace implements Serializable
         return sampleInfos;
     }
 
-    /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
-    public List<String> getAllSampleIDs()
+    /** Get the sample list from the "All Samples" group or get all the samples in the workspace. */
+    public List<SampleInfo> getAllSamples()
     {
         GroupInfo allSamplesGroup = getAllSamplesGroup();
 
-        List<String> allSampleIDs = null;
+        List<SampleInfo> allSamples = null;
         if (allSamplesGroup != null)
-            allSampleIDs = allSamplesGroup.getSampleIds();
+            allSamples = allSamplesGroup.getSampleInfos();
 
         // No "All Samples" group found or it was empty. Return all sample IDs in the workspace.
-        if (allSampleIDs == null || allSampleIDs.size() == 0)
-            allSampleIDs = new ArrayList<String>(_sampleInfos.keySet());
+        if (allSamples == null || allSamples.size() == 0)
+            allSamples = getSamples();
 
-        return allSampleIDs;
+        return allSamples;
+    }
+
+    /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
+    public List<String> getAllSampleIDs()
+    {
+        List<SampleInfo> allSamples = getAllSamples();
+        if (allSamples == null)
+            return Collections.emptyList();
+
+        List<String> allSampleIds = new ArrayList<String>(allSamples.size());
+        for (SampleInfo sample : allSamples)
+            allSampleIds.add(sample.getSampleId());
+
+        return allSampleIds;
     }
 
     /** Get the sample label list from the "All Samples" group or get all the samples in the workspace. */
     public List<String> getAllSampleLabels()
     {
-        List<String> allSampleIDs = getAllSampleIDs();
-        if (allSampleIDs == null || allSampleIDs.size() == 0)
-            return null;
+        List<SampleInfo> allSamples = getAllSamples();
+        if (allSamples == null || allSamples.size() == 0)
+            return Collections.emptyList();
 
-        List<String> allSampleLabels = new ArrayList<String>(allSampleIDs.size());
-        for (String sampleID : allSampleIDs)
-        {
-            SampleInfo sampleInfo = getSample(sampleID);
-            if (sampleInfo != null)
-                allSampleLabels.add(sampleInfo.getLabel());
-        }
+        List<String> allSampleLabels = new ArrayList<String>(allSamples.size());
+        for (SampleInfo sample : allSamples)
+            allSampleLabels.add(sample.getLabel());
+
         return allSampleLabels;
     }
 

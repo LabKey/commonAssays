@@ -77,12 +77,12 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         File originalImportedFile,
                         File runFilePathRoot,
                         List<File> keywordDirs,
-                        Map<String, FlowFCSFile> resolvedFCSFiles,
-                        List<String> importGroupNames,
+                        Map<String, FlowFCSFile> selectedFCSFiles,
+                        //List<String> importGroupNames,
                         boolean failOnError)
             throws Exception
     {
-        super(info, root, experiment, AnalysisEngine.FlowJoWorkspace, originalImportedFile, runFilePathRoot, keywordDirs, resolvedFCSFiles, importGroupNames, failOnError);
+        super(info, root, experiment, AnalysisEngine.FlowJoWorkspace, originalImportedFile, runFilePathRoot, keywordDirs, selectedFCSFiles, failOnError);
 
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)
@@ -124,8 +124,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
             return createExperimentRun(getUser(), getContainer(), workspace,
                     getExperiment(), _workspaceName, _workspaceFile, getOriginalImportedFile(),
-                    getRunFilePathRoot(), getResolvedFCSFiles(),
-                    getImportGroupNames(), isFailOnError());
+                    getRunFilePathRoot(), getSelectedFCSFiles(),
+                    isFailOnError());
         }
         finally
         {
@@ -137,7 +137,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                         Workspace workspace, FlowExperiment experiment,
                                         String workspaceName, File workspaceFile, File originalImportedFile,
                                         File runFilePathRoot, Map<String, FlowFCSFile> resolvedFCSFiles,
-                                        List<String> importGroupNames, boolean failOnError) throws Exception
+                                        boolean failOnError) throws Exception
     {
         Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
@@ -147,7 +147,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         Map<Analysis, FlowScript> scripts = new HashMap();
         List<String> sampleLabels = new ArrayList<String>(workspace.getSampleCount());
 
-        if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, importGroupNames, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
+        if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
             return null;
 
         if (checkInterrupted())
@@ -200,23 +200,22 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         }
     }
 
-    private List<String> getSampleIDs(Workspace workspace, List<String> groupNames)
+    private List<String> getSampleIDs(Workspace workspace, Map<String, FlowFCSFile> selectedFCSFile)
     {
         List<String> sampleIDs;
-        if (groupNames == null || groupNames.isEmpty())
+        if (selectedFCSFile == null || selectedFCSFile.isEmpty())
         {
             sampleIDs = workspace.getAllSampleIDs();
         }
         else
         {
             sampleIDs = new ArrayList<String>(workspace.getSampleCount());
-            for (Workspace.GroupInfo group : workspace.getGroups())
+            for (Map.Entry<String, FlowFCSFile> entry : selectedFCSFile.entrySet())
             {
-                if (groupNames.contains(group.getGroupId()) || groupNames.contains(group.getGroupName().toString()))
-                {
-                    info("Getting samples IDs for group '" + group.getGroupName() + "'");
-                    sampleIDs.addAll(group.getSampleIds());
-                }
+                String sampleLabel = entry.getKey();
+                Workspace.SampleInfo sample = workspace.getSample(sampleLabel);
+                if (sample != null)
+                    sampleIDs.add(sample.getSampleId());
             }
         }
 
@@ -227,8 +226,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     private boolean extractAnalysis(Container container,
                                     Workspace workspace,
                                     File runFilePathRoot,
-                                    Map<String, FlowFCSFile> resolvedFCSFiles,
-                                    List<String> importGroupNames,
+                                    Map<String, FlowFCSFile> selectedFCSFiles,
+                                    //List<String> importGroupNames,
                                     boolean failOnError,
                                     Map<String, AttributeSet> keywordsMap,
                                     Map<String, CompensationMatrix> sampleCompMatrixMap,
@@ -237,7 +236,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     Map<Analysis, ScriptDocument> scriptDocs,
                                     Collection<String> sampleLabels) throws SQLException, IOException
     {
-        List<String> sampleIDs = getSampleIDs(workspace, importGroupNames);
+        List<String> sampleIDs = getSampleIDs(workspace, selectedFCSFiles);
         if (sampleIDs == null || sampleIDs.isEmpty())
         {
             addStatus("No samples to import");
@@ -261,11 +260,11 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             // Set the keywords URI using the resolved FCS file or the FCS file in the runFilePathRoot directory
             URI uri = null;
             File file = null;
-            if (resolvedFCSFiles != null)
+            if (selectedFCSFiles != null)
             {
-                FlowFCSFile resolvedFCSFile = resolvedFCSFiles.get(sample.getSampleId());
+                FlowFCSFile resolvedFCSFile = selectedFCSFiles.get(sample.getSampleId());
                 if (resolvedFCSFile == null)
-                    resolvedFCSFile = resolvedFCSFiles.get(sample.getLabel());
+                    resolvedFCSFile = selectedFCSFiles.get(sample.getLabel());
                 if (resolvedFCSFile != null)
                 {
                     uri = resolvedFCSFile.getFCSURI();

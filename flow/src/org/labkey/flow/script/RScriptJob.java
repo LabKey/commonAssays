@@ -49,8 +49,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +76,9 @@ public class RScriptJob extends FlowExperimentJob
     private final File _originalImportedFile;
     private final File _runFilePathRoot;
     private final List<File> _keywordDirs;
-    // Map workspace sample id -> FlowFCSFile
-    private final Map<String, FlowFCSFile> _resolvedFCSFiles;
-    private final List<String> _importGroupNames;
+    // Map workspace sample id -> FlowFCSFile (or null if we aren't resolving previously imported FCS files)
+    private final Map<String, FlowFCSFile> _selectedFCSFiles;
+    //private final List<String> _importGroupNames;
     private final boolean _performNormalization;
     private final String _normalizationReference;
     private final List<String> _normalizationSubsets;
@@ -95,8 +93,8 @@ public class RScriptJob extends FlowExperimentJob
                       File originalImportedFile,
                       File runFilePathRoot,
                       List<File> keywordDirs,
-                      Map<String, FlowFCSFile> resolvedFCSFiles,
-                      List<String> importGroupNames,
+                      Map<String, FlowFCSFile> selectedFCSFiles,
+                      //List<String> importGroupNames,
                       boolean performNormalization,
                       String normalizationReference,
                       List<String> normalizationSubsets,
@@ -108,8 +106,8 @@ public class RScriptJob extends FlowExperimentJob
         _originalImportedFile = originalImportedFile;
         _runFilePathRoot = runFilePathRoot;
         _keywordDirs = keywordDirs;
-        _resolvedFCSFiles = resolvedFCSFiles;
-        _importGroupNames = importGroupNames;
+        _selectedFCSFiles = selectedFCSFiles;
+        //_importGroupNames = importGroupNames;
         _performNormalization = performNormalization;
         _normalizationReference = normalizationReference;
         _failOnError = failOnError;
@@ -174,11 +172,11 @@ public class RScriptJob extends FlowExperimentJob
         replacements.put(WORKSPACE_PATH, _workspaceFile.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(FCSFILE_DIRECTORY, _runFilePathRoot.getAbsolutePath().replaceAll("\\\\", "/"));
         // UNDONE: Add _keywordDirs replacement parameter, remove _runFilePathRoot replacement ?
-        // UNDONE: Add _resolvedFCSFiles replacement parameter
+        // UNDONE: Add _selectedFCSFiles replacement parameter
         replacements.put(R_ANALYSIS_DIRECTORY, rAnalysisDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(NORMALIZED_DIRECTORY, normalizedDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(RUN_NAME, _workspaceName);
-        replacements.put(GROUP_NAMES, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
+//        replacements.put(GROUP_NAMES, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
         replacements.put(NORMALIZATION, _performNormalization ? "TRUE" : "FALSE");
         replacements.put(NORM_REFERENCE, _normalizationReference == null ? "" : _normalizationReference);
 
@@ -232,7 +230,7 @@ public class RScriptJob extends FlowExperimentJob
         info("Writing compensation matrices...");
         Workspace workspace = Workspace.readWorkspace(new FileInputStream(_workspaceFile));
         Map<String, CompensationMatrix> matrices = new HashMap<String, CompensationMatrix>();
-        for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
+        for (Workspace.SampleInfo sampleInfo : workspace.getAllSamples())
         {
             CompensationMatrix matrix = null;
             if (!sampleInfo.isPrecompensated())
@@ -264,7 +262,7 @@ public class RScriptJob extends FlowExperimentJob
                 _originalImportedFile,
                 _runFilePathRoot,
                 _keywordDirs,
-                _resolvedFCSFiles,
+                _selectedFCSFiles,
                 analysisRunName,
                 _failOnError);
         importJob.setLogFile(getLogFile());

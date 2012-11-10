@@ -31,7 +31,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.flow.controllers.executescript.ResolvedSamplesData" %>
+<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
 <%@ page import="org.labkey.flow.data.FlowFCSFile" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -48,6 +48,7 @@
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
+<input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=h(form.getSelectAnalysisEngine())%>">
 
 <%--
@@ -65,9 +66,9 @@
 <input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
 <p>The statistics in this workspace that have been calculated by FlowJo will be imported to <%=h(FlowModule.getLongProductName())%>.<br><br>
-    <%=h(FlowModule.getLongProductName())%> organizes results into different "analysis folders".  The same set of FCS file should only
+    <%=h(FlowModule.getLongProductName())%> organizes results into different "analysis folders".  The same set of FCS files may only
     be analyzed once in a given analysis folder.  If you want to analyze the same FCS file in two different ways,
-    those results should be put into different analysis folders.</p>
+    those results must be put into different analysis folders.</p>
 <hr/>
 <%
     FlowExperiment[] analyses = FlowExperiment.getAnalyses(container);
@@ -90,10 +91,10 @@
             FlowRun keywordsRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
             keywordDirs.add(new File(keywordsRun.getPath()));
         }
-        else if (form.getResolvedSamples().getRows() != null && !form.getResolvedSamples().getRows().isEmpty())
+        else if (form.getSelectedSamples().getRows() != null && !form.getSelectedSamples().getRows().isEmpty())
         {
             // Ugh. Need to include the file root for the resolved files.  For now, just take the run file path of the first run found.
-            for (ResolvedSamplesData.ResolvedSample resolved : form.getResolvedSamples().getRows().values())
+            for (SelectedSamples.ResolvedSample resolved : form.getSelectedSamples().getRows().values())
             {
                 if (resolved.isSelected() && resolved.hasMatchedFile())
                 {

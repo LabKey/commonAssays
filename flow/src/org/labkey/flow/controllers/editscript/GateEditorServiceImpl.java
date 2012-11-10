@@ -190,22 +190,14 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     public GWTRun[] getRuns()
     {
-        try
+        FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+        List<GWTRun> ret = new ArrayList();
+        for (int i = 0; i < runs.length; i ++)
         {
-            FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            List<GWTRun> ret = new ArrayList();
-            for (int i = 0; i < runs.length; i ++)
-            {
-                if (runs[i].hasRealWells())
-                    ret.add(makeRun(runs[i]));
-            }
-            return ret.toArray(new GWTRun[ret.size()]);
+            if (runs[i].hasRealWells())
+                ret.add(makeRun(runs[i]));
         }
-        catch (SQLException e)
-        {
-            _log.error("Error", e);
-            throw UnexpectedException.wrap(e);
-        }
+        return ret.toArray(new GWTRun[ret.size()]);
     }
 
 

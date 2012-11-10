@@ -78,18 +78,11 @@ public class FlowPipelineProvider extends PipelineProvider
 
         final Set<String> usedRelativePaths = new HashSet<String>();
 
-        try
+        for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
         {
-            for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
-            {
-                File r = run.getExperimentRun().getFilePathRoot();
-                if (null != r)
-                    usedRelativePaths.add(pr.relativePath(r));
-            }
-        }
-        catch (SQLException e)
-        {
-            return;
+            File r = run.getExperimentRun().getFilePathRoot();
+            if (null != r)
+                usedRelativePaths.add(pr.relativePath(r));
         }
 
         // UNDONE: walk directory once instead of multiple times

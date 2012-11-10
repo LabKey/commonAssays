@@ -19,7 +19,6 @@ import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,12 +46,14 @@ public class ImportAnalysisForm
     private WorkspaceData workspace = new WorkspaceData();
     private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.Previous;
     private int existingKeywordRunId;
-    private ResolvedSamplesData resolved = new ResolvedSamplesData();
+
+    private String importGroupNames = Workspace.ALL_SAMPLES;
+    private boolean resolving = false;
+    private SelectedSamples selectedSamples = new SelectedSamples();
 
     private AnalysisEngine selectAnalysisEngine = AnalysisEngine.FlowJoWorkspace;
 
     // general analysis options and R normalization configuration
-    private String importGroupNames = Workspace.ALL_SAMPLES;
     private Boolean rEngineNormalization = true;
     private String rEngineNormalizationReference = null;
     private String rEngineNormalizationParameters = null;
@@ -90,9 +91,19 @@ public class ImportAnalysisForm
         return workspace;
     }
 
-    public ResolvedSamplesData getResolvedSamples()
+    public boolean isResolving()
     {
-        return resolved;
+        return resolving;
+    }
+
+    public void setResolving(boolean resolving)
+    {
+        this.resolving = resolving;
+    }
+
+    public SelectedSamples getSelectedSamples()
+    {
+        return selectedSamples;
     }
 
     public SelectFCSFileOption getSelectFCSFilesOption()
