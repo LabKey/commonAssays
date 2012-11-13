@@ -19,6 +19,7 @@ package org.labkey.flow.data;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -27,6 +28,16 @@ public class FlowFCSFile extends FlowWell
     public FlowFCSFile(ExpData data)
     {
         super(data);
+    }
+
+    static public List<FlowFCSFile> fromWellIds(int... ids)
+    {
+        List<FlowFCSFile> wells = new ArrayList<FlowFCSFile>(ids.length);
+        List<FlowDataObject> flowobjs = fromRowIds(ids);
+        for (FlowDataObject flowobj : flowobjs)
+            if (flowobj instanceof FlowFCSFile)
+                wells.add((FlowFCSFile)flowobj);
+        return wells;
     }
 
     static public List<FlowFCSFile> fromName(Container container, String name)

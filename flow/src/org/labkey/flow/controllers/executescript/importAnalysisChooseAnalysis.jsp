@@ -98,7 +98,7 @@
             {
                 if (resolved.isSelected() && resolved.hasMatchedFile())
                 {
-                    FlowWell fcsFile = FlowWell.fromWellId(resolved.getMatchedFile().intValue());
+                    FlowWell fcsFile = FlowWell.fromWellId(resolved.getMatchedFile());
                     if (fcsFile != null)
                     {
                         FlowRun run = fcsFile.getRun();

@@ -44,7 +44,7 @@
             {
                 String path = pipeRoot.relativePath(file);
         %>
-            <li><%=path != null ? path : file.getName()%></li>
+            <li><%=h(path != null ? path : file.getName())%></li>
         <%
             }
         %>
@@ -61,7 +61,7 @@
             {
                 String path = pipeRoot.relativePath(file);
         %>
-            <li><%=path != null ? path : file.getName()%></li>
+            <li><%=h(path != null ? path : file.getName())%></li>
         <%
             }
         %>

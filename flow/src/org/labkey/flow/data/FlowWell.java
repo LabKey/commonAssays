@@ -53,7 +53,7 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    static public List<FlowWell> fromWellIds(int... ids)
+    static public List<? extends FlowWell> fromWellIds(int... ids)
     {
         List<FlowWell> wells = new ArrayList<FlowWell>(ids.length);
         List<FlowDataObject> flowobjs = fromRowIds(ids);
@@ -137,7 +137,7 @@ public class FlowWell extends FlowDataObject
         return getAttributeSet().getURI();
     }
 
-    public String getKeyword(String keyword) throws SQLException
+    public String getKeyword(String keyword)
     {
         return FlowManager.get().getKeyword(getData(), keyword);
     }

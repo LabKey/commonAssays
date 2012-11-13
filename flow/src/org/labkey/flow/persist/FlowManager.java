@@ -687,9 +687,10 @@ public class FlowManager
                                             "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
                                             "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.rowid = flow.keyword.keywordid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name = ?";
-    public String getKeyword(ExpData data, String keyword) throws SQLException
+    public String getKeyword(ExpData data, String keyword)
     {
-        return Table.executeSingleton(getSchema(), sqlSelectKeyword, new Object[] { data.getRowId(), keyword }, String.class);
+        SqlSelector selector = new SqlSelector(getSchema(), sqlSelectKeyword, data.getRowId(), keyword);
+        return selector.getObject(String.class);
     }
 
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";

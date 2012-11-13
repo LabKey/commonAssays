@@ -17,10 +17,9 @@ import java.util.Set;
  */
 public class SelectedSamples
 {
-    // non-form posted values used to initialize the ResolvedConfirmGridView
+    // non-form posted values used to initialize the SamplesConfirmGridView
     private Set<String> _keywords;
     private List<Workspace.SampleInfo> _samples;
-    private Map<Workspace.SampleInfo, FlowFCSFile> _resolved;
 
     // form posted values
     // workspace sample id -> resolved info
@@ -29,17 +28,33 @@ public class SelectedSamples
     public static class ResolvedSample
     {
         private boolean _selected;
-        // FlowFCSFile rowid
+        // FlowFCSFile rowid (may be 0 or null if there is no match)
         private Integer _matchedFile;
+
+        // FlowFCSFile rowid (may be null if there are no candidates)
+        private int[] _candidateFile;
+        private List<FlowFCSFile> _candidateFCSFiles;
 
         public ResolvedSample()
         {
         }
 
-        public ResolvedSample(boolean selected, int matchedFile)
+        public ResolvedSample(boolean selected, int matchedFile, List<FlowFCSFile> candidateFCSFiles)
         {
             _selected = selected;
             _matchedFile = matchedFile;
+            if (candidateFCSFiles == null)
+            {
+                _candidateFCSFiles = null;
+                _candidateFile = null;
+            }
+            else
+            {
+                _candidateFCSFiles = candidateFCSFiles;
+                _candidateFile = new int[candidateFCSFiles.size()];
+                for (int i = 0, len = candidateFCSFiles.size(); i < len; i++)
+                    _candidateFile[i] = candidateFCSFiles.get(i).getRowId();
+            }
         }
 
         public boolean isSelected()
@@ -66,6 +81,25 @@ public class SelectedSamples
         {
             return _matchedFile != null && _matchedFile > 0;
         }
+
+        public int[] getCandidateFile()
+        {
+            return _candidateFile;
+        }
+
+        public List<FlowFCSFile> getCandidateFCSFiles()
+        {
+            if (_candidateFCSFiles == null && _candidateFile != null)
+            {
+                _candidateFCSFiles = FlowFCSFile.fromWellIds(_candidateFile);
+            }
+            return _candidateFCSFiles;
+        }
+
+        public void setCandidateFile(int[] candidateFile)
+        {
+            _candidateFile = candidateFile;
+        }
     }
 
     public SelectedSamples()
@@ -90,16 +124,6 @@ public class SelectedSamples
     public void setSamples(List<Workspace.SampleInfo> samples)
     {
         _samples = samples;
-    }
-
-    public Map<Workspace.SampleInfo, FlowFCSFile> getResolved()
-    {
-        return _resolved;
-    }
-
-    public void setResolved(Map<Workspace.SampleInfo, FlowFCSFile> resolved)
-    {
-        _resolved = resolved;
     }
 
     public void setRows(Map<String, ResolvedSample> rows)

@@ -52,6 +52,7 @@ public class SamplesConfirmGridView extends GridView
 
     static FieldKey MATCHED_FLAG_FIELD_KEY = new FieldKey(null, "MatchedFlag");
     static FieldKey MATCHED_FILE_FIELD_KEY = new FieldKey(null, "MatchedFile");
+    static FieldKey CANDIDATE_FILES_FIELD_KEY = new FieldKey(null, "CandidateFiles");
     static FieldKey SAMPLE_ID_FIELD_KEY = new FieldKey(null, "SampleId");
     static FieldKey SAMPLE_NAME_FIELD_KEY = new FieldKey(null, "SampleName");
     static FieldKey GROUP_NAMES_FIELD_KEY = new FieldKey(null, "GroupNames");
@@ -60,10 +61,10 @@ public class SamplesConfirmGridView extends GridView
 
     public SamplesConfirmGridView(SelectedSamples data, boolean resolving, Errors errors)
     {
-        this(data.getKeywords(), data.getSamples(), resolving, data.getRows(), data.getResolved(), errors);
+        this(data.getKeywords(), data.getSamples(), resolving, data.getRows(), errors);
     }
 
-    public SamplesConfirmGridView(Collection<String> keywords, List<Workspace.SampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Map<Workspace.SampleInfo, FlowFCSFile> resolved, Errors errors)
+    public SamplesConfirmGridView(Collection<String> keywords, List<Workspace.SampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
     {
         super(new SamplesConfirmDataRegion(), errors);
 
@@ -74,6 +75,7 @@ public class SamplesConfirmGridView extends GridView
         {
             columns.add(MATCHED_FLAG_FIELD_KEY.getName());
             columns.add(MATCHED_FILE_FIELD_KEY.getName());
+            columns.add(CANDIDATE_FILES_FIELD_KEY.getName());
         }
         columns.add(SAMPLE_ID_FIELD_KEY.getName());
         columns.add(SAMPLE_NAME_FIELD_KEY.getName());
@@ -98,6 +100,7 @@ public class SamplesConfirmGridView extends GridView
                 matched = rows.get(sample.getSampleId());
                 row[i++] = matched != null && matched.hasMatchedFile();
                 row[i++] = matched != null && matched.hasMatchedFile() ? matched.getMatchedFile() : null;
+                row[i++] = matched != null ? matched.getCandidateFCSFiles() : null;
             }
 
             // SampleId and SampleName
@@ -367,9 +370,30 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public NamedObjectList getSelectList()
+        public NamedObjectList getSelectList(RenderContext ctx)
         {
-            return _list;
+            List<FlowFCSFile> candidates = (List<FlowFCSFile>)ctx.get(CANDIDATE_FILES_FIELD_KEY, List.class);
+            if (candidates == null)
+                return _list;
+
+            // Put most likely canidates on the top of the list
+            Set<Integer> candidateRowIds = new HashSet<Integer>(candidates.size());
+            NamedObjectList list = new NamedObjectList();
+            for (FlowFCSFile candidate : candidates)
+            {
+                candidateRowIds.add(candidate.getRowId());
+                list.put(new SimpleNamedObject(String.valueOf(candidate.getRowId()), candidate));
+            }
+
+            // Add a divider (TODO: Disable this option item in the select list)
+            list.put(new SimpleNamedObject("--------", "--------"));
+
+            // Add the remaining FCS files (maybe add an option to not show all FCS files?)
+            for (NamedObject no : _list)
+                if (!candidateRowIds.contains(((FlowFCSFile)no.getObject()).getRowId()))
+                    list.put(no);
+
+            return list;
         }
     }
 
@@ -392,6 +416,9 @@ public class SamplesConfirmGridView extends GridView
         protected String getSelectInputDisplayValue(NamedObject entry)
         {
             Object o = entry.getObject();
+            if (o instanceof String)
+               return (String)o;
+            
             if (!(o instanceof FlowFCSFile))
                 return null;
 
@@ -411,6 +438,22 @@ public class SamplesConfirmGridView extends GridView
                 return file.getName();
         }
 
+        @Override
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            super.renderGridCellContents(ctx, out);
+
+            // Render hidden form inputs for candidate well ids.
+            List<FlowFCSFile> candidates = (List<FlowFCSFile>)ctx.get(CANDIDATE_FILES_FIELD_KEY, List.class);
+            if (candidates != null)
+            {
+                String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
+                for (FlowFCSFile candidate : candidates)
+                {
+                    out.write("<input type='hidden' name='selectedSamples.rows[" + sampleId + "].candidateFile' value='" + candidate.getRowId() + "'>\n");
+                }
+            }
+        }
     }
 }
 

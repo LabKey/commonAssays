@@ -905,7 +905,7 @@ public class AnalysisScriptController extends BaseFlowController
                 Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
                 for (Workspace.SampleInfo sampleInfo : sampleInfos)
                 {
-                    SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(true, 0);
+                    SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(true, 0, null);
                     rows.put(sampleInfo.getSampleId(), resolvedSample);
                 }
 
@@ -997,7 +997,7 @@ public class AnalysisScriptController extends BaseFlowController
                         boolean exists = sampleFile.exists();
                         if (exists)
                             found = true;
-                        SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(exists, 0);
+                        SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(exists, 0, null);
                         rows.put(sampleInfo.getSampleId(), resolvedSample);
                     }
 
@@ -1049,51 +1049,94 @@ public class AnalysisScriptController extends BaseFlowController
                     files = FlowFCSFile.fromName(getContainer(), null);
                 }
 
-                Map<Workspace.SampleInfo, FlowFCSFile> resolved = resolveSamples(sampleInfos, files);
-                selectedSamples.setResolved(resolved);
+                Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = resolveSamples(sampleInfos, files);
 
                 Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
                 for (Workspace.SampleInfo sample : sampleInfos)
                 {
-                    FlowFCSFile file = resolved.get(sample);
-                    SelectedSamples.ResolvedSample resolvedSample;
-                    if (file != null)
-                        resolvedSample = new SelectedSamples.ResolvedSample(true, file.getRowId());
-                    else
-                        resolvedSample = new SelectedSamples.ResolvedSample(false, 0);
+                    SelectedSamples.ResolvedSample resolvedSample = null;
+                    Pair<FlowFCSFile, List<FlowFCSFile>> matches = resolved.get(sample);
+                    if (matches != null)
+                    {
+                        FlowFCSFile perfectMatch = matches.first;
+                        int perfectMatchId = perfectMatch != null ? perfectMatch.getRowId() : 0;
+                        List<FlowFCSFile> candidates = matches.second;
+
+                        if (perfectMatchId != 0 || (candidates != null && candidates.size() > 0))
+                        {
+                            resolvedSample = new SelectedSamples.ResolvedSample(true, perfectMatchId, candidates);
+                        }
+                    }
+
+                    if (resolvedSample == null)
+                        resolvedSample = new SelectedSamples.ResolvedSample(false, 0, null);
+
                     rows.put(sample.getSampleId(), resolvedSample);
                 }
                 selectedSamples.setRows(rows);
             }
         }
 
-        private Map<Workspace.SampleInfo, FlowFCSFile> resolveSamples(List<Workspace.SampleInfo> samples, List<FlowFCSFile> files)
+        private Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolveSamples(List<Workspace.SampleInfo> samples, List<FlowFCSFile> files)
         {
             if (files.isEmpty())
                 return Collections.emptyMap();
 
-            Map<Workspace.SampleInfo, FlowFCSFile> resolved = new LinkedHashMap<Workspace.SampleInfo, FlowFCSFile>();
+            Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = new LinkedHashMap<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>>();
 
-            MultiHashMap<String, FlowFCSFile> filesMap = new MultiHashMap<String, FlowFCSFile>();
+            MultiHashMap<String, FlowFCSFile> filesByName = new MultiHashMap<String, FlowFCSFile>();
+            MultiHashMap<String, FlowFCSFile> filesByGUID = new MultiHashMap<String, FlowFCSFile>();
             for (FlowFCSFile file : files)
             {
                 // Don't include FCSFile wells created for attaching extra keywords.
                 if (!file.isOriginalFCSFile())
                     continue;
 
-                filesMap.put(file.getName(), file);
+                filesByName.put(file.getName(), file);
+
+                String guidKeyword = file.getKeyword("GUID");
+                if (guidKeyword != null)
+                    filesByGUID.put(guidKeyword, file);
             }
 
+            // Now, attempt to find an exact match and a list of possible candidates.
             for (Workspace.SampleInfo sample : samples)
             {
-                // First, attempt to resolve based only on the sample name or $FIL keyword
-                Collection<FlowFCSFile> duplicates = filesMap.get(sample.getSampleName());
-                if (duplicates == null)
-                    duplicates = filesMap.get(sample.getFilename());
+                FlowFCSFile perfectMatch = null;
+                LinkedHashSet<FlowFCSFile> candidates = new LinkedHashSet<FlowFCSFile>();
 
-                // UNDONE: We need to handle duplicates by resolving against their keywords
-                if (duplicates != null && duplicates.size() == 1)
-                    resolved.put(sample, duplicates.iterator().next());
+                // First, try the most specific keyword
+                Collection<FlowFCSFile> dupes = null;
+                if (sample.getKeywords().containsKey("GUID"))
+                {
+                    dupes = filesByGUID.get(sample.getKeywords().get("GUID"));
+                    if (dupes != null && dupes.size() == 1)
+                        perfectMatch = dupes.iterator().next();
+                    candidates.addAll(dupes);
+                }
+
+                // Next, try well name
+                dupes = filesByName.get(sample.getSampleName());
+                if (dupes != null)
+                {
+                    if (perfectMatch == null && dupes.size() == 1)
+                        perfectMatch = dupes.iterator().next();
+                    candidates.addAll(dupes);
+                }
+
+                // Next, try $FIL keyword
+                dupes = filesByName.get(sample.getFilename());
+                if (dupes != null)
+                {
+                    if (perfectMatch == null && dupes.size() == 1)
+                        perfectMatch = dupes.iterator().next();
+                    candidates.addAll(dupes);
+                }
+
+                if (perfectMatch != null || !candidates.isEmpty())
+                {
+                    resolved.put(sample, Pair.<FlowFCSFile, List<FlowFCSFile>>of(perfectMatch, new ArrayList<FlowFCSFile>(candidates)));
+                }
             }
 
             return resolved;
@@ -1128,7 +1171,7 @@ public class AnalysisScriptController extends BaseFlowController
                 if (resolvedSample.isSelected())
                 {
                     hasSelected = true;
-                    if (resolvedSample.getMatchedFile() == null)
+                    if (!resolvedSample.hasMatchedFile())
                         selectedWithoutMatch.add(sampleId);
                 }
 
