@@ -134,7 +134,7 @@ public class LuminexController extends SpringActionController
             _protocol = form.getProtocol();
 
             AbstractAssayView result = new AbstractAssayView();
-            AssaySchema schema = AssayService.get().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+            AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             settings.setAllowChooseQuery(false);
             QueryView view = new QueryView(schema, settings, errors)

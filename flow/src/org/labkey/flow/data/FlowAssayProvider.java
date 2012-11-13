@@ -135,8 +135,12 @@ public class FlowAssayProvider extends AbstractAssayProvider
         @Override
         public FieldKey getTargetStudyFieldKey()
         {
-            // UNDONE: Lookup fieldkey from flow protocol settings
-            return super.getTargetStudyFieldKey();
+            if (_metadata != null)
+            {
+                return _metadata.getTargetStudyColumn();
+            }
+
+            return null;
         }
 
     }

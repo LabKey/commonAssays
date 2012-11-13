@@ -441,7 +441,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throws SQLException, ValidationException
     {
         // Do a query to find all of the rows that have already been inserted 
-        LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(false);
+        LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(false);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("Data", dataIds));
         // Pull back as a map so that we get custom properties as well
         Map[] databaseMaps = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, Map.class);

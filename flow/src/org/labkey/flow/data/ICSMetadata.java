@@ -37,6 +37,7 @@ public class ICSMetadata
     FieldKey participantColumn;
     FieldKey visitColumn;
     FieldKey dateColumn;
+    FieldKey targetStudyColumn;
 
     List<FieldKey> matchColumns; // columns shared between background and stimulated wells
     List<FilterInfo> background;
@@ -53,6 +54,7 @@ public class ICSMetadata
                 participantColumn == null &&
                 visitColumn == null &&
                 dateColumn == null &&
+                targetStudyColumn == null &&
                 (matchColumns == null || matchColumns.size() == 0) &&
                 (background == null || background.size() == 0);
     }
@@ -157,6 +159,16 @@ public class ICSMetadata
         this.dateColumn = dateColumn;
     }
 
+    public FieldKey getTargetStudyColumn()
+    {
+        return targetStudyColumn;
+    }
+
+    public void setTargetStudyColumn(FieldKey targetStudyColumn)
+    {
+        this.targetStudyColumn = targetStudyColumn;
+    }
+
     public List<FieldKey> getMatchColumns()
     {
         if (matchColumns == null || matchColumns.size() == 0)
@@ -214,6 +226,9 @@ public class ICSMetadata
 
             if (getDateColumn() != null)
                 xStudy.setDateColumn(getDateColumn().toString());
+
+            if (getTargetStudyColumn() != null)
+                xStudy.setTargetStudyColumn(getTargetStudyColumn().toString());
         }
 
         if (hasPartialBackground())
@@ -287,6 +302,9 @@ public class ICSMetadata
 
             if (xStudy.getDateColumn() != null)
                 result.setDateColumn(FieldKey.fromString(xStudy.getDateColumn()));
+
+            if (xStudy.getTargetStudyColumn() != null)
+                result.setTargetStudyColumn(FieldKey.fromString(xStudy.getTargetStudyColumn()));
         }
 
         if (xMetadata.isSetBackground())

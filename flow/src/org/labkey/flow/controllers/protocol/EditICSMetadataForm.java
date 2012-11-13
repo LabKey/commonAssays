@@ -27,7 +27,6 @@ import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.data.ICSMetadata;
-import org.labkey.flow.data.FlowProtocol;
 
 import java.util.*;
 
@@ -45,6 +44,7 @@ public class EditICSMetadataForm extends ProtocolForm
     public String ff_participantColumn;
     public String ff_visitColumn;
     public String ff_dateColumn;
+    public String ff_targetStudyColumn;
     public String[] ff_matchColumn;
     public String[] ff_backgroundFilterField;
     public String[] ff_backgroundFilterOp;
@@ -55,6 +55,7 @@ public class EditICSMetadataForm extends ProtocolForm
     public FieldKey participantColumn;
     public FieldKey visitColumn;
     public FieldKey dateColumn;
+    public FieldKey targetStudyColumn;
     public FieldKey[] matchColumn;
     public FilterInfo[] backgroundFilter;
 
@@ -77,6 +78,9 @@ public class EditICSMetadataForm extends ProtocolForm
 
             if (icsmetadata.getDateColumn() != null)
                 dateColumn = icsmetadata.getDateColumn();
+
+            if (icsmetadata.getTargetStudyColumn() != null)
+                targetStudyColumn = icsmetadata.getTargetStudyColumn();
 
             if (icsmetadata.getMatchColumns() != null)
             {
@@ -121,6 +125,11 @@ public class EditICSMetadataForm extends ProtocolForm
         this.ff_dateColumn = ff_dateColumn;
     }
 
+    public void setFf_targetStudyColumn(String ff_targetStudyColumn)
+    {
+        this.ff_targetStudyColumn = ff_targetStudyColumn;
+    }
+
     public void setFf_matchColumn(String[] ff_matchColumn)
     {
         this.ff_matchColumn = ff_matchColumn;
@@ -159,10 +168,16 @@ public class EditICSMetadataForm extends ProtocolForm
         return ff_visitColumn == null ? null : FieldKey.fromString(ff_visitColumn);
     }
 
-    /** Get TimepoinType from form posted value. */
+    /** Get TimepointType from form posted value. */
     public FieldKey getDateColumn()
     {
         return ff_dateColumn == null ? null : FieldKey.fromString(ff_dateColumn);
+    }
+
+    /** Get target study from form posted value. */
+    public FieldKey getTargetStudyColumn()
+    {
+        return ff_targetStudyColumn == null ? null : FieldKey.fromString(ff_targetStudyColumn);
     }
 
     /** Get match columns from form posted values. */
