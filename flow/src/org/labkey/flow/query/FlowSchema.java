@@ -34,7 +34,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TempTableTracker;
-import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -84,7 +83,6 @@ import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
@@ -105,6 +103,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1100,9 +1099,9 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public Collection<ColumnInfo> getExtendedColumns(boolean hidden)
+        public Map<FieldKey, ColumnInfo> getExtendedColumns(boolean hidden)
         {
-            LinkedHashSet<ColumnInfo> ret = new LinkedHashSet<ColumnInfo>(super.getExtendedColumns(hidden));
+            LinkedHashMap<FieldKey, ColumnInfo> ret = new LinkedHashMap<FieldKey, ColumnInfo>(super.getExtendedColumns(hidden));
 
             // Add Keyword, Statistics, Background, Sample, and Report columns
             addAllColumns(ret, getColumn("Keyword"), hidden);
@@ -1124,17 +1123,17 @@ public class FlowSchema extends UserSchema
                 addAllColumns(ret, getColumn("Sample"), hidden);
             }
 
-            // iterating the reports can be expensive. can we hold onto a column reference for the reports?
+            // iterating the reports can be expensive. can we hold onto a column reference for the reports? XXX: Only check on FCSAnalysis table for reports
             for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
             {
                 FieldKey fieldKey = new FieldKey(null, report.getDescriptor().getReportName());
                 addAllColumns(ret, getColumn(fieldKey), hidden);
             }
 
-            return Collections.unmodifiableCollection(ret);
+            return Collections.unmodifiableMap(ret);
         }
 
-        private void addAllColumns(Collection<ColumnInfo> ret, ColumnInfo lookupColumn, boolean hidden)
+        private void addAllColumns(Map<FieldKey, ColumnInfo> ret, ColumnInfo lookupColumn, boolean hidden)
         {
             if (lookupColumn == null)
                 return;
@@ -1144,10 +1143,13 @@ public class FlowSchema extends UserSchema
                 TableInfo lookupTable = lookupColumn.getFkTableInfo();
                 if (lookupTable != null)
                 {
-                    for (ColumnInfo col : lookupTable.getExtendedColumns(hidden))
+                    for (Map.Entry<FieldKey, ColumnInfo> entry : lookupTable.getExtendedColumns(hidden).entrySet())
                     {
-                        col.setFieldKey(new FieldKey(lookupColumn.getFieldKey(), col.getName()));
-                        ret.add(col);
+                        FieldKey fieldKey = entry.getKey();
+                        ColumnInfo col = entry.getValue();
+                        FieldKey newFieldKey = new FieldKey(lookupColumn.getFieldKey(), col.getName());
+                        col.setFieldKey(newFieldKey);
+                        ret.put(newFieldKey, col);
                     }
                 }
             }
