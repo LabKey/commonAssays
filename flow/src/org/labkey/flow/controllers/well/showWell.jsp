@@ -63,12 +63,14 @@
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.security.SecurityPolicyManager" %>
+<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
+<%@ page import="java.util.LinkedHashMap" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
     .right {text-align:right;}
 </style>
-<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath()%>/Flow/util.js"></script>
+<script type="text/javascript" src="<%=h(AppProps.getInstance().getContextPath())%>/Flow/util.js"></script>
 <script type="text/javascript">
 LABKEY.requiresClientAPI(true);
 LABKEY.requiresScript("TreeGrid.js");
@@ -78,8 +80,8 @@ Ext.QuickTips.init();
     ViewContext context = HttpView.currentContext();
     User user = context.getUser();
     FlowWell well = getWell();
-    FlowWell fcsFile = well.getFCSFile();
-    FlowWell originalFile = well.getOriginalFCSFile();
+    FlowWell fcsFile = well.getFCSFileInput();
+    FlowFCSFile originalFile = well.getOriginalFCSFile();
     if (originalFile == null && fcsFile != null)
         originalFile = fcsFile.getOriginalFCSFile();
     FlowScript script = well.getScript();
@@ -360,7 +362,7 @@ if (getRun() == null)
 }
 else 
 {
-    %><tr><td>Run Name:</td><td><a href="<%=getRun().urlShow()%>"><%=(getRun().getName())%></a></td></tr><%
+    %><tr><td>Run Name:</td><td><a href="<%=getRun().urlShow()%>"><%=h(getRun().getName())%></a></td></tr><%
 
     FlowExperiment experiment = getRun().getExperiment();
     if (experiment != null)
@@ -415,14 +417,14 @@ for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getRepor
     Map<String, Object> properties = OntologyManager.getProperties(getContainer(), lsid);
 
     %><tr><td>&nbsp;</td></tr><%
-    %><tr><td><%=report.getDescriptor().getReportName()%> Report</td><td>&nbsp;</td><%
+    %><tr><td><%=h(report.getDescriptor().getReportName())%> Report</td><td>&nbsp;</td><%
     for (DomainProperty dp : domain.getProperties())
     {
         String propertyURI = dp.getPropertyURI();
         if (properties.containsKey(propertyURI))
         {
             Object value = properties.get(propertyURI);
-            %><tr><td>&nbsp;&nbsp;&nbsp;<%=dp.getName()%>:</td><td><%=String.valueOf(value)%></td></tr><%
+            %><tr><td>&nbsp;&nbsp;&nbsp;<%=h(dp.getName())%>:</td><td><%=h(String.valueOf(value))%></td></tr><%
         }
     }
     %></tr><%
@@ -447,26 +449,95 @@ if (getGraphs().length > 0)
     for (GraphSpec graph : getGraphs())
     {
         %>
-        <span style="display:inline-block; vertical-align:top; height:<%=graphSize%>px; width:<%=graphSize%>px;">
-        <img style="width:<%=graphSize%>px; height:<%=graphSize%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class))%>&amp;graph=<%=u(graph.toString())%>" onerror="flowImgError(this);">
+        <span style="display:inline-block; vertical-align:top; height:<%=h(graphSize)%>px; width:<%=h(graphSize)%>px;">
+        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class))%>&amp;graph=<%=PageFlowUtil.encode(graph.toString())%>" onerror="flowImgError(this);">
         </span><wbr>
         <%
     }
 }
 
-List<FlowWell> analyses = getWell().getFCSAnalyses();
-if (analyses.size() > 0)
+
+List<FlowFCSFile> relatedFiles = well.getFCSFileOutputs();
+if (relatedFiles.size() > 0)
 {
-    %><table><tr><th colspan="3">Analyses performed on this file:</th></tr>
-    <tr><th>FCS Analysis Name</th><th>Run Name</th><th>Analysis Folder</th></tr><%
-    for (FlowWell analysis : analyses)
+    %>
+    <h4>FCS Files derived from this file and associated FCS Analyses:</h4>
+    <table class="labkey-data-region labkey-show-borders">
+        <tr>
+            <td class="labkey-column-header">Name</td>
+            <td class="labkey-column-header">Run Name</td>
+            <td class="labkey-column-header">Analysis Folder</td>
+        </tr><%
+    int count = 0;
+    for (FlowFCSFile related : relatedFiles)
     {
+        count++;
+        FlowRun run = related.getRun();
+        FlowExperiment experiment = run.getExperiment();
+
+        %><tr class="<%=text(count % 2 == 0 ? "labkey-row" : "labkey-alternate-row")%>">
+            <td style="white-space:nowrap"><a href="<%=h(related.urlShow())%>"><%=h(related.getLabel())%></a></td>
+            <td style="white-space:nowrap"><a href="<%=h(run.urlShow())%>"><%=h(run.getLabel())%></a></td>
+        <% if (experiment == null) { %>
+            <td style="white-space:nowrap">&nbsp;</td>
+        <% } else { %>
+            <td style="white-space:nowrap"><a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getLabel())%></a></td>
+        <% } %>
+        </tr><%
+
+        List<FlowFCSAnalysis> analyses = related.getFCSAnalysisOutputs();
+        for (FlowFCSAnalysis analysis : analyses)
+        {
+            count++;
+            %><tr class="<%=text(count % 2 == 0 ? "labkey-row" : "labkey-alternate-row")%>">
+                <td style="white-space:nowrap; padding-left:2em;"><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
+                <td style="white-space:nowrap"><a href="<%=h(run.urlShow())%>"><%=h(run.getLabel())%></a></td>
+                <% if (experiment == null) { %>
+                <td style="white-space:nowrap">&nbsp;</td>
+                <% } else { %>
+                <td style="white-space:nowrap"><a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getLabel())%></a></td>
+                <% } %>
+            </tr><%
+        }
+    }
+    %></table><%
+}
+
+LinkedHashMap<Integer, FlowFCSAnalysis> allAnalyses = new LinkedHashMap<Integer, FlowFCSAnalysis>(10);
+for (FlowFCSAnalysis analysis : well.getFCSAnalysisOutputs())
+    allAnalyses.put(analysis.getRowId(), analysis);
+if (originalFile != null)
+{
+    List<FlowFCSFile> originalRelatedFiles = originalFile.getFCSFileOutputs();
+    for (FlowFCSFile originalRelatedFile : originalRelatedFiles)
+        for (FlowFCSAnalysis analysis : originalRelatedFile.getFCSAnalysisOutputs())
+            allAnalyses.put(analysis.getRowId(), analysis);
+}
+if (allAnalyses.size() > 0)
+{
+    %>
+    <h4>FCS Analyses performed on this file:</h4>
+    <table class="labkey-data-region labkey-show-borders">
+        <tr>
+            <td class="labkey-column-header">Name</td>
+            <td class="labkey-column-header">Run Name</td>
+            <td class="labkey-column-header">Analysis Folder</td>
+        </tr><%
+    int count = 0;
+    for (FlowWell analysis : allAnalyses.values())
+    {
+        count++;
         FlowRun run = analysis.getRun();
         FlowExperiment experiment = run.getExperiment();
 
-        %><tr><td><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
-        <td><%=h(run.getLabel())%></td>
-        <td><%=experiment == null ? "" : h(experiment.getLabel())%></td>
+        %><tr class="<%=text(count % 2 == 0 ? "labkey-row" : "labkey-alternate-row")%>">
+            <td style="white-space:nowrap"><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
+            <td style="white-space:nowrap"><a href="<%=h(run.urlShow())%>"><%=h(run.getLabel())%></a></td>
+        <% if (experiment == null) { %>
+            <td style="white-space:nowrap">&nbsp;</td>
+        <% } else { %>
+            <td style="white-space:nowrap"><a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getLabel())%></a></td>
+        <% } %>
         </tr><%
     }
     %></table><%
@@ -505,7 +576,7 @@ else
                 }
                 else
                 {
-                    %><div class="error">The original FCS file is no longer available or is not readable: <%=rel.getPath()%></div><%
+                    %><div class="error">The original FCS file is no longer available or is not readable: <%=h(rel.getPath())%></div><%
                 }
             }
         }

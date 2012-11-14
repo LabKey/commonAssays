@@ -96,7 +96,11 @@ public class FlowWell extends FlowDataObject
         super(data);
     }
 
-    public FlowFCSFile getFCSFile()
+    /**
+     * Get the FlowFCSFile DataInput of this FCSAnalysis (or fake FCSFile.)
+     * @return
+     */
+    public FlowFCSFile getFCSFileInput()
     {
         if (getDataType() == FlowDataType.FCSFile)
             return (FlowFCSFile) this;
@@ -130,6 +134,36 @@ public class FlowWell extends FlowDataObject
 
         // CONSIDER: Also find FlowFCSFile well with same URI as this well.
         return null;
+    }
+
+    /**
+     * Get all FlowFCSFile wells that are DataOutputs of this 'fake' FCSFile well.
+     * @return
+     */
+    public List<FlowFCSFile> getFCSFileOutputs()
+    {
+        ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
+        List<FlowFCSFile> ret = new ArrayList<FlowFCSFile>();
+        for (ExpProtocolApplication app : apps)
+        {
+            addDataOfType(app.getOutputDatas(), FlowDataType.FCSFile, ret);
+        }
+        return ret;
+    }
+
+    /**
+     * Get all FlowFCSAnalysis wells that are DataOutputs of this FCSFile well.
+     * @return
+     */
+    public List<FlowFCSAnalysis> getFCSAnalysisOutputs() throws SQLException
+    {
+        ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
+        List<FlowFCSAnalysis> ret = new ArrayList<FlowFCSAnalysis>();
+        for (ExpProtocolApplication app : apps)
+        {
+            addDataOfType(app.getOutputDatas(), FlowDataType.FCSAnalysis, ret);
+        }
+        return ret;
     }
 
     public URI getFCSURI()
@@ -257,17 +291,6 @@ public class FlowWell extends FlowDataObject
     public String getComment() throws SQLException
     {
         return getExpObject().getComment();
-    }
-
-    public List<FlowWell> getFCSAnalyses() throws SQLException
-    {
-        ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
-        List<FlowWell> ret = new ArrayList();
-        for (ExpProtocolApplication app : apps)
-        {
-            addDataOfType(app.getOutputDatas(), FlowDataType.FCSAnalysis, ret);
-        }
-        return ret;
     }
 
     public ExpMaterial getSample(ExpSampleSet set)

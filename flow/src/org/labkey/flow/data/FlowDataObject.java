@@ -262,7 +262,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
 
         if (includeKeywords && (this instanceof FlowWell))
         {
-            FlowFCSFile fcsFile = ((FlowWell)this).getFCSFile();
+            FlowFCSFile fcsFile = ((FlowWell)this).getFCSFileInput();
             if (fcsFile != null && fcsFile != this)
             {
                 AttributeSet keywords = fcsFile.getAttributeSet();

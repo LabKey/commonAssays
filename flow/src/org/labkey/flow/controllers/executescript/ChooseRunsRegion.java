@@ -139,7 +139,7 @@ public class ChooseRunsRegion extends DataRegion
                         if (well instanceof FlowCompensationControl)
                             continue;
 
-                        FlowFCSFile fcsFile = well.getFCSFile();
+                        FlowFCSFile fcsFile = well.getFCSFileInput();
                         CompensationMatrix matrix = CompensationMatrix.fromSpillKeyword(fcsFile.getKeywords());
                         if (matrix != null)
                             return null;

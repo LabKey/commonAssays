@@ -39,7 +39,6 @@ import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipFile;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -439,7 +438,7 @@ public class RunController extends BaseFlowController
 
             if (includeKeywords)
             {
-                FlowFCSFile file = well.getFCSFile();
+                FlowFCSFile file = well.getFCSFileInput();
                 AttributeSet attrs = file.getAttributeSet();
                 keywordAttrs.put(name, attrs);
             }

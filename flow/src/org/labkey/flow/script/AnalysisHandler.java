@@ -23,8 +23,6 @@ import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.Analysis;
@@ -39,7 +37,6 @@ import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.query.FlowSchema;
 
 import java.io.File;
 import java.net.URI;
@@ -229,7 +226,7 @@ public class AnalysisHandler extends BaseHandler
                 String description = "well " + iWell + "/" + _wellCount + ":" + _run.getName() + ":" + _well.getName();
 
                 AttributeSet attrs = tryCopyAttributes();
-                DataBaseType dbt = addWell(_runElement, _well.getFCSFile(), _flowComp, _scriptLSID);
+                DataBaseType dbt = addWell(_runElement, _well.getFCSFileInput(), _flowComp, _scriptLSID);
                 if (attrs != null)
                 {
                     _job.addStatus("Copying " + description);
