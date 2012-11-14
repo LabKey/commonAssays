@@ -386,8 +386,8 @@ public class FlowSchema extends UserSchema
 
             ColumnInfo colWorkspace = ret.addDataInputColumn("Workspace", InputRole.Workspace.toString());
             ExpDataTable workspacesTable = ExperimentService.get().createDataTable("Datas", this);
+            workspacesTable.setPublicSchemaName(ExpSchema.SCHEMA_NAME);
             workspacesTable.populate();
-            createDataTable("Workspace", FlowDataType.Workspace);
             colWorkspace.setFk(new QueryForeignKey(workspacesTable, "RowId", "Name"));
             colWorkspace.setHidden(true);
         }
