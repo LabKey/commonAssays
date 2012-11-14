@@ -24,7 +24,6 @@
 <%@ page import="org.labkey.api.study.WellGroup" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
 <%
     JspView<NabController.PublishVerifyBean> me = (JspView<NabController.PublishVerifyBean>) HttpView.currentView();
     NabController.PublishVerifyBean bean = me.getModelBean();
@@ -83,12 +82,7 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
                 if (sampleInfo instanceof NabController.PublishSampleInfo)
                     sequenceNumString = ((NabController.PublishSampleInfo) sampleInfo).getVisitIDString();
 %>
-                <input type="text" name="sequenceNums"
-                  onKeyDown="return ctrlKeyCheck(event);"
-                  onBlur="hideCompletionDiv();"
-                  autocomplete="off"
-                  value="<%= h(sequenceNumString != null ? sequenceNumString : bean.format(sampleInfo.getVisitID())) %>"
-                  onKeyUp="return handleChange(this, event, '<%= bean.getVisitIdCompletionBase() %>');">
+                <labkey:autoCompleteText name="sequenceNums" url="<%= bean.getVisitIdCompletionBase() %>" value="<%= h(sequenceNumString != null ? sequenceNumString : bean.format(sampleInfo.getVisitID())) %>"/>
 <%
             }
             else
