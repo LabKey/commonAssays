@@ -36,7 +36,6 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
-import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
@@ -831,7 +830,7 @@ public class FlowManager
             SimpleFilter filter = new SimpleFilter();
             filter.addCondition(FieldKey.fromParts("Original"), true, CompareType.EQUAL);
 
-            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
+            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter);
             //TODO: multiple aggregates
             Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
             if (result != null)
@@ -856,7 +855,7 @@ public class FlowManager
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
             SimpleFilter filter = new SimpleFilter("Sample/Name", null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
 
-            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
+            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter);
             //TODO: multiple aggregates
             Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
             if (result != null)
@@ -881,7 +880,7 @@ public class FlowManager
         {
             List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
+            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter);
             Aggregate.Result result = agg.get("RowId").get(0);
             if (result != null)
                 return ((Long)result.getValue()).intValue();
