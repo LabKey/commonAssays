@@ -56,7 +56,7 @@ public class FastaValidator
             //noinspection ForLoopReplaceableByForEach
             for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
             {
-                Protein protein = (Protein)proteinIterator.next();
+                Protein protein = proteinIterator.next();
 
                 // Use UTF-8 encoding so that we only use a single byte for ASCII characters
                 String lookupString = protein.getLookup().toLowerCase();
