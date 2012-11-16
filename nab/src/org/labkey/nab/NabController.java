@@ -189,7 +189,7 @@ public class NabController extends SpringActionController
         {
             VBox box = new VBox();
 
-            box.addView(AssayService.get().createAssayListView(getViewContext(), false));
+            box.addView(AssayService.get().createAssayListView(getViewContext(), false, errors));
             box.addView(new HtmlView(PageFlowUtil.textLink("Deprecated NAb Run", new ActionURL(CreateAction.class, getContainer()))));
 
             return box;
