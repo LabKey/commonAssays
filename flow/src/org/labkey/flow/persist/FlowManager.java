@@ -692,6 +692,28 @@ public class FlowManager
         return selector.getObject(String.class);
     }
 
+    // Select a set of keywords and values.  The keyword name IN clause will be appended.
+    static private String sqlSelectKeywords = "SELECT flow.keywordAttr.name, flow.keyword.value FROM flow.object" +
+                                            "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
+                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.rowid = flow.keyword.keywordid" +
+                                            "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name ";
+    public Map<String, String> getKeywords(ExpData data, String... keywords)
+    {
+        SQLFragment sql = new SQLFragment(sqlSelectKeywords, data.getRowId());
+        getSchema().getSqlDialect().appendInClauseSql(sql, keywords);
+        SqlSelector selector = new SqlSelector(getSchema(), sql);
+
+        final Map<String, String> map = new TreeMap<String, String>();
+        selector.forEach(new Selector.ForEachBlock<ResultSet>() {
+            @Override
+            public void exec(ResultSet rs) throws SQLException
+            {
+                map.put(rs.getString(1), rs.getString(2));
+            }
+        });
+        return map;
+    }
+
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
     static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, Value) VALUES (?, ?, ?)";
 

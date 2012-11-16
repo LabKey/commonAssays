@@ -176,6 +176,16 @@ public class FlowWell extends FlowDataObject
         return FlowManager.get().getKeyword(getData(), keyword);
     }
 
+    /**
+     * Get only the requested keyword values.
+     * @param keywords The set of keywords to fetch.
+     * @return
+     */
+    public Map<String, String> getKeywords(String... keywords)
+    {
+        return FlowManager.get().getKeywords(getData(), keywords);
+    }
+
     public void setKeyword(String keyword, String value) throws SQLException
     {
         FlowManager.get().setKeyword(getContainer(), getData(), keyword, value);

@@ -16,7 +16,6 @@
 
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +51,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.script.*;
+import org.labkey.flow.util.SampleUtil;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -1049,7 +1049,7 @@ public class AnalysisScriptController extends BaseFlowController
                     files = FlowFCSFile.fromName(getContainer(), null);
                 }
 
-                Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = resolveSamples(sampleInfos, files);
+                Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = SampleUtil.resolveSamples(sampleInfos, files);
 
                 Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
                 for (Workspace.SampleInfo sample : sampleInfos)
@@ -1077,70 +1077,6 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        private Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolveSamples(List<Workspace.SampleInfo> samples, List<FlowFCSFile> files)
-        {
-            if (files.isEmpty())
-                return Collections.emptyMap();
-
-            Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = new LinkedHashMap<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>>();
-
-            MultiHashMap<String, FlowFCSFile> filesByName = new MultiHashMap<String, FlowFCSFile>();
-            MultiHashMap<String, FlowFCSFile> filesByGUID = new MultiHashMap<String, FlowFCSFile>();
-            for (FlowFCSFile file : files)
-            {
-                // Don't include FCSFile wells created for attaching extra keywords.
-                if (!file.isOriginalFCSFile())
-                    continue;
-
-                filesByName.put(file.getName(), file);
-
-                String guidKeyword = file.getKeyword("GUID");
-                if (guidKeyword != null)
-                    filesByGUID.put(guidKeyword, file);
-            }
-
-            // Now, attempt to find an exact match and a list of possible candidates.
-            for (Workspace.SampleInfo sample : samples)
-            {
-                FlowFCSFile perfectMatch = null;
-                LinkedHashSet<FlowFCSFile> candidates = new LinkedHashSet<FlowFCSFile>();
-
-                // First, try the most specific keyword
-                Collection<FlowFCSFile> dupes = null;
-                if (sample.getKeywords().containsKey("GUID"))
-                {
-                    dupes = filesByGUID.get(sample.getKeywords().get("GUID"));
-                    if (dupes != null && dupes.size() == 1)
-                        perfectMatch = dupes.iterator().next();
-                    candidates.addAll(dupes);
-                }
-
-                // Next, try well name
-                dupes = filesByName.get(sample.getSampleName());
-                if (dupes != null)
-                {
-                    if (perfectMatch == null && dupes.size() == 1)
-                        perfectMatch = dupes.iterator().next();
-                    candidates.addAll(dupes);
-                }
-
-                // Next, try $FIL keyword
-                dupes = filesByName.get(sample.getFilename());
-                if (dupes != null)
-                {
-                    if (perfectMatch == null && dupes.size() == 1)
-                        perfectMatch = dupes.iterator().next();
-                    candidates.addAll(dupes);
-                }
-
-                if (perfectMatch != null || !candidates.isEmpty())
-                {
-                    resolved.put(sample, Pair.<FlowFCSFile, List<FlowFCSFile>>of(perfectMatch, new ArrayList<FlowFCSFile>(candidates)));
-                }
-            }
-
-            return resolved;
-        }
 
         private void stepReviewSamples(ImportAnalysisForm form, BindException errors) throws Exception
         {
