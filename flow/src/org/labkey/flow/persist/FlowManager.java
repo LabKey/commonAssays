@@ -839,29 +839,22 @@ public class FlowManager
     {
         FlowSchema schema = new FlowSchema(user, container);
 
+        // count(fcsfile)
+        TableInfo table = schema.getTable(FlowTableType.FCSFiles);
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+        List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
 
-        try
-        {
-            // count(fcsfile)
-            TableInfo table = schema.getTable(FlowTableType.FCSFiles);
-            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
-            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
+        // filter to those wells that were imported from a Keywords run
+        // ignoring 'fake' FCSFiles created while importing a FlowJo workspace.
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromParts("Original"), true, CompareType.EQUAL);
 
-            // filter to those wells that were imported from a Keywords run
-            // ignoring 'fake' FCSFiles created while importing a FlowJo workspace.
-            SimpleFilter filter = new SimpleFilter();
-            filter.addCondition(FieldKey.fromParts("Original"), true, CompareType.EQUAL);
+        Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
+        //TODO: multiple aggregates
+        Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
+        if (result != null)
+            return ((Long)result.getValue()).intValue();
 
-            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter);
-            //TODO: multiple aggregates
-            Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
-            if (result != null)
-                return ((Long)result.getValue()).intValue();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
         return 0;
     }
 
@@ -870,23 +863,17 @@ public class FlowManager
     {
         FlowSchema schema = new FlowSchema(user, container);
 
-        try
-        {
-            TableInfo table = schema.getTable(FlowTableType.FCSFiles);
-            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
-            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-            SimpleFilter filter = new SimpleFilter("Sample/Name", null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
+        TableInfo table = schema.getTable(FlowTableType.FCSFiles);
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+        List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
+        SimpleFilter filter = new SimpleFilter("Sample/Name", null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
 
-            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter);
-            //TODO: multiple aggregates
-            Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
-            if (result != null)
-                return ((Long)result.getValue()).intValue();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
+        //TODO: multiple aggregates
+        Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
+        if (result != null)
+            return ((Long)result.getValue()).intValue();
+
         return 0;
     }
 
@@ -898,19 +885,13 @@ public class FlowManager
         filter.addCondition("FCSFileCount", 0, CompareType.NEQ);
         filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
         TableInfo table = schema.getTable(FlowTableType.Runs);
-        try
-        {
-            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
-            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-            Map<String, List<Aggregate.Result>> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter);
-            Aggregate.Result result = agg.get("RowId").get(0);
-            if (result != null)
-                return ((Long)result.getValue()).intValue();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+        List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
+        Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
+        Aggregate.Result result = agg.get("RowId").get(0);
+        if (result != null)
+            return ((Long)result.getValue()).intValue();
+
         return 0;
     }
 
