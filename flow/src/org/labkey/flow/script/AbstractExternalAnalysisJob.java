@@ -322,7 +322,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 run.setFilePathRoot(runFilePathRoot);
             }
             run.save(user);
-            run.setProperty(user, FlowProperty.AnalysisEngine.getPropertyDescriptor(), getAnalysisEngine().name());
+            if (getAnalysisEngine() != null)
+                run.setProperty(user, FlowProperty.AnalysisEngine.getPropertyDescriptor(), getAnalysisEngine().name());
 
             ExpData externalAnalysisData = createExternalAnalysisData(svc, run, user, container, analysisName, externalAnalysisFile, originalImportedFile);
 

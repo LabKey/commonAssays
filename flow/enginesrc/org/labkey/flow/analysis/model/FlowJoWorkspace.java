@@ -64,9 +64,10 @@ abstract public class FlowJoWorkspace extends Workspace
     {
     }
 
-    protected FlowJoWorkspace(String name, Element elDoc)
+    protected FlowJoWorkspace(String name, String path, Element elDoc)
     {
         _name = name;
+        _path = path;
         readAll(elDoc);
     }
 
@@ -93,7 +94,7 @@ abstract public class FlowJoWorkspace extends Workspace
     {
         Map<SubsetSpec, SubsetSpec> aliases = new HashMap<SubsetSpec, SubsetSpec>();
 
-        for (SampleInfo sampleInfo : getSamples())
+        for (SampleInfo sampleInfo : getSamplesComplete())
         {
             Analysis analysis = getSampleAnalysis(sampleInfo);
             if (analysis == null)
@@ -301,7 +302,7 @@ abstract public class FlowJoWorkspace extends Workspace
         ParameterInfo info = _parameters.get(name);
         if (info == null)
             return 1;
-        return info.multiplier;
+        return info._multiplier;
     }
 
     protected void readKeywords(SampleInfo sample, Element el)
@@ -396,7 +397,7 @@ abstract public class FlowJoWorkspace extends Workspace
     {
         param = ___cleanName(param);
         if (_parameters.containsKey(param))
-            return _parameters.get(param).name;
+            return _parameters.get(param)._name;
 
         return param;
     }
@@ -496,7 +497,7 @@ abstract public class FlowJoWorkspace extends Workspace
         ParameterInfo info = _parameters.get(param);
         if (info == null)
             return null;
-        return info.calibrationTable;
+        return info._calibrationTable;
     }
 
     private double interpolate(double v1, double v2, CalibrationTable ct, int index, int count)
@@ -586,7 +587,7 @@ abstract public class FlowJoWorkspace extends Workspace
         private Workspace loadWorkspace(String path) throws Exception
         {
             File file = new File(projectRoot(), path);
-            return Workspace.readWorkspace(path, new FileInputStream(file));
+            return Workspace.readWorkspace(file.getName(), path, new FileInputStream(file));
         }
 
         @Test
@@ -625,7 +626,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals("panel 1", workspace.getGroups().get(1).getGroupName().toString());
             assertEquals(72, workspace.getGroups().get(1).getSampleIds().size());
             assertEquals(2, workspace.getGroupAnalyses().size());
-            assertEquals(10, workspace.getParameters().length);
+            assertEquals(10, workspace.getParameterNames().size());
             assertEquals(0, workspace.getWarnings().size());
 
             SampleInfo sampleInfo = workspace.getSample("2");
@@ -690,7 +691,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals(7, workspace._groupInfos.size());
             assertEquals(7, workspace._groupAnalyses.size());
             //assertEquals(1, workspace.getCompensationMatrices().size());
-            assertEquals(4, workspace.getParameters().length);
+            assertEquals(4, workspace.getParameterNames().size());
 
             // warnings
             assertEquals(1, workspace.getWarnings().size());

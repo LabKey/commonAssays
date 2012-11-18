@@ -26,6 +26,8 @@ import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.ExternalAnalysis;
+import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
@@ -155,7 +157,7 @@ public class Main
         // ... then, hash the sample analysis
         Map<Analysis, List<Workspace.SampleInfo>> analysisToSamples = new HashMap<Analysis, List<Workspace.SampleInfo>>();
         Map<String, List<Workspace.SampleInfo>> sampleLabels = new HashMap<String, List<Workspace.SampleInfo>>();
-        for (Workspace.SampleInfo sample : workspace.getSamples())
+        for (Workspace.SampleInfo sample : workspace.getSamplesComplete())
         {
             Analysis analysis = workspace.getSampleAnalysis(sample);
             List<Workspace.SampleInfo> samples = analysisToSamples.get(analysis);
@@ -265,7 +267,7 @@ public class Main
 
         if (writeAll || !sampleIds.isEmpty())
         {
-            for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
+            for (Workspace.SampleInfo sampleInfo : workspace.getSamplesComplete())
             {
                 if (writeAll || sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
                 {
@@ -375,7 +377,7 @@ public class Main
         return Tuple3.of(keywords, analysis, matrices);
     }
 
-    private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readTsvAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static ExternalAnalysis readTsvAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
         VirtualFile rootDir;
         if (analysisResultsFile.getName().endsWith(".zip"))
@@ -439,12 +441,12 @@ public class Main
         }
     }
 
-    private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static IWorkspace readAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
-        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = null;
         if (WorkspaceParser.isFlowJoWorkspace(analysisResultsFile))
         {
-            results = readWorkspaceAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
+            //return readWorkspaceAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
+            return readWorkspace(analysisResultsFile, true);
         }
         else if (analysisResultsFile.getName().endsWith(".xar"))
         {
@@ -453,15 +455,13 @@ public class Main
         }
         else
         {
-            results = readTsvAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
+            return readTsvAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
         }
-
-        return results;
     }
 
     private static void executeConvertAnalysis(File outDir, File workspaceOrAnalysisResults, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats, AnalysisResultsOutputFormat outputFormat)
     {
-        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
+        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = null;//readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
         if (results == null)
             return;
 

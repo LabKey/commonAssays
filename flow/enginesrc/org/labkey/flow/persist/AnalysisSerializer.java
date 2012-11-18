@@ -31,7 +31,9 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.api.writer.VirtualFile;
+import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.ExternalAnalysis;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -57,6 +59,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Reads/writes a directory of stats and graphs suitable for interchange with R and LabKey.
@@ -220,6 +224,62 @@ public class AnalysisSerializer
             System.err.println(msg);
             t.printStackTrace(System.err);
         }
+    }
+
+    public static File extractArchive(File file, File tempDir)
+            throws IOException
+    {
+        File statisticsFile = null;
+        if (file.getName().equals(AnalysisSerializer.STATISTICS_FILENAME))
+        {
+            statisticsFile = file;
+        }
+        else if (file.isDirectory() && new File(file, AnalysisSerializer.STATISTICS_FILENAME).isFile())
+        {
+            statisticsFile = new File(file, AnalysisSerializer.STATISTICS_FILENAME);
+        }
+        else if (file.getName().endsWith(".zip"))
+        {
+            tempDir.mkdir();
+
+            ZipFile zipFile = new ZipFile(file);
+
+            File importDir;
+            String zipBaseName = FileUtil.getBaseName(file);
+            ZipEntry zipEntry = zipFile.getEntry(AnalysisSerializer.STATISTICS_FILENAME);
+            if (zipEntry != null)
+            {
+                // Create extra directory under tempDir to extract into.
+                importDir = new File(tempDir, zipBaseName);
+            }
+            else
+            {
+                zipEntry = zipFile.getEntry(zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME);
+                importDir = tempDir;
+            }
+
+            if (zipEntry == null)
+                throw new IOException("Couldn't find '" + AnalysisSerializer.STATISTICS_FILENAME + "' or '" + zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME + "' in the zip archive.");
+
+            //File importDir = File.createTempFile(zipBaseName, null, tempDir);
+            if (importDir.exists() && !FileUtil.deleteDir(importDir))
+                throw new IOException("Could not delete the directory \"" + importDir + "\"");
+
+            ZipUtil.unzipToDirectory(file, importDir);
+            statisticsFile = new File(importDir, zipEntry.getName());
+        }
+
+        if (statisticsFile == null)
+            return null;
+
+        return statisticsFile.getParentFile();
+    }
+
+    public static ExternalAnalysis readAnalysis(File file) throws IOException
+    {
+        VirtualFile vf = new FileSystemFile(file);
+        AnalysisSerializer as = new AnalysisSerializer(ExternalAnalysis.LOG, vf);
+        return as.readAnalysis();
     }
 
     public AnalysisSerializer(JobLog log, VirtualFile rootDir)
@@ -874,8 +934,18 @@ public class AnalysisSerializer
         }
     }
 
+    public ExternalAnalysis readAnalysis() throws IOException
+    {
+        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> analysis = readAnalysisTuple();
+        if (analysis == null)
+            return null;
+
+        String name = new File(_rootDir.getLocation()).getName();
+        return new ExternalAnalysis(name, analysis.first, analysis.second, analysis.third);
+    }
+
     // Read keywords, stats, graphs, and compensation matrices.
-    public Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysis() throws Exception
+    public Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysisTuple() throws IOException
     {
         Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
         Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
@@ -1544,7 +1614,7 @@ public class AnalysisSerializer
             FileSystemFile rootDir = new FileSystemFile(dir);
             TestLog log = new TestLog();
             AnalysisSerializer serializer = new AnalysisSerializer(log, rootDir);
-            Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> tuple = serializer.readAnalysis();
+            Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> tuple = serializer.readAnalysisTuple();
 
             Map<String, AttributeSet> keywords = tuple.first;
             Map<String, AttributeSet> results = tuple.second;

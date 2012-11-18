@@ -103,7 +103,7 @@ public class DataFrame
         {
             Field field = getField(p);
             ScalingFunction fn = field.getScalingFunction();
-            ScriptSettings.ParameterInfo paramInfo = null;
+            ParameterInfo paramInfo = null;
             if (settings != null)
             {
                 paramInfo = settings.getParameterInfo(field);

@@ -114,7 +114,7 @@ public class FlowAnalyzer
         return comp.getCompensationMatrix();
     }
 
-    synchronized static public File getAnalysisDirectory() throws Exception
+    synchronized static public File getAnalysisDirectory()
     {
         return FlowSettings.getWorkingDirectory();
     }

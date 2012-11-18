@@ -439,7 +439,7 @@ public class ScriptAnalyzer
             }
             if (analysis == null)
             {
-                for (Workspace.SampleInfo sample : workspace.getSamples())
+                for (Workspace.SampleInfo sample : workspace.getSamplesComplete())
                 {
                     Analysis analysisTry = workspace.getSampleAnalysis(sample);
                     if (analysisTry == null)

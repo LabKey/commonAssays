@@ -45,6 +45,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
+<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -97,16 +99,18 @@
 
 <p>You are about to import the analysis from the workspace with the following settings:</p>
 <%
-    Workspace workspace = form.getWorkspace().getWorkspaceObject();
+    IWorkspace workspace = form.getWorkspace().getWorkspaceObject();
 %>
 <ul>
     <li style="padding-bottom:0.5em;">
         <%
-            String name = form.getWorkspace().getPath();
+            String name = form.getWorkspace().getOriginalPath();
+            if (name == null)
+                name = form.getWorkspace().getPath();
             if (name == null)
                 name = form.getWorkspace().getName();
 
-            List<Workspace.SampleInfo> allSamples = workspace.getAllSamples();
+            List<? extends ISampleInfo> allSamples = workspace.getSamples();
             boolean allSelected = allSamples.size() == selectedSamples.size();
         %>
         <b>Workspace:</b> <%=h(name)%><br/>
@@ -121,7 +125,7 @@
             </tr>
             <tr>
                 <td><b>Parameters:</b></td>
-                <td><%=h(StringUtils.join(workspace.getParameters(), ", "))%></td>
+                <td><%=h(StringUtils.join(workspace.getParameterNames(), ", "))%></td>
             </tr>
         </table>
     </li>

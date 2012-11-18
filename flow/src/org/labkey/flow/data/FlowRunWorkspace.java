@@ -18,7 +18,7 @@ package org.labkey.flow.data;
 
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FCSKeywordData;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.ParameterInfo;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -62,9 +62,8 @@ public class FlowRunWorkspace extends Workspace
             {
                 if (_parameters.containsKey(param))
                     continue;
-                ParameterInfo paramInfo = new ParameterInfo();
-                paramInfo.name = param;
-                paramInfo.multiplier = 1;
+                ParameterInfo paramInfo = new ParameterInfo(param);
+                paramInfo.setMultiplier(1d);
                 _parameters.put(param, paramInfo);
             }
         }

@@ -17,6 +17,7 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.collections15.FactoryUtils;
 import org.apache.commons.collections15.MapUtils;
+import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
 
@@ -34,7 +35,7 @@ public class SelectedSamples
 {
     // non-form posted values used to initialize the SamplesConfirmGridView
     private Set<String> _keywords;
-    private List<Workspace.SampleInfo> _samples;
+    private List<? extends ISampleInfo> _samples;
 
     // form posted values
     // workspace sample id -> resolved info
@@ -131,12 +132,12 @@ public class SelectedSamples
         _keywords = keywords;
     }
 
-    public List<Workspace.SampleInfo> getSamples()
+    public List<? extends ISampleInfo> getSamples()
     {
         return _samples;
     }
 
-    public void setSamples(List<Workspace.SampleInfo> samples)
+    public void setSamples(List<? extends ISampleInfo> samples)
     {
         _samples = samples;
     }

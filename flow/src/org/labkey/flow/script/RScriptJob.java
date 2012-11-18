@@ -230,7 +230,7 @@ public class RScriptJob extends FlowExperimentJob
         info("Writing compensation matrices...");
         Workspace workspace = Workspace.readWorkspace(new FileInputStream(_workspaceFile));
         Map<String, CompensationMatrix> matrices = new HashMap<String, CompensationMatrix>();
-        for (Workspace.SampleInfo sampleInfo : workspace.getAllSamples())
+        for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
         {
             CompensationMatrix matrix = null;
             if (!sampleInfo.isPrecompensated())

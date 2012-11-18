@@ -130,7 +130,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     {
         Set<String> keywordsSet = new TreeSet();
         Map<Workspace.SampleInfo, List<String>> sampleSubsetMap = new HashMap();
-        for (Workspace.SampleInfo sample : workspace.getSamples()) {
+        for (Workspace.SampleInfo sample : workspace.getSamplesComplete()) {
             Analysis analysis = workspace.getSampleAnalysis(sample);
             if (analysis == null)
                 continue;

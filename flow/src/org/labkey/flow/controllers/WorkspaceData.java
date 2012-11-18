@@ -21,9 +21,12 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
+import org.labkey.flow.persist.AnalysisSerializer;
 import org.springframework.validation.Errors;
 import org.xml.sax.SAXParseException;
 
@@ -39,7 +42,8 @@ public class WorkspaceData implements Serializable
 
     String path;
     String name;
-    Workspace _object;
+    String originalPath;
+    IWorkspace _object;
     // UNDONE: Placeholder for when analysis archives (or ACS archives) include FCS files during import.
     boolean _includesFCSFiles;
 
@@ -51,6 +55,25 @@ public class WorkspaceData implements Serializable
             this.path = path;
             this.name = new File(path).getName();
         }
+    }
+
+    public String getPath()
+    {
+        return path;
+    }
+
+    public void setOriginalPath(String path)
+    {
+        if (path != null)
+        {
+            path = PageFlowUtil.decode(path);
+            this.originalPath = path;
+        }
+    }
+
+    public String getOriginalPath()
+    {
+        return this.originalPath;
     }
 
     public void setName(String name)
@@ -65,17 +88,12 @@ public class WorkspaceData implements Serializable
 
     public void setObject(String object) throws Exception
     {
-        this._object = (Workspace) PageFlowUtil.decodeObject(object);
+        this._object = (IWorkspace) PageFlowUtil.decodeObject(object);
     }
 
-    public Workspace getWorkspaceObject()
+    public IWorkspace getWorkspaceObject()
     {
         return _object;
-    }
-
-    public String getPath()
-    {
-        return path;
     }
 
     public boolean isIncludesFCSFiles()
@@ -127,6 +145,41 @@ public class WorkspaceData implements Serializable
                 }
 
                 File file = pipeRoot.resolvePath(path);
+                if (file == null)
+                {
+                    throw new WorkspaceValidationException("The path '" + path + "' is invalid.");
+                }
+                if (!file.exists())
+                {
+                    throw new WorkspaceValidationException("The file '" + path + "' does not exist.");
+                }
+                if (!file.canRead())
+                {
+                    throw new WorkspaceValidationException("The file '" + path + "' is not readable.");
+                }
+
+                if (file.getName().endsWith(AnalysisSerializer.STATISTICS_FILENAME))
+                {
+                    // Set path to parent directory
+                    file = file.getParentFile();
+                    this.path = pipeRoot.relativePath(file);
+                }
+                else if (path.endsWith(".zip"))
+                {
+                    // Extract external analysis zip into pipeline
+                    File tempDir = pipeRoot.resolvePath("unzip");
+                    if (tempDir.exists() && !FileUtil.deleteDir(tempDir))
+                        throw new IOException("Failed to delete temp directory");
+
+                    String originalPath = path;
+                    File zipFile = pipeRoot.resolvePath(path);
+                    file = AnalysisSerializer.extractArchive(zipFile, tempDir);
+
+                    String workspacePath = pipeRoot.relativePath(file);
+                    this.path = workspacePath;
+                    this.originalPath = originalPath;
+                }
+
                 _object = readWorkspace(file, path);
             }
             else
@@ -136,51 +189,22 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    private static Workspace readWorkspace(File file, String path) throws WorkspaceValidationException
-    {
-        if (file == null)
-        {
-            throw new WorkspaceValidationException("The path '" + path + "' is invalid.");
-        }
-        if (!file.exists())
-        {
-            throw new WorkspaceValidationException("The file '" + path + "' does not exist.");
-        }
-        if (file.isDirectory())
-        {
-            throw new WorkspaceValidationException("The file '" + path + "' is a directory.");
-        }
-        if (!file.canRead())
-        {
-            throw new WorkspaceValidationException("The file '" + path + "' is not readable.");
-        }
-
-        try
-        {
-            FileInputStream is = new FileInputStream(file);
-            return readWorkspace(is);
-        }
-        catch (FileNotFoundException fnfe)
-        {
-            _log.error("Error", fnfe);
-            throw new WorkspaceValidationException("Unable to access the file '" + path + "'.");
-        }
-    }
-
-    private static Workspace readWorkspace(InputStream is) throws WorkspaceValidationException
+    private static IWorkspace readWorkspace(File file, String path) throws WorkspaceValidationException
     {
         try
         {
-            return Workspace.readWorkspace(is);
+            if (file.isDirectory() && new File(file, AnalysisSerializer.STATISTICS_FILENAME).isFile())
+            {
+                return AnalysisSerializer.readAnalysis(file);
+            }
+            else
+            {
+                return Workspace.readWorkspace(file);
+            }
         }
-        catch (SAXParseException spe)
+        catch (IOException e)
         {
-            throw new WorkspaceValidationException("Error parsing the workspace.  This might be because it is not an " +
-                    "XML document: " + spe);
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Error parsing workspace: " + e, e);
+            throw new WorkspaceValidationException("Unable to load analysis for '" + path + "': " + e.getMessage(), e);
         }
     }
 
@@ -188,7 +212,11 @@ public class WorkspaceData implements Serializable
     {
         if (path != null)
         {
-            return Collections.singletonMap("path", path);
+            Map<String, String> ret = new HashMap<String, String>();
+            ret.put("path", path);
+            if (originalPath != null)
+                ret.put("originalPath", originalPath);
+            return ret;
         }
         else
         {

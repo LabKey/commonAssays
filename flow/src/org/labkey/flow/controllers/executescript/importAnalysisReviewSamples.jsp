@@ -43,6 +43,8 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
 <%@ page import="org.json.JSONArray" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
+<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -54,36 +56,42 @@
     FlowProtocol protocol = FlowProtocol.getForContainer(container);
 
     WorkspaceData workspaceData = form.getWorkspace();
-    Workspace workspace = workspaceData.getWorkspaceObject();
+    IWorkspace workspace = workspaceData.getWorkspaceObject();
 
     Map<String, String> groupOptions = new TreeMap<String, String>();
     Map<String, Collection<String[]>> groups = new TreeMap<String, Collection<String[]>>();
-    for (Workspace.GroupInfo group : workspace.getGroups())
+    if (workspace instanceof Workspace)
     {
-        Map<String, String[]> groupSamples = new TreeMap<String, String[]>();
-        for (String sampleID : group.getSampleIds())
+        Workspace w = (Workspace)workspace;
+        for (Workspace.GroupInfo group : w.getGroups())
         {
-            Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
-            if (sampleInfo != null)
-                groupSamples.put(sampleInfo.getLabel(), new String[] { sampleInfo.getSampleId(), sampleInfo.getLabel() });
-        }
-        if (group.isAllSamples() || groupSamples.size() > 0)
-        {
-            String groupName = group.getGroupName().toString();
-            groups.put(groupName, groupSamples.values());
-            groupOptions.put(groupName, groupName + " (" + groupSamples.size() + " samples)");
+            Map<String, String[]> groupSamples = new TreeMap<String, String[]>();
+            for (String sampleID : group.getSampleIds())
+            {
+                Workspace.SampleInfo sampleInfo = w.getSample(sampleID);
+                if (sampleInfo != null)
+                    groupSamples.put(sampleInfo.getLabel(), new String[] { sampleInfo.getSampleId(), sampleInfo.getLabel() });
+            }
+            if (group.isAllSamples() || groupSamples.size() > 0)
+            {
+                String groupName = group.getGroupName().toString();
+                groups.put(groupName, groupSamples.values());
+                groupOptions.put(groupName, groupName + " (" + groupSamples.size() + " samples)");
+            }
         }
     }
 
-    List<Map<String, Object>> samples = new ArrayList<Map<String, Object>>(workspace.getSampleCount());
-    for (Workspace.SampleInfo sample : workspace.getAllSamples())
+    List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
+    List<Map<String, Object>> samples = new ArrayList<Map<String, Object>>(sampleInfos.size());
+    for (ISampleInfo sample : sampleInfos)
     {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("sampleId", sample.getSampleId());
         map.put("label", sample.getLabel());
         List<String> sampleGroups = new ArrayList<String>(10);
-        for (PopulationName pop : sample.getGroupNames())
-            sampleGroups.add(pop.toString());
+        if (sample instanceof Workspace.SampleInfo)
+            for (PopulationName pop : ((Workspace.SampleInfo)sample).getGroupNames())
+                sampleGroups.add(pop.toString());
         map.put("groups", sampleGroups);
         samples.add(map);
     }
@@ -99,11 +107,11 @@
 <% } %>
 <input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 
-<p>Please choose which samples from the analysis should be imported. Only checked rows will be imported.
+<p>Please choose which samples from the analysis should be imported. Only selected rows will be imported.
 </p>
 <% if (form.isResolving()) { %>
 <p>If a sample from the analysis couldn't be resolved or was incorrectly resolved, you may correct it by
-    selecting the approrpiate FCS file from the dropdown.
+    selecting the approrpiate FCS file from the dropdown.  All selected rows must have a match to be imported.
 </p>
 <% } %>
 <hr/>

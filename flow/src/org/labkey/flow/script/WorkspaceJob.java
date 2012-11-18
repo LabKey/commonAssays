@@ -205,7 +205,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         List<String> sampleIDs;
         if (selectedFCSFile == null || selectedFCSFile.isEmpty())
         {
-            sampleIDs = workspace.getAllSampleIDs();
+            sampleIDs = workspace.getSampleIds();
         }
         else
         {

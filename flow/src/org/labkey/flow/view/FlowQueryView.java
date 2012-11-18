@@ -258,7 +258,7 @@ public class FlowQueryView extends QueryView
                 ExpProtocol expProtocol = protocol.getProtocol();
                 ActionURL publishURL = PageFlowUtil.urlProvider(AssayUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
                 /*
-                for (Pair<String, String> param : publishURL.getParameters())
+                for (Pair<String, String> param : publishURL.getParameterNames())
                 {
                     if (!"rowId".equalsIgnoreCase(param.getKey()))
                         view.getDataRegion().addHiddenFormField(param.getKey(), param.getValue());

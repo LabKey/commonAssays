@@ -33,9 +33,9 @@ import java.util.*;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
-    public MacWorkspace(String name, Element elDoc) throws Exception
+    public MacWorkspace(String name, String path, Element elDoc) throws Exception
     {
-        super(name, elDoc);
+        super(name, path, elDoc);
     }
 
     protected void readAll(Element elDoc)
@@ -443,22 +443,21 @@ public class MacWorkspace extends FlowJoWorkspace
             String name = getNormalizedParameterName(elParameter.getAttribute("name"));
             if (!_parameters.containsKey(name))
             {
-                ParameterInfo pi = new ParameterInfo();
-                pi.name = name;
-                pi.multiplier = findMultiplier(elParameter);
+                ParameterInfo pi = new ParameterInfo(name);
+                pi._multiplier = findMultiplier(elParameter);
                 String calibrationIndex = elParameter.getAttribute("calibrationIndex");
                 if (!StringUtils.isEmpty(calibrationIndex))
                 {
                     int index = Integer.valueOf(calibrationIndex).intValue();
                     if (index > 0 && index <= _calibrationTables.size())
                     {
-                        pi.calibrationTable = _calibrationTables.get(index - 1);
+                        pi._calibrationTable = _calibrationTables.get(index - 1);
                     }
                 }
 
-                if (pi.calibrationTable == null)
+                if (pi._calibrationTable == null)
                 {
-                    pi.calibrationTable = new IdentityCalibrationTable(getRange(elParameter));
+                    pi._calibrationTable = new IdentityCalibrationTable(getRange(elParameter));
                 }
                 _parameters.put(name, pi);
             }

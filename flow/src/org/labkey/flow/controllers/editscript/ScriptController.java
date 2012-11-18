@@ -53,7 +53,6 @@ import org.labkey.flow.ScriptParser;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationCalculation;
 import org.labkey.flow.analysis.model.FlowException;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Gate;
 import org.labkey.flow.analysis.model.IntervalGate;
 import org.labkey.flow.analysis.model.Polygon;
@@ -73,7 +72,6 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowRunWorkspace;
@@ -402,7 +400,7 @@ public class ScriptController extends BaseFlowController
 
             Map<String, String> ret = new LinkedHashMap<String, String>();
 
-            for (Workspace.SampleInfo sample : form._workspaceObject.getSamples())
+            for (Workspace.SampleInfo sample : form._workspaceObject.getSamplesComplete())
             {
                 Analysis analysis = form._workspaceObject.getSampleAnalysis(sample);
                 if (analysis.getPopulations().size() > 0)

@@ -28,12 +28,13 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class PCWorkspace extends FlowJoWorkspace
 {
-    public PCWorkspace(String name, Element elDoc)
+    public PCWorkspace(String name, String path, Element elDoc)
     {
-        super(name, elDoc);
+        super(name, path, elDoc);
     }
 
     protected void readSample(Element elSample)
@@ -58,31 +59,19 @@ public class PCWorkspace extends FlowJoWorkspace
     }
 
     // UNDONE: Assumes all parameters in the workspace are scaled the same
-    protected void readParameterInfo(SampleInfo sampleInfo)
+    protected void readParameterInfo(ISampleInfo sampleInfo)
     {
+        Map<String, String> keywords = sampleInfo.getKeywords();
         for (int i = 1; i < 100; i ++)
         {
-            String paramName = FCSHeader.getParameterName(sampleInfo._keywords, i);
+            String paramName = FCSHeader.getParameterName(keywords, i);
             if (paramName == null)
                 break;
             if (_parameters.containsKey(paramName))
                 continue;
 
-            ParameterInfo paramInfo = new ParameterInfo();
-            paramInfo.name = paramName;
-            paramInfo.multiplier = 1;
-            String paramDisplay = sampleInfo._keywords.get("P" + i + "DISPLAY");
-            String paramRange = sampleInfo._keywords.get("$P" + i + "R");
-            if ("LIN".equals(paramDisplay))
-            {
-                double range = Double.valueOf(paramRange).doubleValue();
-                if (range > 4096)
-                {
-                    paramInfo.multiplier = range/4096;
-                }
-            }
-
-            _parameters.put(paramInfo.name, paramInfo);
+            ParameterInfo paramInfo = ParameterInfo.fromKeywords(keywords, i);
+            _parameters.put(paramInfo._name, paramInfo);
         }
     }
 

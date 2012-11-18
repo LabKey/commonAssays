@@ -40,6 +40,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.view.GridView;
+import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowRun;
@@ -79,9 +80,11 @@ public class SamplesConfirmGridView extends GridView
         this(data.getKeywords(), data.getSamples(), resolving, data.getRows(), errors);
     }
 
-    public SamplesConfirmGridView(Collection<String> keywords, List<Workspace.SampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
+    public SamplesConfirmGridView(Collection<String> keywords, List<? extends ISampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
     {
         super(new SamplesConfirmDataRegion(), errors);
+
+        boolean hasGroupInfo = samples.get(0) instanceof Workspace.SampleInfo;
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
@@ -94,7 +97,8 @@ public class SamplesConfirmGridView extends GridView
         }
         columns.add(SAMPLE_ID_FIELD_KEY.getName());
         columns.add(SAMPLE_NAME_FIELD_KEY.getName());
-        columns.add(GROUP_NAMES_FIELD_KEY.getName());
+        if (hasGroupInfo)
+            columns.add(GROUP_NAMES_FIELD_KEY.getName());
         columns.addAll(keywords);
         int columnCount = columns.size();
         RowMapFactory factory = new RowMapFactory(columns.toArray(new String[columnCount]));
@@ -103,7 +107,7 @@ public class SamplesConfirmGridView extends GridView
         // Create the data maps, one for each sample in the workspace
         List<Map<String, Object>> unmatchedList = new ArrayList<Map<String, Object>>(samples.size());
         List<Map<String, Object>> matchedList = new ArrayList<Map<String, Object>>(samples.size());
-        for (Workspace.SampleInfo sample : samples)
+        for (ISampleInfo sample : samples)
         {
             Object[] row = new Object[columnCount];
             int i = 0;
@@ -123,16 +127,19 @@ public class SamplesConfirmGridView extends GridView
             row[i++] = sample.getLabel();
 
             // GroupNames
-            String sep = "";
-            StringBuilder sb = new StringBuilder();
-            for (Workspace.GroupInfo group : sample.getGroups())
+            if (hasGroupInfo)
             {
-                if (group.isAllSamples())
-                    continue;
-                sb.append(sep).append(group.getGroupName().toString());
-                sep = ", ";
+                String sep = "";
+                StringBuilder sb = new StringBuilder();
+                for (Workspace.GroupInfo group : ((Workspace.SampleInfo)sample).getGroups())
+                {
+                    if (group.isAllSamples())
+                        continue;
+                    sb.append(sep).append(group.getGroupName().toString());
+                    sep = ", ";
+                }
+                row[i++] = sb.toString();
             }
-            row[i++] = sb.toString();
 
             // Keywords
             Map<String, String> sampleKeywords = sample.getKeywords();
@@ -214,9 +221,12 @@ public class SamplesConfirmGridView extends GridView
         dr.addDisplayColumn(dc);
 
         // Add GroupNames column
-        dc = new SimpleDisplayColumn("${" + GROUP_NAMES_FIELD_KEY.getName() + "}");
-        dc.setCaption("Groups");
-        dr.addDisplayColumn(dc);
+        if (hasGroupInfo)
+        {
+            dc = new SimpleDisplayColumn("${" + GROUP_NAMES_FIELD_KEY.getName() + "}");
+            dc.setCaption("Groups");
+            dr.addDisplayColumn(dc);
+        }
 
         // Add keyword columns
         for (String keyword : keywords)
@@ -400,13 +410,16 @@ public class SamplesConfirmGridView extends GridView
                 list.put(new SimpleNamedObject(String.valueOf(candidate.getRowId()), candidate));
             }
 
-            // Add a divider (TODO: Disable this option item in the select list)
-            list.put(new SimpleNamedObject("--------", "--------"));
+            if (list.size() < _list.size())
+            {
+                // Add a divider (TODO: Disable this option item in the select list)
+                list.put(new SimpleNamedObject("--------", "--------"));
 
-            // Add the remaining FCS files (maybe add an option to not show all FCS files?)
-            for (NamedObject no : _list)
-                if (!candidateRowIds.contains(((FlowFCSFile)no.getObject()).getRowId()))
-                    list.put(no);
+                // Add the remaining FCS files (maybe add an option to not show all FCS files?)
+                for (NamedObject no : _list)
+                    if (!candidateRowIds.contains(((FlowFCSFile)no.getObject()).getRowId()))
+                        list.put(no);
+            }
 
             return list;
         }

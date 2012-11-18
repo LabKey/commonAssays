@@ -85,7 +85,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         addStatus("Loading external analysis from '" + _analysisPathRoot + "'");
         FileSystemFile rootDir = new FileSystemFile(_analysisPathRoot);
         AnalysisSerializer serializer = new AnalysisSerializer(getLogger(), rootDir);
-        return serializer.readAnalysis();
+        return serializer.readAnalysisTuple();
     }
 
 
@@ -102,6 +102,8 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         Set<String> sampleLabels = new LinkedHashSet<String>();
 
         Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> analysis = loadAnalysis();
+        if (analysis == null)
+            error("Failed to parse analysis from");
         keywordsMap = analysis.first;
         resultsMap = analysis.second;
         sampleCompMatrixMap = analysis.third;

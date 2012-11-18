@@ -57,7 +57,7 @@ public class PlotTests extends Assert
 
     private Workspace loadWorkspace(File file) throws Exception
     {
-        return Workspace.readWorkspace(file.getName(), new FileInputStream(file));
+        return Workspace.readWorkspace(file.getName(), file.getPath(), new FileInputStream(file));
     }
 
     private File dataDir()

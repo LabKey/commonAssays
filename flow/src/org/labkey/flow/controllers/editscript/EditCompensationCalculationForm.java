@@ -22,12 +22,10 @@ import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowProtocolStep;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class EditCompensationCalculationForm extends EditSettingsForm
@@ -149,7 +147,7 @@ public class EditCompensationCalculationForm extends EditSettingsForm
         }
         else
         {
-            lstParameters.addAll(Arrays.asList(this.workspace.getParameters()));
+            lstParameters.addAll(this.workspace.getParameterNames());
         }
         this.parameters = lstParameters.toArray(new String[0]);
         int parameterCount = this.parameters.length;

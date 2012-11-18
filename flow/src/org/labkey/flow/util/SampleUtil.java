@@ -2,11 +2,12 @@ package org.labkey.flow.util;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.labkey.api.util.Pair;
-import org.labkey.flow.analysis.model.Workspace;
+import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.data.FlowFCSFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,7 +20,8 @@ import java.util.Map;
 public class SampleUtil
 {
     private static final String[] KEYWORDS = new String[] { "$FIL", "GUID", "$TOT", "$PAR", "$DATE", "$ETIM" };
-    private static final int MIN_DISTANCE = 4;
+    private static final int MAX_MATCHES = KEYWORDS.length+1;
+    private static final int MIN_MATCHES = 2;
 
     private static class FlowFCSFileList extends ArrayList<FlowFCSFile>
     {
@@ -29,77 +31,116 @@ public class SampleUtil
         }
     }
 
-    public static int distance(String[] a, String[] b)
+    public static int matches(String[] a, String[] b)
     {
         assert a.length == b.length;
-        int dist = 0;
+        int dist = -1;
         for (int i = 0, len = a.length; i < len; i++)
-            if (!ObjectUtils.equals(a[i], b[i]))
+            if (ObjectUtils.equals(a[i], b[i]))
                 dist++;
 
         return dist;
+    }
+
+    private static String[] keywordValues(String name, Map<String, String> keywords)
+    {
+        String[] values = new String[KEYWORDS.length+1];
+        values[0] = name;
+        for (int i = 0, len = KEYWORDS.length; i < len; i++)
+        {
+            String value = keywords.get(KEYWORDS[i]);
+            if (value != null)
+                value = value.trim();
+            values[i+1] = value;
+        }
+
+        return values;
     }
 
     /**
      * Give the list of workspace samples and previously imported samples, calculate each
      * workspace sample's exact match and a list of partial matches.
      */
-    public static Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolveSamples(List<Workspace.SampleInfo> samples, List<FlowFCSFile> files)
+    public static Map<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolveSamples(List<? extends ISampleInfo> samples, List<FlowFCSFile> files)
     {
         if (files.isEmpty())
             return Collections.emptyMap();
 
-        Map<FlowFCSFile, String[]> fileKeywordMap = new IdentityHashMap<FlowFCSFile, String[]>();
+        // Don't include FCSFile wells created for attaching extra keywords.
+        List<FlowFCSFile> originalFiles = new ArrayList<FlowFCSFile>(files.size());
+        Map<String, FlowFCSFile> originalFileMap = new HashMap<String, FlowFCSFile>();
         for (FlowFCSFile file : files)
         {
-            // Don't include FCSFile wells created for attaching extra keywords.
             if (!file.isOriginalFCSFile())
                 continue;
 
-            //String[] values = file.getKeywords(KEYWORDS);
-            Map<String, String> keywords = file.getKeywords(KEYWORDS);
-            String[] values = new String[KEYWORDS.length];
-            for (int i = 0, len = KEYWORDS.length; i < len; i++)
-                values[i] = keywords.get(KEYWORDS[i]);
-
-            fileKeywordMap.put(file, values);
+            originalFiles.add(file);
+            originalFileMap.put(file.getName(), file);
         }
 
-        Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = new LinkedHashMap<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>>();
+        Map<FlowFCSFile, String[]> fileKeywordMap = new IdentityHashMap<FlowFCSFile, String[]>();
 
-        for (Workspace.SampleInfo sample : samples)
+        Map<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = new LinkedHashMap<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>>();
+
+        for (ISampleInfo sample : samples)
         {
-            Map<String, String> keywords = sample.getKeywords();
-            String[] values = new String[KEYWORDS.length];
-            for (int i = 0, len = KEYWORDS.length; i < len; i++)
-                values[i] = keywords.get(KEYWORDS[i]);
-
-            FlowFCSFileList[] candidates = new FlowFCSFileList[MIN_DISTANCE];
-            for (int i = 0; i < MIN_DISTANCE; i++)
-                candidates[i] = new FlowFCSFileList(5);
-
-            // Calculate the difference between the FlowFCSFile and the Workspace.SampleInfo
-            // and store the candidates ordered by their distance score (0 is exact match).
-            for (FlowFCSFile file : files)
-            {
-                String[] fileKeywords = fileKeywordMap.get(file);
-                if (fileKeywords == null)
-                    continue;
-
-                int dist = distance(values, fileKeywords);
-                if (dist >= MIN_DISTANCE)
-                    continue;
-
-                candidates[dist].add(file);
-            }
-
             FlowFCSFile perfectMatch = null;
-            if (candidates[0].size() == 1)
-                perfectMatch = candidates[0].get(0);
-
             List<FlowFCSFile> partialMatches = new ArrayList<FlowFCSFile>(10);
-            for (int i = 0; i < candidates.length; i++)
-                partialMatches.addAll(candidates[i]);
+
+            Map<String, String> keywords = sample.getKeywords();
+            if (keywords.size() == 0)
+            {
+                // No keywords available. Match only based on name
+                FlowFCSFile file = originalFileMap.get(sample.getSampleName());
+                if (file == null)
+                    file = originalFileMap.get(sample.getSampleId());
+
+                if (file != null)
+                {
+                    perfectMatch = file;
+                    partialMatches.add(file);
+                }
+            }
+            else
+            {
+                // Match based on keyword values
+                String name = sample.getSampleName();
+                if (name == null || name.length() == 0)
+                    name = sample.getFilename();
+                String[] values = keywordValues(name, keywords);
+
+                FlowFCSFileList[] candidates = new FlowFCSFileList[MAX_MATCHES];
+                for (int i = 0; i < MAX_MATCHES; i++)
+                    candidates[i] = new FlowFCSFileList(5);
+
+                // Calculate the difference between the FlowFCSFile and the Workspace.SampleInfo
+                // and store the candidates ordered by their matches score (higher is better.)
+                int maxMatches = 0;
+                for (FlowFCSFile file : originalFiles)
+                {
+                    String[] fileKeywords = fileKeywordMap.get(file);
+                    if (fileKeywords == null)
+                    {
+                        fileKeywords = keywordValues(file.getName(), file.getKeywords(KEYWORDS));
+                        fileKeywordMap.put(file, fileKeywords);
+                    }
+
+                    int matches = matches(values, fileKeywords);
+                    if (matches < MIN_MATCHES)
+                        continue;
+
+                    if (matches > maxMatches)
+                        maxMatches = matches;
+
+                    candidates[matches].add(file);
+                }
+
+                if (maxMatches >= MIN_MATCHES && candidates[maxMatches].size() == 1)
+                    perfectMatch = candidates[maxMatches].get(0);
+
+                for (int i = candidates.length-1; i >= 0; i--)
+                    partialMatches.addAll(candidates[i]);
+            }
 
             resolved.put(sample, Pair.of(perfectMatch, partialMatches));
         }

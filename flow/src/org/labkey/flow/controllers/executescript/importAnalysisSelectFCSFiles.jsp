@@ -35,6 +35,7 @@
 <%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.flow.analysis.model.Workspace" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -46,7 +47,7 @@
     boolean hasPipelineRoot = pipeRoot != null;
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 
-    Workspace workspace = form.getWorkspace().getWorkspaceObject();
+    IWorkspace workspace = form.getWorkspace().getWorkspaceObject();
     List<String> warnings = workspace.getWarnings();
     if (warnings.size() > 0)
     {
@@ -199,8 +200,46 @@
 
         function renderFileBrowser()
         {
-            if (!fileBrowser.rendered)
+            if (!fileBrowser)
             {
+                Ext.QuickTips.init();
+
+                fileSystem = new LABKEY.FileSystem.WebdavFileSystem({
+                    baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
+                    rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
+
+                fileBrowser = new LABKEY.ext.FileBrowser({
+                    fileSystem:fileSystem
+                    ,helpEl:null
+                    ,showAddressBar:false
+                    ,showFolderTree:true
+                    ,showDetails:false
+                    ,showFileUpload:false
+                    ,allowChangeDirectory:true
+                    ,tbarItems:[]
+                    ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs") || endsWith(data.name,".facs")|| endsWith(data.name, ".lmd"); }}
+                });
+
+                fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.doubleclick, function(record){
+                    if (!record || !record.data.file)
+                        return;
+                    var path = fileSystem.parentPath(record.data.path);
+                    selectRecord(path);
+                    document.forms["importAnalysis"].submit();
+                    return true;
+                });
+                fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.selectionchange, function(record){
+                    var path = null;
+                    if (record)
+                    {
+                        path = record.data.path;
+                        if (record.data.file)
+                            path = fileSystem.parentPath(path); // parent directory of selected .fcs file
+                    }
+                    selectRecord(path);
+                    return true;
+                });
+
                 fileBrowser.render('treeDiv');
                 var path = <%=q(keywordDir)%>;
                 fileBrowser.start(path);
@@ -210,44 +249,6 @@
 
         Ext.onReady(function()
         {
-            Ext.QuickTips.init();
-
-            fileSystem = new LABKEY.FileSystem.WebdavFileSystem({
-                baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
-                rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
-
-            fileBrowser = new LABKEY.ext.FileBrowser({
-                fileSystem:fileSystem
-                ,helpEl:null
-                ,showAddressBar:false
-                ,showFolderTree:true
-                ,showDetails:false
-                ,showFileUpload:false
-                ,allowChangeDirectory:true
-                ,tbarItems:[]
-                ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs") || endsWith(data.name,".facs")|| endsWith(data.name, ".lmd"); }}
-            });
-
-            fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.doubleclick, function(record){
-                if (!record || !record.data.file)
-                    return;
-                var path = fileSystem.parentPath(record.data.path);
-                selectRecord(path);
-                document.forms["importAnalysis"].submit();
-                return true;
-            });
-            fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.selectionchange, function(record){
-                var path = null;
-                if (record)
-                {
-                    path = record.data.path;
-                    if (record.data.file)
-                        path = fileSystem.parentPath(path); // parent directory of selected .fcs file
-                }
-                selectRecord(path);
-                return true;
-            });
-
             <% if (form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse) { %>
             renderFileBrowser();
             <% } %>

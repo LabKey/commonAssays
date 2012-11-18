@@ -39,53 +39,6 @@ public class ScriptSettings implements Serializable
                 filter.getValue());
     }
 
-    static public class ParameterInfo implements Serializable
-    {
-        String _name;
-        Double _minValue;
-
-        ParameterInfo(String name)
-        {
-            _name = name;
-        }
-
-        public String getName()
-        {
-            return _name;
-        }
-
-        public Double getMinValue()
-        {
-            return _minValue;
-        }
-
-        public void setMinValue(double value)
-        {
-            _minValue = value;
-        }
-
-        public boolean equals(Object o)
-        {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ParameterInfo that = (ParameterInfo) o;
-
-            if (_minValue != null ? !_minValue.equals(that._minValue) : that._minValue != null) return false;
-            if (!_name.equals(that._name)) return false;
-
-            return true;
-        }
-
-        public int hashCode()
-        {
-            int result;
-            result = _name.hashCode();
-            result = 31 * result + (_minValue != null ? _minValue.hashCode() : 0);
-            return result;
-        }
-    }
-
     public ParameterInfo getParameterInfo(DataFrame.Field field)
     {
         for (String alias : field.getAliases())

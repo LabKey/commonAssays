@@ -110,6 +110,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/CompensationCalculation.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CompensationMatrix.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/DataFrame.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/EllipseGate.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/ExternalAnalysis.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FCS.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FCSCache.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FCSHeader.java -text
@@ -121,6 +122,8 @@ flow/enginesrc/org/labkey/flow/analysis/model/FlowJoWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Gate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/GateExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/GateList.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/ISampleInfo.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/IWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IdentityCalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IntervalGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/MacWorkspace.java -text
@@ -129,6 +132,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/NotGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/OrGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PC75Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PCWorkspace.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/ParameterInfo.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Polygon.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PolygonGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Population.java -text
@@ -137,6 +141,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/PopulationSet.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/RegionGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/RemapExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SampleCriteria.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/SampleInfoBase.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScalingFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScriptComponent.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScriptSettings.java -text

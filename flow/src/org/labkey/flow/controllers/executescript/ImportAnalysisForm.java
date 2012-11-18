@@ -44,14 +44,14 @@ public class ImportAnalysisForm
 
     private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
     private WorkspaceData workspace = new WorkspaceData();
-    private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.Previous;
+    private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.None;
     private int existingKeywordRunId;
 
     private String importGroupNames = Workspace.ALL_SAMPLES;
     private boolean resolving = false;
     private SelectedSamples selectedSamples = new SelectedSamples();
 
-    private AnalysisEngine selectAnalysisEngine = AnalysisEngine.FlowJoWorkspace;
+    private AnalysisEngine selectAnalysisEngine = null;
 
     // general analysis options and R normalization configuration
     private Boolean rEngineNormalization = true;

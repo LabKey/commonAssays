@@ -50,9 +50,9 @@ import static org.labkey.flow.analysis.model.WorkspaceParser.DATATYPES_1_5_NS;
  */
 public class PC75Workspace extends PCWorkspace
 {
-    public PC75Workspace(String name, Element elDoc)
+    public PC75Workspace(String name, String path, Element elDoc)
     {
-        super(name, elDoc);
+        super(name, path, elDoc);
     }
 
     protected PolygonGate readPolygonGate(PolygonGateType xPolygonGate)

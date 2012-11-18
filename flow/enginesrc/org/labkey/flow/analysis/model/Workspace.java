@@ -45,11 +45,13 @@ import java.util.Set;
  * User: kevink
  * Date: 2/8/12
  */
-public abstract class Workspace implements Serializable
+public abstract class Workspace implements IWorkspace, Serializable
 {
     public static final String ALL_SAMPLES = "All Samples";
     
     protected String _name = null;
+    protected String _path = null;
+    
     // group name -> analysis
     protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<PopulationName, Analysis>();
     // sample id -> analysis
@@ -71,16 +73,16 @@ public abstract class Workspace implements Serializable
 
     static public Workspace readWorkspace(InputStream stream) throws Exception
     {
-        return readWorkspace(null, stream);
+        return readWorkspace(null, null, stream);
     }
 
-    static public Workspace readWorkspace(File file) throws Exception
+    static public Workspace readWorkspace(File file)
     {
         InputStream is = null;
         try
         {
             is = new FileInputStream(file);
-            return readWorkspace(file.getPath(), is);
+            return readWorkspace(file.getName(), file.getPath(), is);
         }
         catch (Exception e)
         {
@@ -92,7 +94,7 @@ public abstract class Workspace implements Serializable
         }
     }
 
-    static public Workspace readWorkspace(String name, InputStream stream) throws Exception
+    static public Workspace readWorkspace(String name, String path, InputStream stream) throws Exception
     {
         Document doc = WorkspaceParser.parseXml(stream);
         Element elDoc = doc.getDocumentElement();
@@ -113,26 +115,26 @@ public abstract class Workspace implements Serializable
         {
             if (version >= 1.4 && version < 1.6)
             {
-                return new PCWorkspace(name, elDoc);
+                return new PCWorkspace(name, path, elDoc);
             }
             else if (version < 2.0)
             {
                 // GatingML appears in version >= 1.6 (FlowJo version 7.5.5)
-                return new PC75Workspace(name, elDoc);
+                return new PC75Workspace(name, path, elDoc);
             }
 
             if (version == 2.0)
             {
-                return new FJ8Workspace(name, elDoc);
+                return new FJ8Workspace(name, path, elDoc);
             }
         }
 
         if (name != null && (name.endsWith(".wsp") || name.endsWith(".WSP")))
         {
-            return new PCWorkspace(name, elDoc);
+            return new PCWorkspace(name, path, elDoc);
         }
 
-        return new MacWorkspace(name, elDoc);
+        return new MacWorkspace(name, path, elDoc);
     }
 
     static long debugComputeSize(Object doc)
@@ -170,9 +172,24 @@ public abstract class Workspace implements Serializable
         }
     }
 
+    public String getName()
+    {
+        return _name;
+    }
+
+    public String getPath()
+    {
+        return _path;
+    }
+
     public ScriptSettings getSettings()
     {
         return _settings;
+    }
+
+    public CompensationMatrix getSampleCompensationMatrix(ISampleInfo sample)
+    {
+        return sample.getCompensationMatrix();
     }
 
     public List<CompensationMatrix> getCompensationMatrices()
@@ -183,7 +200,7 @@ public abstract class Workspace implements Serializable
     public Set<CompensationMatrix> getUsedCompensationMatrices()
     {
         Set<CompensationMatrix> ret = new LinkedHashSet<CompensationMatrix>();
-        for (SampleInfo sample : getSamples())
+        for (SampleInfo sample : getSamplesComplete())
         {
             CompensationMatrix comp = sample.getCompensationMatrix();
             if (comp == null)
@@ -237,10 +254,12 @@ public abstract class Workspace implements Serializable
     }
 
     /**
-     * Usually using .getAllSamples() is preferred.
-     * Sometimes the workspace will contains samples that are no longer referenced by any existing group.
+     * Get all samples in the workspace, including samples that are no longer referened by any group.
+     * Usually using .getSamples() is preferred.
+     * After deleting samples from a FlowJo workspace, the workspace may retain the sample info and just
+     * remove it from the "All Samples" group.
      */
-    public List<SampleInfo> getSamples()
+    public List<SampleInfo> getSamplesComplete()
     {
         return new ArrayList<SampleInfo>(_sampleInfos.values());
     }
@@ -255,7 +274,7 @@ public abstract class Workspace implements Serializable
     public Set<SampleInfo> getSamples(Collection<PopulationName> groupNames, Collection<String> sampleNames)
     {
         if (groupNames.isEmpty() && sampleNames.isEmpty())
-            return new LinkedHashSet<SampleInfo>(getSamples());
+            return new LinkedHashSet<SampleInfo>(getSamplesComplete());
 
         Set<Workspace.SampleInfo> sampleInfos = new LinkedHashSet<Workspace.SampleInfo>();
         if (!groupNames.isEmpty())
@@ -275,7 +294,7 @@ public abstract class Workspace implements Serializable
 
         if (!sampleNames.isEmpty())
         {
-            for (Workspace.SampleInfo sampleInfo : getSamples())
+            for (Workspace.SampleInfo sampleInfo : getSamplesComplete())
             {
                 if (sampleNames.contains(sampleInfo.getSampleId()) || sampleNames.contains(sampleInfo.getLabel()))
                     sampleInfos.add(sampleInfo);
@@ -286,7 +305,7 @@ public abstract class Workspace implements Serializable
     }
 
     /** Get the sample list from the "All Samples" group or get all the samples in the workspace. */
-    public List<SampleInfo> getAllSamples()
+    public List<SampleInfo> getSamples()
     {
         GroupInfo allSamplesGroup = getAllSamplesGroup();
 
@@ -296,15 +315,15 @@ public abstract class Workspace implements Serializable
 
         // No "All Samples" group found or it was empty. Return all sample IDs in the workspace.
         if (allSamples == null || allSamples.size() == 0)
-            allSamples = getSamples();
+            allSamples = getSamplesComplete();
 
         return allSamples;
     }
 
     /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
-    public List<String> getAllSampleIDs()
+    public List<String> getSampleIds()
     {
-        List<SampleInfo> allSamples = getAllSamples();
+        List<SampleInfo> allSamples = getSamples();
         if (allSamples == null)
             return Collections.emptyList();
 
@@ -316,9 +335,9 @@ public abstract class Workspace implements Serializable
     }
 
     /** Get the sample label list from the "All Samples" group or get all the samples in the workspace. */
-    public List<String> getAllSampleLabels()
+    public List<String> getSampleLabels()
     {
-        List<SampleInfo> allSamples = getAllSamples();
+        List<SampleInfo> allSamples = getSamples();
         if (allSamples == null || allSamples.size() == 0)
             return Collections.emptyList();
 
@@ -354,24 +373,34 @@ public abstract class Workspace implements Serializable
         return null;
     }
 
-    public Analysis getSampleAnalysis(SampleInfo sample)
+    public boolean hasAnalysis()
     {
-        return _sampleAnalyses.get(sample._sampleId);
+        return true;
     }
 
-    public AttributeSet getSampleAnalysisResults(SampleInfo sample)
+    public Analysis getSampleAnalysis(ISampleInfo sample)
     {
-        return _sampleAnalysisResults.get(sample._sampleId);
+        return _sampleAnalyses.get(sample.getSampleId());
     }
 
-    public String[] getParameters()
+    public AttributeSet getSampleAnalysisResults(ISampleInfo sample)
     {
-        return _parameters.keySet().toArray(new String[_parameters.keySet().size()]);
+        return _sampleAnalysisResults.get(sample.getSampleId());
+    }
+
+    public List<String> getParameterNames()
+    {
+        return new ArrayList<String>(_parameters.keySet());
+    }
+
+    public List<ParameterInfo> getParameters()
+    {
+        return new ArrayList<ParameterInfo>(_parameters.values());
     }
 
     public SampleInfo findSampleWithKeywordValue(String keyword, String value)
     {
-        for (SampleInfo sample : getSamples())
+        for (SampleInfo sample : getSamplesComplete())
         {
             if (value.equals(sample._keywords.get(keyword)))
                 return sample;
@@ -433,33 +462,17 @@ public abstract class Workspace implements Serializable
         public String negativeSubset;
     }
 
-    public class SampleInfo implements Serializable
+    public class SampleInfo extends SampleInfoBase
     {
-        Map<String, String> _keywords = new HashMap<String, String>();
-        Map<String, Workspace.ParameterInfo> _parameters;
-        String _sampleId;
-        String _sampleName;
         String _compensationId;
 
         public void setSampleId(String id)
         {
             _sampleId = id;
         }
-        public String getSampleId()
-        {
-            return _sampleId;
-        }
         public void setSampleName(String name)
         {
             _sampleName = name;
-        }
-        public String getSampleName()
-        {
-            return _sampleName;
-        }
-        public Map<String,String> getKeywords()
-        {
-            return _keywords;
         }
         public void putKeyword(String keyword, String value)
         {
@@ -477,19 +490,14 @@ public abstract class Workspace implements Serializable
             _compensationId = id;
         }
 
-        public String getLabel()
+        public Analysis getAnalysis()
         {
-            String ret = _sampleName;
-            if (ret == null || ret.length() == 0)
-                ret = getFilename();
-            if (ret == null)
-                return _sampleId;
-            return ret;
+            return getSampleAnalysis(this);
         }
 
-        public String getFilename()
+        public AttributeSet getAnalysisResults()
         {
-            return getKeywords().get("$FIL");
+            return getSampleAnalysisResults(this);
         }
 
         /** Returns true if the sample has already been compensated by the flow cytometer. */
@@ -560,16 +568,6 @@ public abstract class Workspace implements Serializable
             return groups;
         }
 
-        public String toString()
-        {
-            String name = _sampleName;
-            if (name == null || name.length() == 0)
-                name = getFilename();
-            if (name == null)
-                return _sampleId;
-
-            return name + " (" + _sampleId + ")";
-        }
     }
 
     public class GroupInfo implements Serializable
@@ -624,14 +622,4 @@ public abstract class Workspace implements Serializable
         }
     }
 
-    public class ParameterInfo implements Serializable
-    {
-        public String name;
-        // For some parameters, FlowJo maps them as integers between 0 and 4095, even though
-        // they actually range much higher.
-        // This multiplier maps to the range that we actually use.
-        public double multiplier;
-        public double minValue;
-        public CalibrationTable calibrationTable;
-    }
 }

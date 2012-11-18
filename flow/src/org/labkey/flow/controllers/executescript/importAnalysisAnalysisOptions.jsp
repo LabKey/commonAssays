@@ -47,6 +47,8 @@
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
+<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -59,7 +61,7 @@
 
     boolean normalizationEnabled = FlowSettings.isNormalizationEnabled();
 
-    Workspace workspace = form.getWorkspace().getWorkspaceObject();
+    IWorkspace workspace = form.getWorkspace().getWorkspaceObject();
 
     SelectedSamples selectedSamples = form.getSelectedSamples();
     List<String> sampleIds = new ArrayList<String>(selectedSamples.getRows().size());
@@ -150,7 +152,7 @@
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();
             for (String sampleId : sampleIds)
             {
-                Workspace.SampleInfo sampleInfo = workspace.getSample(sampleId);
+                ISampleInfo sampleInfo = workspace.getSample(sampleId);
                 if (sampleInfo != null)
                 {
                     boolean selected = sampleInfo.getSampleId().equals(rEngineNormalizationReference);
@@ -182,7 +184,7 @@
         JSONObject jsonSubsetMap = new JSONObject();
         for (String sampleId : sampleIds)
         {
-            Workspace.SampleInfo sampleInfo = workspace.getSample(sampleId);
+            ISampleInfo sampleInfo = workspace.getSample(sampleId);
             Analysis analysis = sampleInfo != null ? workspace.getSampleAnalysis(sampleInfo) : null;
             if (analysis != null)
             {
@@ -232,7 +234,7 @@
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <%
         JSONArray jsonParams = new JSONArray();
-        for (String param : workspace.getParameters())
+        for (String param : workspace.getParameterNames())
         {
             if (KeywordUtil.isColorChannel(param))
             {

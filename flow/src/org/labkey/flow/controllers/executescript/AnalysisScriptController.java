@@ -17,7 +17,6 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.*;
@@ -35,12 +34,14 @@ import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.ExternalAnalysis;
 import org.labkey.flow.analysis.model.FCS;
+import org.labkey.flow.analysis.model.ISampleInfo;
+import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.PCWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -61,7 +62,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
-import java.util.zip.ZipEntry;
 
 public class AnalysisScriptController extends BaseFlowController
 {
@@ -470,8 +470,6 @@ public class AnalysisScriptController extends BaseFlowController
         {
             return null;
         }
-
-
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
@@ -609,8 +607,8 @@ public class AnalysisScriptController extends BaseFlowController
 
         // path may be:
         // - absolute (run path)
-        // - a file-browser path (absolute but relative to pipe root)
-        // - a file-browser path (relative to pipe root)
+        // - a file-browser path (relative to pipe root but starts with '/')
+        // - a file-browser path (relative to pipe root and doesn't start with '/')
         private File getDir(String path, Errors errors)
         {
             PipeRoot root = getPipeRoot();
@@ -730,7 +728,7 @@ public class AnalysisScriptController extends BaseFlowController
         private Map<String, FlowFCSFile> getSelectedFCSFiles(ImportAnalysisForm form, Errors errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
-            Workspace workspace = workspaceData.getWorkspaceObject();
+            IWorkspace workspace = workspaceData.getWorkspaceObject();
             Map<String, SelectedSamples.ResolvedSample> rows = form.getSelectedSamples().getRows();
             if (rows.size() == 0)
                 return null;
@@ -786,7 +784,7 @@ public class AnalysisScriptController extends BaseFlowController
                             }
                         }
 
-                        Workspace.SampleInfo sampleInfo = workspace.getSample(entry.getKey());
+                        ISampleInfo sampleInfo = workspace.getSample(entry.getKey());
                         if (sampleInfo == null)
                             continue;
                         fcsFiles.put(sampleInfo.getLabel(), file);
@@ -808,8 +806,8 @@ public class AnalysisScriptController extends BaseFlowController
         private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
-            Workspace workspace = workspaceData.getWorkspaceObject();
-            List<Workspace.SampleInfo> samples = workspace.getAllSamples();
+            IWorkspace workspace = workspaceData.getWorkspaceObject();
+            List<? extends ISampleInfo> samples = workspace.getSamples();
             if (samples.size() == 0)
             {
                 errors.reject(ERROR_MSG, "The workspace doesn't contain samples");
@@ -857,7 +855,7 @@ public class AnalysisScriptController extends BaseFlowController
                 if (workspaceFile != null)
                 {
                     File keywordDir = null;
-                    for (Workspace.SampleInfo sampleInfo : samples)
+                    for (ISampleInfo sampleInfo : samples)
                     {
                         File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
                         if (sampleFile.exists())
@@ -900,10 +898,10 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 // Don't associate FCS files with the workspace.
                 WorkspaceData workspaceData = form.getWorkspace();
-                Workspace workspace = workspaceData.getWorkspaceObject();
-                List<Workspace.SampleInfo> sampleInfos = workspace.getAllSamples();
+                IWorkspace workspace = workspaceData.getWorkspaceObject();
+                List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
                 Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
-                for (Workspace.SampleInfo sampleInfo : sampleInfos)
+                for (ISampleInfo sampleInfo : sampleInfos)
                 {
                     SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(true, 0, null);
                     rows.put(sampleInfo.getSampleId(), resolvedSample);
@@ -914,7 +912,7 @@ public class AnalysisScriptController extends BaseFlowController
                 samples.setKeywords(workspace.getKeywords());
                 samples.setRows(rows);
 
-                //// Skip Analysis engine step.  Analysis engine can only be selected when no FCS files are associated with the run
+                // Skip Analysis engine step.  Analysis engine can only be selected when no FCS files are associated with the run
                 form.setWizardStep(ImportAnalysisStep.REVIEW_SAMPLES);
             }
             else if (fcsFilesOption == SelectFCSFileOption.Included)
@@ -988,10 +986,10 @@ public class AnalysisScriptController extends BaseFlowController
                     // We don't have an existing keyword run, check that at least one sample in the
                     // selected directory exists and mark those samples as selected for import.
                     boolean found = false;
-                    Workspace workspace = workspaceData.getWorkspaceObject();
-                    List<Workspace.SampleInfo> sampleInfos = workspace.getAllSamples();
+                    IWorkspace workspace = workspaceData.getWorkspaceObject();
+                    List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
                     Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
-                    for (Workspace.SampleInfo sampleInfo : sampleInfos)
+                    for (ISampleInfo sampleInfo : sampleInfos)
                     {
                         File sampleFile = new File(keywordDir, sampleInfo.getLabel());
                         boolean exists = sampleFile.exists();
@@ -1028,8 +1026,8 @@ public class AnalysisScriptController extends BaseFlowController
         private void resolveSamples(ImportAnalysisForm form)
         {
             WorkspaceData workspaceData = form.getWorkspace();
-            Workspace workspace = workspaceData.getWorkspaceObject();
-            List<Workspace.SampleInfo> sampleInfos = workspace.getAllSamples();
+            IWorkspace workspace = workspaceData.getWorkspaceObject();
+            List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
 
             SelectedSamples selectedSamples = form.getSelectedSamples();
             selectedSamples.setSamples(sampleInfos);
@@ -1049,10 +1047,10 @@ public class AnalysisScriptController extends BaseFlowController
                     files = FlowFCSFile.fromName(getContainer(), null);
                 }
 
-                Map<Workspace.SampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = SampleUtil.resolveSamples(sampleInfos, files);
+                Map<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = SampleUtil.resolveSamples(sampleInfos, files);
 
                 Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
-                for (Workspace.SampleInfo sample : sampleInfos)
+                for (ISampleInfo sample : sampleInfos)
                 {
                     SelectedSamples.ResolvedSample resolvedSample = null;
                     Pair<FlowFCSFile, List<FlowFCSFile>> matches = resolved.get(sample);
@@ -1064,7 +1062,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                         if (perfectMatchId != 0 || (candidates != null && candidates.size() > 0))
                         {
-                            resolvedSample = new SelectedSamples.ResolvedSample(true, perfectMatchId, candidates);
+                            resolvedSample = new SelectedSamples.ResolvedSample(perfectMatchId > 0, perfectMatchId, candidates);
                         }
                     }
 
@@ -1081,10 +1079,10 @@ public class AnalysisScriptController extends BaseFlowController
         private void stepReviewSamples(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
-            Workspace workspace = workspaceData.getWorkspaceObject();
+            IWorkspace workspace = workspaceData.getWorkspaceObject();
 
             // Populate resolved samples data for error reshow
-            form.getSelectedSamples().setSamples(workspace.getAllSamples());
+            form.getSelectedSamples().setSamples(workspace.getSamples());
             form.getSelectedSamples().setKeywords(workspace.getKeywords());
 
             // Verify resolved FCSFiles
@@ -1130,16 +1128,29 @@ public class AnalysisScriptController extends BaseFlowController
             if (errors.hasErrors())
                 return;
 
-            // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Folder step.
-            if (workspaceData.getWorkspaceObject() instanceof PCWorkspace)
+            if (!workspaceData.getWorkspaceObject().hasAnalysis() || workspaceData.getWorkspaceObject() instanceof ExternalAnalysis)
+            {
+                // The current ExternalAnalysis archive format doesn't include any analysis definition so no analysis engine can be executed.
+                form.setSelectAnalysisEngine(AnalysisEngine.Archive);
                 form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
+            }
+            else if (workspaceData.getWorkspaceObject() instanceof PCWorkspace) // XXX: or has not keyword dirs
+            {
+                // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Folder step.
+                form.setSelectAnalysisEngine(AnalysisEngine.FlowJoWorkspace);
+                form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
+            }
             else
+            {
                 form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
+            }
         }
 
         private void stepAnalysisEngine(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
+            assert workspaceData.getWorkspaceObject().hasAnalysis();
+
             List<File> keywordDirs = getKeywordDirs(form, errors);
             if (errors.hasErrors())
                 return;
@@ -1224,8 +1235,8 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
-                Workspace workspace = workspaceData.getWorkspaceObject();
-                String[] parameters = workspace.getParameters();
+                IWorkspace workspace = workspaceData.getWorkspaceObject();
+                List<String> parameters = workspace.getParameterNames();
                 List<String> params = form.getrEngineNormalizationParameterList();
                 for (String param : params)
                 {
@@ -1233,7 +1244,7 @@ public class AnalysisScriptController extends BaseFlowController
                     if (param.startsWith(CompensationMatrix.PREFIX) && param.endsWith(CompensationMatrix.SUFFIX))
                         param = param.substring(1, param.length()-1);
 
-                    int index = ArrayUtils.indexOf(parameters, param);
+                    int index = parameters.indexOf(param);
                     if (index == -1)
                     {
                         errors.reject(ERROR_MSG, "Parameter '" + param + "' does not exist in the workspace");
@@ -1242,11 +1253,11 @@ public class AnalysisScriptController extends BaseFlowController
                 }
 
                 // All samples in group should have the same staining panel for normalization to succeed.
-                List<Workspace.SampleInfo> sampleInfos = new ArrayList<Workspace.SampleInfo>();
+                List<ISampleInfo> sampleInfos = new ArrayList<ISampleInfo>();
                 SelectedSamples selectedSamples = form.getSelectedSamples();
                 for (String sampleId : selectedSamples.getRows().keySet())
                 {
-                    Workspace.SampleInfo sampleInfo = workspace.getSample(sampleId);
+                    ISampleInfo sampleInfo = workspace.getSample(sampleId);
                     if (sampleInfo != null)
                         sampleInfos.add(sampleInfo);
                 }
@@ -1257,7 +1268,7 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
-                Workspace.SampleInfo referenceSample = sampleInfos.get(0);
+                ISampleInfo referenceSample = sampleInfos.get(0);
                 Analysis referenceAnalysis = workspace.getSampleAnalysis(referenceSample);
                 for (int i = 1; i < sampleInfos.size(); i++)
                 {
@@ -1398,13 +1409,29 @@ public class AnalysisScriptController extends BaseFlowController
                 return;
 
             FlowJob job = null;
-            if (AnalysisEngine.FlowJoWorkspace == analysisEngine)
+            if (analysisEngine == null || AnalysisEngine.FlowJoWorkspace == analysisEngine)
             {
+                assert (workspaceData.getWorkspaceObject() instanceof Workspace);
                 job = new WorkspaceJob(info, getPipeRoot(), experiment,
                         workspaceData, pipelineFile, runFilePathRoot,
                         keywordDirs,
                         selectedFCSFiles,
                         false);
+            }
+            else if (AnalysisEngine.Archive == analysisEngine)
+            {
+                assert (workspaceData.getWorkspaceObject() instanceof ExternalAnalysis);
+                File originalFile = pipelineFile;
+                if (workspaceData.getOriginalPath() != null)
+                    originalFile = root.resolvePath(workspaceData.getOriginalPath());
+                job = new ImportResultsJob(info, getPipeRoot(), experiment,
+                        AnalysisEngine.Archive, pipelineFile, originalFile,
+                        runFilePathRoot,
+                        keywordDirs,
+                        selectedFCSFiles,
+                        workspaceData.getWorkspaceObject().getName(),
+                        false);
+
             }
             /*
             else if (AnalysisEngine.LabKey == analysisEngine)
@@ -1447,7 +1474,7 @@ public class AnalysisScriptController extends BaseFlowController
     }
 
 
-
+    /*
     // Called from pipeline import panel
     @RequiresPermissionClass(UpdatePermission.class)
     public class ImportAnalysisResultsAction extends SimpleViewAction<PipelinePathForm>
@@ -1528,48 +1555,9 @@ public class AnalysisScriptController extends BaseFlowController
         }
         else if (pipelineFile.getName().endsWith(".zip"))
         {
-            // NOTE: Duplicated code in Main
-            java.util.zip.ZipFile zipFile;
-            try
-            {
-                zipFile = new java.util.zip.ZipFile(pipelineFile);
-            }
-            catch (IOException e)
-            {
-                errors.reject(ERROR_MSG, "Import failed: Could not read zip file: " + e.getMessage());
-                return null;
-            }
-
-            String zipBaseName = FileUtil.getBaseName(pipelineFile);
-            ZipEntry zipEntry = zipFile.getEntry(AnalysisSerializer.STATISTICS_FILENAME);
-            if (zipEntry == null)
-                zipEntry = zipFile.getEntry(zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME);
-
-            if (zipEntry == null)
-            {
-                errors.reject(ERROR_MSG, "Import failed: Couldn't find '" + AnalysisSerializer.STATISTICS_FILENAME + "' or '" + zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME + "' in the zip archive.");
-                return null;
-            }
-
-            File importDir = File.createTempFile(zipBaseName, null, tempDir);
-            if (importDir.exists() && !FileUtil.deleteDir(importDir))
-            {
-                errors.reject(ERROR_MSG, "Import failed: Could not delete the directory \"" + importDir + "\"");
-                return null;
-            }
-
-            try
-            {
-                ZipUtil.unzipToDirectory(pipelineFile, importDir, _log);
-                statisticsFile = new File(importDir, zipEntry.getName());
-            }
-            catch (IOException e)
-            {
-                errors.reject(ERROR_MSG, "Import failed: Could not extract zip archive: " + e.getMessage());
-                return null;
-            }
         }
 
         return statisticsFile;
     }
+    */
 }

@@ -166,8 +166,8 @@ public class FlowPipelineProvider extends PipelineProvider
         });
         if (includeAll || (externalAnalysis != null && externalAnalysis.length > 0))
         {
-            String actionId = createActionId(AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL);
-            addAction(actionId, AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL, directory, externalAnalysis, false, true, includeAll);
+            String actionId = createActionId(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, IMPORT_ANALYSIS_LABEL);
+            addAction(actionId, AnalysisScriptController.ImportAnalysisFromPipelineAction.class, IMPORT_ANALYSIS_LABEL, directory, externalAnalysis, false, true, includeAll);
         }
     }
 

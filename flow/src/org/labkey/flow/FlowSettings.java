@@ -22,6 +22,7 @@ import org.labkey.api.data.PropertyManager;
 import org.labkey.api.gwt.client.util.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 public class FlowSettings
@@ -32,11 +33,19 @@ public class FlowSettings
     static private final String PROPNAME_NORMALIZATION_ENABLED = "normalizationEnabled";
     static private final String PROPNAME_DELETE_FILES = "deleteFiles";
 
-    static private File getTempAnalysisDirectory() throws Exception
+    static private File getTempAnalysisDirectory()
     {
         if (_tempAnalysisDirectory != null)
             return _tempAnalysisDirectory;
-        File file = File.createTempFile("FlowAnalysis", "tmp");
+        File file;
+        try
+        {
+            file = File.createTempFile("FlowAnalysis", "tmp");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
         File ret = new File(file.getParentFile(), "FlowAnalysis");
         if (!ret.exists())
         {
@@ -47,7 +56,7 @@ public class FlowSettings
         return ret;
     }
 
-    static public File getWorkingDirectory() throws Exception
+    static public File getWorkingDirectory()
     {
         String path = getWorkingDirectoryPath();
         if (path != null)

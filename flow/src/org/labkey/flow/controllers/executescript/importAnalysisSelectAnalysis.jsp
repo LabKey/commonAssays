@@ -41,7 +41,7 @@
 
 <p>You may either upload a FlowJo workspace from your local computer or browse the pipeline
     for a FlowJo workspace available to the server.  Be sure to save your FlowJo workspace
-    as XML so <%=FlowModule.getShortProductName()%> can read it.
+    as XML so <%=h(FlowModule.getShortProductName())%> can read it.
 </p>
 <hr/>
 <input type="radio" name="selectWorkspace" id="uploadWorkspace" value="uploadWorkspace" />
@@ -61,9 +61,9 @@
     <% if (hasPipelineRoot) {
         String inputId = "workspace.path";
     %>
-    You can browse the pipeline directories and find the <b>workspace XML</b> to import.<br/><br/>
+    You can browse the pipeline directories and find the analysis archive or <b>workspace XML</b> to import.<br/><br/>
     <%  if (!form.getWorkspace().getHiddenFields().containsKey("path")) { %>
-    <input type="hidden" id="<%=inputId%>" name="<%=inputId%>" value=""/>
+    <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
     <div id="treeDiv" class="extContainer"></div>
     <script type="text/javascript">
@@ -104,7 +104,7 @@
                 ,showFileUpload:false
                 ,allowChangeDirectory:true
                 ,tbarItems:[]
-                ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp"); }}
+                ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp") || endsWith(data.name, ".zip"); }}
             });
 
             fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.doubleclick, function(record){
