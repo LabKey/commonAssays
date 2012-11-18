@@ -266,7 +266,7 @@ public class FlowQueryView extends QueryView
                 publishURL.deleteParameters();
                 */
 
-                if (getTable().getContainerFilter() != null)
+                if (getTable().getContainerFilter() != null && getTable().getContainerFilter().getType() != null)
                     publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
 
                 ActionButton publishButton = new ActionButton(publishURL,

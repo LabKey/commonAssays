@@ -336,7 +336,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         // add header link for the Excluded Data Report
         ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.ExcludedDataAction.class);
-        if (containerFilter != null && containerFilter != ContainerFilter.EVERYTHING)
+        if (containerFilter != null && containerFilter.getType() != null)
         {
             url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
             url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
@@ -350,7 +350,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         // add header link for the QC Report
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.QcReportAction.class);
-        if (containerFilter != null && containerFilter != ContainerFilter.EVERYTHING)
+        if (containerFilter != null && containerFilter.getType() != null)
         {
             url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
