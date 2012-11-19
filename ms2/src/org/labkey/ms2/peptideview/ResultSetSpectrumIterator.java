@@ -194,7 +194,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             sql.append('\n');
             sql.append(_sort.getOrderByClause(MS2Manager.getSqlDialect()));
 
-            return Table.executeQuery(MS2Manager.getSchema(), sql.toString(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), Table.ALL_ROWS, false);
+            return Table.executeQuery(MS2Manager.getSchema(), sql.toString(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), false);
         }
     }
 }

@@ -73,7 +73,7 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
                 joinSql = sql.getSQL().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
             }
 
-            return Table.executeQuery(ProteinManager.getSchema(), joinSql, sql.getParams().toArray(), Table.ALL_ROWS, false);
+            return Table.executeQuery(ProteinManager.getSchema(), joinSql, sql.getParams().toArray(), false);
         }
     }
 }
