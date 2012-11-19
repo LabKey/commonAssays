@@ -109,9 +109,10 @@ public class GraphColumn extends DataColumn
                 String urlGraph = renderURL(ctx);
 
                 StringBuilder iconHtml = new StringBuilder();
-                iconHtml.append("<img width=32 height=32 src=\"");
-                iconHtml.append(PageFlowUtil.filter(urlGraph));
-                iconHtml.append("\" />");
+                iconHtml.append("<img width=32 height=32");
+                iconHtml.append(" title=\"").append(graphTitle).append("\"");
+                iconHtml.append(" src=\"").append(PageFlowUtil.filter(urlGraph)).append("\"");
+                iconHtml.append(" />");
 
                 StringBuilder imageHtml = new StringBuilder();
                 imageHtml.append("<img src=\"").append(PageFlowUtil.filter(urlGraph)).append("\" />");
