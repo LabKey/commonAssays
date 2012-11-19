@@ -350,7 +350,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         {
             SubsetSpec workspaceSubset = SubsetSpec.fromEscapedString(subset);
             boolean selected = subsetMatches(current, workspaceSubset, sign, index);
-            ret.append("\n<option value=\"" + h(subset) + "\"");
+            ret.append("\n<option value=\"" + h(workspaceSubset.toString()) + "\"");
             if (selected)
             {
                 ret.append(" selected");

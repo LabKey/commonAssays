@@ -21,7 +21,11 @@ import org.springframework.beans.PropertyValues;
 
 public class FlowQuerySettings extends QuerySettings
 {
-    private boolean _showGraphs;
+    public enum ShowGraphs {
+        None, Thumbnail, Inline
+    }
+
+    private ShowGraphs _showGraphs;
     private boolean _subtractBackground;
 
     protected FlowQuerySettings(String dataRegionName)
@@ -38,17 +42,35 @@ public class FlowQuerySettings extends QuerySettings
     public void init(PropertyValues params)
     {
         super.init(params);
-        _showGraphs = _getParameter(param("showGraphs")) != null;
+        String showGraphsParam = _getParameter(param("showGraphs"));
+        if (showGraphsParam != null)
+        {
+            if (showGraphsParam.equals("true"))
+                _showGraphs = ShowGraphs.Inline;
+            else if (showGraphsParam.equals("false"))
+                _showGraphs = ShowGraphs.None;
+            else
+            {
+                try
+                {
+                    _showGraphs = ShowGraphs.valueOf(showGraphsParam);
+                }
+                catch (IllegalArgumentException ex)
+                {
+                    System.out.println(ex.getMessage());
+                }
+            }
+        }
         _subtractBackground = _getParameter(param("subtractBackground")) != null;
     }
 
-    public boolean getShowGraphs()
+    public ShowGraphs getShowGraphs()
     {
         return _showGraphs;
     }
-    public void setShowGraphs(boolean b)
+    public void setShowGraphs(ShowGraphs showGraphs)
     {
-        _showGraphs = b;
+        _showGraphs = showGraphs;
     }
 
     public boolean getSubtractBackground()

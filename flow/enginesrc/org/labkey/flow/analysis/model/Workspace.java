@@ -479,6 +479,11 @@ public abstract class Workspace implements IWorkspace, Serializable
             _keywords.put(keyword, value);
             Workspace.this._keywords.add(keyword);
         }
+        public void putAllKeywords(Map<String, String> keywords)
+        {
+            _keywords.putAll(keywords);
+            Workspace.this._keywords.addAll(keywords.keySet());
+        }
 
         public String getCompensationId()
         {

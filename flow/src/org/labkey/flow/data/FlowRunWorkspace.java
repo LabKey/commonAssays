@@ -54,7 +54,7 @@ public class FlowRunWorkspace extends Workspace
             info.setSampleName(well.getName());
             info.setSampleId(key);
             FCSKeywordData fcs = FCSAnalyzer.get().readAllKeywords(FlowAnalyzer.getFCSRef(well));
-            info.getKeywords().putAll(fcs.getAllKeywords());
+            info.putAllKeywords(fcs.getAllKeywords());
             _sampleInfos.put(info.getSampleId(), info);
             _sampleAnalyses.put(info.getSampleId(), analysis);
             Map<String,String> params = FlowAnalyzer.getParameters(well, null);

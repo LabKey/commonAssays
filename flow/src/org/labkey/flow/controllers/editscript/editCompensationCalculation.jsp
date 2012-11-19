@@ -31,22 +31,22 @@
     int clauseCount = Math.max(form.ff_filter_field.length, 3);
 %>
 <labkey:errors/>
-<script type="text/javascript" src="<%=request.getContextPath()%>/Flow/editCompensationCalculation.js"></script>
+<script type="text/javascript" src="<%=h(request.getContextPath())%>/Flow/editCompensationCalculation.js"></script>
 <script type="text/javascript">
 function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }
-var parameters = <%=javascriptArray(form.parameters)%>
+var parameters = <%=text(javascriptArray(form.parameters))%>
 var AutoComp = {};
 <%
     boolean hasAutoCompScripts = form.workspace.getAutoCompensationScripts().size() > 0;
     for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
     {
-        %>AutoComp['<%=autoComp.getName()%>']={<%
+        %>AutoComp[<%=PageFlowUtil.jsString(autoComp.getName())%>]={<%
 
         // 'criteria' : [ primarykKeyword, secondaryKeyword, secondaryValue ]
         AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
         if (criteria != null)
         {
-        %>'criteria' : <%=javascriptArray(criteria.getPrimaryKeyword(), criteria.getSecondaryKeyword(), criteria.getSecondaryValue())%>,
+        %>'criteria' : <%=text(javascriptArray(criteria.getPrimaryKeyword(), criteria.getSecondaryKeyword(), criteria.getSecondaryValue()))%>,
         <%
         }
 
@@ -55,8 +55,8 @@ var AutoComp = {};
         String and = "\n";
         for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
         {
-            %><%=and%>'<%= param.getParameterName()%>' : <%=javascriptArray(
-                param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate())%><%
+            %><%=text(and)%><%= PageFlowUtil.jsString(param.getParameterName())%> : <%=text(javascriptArray(
+                param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate()))%><%
             and = ",\n";
         }
         %>}
@@ -77,7 +77,7 @@ var SS = []; // SUBSETS
             {
                 hashToIndexMap.put(subsetHash, index);
                 index = index.intValue() + 1;
-                %>SS.push(<%=javascriptArray(subsets)%>);<%
+                %>SS.push(<%=text(javascriptArray(subsets))%>);<%
                 out.println();
             }
         }
@@ -88,13 +88,13 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
     for (Map.Entry<String, Map<String, List<String>>> keywordEntry : keywordValueSampleMap.entrySet())
     {
         String keyword = keywordEntry.getKey();
-        %>KV['<%=keyword%>']=o(<%
+        %>KV[<%=PageFlowUtil.jsString(keyword)%>]=o(<%
         String and="";
         for (Map.Entry<String, List<String>> valueEntry : keywordEntry.getValue().entrySet())
         {
             String value = valueEntry.getKey();
             int subsetHash = valueEntry.getValue().hashCode();
-            %><%=and%>'<%=value%>', SS[<%=hashToIndexMap.get(subsetHash)%>]<%
+            %><%=text(and)%><%=PageFlowUtil.jsString(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
             and = ",";
         }
         %>);<%
@@ -104,7 +104,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 var keywordValueSubsetListMap = KV; 
 </script>
 
-<form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>">
+<form method="POST" action="<%=h(formAction(ScriptController.EditCompensationCalculationAction.class))%>">
 
 <% if (hasAutoCompScripts) { %>
     <p/>
@@ -123,7 +123,7 @@ var keywordValueSubsetListMap = KV;
         for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
         {
             %>
-            <option value="<%=autoComp.getName()%>"<%=autoComp.getName().equals(form.selectAutoCompScript) ? " selected" : ""%>><%=autoComp.getName()%></option><%
+            <option value="<%=h(autoComp.getName())%>"<%=h(autoComp.getName().equals(form.selectAutoCompScript) ? " selected" : "")%>><%=h(autoComp.getName())%></option><%
         }
     %>
     </select>
@@ -160,14 +160,14 @@ var keywordValueSubsetListMap = KV;
 
             %>
             <tr>
-                <td><%= i == 0 ? "" : "and" %></td>
+                <td><%= text(i == 0 ? "" : "and") %></td>
             <% if (canEdit) { %>
                 <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
                 <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
                 <td><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
             <% } else { %>
-                <td><%=fieldOptions.get(field)%></td>
-                <td><%=opOptions.get(op)%></td>
+                <td><%=h(fieldOptions.get(field))%></td>
+                <td><%=h(opOptions.get(op))%></td>
                 <td><%=h(value)%></td>
             <% } %>
             </tr>
@@ -200,12 +200,12 @@ var keywordValueSubsetListMap = KV;
         %>
         <tr id="<%=h(parameter)%>">
             <td><%=h(parameter)%></td>
-            <td><%=selectKeywordNames(Sign.positive, i)%></td>
-            <td><%=selectKeywordValues(Sign.positive, i)%></td>
-            <td><%=selectSubsets(Sign.positive, i)%></td>
-            <td><%=selectKeywordNames(Sign.negative, i)%></td>
-            <td><%=selectKeywordValues(Sign.negative, i)%></td>
-            <td><%=selectSubsets(Sign.negative, i)%></td>
+            <td><%=text(selectKeywordNames(Sign.positive, i))%></td>
+            <td><%=text(selectKeywordValues(Sign.positive, i))%></td>
+            <td><%=text(selectSubsets(Sign.positive, i))%></td>
+            <td><%=text(selectKeywordNames(Sign.negative, i))%></td>
+            <td><%=text(selectKeywordValues(Sign.negative, i))%></td>
+            <td><%=text(selectSubsets(Sign.negative, i))%></td>
             <% if (i == 0) { %>
                 <td><input type="button" value="Universal" onclick="universalNegative()"></td>
             <% } %>

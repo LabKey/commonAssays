@@ -53,10 +53,10 @@
     <tr><td><%=h(channel)%></td>
         <td><%=h(form.positiveKeywordName[i])%></td>
         <td><%=h(form.positiveKeywordValue[i])%></td>
-        <td><%=subsetLink(form.positiveSubset[i])%></td>
+        <td><%=text(subsetLink(form.positiveSubset[i]))%></td>
         <td><%=h(form.negativeKeywordName[i])%></td>
         <td><%=h(form.negativeKeywordValue[i])%></td>
-        <td><%=subsetLink(form.negativeSubset[i])%></td>
+        <td><%=text(subsetLink(form.negativeSubset[i]))%></td>
     </tr>
     <% } %>
 </table>

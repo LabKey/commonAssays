@@ -31,7 +31,6 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.study.assay.AssayUrls;
@@ -43,6 +42,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTrailConfig;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.PopupMenu;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
@@ -131,7 +131,7 @@ public class FlowQueryView extends QueryView
     @Override
     protected DataRegion createDataRegion()
     {
-        if (hasGraphs() && showGraphs())
+        if (hasGraphs() && showGraphs() == FlowQuerySettings.ShowGraphs.Inline)
         {
             DataRegion rgn = new GraphDataRegion();
             configureDataRegion(rgn);
@@ -162,20 +162,30 @@ public class FlowQueryView extends QueryView
             PrintWriter out = response.getWriter();
             if (hasGraphs())
             {
-                if (showGraphs())
+                FlowQuerySettings.ShowGraphs showGraphs = showGraphs();
+                ActionURL urlShow = getViewContext().cloneActionURL();
+
+                NavTree showNone = new NavTree("None", urlShow.clone().deleteParameter(param("showGraphs")));
+                showNone.setSelected(showGraphs == null || showGraphs == FlowQuerySettings.ShowGraphs.None);
+
+                NavTree showHover = new NavTree("Thumbnail", urlShow.clone().replaceParameter(param("showGraphs"), FlowQuerySettings.ShowGraphs.Thumbnail.name()));
+                showHover.setSelected(showGraphs == FlowQuerySettings.ShowGraphs.Thumbnail);
+
+                NavTree showInline = new NavTree("Inline", urlShow.clone().replaceParameter(param("showGraphs"), FlowQuerySettings.ShowGraphs.Inline.name()));
+                showInline.setSelected(showGraphs == FlowQuerySettings.ShowGraphs.Inline);
+
+                NavTree navtree = new NavTree("Show Graphs", (String)null);
+                navtree.addChild(showNone);
+                navtree.addChild(showHover);
+                navtree.addChild(showInline);
+                PopupMenu menu = new PopupMenu(navtree, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.TEXT);
+                menu.render(out);
+
+                if (showGraphs == FlowQuerySettings.ShowGraphs.Inline)
                 {
-                    ActionURL urlHide = getViewContext().cloneActionURL();
-                    urlHide.deleteParameter(param("showGraphs"));
-                    out.write(textLink("Hide Graphs", urlHide));
                     JspView view = new JspView(JspLoader.createPage(FlowQueryView.class, "setGraphSize.jsp"));
                     view.setFrame(FrameType.NONE);
                     HttpView.currentView().include(view, out);
-                }
-                else
-                {
-                    ActionURL urlShow = getViewContext().cloneActionURL();
-                    urlShow.addParameter(param("showGraphs"), "true");
-                    out.write(textLink("Show Graphs", urlShow));
                 }
                 out.write("<br>");
             }
@@ -188,7 +198,7 @@ public class FlowQueryView extends QueryView
         return (FlowQuerySettings) super.getSettings();
     }
 
-    protected boolean showGraphs()
+    protected FlowQuerySettings.ShowGraphs showGraphs()
     {
         return getSettings().getShowGraphs();
     }
@@ -313,14 +323,14 @@ public class FlowQueryView extends QueryView
             return _displayColumns;
         _displayColumns = super.getDisplayColumns();
         __hasGraphs = false;
-        boolean showGraphs = showGraphs();
+        FlowQuerySettings.ShowGraphs showGraphs = showGraphs();
         for (Iterator<DisplayColumn> it = _displayColumns.iterator(); it.hasNext();)
         {
             DisplayColumn dc = it.next();
             if (dc instanceof GraphColumn)
             {
                 __hasGraphs = true;
-                if (showGraphs)
+                if (showGraphs == FlowQuerySettings.ShowGraphs.Thumbnail || showGraphs == FlowQuerySettings.ShowGraphs.Inline)
                 {
                     return _displayColumns;
                 }

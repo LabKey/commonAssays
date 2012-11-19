@@ -103,8 +103,7 @@ public class WorkspaceCompensation implements Serializable
         assert !SubsetSpec.___isExpression(name);
         assert !SubsetSpec.___isExpression(subset);
         PopulationName rootName = PopulationName.fromString(name);
-        // UNDONE: I'm pretty sure this could be a subset "A/B" so creating a PopulationName here won't work.
-        PopulationName subsetName = PopulationName.fromString(subset);
+        SubsetSpec subsetName = SubsetSpec.fromEscapedString(subset);
         SubsetSpec ret = new SubsetSpec(null, rootName).createChild(subsetName);
 
         Population pop = calc.getPopulation(rootName);
@@ -119,7 +118,7 @@ public class WorkspaceCompensation implements Serializable
             calc.addPopulation(pop);
         }
 
-        if (!"Ungated".equals(subset) && pop.getPopulation(subsetName) == null)
+        if (!"Ungated".equals(subset) && pop.getPopulation(subsetName.getRoot().getPopulationName()) == null)
         {
             String analysisName = analysis.getName() == null ? "" : " '" + analysis.getName() + "'";
             errors.add("Channel '" + name + "' subset '" + subset + "' not found in analysis" + analysisName);
