@@ -20,7 +20,6 @@ import org.labkey.api.data.*;
 
 import java.util.Map;
 import java.util.List;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -48,20 +47,14 @@ public class FirstProteinDisplayColumn extends SimpleDisplayColumn
             columnName = "RowId";
             id = (Number)row.get(columnName);
         }
-        try
+
+        List<ProteinSummary> summaries = _proteins.getSummaries(id.intValue(), ctx, columnName);
+        if (summaries == null)
         {
-            List<ProteinSummary> summaries = _proteins.getSummaries(id.intValue(), ctx, columnName);
-            if (summaries == null)
-            {
-                return "ERROR - No matching proteins found";
-            }
-            ProteinSummary firstSummary = summaries.get(0);
-            return _type.getValue(firstSummary);
+            return "ERROR - No matching proteins found";
         }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        ProteinSummary firstSummary = summaries.get(0);
+        return _type.getValue(firstSummary);
     }
 
     public enum FirstProteinType

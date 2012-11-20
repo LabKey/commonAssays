@@ -18,7 +18,6 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
@@ -28,7 +27,6 @@ import org.labkey.api.query.FieldKey;
 import java.io.Writer;
 import java.io.IOException;
 import java.util.*;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 
 /**
@@ -180,71 +178,76 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     {
         Map row = ctx.getRow();
         String columnName = _columnName;
-        Number id = (Number)row.get(columnName);
-        if (id == null)
+        Number id;
+        if (!row.containsKey(columnName))
         {
             columnName = "RowId";
             id = (Number)row.get(columnName);
         }
-        try
+        else
         {
-            List<ProteinSummary> summaryList = _proteins.getSummaries(id.intValue(), ctx, columnName);
-            StringBuilder sb = new StringBuilder();
-            if (summaryList == null)
-            {
-                sb.append("ERROR - No matching proteins found");
-            }
-            else
-            {
-                String proteinSeparator = "";
-                for (ProteinSummary summary : summaryList)
-                {
-                    sb.append(proteinSeparator);
-                    proteinSeparator = ", ";
+            id = (Number)row.get(columnName);
+        }
+        if (id == null)
+        {
+            return "";
+        }
 
-                    Object value = _sequenceColumn.getValue(summary);
-                    if (value != null)
-                    {
-                        sb.append(value);
-                    }
+        List<ProteinSummary> summaryList = _proteins.getSummaries(id.intValue(), ctx, columnName);
+        StringBuilder sb = new StringBuilder();
+        if (summaryList == null)
+        {
+            sb.append("ERROR - No matching proteins found for RowId ");
+            sb.append(id);
+        }
+        else
+        {
+            String separator = "";
+            for (ProteinSummary summary : summaryList)
+            {
+                Object value = _sequenceColumn.getValue(summary);
+                if (value != null)
+                {
+                    sb.append(separator);
+                    separator = ", ";
+                    sb.append(value);
                 }
             }
-            return sb.toString();
         }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return sb.toString();
     }
 
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         Map row = ctx.getRow();
-        try
+
+        if (!row.containsKey(_columnName))
         {
-            Object groupIdObject = row.get(_columnName);
-            if (!(groupIdObject instanceof Number))
-            {
-                out.write("ProteinGroupId not present in ResultSet");
-                return;
-            }
-            int groupId = ((Number) groupIdObject).intValue();
-            List<ProteinSummary> summaryList = _proteins.getSummaries(groupId, ctx, _columnName);
-
-            ActionURL url = ctx.getViewContext().cloneActionURL();
-            url.setAction(MS2Controller.ShowProteinAction.class);
-
-            if (summaryList != null)
-            {
-                for (ProteinSummary summary : summaryList)
-                {
-                    writeInfo(summary, out, url, groupId);
-                }
-            }
+            out.write("ProteinGroupId not present in ResultSet");
+            return;
         }
-        catch (SQLException e)
+        Object groupIdObject = row.get(_columnName);
+        if (groupIdObject == null)
         {
-            throw new RuntimeSQLException(e);
+            return;
+        }
+        if (!(groupIdObject instanceof Number))
+        {
+            out.write("ProteinGroupId is of unexpected type: " + groupIdObject.getClass());
+            return;
+        }
+        int groupId = ((Number) groupIdObject).intValue();
+        List<ProteinSummary> summaryList = _proteins.getSummaries(groupId, ctx, _columnName);
+
+        ActionURL url = ctx.getViewContext().cloneActionURL();
+        url.setAction(MS2Controller.ShowProteinAction.class);
+
+        if (summaryList != null)
+        {
+            for (ProteinSummary summary : summaryList)
+            {
+                writeInfo(summary, out, url, groupId);
+            }
         }
     }
 

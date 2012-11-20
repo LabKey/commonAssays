@@ -16,8 +16,10 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.RenderContext;
 
 import java.util.*;
@@ -43,24 +45,38 @@ public class ProteinGroupProteins
         _runs = runs;
     }
 
-    private Map<Integer, List<ProteinSummary>> calculateSummaries(ResultSet rs, String columnName) throws SQLException
+    private Map<Integer, List<ProteinSummary>> calculateSummaries(ResultSet rs, String columnName)
     {
         Map<Integer, List<ProteinSummary>> result = new HashMap<Integer, List<ProteinSummary>>();
 
-        int originalRow = rs.getRow();
-        rs.beforeFirst();
-
         int firstGroupId = Integer.MAX_VALUE;
         int lastGroupId = Integer.MIN_VALUE;
-
-        while (rs.next())
+        try
         {
-            int groupId = rs.getInt(columnName);
-            firstGroupId = Math.min(firstGroupId, groupId);
-            lastGroupId = Math.max(lastGroupId, groupId);
-        }
+            if (rs.getType() == ResultSet.TYPE_FORWARD_ONLY)
+            {
+                firstGroupId = rs.getInt(columnName);
+                lastGroupId = firstGroupId;
+            }
+            else
+            {
+                int originalRow = rs.getRow();
+                rs.beforeFirst();
 
-        rs.absolute(originalRow);
+                while (rs.next())
+                {
+                    int groupId = rs.getInt(columnName);
+                    firstGroupId = Math.min(firstGroupId, groupId);
+                    lastGroupId = Math.max(lastGroupId, groupId);
+                }
+
+                rs.absolute(originalRow);
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
 
         StringBuilder whereClause = new StringBuilder();
 
@@ -88,7 +104,6 @@ public class ProteinGroupProteins
     }
 
     private void addGroupsToList(StringBuilder extraWhereClause, Map<Integer, List<ProteinSummary>> result)
-        throws SQLException
     {
         String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
                 "FROM " + ProteinManager.getTableInfoSequences() + " protseq, " +
@@ -106,17 +121,17 @@ public class ProteinGroupProteins
                 "   AND proteinseq.SeqId = pgm.SeqId" +
                 "\nORDER BY pg.GroupNumber, pg.IndistinguishableCollectionId, protseq.Length, proteinseq.LookupString";
 
-        Map<String, Object>[] rows = Table.executeQuery(MS2Manager.getSchema(), sql, new Object[0], Map.class);
+        Map<String, Object>[] rows = new SqlSelector(MS2Manager.getSchema(), new SQLFragment(sql)).getArray(Map.class);
 
         for (Map<String, Object> row : rows)
         {
-            Integer rowId = (Integer)row.get("RowId");
+            Integer rowId = ((Number)row.get("RowId")).intValue();
             String lookupString = (String)row.get("Protein");
-            int seqId = ((Integer)row.get("SeqId")).intValue();
+            int seqId = ((Number)row.get("SeqId")).intValue();
             String description = (String)row.get("Description");
             String bestName = (String)row.get("BestName");
             String bestGeneName = (String)row.get("BestGeneName");
-            double sequenceMass = ((Double)row.get("Mass")).doubleValue();
+            double sequenceMass = ((Number)row.get("Mass")).doubleValue();
             ProteinSummary summary = new ProteinSummary(lookupString, seqId, description, bestName, bestGeneName, sequenceMass);
             List<ProteinSummary> summaries = result.get(rowId);
             if (summaries == null)
@@ -128,16 +143,24 @@ public class ProteinGroupProteins
         }
     }
 
-    public List<ProteinSummary> getSummaries(int proteinGroupId, RenderContext context, String columnName) throws SQLException
+    public List<ProteinSummary> getSummaries(int proteinGroupId, RenderContext context, String columnName)
     {
-        ResultSet rs = context.getResultSet();
+        ResultSet rs = context.getResults();
         Map<Integer, List<ProteinSummary>> summaries = _summaries.get(rs);
         if (summaries == null)
         {
             summaries = calculateSummaries(rs, columnName);
             _summaries.put(rs, summaries);
         }
-        return summaries.get(proteinGroupId);
+        List<ProteinSummary> result = summaries.get(proteinGroupId);
+        if (result == null)
+        {
+            // We don't have cached results, so requery. We may not have been able to do a single query to get all
+            // of the protein summaries, so we might still be able to get it for this individual row
+            summaries.putAll(calculateSummaries(rs, columnName));
+            result = summaries.get(proteinGroupId);
+        }
+        return result;
     }
 
 
