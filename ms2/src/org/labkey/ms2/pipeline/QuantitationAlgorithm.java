@@ -185,6 +185,14 @@ public enum QuantitationAlgorithm
                 continue;
             String mass = specVals[0].trim();
             String aa = specVals[1].trim();
+            if ("[".equals(aa))
+            {
+                aa = "n";
+            }
+            else if ("]".equals(aa))
+            {
+                aa = "c";
+            }
             quantOpts.add("-n" + aa + "," + mass);
         }
     }

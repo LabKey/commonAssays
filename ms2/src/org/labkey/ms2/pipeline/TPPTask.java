@@ -15,8 +15,12 @@
  */
 package org.labkey.ms2.pipeline;
 
+import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Test;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
@@ -618,5 +622,53 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             return null;
 
         return paramAlgorithm.getCommand(params, pathMzXml, _factory, configFile);
+    }
+
+    public static class TestCase extends Assert
+    {
+        private Mockery _context;
+        private Factory _factory;
+        private PipelineJob _job;
+
+        public TestCase()
+        {
+            _context = new Mockery();
+            _context.setImposteriser(ClassImposteriser.INSTANCE);
+            _factory = _context.mock(Factory.class);
+            _job = _context.mock(PipelineJob.class);
+        }
+
+        @Test
+        public void testQuantAlgorithmSelection()
+        {
+            TPPTask task = new TPPTask(_factory, _job);
+            assertEquals(QuantitationAlgorithm.q3, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "q3")));
+            assertEquals(QuantitationAlgorithm.q3, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3")));
+            assertEquals(null, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3a")));
+            assertEquals(QuantitationAlgorithm.libra, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "libra")));
+            assertEquals(QuantitationAlgorithm.xpress, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "xpress")));
+        }
+
+        @Test
+        public void testXpressCommandLine() throws PipelineJobException, FileNotFoundException
+        {
+            Map<String, String> params1 = new HashMap<String, String>();
+            params1.put("pipeline quantitation, residue label mass", "4.027@[,4.027@K");
+            params1.put("residue, modification mass", "28.029@K,28.029@[,57.02146@C");
+            params1.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@[");
+            assertTrue(Arrays.equals(new String[] { "-X-nn,4.027 -nK,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params1, "/pathToMzXML", _factory, null)));
+
+            Map<String, String> params2 = new HashMap<String, String>();
+            params2.put("pipeline quantitation, residue label mass", "4.027@A,4.027@K");
+            params2.put("residue, modification mass", "28.029@K,28.029@A,57.02146@C");
+            params2.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@A");
+            assertTrue(Arrays.equals(new String[] { "-X-nA,4.027 -nK,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params2, "/pathToMzXML", _factory, null)));
+
+            Map<String, String> params3 = new HashMap<String, String>();
+            params3.put("pipeline quantitation, residue label mass", "4.027@]");
+            params3.put("residue, modification mass", "28.029@K,28.029@],57.02146@C");
+            params3.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@]");
+            assertTrue(Arrays.equals(new String[] { "-X-nc,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params3, "/pathToMzXML", _factory, null)));
+        }
     }
 }
