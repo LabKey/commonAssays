@@ -100,7 +100,7 @@
         Optionally require that peptides have a sequence match in protein: <input type="text" size="30" name="<%= MS2Controller.PeptideFilteringFormElements.targetProtein %>" value="<%= form.getTargetProtein()==null ? "" : form.getTargetProtein() %>" />
         <%= PageFlowUtil.helpPopup("Protein Filter", "<p>Show only peptides whose sequences match against a specified protein. It need not be the protein mapped to the peptide by the search engine or ProteinProphet.</p><p>If no protein matches the name specified, or if multiple proteins match, this page will be redisplayed to correct the search.</p>", true)%>
     </p>
-    <div class="labkey-indented"><span class="labkey-error" > <%= form.getTargetProteinMsg()== null ? "" : form.getTargetProteinMsg()  %></span></div>
+    <div class="labkey-indented"><span class="labkey-error" > <%= h(form.getTargetProteinMsg()== null ? "" : form.getTargetProteinMsg()) %></span></div>
    <%
        StringBuffer links= new StringBuffer();
        if (null != form.getMatchingSeqIds() && null != form.getMatchingProtNames())
@@ -127,6 +127,6 @@
                links.append("  Error parsing potential matches, try a more specific protein search term ");
        }
    %>
-    <div class="labkey-indented"><%= links.toString()  %> </div>
+    <div class="labkey-indented"><%= text(links.toString()) %> </div>
     <p><labkey:button text="Compare"/></p>
 </form>

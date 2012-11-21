@@ -56,6 +56,7 @@ import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.comet.CometCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
@@ -396,6 +397,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             UWSequestSearchTask.TestCase.class,
             ProteinCoverageMapBuilder.TestCase.class,
             UWSequestSearchTask.TestCase.class,
+            TPPTask.TestCase.class,
             Protein.TestCase.class
         ));
     }

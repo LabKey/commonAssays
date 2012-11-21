@@ -47,6 +47,7 @@ function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
                     schemaName: "ms2",
                     queryName: queryName,
                     viewName: viewName,
+                    allowableContainerFilters: [['Current', 'Current Folder'], ['CurrentAndSubfolders', 'Current folder and subfolders']],
                     includeRevert: false,
                     includeViewGrid: false,
                     query: json
