@@ -267,7 +267,7 @@ public abstract class CompareQuery extends SQLFragment
         // of columns you can sort on to 3.
         while (sort.getSortList().size() > 3)
         {
-            sort.getSortList().remove(sort.getSortList().size() - 1);
+            sort.deleteSortColumn(sort.getSortList().size() - 1);
         }
         append(sort.getOrderByClause(MS2Manager.getSqlDialect()));
     }
