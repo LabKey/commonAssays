@@ -21,6 +21,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
@@ -29,6 +30,7 @@ import org.labkey.flow.query.FlowQuerySettings;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Set;
 
 public class GraphColumn extends DataColumn
 {
@@ -39,6 +41,13 @@ public class GraphColumn extends DataColumn
     public GraphColumn(ColumnInfo colinfo)
     {
         super(colinfo);
+    }
+
+    @Override
+    public void addQueryFieldKeys(Set<FieldKey> keys)
+    {
+        super.addQueryFieldKeys(keys);
+        keys.add(getColumnInfo().getDisplayField().getFieldKey());
     }
 
     protected FlowQuerySettings.ShowGraphs showGraphs(RenderContext ctx)

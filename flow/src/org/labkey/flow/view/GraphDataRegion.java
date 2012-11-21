@@ -38,13 +38,17 @@ import java.util.Set;
 public class GraphDataRegion extends DataRegion
 {
     private List<GraphColumn> _graphColumns;
+    private List<DisplayColumn> _dataColumns;
 
     // Remove the graph columns from the set of display columns
     @Override
     public List<DisplayColumn> getDisplayColumns()
     {
+        if (_dataColumns != null)
+            return _dataColumns;
+
         List<DisplayColumn> renderers = super.getDisplayColumns();
-        List<DisplayColumn> dataColumns = new ArrayList<DisplayColumn>(renderers.size());
+        _dataColumns = new ArrayList<DisplayColumn>(renderers.size());
         _graphColumns = new ArrayList<GraphColumn>(10);
 
         for (DisplayColumn dc : renderers)
@@ -52,10 +56,10 @@ public class GraphDataRegion extends DataRegion
             if (dc instanceof GraphColumn)
                 _graphColumns.add((GraphColumn) dc);
             else
-                dataColumns.add(dc);
+                _dataColumns.add(dc);
         }
 
-        return dataColumns;
+        return _dataColumns;
     }
 
     // Add the graph columns back into the set of selected columns
@@ -64,8 +68,7 @@ public class GraphDataRegion extends DataRegion
     {
         super.addQueryColumns(columns);
 
-        for (GraphColumn graphColumn : _graphColumns)
-            columns.add(graphColumn.getColumnInfo());
+        columns.addAll(RenderContext.getSelectColumns((List)_graphColumns, getTable()));
     }
 
     @Override
