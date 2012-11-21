@@ -45,7 +45,6 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
@@ -135,11 +134,6 @@ public class FlowAssayProvider extends AbstractAssayProvider
         @Override
         public FieldKey getTargetStudyFieldKey()
         {
-            if (_metadata != null)
-            {
-                return _metadata.getTargetStudyColumn();
-            }
-
             return null;
         }
 

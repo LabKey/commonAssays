@@ -98,12 +98,6 @@
                 <select name="ff_dateColumn"><labkey:options value="<%=form.dateColumn%>" map="<%=keywordSampleOptions%>" /></select>
             </td>
         </tr>
-        <tr>
-            <td>Target study column</td>
-            <td>
-                <select name="ff_targetStudyColumn"><labkey:options value="<%=form.targetStudyColumn%>" map="<%=keywordSampleOptions%>" /></select>
-            </td>
-        </tr>
     </table>
 
     <br><br>

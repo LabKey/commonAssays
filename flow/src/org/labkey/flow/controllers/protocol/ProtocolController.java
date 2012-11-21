@@ -270,7 +270,6 @@ public class ProtocolController extends BaseFlowController
             metadata.setParticipantColumn(form.getParticipantColumn());
             metadata.setVisitColumn(form.getVisitColumn());
             metadata.setDateColumn(form.getDateColumn());
-            metadata.setTargetStudyColumn(form.getTargetStudyColumn());
             metadata.setMatchColumns(form.getMatchColumns());
             metadata.setBackgroundFilter(form.getBackgroundFilters());
 
