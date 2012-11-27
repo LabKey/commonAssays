@@ -75,7 +75,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         column.setFk(new AbstractForeignKey() {
             public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
             {
-                if (displayField != null)
+                if (displayField != null && !"$".equals(displayField))
                     return null;
                 SQLFragment sqlExpr = new SQLFragment();
                 sqlExpr.appendStringLiteral(spec.toString());

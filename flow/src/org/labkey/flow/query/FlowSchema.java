@@ -350,14 +350,15 @@ public class FlowSchema extends UserSchema
 //        }
 
         ret.addColumn(ExpRunTable.Column.RowId);
-        ret.setDetailsURL(new DetailsURL(new ActionURL(RunController.ShowRunAction.class, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
+        DetailsURL detailsURL = new DetailsURL(new ActionURL(RunController.ShowRunAction.class, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString()));
+        ret.setDetailsURL(detailsURL);
         if (type == null || type == FlowDataType.FCSFile || type == FlowDataType.FCSAnalysis)
         {
             ColumnInfo flag = ret.addColumn(ExpRunTable.Column.Flag);
             if (type != null)
                 flag.setDescription(type.getLabel() + " Flag");
         }
-        ret.addColumn(ExpRunTable.Column.Name);
+        ret.addColumn(ExpRunTable.Column.Name).setURL(detailsURL);
         ColumnInfo containerCol = ret.addColumn(ExpRunTable.Column.Folder);
         containerCol.setHidden(true);
         ContainerForeignKey.initColumn(containerCol, this, null);
@@ -1415,7 +1416,9 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
+        DetailsURL detailsURL = new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString()));
+        ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
+        ret.setDetailsURL(detailsURL);
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
@@ -1472,7 +1475,9 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
+        DetailsURL detailsURL = new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString()));
+        ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
+        ret.setDetailsURL(detailsURL);
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
@@ -1545,7 +1550,9 @@ public class FlowSchema extends UserSchema
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
-        ret.setDetailsURL(new DetailsURL(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), Collections.singletonMap(FlowParam.compId.toString(), ExpDataTable.Column.RowId.toString())));
+        DetailsURL detailsURL = new DetailsURL(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), Collections.singletonMap(FlowParam.compId.toString(), ExpDataTable.Column.RowId.toString()));
+        ret.setDetailsURL(detailsURL);
+        ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
         ret.addStatisticColumn("Value");
         return ret;
     }
@@ -1560,7 +1567,9 @@ public class FlowSchema extends UserSchema
         }
         ret.addInputRunCountColumn("RunCount");
         ret.getColumn(ExpDataTable.Column.Run.toString()).setHidden(true);
-        ret.setDetailsURL(new DetailsURL(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
+        DetailsURL detailsURL = new DetailsURL(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId"));
+        ret.setDetailsURL(detailsURL);
+        ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
         return ret;
     }
 
@@ -1596,6 +1605,7 @@ public class FlowSchema extends UserSchema
         DetailsURL detailsUrl = new DetailsURL(new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep"),
                 Collections.singletonMap(FlowParam.experimentId.toString(), ExpExperimentTable.Column.RowId.toString()));
         ret.setDetailsURL(detailsUrl);
+        ret.getColumn(ExpExperimentTable.Column.Name).setURL(detailsUrl);
         SQLFragment lsidCondition = new SQLFragment("LSID <> ");
         lsidCondition.appendStringLiteral(FlowExperiment.getExperimentRunExperimentLSID(getContainer()));
         ret.addCondition(lsidCondition);
