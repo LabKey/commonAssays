@@ -79,7 +79,9 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
                     return null;
                 SQLFragment sqlExpr = new SQLFragment();
                 sqlExpr.appendStringLiteral(spec.toString());
-                return new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(),"$"), sqlExpr, JdbcType.VARCHAR);
+                ExprColumn col = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(),"$"), sqlExpr, JdbcType.VARCHAR);
+                col.setAlias(parent.getAlias() + "$");
+                return col;
             }
 
             public TableInfo getLookupTableInfo()
