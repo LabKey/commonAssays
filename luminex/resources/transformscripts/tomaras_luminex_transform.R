@@ -25,10 +25,11 @@
 #  - 3.0.20120323 : Changes for LabKey server 12.1
 #  - 3.1.20120629 : Issue 15279: Luminex Positivity Calculation incorrect for titrated unknowns incorrect
 #  - 4.0.20120509 : Changes for LabKey server 12.2
-#  - 4.1.20120806 : Issue 15709: Luminex tranform : QC Control plots not displayed when EC50 value out of acceptable range 
+#  - 4.1.20120806 : Issue 15709: Luminex tranform : QC Control plots not displayed when EC50 value out of acceptable range
+#  - 4.2.20121121 : Changes for LabKey server 12.3, Issue 15042: Transform script (and AUC calculation error) when luminex file uploaded that has an ExpConc value of zero for a standard well
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "4.1.20120806";
+transformVersion = "4.2.20121121";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -226,7 +227,7 @@ if (any(regexpr("^blank", analytes, ignore.case=TRUE) > -1))
 	    expConc = combos$expConc[index];
 
         # only standards have expConc, the rest are NA
-	    combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & run.data$expConc == expConc;
+	    combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & !is.na(run.data$expConc) & run.data$expConc == expConc;
 	    if (is.na(expConc))
 	    {
 	        combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & is.na(run.data$expConc);
@@ -626,7 +627,7 @@ if (any(dat$isStandard) & length(standards) > 0)
                     # remove the rows from the standard.dat object where the max FI < 1000
                     if (agg.dat$x[aggIndex] < 1000)
                     {
-                        print(paste("Max(FI) is < 1000 for", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], "don't calculate estimated concentrations for this standard/analyte.", sep=" "));
+                        print(paste("Max(FI) is < 1000 for ", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], ", don't calculate estimated concentrations for this standard/analyte.", sep=""));
                         standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
                     }
                 }
@@ -636,6 +637,14 @@ if (any(dat$isStandard) & length(standards) > 0)
             if (nrow(standard.dat) == 0 | !any(standard.dat$isStandard))
             {
                 next();
+            }
+
+            # Issue 15042: check to make sure all of the standard ExpConc values are non-rounded (i.e. not zero)
+            zeroExpConcs = unique(subset(standard.dat, well_role=="Standard" & expected_conc==0, select=c("description", "well")));
+            if (nrow(zeroExpConcs) > 0)
+            {
+                wells = paste(zeroExpConcs$description, zeroExpConcs$well, collapse=', ');
+                stop(paste("Zero values not allowed in ExpConc for standard titration curve fit calculation:", wells));
             }
 
             # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns

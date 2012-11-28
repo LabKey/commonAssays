@@ -752,6 +752,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 // Do the trapezoidal AUC calculation
                 Double auc = calculateTrapezoidalAUC(wellGroup, curveFitInput);
 
+                // issue 15042
+                if (auc != null && auc.isNaN())
+                    throw new ExperimentException("Error: unable to calculate Trapezoidal AUC for " + titration.getName() + " " + analyte.getName());
+
                 CurveFit fit = new CurveFit();
                 fit.setAUC(auc);
                 fit.setAnalyteId(analyte.getRowId());
@@ -796,7 +800,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    private Double calculateTrapezoidalAUC(LuminexWellGroup wellGroup, String curveFitInput)
+    private Double calculateTrapezoidalAUC(LuminexWellGroup wellGroup, String curveFitInput) throws ExperimentException
     {
         double auc = 0;
         List<LuminexWell> wells = wellGroup.getWellData(true);
@@ -810,6 +814,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             if (well.getDose() == null || well.getAucValue(curveFitInput) == null || well.getDataRow().isExcluded())
             {
                 it.remove();
+            }
+
+            // issue 15042
+            if (well.getDose() == 0.0)
+            {
+                throw new ExperimentException("Zero values not allowed in dose (i.e. ExpConc/Dilution) for Trapezoidal AUC calculation: "
+                    + well.getDataRow().getDescription() + " (" + well.getDataRow().getType() + ").");
             }
         }
 
@@ -934,7 +945,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
-        public void testAUCSummaryData() throws DilutionCurve.FitFailedException
+        public void testAUCSummaryData() throws DilutionCurve.FitFailedException, ExperimentException
         {
             // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<LuminexWell>();
@@ -980,7 +991,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
-        public void testAUCRawData() throws DilutionCurve.FitFailedException
+        public void testAUCRawData() throws DilutionCurve.FitFailedException, ExperimentException
         {
             // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<LuminexWell>();
