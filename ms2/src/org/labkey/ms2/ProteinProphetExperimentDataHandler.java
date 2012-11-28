@@ -21,6 +21,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
@@ -42,8 +43,12 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
     {
         try
         {
-            ProteinProphetImporter importer = new ProteinProphetImporter(dataFile, data.getRun().getLSID(), context);
-            importer.importFile(info, log);
+            ExpRun run = data.getRun();
+            if (run != null)
+            {
+                ProteinProphetImporter importer = new ProteinProphetImporter(dataFile, run.getLSID(), context);
+                importer.importFile(info, log);
+            }
         }
         catch (SQLException e)
         {
