@@ -603,7 +603,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
                     // todo: move the JS and CSS inclusion to the page level
 
-                    result.getDataRegion().getButtonBar(DataRegion.MODE_GRID).add(excludeAnalytes);
+                    ButtonBar buttonBar = new ButtonBar(result.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
+                    buttonBar.add(excludeAnalytes);
+                    result.getDataRegion().setButtonBar(buttonBar, DataRegion.MODE_GRID);
                 }
                 return result;
             }
