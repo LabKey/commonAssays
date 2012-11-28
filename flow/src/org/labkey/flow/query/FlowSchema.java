@@ -65,6 +65,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
@@ -392,6 +393,7 @@ public class FlowSchema extends UserSchema
             colWorkspace.setFk(new QueryForeignKey(workspacesTable, "RowId", "Name"));
             colWorkspace.setHidden(true);
         }
+
         if (type != FlowDataType.CompensationMatrix && type != FlowDataType.FCSFile)
         {
             ColumnInfo colCompensationMatrix;
@@ -404,7 +406,11 @@ public class FlowSchema extends UserSchema
                     return detach().createCompensationMatrixTable("Lookup");
                 }
             });
+
+            ColumnInfo colTargetStudy = ret.addColumn(new ExprColumn(ret, AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, new SQLFragment("'3'"), JdbcType.GUID));
+            colTargetStudy.setLabel(AbstractAssayProvider.TARGET_STUDY_PROPERTY_CAPTION);
         }
+
         ret.addDataCountColumn("WellCount", InputRole.FCSFile.toString());
         ret.addColumn(ExpRunTable.Column.Created);
         ret.addColumn(ExpRunTable.Column.CreatedBy);
