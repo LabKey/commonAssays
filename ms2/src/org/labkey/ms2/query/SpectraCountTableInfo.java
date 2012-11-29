@@ -27,6 +27,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
@@ -77,7 +78,7 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", ");
             sql.append(function);
             sql.append("(pd.");
-            sql.append(_key.toString().replace('/', '_'));
+            sql.append(AliasManager.makeLegalName(_key.toString(), getSqlDialect()));
             sql.append(") AS ");
             sql.append(prefix);
             sql.append(_key.getName());
