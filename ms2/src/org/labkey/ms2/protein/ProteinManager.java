@@ -253,7 +253,7 @@ public class ProteinManager
         Protein[] proteins = Table.executeQuery(getSchema(), sql, Protein.class);
 
         if (proteins.length == 0)
-            _log.error("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
+            _log.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
 
         return proteins;
     }
