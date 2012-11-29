@@ -20,9 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -30,6 +32,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.IAssayDomainType;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
@@ -134,7 +137,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
         @Override
         public FieldKey getTargetStudyFieldKey()
         {
-            return null;
+            return FieldKey.fromParts(ExpDataTable.Column.Run.toString(), FlowProperty.TargetStudy.getPropertyDescriptor().getName());
         }
 
     }
@@ -442,5 +445,22 @@ public class FlowAssayProvider extends AbstractAssayProvider
     public DataExchangeHandler createDataExchangeHandler()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public Container getAssociatedStudyContainer(ExpProtocol protocol, Object dataId)
+    {
+        ExpData data = getDataForDataRow(dataId, protocol);
+        if (data == null)
+            return null;
+        ExpRun run = data.getRun();
+        if (run == null)
+            return null;
+
+        Map<String, Object> properties = OntologyManager.getProperties(run.getContainer(), run.getLSID());
+        String targetStudyId = (String) properties.get(FlowProperty.TargetStudy.getPropertyDescriptor().getPropertyURI());
+
+        if (targetStudyId != null)
+            return ContainerManager.getForId(targetStudyId);
+        return null;
     }
 }

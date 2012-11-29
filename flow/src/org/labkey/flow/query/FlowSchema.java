@@ -525,7 +525,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addKeywordColumn(String columnAlias)
         {
             ColumnInfo colKeyword = addObjectIdColumn(columnAlias);
-            colKeyword.setFk(new KeywordForeignKey(getContainer(), _fps));
+            colKeyword.setFk(new KeywordForeignKey(FlowSchema.this, _fps));
             colKeyword.setIsUnselectable(true);
             addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword));
             return colKeyword;
@@ -822,7 +822,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addKeywordColumn(String columnAlias)
         {
             ColumnInfo colKeyword = addObjectIdColumn(columnAlias);
-            colKeyword.setFk(new KeywordForeignKey(getContainer(), _fps));
+            colKeyword.setFk(new KeywordForeignKey(FlowSchema.this, _fps));
             colKeyword.setIsUnselectable(true);
             addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword));
             return colKeyword;

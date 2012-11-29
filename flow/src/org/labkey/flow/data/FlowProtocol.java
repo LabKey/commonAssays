@@ -19,6 +19,7 @@ package org.labkey.flow.data;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -613,6 +614,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return metadata != null && metadata.length() > 0;
     }
 
+    @Nullable
     public ICSMetadata getICSMetadata()
     {
         String metadata = getICSMetadataString();

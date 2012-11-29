@@ -17,21 +17,29 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.flow.data.AttributeType;
+import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.util.KeywordUtil;
 
 import java.util.Map;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
+    private final FlowSchema _schema;
     FlowPropertySet _fps;
+    private SpecimenForeignKey _specimenFK;
 
-    public KeywordForeignKey(Container c, FlowPropertySet fps)
+    public KeywordForeignKey(FlowSchema schema, FlowPropertySet fps)
     {
-        super(c);
+        super(schema.getContainer());
+        _schema = schema;
         _fps = fps;
     }
 
@@ -58,6 +66,19 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         if (KeywordUtil.isHidden(attrName))
         {
             column.setHidden(true);
+        }
+
+        ICSMetadata icsMetadata = _schema.getProtocol().getICSMetadata();
+        if (icsMetadata != null && icsMetadata.getSpecimenIdColumn() != null && icsMetadata.getSpecimenIdColumn().getName().equalsIgnoreCase(attrName))
+        {
+            if (_specimenFK == null)
+            {
+                ExpProtocol protocol = _schema.getProtocol().getProtocol();
+                AssayProvider provider = AssayService.get().getProvider(protocol);
+                AssayProtocolSchema schema = provider.createProtocolSchema(_schema.getUser(), _schema.getContainer(), protocol, null);
+                _specimenFK = new SpecimenForeignKey(schema, provider, protocol);
+            }
+            column.setFk(_specimenFK);
         }
     }
 
