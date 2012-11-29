@@ -31,6 +31,9 @@ abstract public class FlowProperty
     // Property on FlowRun ExpRun object: name of analysis engine (AnalysisEngine)
     static public final SystemProperty AnalysisEngine = new SystemProperty(PROPERTY_BASE + "AnalysisEngine", PropertyType.STRING);
 
+    // Property on FlowRun ExpRun object: container id of target study
+    static public final SystemProperty TargetStudy = new SystemProperty(PROPERTY_BASE + "TargetStudy", PropertyType.STRING);
+
     // Property on FlowFCSFile ExpData object: true when the FlowFCSFile was created from an external analysis (extracted from FlowJo workspace or analysis archive)
     //static public final SystemProperty ExtraKeywordsFCSFile = new SystemProperty(PROPERTY_BASE + "ExtraKeywordsFCSFile", PropertyType.BOOLEAN);
 

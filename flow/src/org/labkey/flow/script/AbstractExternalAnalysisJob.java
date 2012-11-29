@@ -79,6 +79,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     // Map workspace sample label -> FlowFCSFile (or null if we aren't resolving previously imported FCS files)
     private Map<String, FlowFCSFile> _selectedFCSFiles;
 //    private final List<String> _importGroupNames;
+    private final Container _targetStudy;
     private final boolean _failOnError;
 
     // Result of the import
@@ -94,6 +95,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             List<File> keywordDirs,
             Map<String, FlowFCSFile> selectedFCSFiles,
             //List<String> importGroupNames,
+            Container targetStudy,
             boolean failOnError)
         throws Exception
     {
@@ -106,6 +108,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         _keywordDirs = keywordDirs;
         _selectedFCSFiles = selectedFCSFiles;
         //_importGroupNames = importGroupNames;
+        _targetStudy = targetStudy;
         _failOnError = failOnError;
     }
 
@@ -151,6 +154,11 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     public Map<String,FlowFCSFile> getSelectedFCSFiles()
     {
         return _selectedFCSFiles;
+    }
+
+    public Container getTargetStudy()
+    {
+        return _targetStudy;
     }
 
     public boolean isFailOnError()
@@ -216,6 +224,10 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
             if (_run != null)
             {
+                // Add TargetStudy property to ExpRun object
+                if (getTargetStudy() != null)
+                    _run.setProperty(getUser(), FlowProperty.TargetStudy.getPropertyDescriptor(), getTargetStudy().getId());
+
 //                // Add run level graphs as attachments to the run
 //                File[] runImages = _analysisPathRoot.listFiles(new FilenameFilter() {
 //                    public boolean accept(File dir, String name)

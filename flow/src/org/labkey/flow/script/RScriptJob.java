@@ -16,6 +16,7 @@
 package org.labkey.flow.script;
 
 import org.apache.commons.io.IOUtils;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -84,6 +85,8 @@ public class RScriptJob extends FlowExperimentJob
     private final List<String> _normalizationSubsets;
     private final List<String> _normalizationParameters;
 
+    private final Container _targetStudy;
+
     private final boolean _failOnError;
 
     public RScriptJob(ViewBackgroundInfo info,
@@ -99,6 +102,7 @@ public class RScriptJob extends FlowExperimentJob
                       String normalizationReference,
                       List<String> normalizationSubsets,
                       List<String> normalizationParameters,
+                      Container targetStudy,
                       boolean failOnError) throws Exception
     {
         super(info, root, experiment.getLSID(), FlowProtocol.ensureForContainer(info.getUser(), info.getContainer()), experiment.getName(), FlowProtocolStep.analysis);
@@ -110,6 +114,7 @@ public class RScriptJob extends FlowExperimentJob
         //_importGroupNames = importGroupNames;
         _performNormalization = performNormalization;
         _normalizationReference = normalizationReference;
+        _targetStudy = targetStudy;
         _failOnError = failOnError;
 
         if (workspaceData.getPath() == null || originalImportedFile == null)
@@ -264,6 +269,7 @@ public class RScriptJob extends FlowExperimentJob
                 _keywordDirs,
                 _selectedFCSFiles,
                 analysisRunName,
+                _targetStudy,
                 _failOnError);
         importJob.setLogFile(getLogFile());
         importJob.setLogLevel(getLogLevel());

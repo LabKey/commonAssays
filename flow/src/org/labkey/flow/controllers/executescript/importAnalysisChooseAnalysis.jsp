@@ -34,13 +34,27 @@
 <%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
 <%@ page import="org.labkey.flow.data.FlowFCSFile" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
+<%@ page import="org.labkey.api.study.Study" %>
+<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
+<%@ page import="java.util.LinkedHashMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
     ViewContext context = getViewContext();
     Container container = context.getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
+
+    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
+    Map<String, String> targetStudies = new LinkedHashMap<String, String>();
+    targetStudies.put("", "[None]");
+    for (Study study : validStudies)
+    {
+        Container c = study.getContainer();
+        targetStudies.put(c.getId(), c.getPath() + " (" + study.getLabel() + ")");
+    }
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
@@ -65,10 +79,7 @@
 <input type="hidden" name="rEngineNormalizationSubsets" value="<%=h(form.getrEngineNormalizationSubsets())%>"/>
 <input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
-<p>The statistics in this workspace that have been calculated by FlowJo will be imported to <%=h(FlowModule.getLongProductName())%>.<br><br>
-    <%=h(FlowModule.getLongProductName())%> organizes results into different "analysis folders".  The same set of FCS files may only
-    be analyzed once in a given analysis folder.  If you want to analyze the same FCS file in two different ways,
-    those results must be put into different analysis folders.</p>
+<p>
 <hr/>
 <%
     FlowExperiment[] analyses = FlowExperiment.getAnalyses(container);
@@ -146,13 +157,20 @@
         }
     }
 %>
+
+<b>Analysis Folder</b>
+<br>
+<%=h(FlowModule.getLongProductName())%> organizes results into different "analysis folders".  The same set of FCS files may only
+be analyzed once in a given analysis folder.  If you want to analyze the same FCS file in two different ways,
+those results must be put into different analysis folders.
+<br>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (analyses.length == 0 || analyses.length == disabledAnalyses.size()) { %>
     What do you want to call the new analysis folder?  You will be able to use this name for multiple uploaded workspaces.<br><br>
     <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>">
     <input type="hidden" name="createAnalysis" value="true"/>
     <% } else { %>
-    <p>
+    <br>
     <table>
         <tr>
             <td valign="top">
@@ -198,6 +216,21 @@
             </td>
         </tr>
     </table>
-    <% } %>
 </div>
+<% } %>
+<% if (targetStudies.size() > 0) { %>
+<b>Target Study</b>
+<br>
+<em>Optionally</em>, select a target study for the imported flow run.  If the flow metadata includes PTID and Date/Visit columns,
+specimen information from the study will be included in the FCSAnalyses table.
+<br>
+<div style="padding-left: 2em; padding-bottom: 1em;">
+    <br>
+    <label for="targetStudy">Choose a target study folder:</label><br>
+    <select id="targetStudy" name="targetStudy">
+        <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
+    </select>
+    <br><br>
+</div>
+<% } %>
 

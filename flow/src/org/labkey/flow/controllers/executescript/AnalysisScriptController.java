@@ -20,6 +20,8 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.pipeline.PipeRoot;
@@ -30,6 +32,8 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.study.Study;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
@@ -803,6 +807,41 @@ public class AnalysisScriptController extends BaseFlowController
             return AnalysisEngine.FlowJoWorkspace;
         }
 
+        private Container getTargetStudy(ImportAnalysisForm form, Errors errors) throws Exception
+        {
+            Container targetStudy = null;
+            if (form.getTargetStudy() != null && form.getTargetStudy().length() > 0)
+            {
+                targetStudy = ContainerManager.getForId(form.getTargetStudy());
+                if (targetStudy == null)
+                {
+                    errors.reject(ERROR_MSG, "TargetStudy container '" + form.getTargetStudy() + "' doesn't exist.");
+                    return null;
+                }
+
+                if (!targetStudy.hasPermission(getUser(), ReadPermission.class))
+                {
+                    errors.reject(ERROR_MSG, "You don't have read permission to the TargetStudy container '" + form.getTargetStudy() + "'.");
+                    return null;
+                }
+
+                Set<Study> studies = StudyService.get().findStudy(targetStudy, getUser());
+                if (studies == null || studies.isEmpty())
+                {
+                    errors.reject(ERROR_MSG, "No study found in TargetStudy container '" + form.getTargetStudy() + "'.");
+                    return null;
+                }
+
+                if (studies.size() > 1)
+                {
+                    errors.reject(ERROR_MSG, "Found more than one study for TargetStudy container '" + form.getTargetStudy() + "'");
+                    return null;
+                }
+            }
+
+            return targetStudy;
+        }
+
         private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
@@ -1338,6 +1377,10 @@ public class AnalysisScriptController extends BaseFlowController
                 }
             }
 
+            Container targetStudy = getTargetStudy(form, errors);
+            if (errors.hasErrors())
+                return;
+
             form.setWizardStep(ImportAnalysisStep.CONFIRM);
         }
 
@@ -1408,6 +1451,10 @@ public class AnalysisScriptController extends BaseFlowController
             if (errors.hasErrors())
                 return;
 
+            Container targetStudy = getTargetStudy(form, errors);
+            if (errors.hasErrors())
+                return;
+
             FlowJob job = null;
             if (analysisEngine == null || AnalysisEngine.FlowJoWorkspace == analysisEngine)
             {
@@ -1416,6 +1463,7 @@ public class AnalysisScriptController extends BaseFlowController
                         workspaceData, pipelineFile, runFilePathRoot,
                         keywordDirs,
                         selectedFCSFiles,
+                        targetStudy,
                         false);
             }
             else if (AnalysisEngine.Archive == analysisEngine)
@@ -1430,6 +1478,7 @@ public class AnalysisScriptController extends BaseFlowController
                         keywordDirs,
                         selectedFCSFiles,
                         workspaceData.getWorkspaceObject().getName(),
+                        targetStudy,
                         false);
 
             }
@@ -1448,6 +1497,7 @@ public class AnalysisScriptController extends BaseFlowController
                         form.getrEngineNormalizationReference(),
                         form.getrEngineNormalizationSubsetList(),
                         form.getrEngineNormalizationParameterList(),
+                        targetStudy,
                         false);
             }
             else

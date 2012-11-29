@@ -63,9 +63,10 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                             List<File> keywordDirs,
                             Map<String, FlowFCSFile> selectedFCSFiles,
                             String analysisRunName,
+                            Container targetStudy,
                             boolean failOnError) throws Exception
     {
-        super(info, root, experiment, analysisEngine, originalImportedFile, runFilePathRoot, keywordDirs, selectedFCSFiles, failOnError);
+        super(info, root, experiment, analysisEngine, originalImportedFile, runFilePathRoot, keywordDirs, selectedFCSFiles, targetStudy, failOnError);
 
         _analysisPathRoot = analysisPathRoot;
         if (!_analysisPathRoot.isDirectory())

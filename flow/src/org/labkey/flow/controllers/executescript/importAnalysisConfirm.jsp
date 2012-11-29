@@ -47,6 +47,8 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
 <%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
+<%@ page import="org.labkey.api.study.StudyService" %>
+<%@ page import="org.labkey.api.study.Study" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -65,6 +67,14 @@
         SelectedSamples.ResolvedSample resolvedSample = entry.getValue();
         if (resolvedSample.isSelected())
             selectedSamples.add(entry.getKey());
+    }
+
+    String targetStudyLabel = "[None]";
+    if (form.getTargetStudy() != null && form.getTargetStudy().length() > 0)
+    {
+        Set<Study> studies = StudyService.get().findStudy(form.getTargetStudy(), context.getUser());
+        Study study = studies.iterator().next();
+        targetStudyLabel = study.getContainer().getPath() + " (" + study.getLabel() + ")";
     }
 %>
 
@@ -96,6 +106,8 @@
 <% } else { %>
 <input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=h(form.getExistingAnalysisId())%>">
 <% } %>
+
+<input type="hidden" name="targetStudy" id="targetStudy" value="<%=h(form.getTargetStudy())%>">
 
 <p>You are about to import the analysis from the workspace with the following settings:</p>
 <%
@@ -229,6 +241,10 @@
         <% FlowExperiment experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId()); %>
         <a href="<%=experiment.urlShow()%>" target="_blank"><%=h(experiment.getName())%></a>
         <% } %>
+    </li>
+
+    <li style="padding-bottom:0.5em;">
+        <b>Target Study: </b> <%=h(targetStudyLabel)%>
     </li>
 </ul>
 

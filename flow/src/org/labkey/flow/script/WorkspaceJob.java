@@ -79,10 +79,11 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         List<File> keywordDirs,
                         Map<String, FlowFCSFile> selectedFCSFiles,
                         //List<String> importGroupNames,
+                        Container targetStudy,
                         boolean failOnError)
             throws Exception
     {
-        super(info, root, experiment, AnalysisEngine.FlowJoWorkspace, originalImportedFile, runFilePathRoot, keywordDirs, selectedFCSFiles, failOnError);
+        super(info, root, experiment, AnalysisEngine.FlowJoWorkspace, originalImportedFile, runFilePathRoot, keywordDirs, selectedFCSFiles, targetStudy, failOnError);
 
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)

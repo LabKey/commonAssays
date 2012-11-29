@@ -25,15 +25,21 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TempTableTracker;
+import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -48,6 +54,7 @@ import org.labkey.api.exp.query.ExpExperimentTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.query.SamplesSchema;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -65,6 +72,8 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.Study;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.ContainerContext;
@@ -84,6 +93,7 @@ import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
@@ -97,6 +107,8 @@ import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -364,7 +376,8 @@ public class FlowSchema extends UserSchema
         containerCol.setHidden(true);
         ContainerForeignKey.initColumn(containerCol, this, null);
         ret.addColumn(ExpRunTable.Column.FilePathRoot).setHidden(true);
-        ret.addColumn(ExpRunTable.Column.LSID).setHidden(true);
+        ColumnInfo colLSID = ret.addColumn(ExpRunTable.Column.LSID);
+        colLSID.setHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);
 
         ColumnInfo analysisFolder = ret.addColumn(ExpRunTable.Column.RunGroups);
@@ -407,8 +420,41 @@ public class FlowSchema extends UserSchema
                 }
             });
 
-            ColumnInfo colTargetStudy = ret.addColumn(new ExprColumn(ret, AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, new SQLFragment("'3'"), JdbcType.GUID));
+            PropertyDescriptor pd = FlowProperty.TargetStudy.getPropertyDescriptor();
+            PropertyColumn colTargetStudy = new PropertyColumn(pd, colLSID, getContainer(), getUser(), true);
             colTargetStudy.setLabel(AbstractAssayProvider.TARGET_STUDY_PROPERTY_CAPTION);
+            colTargetStudy.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    return new DataColumn(colInfo)
+                    {
+                        @Override
+                        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                        {
+                            String targetStudyId = (String)getBoundColumn().getValue(ctx);
+                            if (targetStudyId != null && targetStudyId.length() > 0)
+                            {
+                                Container c = ContainerManager.getForId(targetStudyId);
+                                if (c != null)
+                                {
+                                    Study study = StudyService.get().getStudy(c);
+                                    if (study != null)
+                                    {
+                                        out.write("<a href=\"");
+                                        out.write(PageFlowUtil.filter(PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c)));
+                                        out.write("\">");
+                                        out.write(study.getLabel().replaceAll(" ", "&nbsp;"));
+                                        out.write("</a>");
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+            });
+            ret.addColumn(colTargetStudy);
         }
 
         ret.addDataCountColumn("WellCount", InputRole.FCSFile.toString());

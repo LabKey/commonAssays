@@ -62,6 +62,9 @@ public class ImportAnalysisForm
     private boolean createAnalysis;
     private String newAnalysisName;
     private int existingAnalysisId;
+
+    private String targetStudy;
+
     // FCSFile directories selected in the pipeline browser for association with the imported workspace analysis.
     private String[] keywordDir;
     private boolean confirm;
@@ -229,6 +232,16 @@ public class ImportAnalysisForm
     public void setExistingAnalysisId(int existingAnalysisId)
     {
         this.existingAnalysisId = existingAnalysisId;
+    }
+
+    public String getTargetStudy()
+    {
+        return targetStudy;
+    }
+
+    public void setTargetStudy(String targetStudy)
+    {
+        this.targetStudy = targetStudy;
     }
 
     public String[] getKeywordDir()
