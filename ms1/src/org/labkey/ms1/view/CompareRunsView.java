@@ -63,7 +63,7 @@ public class CompareRunsView extends ComparisonCrosstabView
     {
         DataView view = super.createDataView();
         view.getRenderContext().setViewContext(getViewContext());
-        String sortString = CrosstabTable.getDefaultSortString() + "," + FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "_Peptide";
+        String sortString = CrosstabTable.getDefaultSortString() + "," + AliasManager.makeLegalName(FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "/Peptide", null);
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;
     }

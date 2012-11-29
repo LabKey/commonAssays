@@ -143,7 +143,7 @@ public class MS1Schema extends UserSchema
         CrosstabSettings settings = new CrosstabSettings(tinfo);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts(FeaturesTableInfo.COLUMN_PEPTIDE_INFO, "Peptide"));
-        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${RelatedPeptide_Peptide}");
+        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${" + AliasManager.makeLegalName(FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "/Peptide", getDbSchema().getSqlDialect()) + "}");
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("FileId", "ExpDataFileId", "Run", "RowId"));
         colDim.setUrl(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString() + "runId=" + CrosstabMember.VALUE_TOKEN);
@@ -169,7 +169,7 @@ public class MS1Schema extends UserSchema
 
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.runId.name(), CrosstabMember.VALUE_NAME);
-        parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name(), "RelatedPeptide_Peptide");
+        parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name(), AliasManager.makeLegalName(FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "/Peptide", getDbSchema().getSqlDialect()));
         for(CrosstabMeasure measure : settings.getMeasures())
             measure.setUrl(new DetailsURL(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()), parameters));
 
