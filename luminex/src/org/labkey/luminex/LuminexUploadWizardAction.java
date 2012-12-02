@@ -230,7 +230,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
             collector.addHiddenFormFields(view, form);
 
-            Map<String, String> defaultWellRoleValues = PropertyManager.getProperties(getViewContext().getUser().getUserId(),
+            Map<String, String> defaultWellRoleValues = PropertyManager.getProperties(getViewContext().getUser(),
                 getContainer(), _protocol.getName() + ": Well Role");
             
             // get a set of which titrations are going to be pre-selected as standards (based on default value, well type, etc.)
@@ -311,7 +311,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     continue;
                 }
 
-                final Map<String, String> defaultTitrationValues = PropertyManager.getProperties(getViewContext().getUser().getUserId(),
+                final Map<String, String> defaultTitrationValues = PropertyManager.getProperties(getViewContext().getUser(),
                         getContainer(), _protocol.getName() + ": " + titrationEntry.getValue().getName());
 
                 String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
@@ -565,7 +565,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                     // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
                     PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
-                            getViewContext().getUser().getUserId(), getContainer(), _protocol.getName() + ": Well Role", true);
+                            getViewContext().getUser(), getContainer(), _protocol.getName() + ": Well Role", true);
 
                     for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
                     {
@@ -595,7 +595,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
                         {
                             PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
-                                    getViewContext().getUser().getUserId(), getContainer(),
+                                    getViewContext().getUser(), getContainer(),
                                     _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
                             for (String analyteName : form.getAnalyteNames())
                             {

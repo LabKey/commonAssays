@@ -29,7 +29,6 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 
 import java.io.File;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -41,7 +40,7 @@ public class MS2ImportPipelineJob extends PipelineJob
     private final String _description;
     private MS2Importer.RunInfo _runInfo;
 
-    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo, PipeRoot root) throws SQLException
+    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo, PipeRoot root)
     {
         super(MS2PipelineProvider.name, info, root);
         _file = file;

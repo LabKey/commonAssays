@@ -16,16 +16,28 @@
 
 package org.labkey.microarray.pipeline;
 
-import java.io.*;
-import java.util.*;
-import java.sql.SQLException;
-
 import org.labkey.api.data.Container;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.microarray.MicroarrayModule;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class ArrayPipelineManager {
+
+public class ArrayPipelineManager
+{
     
     protected static String _pipelineLogExt = ".log";
     protected static String _pipelineResultsExt = ".tgz";
@@ -52,7 +64,7 @@ public class ArrayPipelineManager {
         return new PipelineProvider.FileTypesEntryFilter(MicroarrayModule.MAGE_ML_INPUT_TYPE.getFileType());
     }
     
-    public static File[] getImageFiles(File imageDir, FileStatus status, Container c) throws IOException, SQLException
+    public static File[] getImageFiles(File imageDir, FileStatus status, Container c) throws IOException
     {
         Map<File, FileStatus> imageFileStatus = getExtractionStatus(imageDir, c);
         List<File> fileList = new ArrayList<File>();
@@ -64,7 +76,7 @@ public class ArrayPipelineManager {
         return fileList.toArray(new File[fileList.size()]);
     }
     
-    public static Map<File, FileStatus> getExtractionStatus(File imageDir, Container c) throws IOException, SQLException
+    public static Map<File, FileStatus> getExtractionStatus(File imageDir, Container c) throws IOException
     {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();

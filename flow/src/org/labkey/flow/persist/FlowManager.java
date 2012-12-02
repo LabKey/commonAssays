@@ -703,15 +703,7 @@ public class FlowManager
         getSchema().getSqlDialect().appendInClauseSql(sql, keywords);
         SqlSelector selector = new SqlSelector(getSchema(), sql);
 
-        final Map<String, String> map = new TreeMap<String, String>();
-        selector.forEach(new Selector.ForEachBlock<ResultSet>() {
-            @Override
-            public void exec(ResultSet rs) throws SQLException
-            {
-                map.put(rs.getString(1), rs.getString(2));
-            }
-        });
-        return map;
+        return selector.fillValueMap(new TreeMap<String, String>());
     }
 
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";

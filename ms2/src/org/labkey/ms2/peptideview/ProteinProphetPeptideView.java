@@ -54,7 +54,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         super(viewContext, "NestedPeptides", runs);
     }
 
-    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
+    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport)
     {
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
         List<DisplayColumn> displayColumns = new ArrayList<DisplayColumn>();
@@ -139,7 +139,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return displayColumns;
     }
 
-    public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
+    public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames)
     {
         return getColumns(new PeptideColumnNameList(peptideColumnNames), createLegacyWrappedPeptidesTable(), MS2Manager.getTableInfoPeptideMemberships());
     }

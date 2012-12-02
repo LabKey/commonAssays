@@ -80,7 +80,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return proteinView;
     }
 
-    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
+    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport)
     {
         List<DisplayColumn> result = new ArrayList<DisplayColumn>();
 

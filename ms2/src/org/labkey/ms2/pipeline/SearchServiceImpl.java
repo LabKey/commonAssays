@@ -504,19 +504,13 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         if (fileStatus != null)
         {
             String path = PipelineJobService.statusPathOf(fileStatus.getAbsolutePath());
-            try
-            {
-                PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
-                if (sf == null)
-                    return null;
+            PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
+            if (sf == null)
+                return null;
 
-                if (sf.isActive())
-                    results.setActiveJobs(true);
-                return sf.getStatus();
-            }
-            catch (SQLException e)
-            {
-            }
+            if (sf.isActive())
+                results.setActiveJobs(true);
+            return sf.getStatus();
         }
 
         // Failed to get status.  Assume job is active, and return unknown status.

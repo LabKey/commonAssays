@@ -71,7 +71,7 @@ public class FlowSettings
         return map.get(PROPNAME_WORKINGDIRECTORY);
     }
 
-    static public void setWorkingDirectoryPath(String path) throws Exception
+    static public void setWorkingDirectoryPath(String path)
     {
         Container container = ContainerManager.getRoot();
         PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, path != null);

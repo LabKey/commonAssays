@@ -47,9 +47,9 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         return exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException;
+    protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport);
 
-    public ProteinTSVGridWriter getTSVProteinGridWriter(String requestedProteinColumnNames, String requestedPeptideColumnNames, boolean expanded) throws SQLException
+    public ProteinTSVGridWriter getTSVProteinGridWriter(String requestedProteinColumnNames, String requestedPeptideColumnNames, boolean expanded)
     {
         List<DisplayColumn> proteinDisplayColumns = getProteinDisplayColumns(requestedProteinColumnNames, true);
         List<DisplayColumn> peptideDisplayColumns = null;

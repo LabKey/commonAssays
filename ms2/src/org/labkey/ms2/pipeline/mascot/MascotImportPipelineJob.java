@@ -29,8 +29,13 @@ import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.TPPTask;
 
-import java.io.*;
-import java.sql.SQLException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * User: jeckels
@@ -41,7 +46,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
     private final File _file;
 
     public MascotImportPipelineJob(ViewBackgroundInfo info, File file, String description,
-                                MS2Importer.RunInfo runInfo, PipeRoot root) throws SQLException
+                                MS2Importer.RunInfo runInfo, PipeRoot root)
     {
         super(info, TPPTask.getPepXMLFile(file.getParentFile(), FileUtil.getBaseName(file)), description, runInfo, root);
         _file = file;

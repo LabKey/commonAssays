@@ -182,23 +182,23 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return _user;
     }
 
-    public void savePeptideColumnNames(String type, String columnNames) throws SQLException
+    public void savePeptideColumnNames(String type, String columnNames)
     {
-        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user.getUserId(), ContainerManager.getRoot(), "ColumnNames", true);
+        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user, ContainerManager.getRoot(), "ColumnNames", true);
         defaultColumnLists.put(type + _columnPropertyName, columnNames);
         PropertyManager.saveProperties(defaultColumnLists);
     }
 
-    public void saveProteinColumnNames(String type, String columnNames) throws SQLException
+    public void saveProteinColumnNames(String type, String columnNames)
     {
-        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user.getUserId(), ContainerManager.getRoot(), "ProteinColumnNames", true);
+        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user, ContainerManager.getRoot(), "ProteinColumnNames", true);
         defaultColumnLists.put(type + "Protein", columnNames);
         PropertyManager.saveProperties(defaultColumnLists);
     }
 
-    private @Nullable String getSavedPeptideColumnNames() throws SQLException
+    private @Nullable String getSavedPeptideColumnNames()
     {
-        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot(), "ColumnNames");
+        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), "ColumnNames");
         return defaultColumnLists.get(_runs[0].getType() + "Peptides");
     }
 
@@ -306,7 +306,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return rgn;
     }
 
-    public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
+    public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames)
     {
         FilteredTable table = createLegacyWrappedPeptidesTable();
         return getColumns(new PeptideColumnNameList(peptideColumnNames), table);
@@ -347,7 +347,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         }
     }
 
-    protected List<DisplayColumn> getColumns(List<String> columnNames, TableInfo... tinfos) throws SQLException
+    protected List<DisplayColumn> getColumns(List<String> columnNames, TableInfo... tinfos)
     {
         List<DisplayColumn> result = new ArrayList<DisplayColumn>();
 
@@ -444,7 +444,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {
-        PeptideColumnNameList(String columnNames) throws SQLException
+        PeptideColumnNameList(String columnNames)
         {
             super(getPeptideColumnNames(columnNames));
         }
@@ -452,7 +452,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected  class ProteinColumnNameList extends MS2Run.ColumnNameList
     {
-        ProteinColumnNameList(String columnNames) throws SQLException
+        ProteinColumnNameList(String columnNames)
         {
             super(getProteinColumnNames(columnNames));
         }
@@ -463,7 +463,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         }
     }
 
-    public String getPeptideColumnNames(String columnNames) throws SQLException
+    public String getPeptideColumnNames(String columnNames)
     {
         if (null == columnNames)
         {
@@ -476,7 +476,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return columnNames;
     }
 
-    public String getProteinColumnNames(String proteinColumnNames) throws SQLException
+    public String getProteinColumnNames(String proteinColumnNames)
     {
         if (null == proteinColumnNames)
         {
@@ -489,9 +489,9 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return proteinColumnNames;
     }
 
-    private @Nullable String getSavedProteinColumnNames() throws SQLException
+    private @Nullable String getSavedProteinColumnNames()
     {
-        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot(), "ProteinColumnNames");
+        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), "ProteinColumnNames");
         return defaultColumnLists.get(_runs[0].getType() + "Protein");
     }
 
