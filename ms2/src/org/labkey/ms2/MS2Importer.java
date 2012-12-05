@@ -19,10 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.collections.CsvSet;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -400,7 +401,7 @@ public abstract class MS2Importer
     {
         if (null != spectrumFile)
         {
-            MS2Fraction existingFraction = Table.selectObject(MS2Manager.getTableInfoFractions(), _fractionId, MS2Fraction.class);
+            MS2Fraction existingFraction = new TableSelector(MS2Manager.getTableInfoFractions()).getObject(_fractionId, MS2Fraction.class);
             if (existingFraction != null && existingFraction.getMzXmlURL() == null)
             {
                 existingFraction.setMzXmlURL(spectrumFile.toURI().toString());
@@ -464,7 +465,7 @@ public abstract class MS2Importer
     }
 
 
-    protected void updatePeptideColumns(MS2Progress progress) throws SQLException
+    protected void updatePeptideColumns(MS2Progress progress)
     {
         updateRunStatus("Updating peptide columns");
         MS2Run run = MS2Manager.getRun(_runId);
@@ -482,10 +483,8 @@ public abstract class MS2Importer
 
         for (MS2Fraction fraction : fractions)
         {
-            Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, fraction.getFraction(), run.getFastaId());
-
-            if (fractionCount > 1)
-                _log.info("Updating SeqId column: fraction " + (++i) + " out of " + fractionCount);
+            int rowCount = new SqlExecutor(MS2Manager.getSchema(), _updateSeqIdSql, fraction.getFraction(), run.getFastaId()).execute();
+            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);
@@ -494,10 +493,8 @@ public abstract class MS2Importer
 
         for (MS2Fraction fraction : fractions)
         {
-            Table.execute(MS2Manager.getSchema(), _updateSequencePositionSql, fraction.getFraction());
-
-            if (fractionCount > 1)
-                _log.info("Updating SequencePosition column: fraction " + (++i) + " out of " + fractionCount);
+            int rowCount = new SqlExecutor(MS2Manager.getSchema(), _updateSequencePositionSql, fraction.getFraction()).execute();
+            _log.info("Set SequencePosition values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
         }
     }
 
@@ -508,13 +505,13 @@ public abstract class MS2Importer
                 " SpectrumCount = (SELECT COUNT(*) AS SpecCount FROM " + MS2Manager.getTableInfoSpectra() + " spec WHERE spec.run = " + MS2Manager.getTableInfoRuns() + ".run)" +
             " WHERE Run = ?";
 
-    private void updateCounts(MS2Progress progress) throws SQLException
+    private void updateCounts(MS2Progress progress)
     {
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateCounts);
 
         String negativeHitLike = MS2Manager.NEGATIVE_HIT_PREFIX + "%";
 
-        Table.execute(MS2Manager.getSchema(), _updateCountsSql, negativeHitLike, _runId);
+        new SqlExecutor(MS2Manager.getSchema(), _updateCountsSql, negativeHitLike, _runId).execute();
     }
 
 
@@ -560,25 +557,10 @@ public abstract class MS2Importer
         updateRunStatus(_runId, status, statusId);
     }
 
-
-    protected static void updateRunStatus(int run, String status)
-    {
-        // Default statusId = running
-        updateRunStatus(run, status, STATUS_RUNNING);
-    }
-
-
     protected static void updateRunStatus(int run, String status, int statusId)
     {
-        try
-        {
-            Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET Status = ?, StatusId = ? WHERE Run = ?",
-                    status, statusId, run);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        new SqlExecutor(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET Status = ?, StatusId = ? WHERE Run = ?",
+                status, statusId, run).execute();
     }
 
 
@@ -594,13 +576,6 @@ public abstract class MS2Importer
         }
 
         return index;
-    }
-
-
-    protected void logError(String message)
-    {
-        _systemLog.error(message);
-        _log.error(message);
     }
 
 
