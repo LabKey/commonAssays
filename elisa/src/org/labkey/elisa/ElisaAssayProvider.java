@@ -120,20 +120,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
-    {
-        if (!(dataRowId instanceof Integer))
-            return null;
-        OntologyObject dataRow = OntologyManager.getOntologyObject((Integer) dataRowId);
-        if (dataRow == null)
-            return null;
-        OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
-        if (dataRowParent == null)
-            return null;
-        return ExperimentService.get().getExpData(dataRowParent.getObjectURI());
-    }
-
-    @Override
     public String getName()
     {
         return NAME;

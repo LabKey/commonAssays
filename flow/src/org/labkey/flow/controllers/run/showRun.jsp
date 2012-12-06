@@ -36,6 +36,13 @@
 <%@ page import="org.labkey.api.util.MimeMap" %>
 <%@ page import="java.util.Collection" %>
 <%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.flow.data.FlowProperty" %>
+<%@ page import="org.labkey.api.study.Study" %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.data.ContainerManager" %>
+<%@ page import="org.labkey.api.study.StudyService" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -51,8 +58,21 @@
         %><p> Run Comment: <% include(new SetCommentView(run), out); %></p><%
     }
 
-    run.getLSID();
-    
+    String targetStudyId = (String)run.getProperty(FlowProperty.TargetStudy);
+    if (targetStudyId != null && targetStudyId.length() > 0)
+    {
+        Container c = ContainerManager.getForId(targetStudyId);
+        if (c != null)
+        {
+            Study study = StudyService.get().getStudy(c);
+            if (study != null)
+            {
+                ActionURL studyURL = PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c);
+                %><p> Target Study: <a href="<%=h(studyURL)%>"><%=h(study.getLabel())%></a></p><%
+            }
+        }
+    }
+
     FlowQueryView view = new FlowQueryView(form);
     include(view, out);
 

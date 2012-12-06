@@ -68,7 +68,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
             column.setHidden(true);
         }
 
-        ICSMetadata icsMetadata = _schema.getProtocol().getICSMetadata();
+        ICSMetadata icsMetadata = _schema.getProtocol() == null ? null : _schema.getProtocol().getICSMetadata();
         if (icsMetadata != null && icsMetadata.getSpecimenIdColumn() != null && icsMetadata.getSpecimenIdColumn().getName().equalsIgnoreCase(attrName))
         {
             if (_specimenFK == null)

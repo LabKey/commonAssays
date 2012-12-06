@@ -16,6 +16,7 @@
 
 package org.labkey.flow.script;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -355,13 +356,13 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                     assert resolvedFCSFile == null || resolvedFCSFile.isOriginalFCSFile();
                 }
 
-                // Create a 'fake' FCSFile if there is no resolved original FCSFile, or the resolved FCSFile's keywords don't match the extra keywords provided (e.g., extra FlowJo keywords)
+                // Create a 'fake' FCSFile if there is no resolved original FCSFile, or the extra keywords are not a subset of the resolved FCSFile's keywords:
                 // - If there is no 'original' FCSFile, a fake 'FCSFile' is created and used as the DataInput of the FCSAnalysis.
-                // - If there is an 'original' FCSFile and the extra keywords match the original FCSFile, the 'original' FCSFile will be used as the DataInput of the FCSAnalysis.
+                // - If there is an 'original' FCSFile and the extra keywords are a subset of the original FCSFile, the 'original' FCSFile will be used as the DataInput of the FCSAnalysis (no 'fake' FCS file is created.)
                 // - If there is an 'original' FCSFile and there are additional extra keywords, the 'original' FCSFile is a DataInput of the 'fake' FCSFile (which in turn is a DatInput of the FCSAnalysis.)
                 FlowFCSFile flowFCSFile = resolvedFCSFile;
                 AttributeSet keywordAttrs = keywordsMap.get(sampleLabel);
-                if (resolvedFCSFile == null || (keywordAttrs != null && !resolvedFCSFile.getKeywords().equals(keywordAttrs.getKeywords())))
+                if (resolvedFCSFile == null || (keywordAttrs != null && !isSubset(keywordAttrs.getKeywords(), resolvedFCSFile.getKeywords())))
                 {
                     flowFCSFile = createFakeFCSFile(user, container,
                             resolvedFCSFile,
@@ -484,6 +485,34 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             }
             FlowManager.analyze();
         }
+    }
+
+    /**
+     * Returns true if 'a' is a subset of 'b' and the subset values are equal.
+     */
+    private boolean isSubset(Map<String, String> a, Map<String, String> b)
+    {
+        if (a.size() > b.size())
+            return false;
+
+        for (String key : a.keySet())
+        {
+            if (!b.containsKey(key))
+                return false;
+
+            String bValue = b.get(key);
+            if (bValue != null)
+                bValue = bValue.trim();
+
+            String aValue = a.get(key);
+            if (aValue != null)
+                aValue = aValue.trim();
+
+            if (!ObjectUtils.equals(aValue, bValue))
+                return false;
+        }
+
+        return true;
     }
 
     // Create a 'fake' FCSFile for the import.

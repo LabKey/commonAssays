@@ -112,8 +112,10 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         // UNDONE: only import attrs that match the filter
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
+        Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles();
+
         if (keywordsMap.size() > 0)
-            info("Preparing keywords for " + keywordsMap.size() + " samples...");
+            info("Preparing keywords for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : keywordsMap.size()) + " samples...");
         for (Map.Entry<String, AttributeSet> entry : keywordsMap.entrySet())
         {
             String sampleLabel = entry.getKey();
@@ -125,13 +127,13 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             // Set the keywords URI using the resolved FCS file or the FCS file in the runFilePathRoot directory
             URI uri = null;
             File file = null;
-            if (getSelectedFCSFiles() != null)
+            if (selectedFCSFiles != null)
             {
                 // Don't import unless the sample label is selected.
-                if (!getSelectedFCSFiles().containsKey(sampleLabel))
+                if (!selectedFCSFiles.containsKey(sampleLabel))
                     continue;
 
-                FlowFCSFile resolvedFCSFile = getSelectedFCSFiles().get(sampleLabel);
+                FlowFCSFile resolvedFCSFile = selectedFCSFiles.get(sampleLabel);
                 if (resolvedFCSFile != null)
                 {
                     uri = resolvedFCSFile.getFCSURI();
@@ -153,10 +155,15 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         }
 
         if (resultsMap.size() > 0)
-            info("Preparing results for " + resultsMap.size() + " samples...");
+            info("Preparing results for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : resultsMap.size()) + " samples...");
         for (Map.Entry<String, AttributeSet> entry : resultsMap.entrySet())
         {
             String sampleLabel = entry.getKey();
+
+            // Don't import unless the sample label is selected.
+            if (selectedFCSFiles != null && !selectedFCSFiles.containsKey(sampleLabel))
+                continue;
+
             sampleLabels.add(sampleLabel);
 
             AttributeSet resultsAttrs = entry.getValue();
@@ -170,7 +177,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         return saveAnalysis(getUser(), getContainer(), getExperiment(),
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
                 getRunFilePathRoot(),
-                getSelectedFCSFiles(),
+                selectedFCSFiles,
                 keywordsMap,
                 sampleCompMatrixMap,
                 resultsMap,

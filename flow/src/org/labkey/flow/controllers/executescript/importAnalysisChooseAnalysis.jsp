@@ -165,12 +165,14 @@ be analyzed once in a given analysis folder.  If you want to analyze the same FC
 those results must be put into different analysis folders.
 <br>
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    <% if (analyses.length == 0 || analyses.length == disabledAnalyses.size()) { %>
-    What do you want to call the new analysis folder?  You will be able to use this name for multiple uploaded workspaces.<br><br>
-    <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>">
-    <input type="hidden" name="createAnalysis" value="true"/>
-    <% } else { %>
     <br>
+    <% if (analyses.length == 0 || analyses.length == disabledAnalyses.size()) { %>
+    What do you want to call the new analysis folder?  You will be able to use this name for multiple uploaded workspaces.<br>
+    <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>">
+    <input type="hidden" name="createAnalysis" value="true">
+    <br>
+    <br>
+    <% } else { %>
     <table>
         <tr>
             <td valign="top">
@@ -216,8 +218,9 @@ those results must be put into different analysis folders.
             </td>
         </tr>
     </table>
-</div>
 <% } %>
+</div>
+
 <% if (targetStudies.size() > 0) { %>
 <b>Target Study</b>
 <br>
