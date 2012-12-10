@@ -27,16 +27,17 @@
 #  - 4.0.20120509 : Changes for LabKey server 12.2
 #  - 4.1.20120806 : Issue 15709: Luminex tranform : QC Control plots not displayed when EC50 value out of acceptable range
 #  - 4.2.20121121 : Changes for LabKey server 12.3, Issue 15042: Transform script (and AUC calculation error) when luminex file uploaded that has an ExpConc value of zero for a standard well
+#  - 5.0.20121210 : Change for LabKey server 13.1
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "4.2.20121121";
+transformVersion = "5.0.20121210";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
 
 source("${srcDirectory}/youtil.R");
 # Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
-library(Ruminex, quietly=TRUE);
+suppressMessages(library(Ruminex));
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
 ########################################## FUNCTIONS ##########################################
