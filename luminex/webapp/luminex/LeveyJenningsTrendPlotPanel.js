@@ -154,7 +154,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.ec504plPanel = new Ext.Panel({
             itemId: "EC50 4PL",
             title: "EC50 - 4PL",
-            html: "<div id='EC50 4PLTrendPlotDiv' class='ec504plTrendPlot'></div></div>",
+            html: "<div id='EC50 4PLTrendPlotDiv' class='ec504plTrendPlot'>To begin, choose an Antigen, Isotype, and Conjugate from the panel to the left and click the Apply button.</div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -164,7 +164,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.ec505plPanel = new Ext.Panel({
             itemId: "EC50 5PL",
             title: "EC50 - 5PL Rumi",
-            html: "<div id='EC50 5PLTrendPlotDiv' class='ec505plTrendPlot'></div></div>",
+            html: "<div id='EC50 5PLTrendPlotDiv' class='ec505plTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -174,7 +174,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.aucPanel = new Ext.Panel({
             itemId: "AUC",
             title: "AUC",
-            html: "<div id='AUCTrendPlotDiv' class='aucTrendPlot'></div></div>",
+            html: "<div id='AUCTrendPlotDiv' class='aucTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -184,7 +184,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.mfiPanel = new Ext.Panel({
             itemId: "High MFI",
             title: "High MFI",
-            html: "<div id='High MFITrendPlotDiv' class='mfiTrendPlot'></div></div>",
+            html: "<div id='High MFITrendPlotDiv' class='mfiTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,

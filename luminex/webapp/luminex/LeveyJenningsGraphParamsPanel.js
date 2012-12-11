@@ -67,7 +67,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
 
         // add grid panel element for selection of the antigen/analyte
         this.analyteGrid = new Ext.grid.GridPanel({
-            id: 'analtye-grid-panel',
+            id: 'analyte-grid-panel',
             fieldLabel: 'Antigens',
             disabled: true,
             height: 225,

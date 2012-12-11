@@ -32,6 +32,7 @@ import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -91,12 +92,16 @@ public class LuminexController extends SpringActionController
             QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME);
             QueryView runsView = createQueryView(runsSetting, schema, errors);
             runsView.setTitle("Excluded Analytes");
+            runsView.setTitlePopupHelp("Excluded Analytes", "Shows all of the analytes that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
             result.setupViews(runsView, false, form.getProvider(), form.getProtocol());
 
             QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME);
             QueryView wellsView = createQueryView(wellsSetting, schema, errors);
             wellsView.setTitle("Excluded Wells");
+            wellsView.setTitlePopupHelp("Excluded Wells", "Shows all of the wells that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
             result.addView(wellsView);
+
+            setHelpTopic(new HelpTopic("excludeAnalytes"));
 
             return result;
         }
@@ -137,6 +142,7 @@ public class LuminexController extends SpringActionController
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             settings.setAllowChooseQuery(false);
+            setHelpTopic(new HelpTopic("applyGuideSets"));
             QueryView view = new QueryView(schema, settings, errors)
             {
                 @Override
@@ -187,6 +193,7 @@ public class LuminexController extends SpringActionController
             result.addView(header);
             JspView report = new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
             result.addView(report);
+            setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             return result;
         }
 

@@ -100,11 +100,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             {
                 JspView<LuminexRunUploadForm> top = new JspView<LuminexRunUploadForm>("/org/labkey/luminex/titrationWellRoles.jsp", form);
                 top.setTitle("Define Titration Well Roles");
+                top.setTitlePopupHelp("Define Titration Well Roles", "Samples that are titrated across different wells can used in different ways. Standards are used to calculate a titration curve against which unknowns are fit. QC Controls also define a curve and used to compare runs against each other. Choose the purpose(s) for each titration.");
                 vbox.addView(top);
             }
 
             InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
             view.setTitle("Analyte Properties");
+            view.setTitlePopupHelp("Analyte Properties", "Each Luminex assay design defines a set of properties to track for analytes. Additionally, if multiple titrations are present in a given run, each analyte may be assigned to the appropriate set of titrations.");
 
             for (String analyte : analyteNames)
                 view.getDataRegion().addHiddenFormField("analyteNames", analyte);

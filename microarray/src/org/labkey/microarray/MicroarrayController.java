@@ -28,6 +28,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GWTView;
@@ -65,6 +66,7 @@ public class MicroarrayController extends SpringActionController
     {
         protected ModelAndView createGWTView(Map<String, String> properties)
         {
+            setHelpTopic(new HelpTopic("microarrayProperties"));
             return new GWTView(MicroarrayAssayDesigner.class, properties);
         }
     }
