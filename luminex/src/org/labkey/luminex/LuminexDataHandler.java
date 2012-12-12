@@ -1171,6 +1171,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(60.0, 60.0, null));
             assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(60.01, 60.0, null));
             assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(59.99, 60.0, null));
+
+            // Issue 16767
+            assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(0.024779, 0.016229, null));
+            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(0.017644, 0.021754, null));
         }
     }
 
@@ -1371,10 +1375,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             if (null == stdDev)
                 stdDev = 0.0;
 
-            // compare everything to two decimal places
-            value = (double)Math.round(value * 100) / 100;
-            double top = (double)Math.round((average + 3 * stdDev) * 100) / 100;
-            double bottom = (double)Math.round((average - 3 * stdDev) * 100) / 100;
+            // compare everything to six decimal places, Issue 16767
+            int precision = 1000000;
+            value = (double)Math.round(value * precision) / precision;
+            double top = (double)Math.round((average + 3 * stdDev) * precision) / precision;
+            double bottom = (double)Math.round((average - 3 * stdDev) * precision) / precision;
 
             if (value > top)
                 return "over";

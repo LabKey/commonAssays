@@ -179,7 +179,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             if (getKeywordDirectories() != null && getKeywordDirectories().size() > 0)
             {
                 // CONSIDER: Only import FCSFiles in keyword directories that are in selectedFCSFiles if not null
-                KeywordsJob keywordsJob = new KeywordsJob(getInfo(), _protocol, getKeywordDirectories(), PipelineService.get().findPipelineRoot(getContainer()));
+                KeywordsJob keywordsJob = new KeywordsJob(getInfo(), _protocol, getKeywordDirectories(), getTargetStudy(), PipelineService.get().findPipelineRoot(getContainer()));
                 keywordsJob.setLogFile(getLogFile());
                 keywordsJob.setLogLevel(getLogLevel());
                 keywordsJob.setSubmitted();
@@ -225,10 +225,6 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
             if (_run != null)
             {
-                // Add TargetStudy property to ExpRun object
-                if (getTargetStudy() != null)
-                    _run.setProperty(getUser(), FlowProperty.TargetStudy.getPropertyDescriptor(), getTargetStudy().getId());
-
 //                // Add run level graphs as attachments to the run
 //                File[] runImages = _analysisPathRoot.listFiles(new FilenameFilter() {
 //                    public boolean accept(File dir, String name)

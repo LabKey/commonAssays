@@ -67,19 +67,6 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         {
             column.setHidden(true);
         }
-
-        ICSMetadata icsMetadata = _schema.getProtocol() == null ? null : _schema.getProtocol().getICSMetadata();
-        if (icsMetadata != null && icsMetadata.getSpecimenIdColumn() != null && icsMetadata.getSpecimenIdColumn().getName().equalsIgnoreCase(attrName))
-        {
-            if (_specimenFK == null)
-            {
-                ExpProtocol protocol = _schema.getProtocol().getProtocol();
-                AssayProvider provider = AssayService.get().getProvider(protocol);
-                AssayProtocolSchema schema = provider.createProtocolSchema(_schema.getUser(), _schema.getContainer(), protocol, null);
-                _specimenFK = new SpecimenForeignKey(schema, provider, protocol);
-            }
-            column.setFk(_specimenFK);
-        }
     }
 
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, String attrName, int attrId)

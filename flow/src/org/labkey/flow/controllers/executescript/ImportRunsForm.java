@@ -34,6 +34,7 @@ public class ImportRunsForm extends PipelinePathForm
 
     private String _displayPath;
     private Map<String, String> _newPaths = Collections.emptyMap();
+    private String _targetStudy;
 
     public boolean isConfirm()
     {
@@ -74,6 +75,16 @@ public class ImportRunsForm extends PipelinePathForm
     public void setNewPaths(Map<String, String> newPaths)
     {
         _newPaths = newPaths;
+    }
+
+    public String getTargetStudy()
+    {
+        return _targetStudy;
+    }
+
+    public void setTargetStudy(String targetStudy)
+    {
+        _targetStudy = targetStudy;
     }
 
     public ReturnURLString getReturnUrl()

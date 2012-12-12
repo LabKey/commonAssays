@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.fhcrc.cpas.exp.xml.*;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExperimentService;
@@ -132,7 +133,7 @@ public class KeywordsHandler extends BaseHandler
         return FlowRun.fromLSID(run.getAbout());
     }
 
-    protected FlowRun importRun(File directory) throws Exception
+    protected FlowRun importRun(File directory, Container targetStudy) throws Exception
     {
         addStatus("Reading keywords from directory " + directory);
         File[] files = directory.listFiles();
@@ -151,7 +152,15 @@ public class KeywordsHandler extends BaseHandler
             addStatus("No FCS files found");
             return null;
         }
-        return addRun(directory, lstFileData);
+
+        FlowRun run = addRun(directory, lstFileData);
+        if (targetStudy != null)
+        {
+            addStatus("Setting target study on keyword run: " + targetStudy);
+            run.setProperty(_job.getUser(), FlowProperty.TargetStudy.getPropertyDescriptor(), targetStudy.getId());
+        }
+
+        return run;
     }
 
     protected FCSAnalyzer getAnalyzer()
@@ -164,9 +173,9 @@ public class KeywordsHandler extends BaseHandler
         throw new UnsupportedOperationException();
     }
 
-    public FlowRun run(File directory) throws Exception
+    public FlowRun run(File directory, Container targetStudy) throws Exception
     {
-        return importRun(directory);
+        return importRun(directory, targetStudy);
     }
 
 

@@ -82,8 +82,8 @@
         items.push(Ext4.create('LABKEY.ext4.GenericChartPanel', {
             height          : 500,
             border          : true,
-            schemaName      : <%=form.getSchemaName() != null ? q(form.getSchemaName()) : null %>,
-            queryName       : <%=form.getQueryName() != null ? q(form.getQueryName()) : null %>,
+            schemaName      : <%=q(form.getSchemaName() != null ? form.getSchemaName() : null) %>,
+            queryName       : <%=q(form.getQueryName() != null ? form.getQueryName() : null) %>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
             renderType      : <%=q(form.getRenderType())%>,
             id              : <%=q(form.getComponentId())%>,
@@ -91,11 +91,11 @@
             allowShare      : <%=c.hasPermission(ctx.getUser(), ShareReportPermission.class)%>,
             isDeveloper     : <%=ctx.getUser().isDeveloper()%>,
             hideSave        : <%=ctx.getUser().isGuest()%>,
-            autoColumnYName  : <%=form.getAutoColumnYName() != null ? q(form.getAutoColumnYName()) : null%>,
-            autoColumnXName  : <%=form.getAutoColumnXName() != null ? q(form.getAutoColumnXName()) : null%>,
-            defaultNumberFormat: eval("<%=numberFormatFn%>"),
+            autoColumnYName  : <%=q(form.getAutoColumnYName() != null ? form.getAutoColumnYName() : null)%>,
+            autoColumnXName  : <%=q(form.getAutoColumnXName() != null ? form.getAutoColumnXName() : null)%>,
+            defaultNumberFormat: eval(<%=q(numberFormatFn)%>),
             allowEditMode   : <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>,
-            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=gson.toJson(form.getFitParams())%>}
+            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(gson.toJson(form.getFitParams()))%>}
         }));
 
         items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {
@@ -132,5 +132,5 @@
 
 </script>
 
-<div id="<%= renderId%>" style="width:100%;"></div>
+<div id="<%=h(renderId)%>" style="width:100%;"></div>
 

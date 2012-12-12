@@ -340,14 +340,17 @@ public class AnalysisScriptController extends BaseFlowController
             List<File> files;
             PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (form.isCurrent())
-            {
                 files = Collections.singletonList(pr.resolvePath(form.getPath()));
-            }
             else
                 files = form.getValidatedFiles(form.getContainer());
 
+            // validate target study
+            Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
+            if (errors.hasErrors())
+                return confirmRuns(form, errors);
+
             ViewBackgroundInfo vbi = getViewBackgroundInfo();
-            KeywordsJob job = new KeywordsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files, pr);
+            KeywordsJob job = new KeywordsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files, targetStudy, pr);
             return HttpView.redirect(executeScript(job));
         }
 
@@ -405,6 +408,41 @@ public class AnalysisScriptController extends BaseFlowController
         {
             return _analysisScript;
         }
+    }
+
+    private Container getTargetStudy(String targetStudyId, Errors errors) throws Exception
+    {
+        Container targetStudy = null;
+        if (targetStudyId != null && targetStudyId.length() > 0)
+        {
+            targetStudy = ContainerManager.getForId(targetStudyId);
+            if (targetStudy == null)
+            {
+                errors.reject(ERROR_MSG, "TargetStudy container '" + targetStudyId + "' doesn't exist.");
+                return null;
+            }
+
+            if (!targetStudy.hasPermission(getUser(), ReadPermission.class))
+            {
+                errors.reject(ERROR_MSG, "You don't have read permission to the TargetStudy container '" + targetStudyId + "'.");
+                return null;
+            }
+
+            Set<Study> studies = StudyService.get().findStudy(targetStudy, getUser());
+            if (studies == null || studies.isEmpty())
+            {
+                errors.reject(ERROR_MSG, "No study found in TargetStudy container '" + targetStudy.getPath() + "'.");
+                return null;
+            }
+
+            if (studies.size() > 1)
+            {
+                errors.reject(ERROR_MSG, "Found more than one study for TargetStudy container '" + targetStudy.getPath() + "'");
+                return null;
+            }
+        }
+
+        return targetStudy;
     }
 
     public enum ImportAnalysisStep
@@ -805,41 +843,6 @@ public class AnalysisScriptController extends BaseFlowController
             if (form.getSelectAnalysisEngine() != null)
                 return form.getSelectAnalysisEngine();
             return AnalysisEngine.FlowJoWorkspace;
-        }
-
-        private Container getTargetStudy(ImportAnalysisForm form, Errors errors) throws Exception
-        {
-            Container targetStudy = null;
-            if (form.getTargetStudy() != null && form.getTargetStudy().length() > 0)
-            {
-                targetStudy = ContainerManager.getForId(form.getTargetStudy());
-                if (targetStudy == null)
-                {
-                    errors.reject(ERROR_MSG, "TargetStudy container '" + form.getTargetStudy() + "' doesn't exist.");
-                    return null;
-                }
-
-                if (!targetStudy.hasPermission(getUser(), ReadPermission.class))
-                {
-                    errors.reject(ERROR_MSG, "You don't have read permission to the TargetStudy container '" + form.getTargetStudy() + "'.");
-                    return null;
-                }
-
-                Set<Study> studies = StudyService.get().findStudy(targetStudy, getUser());
-                if (studies == null || studies.isEmpty())
-                {
-                    errors.reject(ERROR_MSG, "No study found in TargetStudy container '" + form.getTargetStudy() + "'.");
-                    return null;
-                }
-
-                if (studies.size() > 1)
-                {
-                    errors.reject(ERROR_MSG, "Found more than one study for TargetStudy container '" + form.getTargetStudy() + "'");
-                    return null;
-                }
-            }
-
-            return targetStudy;
         }
 
         private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors) throws Exception
@@ -1377,9 +1380,15 @@ public class AnalysisScriptController extends BaseFlowController
                 }
             }
 
-            Container targetStudy = getTargetStudy(form, errors);
+            Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
             if (errors.hasErrors())
                 return;
+
+            if (targetStudy != null && (keywordDirs == null || keywordDirs.size() == 0))
+            {
+                errors.reject(ERROR_MSG, "Target study can only be selected when also importing a directory of FCS files");
+                return;
+            }
 
             form.setWizardStep(ImportAnalysisStep.CONFIRM);
         }
@@ -1451,9 +1460,15 @@ public class AnalysisScriptController extends BaseFlowController
             if (errors.hasErrors())
                 return;
 
-            Container targetStudy = getTargetStudy(form, errors);
+            Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
             if (errors.hasErrors())
                 return;
+
+            if (targetStudy != null && (keywordDirs == null || keywordDirs.size() == 0))
+            {
+                errors.reject(ERROR_MSG, "Target study can only be selected when also importing a directory of FCS files");
+                return;
+            }
 
             FlowJob job = null;
             if (analysisEngine == null || AnalysisEngine.FlowJoWorkspace == analysisEngine)

@@ -20,25 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerForeignKey;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.FilterInfo;
-import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TempTableTracker;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
@@ -55,6 +37,7 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.query.SamplesSchema;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -75,7 +58,10 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
@@ -419,7 +405,10 @@ public class FlowSchema extends UserSchema
                     return detach().createCompensationMatrixTable("Lookup");
                 }
             });
+        }
 
+        if (type == null || type == FlowDataType.FCSFile)
+        {
             PropertyDescriptor pd = FlowProperty.TargetStudy.getPropertyDescriptor();
             PropertyColumn colTargetStudy = new PropertyColumn(pd, colLSID, getContainer(), getUser(), true);
             colTargetStudy.setLabel(AbstractAssayProvider.TARGET_STUDY_PROPERTY_CAPTION);
@@ -861,7 +850,7 @@ public class FlowSchema extends UserSchema
             ret.copyAttributesFrom(underlyingColumn);
             ret.setHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
-                ret.setFk(new RowIdForeignKey(ret));            
+                ret.setFk(new RowIdForeignKey(ret));
             addColumn(ret);
             return ret;
         }
@@ -1397,6 +1386,11 @@ public class FlowSchema extends UserSchema
 
     public FlowDataTable createFCSFileTable(String name)
     {
+        return createFCSFileTable(name, true);
+    }
+
+    public FlowDataTable createFCSFileTable(String name, boolean specimenRelativeFromFCSFileTable)
+    {
         final FlowDataTable ret = createDataTable(name, FlowDataType.FCSFile);
         ret.getColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
@@ -1410,6 +1404,37 @@ public class FlowSchema extends UserSchema
         if (ss == null)
         {
             colMaterialInput.setHidden(true);
+        }
+
+        // Add the specimen lookup if possible.
+        ICSMetadata metadata = getProtocol() == null ? null : getProtocol().getICSMetadata();
+        if (metadata != null && metadata.getSpecimenIdColumn() != null)
+        {
+            // The FieldKey is relative from the flow.FCSAnalysis table but the SpecimenFK is attached to flow.FCSFiles, so we need to remove the root 'FCSFiles' FieldKey.
+            FieldKey specimenIdFieldKey = metadata.getSpecimenIdColumn();
+            List<String> parts = specimenIdFieldKey.getParts();
+            if (parts.get(0).equals("FCSFile"))
+            {
+                parts.remove(0);
+                specimenIdFieldKey = FieldKey.fromParts(parts);
+
+                Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(ret, Collections.singleton(specimenIdFieldKey));
+                ColumnInfo specimenIdCol = cols.get(specimenIdFieldKey);
+                if (specimenIdCol != null)
+                {
+                    ColumnInfo colSpecimen = new AliasedColumn(ret, specimenIdFieldKey, specimenIdCol, false);
+                    colSpecimen.setName("Specimen");
+                    colSpecimen.setLabel("Specimen");
+                    ret.addColumn(colSpecimen);
+
+                    ExpProtocol protocol = getProtocol().getProtocol();
+                    AssayProvider provider = AssayService.get().getProvider(protocol);
+                    AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), protocol, null);
+                    FlowAssayProvider.FlowAssayTableMetadata tableMetadata = new FlowAssayProvider.FlowAssayTableMetadata(provider, protocol, specimenRelativeFromFCSFileTable);
+                    SpecimenForeignKey specimenFK = new SpecimenForeignKey(schema, provider, protocol, tableMetadata);
+                    colSpecimen.setFk(specimenFK);
+                }
+            }
         }
 
         String bTRUE = _dbSchema.getSqlDialect().getBooleanTRUE();
@@ -1486,7 +1511,7 @@ public class FlowSchema extends UserSchema
                 FlowTableType.FCSFiles.toString(), "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
                 {
-                    return detach().createFCSFileTable("FCSFile");
+                    return detach().createFCSFileTable("FCSFile", false);
                 }
             });
 
@@ -1548,7 +1573,7 @@ public class FlowSchema extends UserSchema
                 "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
                 {
-                    return detach().createFCSFileTable("FCSFile");
+                    return detach().createFCSFileTable("FCSFile", false);
                 }
             });
 

@@ -176,10 +176,10 @@
 
 
 </script>
-<link type="text/css" rel="StyleSheet" href="<%=contextPath%>/slider/css/rangeslider.css" />
-<script type="text/javascript" src="<%=contextPath%>/slider/range.js"></script>
-<script type="text/javascript" src="<%=contextPath%>/slider/slidertimer.js"></script>
-<script type="text/javascript" src="<%=contextPath%>/slider/rangeslider.js"></script>
+<link type="text/css" rel="StyleSheet" href="<%=h(contextPath)%>/slider/css/rangeslider.css" />
+<script type="text/javascript" src="<%=h(contextPath)%>/slider/range.js"></script>
+<script type="text/javascript" src="<%=h(contextPath)%>/slider/slidertimer.js"></script>
+<script type="text/javascript" src="<%=h(contextPath)%>/slider/rangeslider.js"></script>
 
 <!-- Main View Layout Table -->
 <table>
@@ -218,11 +218,11 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Time</td>
-                    <td><%=model.formatNumber(feature.getTime())%></td>
+                    <td><%=text(model.formatNumber(feature.getTime()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">m/z</td>
-                    <td><%=model.formatNumber(feature.getMz())%>
+                    <td><%=text(model.formatNumber(feature.getMz()))%>
                         &nbsp;<%=textLink("find similar", model.getFindSimilarUrl())%>
                     </td>
                 </tr>
@@ -232,11 +232,11 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Mass</td>
-                    <td><%=model.formatNumber(feature.getMass())%></td>
+                    <td><%=text(model.formatNumber(feature.getMass()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Intensity</td>
-                    <td><%=model.formatNumber(feature.getIntensity())%></td>
+                    <td><%=text(model.formatNumber(feature.getIntensity()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Charge</td>
@@ -248,15 +248,15 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">KL</td>
-                    <td><%=model.formatNumber(feature.getKl())%></td>
+                    <td><%=text(model.formatNumber(feature.getKl()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Background</td>
-                    <td><%=model.formatNumber(feature.getBackground())%></td>
+                    <td><%=text(model.formatNumber(feature.getBackground()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Median</td>
-                    <td><%=model.formatNumber(feature.getMedian())%></td>
+                    <td><%=text(model.formatNumber(feature.getMedian()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Peaks</td>
@@ -272,7 +272,7 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Total Intensity</td>
-                    <td><%=model.formatNumber(feature.getTotalIntensity())%></td>
+                    <td><%=text(model.formatNumber(feature.getTotalIntensity()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">MS2 Scan</td>
@@ -295,7 +295,7 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">MS2 Probability</td>
-                    <td><%=model.formatNumber(feature.getMs2ConnectivityProbability())%></td>
+                    <td><%=text(model.formatNumber(feature.getMs2ConnectivityProbability()))%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Matching Peptide</td>
@@ -326,7 +326,7 @@
                 <tr>
                     <td class="labkey-alternate-row">Experiment Run</td>
                     <td>
-                        <a href="<%=model.getRunDetailsUrl()%>">
+                        <a href="<%=h(model.getRunDetailsUrl())%>">
                         <%=feature.getExpRun() == null ? "&nbsp;" : h(feature.getExpRun().getName())%>
                         </a>
                     </td>
@@ -361,12 +361,12 @@
             %>
             <!-- m/z and intensity peaks mass chart -->
             <br/>
-            <a href="<%=model.getPeaksUrl(true)%>">
-            <img width="425" height="300" src="<%=model.getChartUrl("spectrum")%>" alt="Spectrum chart" title="Click to see tabular data"/>
+            <a href="<%=h(model.getPeaksUrl(true))%>">
+            <img width="425" height="300" src="<%=h(model.getChartUrl("spectrum"))%>" alt="Spectrum chart" title="Click to see tabular data"/>
             </a>
             <br/>Intensities of peaks with a
             <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
-            similar m/z as the feature (<%=model.getMzWindow()%> <b>[adjust]</b>)</a>,
+            similar m/z as the feature (<%=h(model.getMzWindow())%> <b>[adjust]</b>)</a>,
             for a particular scan.
         </td>
     </tr>
@@ -394,12 +394,12 @@
                 <tr>
                     <td colspan="3" style="text-align:center">
                         <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
-                            <input type="hidden" name="srcUrl" value="<%=model.getSrcUrl()%>"/>
+                            <input type="hidden" name="srcUrl" value="<%=h(model.getSrcUrl())%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
                             <input type="hidden" name="scanWindowLow" value="<%=model.getScanWindowLow()%>"/>
                             <input type="hidden" name="scanWindowHigh" value="<%=model.getScanWindowHigh()%>"/>
-                            <%=model.getQueryFiltersAsInputs()%>
+                            <%=text(model.getQueryFiltersAsInputs())%>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtMzWindowLow" name="mzWindowLow" size="4" onchange="_slider.setValueLow(this.value);" tabindex="2"/>
@@ -436,13 +436,13 @@
             <!-- retention time and intensity peaks elution chart -->
             <% /*Note that this chart does not use the mzWindow* values since it is supposed to show the closest peak values within a fine tolerance*/ %>
 
-            <a href="<%=model.getPeaksUrl(-0.02, 0.02, false)%>">
-            <img width="425" height="300" src="<%=model.getChartUrl("elution")%>" alt="Elution chart" title="Click to see tabular data"/>
+            <a href="<%=h(model.getPeaksUrl(-0.02, 0.02, false))%>">
+            <img width="425" height="300" src="<%=h(model.getChartUrl("elution"))%>" alt="Elution chart" title="Click to see tabular data"/>
             </a>
 
             <br/>Intensity of the peaks with the closest m/z value to the feature, across
             <a href="javascript:{}" onclick="showScanFilter();">
-                all scans within the feature's range (<%=model.getScanWindow()%> scans <b>[adjust]</b>)
+                all scans within the feature's range (<%=h(model.getScanWindow())%> scans <b>[adjust]</b>)
             </a>.
         </td>
 
@@ -468,12 +468,12 @@
                 <tr>
                     <td style="text-align:center">
                         <form id="frmScanWindowFilter" action="showFeatureDetails.view" method="GET">
-                            <input type="hidden" name="srcUrl" value="<%=model.getSrcUrl()%>"/>
+                            <input type="hidden" name="srcUrl" value="<%=h(model.getSrcUrl())%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
                             <input type="hidden" name="mzWindowLow" value="<%=model.getMzWindowLow()%>"/>
                             <input type="hidden" name="mzWindowHigh" value="<%=model.getMzWindowHigh()%>"/>
-                            <%=model.getQueryFiltersAsInputs()%>
+                            <%=text(model.getQueryFiltersAsInputs())%>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtScanWindowLow" name="scanWindowLow" size="3" onchange="_sliderScan.setValueLow(this.value)" tabindex="102"/>
@@ -508,17 +508,17 @@
 
             <!-- retention time and m/z bubble chart -->
 
-            <a href="<%=model.getPeaksUrl(false)%>">
-            <img width="425" height="300" src="<%=model.getChartUrl("bubble")%>"
+            <a href="<%=h(model.getPeaksUrl(false))%>">
+            <img width="425" height="300" src="<%=h(model.getChartUrl("bubble"))%>"
                  alt="Intesities Bubble chart" title="Click to see tabular data"/>
             </a>
 
             <br/>Peaks with a
             <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
-            similar m/z as the feature (<%=model.getMzWindow()%> <b>[adjust]</b>)</a>,
+            similar m/z as the feature (<%=h(model.getMzWindow())%> <b>[adjust]</b>)</a>,
             across
             <a href="javascript:{}" onclick="showScanFilter();">
-                all scans within the feature's range (<%=model.getScanWindow()%> scans <b>[adjust]</b>)
+                all scans within the feature's range (<%=h(model.getScanWindow())%> scans <b>[adjust]</b>)
             </a>. The size and color of the bubbles represent the peak's relative intensity.
         </td>
     </tr>

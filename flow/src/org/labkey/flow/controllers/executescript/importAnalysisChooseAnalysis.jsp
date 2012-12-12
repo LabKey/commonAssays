@@ -47,14 +47,6 @@
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
-    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
-    Map<String, String> targetStudies = new LinkedHashMap<String, String>();
-    targetStudies.put("", "[None]");
-    for (Study study : validStudies)
-    {
-        Container c = study.getContainer();
-        targetStudies.put(c.getId(), c.getPath() + " (" + study.getLabel() + ")");
-    }
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
@@ -221,19 +213,42 @@ those results must be put into different analysis folders.
 <% } %>
 </div>
 
-<% if (targetStudies.size() > 0) { %>
-<b>Target Study</b>
-<br>
-<em>Optionally</em>, select a target study for the imported flow run.  If the flow metadata includes PTID and Date/Visit columns,
-specimen information from the study will be included in the FCSAnalyses table.
-<br>
-<div style="padding-left: 2em; padding-bottom: 1em;">
-    <br>
-    <label for="targetStudy">Choose a target study folder:</label><br>
-    <select id="targetStudy" name="targetStudy">
-        <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
-    </select>
-    <br><br>
-</div>
-<% } %>
+<%
+// Let user select a Target Study only if we are also importing a keywords directory.
+if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
+{
+    // Get set of valid copy to study targets
+    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
+    Map<String, String> targetStudies = new LinkedHashMap<String, String>();
+    targetStudies.put("", "[None]");
+    for (Study study : validStudies)
+    {
+        Container c = study.getContainer();
+        targetStudies.put(c.getId(), c.getPath() + " (" + study.getLabel() + ")");
+    }
+
+    if (validStudies.size() > 0)
+    {
+        // Pre-select the most recent target study
+        if (form.getTargetStudy() == null)
+            form.setTargetStudy(FlowRun.findMostRecentTargetStudy(container));
+
+        %>
+        <b>Target Study</b>
+        <br>
+        <em>Optionally</em>, select a target study for the imported flow run.  If the flow metadata includes PTID and Date/Visit columns,
+        specimen information from the study will be included in the FCSAnalyses table.
+        <br>
+        <div style="padding-left: 2em; padding-bottom: 1em;">
+            <br>
+            <label for="targetStudy">Choose a target study folder:</label><br>
+            <select id="targetStudy" name="targetStudy">
+                <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
+            </select>
+            <br><br>
+        </div>
+        <%
+    }
+}
+%>
 

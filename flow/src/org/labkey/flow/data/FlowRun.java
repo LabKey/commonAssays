@@ -46,6 +46,21 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
 
+    public static Comparator<FlowRun> NAME_COMPARATOR = new Comparator<FlowRun>() {
+        public int compare(FlowRun o1, FlowRun o2)
+        {
+            return o1.getName().compareTo(o2.getName());
+        }
+    };
+
+    public static Comparator<FlowRun> CREATED_COMPARATOR = new Comparator<FlowRun>() {
+        public int compare(FlowRun o1, FlowRun o2)
+        {
+            return o1.getExperimentRun().getCreated().compareTo(o2.getExperimentRun().getCreated());
+        }
+    };
+
+
     static public String getRunLSIDPrefix()
     {
         // See ExperimentServiceImpl.getNamespacePrefix(ExpRunImpl.class)
@@ -325,16 +340,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             return null;
     }
 
-    static public void sortRuns(List<FlowRun> runs)
-    {
-        Collections.sort(runs, new Comparator<FlowRun>() {
-            public int compare(FlowRun o1, FlowRun o2)
-            {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-    }
-
     static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step)
     {
         return getRunsForPath(container, step, null);
@@ -382,6 +387,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot)
     {
+        return getRunsForPath(container, step, runFilePathRoot, NAME_COMPARATOR);
+    }
+
+    static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot, Comparator<FlowRun> comparator)
+    {
         List<FlowRun> ret = new ArrayList<FlowRun>();
         ExpProtocol childProtocol = null;
         if (step != null)
@@ -398,8 +408,27 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             if (runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(run.getFilePathRoot())))
                 ret.add(new FlowRun(run));
         }
-        sortRuns(ret);
+
+        if (comparator != null)
+            Collections.sort(ret, comparator);
+
         return ret.toArray(new FlowRun[0]);
+    }
+
+    public static String findMostRecentTargetStudy(Container container)
+    {
+        FlowRun[] runs = FlowRun.getRunsForPath(container, FlowProtocolStep.keywords, null, FlowRun.CREATED_COMPARATOR);
+        if (runs != null)
+        {
+            for (FlowRun run : runs)
+            {
+                String targetStudy = (String)run.getProperty(FlowProperty.TargetStudy);
+                if (targetStudy != null && targetStudy.length() > 0)
+                    return targetStudy;
+            }
+        }
+
+        return null;
     }
 
     public FlowProtocolStep getStep()

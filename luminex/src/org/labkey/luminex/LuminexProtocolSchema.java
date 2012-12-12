@@ -255,7 +255,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public ExpDataTable createDataFileTable()
     {
-        final ExpDataTable ret = ExperimentService.get().createDataTable(DATA_FILE_TABLE_NAME, AssayService.get().createSchema(getUser(), getContainer(), null));
+        final ExpDataTable ret = ExperimentService.get().createDataTable(DATA_FILE_TABLE_NAME, this);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);

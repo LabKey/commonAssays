@@ -25,6 +25,12 @@
 <%@ page import="org.labkey.flow.controllers.executescript.ImportRunsForm" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.api.study.Study" %>
+<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
+<%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ImportRunsForm> me = (JspView<ImportRunsForm>) HttpView.currentView();
@@ -34,6 +40,20 @@
     Container c = context.getContainer();
 
     Map<String, String> paths = form.getNewPaths();
+
+    // Get set of valid copy to study targets
+    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
+    Map<String, String> targetStudies = new LinkedHashMap<String, String>();
+    targetStudies.put("", "[None]");
+    for (Study study : validStudies)
+    {
+        Container studyContainer = study.getContainer();
+        targetStudies.put(studyContainer.getId(), studyContainer.getPath() + " (" + study.getLabel() + ")");
+    }
+
+    // Pre-select the most recent target study
+    if (form.getTargetStudy() == null)
+        form.setTargetStudy(FlowRun.findMostRecentTargetStudy(c));
 
     %><labkey:errors/><%
 
@@ -49,7 +69,6 @@
             themselves will not be modified, and will remain in the file system.
         </p>
         <table class="labkey-indented"><%
-
         for (Map.Entry<String, String> entry : paths.entrySet())
         {
             %><tr>
@@ -59,6 +78,21 @@
         }
 
         %></table>
+
+        <% if (targetStudies.size() > 0) { %>
+            <p>
+                <em>Optionally,</em> select a target study for imported FCS files.  The target study will be used
+                as the detault copy to study target and, if the flow metadata specifies a specimen ID column, used
+                to look up specimen information from the target study's specimen repository.
+            </p>
+            <p class="labkey-indented">
+                <label for="targetStudy">Optionally, choose a target study folder:</label><br>
+                <select id="targetStudy" name="targetStudy">
+                    <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
+                </select>
+            </p>
+        <% } %>
+
         <br />
         <labkey:button text="Import Selected Runs" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>"/>
         <labkey:button text="Cancel" href="<%=form.getReturnURLHelper()%>"/>
