@@ -147,6 +147,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             super(table, ViabilityAssaySchema.this.getContainer());
             _provider = ViabilityManager.get().getProvider();
             _defaultVisibleColumns = new ArrayList<FieldKey>();
+            setPublicSchemaName(ViabilityAssaySchema.this.getSchemaName());
         }
 
         protected ColumnInfo addVisible(ColumnInfo col)
@@ -190,6 +191,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         public ResultsTable()
         {
             super(ViabilitySchema.getTableInfoResults());
+            setName(AssayProtocolSchema.DATA_TABLE_NAME);
 
             _resultsDomain = _provider.getResultsDomain(getProtocol());
             DomainProperty[] resultDomainProperties = _resultsDomain.getProperties();
