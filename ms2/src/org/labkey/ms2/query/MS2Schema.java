@@ -1090,7 +1090,8 @@ public class MS2Schema extends UserSchema
                 return NORMALIZED_PROTEIN_GROUP_CACHE.get(runListId).getName();
             }
 
-            Connection connection = MS2Manager.getSchema().getScope().getConnection();
+            DbScope scope = MS2Manager.getSchema().getScope();
+            Connection connection = scope.getConnection();
 
             String shortName = "RunList" + runListId;
             String tempTableName = getDbSchema().getSqlDialect().getGlobalTempTablePrefix() + shortName;
@@ -1099,6 +1100,9 @@ public class MS2Schema extends UserSchema
             TempTableTracker.track(MS2Manager.getSchema(), tempTableName, tracker);
             try
             {
+                // Working with a temp table, so use the same connection for all inserts/updates
+                SqlExecutor executor = new SqlExecutor(scope, connection);
+
                 // Populate the temp table with all of the protein groups from the selected runs
                 SQLFragment insertSQL = new SQLFragment("SELECT x.RowId AS ProteinGroupId, x.RowId as NormalizedId INTO " + tempTableName +
                         " FROM (SELECT pg.RowId FROM " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
@@ -1112,10 +1116,10 @@ public class MS2Schema extends UserSchema
                 }
                 insertSQL.append(") ) AS x");
 
-                Table.execute(connection, insertSQL.getSQL());
+                executor.execute(insertSQL);
 
                 // Use the protein group's RowId as the normalized group id
-                Table.execute(connection, "UPDATE " + tempTableName + " SET NormalizedId = ProteinGroupId");
+                executor.execute("UPDATE " + tempTableName + " SET NormalizedId = ProteinGroupId");
 
                 // Figure out the minimum group id that contains a protein (SeqId) that's also in this group
                 String updateSubQuery = "SELECT MIN(MinNormalizedId) AS NewNormalizedId, GroupId FROM \n" +
@@ -1132,7 +1136,7 @@ public class MS2Schema extends UserSchema
                 do
                 {
                     // Set the normalized group id to be the minimum id from all the groups that share the same proteins
-                    rowsUpdated = Table.execute(connection, updateSQL);
+                    rowsUpdated = executor.execute(updateSQL);
                 }
                 // Keep going while any value changed. When we're done, we've found the transitive closure and any
                 // groups that share proteins (including transitively) are lumped into the same normalized group

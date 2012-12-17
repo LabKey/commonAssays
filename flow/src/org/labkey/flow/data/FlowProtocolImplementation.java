@@ -19,14 +19,12 @@ package org.labkey.flow.data;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.Table;
-import org.labkey.api.exp.api.ProtocolImplementation;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ProtocolImplementation;
 import org.labkey.api.security.User;
 
-import java.util.List;
 import java.sql.SQLException;
 
 public class FlowProtocolImplementation extends ProtocolImplementation
@@ -63,6 +61,6 @@ public class FlowProtocolImplementation extends ProtocolImplementation
         sql.append("    NOT EXISTS (SELECT fo.dataid FROM flow.object fo WHERE fo.dataid = d.rowid AND fo.container = ?)\n").add(container.getId());
         sql.append(")\n");
 
-        new SqlExecutor(ExperimentService.get().getSchema(), sql).execute();
+        new SqlExecutor(ExperimentService.get().getSchema()).execute(sql);
     }
 }

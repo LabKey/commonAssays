@@ -480,10 +480,11 @@ public abstract class MS2Importer
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSeqId);
 
         int i = 0;
+        SqlExecutor executor = new SqlExecutor(MS2Manager.getSchema());
 
         for (MS2Fraction fraction : fractions)
         {
-            int rowCount = new SqlExecutor(MS2Manager.getSchema(), _updateSeqIdSql, fraction.getFraction(), run.getFastaId()).execute();
+            int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), run.getFastaId());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
         }
 
@@ -493,7 +494,7 @@ public abstract class MS2Importer
 
         for (MS2Fraction fraction : fractions)
         {
-            int rowCount = new SqlExecutor(MS2Manager.getSchema(), _updateSequencePositionSql, fraction.getFraction()).execute();
+            int rowCount = executor.execute(_updateSequencePositionSql, fraction.getFraction());
             _log.info("Set SequencePosition values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
         }
     }
@@ -511,7 +512,7 @@ public abstract class MS2Importer
 
         String negativeHitLike = MS2Manager.NEGATIVE_HIT_PREFIX + "%";
 
-        new SqlExecutor(MS2Manager.getSchema(), _updateCountsSql, negativeHitLike, _runId).execute();
+        new SqlExecutor(MS2Manager.getSchema()).execute(_updateCountsSql, negativeHitLike, _runId);
     }
 
 
@@ -559,8 +560,8 @@ public abstract class MS2Importer
 
     protected static void updateRunStatus(int run, String status, int statusId)
     {
-        new SqlExecutor(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET Status = ?, StatusId = ? WHERE Run = ?",
-                status, statusId, run).execute();
+        new SqlExecutor(MS2Manager.getSchema()).execute("UPDATE " + MS2Manager.getTableInfoRuns() + " SET Status = ?, StatusId = ? WHERE Run = ?",
+                status, statusId, run);
     }
 
 
