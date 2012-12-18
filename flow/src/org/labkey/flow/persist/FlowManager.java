@@ -569,6 +569,9 @@ public class FlowManager
     {
         if (oids.length == 0)
             return;
+
+        SqlExecutor executor = new SqlExecutor(getSchema());
+
         for (int from = 0, to; from < oids.length; from = to)
         {
             to = from + MAX_BATCH;
@@ -577,10 +580,10 @@ public class FlowManager
 
             String list = join(oids, from, to);
             // XXX: delete no longer referenced statattr afterwards?
-            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")");
-            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")");
-            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")");
-            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")");
+            executor.execute("DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")");
+            executor.execute("DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")");
+            executor.execute("DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")");
+            executor.execute("DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")");
         }
     }
 
