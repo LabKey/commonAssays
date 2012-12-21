@@ -30,7 +30,19 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.elisa.ElisaController" %>
 <%@ page import="com.google.gson.Gson" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<ClientDependency>();
+        resources.add(ClientDependency.fromFilePath("vischart"));
+        resources.add(ClientDependency.fromFilePath("/elisa/runDetailsPanel.js"));
+        resources.add(ClientDependency.fromFilePath("/elisa/runDataPanel.js"));
+        return resources;
+    }
+%>
 <%
     JspView<ElisaController.GenericReportForm> me = (JspView<ElisaController.GenericReportForm>) HttpView.currentView();
     ViewContext ctx = me.getViewContext();
@@ -51,17 +63,7 @@
     ActionURL baseUrl = ctx.cloneActionURL().addParameter("filterUrl", filterUrl.getLocalURIString());
     Gson gson = new Gson();
 %>
-
-<script type="text/javascript">
-    LABKEY.requiresClientAPI(true);
-    LABKEY.requiresExt4Sandbox(true);
-    LABKEY.requiresScript("vis/genericChart/genericChartPanel.js");
-    LABKEY.requiresVisualization();
-    LABKEY.requiresScript("elisa/runDetailsPanel.js");
-    LABKEY.requiresScript("elisa/runDataPanel.js");
-
-</script>
-
+<div id="<%=h(renderId)%>" style="width:100%;"></div>
 <script type="text/javascript">
     Ext4.QuickTips.init();
 
@@ -131,6 +133,4 @@
     }
 
 </script>
-
-<div id="<%=h(renderId)%>" style="width:100%;"></div>
 
