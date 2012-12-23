@@ -207,7 +207,12 @@
         <table border="0" style="margin-left:1em;">
             <tr>
                 <td><b>Reference Sample:</b></td>
-                <td><%=h(form.getrEngineNormalizationReference())%></td>
+                <td>
+                    <% if (form.getrEngineNormalizationReference() != null) {
+                        ISampleInfo sample = workspace.getSample(form.getrEngineNormalizationReference());
+                        %><%=h(sample.getLabel())%>
+                    <% } %>
+                </td>
             </tr>
             <tr>
                 <td><b>Normalize Subsets:</b></td>

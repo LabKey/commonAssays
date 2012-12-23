@@ -79,7 +79,7 @@ public class RScriptJob extends FlowExperimentJob
     private final List<File> _keywordDirs;
     // Map workspace sample id -> FlowFCSFile (or null if we aren't resolving previously imported FCS files)
     private final Map<String, FlowFCSFile> _selectedFCSFiles;
-    //private final List<String> _importGroupNames;
+    private final List<String> _importGroupNames;
     private final boolean _performNormalization;
     private final String _normalizationReference;
     private final List<String> _normalizationSubsets;
@@ -97,7 +97,8 @@ public class RScriptJob extends FlowExperimentJob
                       File runFilePathRoot,
                       List<File> keywordDirs,
                       Map<String, FlowFCSFile> selectedFCSFiles,
-                      //List<String> importGroupNames,
+                      // UNDONE: Remove importGroupNames and use selectedFCSFiles instead.
+                      List<String> importGroupNames,
                       boolean performNormalization,
                       String normalizationReference,
                       List<String> normalizationSubsets,
@@ -111,7 +112,7 @@ public class RScriptJob extends FlowExperimentJob
         _runFilePathRoot = runFilePathRoot;
         _keywordDirs = keywordDirs;
         _selectedFCSFiles = selectedFCSFiles;
-        //_importGroupNames = importGroupNames;
+        _importGroupNames = importGroupNames;
         _performNormalization = performNormalization;
         _normalizationReference = normalizationReference;
         _targetStudy = targetStudy;
@@ -181,7 +182,7 @@ public class RScriptJob extends FlowExperimentJob
         replacements.put(R_ANALYSIS_DIRECTORY, rAnalysisDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(NORMALIZED_DIRECTORY, normalizedDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(RUN_NAME, _workspaceName);
-//        replacements.put(GROUP_NAMES, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
+        replacements.put(GROUP_NAMES, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
         replacements.put(NORMALIZATION, _performNormalization ? "TRUE" : "FALSE");
         replacements.put(NORM_REFERENCE, _normalizationReference == null ? "" : _normalizationReference);
 

@@ -1296,8 +1296,8 @@ public class AnalysisScriptController extends BaseFlowController
 
                 // All samples in group should have the same staining panel for normalization to succeed.
                 List<ISampleInfo> sampleInfos = new ArrayList<ISampleInfo>();
-                SelectedSamples selectedSamples = form.getSelectedSamples();
-                for (String sampleId : selectedSamples.getRows().keySet())
+                Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles(form, errors);
+                for (String sampleId : selectedFCSFiles.keySet())
                 {
                     ISampleInfo sampleInfo = workspace.getSample(sampleId);
                     if (sampleInfo != null)
@@ -1508,6 +1508,7 @@ public class AnalysisScriptController extends BaseFlowController
                         workspaceData, pipelineFile, runFilePathRoot,
                         keywordDirs,
                         selectedFCSFiles,
+                        form.getImportGroupNameList(),
                         form.isrEngineNormalization(),
                         form.getrEngineNormalizationReference(),
                         form.getrEngineNormalizationSubsetList(),
