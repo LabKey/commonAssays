@@ -27,6 +27,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -41,7 +42,6 @@ import org.labkey.elispot.query.ElispotRunAntigenTable;
 import org.labkey.elispot.query.ElispotRunDataTable;
 import org.springframework.validation.BindException;
 
-import java.sql.SQLException;
 import java.util.Set;
 
 public class ElispotProtocolSchema extends AssayProtocolSchema
@@ -79,14 +79,14 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return super.createProviderTable(name);
     }
 
-    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix) throws SQLException
+    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix)
     {
         String propPrefix = new Lsid(propertyPrefix, protocol.getName(), "").toString();
         SimpleFilter propertyFilter = new SimpleFilter();
-        propertyFilter.addCondition("PropertyURI", propPrefix, CompareType.STARTS_WITH);
+        propertyFilter.addCondition(FieldKey.fromParts("PropertyURI"), propPrefix, CompareType.STARTS_WITH);
 
-        PropertyDescriptor[] result = Table.select(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
-                propertyFilter, null, PropertyDescriptor.class);
+        PropertyDescriptor[] result = new TableSelector(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
+                propertyFilter, null).getArray(PropertyDescriptor.class);
 
         // Merge measure/dimension properties from well group domain into ElispotProperties domain
         // This needs to be removed and instead base the properties on a single PropertyDescriptor/DomainProperty

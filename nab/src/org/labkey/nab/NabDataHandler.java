@@ -17,9 +17,9 @@
 package org.labkey.nab;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.OORDisplayColumnFactory;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
@@ -71,27 +71,21 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         private ExpData _data;
         private File _dataFile;
         private ViewBackgroundInfo _info;
-        private Logger _log;
-        private XarContext _context;
 
-        public NabDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
+        public NabDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info)
         {
             _data = data;
             _dataFile = dataFile;
             _info = info;
-            _log = log;
-            _context = context;
         }
 
         public List<Map<String, Object>> getResults() throws ExperimentException
         {
-            try {
+            try
+            {
                 ExpRun run = _data.getRun();
-                ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
-                Container container = _data.getContainer();
                 NabAssayRun assayResults = getAssayResults(run, _info.getUser(), _dataFile, null);
                 List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-                Map<Integer, String> cutoffFormats = assayResults.getCutoffFormats();
 
                 for (int summaryIndex = 0; summaryIndex < assayResults.getSummaries().length; summaryIndex++)
                 {
@@ -109,12 +103,12 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                         {
                             double value = dilution.getCutoffDilution(cutoff / 100.0, type);
                             saveICValue(getPropertyName(CURVE_IC_PREFIX, cutoff, type), value,
-                                    dilution, protocol, container, cutoffFormats, props, type);
+                                    dilution, props, type);
 
                             if (type == assayResults.getRenderedCurveFitType())
                             {
                                 saveICValue(CURVE_IC_PREFIX + cutoff, value,
-                                        dilution, protocol, container, cutoffFormats, props, type);
+                                        dilution, props, type);
                             }
                         }
                         // compute both normal and positive AUC values
@@ -139,7 +133,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                     for (Integer cutoff : assayResults.getCutoffs())
                     {
                         saveICValue(POINT_IC_PREFIX + cutoff, dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getRenderedCurveFitType()),
-                            dilution, protocol, container, cutoffFormats, props, assayResults.getRenderedCurveFitType());
+                            dilution, props, assayResults.getRenderedCurveFitType());
                     }
                     props.put(FIT_ERROR_PROPERTY, dilution.getFitError());
                     props.put(NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID());
@@ -153,8 +147,8 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
             }
         }
 
-        protected void saveICValue(String name, double icValue, DilutionSummary dilution, ExpProtocol protocol,
-                                          Container container, Map<Integer, String> formats, Map<String, Object> results, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
+        protected void saveICValue(String name, double icValue, DilutionSummary dilution,
+                                   Map<String, Object> results, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
         {
             String outOfRange = null;
             if (Double.NEGATIVE_INFINITY == icValue)
@@ -182,7 +176,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         throwParseError(dataFile, msg, null);
     }
 
-    protected void throwParseError(File dataFile, String msg, Exception cause) throws ExperimentException
+    protected void throwParseError(File dataFile, String msg, @Nullable Exception cause) throws ExperimentException
     {
         StringBuilder fullMessage = new StringBuilder("There was an error parsing ");
         fullMessage.append(dataFile.getName()).append(".\n");
@@ -216,7 +210,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return getAssayResults(run, user, null);
     }
 
-    public NabAssayRun getAssayResults(ExpRun run, User user, DilutionCurve.FitType fit) throws ExperimentException
+    public NabAssayRun getAssayResults(ExpRun run, User user, @Nullable DilutionCurve.FitType fit) throws ExperimentException
     {
         File dataFile = getDataFile(run);
         if (dataFile == null)
@@ -241,7 +235,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
     protected abstract List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException;
 
-    protected NabAssayRun getAssayResults(ExpRun run, User user, File dataFile, DilutionCurve.FitType fit) throws ExperimentException
+    protected NabAssayRun getAssayResults(ExpRun run, User user, File dataFile, @Nullable DilutionCurve.FitType fit) throws ExperimentException
     {
         ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
         Container container = run.getContainer();
@@ -392,16 +386,16 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return summaries;
     }
 
-    protected NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
+    protected NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info)
     {
-        return new NabDataFileParser(data, dataFile, info, log, context);
+        return new NabDataFileParser(data, dataFile, info);
     }
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
-        NabDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
+        NabDataFileParser parser = getDataFileParser(data, dataFile, info);
 
         importRows(data, run, protocol, parser.getResults());
     }

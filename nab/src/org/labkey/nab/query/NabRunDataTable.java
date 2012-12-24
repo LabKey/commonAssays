@@ -16,14 +16,12 @@
 
 package org.labkey.nab.query;
 
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.nab.SinglePlateNabDataHandler;
 
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -39,7 +37,7 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
         setDescription("Contains one row per data for the \"" + protocol.getName() + "\" Neutralizing Antibodies assay design.");
     }
 
-    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
+    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
     {
         List<PropertyDescriptor>pds = Arrays.asList(NabProviderSchema.getExistingDataProperties(protocol));
 
@@ -68,23 +66,17 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
     {
         Set<String> hiddenCols = super.getHiddenColumns(protocol);
 
-        try {
-            // hide the fit method specific values for curve IC and AUC
-            for (PropertyDescriptor prop : getExistingDataProperties(protocol))
-            {
-                String propName = prop.getName();
-                if (propName.startsWith(SinglePlateNabDataHandler.CURVE_IC_PREFIX) ||
-                        propName.startsWith(SinglePlateNabDataHandler.AUC_PREFIX) ||
-                        propName.startsWith(SinglePlateNabDataHandler.pAUC_PREFIX))
-                {
-                    if (propName.indexOf('_') != -1)
-                        hiddenCols.add(propName);
-                }
-            }
-        }
-        catch (SQLException e)
+        // hide the fit method specific values for curve IC and AUC
+        for (PropertyDescriptor prop : getExistingDataProperties(protocol))
         {
-            throw new RuntimeSQLException(e);
+            String propName = prop.getName();
+            if (propName.startsWith(SinglePlateNabDataHandler.CURVE_IC_PREFIX) ||
+                    propName.startsWith(SinglePlateNabDataHandler.AUC_PREFIX) ||
+                    propName.startsWith(SinglePlateNabDataHandler.pAUC_PREFIX))
+            {
+                if (propName.indexOf('_') != -1)
+                    hiddenCols.add(propName);
+            }
         }
         return hiddenCols;
     }

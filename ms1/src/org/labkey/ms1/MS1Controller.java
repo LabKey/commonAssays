@@ -445,9 +445,6 @@ public class MS1Controller extends SpringActionController
 
         public ModelAndView getView(FeatureDetailsForm form, BindException errors) throws Exception
         {
-            if(null == form || form.getFeatureId() < 0)
-                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getViewContext().getContainer()));
-
             //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
             if(null == feature)

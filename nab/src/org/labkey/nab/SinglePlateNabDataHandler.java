@@ -281,7 +281,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        NabDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
+        NabDataFileParser parser = getDataFileParser(data, dataFile, info);
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
         datas.put(NAB_TRANSFORMED_DATA_TYPE, parser.getResults());

@@ -24,6 +24,7 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
@@ -34,7 +35,6 @@ import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.SinglePlateNabDataHandler;
 import org.labkey.nab.SampleInfo;
 
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -141,13 +141,13 @@ public class NabProviderSchema extends AssayProviderSchema
         return new NabRunDataTable(this, protocol);        
     }
 
-    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
+    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
     {
         String propPrefix = new Lsid(SinglePlateNabDataHandler.NAB_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
         SimpleFilter propertyFilter = new SimpleFilter();
-        propertyFilter.addCondition("PropertyURI", propPrefix, CompareType.STARTS_WITH);
-        propertyFilter.addCondition("Project", protocol.getContainer().getProject());
-        return Table.select(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
-                propertyFilter, null, PropertyDescriptor.class);
+        propertyFilter.addCondition(FieldKey.fromParts("PropertyURI"), propPrefix, CompareType.STARTS_WITH);
+        propertyFilter.addCondition(FieldKey.fromParts("Project"), protocol.getContainer().getProject());
+        return new TableSelector(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
+                propertyFilter, null).getArray(PropertyDescriptor.class);
     }
 }

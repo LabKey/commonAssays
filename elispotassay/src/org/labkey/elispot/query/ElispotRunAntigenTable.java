@@ -24,14 +24,10 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotProtocolSchema;
 
-import java.sql.SQLException;
-
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: Jan 27, 2011
  * Time: 1:45:11 PM
- * To change this template use File | Settings | File Templates.
  */
 public class ElispotRunAntigenTable extends ElispotRunDataTable
 {
@@ -41,7 +37,7 @@ public class ElispotRunAntigenTable extends ElispotRunDataTable
         setDescription("Contains one row per well for the \"" + protocol.getName() + "\" ELISpot assay design.");
     }
 
-    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
+    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
     {
         return ElispotProtocolSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX);
     }
