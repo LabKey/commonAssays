@@ -31,7 +31,6 @@ public class ChooseRunsView extends FlowQueryView
     public ChooseRunsView(ChooseRunsToAnalyzeForm form) throws Exception
     {
         super(form);
-        getSettings().setAllowChooseQuery(false);
         getSettings().setAllowChooseView(false);
         getSettings().setMaxRows(Table.ALL_ROWS);
         _form = form;

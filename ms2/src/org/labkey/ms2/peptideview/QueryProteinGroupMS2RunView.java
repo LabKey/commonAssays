@@ -48,7 +48,6 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     protected QuerySettings createQuerySettings(UserSchema schema) throws RedirectException
     {
         QuerySettings settings = schema.getSettings(_url.getPropertyValues(), DATA_REGION_NAME);
-        settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setQueryName(MS2Schema.HiddenTableType.ProteinGroupsForRun.toString());
 

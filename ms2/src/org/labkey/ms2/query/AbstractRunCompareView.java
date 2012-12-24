@@ -117,9 +117,7 @@ public abstract class AbstractRunCompareView extends QueryView
     
     private QuerySettings createSettings(ViewContext context, String tableName)
     {
-        QuerySettings settings = getSchema().getSettings(context, "Compare", tableName);
-        settings.setAllowChooseQuery(false);
-        return settings;
+        return getSchema().getSettings(context, "Compare", tableName);
     }
 
     public MS2Schema getSchema()

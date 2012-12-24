@@ -68,7 +68,6 @@ The analysis section describes which gates in the analysis, as well as the stati
         view.setShowRecordSelectors(false);
         view.setShowExportButtons(false);
         view.getSettings().setMaxRows(Table.ALL_ROWS);
-        view.getSettings().setAllowChooseQuery(false);
         view.getSettings().setAllowChooseView(false);
         view.getSettings().setAllowCustomizeView(false);
         view.getSettings().getBaseFilter().addCondition("AnalysisScript/RowId", script.getScriptId(), CompareType.EQUAL);

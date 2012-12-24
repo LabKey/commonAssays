@@ -141,7 +141,6 @@ public class ElispotController extends SpringActionController
 
             // create the query view for antigen information
             QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
-            settings.setAllowChooseQuery(false);
             settings.setAllowChooseView(true);
 
             QueryView queryView = new QueryView(new ElispotProtocolSchema(getViewContext().getUser(), getViewContext().getContainer(), _protocol, (ElispotAssayProvider)AssayService.get().getProvider(_protocol), null), settings, errors);

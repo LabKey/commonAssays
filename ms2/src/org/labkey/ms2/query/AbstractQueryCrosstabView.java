@@ -56,7 +56,6 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
 
         QuerySettings settings = schema.getSettings(url.getPropertyValues(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(tableType.toString());
-        settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         setSettings(settings);
         setAllowExportExternalQuery(false);

@@ -76,7 +76,6 @@ public class FeaturesView extends QueryView
         _forSearch = forSearch;
 
         QuerySettings settings = schema.getSettings(getViewContext(), DATAREGION_NAME, _forSearch ? MS1Schema.TABLE_FEATURES_SEARCH : MS1Schema.TABLE_FEATURES);
-        settings.setAllowChooseQuery(false);
         setSettings(settings);
         setShowDetailsColumn(false);
 

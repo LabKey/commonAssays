@@ -46,7 +46,6 @@ public class CompareRunsView extends ComparisonCrosstabView
         
         QuerySettings settings = schema.getSettings(url.getPropertyValues(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_COMPARE_PEP);
-        settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         setSettings(settings);
 

@@ -49,7 +49,6 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     protected QuerySettings createQuerySettings(MS2Schema schema) throws RedirectException
     {
         QuerySettings settings = schema.getSettings(_url.getPropertyValues(), MS2Manager.getDataRegionNamePeptides());
-        settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setQueryName(createPeptideTable(schema).getPublicName());
         String columnNames = _url.getParameter("columns");

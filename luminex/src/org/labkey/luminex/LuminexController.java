@@ -108,7 +108,6 @@ public class LuminexController extends SpringActionController
 
         private QueryView createQueryView(QuerySettings settings, UserSchema schema, BindException errors)
         {
-            settings.setAllowChooseQuery(false);
             QueryView result = new QueryView(schema, settings, errors);
             result.setShadeAlternatingRows(true);
             result.setShowBorders(true);
@@ -141,7 +140,6 @@ public class LuminexController extends SpringActionController
             AbstractAssayView result = new AbstractAssayView();
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
-            settings.setAllowChooseQuery(false);
             setHelpTopic(new HelpTopic("applyGuideSets"));
             QueryView view = new QueryView(schema, settings, errors)
             {

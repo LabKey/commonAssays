@@ -92,7 +92,6 @@ public class SpectraCountRReport extends RReport
 
         QuerySettings settings = schema.getSettings(context, "SpectraCount", config.getTableName());
         settings.setViewName(getDescriptor().getProperty(ReportDescriptor.Prop.viewName));
-        settings.setAllowChooseQuery(false);
 
         return new SpectraCountQueryView(schema, settings, null, config, form);
     }

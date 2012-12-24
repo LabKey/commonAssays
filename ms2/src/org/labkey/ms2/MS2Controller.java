@@ -2654,7 +2654,6 @@ public class MS2Controller extends SpringActionController
             schema.setRuns(_runs);
 
             QuerySettings settings = schema.getSettings(getViewContext(), "SpectraCount", _config.getTableName());
-            settings.setAllowChooseQuery(false);
             QueryView view = new SpectraCountQueryView(schema, settings, errors, _config, _form);
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
             view.setAllowExportExternalQuery(false);
@@ -3345,7 +3344,6 @@ public class MS2Controller extends SpringActionController
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
-            proteinsSettings.setAllowChooseQuery(false);
             QueryView proteinsView = new QueryView(schema, proteinsSettings, errors);
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
@@ -3373,7 +3371,6 @@ public class MS2Controller extends SpringActionController
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
-            groupsSettings.setAllowChooseQuery(false);
             QueryView groupsView = new QueryView(schema, groupsSettings, errors)
             {
                 protected TableInfo createTable()
