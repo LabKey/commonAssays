@@ -31,11 +31,13 @@ public class FlowQuerySettings extends QuerySettings
     protected FlowQuerySettings(String dataRegionName)
     {
         super(dataRegionName);
+        setAllowChooseQuery(true);
     }
 
     public FlowQuerySettings(PropertyValues pvs, String dataRegionName)
     {
         super(pvs, dataRegionName);
+        setAllowChooseQuery(true);
     }
 
     @Override
