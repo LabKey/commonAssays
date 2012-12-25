@@ -595,7 +595,7 @@ public class FlowManager
         {
             scope.ensureTransaction();
 
-            Integer[] objids = Table.executeArray(getSchema(), sqlObjectIds, Integer.class);
+            Integer[] objids = new SqlSelector(getSchema(), sqlObjectIds).getArray(Integer.class);
             deleteAttributes(objids);
             scope.commitTransaction();
         }
@@ -674,12 +674,12 @@ public class FlowManager
         for (ExpData data : datas)
         {
             sqlGetOIDs.append(comma);
-            comma = ",";
+            comma = ", ";
             sqlGetOIDs.append(data.getRowId());
             containers.add(data.getContainer());
         }
         sqlGetOIDs.append(")");
-        Integer[] objectIds = Table.executeArray(getSchema(), sqlGetOIDs.toString(), null, Integer.class);
+        Integer[] objectIds = new SqlSelector(getSchema(), sqlGetOIDs).getArray(Integer.class);
         if (objectIds.length == 0)
             return;
         deleteObjectIds(objectIds, containers);

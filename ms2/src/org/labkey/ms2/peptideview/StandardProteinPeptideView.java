@@ -30,6 +30,7 @@ import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.Table;
 import org.labkey.api.query.DetailsURL;
@@ -297,7 +298,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.ALL_FILTERS, getUser(), getSingleRun());
         SimpleFilter validFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides());
-        return Table.executeArray(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + validFilter.getWhereSQL(ProteinManager.getSqlDialect()), validFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
+
+        return new SqlSelector(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + validFilter.getWhereSQL(ProteinManager.getSqlDialect()), validFilter.getWhereParams(MS2Manager.getTableInfoPeptides())).getArray(String.class);
     }
 
     public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception

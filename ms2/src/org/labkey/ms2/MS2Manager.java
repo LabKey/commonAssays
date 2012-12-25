@@ -37,6 +37,7 @@ import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -820,15 +821,8 @@ public class MS2Manager
 
     public static void markAsDeleted(Container c, User user)
     {
-        try
-        {
-            Integer[] runIds = Table.executeArray(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Container=?", new Object[]{c.getId()}, Integer.class);
-            markAsDeleted(Arrays.asList(runIds), c, user);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        List<Integer> runIds = new SqlSelector(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Container=?", c).getArrayList(Integer.class);
+        markAsDeleted(runIds, c, user);
     }
 
     // pulled out into separate method so could be called by itself from data handlers
@@ -885,7 +879,7 @@ public class MS2Manager
         cutOff.add(Calendar.DAY_OF_MONTH, -days);
         Date date = cutOff.getTime();
 
-        Integer[] runIds = Table.executeArray(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Deleted=? AND Modified <= ?", new Object[]{Boolean.TRUE, date}, Integer.class);
+        Integer[] runIds = new SqlSelector(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Deleted = ? AND Modified <= ?", Boolean.TRUE, date).getArray(Integer.class);
 
         // Don't bother with the thread if there are no runs to delete... prevents "0 runs to purge" status message
         if (0 == runIds.length)

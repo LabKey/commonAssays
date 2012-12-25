@@ -22,7 +22,7 @@ import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.util.Filter;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -31,7 +31,6 @@ import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.FlowManager.FlowEntry;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -227,19 +226,11 @@ abstract public class AttributeCache<T>
         {
             return mapFromEntries(entries, includeAliases);
         }
-        try
-        {
-            long transactionCount = getTransactionCount();
-            Integer[] ids = Table.executeArray(FlowManager.get().getSchema(), sql, Integer.class);
-            entries = FlowManager.get().getAttributeEntry(type(), ids);
-            storeInCache(transactionCount, key, entries);
-            return mapFromEntries(entries, includeAliases);
-        }
-        catch (SQLException e)
-        {
-            _log.error("exception", e);
-            return Collections.emptyMap();
-        }
+        long transactionCount = getTransactionCount();
+        Integer[] ids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Integer.class);
+        entries = FlowManager.get().getAttributeEntry(type(), ids);
+        storeInCache(transactionCount, key, entries);
+        return mapFromEntries(entries, includeAliases);
     }
 
     private Map<T, Integer> mapFromEntries(FlowEntry[] entries, boolean includeAliases)

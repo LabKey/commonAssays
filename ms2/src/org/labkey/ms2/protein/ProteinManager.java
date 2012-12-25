@@ -206,14 +206,14 @@ public class ProteinManager
     public static Protein getProtein(int seqId)
     {
         return new SqlSelector(getSchema(),
-                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE SeqId=?",
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE SeqId = ?",
                 seqId).getObject(Protein.class);
     }
 
     public static Protein getProtein(String sequence, int organismId)
     {
         return new SqlSelector(getSchema(),
-                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE Hash=? AND OrgId=?",
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE Hash = ? AND OrgId = ?",
                 hashSequence(sequence), organismId).getObject(Protein.class);
     }
 
@@ -1353,12 +1353,11 @@ public class ProteinManager
         {
             HashSet<String> retVal = new HashSet<String>();
             Integer paramArr[] = {id};
-            String rvString[] = Table.executeArray(getSchema(),
-                    "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND seqID=?",
-                    paramArr,
-                    String.class);
+            List<String> rvString = new SqlSelector(getSchema(),
+                    "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
+                    paramArr).getArrayList(String.class);
 
-            retVal.addAll(Arrays.asList(rvString));
+            retVal.addAll(rvString);
 
             String org = Table.executeSingleton(getSchema(),
                     "SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
@@ -1473,10 +1472,10 @@ public class ProteinManager
     /** Deletes all ProteinSequences, and the FastaFile record as well */
     public static void deleteFastaFile(int fastaId) throws SQLException
     {
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ?", fastaId);
-        Table.execute(getSchema(), "UPDATE " + getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId = ?", fastaId);
-
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaFiles() + " WHERE FastaId = ?", fastaId);
+        SqlExecutor executor = new SqlExecutor(getSchema());
+        executor.execute("DELETE FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ?", fastaId);
+        executor.execute("UPDATE " + getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId = ?", fastaId);
+        executor.execute("DELETE FROM " + getTableInfoFastaFiles() + " WHERE FastaId = ?", fastaId);
     }
 
 
@@ -1485,7 +1484,7 @@ public class ProteinManager
         SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?");
         sql.add(id);
 
-        Table.execute(ProteinManager.getSchema(), sql);
+        new SqlExecutor(ProteinManager.getSchema()).execute(sql);
     }
 
 
@@ -1519,15 +1518,8 @@ public class ProteinManager
         task.addRunnable(new Runnable(){
             public void run()
             {
-                try
-                {
-                    Integer[] arr = Table.executeArray(getSchema(), "SELECT seqId FROM prot.sequences", null, Integer.class);
-                    indexProteins(t, Arrays.asList(arr));
-                }
-                catch (SQLException x)
-                {
-                    throw new RuntimeSQLException(x);
-                }
+                List<Integer> list = new SqlSelector(getSchema(), "SELECT SeqId FROM prot.Sequences").getArrayList(Integer.class);
+                indexProteins(t, list);
             }
         }, SearchService.PRIORITY.background);
     }

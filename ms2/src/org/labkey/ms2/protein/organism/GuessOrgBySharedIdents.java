@@ -109,7 +109,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         retVal = new SqlSelector(_schema,
                 "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " + ProteinManager.getTableInfoSprotOrgMap() + " " +
                         " WHERE SprotSuffix=?",
-                new String[]{pName}).getObject(String.class);
+                pName).getObject(String.class);
         _sprotCache.put(pName, retVal != null ? retVal : CACHED_MISS_VALUE);
         return retVal;
     }

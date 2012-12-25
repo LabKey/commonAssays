@@ -360,7 +360,8 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
                     " AND pm.ProteinGroupId = pgm.ProteinGroupId" +
                     " AND ppf.PPRun = p.Run" +
                     " AND ppf.RowId = pg.ProteinProphetFileId";
-            return Table.executeArray(ProteinManager.getSchema(), sql, coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
+
+            return new SqlSelector(ProteinManager.getSchema(), sql, coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides())).getArray(String.class);
         }
 
         return null;

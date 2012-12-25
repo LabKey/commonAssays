@@ -2841,7 +2841,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public boolean handlePost(Object o, BindException errors) throws Exception
+        public boolean handlePost(Object o, BindException errors) throws SQLException
         {
             Set<String> fastaIdStrings = DataRegionSelection.getSelected(getViewContext(), true);
             Set<Integer> fastaIds = new HashSet<Integer>();
@@ -2857,7 +2857,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
             String idList = StringUtils.join(fastaIds, ',');
-            List<Integer> validIds = Arrays.asList(Table.executeArray(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))", new Object[]{}, Integer.class));
+            List<Integer> validIds = new SqlSelector(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))").getArrayList(Integer.class);
 
             fastaIds.removeAll(validIds);
 

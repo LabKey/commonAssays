@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
@@ -29,12 +30,12 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayRunDatabaseContext;
-import org.labkey.api.util.PageFlowUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,15 +127,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         sql.add(Boolean.TRUE);
         sql.add(analyte.getRowId());
 
-        try
-        {
-            String[] titrationNames = Table.executeArray(LuminexProtocolSchema.getSchema(), sql, String.class);
-            return PageFlowUtil.set(titrationNames);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return new HashSet<String>(new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getCollection(String.class));
     }
 
     @Override
