@@ -92,41 +92,26 @@ public class PepXmlLoader extends MS2Loader
     }
 
 
-    public class FractionIterator implements Iterator<PepXmlFraction>
+    /** Doesn't implement Iterator so that we can throw XMLStreamExceptions instead of having to wrap them as RuntimeExceptions */
+    public class FractionIterator
     {
-        public boolean hasNext()
+        public boolean hasNext() throws XMLStreamException
         {
             boolean hasNext = true;
 
             // If we're not currently on the start of an msms_run_summary then attempt to skip to the next one
             if (!_parser.isStartElement() || !"msms_run_summary".equals(_parser.getLocalName()))
             {
-                try
-                {
-                    hasNext = _parser.skipToStart("msms_run_summary");
-                }
-                catch (XMLStreamException e)
-                {
-                    _log.error("XMLStreamException in hasNext()", e);
-                    throw new RuntimeException("XMLStreamException in hasNext()", e);
-                }
+                hasNext = _parser.skipToStart("msms_run_summary");
             }
 
             return hasNext;
         }
 
 
-        public PepXmlFraction next()
+        public PepXmlFraction next() throws XMLStreamException
         {
-        try
-            {
-                return PepXmlFraction.getNextFraction(_parser);
-            }
-            catch (XMLStreamException e)
-            {
-                _log.error("XMLStreamException in next()", e);
-                throw new RuntimeException("XMLStreamException in next()", e);
-            }
+            return PepXmlFraction.getNextFraction(_parser);
         }
 
 
