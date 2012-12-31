@@ -114,7 +114,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return new AssayTableMetadata(
                 this,
                 protocol,
-                FieldKey.fromParts("Properties", ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+                FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
                 FieldKey.fromParts(AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME));
     }
@@ -229,10 +229,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return domainMap;
     }
 
-    @Override
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
-        return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
+        return Arrays.asList(new StudyParticipantVisitResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
     @Override
