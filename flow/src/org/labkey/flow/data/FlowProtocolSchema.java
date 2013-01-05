@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.data;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -57,6 +58,7 @@ public class FlowProtocolSchema extends AssayProtocolSchema
         return flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
     }
 
+    @Nullable
     @Override
     protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
@@ -64,6 +66,7 @@ public class FlowProtocolSchema extends AssayProtocolSchema
         return null;
     }
 
+    @Nullable
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {

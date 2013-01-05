@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
@@ -573,6 +574,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     }
 
 
+    @Nullable
     @Override
     protected ResultsQueryView createDataQueryView(final ViewContext context, QuerySettings settings, BindException errors)
     {

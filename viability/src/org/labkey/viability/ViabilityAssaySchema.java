@@ -17,6 +17,7 @@
 package org.labkey.viability;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -539,6 +540,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         }
     }
 
+    @Nullable
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {

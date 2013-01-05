@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray.assay;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -91,6 +92,7 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
+    @Nullable
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {

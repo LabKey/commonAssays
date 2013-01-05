@@ -96,6 +96,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         return runTable;
     }
 
+    @Nullable
     @Override
     protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
@@ -206,6 +207,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         }
     }
 
+    @Nullable
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {

@@ -117,6 +117,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return table;
     }
 
+    @Nullable
     @Override
     protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
@@ -138,6 +139,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         }
     }
 
+    @Nullable
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
