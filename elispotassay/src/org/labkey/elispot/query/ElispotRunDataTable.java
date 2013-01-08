@@ -49,13 +49,11 @@ import java.util.Set;
  */
 public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 {
-    protected AssaySchema _schema;
     protected ExpProtocol _protocol;
 
     public ElispotRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         super(schema, protocol);
-        _schema = schema;
         _protocol = protocol;
 
         setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
@@ -169,7 +167,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ElispotRunDataTable(_schema, _protocol);
+                    return new ElispotRunDataTable(_userSchema, _protocol);
                 }
             };
             fk.setPrefixColumnCaption(false);

@@ -538,6 +538,12 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
+        public UserSchema getUserSchema()
+        {
+            return FlowSchema.this;
+        }
+
+        @Override
         public void addAllowablePermission(Class<? extends Permission> permission)
         {
             _expData.addAllowablePermission(permission);
@@ -797,6 +803,12 @@ public class FlowSchema extends UserSchema
         public void addAllowablePermission(Class<? extends Permission> permission)
         {
             _expData.addAllowablePermission(permission);
+        }
+
+        @Override
+        public UserSchema getUserSchema()
+        {
+            return FlowSchema.this;
         }
 
         ColumnInfo addStatisticColumn(String columnAlias)
@@ -1737,7 +1749,7 @@ public class FlowSchema extends UserSchema
 
     private TableInfo createAttributeTable(String alias, TableInfo realTable)
     {
-        FilteredTable ret = new FilteredTable(realTable, getContainer());
+        FilteredTable ret = new FilteredTable<FlowSchema>(realTable, this);
         ret.setName(alias);
         ret.addWrapColumn(ret.getRealTable().getColumn("RowId")).setHidden(true);
         ret.addWrapColumn(ret.getRealTable().getColumn("Container")).setHidden(true);

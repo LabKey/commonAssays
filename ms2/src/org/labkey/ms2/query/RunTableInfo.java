@@ -32,14 +32,11 @@ import org.labkey.ms2.MS2Manager;
  * User: jeckels
  * Date: Feb 22, 2007
  */
-public class RunTableInfo extends FilteredTable
+public class RunTableInfo extends FilteredTable<MS2Schema>
 {
-    private final MS2Schema _schema;
-
     public RunTableInfo(MS2Schema schema)
     {
-        super(MS2Manager.getTableInfoRuns());
-        _schema = schema;
+        super(MS2Manager.getTableInfoRuns(), schema);
 
         wrapAllColumns(true);
 
@@ -48,7 +45,7 @@ public class RunTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ContainerTable(_schema);
+                return new ContainerTable(_userSchema);
             }
         };
         getColumn("Container").setFk(containerFK);
@@ -65,7 +62,7 @@ public class RunTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpSchema schema = new ExpSchema(_schema.getUser(), _schema.getContainer());
+                ExpSchema schema = new ExpSchema(_userSchema.getUser(), _userSchema.getContainer());
                 return schema.getRunsTable();
             }
         });

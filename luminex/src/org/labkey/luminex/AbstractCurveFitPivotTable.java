@@ -47,7 +47,7 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
 
     protected void addCurveTypeColumns()
     {
-        for (final String curveType : _schema.getCurveTypes())
+        for (final String curveType : _userSchema.getCurveTypes())
         {
             ColumnInfo curveTypeColumn = createCurveTypeColumn(curveType);
             addColumn(curveTypeColumn);

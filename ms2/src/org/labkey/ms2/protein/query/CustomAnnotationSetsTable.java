@@ -16,14 +16,13 @@
 
 package org.labkey.ms2.protein.query;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 
@@ -33,17 +32,12 @@ import java.util.Map;
  * User: jeckels
 * Date: Apr 3, 2007
 */
-public class CustomAnnotationSetsTable extends VirtualTable
+public class CustomAnnotationSetsTable extends VirtualTable<CustomAnnotationSchema>
 {
-    private final Container _container;
-    private final QuerySchema _schema;
-
-    public CustomAnnotationSetsTable(TableInfo parentTable, QuerySchema schema, Container container)
+    public CustomAnnotationSetsTable(TableInfo parentTable, CustomAnnotationSchema schema)
     {
-        super(ProteinManager.getSchema());
-        _container = container;
-        _schema = schema;
-        Map<String, CustomAnnotationSet> annotationSets = ProteinManager.getCustomAnnotationSets(_container, true);
+        super(ProteinManager.getSchema(), schema);
+        Map<String, CustomAnnotationSet> annotationSets = ProteinManager.getCustomAnnotationSets(schema.getContainer(), true);
         SQLFragment sqlFragment = new SQLFragment("SELECT 1");
 
         if (annotationSets.isEmpty())
@@ -62,7 +56,7 @@ public class CustomAnnotationSetsTable extends VirtualTable
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new CustomAnnotationTable(annotationSet, _schema);
+                        return new CustomAnnotationTable(annotationSet, _userSchema);
                     }
                 });
             }

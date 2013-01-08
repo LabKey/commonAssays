@@ -60,15 +60,14 @@ import java.util.Set;
  * User: jeckels
  * Date: May 22, 2009
  */
-public class LuminexDataTable extends FilteredTable implements UpdateableTableInfo
+public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> implements UpdateableTableInfo
 {
-    private final LuminexProtocolSchema _schema;
     private LuminexAssayProvider _provider;
     public static final String FLAGGED_AS_EXCLUDED_COLUMN_NAME = "FlaggedAsExcluded";
 
     public LuminexDataTable(LuminexProtocolSchema schema)
     {
-        super(LuminexProtocolSchema.getTableInfoDataRow(), schema.getContainer());
+        super(LuminexProtocolSchema.getTableInfoDataRow(), schema);
         final ExpProtocol protocol = schema.getProtocol();
 
         setName(AssayProtocolSchema.DATA_TABLE_NAME);
@@ -77,14 +76,13 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         _provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
 
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
-        _schema = schema;
 
         ColumnInfo dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
         dataColumn.setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpDataTable result = _schema.createDataFileTable();
+                ExpDataTable result = _userSchema.createDataFileTable();
                 result.setContainerFilter(getContainerFilter());
                 return result;
             }
@@ -94,7 +92,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         rowIdColumn.setKeyField(true);
         addColumn(wrapColumn(getRealTable().getColumn("LSID"))).setHidden(true);
         ColumnInfo protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
-        protocolColumn.setFk(new ExpSchema(_schema.getUser(), _schema.getContainer()).getProtocolForeignKey("RowId"));
+        protocolColumn.setFk(new ExpSchema(_userSchema.getUser(), _userSchema.getContainer()).getProtocolForeignKey("RowId"));
         protocolColumn.setHidden(true);
         addColumn(wrapColumn(getRealTable().getColumn("WellRole")));
         addColumn(wrapColumn(getRealTable().getColumn("Type")));
@@ -102,7 +100,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));
         addColumn(wrapColumn(getRealTable().getColumn("Description")));
         ColumnInfo specimenColumn = wrapColumn(getRealTable().getColumn("SpecimenID"));
-        specimenColumn.setFk(new SpecimenForeignKey(_schema, AssayService.get().getProvider(_schema.getProtocol()), _schema.getProtocol()));
+        specimenColumn.setFk(new SpecimenForeignKey(_userSchema, AssayService.get().getProvider(_userSchema.getProtocol()), _userSchema.getProtocol()));
         addColumn(specimenColumn);
         addColumn(wrapColumn(getRealTable().getColumn("ExtraSpecimenInfo")));
         addColumn(wrapColumn(getRealTable().getColumn("FIString"))).setLabel("FI String");
@@ -152,7 +150,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createTitrationTable(true);
+                return _userSchema.createTitrationTable(true);
             }
         });
 
@@ -163,7 +161,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createAnalyteTitrationTable(false);
+                return _userSchema.createAnalyteTitrationTable(false);
             }
 
             @Override
@@ -181,7 +179,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
-        containerColumn.setFk(new ContainerForeignKey(_schema));
+        containerColumn.setFk(new ContainerForeignKey(_userSchema));
 
         SQLFragment repGroupCaseStatement = new SQLFragment();
         repGroupCaseStatement.append("(CASE WHEN we.Comment IS NOT NULL THEN ");
@@ -239,7 +237,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new ExclusionUIDisplayColumn(colInfo, protocol.getName(), _schema.getContainer(), _schema.getUser());
+                return new ExclusionUIDisplayColumn(colInfo, protocol.getName(), _userSchema.getContainer(), _userSchema.getUser());
             }
         });
         addColumn(exclusionUIColumn);
@@ -293,14 +291,14 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         setDefaultVisibleColumns(defaultCols);
 
-        getColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_schema));
+        getColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_userSchema));
 
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
-        protocolIDFilter.add(_schema.getProtocol().getRowId());
+        protocolIDFilter.add(_userSchema.getProtocol().getRowId());
         addCondition(protocolIDFilter, FieldKey.fromParts("ProtocolID"));
 
         SQLFragment containerFilter = new SQLFragment("Container = ?");
-        containerFilter.add(_schema.getContainer().getId());
+        containerFilter.add(_userSchema.getContainer().getId());
         addCondition(containerFilter, FieldKey.fromParts("Container"));
     }
 
@@ -308,7 +306,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     @NotNull
     public Domain getDomain()
     {
-        return _provider.getResultsDomain(_schema.getProtocol());
+        return _provider.getResultsDomain(_userSchema.getProtocol());
     }
 
     @Override

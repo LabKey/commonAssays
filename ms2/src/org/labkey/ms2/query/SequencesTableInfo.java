@@ -29,7 +29,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.StringExpressionFactory;
@@ -39,35 +39,30 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomAnnotationType;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
 import org.labkey.ms2.protein.query.CustomAnnotationTable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
  * User: jeckels
  * Date: Feb 9, 2007
  */
-public class SequencesTableInfo extends FilteredTable
+public class SequencesTableInfo extends FilteredTable<MS2Schema>
 {
-    private final Container _container;
-    private final QuerySchema _schema;
-
-    protected SequencesTableInfo(String name, QuerySchema schema)
+    protected SequencesTableInfo(String name, MS2Schema schema)
     {
         this(schema);
         setName(name);
     }
 
-    public SequencesTableInfo(QuerySchema schema)
+    public SequencesTableInfo(MS2Schema schema)
     {
-        super(ProteinManager.getTableInfoSequences());
-        _schema = schema;
-        _container = schema.getContainer();
+        super(ProteinManager.getTableInfoSequences(), schema);
         setTitleColumn("BestName");
         wrapAllColumns(true);
 
@@ -75,14 +70,14 @@ public class SequencesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new OrganismTableInfo();
+                return new OrganismTableInfo(_userSchema);
             }
         });
 
         addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
         getColumn("SourceId").setHidden(true);
 
-        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _container);
+        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _userSchema.getContainer());
         url.addParameter("seqId", "${SeqId}");
         ColumnInfo bnColumn = getColumn("BestName");
         bnColumn.setURL(StringExpressionFactory.createURL(url));
@@ -102,7 +97,7 @@ public class SequencesTableInfo extends FilteredTable
                 if (displayField == null)
                     return null;
 
-                for (final CustomAnnotationSet annotationSet : ProteinManager.getCustomAnnotationSets(_container, true).values())
+                for (final CustomAnnotationSet annotationSet : ProteinManager.getCustomAnnotationSets(_userSchema.getContainer(), true).values())
                 {
                     if (displayField.equals(annotationSet.getName()))
                     {
@@ -122,7 +117,7 @@ public class SequencesTableInfo extends FilteredTable
                         {
                             public TableInfo getLookupTableInfo()
                             {
-                                return new CustomAnnotationTable(annotationSet, _schema);
+                                return new CustomAnnotationTable(annotationSet, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false));
                             }
                         });
                         return ret;
@@ -134,7 +129,7 @@ public class SequencesTableInfo extends FilteredTable
 
             public TableInfo getLookupTableInfo()
             {
-                return new CustomAnnotationSetsTable(SequencesTableInfo.this, _schema, _container);
+                return new CustomAnnotationSetsTable(SequencesTableInfo.this, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false));
             }
         });
         addColumn(annotationColumn);

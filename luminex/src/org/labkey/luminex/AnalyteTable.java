@@ -53,7 +53,7 @@ import java.util.TreeMap;
  */
 public class AnalyteTable extends AbstractLuminexTable
 {
-    public AnalyteTable(LuminexProtocolSchema schema, boolean filter)
+    public AnalyteTable(final LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, filter);
         setName(LuminexProtocolSchema.ANALYTE_TABLE_NAME);
@@ -64,7 +64,7 @@ public class AnalyteTable extends AbstractLuminexTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createDataFileTable();
+                return _userSchema.createDataFileTable();
             }
         });
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
@@ -80,14 +80,14 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable(LuminexProtocolSchema.getTableInfoAnalyteTitration());
+                FilteredTable result = new FilteredTable<LuminexProtocolSchema>(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema);
                 ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
                 titrationColumn.setFk(new LookupForeignKey("RowId")
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        TitrationTable titrationTable = _schema.createTitrationTable(false);
+                        TitrationTable titrationTable = _userSchema.createTitrationTable(false);
                         titrationTable.addCondition(new SimpleFilter("Standard", Boolean.TRUE));
                         return titrationTable;
                     }
@@ -98,7 +98,7 @@ public class AnalyteTable extends AbstractLuminexTable
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        return _schema.createAnalyteTable(false);
+                        return _userSchema.createAnalyteTable(false);
                     }
                 });
                 return result;
@@ -112,13 +112,13 @@ public class AnalyteTable extends AbstractLuminexTable
         lsidColumn.setShownInUpdateView(false);
 
         ColumnInfo colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_schema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_userSchema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         for(DomainProperty pd : analyteDomain.getProperties())
         {
             map.put(pd.getName(), pd.getPropertyDescriptor());
         }
-        colProperty.setFk(new PropertyForeignKey(map, _schema));
+        colProperty.setFk(new PropertyForeignKey(map, _userSchema));
         colProperty.setIsUnselectable(true);
         colProperty.setReadOnly(true);
         colProperty.setShownInInsertView(false);
@@ -141,7 +141,7 @@ public class AnalyteTable extends AbstractLuminexTable
     public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         return (perm.equals(UpdatePermission.class) || perm.equals(ReadPermission.class))
-                && _schema.getContainer().hasPermission(user, perm);
+                && _userSchema.getContainer().hasPermission(user, perm);
     }
 
     @Override

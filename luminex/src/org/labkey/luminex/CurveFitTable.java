@@ -45,7 +45,7 @@ public class CurveFitTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createTitrationTable(false);
+                return _userSchema.createTitrationTable(false);
             }
         });
 
@@ -56,7 +56,7 @@ public class CurveFitTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createAnalyteTable(false);
+                return _userSchema.createAnalyteTable(false);
             }
         });
 

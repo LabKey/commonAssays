@@ -139,13 +139,13 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         return ret;
     }
 
-    class ViabilityAssayTable extends FilteredTable
+    class ViabilityAssayTable extends FilteredTable<ViabilityAssaySchema>
     {
         ViabilityAssayProvider _provider;
 
         protected ViabilityAssayTable(TableInfo table)
         {
-            super(table, ViabilityAssaySchema.this.getContainer());
+            super(table, ViabilityAssaySchema.this);
             _provider = ViabilityManager.get().getProvider();
             _defaultVisibleColumns = new ArrayList<FieldKey>();
             setPublicSchemaName(ViabilityAssaySchema.this.getSchemaName());

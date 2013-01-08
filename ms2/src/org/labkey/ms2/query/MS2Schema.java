@@ -600,7 +600,7 @@ public class MS2Schema extends UserSchema
     protected TableInfo createFractionsTable()
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
-        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoFractions())
+        FilteredTable result = new FilteredTable<MS2Schema>(MS2Manager.getTableInfoFractions(), this)
         {
             @Override
             protected void applyContainerFilter(ContainerFilter filter)

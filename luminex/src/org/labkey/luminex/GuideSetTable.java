@@ -107,7 +107,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createGuideSetCurveFitTable(curveType);
+                return _userSchema.createGuideSetCurveFitTable(curveType);
             }
         };
     }
@@ -117,7 +117,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     {
         // Guide sets are scoped to the protocol, not to folders
         SQLFragment sql = new SQLFragment("ProtocolId = ?");
-        sql.add(_schema.getProtocol().getRowId());
+        sql.add(_userSchema.getProtocol().getRowId());
         return sql;
     }
 
@@ -125,13 +125,13 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         // First check if the user has the permission in the folder where the assay is defined
-        if (_schema.getProtocol().getContainer().hasPermission(user, perm))
+        if (_userSchema.getProtocol().getContainer().hasPermission(user, perm))
         {
             return true;
         }
 
         // Then look if they have the permission in any of the folders where there are runs for the assay design
-        for (Container container : _schema.getProtocol().getExpRunContainers())
+        for (Container container : _userSchema.getProtocol().getExpRunContainers())
         {
             if (container.hasPermission(user, perm))
             {
@@ -154,7 +154,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         public GuideSetTableUpdateService(GuideSetTable guideSetTable)
         {
             super(guideSetTable);
-            _protocol = guideSetTable._schema.getProtocol();
+            _protocol = guideSetTable._userSchema.getProtocol();
         }
 
         public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)

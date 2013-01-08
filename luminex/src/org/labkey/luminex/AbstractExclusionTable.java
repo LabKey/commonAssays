@@ -79,7 +79,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
     @Override
     public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
-        return _schema.getContainer().hasPermission(user, perm);
+        return _userSchema.getContainer().hasPermission(user, perm);
     }
 
     /**

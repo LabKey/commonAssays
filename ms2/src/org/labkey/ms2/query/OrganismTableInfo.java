@@ -26,11 +26,11 @@ import org.labkey.ms2.protein.ProteinManager;
  * User: jeckels
  * Date: Feb 22, 2007
  */
-public class OrganismTableInfo extends FilteredTable
+public class OrganismTableInfo extends FilteredTable<MS2Schema>
 {
-    public OrganismTableInfo()
+    public OrganismTableInfo(MS2Schema schema)
     {
-        super(ProteinManager.getTableInfoOrganisms());
+        super(ProteinManager.getTableInfoOrganisms(), schema);
 
         wrapAllColumns(true);
 

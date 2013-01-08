@@ -234,7 +234,7 @@ public class MS1Schema extends UserSchema
 
     public PeaksTableInfo getPeaksTableInfo()
     {
-        return new PeaksTableInfo(this, getContainer());
+        return new PeaksTableInfo(this);
     }
 
     public FilesTableInfo getFilesTableInfo()
@@ -244,7 +244,7 @@ public class MS1Schema extends UserSchema
 
     public ScansTableInfo getScansTableInfo()
     {
-        return new ScansTableInfo(this, getContainer());
+        return new ScansTableInfo(this);
     }
 
     public ExpRunTable getMS1ExpRunsTableInfo()

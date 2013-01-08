@@ -38,7 +38,6 @@ import java.util.Collections;
  */
 public class CompareProteinProphetTableInfo extends SequencesTableInfo
 {
-    private final MS2Schema _schema;
     private final List<MS2Run> _runs;
     private final boolean _forExport;
     private final HttpServletRequest _request;
@@ -48,7 +47,6 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
     {
         super(MS2Schema.HiddenTableType.CompareProteinProphet.toString(), schema);
 
-        _schema = schema;
         _runs = runs;
         _forExport = forExport;
         _request = request;
@@ -93,7 +91,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new ProteinGroupTableInfo(_schema, false);
+                        return new ProteinGroupTableInfo(_userSchema, false);
                     }
                 };
                 if (!_forExport)
@@ -113,7 +111,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ProteinGroupTableInfo(_schema, false);
+                    return new ProteinGroupTableInfo(_userSchema, false);
                 }
             });
             addColumn(proteinGroupIdColumn);
@@ -197,7 +195,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         result.append(", ");
         result.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
         result.append(", (");
-        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, Collections.singletonList(FieldKey.fromParts("RowId")), null));
+        result.append(_userSchema.getPeptideSelectSQL(_request, _peptideViewName, Collections.singletonList(FieldKey.fromParts("RowId")), null));
         result.append(" ) pep WHERE ppf.Run IN (");
         String separator = "";
         for (MS2Run run : _runs)

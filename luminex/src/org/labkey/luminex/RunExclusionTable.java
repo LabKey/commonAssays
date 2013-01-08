@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class RunExclusionTable extends AbstractExclusionTable
 {
-    public RunExclusionTable(final LuminexProtocolSchema schema, boolean filter)
+    public RunExclusionTable(LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoRunExclusion(), schema, filter);
 
@@ -53,7 +53,7 @@ public class RunExclusionTable extends AbstractExclusionTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return schema.createRunsTable();
+                return _userSchema.createRunsTable();
             }
         });
 
@@ -62,7 +62,7 @@ public class RunExclusionTable extends AbstractExclusionTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return schema.createRunExclusionAnalyteTable();
+                return _userSchema.createRunExclusionAnalyteTable();
             }
         }, "AnalyteId"));
 

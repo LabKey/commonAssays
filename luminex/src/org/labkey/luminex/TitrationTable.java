@@ -22,7 +22,6 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 
@@ -32,13 +31,10 @@ import org.labkey.api.view.ActionURL;
  */
 public class TitrationTable extends AbstractLuminexTable
 {
-    private final LuminexProtocolSchema _schema;
-
     public TitrationTable(LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoTitration(), schema, filter);
         setName(LuminexProtocolSchema.TITRATION_TABLE_NAME);
-        _schema = schema;
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
         ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
@@ -58,7 +54,7 @@ public class TitrationTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createRunsTable();
+                return _userSchema.createRunsTable();
             }
         };
         runFk.setPrefixColumnCaption(false);

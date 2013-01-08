@@ -53,11 +53,10 @@ import java.util.Set;
  * User: jeckels
  * Date: Feb 8, 2007
  */
-public class ProteinGroupTableInfo extends FilteredTable
+public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
 {
     private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId", "Deleted", "HasPeptideProphet"));
     private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
-    private final MS2Schema _schema;
     private List<MS2Run> _runs;
 
     public ProteinGroupTableInfo(MS2Schema schema)
@@ -67,15 +66,14 @@ public class ProteinGroupTableInfo extends FilteredTable
 
     public ProteinGroupTableInfo(MS2Schema schema, boolean includeFirstProteinColumn)
     {
-        super(MS2Manager.getTableInfoProteinGroups());
-        _schema = schema;
+        super(MS2Manager.getTableInfoProteinGroups(), schema);
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new GroupNumberDisplayColumn(colInfo, _schema.getContainer());
+                return new GroupNumberDisplayColumn(colInfo, _userSchema.getContainer());
             }
         });
 
@@ -93,7 +91,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ProteinQuantitationTable();
+                return new ProteinQuantitationTable(_userSchema);
             }
         });
         quantitation.setKeyField(false);
@@ -106,7 +104,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ITraqProteinQuantitationTable();
+                return new ITraqProteinQuantitationTable(_userSchema);
             }
         });
         iTraqQuantitation.setKeyField(false);
@@ -124,7 +122,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ProteinProphetFileTableInfo(_schema);
+                return new ProteinProphetFileTableInfo(_userSchema);
             }
         };
         foreignKey.setPrefixColumnCaption(false);
@@ -150,7 +148,7 @@ public class ProteinGroupTableInfo extends FilteredTable
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new SequencesTableInfo(null, _schema);
+                    return new SequencesTableInfo(null, _userSchema);
                 }
             });
             addColumn(firstProteinColumn);
@@ -187,7 +185,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         Set<FieldKey> peptideFieldKeys = Collections.singleton(FieldKey.fromParts("RowId"));
         if (form.isCustomViewPeptideFilter())
         {
-            peptidesSQL = _schema.getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), peptideFieldKeys, null);
+            peptidesSQL = _userSchema.getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), peptideFieldKeys, null);
         }
         else
         {
@@ -196,7 +194,7 @@ public class ProteinGroupTableInfo extends FilteredTable
             {
                 filter.addClause(new CompareType.CompareClause(FieldKey.fromParts("PeptideProphet"), CompareType.GTE, form.getPeptideProphetProbability()));
             }
-            peptidesSQL = _schema.getPeptideSelectSQL(filter, peptideFieldKeys);
+            peptidesSQL = _userSchema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
         SQLFragment condition = new SQLFragment();
         condition.append("RowId IN (SELECT ProteinGroupId FROM " + MS2Manager.getTableInfoPeptideMemberships() + " WHERE PeptideId IN (");
@@ -231,7 +229,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                         DataColumn result = new DataColumn(colInfo);
                         result.setLinkTarget("prot");
 
-                        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _schema.getContainer());
+                        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _userSchema.getContainer());
                         if (_runs != null && _runs.size() == 1)
                         {
                             url.addParameter("run", Integer.toString(_runs.get(0).getRun()));
@@ -246,7 +244,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        SequencesTableInfo result = new SequencesTableInfo(null, _schema);
+                        SequencesTableInfo result = new SequencesTableInfo(null, _userSchema);
                         ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", new SQLFragment("#PLACEHOLDER#"), JdbcType.VARCHAR)
                         {
                             @Override
@@ -297,8 +295,8 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                _schema.getProteinGroupProteins().setRuns(_schema.getRuns());
-                ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getColumnName(), _schema.getProteinGroupProteins());
+                _userSchema.getProteinGroupProteins().setRuns(_userSchema.getRuns());
+                ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getColumnName(), _userSchema.getProteinGroupProteins());
                 result.setColumnInfo(colInfo);
                 return result;
             }
@@ -452,7 +450,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.append(" WHERE Run IN (SELECT Run FROM ");
         sql.append(MS2Manager.getTableInfoRuns());
         sql.append(" WHERE Container = ? AND Deleted = ?");
-        sql.add(_schema.getContainer().getId());
+        sql.add(_userSchema.getContainer().getId());
         sql.add(Boolean.FALSE);
         if (runs != null)
         {

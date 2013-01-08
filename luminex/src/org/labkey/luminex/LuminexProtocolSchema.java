@@ -67,7 +67,6 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public LuminexProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
     {
         super(user, container, protocol, targetStudy);
-        assert protocol != null;
     }
 
     public Set<String> getTableNames()
@@ -427,7 +426,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public TableInfo createWellExclusionAnalyteTable()
     {
-        FilteredTable result = new FilteredTable(getTableInfoWellExclusionAnalyte());
+        FilteredTable result = new FilteredTable<LuminexProtocolSchema>(getTableInfoWellExclusionAnalyte(), this);
         result.wrapAllColumns(true);
         result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
         return result;
@@ -435,7 +434,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public TableInfo createRunExclusionAnalyteTable()
     {
-        FilteredTable result = new FilteredTable(getTableInfoRunExclusionAnalyte());
+        FilteredTable result = new FilteredTable<LuminexProtocolSchema>(getTableInfoRunExclusionAnalyte(), this);
         result.wrapAllColumns(true);
         result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
         return result;

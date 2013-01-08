@@ -25,23 +25,20 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.api.study.assay.AssaySchema;
 
 /**
  * User: jeckels
  * Date: 7/8/11
  */
-public abstract class AbstractLuminexTable extends FilteredTable
+public abstract class AbstractLuminexTable extends FilteredTable<LuminexProtocolSchema>
 {
-    protected final LuminexProtocolSchema _schema;
     private final boolean _needsFilter;
 
     private static final FieldKey CONTAINER_FAKE_COLUMN_NAME = FieldKey.fromParts("Container");
 
     public AbstractLuminexTable(TableInfo table, LuminexProtocolSchema schema, boolean filter)
     {
-        super(table, schema.getContainer());
-        _schema = schema;
+        super(table, schema);
         _needsFilter = filter;
 
         applyContainerFilter(getContainerFilter());
@@ -53,7 +50,7 @@ public abstract class AbstractLuminexTable extends FilteredTable
         if (_needsFilter)
         {
             clearConditions(CONTAINER_FAKE_COLUMN_NAME);
-            addCondition(createContainerFilterSQL(filter, _schema.getContainer()), CONTAINER_FAKE_COLUMN_NAME);
+            addCondition(createContainerFilterSQL(filter, _userSchema.getContainer()), CONTAINER_FAKE_COLUMN_NAME);
         }
     }
 
@@ -62,7 +59,7 @@ public abstract class AbstractLuminexTable extends FilteredTable
     @Override
     public String getPublicSchemaName()
     {
-        return _schema.getSchemaName();
+        return _userSchema.getSchemaName();
     }
 
     public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType)

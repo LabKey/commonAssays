@@ -30,9 +30,9 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
-import org.labkey.api.query.QuerySchema;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.SequencesTableInfo;
 
 import java.util.ArrayList;
@@ -42,23 +42,21 @@ import java.util.List;
  * User: jeckels
  * Date: Apr 3, 2007
  */
-public class CustomAnnotationTable extends FilteredTable
+public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 {
     private final CustomAnnotationSet _annotationSet;
     private final boolean _includeSeqId;
 
-    private final QuerySchema _schema;
     private Domain _domain;
 
-    public CustomAnnotationTable(CustomAnnotationSet annotationSet, QuerySchema schema)
+    public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema)
     {
         this(annotationSet, schema, false);
     }
 
-    public CustomAnnotationTable(CustomAnnotationSet annotationSet, QuerySchema schema, boolean includeSeqId)
+    public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema, boolean includeSeqId)
     {
-        super(ProteinManager.getTableInfoCustomAnnotation());
-        _schema = schema;
+        super(ProteinManager.getTableInfoCustomAnnotation(), schema);
         _includeSeqId = includeSeqId;
         wrapAllColumns(true);
         _annotationSet = annotationSet;
@@ -106,7 +104,7 @@ public class CustomAnnotationTable extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new SequencesTableInfo(_schema);
+                return new SequencesTableInfo(new MS2Schema(_userSchema.getUser(), _userSchema.getContainer()));
             }
         });
         addColumn(col);

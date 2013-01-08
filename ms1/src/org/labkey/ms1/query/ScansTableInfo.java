@@ -17,7 +17,6 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
@@ -31,13 +30,11 @@ import org.labkey.ms1.MS1Manager;
  * Date: Oct 23, 2007
  * Time: 2:52:32 PM
  */
-public class ScansTableInfo extends FilteredTable
+public class ScansTableInfo extends FilteredTable<MS1Schema>
 {
-    public ScansTableInfo(MS1Schema schema, Container container)
+    public ScansTableInfo(MS1Schema schema)
     {
-        super(MS1Manager.get().getTable(MS1Manager.TABLE_SCANS));
-
-        _schema = schema;
+        super(MS1Manager.get().getTable(MS1Manager.TABLE_SCANS), schema);
         wrapAllColumns(true);
 
         ColumnInfo fid = getColumn("FileId");
@@ -45,7 +42,7 @@ public class ScansTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.getFilesTableInfo();
+                return _userSchema.getFilesTableInfo();
             }
         });
 
@@ -54,10 +51,8 @@ public class ScansTableInfo extends FilteredTable
         //the underlying table contains a column named "Container," which our Files table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
         SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=?)",
-                                            container.getId(), true, false);
+                                            _userSchema.getContainer().getId(), true, false);
         addCondition(sf, FieldKey.fromParts("FileId"));
 
     }
-
-    private MS1Schema _schema;
 }

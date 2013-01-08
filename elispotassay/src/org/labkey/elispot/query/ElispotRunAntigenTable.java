@@ -68,7 +68,7 @@ public class ElispotRunAntigenTable extends ElispotRunDataTable
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ElispotRunAntigenTable(_schema, _protocol);
+                    return new ElispotRunAntigenTable(_userSchema, _protocol);
                 }
             };
             fk.setPrefixColumnCaption(false);

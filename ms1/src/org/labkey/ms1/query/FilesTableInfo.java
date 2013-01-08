@@ -35,13 +35,12 @@ import java.util.Collection;
  * Date: Oct 23, 2007
  * Time: 2:01:34 PM
  */
-public class FilesTableInfo extends FilteredTable
+public class FilesTableInfo extends FilteredTable<ExpSchema>
 {
     public FilesTableInfo(ExpSchema expSchema, ContainerFilter filter)
     {
-        super(MS1Manager.get().getTable(MS1Manager.TABLE_FILES));
+        super(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), expSchema);
 
-        _expSchema = expSchema;
         wrapAllColumns(true);
 
         getColumn("FileId").setHidden(true);
@@ -50,7 +49,7 @@ public class FilesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _expSchema.getDatasTable();
+                return _userSchema.getDatasTable();
             }
         });
 
@@ -59,10 +58,8 @@ public class FilesTableInfo extends FilteredTable
         SQLFragment sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE ");
         sf.add(true);
         sf.add(false);
-        sf.append(filter.getSQLFragment(getSchema(), "Container", _expSchema.getContainer()));
+        sf.append(filter.getSQLFragment(getSchema(), "Container", _userSchema.getContainer()));
         sf.append(")");
         addCondition(sf, FieldKey.fromParts("Imported"), FieldKey.fromParts("Deleted"), FieldKey.fromParts("ExpDataFileId"));
     }
-
-    private ExpSchema _expSchema;
 }

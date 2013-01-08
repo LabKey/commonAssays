@@ -73,7 +73,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createAnalyteTable(false);
+                return _userSchema.createAnalyteTable(false);
             }
         });
         setTitleColumn(analyteCol.getName());
@@ -83,7 +83,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createTitrationTable(false);
+                return _userSchema.createTitrationTable(false);
             }
         };
         titrationFk.setPrefixColumnCaption(false);
@@ -112,7 +112,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createGuideSetTable(false);
+                return _userSchema.createGuideSetTable(false);
             }
         });
 
@@ -151,7 +151,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                CurveFitTable result = _schema.createCurveFitTable(false);
+                CurveFitTable result = _userSchema.createCurveFitTable(false);
                 result.addCondition(result.getRealTable().getColumn("CurveType"), curveType);
                 return result;
             }
@@ -177,7 +177,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         return (perm.equals(UpdatePermission.class) || perm.equals(ReadPermission.class))
-                && _schema.getContainer().hasPermission(user, perm);
+                && _userSchema.getContainer().hasPermission(user, perm);
     }
 
     @Override
@@ -264,7 +264,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 curveFitFilter.addCondition("TitrationId", bean.getTitrationId());
                 CurveFit[] curveFits = Table.select(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, curveFitFilter, null, CurveFit.class);
                 
-                LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _schema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), Arrays.asList(curveFits));
+                LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), Arrays.asList(curveFits));
             }
 
             @Override
@@ -315,7 +315,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                     {
                         throw new ValidationException("No such guideSetId: " + newGuideSetId);
                     }
-                    if (guideSet.getProtocolId() != _schema.getProtocol().getRowId())
+                    if (guideSet.getProtocolId() != _userSchema.getProtocol().getRowId())
                     {
                         throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + newGuideSetId);
                     }

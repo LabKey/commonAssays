@@ -27,22 +27,19 @@ import org.labkey.ms2.MS2Controller;
  * User: jeckels
  * Date: Feb 8, 2007
  */
-public class ProteinProphetFileTableInfo extends FilteredTable
+public class ProteinProphetFileTableInfo extends FilteredTable<MS2Schema>
 {
-    private final MS2Schema _schema;
-
     public ProteinProphetFileTableInfo(MS2Schema schema)
     {
-        super(MS2Manager.getTableInfoProteinProphetFiles());
-        _schema = schema;
+        super(MS2Manager.getTableInfoProteinProphetFiles(), schema);
         wrapAllColumns(true);
 
-        ActionURL url = MS2Controller.getShowRunURL(_schema.getUser(), getContainer());
+        ActionURL url = MS2Controller.getShowRunURL(_userSchema.getUser(), getContainer());
         getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
             {
-                return new RunTableInfo(_schema);
+                return new RunTableInfo(_userSchema);
             }
         });
     }

@@ -69,7 +69,7 @@ import java.util.TreeSet;
  */
 public class WellExclusionTable extends AbstractExclusionTable
 {
-    public WellExclusionTable(final LuminexProtocolSchema schema, boolean filter)
+    public WellExclusionTable(LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, filter);
 
@@ -81,7 +81,7 @@ public class WellExclusionTable extends AbstractExclusionTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return schema.createWellExclusionAnalyteTable();
+                return _userSchema.createWellExclusionAnalyteTable();
             }
         }, "AnalyteId"));
         getColumn("Analytes").setUserEditable(false);
@@ -291,7 +291,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                     for (ExpRun run : _runsToRefresh)
                     {
                         AssayProvider provider = AssayService.get().getProvider(run);
-                        AssayRunDatabaseContext context = provider.createRunDatabaseContext(run, _schema.getUser(), null);
+                        AssayRunDatabaseContext context = provider.createRunDatabaseContext(run, _userSchema.getUser(), null);
                         provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false);
                     }
                 }

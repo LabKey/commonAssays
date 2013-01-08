@@ -23,7 +23,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.MS1Manager;
 
 import java.util.ArrayList;
@@ -36,12 +35,11 @@ import java.util.ArrayList;
  * Date: Oct 5, 2007
  * Time: 11:10:38 AM
  */
-public class PeaksTableInfo extends FilteredTable
+public class PeaksTableInfo extends FilteredTable<MS1Schema>
 {
-    public PeaksTableInfo(MS1Schema schema, Container container)
+    public PeaksTableInfo(MS1Schema schema)
     {
-        super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS));
-        _schema = schema;
+        super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS), schema);
 
         //wrap all the columns
         wrapAllColumns(true);
@@ -67,7 +65,7 @@ public class PeaksTableInfo extends FilteredTable
             public TableInfo getLookupTableInfo()
             {
                 setPrefixColumnCaption(false);
-                return _schema.getScansTableInfo();
+                return _userSchema.getScansTableInfo();
             }
         });
 
@@ -88,7 +86,7 @@ public class PeaksTableInfo extends FilteredTable
         //the underlying table contains a column named "Container," which our Peaks table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
         SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=?)",
-                                            container.getId(), true, false);
+                                            _userSchema.getContainer().getId(), true, false);
         addCondition(sf, FieldKey.fromParts("ScanId"));
 
     }
@@ -101,6 +99,4 @@ public class PeaksTableInfo extends FilteredTable
         getFilter().deleteConditions("ScanId");
         addCondition(sf, FieldKey.fromParts("ScanId"));
     }
-
-    private MS1Schema _schema;
 } //class PeaksTableInfo
