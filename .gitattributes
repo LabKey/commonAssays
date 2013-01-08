@@ -901,8 +901,7 @@ ms2/resources/queries/ms2/XTandemPeptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/XTandemPeptides/SearchEngineProtein.qview.xml -text
 ms2/resources/queries/ms2/XTandemcometPeptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/XTandemcometPeptides/SearchEngineProtein.qview.xml -text
-ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-9.30.sql -text
-ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.30.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-10.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.10-11.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.20-11.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.30-12.10.sql -text
@@ -914,6 +913,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-2.00.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-2.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-8.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-9.10.sql -text
+ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-1.00-1.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
@@ -962,6 +962,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-1.73-1.74.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-1.74-1.75.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-1.75-1.76.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-10.20-10.21.sql -text
+ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-10.20-10.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-11.20-11.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-11.21-11.22.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-11.30-11.31.sql -text
@@ -992,8 +993,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-8.34-8.35.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.20-9.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.21-9.22.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-9.30.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.30.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-10.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.10-11.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.20-11.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.30-12.10.sql -text
@@ -1007,6 +1007,7 @@ ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-2.00.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-2.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-8.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-9.10.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.57-0.58.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.58-0.59.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.59-0.60.sql -text
@@ -1065,6 +1066,7 @@ ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-1.73-1.74.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-1.74-1.75.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-1.75-1.76.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-10.20-10.21.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-10.20-10.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-11.20-11.21.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-11.21-11.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-11.30-11.31.sql -text
