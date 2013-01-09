@@ -163,7 +163,7 @@ UPDATE luminex.DataRow dr1 SET CV =
 
 /* luminex-11.253-11.254.sql */
 
-ALTER TABLE luminex.wellexclusion ADD COLUMN "type" character varying(10);
+ALTER TABLE luminex.WellExclusion ADD COLUMN "type" VARCHAR(10);
 
 -- Populate the WellExclusion Type column based on the value in the DataRow table for the given DataId/Description/Dilution
 UPDATE luminex.wellexclusion we SET "type" =
