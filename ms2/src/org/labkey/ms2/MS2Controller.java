@@ -449,7 +449,7 @@ public class MS2Controller extends SpringActionController
 
             currentURL.deleteParameter(DataRegion.LAST_FILTER_PARAM);
             // If the user hasn't customized the view at all, show them their default view
-            if (currentURL.getParameters().length == 1)
+            if (currentURL.getParameters().size() == 1)
             {
                 String defaultViewName = getDefaultViewNamePreference(getUser());
                 // Check if they've explicitly requested a view by name as their default

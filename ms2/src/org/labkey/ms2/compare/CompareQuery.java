@@ -335,9 +335,7 @@ public abstract class CompareQuery extends SQLFragment
         originalLinkURL.deleteParameter("total");
         originalLinkURL.deleteParameter("unique");
 
-        Pair<String, String>[] params = originalLinkURL.getParameters();
-
-        for (Pair<String, String> param : params)
+        for (Pair<String, String> param : originalLinkURL.getParameters())
             if (param.getKey().startsWith(MS2Manager.getDataRegionNameCompare()))
                 originalLinkURL.deleteParameter(param.getKey());
 

@@ -37,8 +37,8 @@
     <tr><td class="labkey-form-label">Sequence Mass</td><td><%=h(intFormat.format(bean.protein.getMass()))%></td><td>&nbsp;</td></tr><%
     if (bean.showPeptides)
     { %>
-        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(percentFormat.format(bean.protein.getAAPercent(bean.run)))%> (<%=intFormat.format(bean.protein.getAACoverage(bean.run))%> / <%=intFormat.format(bean.protein.getSequence().length())%>)</td></tr>
-        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(percentFormat.format(bean.protein.getMassPercent(bean.run)))%> (<%=intFormat.format(bean.protein.getMassCoverage(bean.run))%> / <%=intFormat.format(bean.protein.getMass())%>)</td></tr><%
+        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(percentFormat.format(bean.protein.getAAPercent(bean.run)))%> (<%=h(intFormat.format(bean.protein.getAACoverage(bean.run)))%> / <%=h(intFormat.format(bean.protein.getSequence().length()))%>)</td></tr>
+        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(percentFormat.format(bean.protein.getMassPercent(bean.run)))%> (<%=h(intFormat.format(bean.protein.getMassCoverage(bean.run)))%> / <%=h(intFormat.format(bean.protein.getMass()))%>)</td></tr><%
     }
 
     if (bean.enableAllPeptidesFeature)
@@ -52,9 +52,9 @@
                     <% for (Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
                         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
                     <% } %>
-                    <select name="<%= MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM %>" onchange="this.form.submit();">
+                    <select name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" onchange="this.form.submit();">
                         <option value="false">Show only peptides assigned by search engine</option>
-                        <option value="true" <%= org.labkey.ms2.protein.ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()) ? "selected" : "" %>>Show all peptides with sequence matches</option>
+                        <option value="true" <%= text(org.labkey.ms2.protein.ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()) ? "selected" : "") %>>Show all peptides with sequence matches</option>
                     </select>
                 </form>
             </td>

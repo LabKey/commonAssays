@@ -439,8 +439,6 @@ public class MS1Controller extends SpringActionController
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowFeatureDetailsAction extends SimpleViewAction<FeatureDetailsForm>
     {
-        public static final String ACTION_NAME = "showFeatureDetails";
-
         private FeatureDetailsForm _form = null;
 
         public ModelAndView getView(FeatureDetailsForm form, BindException errors) throws Exception

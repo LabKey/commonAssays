@@ -16,6 +16,7 @@
 
 package org.labkey.flow.query;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.api.view.ActionURL;
@@ -74,7 +75,7 @@ public enum FlowTableType
         return urlFor(user, container, filter, null);
     }
 
-    public ActionURL urlFor(User user, Container container, SimpleFilter filter, Sort sort)
+    public ActionURL urlFor(User user, Container container, @Nullable SimpleFilter filter, @Nullable Sort sort)
     {
         ActionURL ret = urlFor(user, container, QueryAction.executeQuery);
         if (filter != null)

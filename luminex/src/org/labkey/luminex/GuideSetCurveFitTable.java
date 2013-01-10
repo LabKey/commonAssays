@@ -30,17 +30,15 @@ import org.labkey.api.study.assay.AssaySchema;
  * User: jeckels
  * Date: Sep 2, 2011
  */
-public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilterable
+public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> implements ContainerFilterable
 {
-    private final LuminexProtocolSchema _schema;
     private final String _curveType;
     private @NotNull ContainerFilter _containerFilter = ContainerFilter.CURRENT;
 
     /** @param curveType the type of curve to filter the results to. Null means don't filter */
     public GuideSetCurveFitTable(LuminexProtocolSchema schema, String curveType)
     {
-        super(schema.getDbSchema());
-        _schema = schema;
+        super(schema.getDbSchema(), schema);
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
@@ -51,7 +49,7 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createGuideSetTable(false);
+                return _userSchema.createGuideSetTable(false);
             }
         });
         guideSetIdColumn.setJdbcType(JdbcType.INTEGER);
@@ -101,21 +99,21 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
     public SQLFragment getFromSQL()
     {
         SQLFragment result = new SQLFragment("SELECT AVG(cf.EC50) AS EC50Average,\n");
-        result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction());
+        result.append(_userSchema.getDbSchema().getSqlDialect().getStdDevFunction());
         result.append("(cf.EC50) AS EC50StdDev, \n");
         result.append("AVG(cf.AUC) AS AUCAverage, \n");
         result.append("COUNT(DISTINCT at.AnalyteId) AS RunCount, \n");
-        result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction());
+        result.append(_userSchema.getDbSchema().getSqlDialect().getStdDevFunction());
         result.append("(cf.AUC) AS AUCStdDev, \n");
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_schema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
+        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_userSchema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
         analyteTitrationTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
-        CurveFitTable curveFitTable = (CurveFitTable)_schema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
+        CurveFitTable curveFitTable = (CurveFitTable)_userSchema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
         curveFitTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(curveFitTable, "cf");
 
