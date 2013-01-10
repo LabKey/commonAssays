@@ -242,6 +242,7 @@ flow/module.properties -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-10.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-11.10-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-11.20-11.30.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-12.30-12.31.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-8.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-9.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-1.50-1.60.sql -text
@@ -261,6 +262,7 @@ flow/resources/schemas/dbscripts/postgresql/obsolete/flow-8.30-9.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-0.00-10.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-11.10-11.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-11.20-11.30.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-12.30-12.31.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-8.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-9.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-1.50-1.60.sql -text

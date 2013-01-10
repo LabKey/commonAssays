@@ -442,11 +442,11 @@ public class AnalysisSerializer
                     // For the %ile(NN) parameter, extract the "NN" number from between the parens.
                     String param = null;
                     int openParen = statistic.indexOf("(");
-                    int closeParen = statistic.indexOf("(");
+                    int closeParen = statistic.indexOf(")");
                     if (openParen > 0 && closeParen > openParen)
                     {
                         param = statistic.substring(openParen + 1, closeParen);
-                        statistic = statistic.substring(0, openParen-1);
+                        statistic = statistic.substring(0, openParen);
                     }
 
                     StatisticSpec.STAT stat = StatisticSpec.STAT.fromString(statistic);
@@ -517,11 +517,11 @@ public class AnalysisSerializer
                     // For the %ile(NN) parameter, extract the "NN" number from between the parens.
                     String param = null;
                     int openParen = statistic.indexOf("(");
-                    int closeParen = statistic.indexOf("(");
+                    int closeParen = statistic.indexOf(")");
                     if (openParen > 0 && closeParen > openParen)
                     {
                         param = statistic.substring(openParen + 1, closeParen);
-                        statistic = statistic.substring(0, openParen-1);
+                        statistic = statistic.substring(0, openParen);
                     }
 
                     StatisticSpec.STAT stat = StatisticSpec.STAT.fromString(statistic);

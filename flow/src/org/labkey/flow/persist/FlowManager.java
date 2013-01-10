@@ -935,6 +935,8 @@ public class FlowManager
             Table.execute(getSchema(), "DELETE FROM " + getTinfoKeywordAttr() + " WHERE container=?", container);
             Table.execute(getSchema(), "DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
             Table.execute(getSchema(), "DELETE FROM " + getTinfoGraphAttr() + " WHERE container=?", container);
+            vacuum();
+            analyze();
         }
         catch (SQLException x)
         {
@@ -1030,7 +1032,7 @@ public class FlowManager
         {
             try
             {
-                Table.execute(FlowManager.get().getSchema(), "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.statistic;");
+                Table.execute(FlowManager.get().getSchema(), "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.keywordattr; VACUUM flow.statistic; VACUUM flow.statisticattr; VACUUM flow.graph; VACUUM flow.graphattr;");
             }
             catch (SQLException x)
             {
@@ -1045,7 +1047,7 @@ public class FlowManager
         {
             try
             {
-                Table.execute(FlowManager.get().getSchema(), "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.statistic;");
+                Table.execute(FlowManager.get().getSchema(), "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.keywordattr; ANALYZE flow.statistic; ANALYZE flow.statisticattr; ANALYZE flow.graph; ANALYZE flow.graphattr;");
             }
             catch (SQLException x)
             {
