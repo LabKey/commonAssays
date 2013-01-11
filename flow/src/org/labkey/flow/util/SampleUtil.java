@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class SampleUtil
 {
-    private static final String[] KEYWORDS = new String[] { "$FIL", "GUID", "$TOT", "$PAR", "$DATE", "$ETIM" };
+    private static final String[] KEYWORDS = new String[] { "$FIL", "GUID", "$TOT", "$PAR", "$DATE", "$ETIM", "EXPORT TIME" };
     private static final int MAX_MATCHES = KEYWORDS.length+1;
     private static final int MIN_MATCHES = 2;
 
