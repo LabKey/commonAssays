@@ -143,7 +143,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
-        return new RunListDetailsQueryView(getProtocol(), context,
+        return new RunListDetailsQueryView(this, settings,
                 ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString())
         {
             @Override

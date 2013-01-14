@@ -201,9 +201,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
     public static class NabRunListQueryView extends RunListDetailsQueryView
     {
-        public NabRunListQueryView(ExpProtocol protocol, ViewContext context)
+        public NabRunListQueryView(AssayProtocolSchema schema, QuerySettings settings)
         {
-            super(protocol, context, NabAssayController.DetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
+            super(schema, settings, NabAssayController.DetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
         }
     }
 
@@ -211,6 +211,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
-        return new NabRunListQueryView(getProtocol(), context);
+        return new NabRunListQueryView(this, settings);
     }
 }

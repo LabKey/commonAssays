@@ -544,23 +544,20 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
     @Override
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
-        return new ViabilityRunListQueryView(getProtocol(), context);
+        return new ViabilityRunListQueryView(this, settings);
     }
 
     private class ViabilityRunListQueryView extends RunListQueryView
     {
-        ExpProtocol _protocol;
-
-        public ViabilityRunListQueryView(ExpProtocol protocol, ViewContext context)
+        public ViabilityRunListQueryView(ViabilityAssaySchema schema, QuerySettings settings)
         {
-            super(protocol, context);
-            _protocol = protocol;
+            super(schema, settings);
         }
 
         @Override
         public List<DisplayColumn> getDisplayColumns()
         {
-            ActionURL reRunURL = getProvider().getImportURL(getContainer(), _protocol);
+            ActionURL reRunURL = getProvider().getImportURL(getContainer(), _schema.getProtocol());
             reRunURL.addParameter("reRunId", "${RowId}");
 
             DisplayColumn reRunDisplayCol = new UrlColumn(StringExpressionFactory.createURL(reRunURL), "rerun");

@@ -39,6 +39,7 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.nab.NabUrls;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -212,9 +213,9 @@ public class NabAssayController extends SpringActionController
         private Luc5Assay _assay;
         private ExpRun _run;
 
-        public DuplicateDataFileRunView(Luc5Assay assay, ExpRun run, ExpProtocol protocol, ViewContext context)
+        public DuplicateDataFileRunView(AssayProtocolSchema schema, QuerySettings settings, Luc5Assay assay, ExpRun run)
         {
-            super(protocol, context);
+            super(schema, settings);
             setShowExportButtons(false);
             _assay = assay;
             _run = run;
@@ -398,7 +399,10 @@ public class NabAssayController extends SpringActionController
         {
             if (isDuplicateDataFile())
             {
-                return new DuplicateDataFileRunView(_assay, _assay.getRun(), _assay.getProtocol(), context);
+                ExpProtocol protocol = _assay.getProtocol();
+                AssayProtocolSchema schema = AssayService.get().getProvider(protocol).createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
+                QuerySettings setting = RunListQueryView.getDefaultQuerySettings(schema, context);
+                return new DuplicateDataFileRunView(schema, setting, _assay, _assay.getRun());
             }
             else
                 return null;
