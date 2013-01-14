@@ -1184,6 +1184,8 @@ public class AnalysisScriptController extends BaseFlowController
             }
             else
             {
+                // Default to using importing results from FlowJo
+                form.setSelectAnalysisEngine(AnalysisEngine.FlowJoWorkspace);
                 form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
             }
         }
