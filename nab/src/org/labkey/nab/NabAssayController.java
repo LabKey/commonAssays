@@ -28,6 +28,7 @@ import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.*;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.ExperimentRunListView;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -401,7 +402,7 @@ public class NabAssayController extends SpringActionController
             {
                 ExpProtocol protocol = _assay.getProtocol();
                 AssayProtocolSchema schema = AssayService.get().getProvider(protocol).createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
-                QuerySettings setting = RunListQueryView.getDefaultQuerySettings(schema, context);
+                QuerySettings setting = ExperimentRunListView.getRunListQuerySettings(schema, context, AssayProtocolSchema.RUNS_TABLE_NAME, true);
                 return new DuplicateDataFileRunView(schema, setting, _assay, _assay.getRun());
             }
             else
