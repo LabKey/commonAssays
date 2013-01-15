@@ -45,8 +45,11 @@ public class KeywordUtil
             "\\$PK\\d+.*|" +
             "\\$G\\d+.*|\\$R\\d.*|" +
             "\\$LASER\\d+.*|" +
+            "LASER\\d+.*|" +
             "\\$TIMESTEP|" +
             "FJ_\\$.*|" +
+            "BD\\$.*|" +
+            "CST .*|" +
             "SPILL|" +
             "\\$DFC\\d+TO\\d+|" +
             "APPLY COMPENSATION|" +
@@ -54,6 +57,9 @@ public class KeywordUtil
             "\\$CYT|\\$SYS|" +
             "FSC ASF|" +
             "THRESHOLD|" +
+            "AUTOBS|" +
+            "GUID|" +
+            "CYTOMETER CONFIG .*|" +
             "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
 
     private static final Set<String> sideScatterNames = Sets.newCaseInsensitiveHashSet(

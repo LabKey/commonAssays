@@ -69,7 +69,7 @@
             selectedSamples.add(entry.getKey());
     }
 
-    String targetStudyLabel = "[None]";
+    String targetStudyLabel = null;
     if (form.getTargetStudy() != null && form.getTargetStudy().length() > 0)
     {
         Set<Study> studies = StudyService.get().findStudy(form.getTargetStudy(), context.getUser());
@@ -248,9 +248,11 @@
         <% } %>
     </li>
 
+    <% if (targetStudyLabel != null) { %>
     <li style="padding-bottom:0.5em;">
         <b>Target Study: </b> <%=h(targetStudyLabel)%>
     </li>
+    <% } %>
 </ul>
 
 <%=generateBackButton()%>
