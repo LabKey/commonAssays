@@ -1112,7 +1112,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, user);
 
-        return Table.executeQuery(getSchema(), sql, maxRows);
+        return new SqlSelector(getSchema(), sql).setMaxRows(maxRows).getResultSet();
     }
 
     public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user)
@@ -1569,7 +1569,7 @@ public class ProteinManager
                 String docid = "protein:" + id;
                 Map<String,Object> m = new HashMap<String,Object>();
                 m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
-                m.put(SearchService.PROPERTY.displayTitle.toString(), "Protein " + p.getBestName());
+                m.put(SearchService.PROPERTY.title.toString(), "Protein " + p.getBestName());
                 SimpleDocumentResource r = new SimpleDocumentResource(
                         new Path(docid),
                         docid,
@@ -1627,7 +1627,7 @@ public class ProteinManager
                             String docid = "protein:" + curSeqId;
                             Map<String,Object> m = new HashMap<String,Object>();
                             m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
-                            m.put(SearchService.PROPERTY.displayTitle.toString(), "Protein " + bestName);
+                            m.put(SearchService.PROPERTY.title.toString(), "Protein " + bestName);
                             SimpleDocumentResource r = new SimpleDocumentResource(
                                     new Path(docid),
                                     docid,
