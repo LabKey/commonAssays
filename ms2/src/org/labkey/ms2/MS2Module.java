@@ -29,7 +29,7 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
-import org.labkey.api.files.TableUpdaterFileMoveListener;
+import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
@@ -279,7 +279,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
         }
 
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileMoveListener.Type.filePathForwardSlash)
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash)
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -288,7 +288,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearRunCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileMoveListener.Type.uri)
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri)
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -297,9 +297,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearFractionCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileMoveListener.Type.filePath));
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileMoveListener.Type.filePath));
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileMoveListener.Type.filePath));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath));
     }
 
     @Override

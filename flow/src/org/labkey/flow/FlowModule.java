@@ -22,7 +22,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
-import org.labkey.api.files.TableUpdaterFileMoveListener;
+import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.flow.api.FlowService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
@@ -170,7 +170,7 @@ public class FlowModule extends DefaultModule
             ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
 
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileMoveListener.Type.uri));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri));
     }
 
 

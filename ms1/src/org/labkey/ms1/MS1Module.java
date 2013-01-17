@@ -23,7 +23,7 @@ import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
-import org.labkey.api.files.TableUpdaterFileMoveListener;
+import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
@@ -174,7 +174,7 @@ public class MS1Module extends SpringModule
         ReportService.get().registerReport(new PeaksRReport());
         ReportService.get().addUIProvider(new MS1ReportUIProvider());
 
-        ServiceRegistry.get(FileContentService.class).addFileMoveListener(new TableUpdaterFileMoveListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileMoveListener.Type.uri));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri));
     }
 
 
