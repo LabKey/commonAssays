@@ -21,11 +21,13 @@ import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -61,6 +63,8 @@ import java.util.Set;
 public class NabProtocolSchema extends AssayProtocolSchema
 {
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
+    public static final String CUTOFF_VALUE_TABLE_NAME = "CutoffValue";
+    public static final String NAB_SPECIMEN_TABLE_NAME = "NAbSpecimen";
 
     public NabProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
@@ -212,5 +216,48 @@ public class NabProtocolSchema extends AssayProtocolSchema
     protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
         return new NabRunListQueryView(this, settings);
+    }
+
+    @Override
+    protected TableInfo createProviderTable(String tableType)
+    {
+        if(tableType != null)
+        {
+            if (CUTOFF_VALUE_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createCutoffValueTable();
+            }
+
+            if (NAB_SPECIMEN_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createNAbSpecimenTable();
+            }
+        }
+        return super.createProviderTable(tableType);
+    }
+
+    public static DbSchema getSchema()
+    {
+        return DbSchema.get("nab");
+    }
+
+    public static TableInfo getTableInfoNAbSpecimen()
+    {
+        return getSchema().getTable(NAB_SPECIMEN_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoCutoffValue()
+    {
+        return getSchema().getTable(CUTOFF_VALUE_TABLE_NAME);
+    }
+
+    private NAbSpecimenTable createNAbSpecimenTable()
+    {
+        return new NAbSpecimenTable(this);
+    }
+
+    private CutoffValueTable createCutoffValueTable()
+    {
+        return new CutoffValueTable(this);
     }
 }

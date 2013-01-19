@@ -1556,6 +1556,8 @@ nab/src/org/labkey/nab/migrateNAb.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
 nab/src/org/labkey/nab/publishChooseStudy.jsp -text
 nab/src/org/labkey/nab/publishVerify.jsp -text
+nab/src/org/labkey/nab/query/CutoffValueTable.java -text
+nab/src/org/labkey/nab/query/NAbSpecimenTable.java -text
 nab/src/org/labkey/nab/query/NabDataLinkDisplayColumn.java -text
 nab/src/org/labkey/nab/query/NabProtocolSchema.java -text
 nab/src/org/labkey/nab/query/NabProviderSchema.java -text
