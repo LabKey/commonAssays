@@ -80,7 +80,7 @@ public class MultiRunRenderContext extends RenderContext
             LegacyTableSelector selector = new LegacyTableSelector(_table, _columns, _filter, _sort).setForDisplay(true);
             selector.setMaxRows(_maxRows).setNamedParamters(_parameters);
 
-            return selector.getResults(true, _cache);
+            return selector.getResults(_cache, true);
         }
     }
 }
