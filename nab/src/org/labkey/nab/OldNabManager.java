@@ -56,8 +56,8 @@ import java.util.Set;
  */
 public class OldNabManager extends AbstractNabManager
 {
-    private static OldNabManager _instance;
-    private static Logger _log = Logger.getLogger(OldNabManager.class);
+    private static final OldNabManager _instance = new OldNabManager();
+    private static final Logger _log = Logger.getLogger(OldNabManager.class);
 
     public static final int START_ROW = 6; //0 based, row 7 in the workshet
     public static final int START_COL = 0;
@@ -90,10 +90,12 @@ public class OldNabManager extends AbstractNabManager
         }
     }
 
+    private OldNabManager()
+    {
+    }
+
     public static OldNabManager get()
     {
-        if (_instance == null)
-            _instance = new OldNabManager();
         return _instance;
     }
 

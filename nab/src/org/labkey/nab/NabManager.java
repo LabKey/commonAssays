@@ -46,13 +46,15 @@ import java.util.*;
  */
 public class NabManager extends AbstractNabManager
 {
-    private static Logger _log = Logger.getLogger(NabManager.class);
-    private static NabManager _instance;
+    private static final Logger _log = Logger.getLogger(NabManager.class);
+    private static final NabManager _instance = new NabManager();
+
+    private NabManager()
+    {
+    }
 
     public static NabManager get()
     {
-        if (_instance == null)
-            _instance = new NabManager();
         return _instance;
     }
     

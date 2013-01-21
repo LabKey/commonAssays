@@ -32,7 +32,8 @@ import java.util.ArrayList;
 
 public class MS1Manager
 {
-    private static MS1Manager _instance;
+    private static MS1Manager _instance = new MS1Manager();
+
     public static final String SCHEMA_NAME = "ms1";
     public static final String TABLE_SCANS = "Scans";
     public static final String TABLE_CALIBRATION_PARAMS = "Calibrations";
@@ -56,10 +57,8 @@ public class MS1Manager
         // prevent external construction with a private default constructor
     }
 
-    public static synchronized MS1Manager get()
+    public static MS1Manager get()
     {
-        if (_instance == null)
-            _instance = new MS1Manager();
         return _instance;
     }
 

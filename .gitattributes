@@ -69,7 +69,6 @@ elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text
 elispotassay/src/org/labkey/elispot/ElispotDataExchangeHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotDataHandler.java -text
-elispotassay/src/org/labkey/elispot/ElispotManager.java -text
 elispotassay/src/org/labkey/elispot/ElispotModule.java -text
 elispotassay/src/org/labkey/elispot/ElispotPlateTypeHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotProtocolSchema.java -text
