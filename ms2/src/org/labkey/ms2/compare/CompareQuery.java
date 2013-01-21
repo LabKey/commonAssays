@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2012 LabKey Corporation
+ * Copyright (c) 2006-2013 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public abstract class CompareQuery extends SQLFragment
 
     public ResultSet createResultSet(boolean export, int maxRows) throws SQLException
     {
-        return Table.executeQuery(MS2Manager.getSchema(), getSQL(), getParamsArray(), maxRows, !export);
+        return new SqlSelector(MS2Manager.getSchema(), this).setMaxRows(maxRows).getResultSet(!export);
     }
 
     protected String getLabelColumn()

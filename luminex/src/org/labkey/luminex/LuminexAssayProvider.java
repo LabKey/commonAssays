@@ -18,60 +18,59 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.*;
+import org.labkey.api.exp.ChangePropertyDescriptorException;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.LsidManager;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.query.ExpDataTable;
-import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryParam;
-import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayRunCreator;
+import org.labkey.api.study.assay.AssayRunDatabaseContext;
+import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.study.assay.AssayTableMetadata;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
+import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
-import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.DataView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.Writer;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -296,7 +295,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void upgradeAssayDefinitions(User user, ExpProtocol protocol, double targetVersion) throws SQLException
+    public void upgradeAssayDefinitions(User user, ExpProtocol protocol, double targetVersion)
     {
         if (targetVersion == LuminexModule.LuminexUpgradeCode.ADD_RESULTS_DOMAIN_UPGRADE)
         {
@@ -368,19 +367,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     @Override
     public void deleteProtocol(ExpProtocol protocol, User user) throws ExperimentException
     {
-        try
-        {
-            // Clear out the guide sets that are FK'd to the protocol
-            SQLFragment deleteGuideSetSQL = new SQLFragment("DELETE FROM ");
-            deleteGuideSetSQL.append(LuminexProtocolSchema.getTableInfoGuideSet());
-            deleteGuideSetSQL.append(" WHERE ProtocolId = ?");
-            deleteGuideSetSQL.add(protocol.getRowId());
-            Table.execute(LuminexProtocolSchema.getSchema(), deleteGuideSetSQL);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        // Clear out the guide sets that are FK'd to the protocol
+        SQLFragment deleteGuideSetSQL = new SQLFragment("DELETE FROM ");
+        deleteGuideSetSQL.append(LuminexProtocolSchema.getTableInfoGuideSet());
+        deleteGuideSetSQL.append(" WHERE ProtocolId = ?");
+        deleteGuideSetSQL.add(protocol.getRowId());
+        new SqlExecutor(LuminexProtocolSchema.getSchema()).execute(deleteGuideSetSQL);
 
         super.deleteProtocol(protocol, user);
     }

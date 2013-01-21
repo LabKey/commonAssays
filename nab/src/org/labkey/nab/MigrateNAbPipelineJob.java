@@ -28,6 +28,7 @@ import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -318,7 +319,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             runFixupSQL.add(created);
             runFixupSQL.add(createdBy);
             runFixupSQL.add(run.getRowId());
-            Table.execute(ExperimentService.get().getSchema(), runFixupSQL);
+            new SqlExecutor(ExperimentService.get().getSchema()).execute(runFixupSQL);
 
             // Get the mapping from specimen name ("Specimen 1", "Specimen 2", etc) to LSID that would have been
             // copied to a study dataset

@@ -1877,7 +1877,7 @@ public class FlowSchema extends UserSchema
 //                    "CREATE INDEX ix_" + shortName + " ON " + name + " (TypeId,ExperimentId);\n" +
                     "CREATE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
                     "CREATE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
-            Table.execute(flow, create);
+            new SqlExecutor(flow).execute(create);
             long end = System.currentTimeMillis();
             return name;
         }
@@ -1926,86 +1926,79 @@ public class FlowSchema extends UserSchema
 
     String createBackgroundJunctionTableName(Container c)
     {
-        try
+        long begin = System.currentTimeMillis();
+        DbSchema flow = FlowManager.get().getSchema();
+        String shortName = "flowJunction" + GUID.makeHash();
+        String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
+
+        ICSMetadata ics = _protocol.getICSMetadata();
+        if (!ics.hasCompleteBackground())
+            return null;
+
+        // BACKGROUND
+        FlowDataTable bg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
+        bg.addObjectIdColumn("objectid");
+        Set<FieldKey> allColumns = new TreeSet<FieldKey>(ics.getMatchColumns());
+        for (FilterInfo f : ics.getBackgroundFilter())
+            allColumns.add(f.getField());
+        Map<FieldKey,ColumnInfo> bgMap = QueryService.get().getColumns(bg, allColumns);
+        if (bgMap.size() != allColumns.size())
+            return null;
+        ArrayList<ColumnInfo> bgFields = new ArrayList<ColumnInfo>();
+        bgFields.add(bg.getColumn("objectid"));
+        bgFields.addAll(bgMap.values());
+        SimpleFilter filter = new SimpleFilter();
+        for (FilterInfo f : ics.getBackgroundFilter())
         {
-            long begin = System.currentTimeMillis();
-            DbSchema flow = FlowManager.get().getSchema();
-            String shortName = "flowJunction" + GUID.makeHash();
-            String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
-            
-            ICSMetadata ics = _protocol.getICSMetadata();
-            if (!ics.hasCompleteBackground())
-                return null;
-
-            // BACKGROUND            
-            FlowDataTable bg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
-            bg.addObjectIdColumn("objectid");
-            Set<FieldKey> allColumns = new TreeSet<FieldKey>(ics.getMatchColumns());
-            for (FilterInfo f : ics.getBackgroundFilter())
-                allColumns.add(f.getField());
-            Map<FieldKey,ColumnInfo> bgMap = QueryService.get().getColumns(bg, allColumns);
-            if (bgMap.size() != allColumns.size())
-                return null;
-            ArrayList<ColumnInfo> bgFields = new ArrayList<ColumnInfo>();
-            bgFields.add(bg.getColumn("objectid"));
-            bgFields.addAll(bgMap.values());
-            SimpleFilter filter = new SimpleFilter();
-            for (FilterInfo f : ics.getBackgroundFilter())
-            {
-                Object value = f.getValue();
-                if (value instanceof String && f.getField().getParts().get(0).equalsIgnoreCase("Statistic"))
-                    value = Double.parseDouble((String)value);
-                filter.addCondition(bgMap.get(f.getField()), value, f.getOp());
-            }
-            SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
-            if (filter.getClauses().size() > 0)
-            {
-                Map<FieldKey, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
-                SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), columnMap);
-                SQLFragment t = new SQLFragment("SELECT * FROM (");
-                t.append(bgSQL);
-                t.append(") _filter_ " );
-                t.append(filterFrag);
-                bgSQL = t;
-            }
-
-            // FOREGROUND
-            FlowDataTable fg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
-            fg.addObjectIdColumn("objectid");
-            Set<FieldKey> setMatchColumns = new HashSet<FieldKey>(ics.getMatchColumns());
-            Map<FieldKey,ColumnInfo> fgMap = QueryService.get().getColumns(fg, setMatchColumns);
-            if (fgMap.size() != setMatchColumns.size())
-                return null;
-            ArrayList<ColumnInfo> fgFields = new ArrayList<ColumnInfo>();
-            fgFields.add(fg.getColumn("objectid"));
-            fgFields.addAll(fgMap.values());
-            SQLFragment fgSQL = Table.getSelectSQL(fg, fgFields, null, null);
-
-            SQLFragment selectInto = new SQLFragment();
-            selectInto.append("SELECT F.objectid as fg, B.objectid as bg INTO " + name + "\n");
-            selectInto.append("FROM (").append(fgSQL).append(") AS F INNER JOIN (").append(bgSQL).append(") AS B");
-            selectInto.append(" ON " );
-            String and = "";
-            for (FieldKey m : setMatchColumns)
-            {
-                selectInto.append(and);
-                if (null == fgMap.get(m) || null == bgMap.get(m))
-                    return null;
-                selectInto.append("F.").append(fgMap.get(m).getAlias()).append("=B.").append(bgMap.get(m).getAlias());
-                and = " AND ";
-            }
-            Table.execute(flow, selectInto);
-            String create =
-                    "CREATE INDEX ix_" + shortName + "_fg ON " + name + " (fg);\n" +
-                    "CREATE INDEX ix_" + shortName + "_bg ON " + name + " (bg);\n";
-            Table.execute(flow, create);
-
-            long end = System.currentTimeMillis();
-            return name;
+            Object value = f.getValue();
+            if (value instanceof String && f.getField().getParts().get(0).equalsIgnoreCase("Statistic"))
+                value = Double.parseDouble((String)value);
+            filter.addCondition(bgMap.get(f.getField()), value, f.getOp());
         }
-        catch (SQLException x)
+        SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
+        if (filter.getClauses().size() > 0)
         {
-            throw new RuntimeSQLException(x);
+            Map<FieldKey, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
+            SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), columnMap);
+            SQLFragment t = new SQLFragment("SELECT * FROM (");
+            t.append(bgSQL);
+            t.append(") _filter_ " );
+            t.append(filterFrag);
+            bgSQL = t;
         }
+
+        // FOREGROUND
+        FlowDataTable fg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
+        fg.addObjectIdColumn("objectid");
+        Set<FieldKey> setMatchColumns = new HashSet<FieldKey>(ics.getMatchColumns());
+        Map<FieldKey,ColumnInfo> fgMap = QueryService.get().getColumns(fg, setMatchColumns);
+        if (fgMap.size() != setMatchColumns.size())
+            return null;
+        ArrayList<ColumnInfo> fgFields = new ArrayList<ColumnInfo>();
+        fgFields.add(fg.getColumn("objectid"));
+        fgFields.addAll(fgMap.values());
+        SQLFragment fgSQL = Table.getSelectSQL(fg, fgFields, null, null);
+
+        SQLFragment selectInto = new SQLFragment();
+        selectInto.append("SELECT F.objectid as fg, B.objectid as bg INTO " + name + "\n");
+        selectInto.append("FROM (").append(fgSQL).append(") AS F INNER JOIN (").append(bgSQL).append(") AS B");
+        selectInto.append(" ON " );
+        String and = "";
+        for (FieldKey m : setMatchColumns)
+        {
+            selectInto.append(and);
+            if (null == fgMap.get(m) || null == bgMap.get(m))
+                return null;
+            selectInto.append("F.").append(fgMap.get(m).getAlias()).append("=B.").append(bgMap.get(m).getAlias());
+            and = " AND ";
+        }
+        new SqlExecutor(flow).execute(selectInto);
+        String create =
+                "CREATE INDEX ix_" + shortName + "_fg ON " + name + " (fg);\n" +
+                "CREATE INDEX ix_" + shortName + "_bg ON " + name + " (bg);\n";
+        new SqlExecutor(flow).execute(create);
+
+        long end = System.currentTimeMillis();
+        return name;
     }
 }

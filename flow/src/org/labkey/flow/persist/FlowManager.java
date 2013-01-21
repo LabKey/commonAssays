@@ -625,7 +625,7 @@ public class FlowManager
             SQLFragment sqlf = new SQLFragment("DELETE FROM flow.Object WHERE RowId IN (" );
             sqlf.append(StringUtils.join(oids,','));
             sqlf.append(")");
-            Table.execute(getSchema(), sqlf);
+            new SqlExecutor(getSchema()).execute(sqlf);
             scope.commitTransaction();
         }
         finally
@@ -1030,14 +1030,7 @@ public class FlowManager
     {
         if (isPostgresSQL82())
         {
-            try
-            {
-                Table.execute(FlowManager.get().getSchema(), "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.keywordattr; VACUUM flow.statistic; VACUUM flow.statisticattr; VACUUM flow.graph; VACUUM flow.graphattr;");
-            }
-            catch (SQLException x)
-            {
-                _log.error("unexpected error", x);
-            }
+            new SqlExecutor(FlowManager.get().getSchema()).execute("VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.keywordattr; VACUUM flow.statistic; VACUUM flow.statisticattr; VACUUM flow.graph; VACUUM flow.graphattr;");
         }
     }
 
@@ -1045,14 +1038,7 @@ public class FlowManager
     {
         if (isPostgresSQL82())
         {
-            try
-            {
-                Table.execute(FlowManager.get().getSchema(), "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.keywordattr; ANALYZE flow.statistic; ANALYZE flow.statisticattr; ANALYZE flow.graph; ANALYZE flow.graphattr;");
-            }
-            catch (SQLException x)
-            {
-                _log.error("unexpected error", x);
-            }
+            new SqlExecutor(FlowManager.get().getSchema()).execute("ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.keywordattr; ANALYZE flow.statistic; ANALYZE flow.statisticattr; ANALYZE flow.graph; ANALYZE flow.graphattr;");
         }
     }
 }

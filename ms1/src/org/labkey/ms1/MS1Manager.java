@@ -251,7 +251,7 @@ public class MS1Manager
                 true,expData.getRowId(),FILETYPE_FEATURES);
     }
 
-    public void purgeFeaturesData(int fileId) throws SQLException
+    public void purgeFeaturesData(int fileId)
     {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_FEATURES));
@@ -277,7 +277,7 @@ public class MS1Manager
         sql.append(fileId);
         sql.append(";");
 
-        Table.execute(getSchema(), sql.toString());
+        new SqlExecutor(getSchema()).execute(sql.toString());
     }
 
     public void moveFileData(int oldExpDataFileID, int newExpDataFileID) throws SQLException

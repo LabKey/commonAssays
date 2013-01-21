@@ -140,7 +140,7 @@ public abstract class GoLoader
         Map<String, GoLoadBean> map = getGoLoadMap();
 
         clearGoLoaded();
-        Table.execute(schema, schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
+        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
 
         logStatus("Starting to load GO annotation files");
         logStatus("");
@@ -159,7 +159,7 @@ public abstract class GoLoader
             te = _tis.getNextEntry();
         }
 
-        Table.execute(schema, schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
+        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
 
         logStatus("Successfully loaded all GO annotation files");
     }
@@ -180,7 +180,7 @@ public abstract class GoLoader
         try
         {
             logStatus("Clearing table " + bean.tinfo);
-            Table.execute(ProteinManager.getSchema(), "TRUNCATE TABLE " + bean.tinfo);
+            new SqlExecutor(ProteinManager.getSchema()).execute("TRUNCATE TABLE " + bean.tinfo);
 
             logStatus("Starting to load " + filename);
             InputStreamReader isr = new InputStreamReader(is);
@@ -382,7 +382,7 @@ public abstract class GoLoader
             {
                 _goLoaded = new TableSelector(ProteinManager.getTableInfoGoTerm()).getRowCount() != 0;
             }
-            catch(RuntimeSQLException e)
+            catch(Exception e)
             {
                 _log.error("isGoLoaded", e);
                 _goLoaded = false;    // Don't try this again if there's a SQL error

@@ -479,7 +479,7 @@ public class ProteinManager
             updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
             updatePeptidesSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-            Table.execute(MS2Manager.getSchema(), updatePeptidesSQL);
+            new SqlExecutor(MS2Manager.getSchema()).execute(updatePeptidesSQL);
 
             SQLFragment updateProteinsSQL = new SQLFragment();
             updateProteinsSQL.append("UPDATE " + MS2Manager.getTableInfoProteinGroupMemberships() + " SET SeqId= map.NewSeqId\n");
@@ -495,7 +495,7 @@ public class ProteinManager
             updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
             updateProteinsSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-            Table.execute(MS2Manager.getSchema(), updateProteinsSQL);
+            new SqlExecutor(MS2Manager.getSchema()).execute(updateProteinsSQL);
 
             Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
             MS2Manager.getSchema().getScope().commitTransaction();
@@ -1479,7 +1479,7 @@ public class ProteinManager
     }
 
 
-    public static void deleteAnnotationInsertion(int id) throws SQLException
+    public static void deleteAnnotationInsertion(int id)
     {
         SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?");
         sql.add(id);

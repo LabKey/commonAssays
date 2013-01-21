@@ -17,6 +17,7 @@ package org.labkey.ms2.protein.tools;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -61,7 +62,7 @@ public class ProteinDictionaryHelpers
             DbScope scope = ProteinManager.getSchema().getScope();
             try
             {
-                Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
+                new SqlExecutor(ProteinManager.getSchema()).execute("DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
 
                 TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
                 conn = scope.getConnection();

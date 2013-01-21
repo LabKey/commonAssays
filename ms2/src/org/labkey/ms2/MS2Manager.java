@@ -37,6 +37,7 @@ import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -756,7 +757,7 @@ public class MS2Manager
 
             SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());
             updateSQL.append(runSQL);
-            Table.execute(getSchema(), updateSQL);
+            new SqlExecutor(getSchema()).execute(updateSQL);
         }
         finally
         {
@@ -834,16 +835,9 @@ public class MS2Manager
         where.addInClause("Run", runIds);
         markDeleted.append(where.getSQLFragment(getSqlDialect()));
 
-        try
-        {
-            Table.execute(getSchema(), markDeleted);
-            _removeRunsFromCache(runIds);
-            invalidateBasicStats();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        new SqlExecutor(getSchema()).execute(markDeleted);
+        _removeRunsFromCache(runIds);
+        invalidateBasicStats();
     }
 
     private static String _purgeStatus = null;

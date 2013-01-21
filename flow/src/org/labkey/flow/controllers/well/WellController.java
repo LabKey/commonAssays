@@ -27,6 +27,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
@@ -556,7 +557,7 @@ public class WellController extends BaseFlowController
             }
             update.append(")");
 
-            updated = Table.execute(DbSchema.get("flow"), update);
+            updated = new SqlExecutor(DbSchema.get("flow")).execute(update);
 
             form.message = "" + updated + " values updated";
             // CONSIDER handle nulls (requires INSERT and DELETE)
