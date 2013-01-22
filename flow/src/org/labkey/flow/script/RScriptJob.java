@@ -301,7 +301,13 @@ public class RScriptJob extends FlowExperimentJob
     {
         File workingDir = createAnalysisDirectory(getExperiment().getName(), FlowProtocolStep.analysis);
         File rAnalysisDir = new File(workingDir, "rAnalysis");
+        if (!rAnalysisDir.mkdirs())
+            throw new IOException("Could not create analysis directory: " + rAnalysisDir.getAbsolutePath());
+
         File normalizedDir = new File(workingDir, "normalized");
+        if (_performNormalization && !normalizedDir.mkdirs())
+            throw new IOException("Could not create normalization directory: " + normalizedDir.getAbsolutePath());
+
         runScript(rAnalysisDir, normalizedDir);
 
         if (!hasErrors())
