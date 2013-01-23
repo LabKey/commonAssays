@@ -103,7 +103,8 @@
         items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {
 
             schemaName      : <%=q(form.getSchemaName())%>,
-            queryName       : <%=q(form.getQueryName())%>
+            queryName       : <%=q(form.getQueryName())%>,
+            sampleColumns   : <%=text(gson.toJson(form.getSampleColumns()))%>
         }));
 
         var panel = Ext4.create('Ext.panel.Panel', {

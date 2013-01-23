@@ -63,6 +63,7 @@ public class ElisaController extends SpringActionController
         private boolean _allowToggleMode = false; // view vs. edit mode
         private String _runTableName;
         private Double[] _fitParams = new Double[0];
+        private String[] _sampleColumns = new String[0];
 
         public int getRunId()
         {
@@ -152,6 +153,16 @@ public class ElisaController extends SpringActionController
         public void setFitParams(Double[] fitParams)
         {
             _fitParams = fitParams;
+        }
+
+        public String[] getSampleColumns()
+        {
+            return _sampleColumns;
+        }
+
+        public void setSampleColumns(String[] sampleColumns)
+        {
+            _sampleColumns = sampleColumns;
         }
 
         @Override

@@ -53,9 +53,15 @@ Ext4.define('LABKEY.elisa.RunDataPanel', {
 
     renderDataGrid : function(renderTo) {
 
-        var sql = 'SELECT MAX(SpecimenLsid.Property.SpecimenId) AS SpecimenId,' +
-                'MAX(SpecimenLsid.Property.ParticipantId) AS ParticipantId,' +
-                'MAX(SpecimenLsid.Property.VisitId) AS VisitId,' +
+        var sampleColumns = '';
+
+        for (var i=0; i < this.sampleColumns.length; i++)
+        {
+            var name = this.sampleColumns[i];
+            sampleColumns = sampleColumns.concat(' MAX(SpecimenLsid.Property.' + name + ') AS ' + name + ',');
+        }
+
+        var sql = 'SELECT ' + sampleColumns +
                 'Data.WellgroupLocation,' +
                 "(ROUND(AVG(Concentration), 3)) AS Concentration," +
                 '(ROUND(AVG(Absorption), 3)) AS Absorption ' +

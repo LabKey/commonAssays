@@ -280,6 +280,15 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
         Domain runDomain = getRunDomain(protocol);
         DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS);
+
+        Domain sampleDomain = getSampleWellGroupDomain(protocol);
+        List<String> sampleColumns = new ArrayList<String>();
+        for (DomainProperty property : sampleDomain.getProperties())
+        {
+            sampleColumns.add(property.getName());
+        }
+        form.setSampleColumns(sampleColumns.toArray(new String[sampleColumns.size()]));
+
         if (prop != null)
         {
             Object fitParams = run.getProperty(prop);
