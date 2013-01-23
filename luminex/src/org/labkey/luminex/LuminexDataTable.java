@@ -138,7 +138,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         cvQCFlagSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".Type = qf.Key1");
         cvQCFlagSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".Description = qf.Key2");
         cvQCFlagSQL.append(" ORDER BY qf.RowId");
-        ExprColumn cvFlagEnabledColumn = new ExprColumn(this, "CVQCFlagsEnabled", this.getSqlDialect().getSelectConcat(cvQCFlagSQL), JdbcType.VARCHAR);
+        ExprColumn cvFlagEnabledColumn = new ExprColumn(this, "CVQCFlagsEnabled", this.getSqlDialect().getSelectConcat(cvQCFlagSQL, ","), JdbcType.VARCHAR);
         cvFlagEnabledColumn.setLabel("CV QC Flags Enabled State");
         cvFlagEnabledColumn.setHidden(true);
         addColumn(cvFlagEnabledColumn);

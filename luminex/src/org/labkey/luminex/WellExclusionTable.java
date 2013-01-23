@@ -101,12 +101,12 @@ public class WellExclusionTable extends AbstractExclusionTable
         SQLFragment wellRoleSQL = new SQLFragment("SELECT WellRole FROM (SELECT DISTINCT dr.WellRole");
         wellRoleSQL.append(joinSQL);
         wellRoleSQL.append(") x");
-        addColumn(new ExprColumn(this, "Well Role", schema.getDbSchema().getSqlDialect().getSelectConcat(wellRoleSQL), JdbcType.VARCHAR));
+        addColumn(new ExprColumn(this, "Well Role", schema.getDbSchema().getSqlDialect().getSelectConcat(wellRoleSQL, ","), JdbcType.VARCHAR));
 
         SQLFragment wellSQL = new SQLFragment("SELECT Well FROM (SELECT DISTINCT dr.Well");
         wellSQL.append(joinSQL);
         wellSQL.append(") x");
-        ExprColumn wellsCol = new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL), JdbcType.VARCHAR);
+        ExprColumn wellsCol = new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL, ","), JdbcType.VARCHAR);
         wellsCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override

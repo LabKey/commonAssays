@@ -86,6 +86,6 @@ public abstract class AbstractLuminexTable extends FilteredTable<LuminexProtocol
         }
         sql.append(" ORDER BY qf.RowId");
 
-        return sqlDialect.getSelectConcat(sql);
+        return sqlDialect.getSelectConcat(sql, ",");
     }
 }
