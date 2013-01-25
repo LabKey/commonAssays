@@ -15,8 +15,10 @@
  */
 package org.labkey.nab;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -28,10 +30,12 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * User: migra
@@ -66,6 +70,20 @@ public class NabModule extends DefaultModule
     public boolean hasScripts()
     {
         return true;
+    }
+
+    @NotNull
+    @Override
+    public Set<String> getSchemaNames()
+    {
+        return Collections.singleton(NabProtocolSchema.NAB_DBSCHEMA_NAME);
+    }
+
+    @NotNull
+    @Override
+    public Set<DbSchema> getSchemasToTest()
+    {
+        return Collections.singleton(NabProtocolSchema.getSchema());
     }
 
     public void doStartup(ModuleContext moduleContext)

@@ -65,6 +65,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
     public static final String CUTOFF_VALUE_TABLE_NAME = "CutoffValue";
     public static final String NAB_SPECIMEN_TABLE_NAME = "NAbSpecimen";
+    public static final String NAB_DBSCHEMA_NAME = "nab";
 
     public NabProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
@@ -238,7 +239,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get("nab");
+        return DbSchema.get(NAB_DBSCHEMA_NAME);
     }
 
     public static TableInfo getTableInfoNAbSpecimen()
@@ -259,5 +260,13 @@ public class NabProtocolSchema extends AssayProtocolSchema
     private CutoffValueTable createCutoffValueTable()
     {
         return new CutoffValueTable(this);
+    }
+
+    public Set<String> getTableNames()
+    {
+        Set<String> result = super.getTableNames();
+        result.add(CUTOFF_VALUE_TABLE_NAME);
+        result.add(NAB_SPECIMEN_TABLE_NAME);
+        return result;
     }
 }
