@@ -1575,9 +1575,9 @@
       </ns:column>
     </ns:columns>
     <ns:tableTitle>MS2Spectra</ns:tableTitle>
-    <ns:pkColumnName>Fraction,Scan,Charge</ns:pkColumnName>
+    <ns:pkColumnName>Fraction,Scan</ns:pkColumnName>
     <ns:titleColumn>Run</ns:titleColumn>
-    <ns:description>Contains a row for every spectra loaded from this folder, including some run and fraction data.</ns:description>
+    <ns:description>Contains a row for every spectrum loaded from this folder, including some run and fraction data.</ns:description>
   </ns:table>
   <ns:table tableName="Compare" tableDbType="NOT_IN_DB">
     <ns:tableTitle>MS2Compare</ns:tableTitle>
@@ -1631,7 +1631,7 @@
         <ns:scale>10</ns:scale>
       </ns:column>
     </ns:columns>
-    <ns:description>Contains a row for every </ns:description>
+    <ns:description>Contains a row for every comparison result</ns:description>
   </ns:table>
   <ns:table tableName="Proteins" tableDbType="NOT_IN_DB">
     <ns:tableTitle>MS2Proteins</ns:tableTitle>
