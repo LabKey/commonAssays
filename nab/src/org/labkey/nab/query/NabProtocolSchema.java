@@ -145,7 +145,8 @@ public class NabProtocolSchema extends AssayProtocolSchema
             DataRegion rgn = view.getDataRegion();
             rgn.setRecordSelectorValueColumns("ObjectId");
             rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
-            ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
+            ButtonBar bbar = new ButtonBar(view.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
+            view.getDataRegion().setButtonBar(bbar);
 
             ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
             MenuButton graphSelectedButton = new MenuButton("Graph");
