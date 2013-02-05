@@ -64,6 +64,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     abstract public FlowObject getParent();
     abstract public void addParams(Map<FlowParam, Object> map);
     abstract public ActionURL urlShow();
+    abstract public ActionURL urlDownload();
 
     public String getLSID()
     {

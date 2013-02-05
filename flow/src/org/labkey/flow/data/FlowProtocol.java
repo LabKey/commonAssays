@@ -173,6 +173,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return urlFor(ProtocolController.ShowProtocolAction.class);
     }
 
+    public ActionURL urlDownload()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     public FlowProtocolStep getStep()
     {
         return FlowProtocolStep.fromLSID(getContainer(), getLSID());

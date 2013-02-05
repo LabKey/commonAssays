@@ -52,6 +52,7 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
+import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -61,7 +62,6 @@ import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataObject;
-import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
@@ -75,11 +75,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -407,7 +409,35 @@ public class WellController extends BaseFlowController
 
         protected abstract ModelAndView internalGetView(FlowWell well) throws Exception;
     }
-    
+
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class DownloadAction extends FCSAction
+    {
+        @Override
+        protected ModelAndView internalGetView(FlowWell well) throws Exception
+        {
+            URI fileURI = well.getFCSURI();
+            if (fileURI == null)
+                throw new NotFoundException("file not found");
+
+            File file = new File(fileURI);
+            if (!file.exists())
+                throw new NotFoundException("file not found");
+
+            FileInputStream fis = new FileInputStream(file);
+
+            Map<String, String> headers = Collections.singletonMap("Content-Type", FCSHeader.CONTENT_TYPE);
+            PageFlowUtil.streamFile(getViewContext().getResponse(), headers, file.getName(), fis, true);
+            return null;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
     
     @RequiresPermissionClass(ReadPermission.class)
     public class KeywordsAction extends FCSAction

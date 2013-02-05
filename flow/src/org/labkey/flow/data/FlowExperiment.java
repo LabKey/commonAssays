@@ -235,6 +235,11 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return addParams(urlFor(RunController.ShowRunsAction.class));
     }
 
+    public ActionURL urlDownload()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     public boolean hasRun(File filePath, @Nullable FlowProtocolStep step)
     {
         FlowRun[] runs = getRuns(step);

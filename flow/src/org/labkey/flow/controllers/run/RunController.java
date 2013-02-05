@@ -206,6 +206,7 @@ public class RunController extends BaseFlowController
                 HttpServletResponse response = getViewContext().getResponse();
                 ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip");
                 exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
+                zipFile.close();
 
                 return null;
             }

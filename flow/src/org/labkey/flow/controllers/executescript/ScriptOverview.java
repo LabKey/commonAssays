@@ -91,9 +91,13 @@ public class ScriptOverview extends Overview
         Action actionSettings = new Action("Edit Settings", _script.urlFor(ScriptController.EditSettingsAction.class));
         actionSettings.setExplanatoryHTML("The script has settings that affect the way that graphs are drawn and statistics are calculated.");
         addAction(actionSettings);
+
         Action actionSource = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
         actionSource.setExplanatoryHTML("Advanced: Analysis scripts are XML documents that can be edited by hand");
         addAction(actionSource);
+
+        Action actionDownload = new Action("Download", _script.urlDownload());
+        addAction(actionDownload);
     }
 
     protected boolean hasStep(FlowProtocolStep step)

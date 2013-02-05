@@ -308,7 +308,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         if (workspace == null)
             return null;
 
-        return workspace.getDownloadURL();
+        return workspace.urlDownload();
     }
 
     public void addParams(Map<FlowParam,Object> map)
@@ -319,6 +319,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     public ActionURL urlShow()
     {
         return urlFor(RunController.ShowRunAction.class);
+    }
+
+    // NOTE: This action downloads the FCS files associated with a run and not the external analysis archive zip.
+    public ActionURL urlDownload()
+    {
+        return urlFor(RunController.DownloadAction.class);
     }
 
     public String getLabel()

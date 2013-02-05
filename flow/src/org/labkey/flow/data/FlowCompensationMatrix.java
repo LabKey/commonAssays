@@ -136,6 +136,11 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return urlFor(CompensationController.ShowCompensationAction.class);
     }
 
+    public ActionURL urlDownload()
+    {
+        return urlFor(CompensationController.DownloadAction.class);
+    }
+
     public void addParams(Map<FlowParam, Object> map)
     {
         map.put(FlowParam.compId, getCompId());

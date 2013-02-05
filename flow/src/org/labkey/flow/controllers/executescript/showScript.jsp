@@ -49,7 +49,7 @@ The analysis section describes which gates in the analysis, as well as the stati
 <%
     ScriptOverview overview = new ScriptOverview(context.getUser(), context.getContainer(), script);
 %>
-<%=overview.toString()%>
+<%=text(overview.toString())%>
 
 <div>
 <% if (script.getRunCount() > 0) {

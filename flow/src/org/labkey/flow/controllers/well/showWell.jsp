@@ -571,8 +571,7 @@ else
                 {
                     %><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
                     %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
-                    String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
-                    %><a href="<%=h(url)%>" rel="nofollow">Download FCS file</a><br><%
+                    %><a href="<%=h(getWell().urlDownload())%>" rel="nofollow">Download FCS file</a><br><%
                 }
                 else
                 {

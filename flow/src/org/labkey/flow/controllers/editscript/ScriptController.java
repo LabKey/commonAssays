@@ -48,6 +48,7 @@ import org.labkey.api.view.GWTView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.ScriptParser;
 import org.labkey.flow.analysis.model.Analysis;
@@ -88,6 +89,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -125,6 +127,30 @@ public class ScriptController extends BaseFlowController
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
             return HttpView.redirect(script.urlShow());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class DownloadAction extends SimpleViewAction<EditScriptForm>
+    {
+        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
+        {
+            FlowScript script = form.getFlowScript();
+            if (script == null)
+                throw new NotFoundException("Analysis script not found");
+
+            String filename = script.getName();
+            if (!filename.endsWith(".xml"))
+                filename = filename + ".xml";
+
+            byte[] bytes = script.getAnalysisScript().getBytes(Charset.forName("UTF-8"));
+            PageFlowUtil.streamFileBytes(getViewContext().getResponse(), filename, bytes, true);
+            return null;
         }
 
         public NavTree appendNavTrail(NavTree root)

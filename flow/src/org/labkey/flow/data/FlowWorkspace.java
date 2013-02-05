@@ -113,7 +113,8 @@ public class FlowWorkspace extends FlowDataObject
         return "Workspace '" + getName() + "'";
     }
 
-    public ActionURL getDownloadURL()
+    @Override
+    public ActionURL urlDownload()
     {
         if (!getData().isFileOnDisk())
             return null;

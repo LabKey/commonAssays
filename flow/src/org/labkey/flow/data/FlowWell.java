@@ -249,6 +249,11 @@ public class FlowWell extends FlowDataObject
         return urlFor(WellController.ShowWellAction.class);
     }
 
+    public ActionURL urlDownload()
+    {
+        return urlFor(WellController.DownloadAction.class);
+    }
+
     public ActionURL urlEditAnalysisScript() throws Exception
     {
         FlowScript analysisScript = getScript();

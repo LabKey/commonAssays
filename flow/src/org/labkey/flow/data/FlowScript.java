@@ -34,6 +34,7 @@ import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.persist.FlowDataHandler;
@@ -209,6 +210,11 @@ public class FlowScript extends FlowDataObject
     public ActionURL urlShow()
     {
         return urlFor(AnalysisScriptController.BeginAction.class);
+    }
+
+    public ActionURL urlDownload()
+    {
+        return urlFor(ScriptController.DownloadAction.class);
     }
 
     public String getLabel()

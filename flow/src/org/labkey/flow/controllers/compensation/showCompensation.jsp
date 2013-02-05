@@ -55,7 +55,7 @@
                "</span><wbr>";
     }
 %>
-<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath()%>/Flow/util.js"></script>
+<script type="text/javascript" src="<%=h(AppProps.getInstance().getContextPath())%>/Flow/util.js"></script>
 <%
     final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), request);
     if (null == flowComp)
@@ -104,10 +104,10 @@
         String className = 0==(iChannel%2)?"labkey-alternate-row":"labkey-row";
     %>
     <tr>
-        <th class="labkey-row-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
+        <th class="labkey-row-header <%=text(className)%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         {
-        %><td class="<%=className%>" style="text-align:right;"><%=format.format(comp.getRow(iChannel)[iChannelValue])%></td><%
+        %><td class="<%=text(className)%>" style="text-align:right;"><%=text(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
         }%>
     </tr>
     <%}%>
@@ -160,7 +160,7 @@
 <% include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);%>
 <% for (Callback callback : callbacks)
 { %>
-<p><%=callback.title%></p>
+<p><%=h(callback.title)%></p>
 <table>
     <tr><td>&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
@@ -176,17 +176,17 @@
         <%if (well == null) { %>
         <td>N/A</td>
         <% } else { %>
-        <td><a href="<%=h(well.urlShow())%>"><%=channelNames[iChannel]%></a></td>
+        <td><a href="<%=h(well.urlShow())%>"><%=h(channelNames[iChannel])%></a></td>
         <% } %>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <td><%=callback.render(iChannel, iChannelValue)%></td>
+        <td><%=text(callback.render(iChannel, iChannelValue))%></td>
         <%}%>
     </tr>
     <%}%>
 </table>
 <% } %>
-<labkey:link href="<%=flowComp.urlFor(CompensationController.DownloadAction.class)%>" text="Download" /><br>
+<labkey:link href="<%=flowComp.urlDownload()%>" text="Download" rel="nofollow"/><br>
 <%
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(
