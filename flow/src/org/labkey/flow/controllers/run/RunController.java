@@ -16,6 +16,7 @@
 
 package org.labkey.flow.controllers.run;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -39,6 +40,7 @@ import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipFile;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -57,11 +59,19 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.mail.BodyPart;
+import javax.mail.Part;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -204,9 +214,85 @@ public class RunController extends BaseFlowController
             else
             {
                 HttpServletResponse response = getViewContext().getResponse();
-                ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip");
-                exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
-                zipFile.close();
+                if (form.isExportAsWebPage())
+                {
+                    response.setContentType("multipart/x-mixed-replace;boundary=END");
+                    //response.setContentType("message/rfc822");
+                    //MimeMultipart message = new MimeMultipart("related");
+
+                    ServletOutputStream out = response.getOutputStream();
+                    out.println();
+                    out.println("--END");
+
+                    List<File> files = new ArrayList<File>();
+                    Set<String> seen = new HashSet<String>();
+                    for (FlowWell well : _run.getWells(true))
+                    {
+                        URI uri = well.getFCSURI();
+                        if (uri == null)
+                            continue;
+
+                        File file = new File(uri);
+                        if (file.canRead())
+                        {
+                            String fileName = file.getName();
+                            if (!seen.contains(fileName))
+                            {
+                                seen.add(fileName);
+                                files.add(file);
+                            }
+                        }
+                    }
+
+                    //message.setPreamble("This is a MIME multipart message");
+
+                    for (File file : files)
+                    {
+                        //InternetHeaders headers = new InternetHeaders();
+                        //headers.addHeader("Content-type", FCSHeader.CONTENT_TYPE);
+                        //headers.addHeader("Content-Location", file.getName());
+                        //headers.addHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+                        //headers.addHeader("Content-Id", file.getName());
+
+                        FileInputStream fis = null;
+                        try
+                        {
+                            fis = new FileInputStream(file);
+                            //byte[] bytes = IOUtils.toByteArray(fis);
+                            //MimeBodyPart part = new MimeBodyPart(headers, bytes);
+                            //part.setFileName(file.getName());
+                            //part.setContentID(file.getName());
+                            //part.setDisposition(Part.ATTACHMENT);
+                            //part.setHeader("Content-Type", FCSHeader.CONTENT_TYPE);
+
+                            //message.addBodyPart(part);
+
+                            out.println("Content-type: " + FCSHeader.CONTENT_TYPE);
+                            out.println("Content-Disposition: attachment; filename=" + file.getName());
+                            out.println();
+
+                            IOUtils.copy(fis, out);
+                            out.println();
+                            out.println("--END");
+                            out.flush();
+                        }
+                        finally
+                        {
+                            if (fis != null) try { fis.close(); } catch (IOException e) { }
+                        }
+                    }
+                    
+                    //message.writeTo(response.getOutputStream());
+
+                    out.println("--END--");
+                    out.flush();
+                }
+                else
+                {
+                    ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip");
+                    exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
+                    zipFile.close();
+                }
 
                 return null;
             }
