@@ -268,7 +268,7 @@ public class RunController extends BaseFlowController
                             //message.addBodyPart(part);
 
                             out.println("Content-type: " + FCSHeader.CONTENT_TYPE);
-                            out.println("Content-Disposition: attachment; filename=" + file.getName());
+                            out.println("Content-Disposition: attachment; filename=\"" + file.getName() + "\"");
                             out.println();
 
                             IOUtils.copy(fis, out);
