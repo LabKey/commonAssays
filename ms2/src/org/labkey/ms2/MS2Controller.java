@@ -3342,6 +3342,10 @@ public class MS2Controller extends SpringActionController
             throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
+            if (schema == null)
+            {
+                throw new NotFoundException("MS2 module is not enabled in " + getContainer().getPath());
+            }
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
             QueryView proteinsView = new QueryView(schema, proteinsSettings, errors);
