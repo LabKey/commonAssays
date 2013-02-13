@@ -204,7 +204,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected void readGates(Element elPopulation, SubsetSpec parentSubset, Population ret, Analysis analysis)
+    protected void readGates(Element elPopulation, SubsetSpec subset, SubsetSpec parentSubset, Population ret, Analysis analysis, String sampleId)
     {
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
@@ -229,6 +229,7 @@ public class PCWorkspace extends FlowJoWorkspace
         }
         for (Element elEllipseGate : getElementsByTagName(elPopulation, "EllipseGate"))
         {
+            //warnOnce(sampleId, analysis.getName(), subset, "EllipseGate not yet supported");
             //boolean invert = inverted(elEllipseGate);
             //PolygonGate gate = readRectangleGate(elEllipseGate);
             //ret.addGate(invert ? new NotGate(gate) : gate);
@@ -248,7 +249,7 @@ public class PCWorkspace extends FlowJoWorkspace
         ret.setName(name);
         SubsetSpec subset = new SubsetSpec(parentSubset, name);
 
-        readGates(elPopulation, parentSubset, ret, analysis);
+        readGates(elPopulation, subset, parentSubset, ret, analysis, sampleId);
 
         readStats(subset, elPopulation, results, analysis, sampleId, warnOnMissingStats);
 

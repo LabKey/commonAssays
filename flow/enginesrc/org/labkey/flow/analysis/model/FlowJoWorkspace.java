@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.VersionNumber;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -38,27 +39,51 @@ abstract public class FlowJoWorkspace extends Workspace
     static
     {
         STATS.put("Count", StatisticSpec.STAT.Count);
+        
+        STATS.put("%ile", StatisticSpec.STAT.Percentile);
         STATS.put("Percentile", StatisticSpec.STAT.Percentile);
+
         STATS.put("Mean", StatisticSpec.STAT.Mean);
         STATS.put("Median", StatisticSpec.STAT.Median);
         //statMap.put("Mode", StatisticSpec.STAT.Mode);
+
+        STATS.put("Geom. Mean", StatisticSpec.STAT.Geometric_Mean);
         STATS.put("GeometricMean", StatisticSpec.STAT.Geometric_Mean);
+        STATS.put("Geometric Mean", StatisticSpec.STAT.Geometric_Mean);
+
         STATS.put("CV", StatisticSpec.STAT.CV);
+
         STATS.put("SD", StatisticSpec.STAT.Std_Dev);
+        STATS.put("StdDev", StatisticSpec.STAT.Std_Dev);
+
         STATS.put("MedianAbsDeviation", StatisticSpec.STAT.Median_Abs_Dev);
+        STATS.put("Median Abs Dev", StatisticSpec.STAT.Median_Abs_Dev);
+
         STATS.put("MedianAbsDeviation%", StatisticSpec.STAT.Median_Abs_Dev_Percent);
+
+        //STATS.put("RobustSD", StatisticSpec.STAT.Robust_SD);
+        //STATS.put("Robust SD", StatisticSpec.STAT.Robust_SD);
+
         STATS.put("RobustCV", StatisticSpec.STAT.Robust_CV);
+        STATS.put("Robust CV", StatisticSpec.STAT.Robust_CV);
 
         STATS.put("FrequencyOfGrandParent", StatisticSpec.STAT.Freq_Of_Grandparent);
         STATS.put("FreqGrandparent", StatisticSpec.STAT.Freq_Of_Grandparent);
+        STATS.put("fj.stat.freqofgrandparent", StatisticSpec.STAT.Freq_Of_Grandparent);
 
         STATS.put("FrequencyOfParent", StatisticSpec.STAT.Freq_Of_Parent);
         STATS.put("FreqParent", StatisticSpec.STAT.Freq_Of_Parent);
+        STATS.put("Freq. of Parent", StatisticSpec.STAT.Freq_Of_Parent);
+        STATS.put("fj.stat.freqofparent", StatisticSpec.STAT.Freq_Of_Parent);
 
         STATS.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
         STATS.put("FreqOf", StatisticSpec.STAT.Frequency);
         STATS.put("Freq. of Total", StatisticSpec.STAT.Frequency);
+        STATS.put("fj.stat.freqoftotal", StatisticSpec.STAT.Frequency);
     }
+
+    private VersionNumber _version;
+    private VersionNumber _flowJoVersion;
 
     protected FlowJoWorkspace()
     {
@@ -73,11 +98,30 @@ abstract public class FlowJoWorkspace extends Workspace
 
     protected void readAll(Element elDoc)
     {
+        readVersion(elDoc);
         readCompensationMatrices(elDoc);
         readSamples(elDoc);
         readGroups(elDoc);
         postProcess();
     }
+
+    protected void readVersion(Element elDoc)
+    {
+        if (elDoc.hasAttribute("version"))
+            _version = new VersionNumber(elDoc.getAttribute("version"));
+
+        if (elDoc.hasAttribute("flowJoVersion"))
+        {
+            String flowJoVersion = elDoc.getAttribute("flowJoVersion");
+            if (flowJoVersion.startsWith("Version "))
+                flowJoVersion = flowJoVersion.substring("Version ".length());
+            _flowJoVersion = new VersionNumber(flowJoVersion);
+        }
+    }
+
+    public VersionNumber getVersion() { return _version; }
+
+    public VersionNumber getFlowJoVersion() { return _flowJoVersion; }
 
     abstract protected void readCompensationMatrices(Element elDoc);
 
@@ -364,7 +408,7 @@ abstract public class FlowJoWorkspace extends Workspace
         if (results != null)
         {
             String strValue = StringUtils.trimToNull(elStat.getAttribute("value"));
-            if (strValue != null)
+            if (strValue != null && !strValue.equals("\ufffd"))
             {
                 double value;
                 try
@@ -380,6 +424,13 @@ abstract public class FlowJoWorkspace extends Workspace
                 // PC workspace version <= 1.5 doesn't return a percentage in 0-100 range.
                 if ("FreqOf".equals(statistic))
                     value = 100.0d * value;
+
+                // FlowJo v10.0.* doesn't return a percentage in 0-100 range.
+                if (getVersion() != null && getVersion().getVersionInt() >= 17 && getFlowJoVersion() != null && getFlowJoVersion().getVersionInt() >= 100)
+                {
+                    if (stat == StatisticSpec.STAT.Frequency || stat == StatisticSpec.STAT.Freq_Of_Parent || stat == StatisticSpec.STAT.Freq_Of_Grandparent)
+                        value = 100.0d * value;
+                }
 
                 results.setStatistic(spec, value);
             }
@@ -617,6 +668,13 @@ abstract public class FlowJoWorkspace extends Workspace
             assertPC(workspace, "7.6.5");
         }
 
+        @Test
+        public void loadPC_10_0_5() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/versions/v10.0.5.wsp");
+            assertPC(workspace, "10.0.5");
+        }
+
         private void assertPC(Workspace workspace, String version) throws Exception
         {
             assertEquals(72, workspace.getSampleCount());
@@ -646,6 +704,11 @@ abstract public class FlowJoWorkspace extends Workspace
             {
                 assertEquals(3821, stats.get(new StatisticSpec("Viable/Lymphocytes/CD3+CD4+:Count")).intValue());
                 assertEquals(33.465, stats.get(new StatisticSpec("Viable/Lymphocytes/CD3+CD4+:Freq_Of_Parent")), 0.001d);
+            }
+            else if (version.equals("10.0.5"))
+            {
+                assertEquals(3811, stats.get(new StatisticSpec("Viable/Lymphocytes/CD3+CD4+:Count")).intValue());
+                assertEquals(33.194, stats.get(new StatisticSpec("Viable/Lymphocytes/CD3+CD4+:Freq_Of_Parent")), 0.001d);
             }
             else
             {
@@ -683,6 +746,13 @@ abstract public class FlowJoWorkspace extends Workspace
             assertAdvanced(workspace, "7.6.5");
         }
 
+        @Test
+        public void loadAdvanced_10_0_5() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.5.wsp");
+            assertAdvanced(workspace, "10.0.5");
+        }
+
         private void assertAdvanced(Workspace workspace, String version) throws Exception
         {
             assertEquals(16, workspace.getSampleCount());
@@ -694,8 +764,17 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals(4, workspace.getParameterNames().size());
 
             // warnings
-            assertEquals(1, workspace.getWarnings().size());
-            assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
+            if ("10.0.5".equals(version))
+            {
+                assertEquals(11, workspace.getWarnings().size());
+                assertTrue(workspace.getWarnings().get(0).contains("Coefficient of Variation statistic value missing"));
+                assertTrue(workspace.getWarnings().get(1).contains("Mode statistic not yet supported"));
+            }
+            else
+            {
+                assertEquals(1, workspace.getWarnings().size());
+                assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
+            }
 
             SampleInfo sample = workspace.getSample("2");
             assertEquals("931115-B02- Sample 01.fcs", sample.getLabel());
@@ -765,6 +844,23 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
                 assertEquals(29.628d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                 assertEquals(13.810d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+            }
+            else if ("10.0.5".equals(version))
+            {
+                assertEquals(27,      stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                assertEquals(0.27d,   stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                assertEquals(48.148d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+                assertEquals(5d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
+                assertEquals(61.806d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                assertEquals(44.101d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
+                assertEquals(40.694d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                assertEquals(46.791d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
+                assertEquals(50.673d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+                //assertEquals(0d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
+                // XXX: FreqOfParent wasn't migrated properly by FlowJo from v7.6.5 to v10.0.5
+                //assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
             }
             else
             {

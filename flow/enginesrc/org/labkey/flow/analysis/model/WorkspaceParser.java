@@ -21,6 +21,7 @@ import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
 import org.w3c.dom.*;
@@ -51,14 +52,41 @@ public class WorkspaceParser
     protected static final String DATATYPES_1_5_NS = "http://www.isac-net.org/std/Gating-ML/v1.5/datatypes";
     protected static final String COMPENSATION_1_5_NS = "http://www.isac-net.org/std/Gating-ML/v1.5/compensation";
 
-    protected static Map<String, String> GATINGML_NAMESPACES;
+    // FlowJo v10.0.* uses these incorrect namespaces
+    protected static final String FJ_GATING_1_5_NS = "http://flowcyt.sourceforge.net/std/Gating-ML/v1.5/gating";
+    protected static final String FJ_TRANSFORMATIONS_1_5_NS = "http://flowcyt.sourceforge.net/std/Gating-ML/v1.5/transformations";
+    protected static final String FJ_DATATYPES_1_5_NS = "http://flowcyt.sourceforge.net/std/Gating-ML/v1.5/datatypes";
+    protected static final String FJ_COMPENSATION_1_5_NS = "http://flowcyt.sourceforge.net/std/Gating-ML/v1.5/compensation";
+
+    protected static Map<String, String> GATINGML_PREFIX_MAP;
     static
     {
-        GATINGML_NAMESPACES = new HashMap<String, String>();
-        GATINGML_NAMESPACES.put("gating", GATING_1_5_NS);
-        GATINGML_NAMESPACES.put("transforms", TRANSFORMATIONS_1_5_NS);
-        GATINGML_NAMESPACES.put("data-type", DATATYPES_1_5_NS);
-        GATINGML_NAMESPACES.put("comp", COMPENSATION_1_5_NS);
+        GATINGML_PREFIX_MAP = new HashMap<String, String>();
+        GATINGML_PREFIX_MAP.put("gating", GATING_1_5_NS);
+        GATINGML_PREFIX_MAP.put("transforms", TRANSFORMATIONS_1_5_NS);
+        GATINGML_PREFIX_MAP.put("data-type", DATATYPES_1_5_NS);
+        GATINGML_PREFIX_MAP.put("comp", COMPENSATION_1_5_NS);
+    }
+
+    protected static Set<String> GATINGML_NAMESPACES;
+    static
+    {
+        GATINGML_NAMESPACES = new HashSet<String>();
+        GATINGML_NAMESPACES.add(GATING_1_5_NS);
+        GATINGML_NAMESPACES.add(TRANSFORMATIONS_1_5_NS);
+        GATINGML_NAMESPACES.add(DATATYPES_1_5_NS);
+        GATINGML_NAMESPACES.add(COMPENSATION_1_5_NS);
+    }
+
+    // Map from incorrect to correct namespace URI
+    protected static Map<String, String> FJ_GATINGML_NAMEPSACE_FIXUP;
+    static
+    {
+        FJ_GATINGML_NAMEPSACE_FIXUP = new HashMap<String, String>();
+        FJ_GATINGML_NAMEPSACE_FIXUP.put(FJ_GATING_1_5_NS, GATING_1_5_NS);
+        FJ_GATINGML_NAMEPSACE_FIXUP.put(FJ_TRANSFORMATIONS_1_5_NS, TRANSFORMATIONS_1_5_NS);
+        FJ_GATINGML_NAMEPSACE_FIXUP.put(FJ_DATATYPES_1_5_NS, DATATYPES_1_5_NS);
+        FJ_GATINGML_NAMEPSACE_FIXUP.put(FJ_COMPENSATION_1_5_NS, COMPENSATION_1_5_NS);
     }
 
     static public boolean isFlowJoWorkspace(File file)
@@ -311,7 +339,7 @@ public class WorkspaceParser
             short filter = defaultFilter;
             if (noNamespaceElements.containsKey(localName))
                 filter = noNamespaceElements.get(localName);
-            else if (nsURI != null && (nsURI.equals(GATING_1_5_NS) || nsURI.equals(TRANSFORMATIONS_1_5_NS) || nsURI.equals(DATATYPES_1_5_NS) || nsURI.equals(COMPENSATION_1_5_NS)))
+            else if (nsURI != null && (GATINGML_NAMESPACES.contains(nsURI) || FJ_GATINGML_NAMEPSACE_FIXUP.containsKey(nsURI)))
                 filter = FILTER_ACCEPT;
 
 //            if (filter != FILTER_ACCEPT && rejected.add(element.getNodeName())) System.err.println((filter == FILTER_SKIP ? "SKIPPED:  " : "REJECTED: ") + element.getNodeName());
@@ -410,11 +438,31 @@ public class WorkspaceParser
         {
             // FlowJo v7.5.5 didn't add Gating-ML namepsace declarations.
             // I'm not sure if this is the preferred way to inject the prefixes, but it seems to work.
-            for (Map.Entry<String, String> entry : GATINGML_NAMESPACES.entrySet())
+            for (Map.Entry<String, String> entry : GATINGML_PREFIX_MAP.entrySet())
             {
                 namespaceContext.declarePrefix(entry.getKey(), entry.getValue());
             }
             super.startDocument(locator, encoding, namespaceContext, augs);
+        }
+
+        @Override
+        protected Attr createAttrNode(QName attrQName)
+        {
+            // FlowJo v10.0.* used incorrect Gating-ML namespace declarations.
+            // Replace the incorrect namespace and replace with the proper namespaces.
+            if (FJ_GATINGML_NAMEPSACE_FIXUP.containsKey(attrQName.uri))
+                attrQName.uri = FJ_GATINGML_NAMEPSACE_FIXUP.get(attrQName.uri);
+            return super.createAttrNode(attrQName);
+        }
+
+        @Override
+        protected Element createElementNode(QName qName)
+        {
+            // FlowJo v10.0.* used incorrect Gating-ML namespace declarations.
+            // Replace the incorrect namespace and replace with the proper namespaces.
+            if (FJ_GATINGML_NAMEPSACE_FIXUP.containsKey(qName.uri))
+                qName.uri = FJ_GATINGML_NAMEPSACE_FIXUP.get(qName.uri);
+            return super.createElementNode(qName);
         }
 
         @Override

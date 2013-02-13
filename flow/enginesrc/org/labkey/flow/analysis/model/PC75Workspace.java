@@ -37,10 +37,9 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.labkey.flow.analysis.model.WorkspaceParser.GATINGML_NAMESPACES;
+import static org.labkey.flow.analysis.model.WorkspaceParser.FJ_GATINGML_NAMEPSACE_FIXUP;
+import static org.labkey.flow.analysis.model.WorkspaceParser.GATINGML_PREFIX_MAP;
 import static org.labkey.flow.analysis.model.WorkspaceParser.GATING_1_5_NS;
-import static org.labkey.flow.analysis.model.WorkspaceParser.TRANSFORMATIONS_1_5_NS;
-import static org.labkey.flow.analysis.model.WorkspaceParser.DATATYPES_1_5_NS;
 
 /**
  * User: kevink
@@ -129,19 +128,27 @@ public class PC75Workspace extends PCWorkspace
         return null;
     }
 
-    protected Gate readGate(Element elGate)
+    protected Gate readGate(Element elGate, SubsetSpec subset, Analysis analysis, String sampleId)
     {
         Gate gate = null;
         String id = null;
 
-        Element elChild = getElements(elGate).get(0);
+        List<Element> elChildren = getElements(elGate);
+        if (elChildren.size() == 0)
+        {
+            warnOnce(sampleId, analysis.getName(), subset, "No gate found");
+            return null;
+        }
+
+        Element elChild = elChildren.get(0);
         boolean invert = inverted(elChild);
 
         try
         {
             XmlOptions options = new XmlOptions();
             options.setLoadReplaceDocumentElement(new QName(GATING_1_5_NS, "Gating-ML"));
-            options.setLoadAdditionalNamespaces(GATINGML_NAMESPACES);
+            options.setLoadAdditionalNamespaces(GATINGML_PREFIX_MAP);
+            //options.setLoadSubstituteNamespaces(FJ_GATINGML_NAMEPSACE_FIXUP);
 
             GatingMLDocument xGatingML = GatingMLDocument.Factory.parse(elGate, options);
             XmlObject[] xGates = xGatingML.getGatingML().selectPath("./*");
@@ -161,7 +168,7 @@ public class PC75Workspace extends PCWorkspace
             //else if (xGate instanceof BooleanGateType)
             //    gate = readBooleanGate((BooleanGateType) xGate);
             //else
-            //    warnOnce(null, null, "Unsupported gate type: " + xGate.schemaType().getName());
+            //    warnOnce(sampleId, analysis.getName(), subset, "Unsupported gate '" + elChild.getTagName() + "'");
         }
         catch (XmlException e)
         {
@@ -184,11 +191,11 @@ public class PC75Workspace extends PCWorkspace
     }
 
     @Override
-    protected void readGates(Element elPopulation, SubsetSpec parentSubset, Population ret, Analysis analysis)
+    protected void readGates(Element elPopulation, SubsetSpec subset, SubsetSpec parentSubset, Population ret, Analysis analysis, String sampleId)
     {
         for (Element elGate : getElementsByTagName(elPopulation, "Gate"))
         {
-            Gate gate = readGate(elGate);
+            Gate gate = readGate(elGate, subset, analysis, sampleId);
             if (gate != null)
             {
                 ret.addGate(gate);
