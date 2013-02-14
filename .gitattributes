@@ -37,6 +37,9 @@ cbcassay/src/org/labkey/cbcassay/data/CBCData.java -text
 cbcassay/src/org/labkey/cbcassay/data/CBCDataDisplayColumn.java -text
 cbcassay/src/org/labkey/cbcassay/data/CBCDataProperty.java -text
 cbcassay/src/org/labkey/cbcassay/view/showDetails.jsp -text
+dataintegration/module.properties -text
+dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-0.00-0.01.sql -text
+dataintegration/src/org/labkey/di/DataIntegrationModule.java -text
 elisa/Elisa.iml -text
 elisa/build.xml -text
 elisa/module.properties -text
