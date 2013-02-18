@@ -19,7 +19,6 @@ package org.labkey.viability;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -81,13 +80,6 @@ public class ViabilityModule extends DefaultModule
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(ViabilitySchema.SCHEMA_NAME);
-    }
-
-    @Override
-    @NotNull
-    public Set<DbSchema> getSchemasToTest()
-    {
-        return Collections.singleton(ViabilitySchema.getSchema());
     }
 
     @Override

@@ -360,13 +360,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     @Override
     @NotNull
-    public Set<DbSchema> getSchemasToTest()
-    {
-        return PageFlowUtil.set(MS2Manager.getSchema(), ProteinManager.getSchema());
-    }
-
-    @Override
-    @NotNull
     public Set<Class> getIntegrationTests()
     {
         return new HashSet<Class>(Arrays.asList(

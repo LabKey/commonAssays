@@ -184,12 +184,4 @@ public class MS1Module extends SpringModule
     {
         return PageFlowUtil.set(MS1Manager.get().getSchemaName());
     }
-
-
-    @Override
-    @NotNull
-    public Set<DbSchema> getSchemasToTest()
-    {
-        return PageFlowUtil.set(MS1Manager.get().getSchema());
-    }
 }

@@ -19,7 +19,6 @@ package org.labkey.microarray;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.ExperimentRunType;
@@ -32,7 +31,6 @@ import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayDataType;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.microarray.assay.MageMLDataHandler;
@@ -48,6 +46,7 @@ public class MicroarrayModule extends SpringModule
     public static final String WEBPART_MICROARRAY_STATISTICS = "Microarray Summary";
     public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
     private static final String CONTROLLER_NAME = "microarray";
+    public static final String DB_SCHEMA_NAME = "microarray";
 
     public static final AssayDataType MAGE_ML_INPUT_TYPE =
             new AssayDataType("MicroarrayAssayData", new FileType(Arrays.asList("_MAGEML.xml", "MAGE-ML.xml", ".mage"), "_MAGEML.xml"), "MageML");
@@ -159,14 +158,6 @@ public class MicroarrayModule extends SpringModule
     @NotNull
     public Set<String> getSchemaNames()
     {
-        return Collections.singleton(CONTROLLER_NAME);
+        return Collections.singleton(DB_SCHEMA_NAME);
     }
-
-    @Override
-    @NotNull
-    public Set<DbSchema> getSchemasToTest()
-    {
-        return PageFlowUtil.set(MicroarraySchema.getSchema());
-    }
-
 }

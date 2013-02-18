@@ -159,6 +159,6 @@ public class MicroarraySchema extends SimpleUserSchema
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get("microarray");
+        return DbSchema.get(MicroarrayModule.DB_SCHEMA_NAME);
     }
 }

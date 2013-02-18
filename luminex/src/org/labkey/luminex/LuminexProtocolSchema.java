@@ -62,6 +62,8 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String ANALYTE_TITRATION_QC_FLAG_TABLE_NAME = "AnalyteTitrationQCFlags";
     public static final String CV_QC_FLAG_TABLE_NAME = "CVQCFlags";
 
+    public static final String DB_SCHEMA_NAME = "luminex";
+
     private List<String> _curveTypes;
 
     public LuminexProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
@@ -371,7 +373,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get("luminex");
+        return DbSchema.get(DB_SCHEMA_NAME);
     }
 
     public static TableInfo getTableInfoAnalytes()

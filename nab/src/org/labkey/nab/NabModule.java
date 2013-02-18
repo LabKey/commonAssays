@@ -18,7 +18,6 @@ package org.labkey.nab;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -77,13 +76,6 @@ public class NabModule extends DefaultModule
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(NabProtocolSchema.NAB_DBSCHEMA_NAME);
-    }
-
-    @NotNull
-    @Override
-    public Set<DbSchema> getSchemasToTest()
-    {
-        return Collections.singleton(NabProtocolSchema.getSchema());
     }
 
     public void doStartup(ModuleContext moduleContext)

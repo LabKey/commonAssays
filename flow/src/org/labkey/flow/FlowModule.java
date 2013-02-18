@@ -184,13 +184,6 @@ public class FlowModule extends DefaultModule
 
     @Override
     @NotNull
-    public Set<DbSchema> getSchemasToTest()
-    {
-        return PageFlowUtil.set(FlowManager.get().getSchema());
-    }
-
-    @Override
-    @NotNull
     public Set<Class> getUnitTests()
     {
         return new HashSet<Class>(Arrays.asList(
