@@ -20,6 +20,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -88,6 +89,8 @@ public class BackgroundSubtractionJob extends PipelineJob
     {
         setStatus(PROCESSING_STATUS, "Job started at: " + DateUtil.nowISO());
 
+        DataType elipotDataType = ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE);
+
         for (String runId : _runs)
         {
             int rowId = NumberUtils.toInt(runId, -1);
@@ -102,7 +105,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                     info("Starting background substraction for run : " + runId);
 
                     AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
-                    ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+                    ExpData[] data = run.getOutputDatas(elipotDataType);
                     if (data.length != 1)
                         throw new ExperimentException("Elispot should only upload a single file per run.");
 
@@ -170,7 +173,7 @@ public class BackgroundSubtractionJob extends PipelineJob
     private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, DomainProperty plateReaderProp) throws ExperimentException
     {
         PlateTemplate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
-        ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+        ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         Plate plate = null;
 
         Object plateReader = run.getProperty(plateReaderProp);

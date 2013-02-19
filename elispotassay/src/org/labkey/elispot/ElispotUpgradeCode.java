@@ -82,7 +82,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                         {
                             ExperimentService.get().getSchema().getScope().ensureTransaction();
 
-                            ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+                            ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
                             if (data.length != 1)
                                 throw new ExperimentException("Elispot should only upload a single file per run.");
 

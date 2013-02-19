@@ -211,7 +211,7 @@ public class ElispotController extends SpringActionController
     {
         Map<Position, WellInfo> map = new HashMap<Position, WellInfo>();
 
-        ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+        ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         assert(data.length == 1);
 
         Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);

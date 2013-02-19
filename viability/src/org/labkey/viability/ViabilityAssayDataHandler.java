@@ -43,8 +43,9 @@ import java.sql.SQLException;
  */
 public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHandler
 {
+    public static final String NAMESPACE = "ViabilityAssayData";
     // Used during 9.3 development, but deprecated for the more specific static DATA_TYPE in derived classes.
-    public static final DataType OLD_DATA_TYPE = new DataType("ViabilityAssayData");
+    protected static final DataType OLD_DATA_TYPE = new DataType(NAMESPACE);
 
     public static abstract class Parser
     {
@@ -188,6 +189,12 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     public abstract Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile);
+
+    @Override
+    public DataType getDataType()
+    {
+        return OLD_DATA_TYPE;
+    }
 
     protected boolean allowEmptyData()
     {

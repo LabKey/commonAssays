@@ -76,7 +76,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected DataType getDataType()
+    public DataType getDataType()
     {
         return NAB_DATA_TYPE;
     }

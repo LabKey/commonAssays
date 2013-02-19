@@ -56,7 +56,14 @@ import java.util.Map;
  */
 public class GuavaDataHandler extends ViabilityAssayDataHandler implements TransformDataHandler
 {
-    public static final AssayDataType DATA_TYPE = new AssayDataType("ViabilityAssay-GuavaData", new FileType(".csv"));
+    public static final String NAMESPACE = "ViabilityAssay-GuavaData";
+    private static final AssayDataType DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(".csv"));
+
+    @Override
+    public DataType getDataType()
+    {
+        return DATA_TYPE;
+    }
 
     public Priority getPriority(ExpData data)
     {

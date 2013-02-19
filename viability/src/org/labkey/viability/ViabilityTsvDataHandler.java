@@ -47,6 +47,12 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 {
     public static final DataType DATA_TYPE = new DataType("ViabilityAssay-TsvData");
 
+    @Override
+    public DataType getDataType()
+    {
+        return DATA_TYPE;
+    }
+
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());

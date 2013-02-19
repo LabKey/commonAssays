@@ -75,8 +75,15 @@ import java.util.Set;
  */
 public class ElispotDataHandler extends AbstractElispotDataHandler implements TransformDataHandler
 {
-    public static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType("ElispotAssayData", new FileType(Arrays.asList(".txt", ".xls", ".xlsx"), ".txt"));
-    public static final DataType ELISPOT_TRANSFORMED_DATA_TYPE = new DataType("ElispotTransformedData"); // a marker data type
+    public static final String NAMESPACE = "ElispotAssayData";
+    private static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".txt", ".xls", ".xlsx"), ".txt"));
+    private static final DataType ELISPOT_TRANSFORMED_DATA_TYPE = new DataType("ElispotTransformedData"); // a marker data type
+
+    @Override
+    public DataType getDataType()
+    {
+        return ELISPOT_DATA_TYPE;
+    }
 
     class ElispotFileParser implements ElispotDataFileParser
     {

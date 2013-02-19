@@ -23,6 +23,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
@@ -182,6 +183,12 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         _bindingMap.put(new ColumnBinding("probability", "MS2ConnectivityProbability", java.sql.Types.REAL, false));
         _bindingMap.put(new ColumnBinding("MS2charge", "MS2Charge", java.sql.Types.TINYINT, false));
     } //static init for _bindingMap
+
+    @Override
+    public DataType getDataType()
+    {
+        return null;
+    }
 
     /**
      * The experiment loader calls this to load the data file.

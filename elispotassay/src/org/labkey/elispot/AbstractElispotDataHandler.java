@@ -80,7 +80,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         try {
             Container container = data.getContainer();
 
-            ExpData[] runData = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+            ExpData[] runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
             assert(runData.length == 1);
 
             for (Map<String, Object> row : inputData)

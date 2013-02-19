@@ -17,6 +17,7 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -42,6 +43,11 @@ import java.util.Arrays;
  */
 public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 {
+    public DataType getDataType()
+    {
+        return null;
+    }
+
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpRun expRun = data.getRun();

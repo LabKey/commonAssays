@@ -49,13 +49,10 @@ import java.util.*;
  */
 public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements TransformDataHandler
 {
-    public Priority getPriority(ExpData data)
+    @Override
+    public DataType getDataType()
     {
-        if (MicroarrayModule.MAGE_ML_INPUT_TYPE.matches(new Lsid(data.getLSID())))
-        {
-            return Priority.HIGH;
-        }
-        return null;
+        return MicroarrayModule.MAGE_ML_INPUT_TYPE;
     }
 
     protected boolean allowEmptyData()

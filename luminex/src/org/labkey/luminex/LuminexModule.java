@@ -69,8 +69,8 @@ public class LuminexModule extends DefaultModule
 
     public void doStartup(ModuleContext moduleContext)
     {
-        AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new LuminexDataHandler());
+        AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         PropertyService.get().registerDomainKind(new LuminexAnalyteDomainKind());
         PropertyService.get().registerDomainKind(new LuminexDataDomainKind());
     }

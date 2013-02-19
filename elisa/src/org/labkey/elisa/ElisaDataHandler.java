@@ -66,15 +66,22 @@ import java.util.Map;
  */
 public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements TransformDataHandler
 {
+    public static final String NAMESPACE = "ElisaDataType";
     public static final AssayDataType DATA_TYPE;
     public static final String ELISA_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
 
     static
     {
-        DATA_TYPE = new AssayDataType("ElisaDataType", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+        DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     }
 
     private boolean _allowEmptyData = false;
+
+    @Override
+    public DataType getDataType()
+    {
+        return DATA_TYPE;
+    }
 
     @Override
     protected boolean allowEmptyData()
@@ -86,17 +93,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     protected boolean shouldAddInputMaterials()
     {
         return true;
-    }
-
-    @Override
-    public Priority getPriority(ExpData data)
-    {
-        Lsid lsid = new Lsid(data.getLSID());
-        if (DATA_TYPE.matches(lsid))
-        {
-            return Priority.HIGH;
-        }
-        return null;
     }
 
     @Override
@@ -241,7 +237,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             }
         }
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
-        datas.put(DATA_TYPE, results);
+        datas.put(getDataType(), results);
 
         return datas;
     }

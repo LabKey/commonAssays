@@ -42,6 +42,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
@@ -104,7 +105,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElisaAssayProvider()
     {
-        super("ElisaAssayProtocol", "ElisaAssayRun", ElisaDataHandler.DATA_TYPE);
+        super("ElisaAssayProtocol", "ElisaAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElisaDataHandler.NAMESPACE));
     }
 
     @NotNull
@@ -238,7 +239,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(ElisaModule.class,
-                new PipelineProvider.FileTypesEntryFilter(ElisaDataHandler.DATA_TYPE.getFileType()),
+                new PipelineProvider.FileTypesEntryFilter(
+                        ((AssayDataType) ExperimentService.get().getDataType(ElisaDataHandler.NAMESPACE)).getFileType()
+                ),
                 this, "Import ELISA");
     }
 

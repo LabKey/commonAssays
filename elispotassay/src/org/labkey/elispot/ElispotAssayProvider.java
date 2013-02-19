@@ -81,7 +81,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElispotAssayProvider()
     {
-        super("ElispotAssayProtocol", "ElispotAssayRun", ElispotDataHandler.ELISPOT_DATA_TYPE);
+        super("ElispotAssayProtocol", "ElispotAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
     }
 
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
@@ -249,7 +249,8 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(ElispotModule.class,
-                new PipelineProvider.FileTypesEntryFilter(ElispotDataHandler.ELISPOT_DATA_TYPE.getFileType()),
+                new PipelineProvider.FileTypesEntryFilter(
+                        ((AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE)).getFileType()),
                 this, "Import ELISpot");
     }
 

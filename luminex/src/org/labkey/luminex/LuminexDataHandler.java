@@ -72,8 +72,9 @@ import java.util.regex.Pattern;
  */
 public class LuminexDataHandler extends AbstractExperimentDataHandler implements TransformDataHandler
 {
-    public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
-    public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+    public static final String NAMESPACE = "LuminexDataFile";
+    private static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
+    private static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
     public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50-4";
     public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
@@ -87,6 +88,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
 
     public static final int MINIMUM_TITRATION_COUNT = 5;
+
+    @Override
+    public DataType getDataType()
+    {
+        return LUMINEX_DATA_TYPE;
+    }
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {

@@ -218,8 +218,6 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return getAssayResults(run, user, dataFile, fit);
     }
 
-    protected abstract DataType getDataType();
-
     public File getDataFile(ExpRun run)
     {
         if (run == null)

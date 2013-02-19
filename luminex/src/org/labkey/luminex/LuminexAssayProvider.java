@@ -46,6 +46,7 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayRunDatabaseContext;
@@ -86,7 +87,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public LuminexAssayProvider()
     {
-        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexDataHandler.LUMINEX_DATA_TYPE);
+        super("LuminexAssayProtocol", "LuminexAssayRun", (AssayDataType) ExperimentService.get().getDataType(LuminexDataHandler.NAMESPACE));
         setMaxFileInputs(10);
     }
 

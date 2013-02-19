@@ -17,6 +17,7 @@
 package org.labkey.flow.persist;
 
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.data.Container;
@@ -47,6 +48,12 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
     static public final String EXT_SCRIPT = "flowscript.xml";
 
     static public final FlowDataHandler instance = new FlowDataHandler();
+
+    @Override
+    public DataType getDataType()
+    {
+        return null;
+    }
 
     public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
     {

@@ -22,6 +22,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
@@ -51,6 +52,12 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 {
     public static final massSpecDataFileType FT_MZXML = new massSpecDataFileType();
     public static final FileType FT_PEAKS = new FileType(".peaks.xml");
+
+    @Override
+    public DataType getDataType()
+    {
+        return null;
+    }
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {

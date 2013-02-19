@@ -24,6 +24,7 @@ import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
@@ -79,7 +80,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", GuavaDataHandler.DATA_TYPE);
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", (AssayDataType) ExperimentService.get().getDataType(GuavaDataHandler.NAMESPACE));
     }
 
     /** Relative from Results table. */

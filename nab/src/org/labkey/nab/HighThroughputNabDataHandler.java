@@ -70,7 +70,7 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     }
 
     @Override
-    protected DataType getDataType()
+    public DataType getDataType()
     {
         return NAB_HIGH_THROUGHPUT_DATA_TYPE;
     }
