@@ -50,7 +50,7 @@ public class CustomAnnotationSetsTable extends VirtualTable<CustomAnnotationSche
         {
             for (final CustomAnnotationSet annotationSet : annotationSets.values())
             {
-                ExprColumn setColumn = new ExprColumn(parentTable, annotationSet.getName(), sqlFragment, JdbcType.INTEGER);
+                ExprColumn setColumn = new ExprColumn(this, annotationSet.getName(), sqlFragment, JdbcType.INTEGER);
                 addColumn(setColumn);
                 setColumn.setFk(new LookupForeignKey("CustomAnnotationSetId", "CustomAnnotationSetId")
                 {
