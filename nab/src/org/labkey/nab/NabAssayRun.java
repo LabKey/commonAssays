@@ -312,7 +312,7 @@ public abstract class NabAssayRun extends Luc5Assay
             // "output" data object.
             Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
             String wellGroupName = getWellGroupName(material);
-            String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName).toString();
+            String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName, sampleProperties).toString();
             Map<String, ObjectProperty> outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
             for (ObjectProperty prop : outputProperties.values())
             {
@@ -343,7 +343,7 @@ public abstract class NabAssayRun extends Luc5Assay
             _materialKey = materialKey;
             _sampleProperties = sortProperties(sampleProperties);
             _dataProperties = sortProperties(dataProperties);
-            _dataRowLsid = provider.getDataHandler().getDataRowLSID(data, dilutionSummary.getFirstWellGroup().getName()).toString();
+            _dataRowLsid = provider.getDataHandler().getDataRowLSID(data, dilutionSummary.getFirstWellGroup().getName(), sampleProperties).toString();
             _dataContainer = data.getContainer();
         }
 

@@ -406,6 +406,11 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
             OntologyManager.ensureObject(container, data.getLSID());
             Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
 
+            Map<String, ExpMaterial> inputMaterialMap = new HashMap<String, ExpMaterial>();
+
+            for (ExpMaterial material : run.getMaterialInputs().keySet())
+                inputMaterialMap.put(material.getLSID(), material);
+
             for (Map<String, Object> group : rawData)
             {
                 if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
@@ -414,8 +419,18 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 if (group.get(WELLGROUP_NAME_PROPERTY) == null)
                     throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
 
+                if (group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY) == null)
+                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + NAB_INPUT_MATERIAL_DATA_PROPERTY);
+
                 String groupName = group.get(WELLGROUP_NAME_PROPERTY).toString();
-                String dataRowLsid = getDataRowLSID(data, groupName).toString();
+                String specimenLsid = group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY).toString();
+
+                ExpMaterial material = inputMaterialMap.get(specimenLsid);
+
+                if (material == null)
+                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + NAB_INPUT_MATERIAL_DATA_PROPERTY);
+
+                String dataRowLsid = getDataRowLSID(data, groupName, material.getPropertyValues()).toString();
 
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
                 List<ObjectProperty> results = new ArrayList<ObjectProperty>();
@@ -494,7 +509,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 propertyName.startsWith(POINT_IC_PREFIX);
     }
 
-    public Lsid getDataRowLSID(ExpData data, String wellGroupName)
+    public Lsid getDataRowLSID(ExpData data, String wellGroupName, Map<PropertyDescriptor, Object> sampleProperties)
     {
         Lsid dataRowLsid = new Lsid(data.getLSID());
         dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);

@@ -29,6 +29,10 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.nab.multiplate.CrossPlateDilutionNabAssayProvider;
+import org.labkey.nab.multiplate.CrossPlateDilutionNabDataHandler;
+import org.labkey.nab.multiplate.SinglePlateDilutionNabAssayProvider;
+import org.labkey.nab.multiplate.SinglePlateDilutionNabDataHandler;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 
@@ -94,8 +98,10 @@ public class NabModule extends DefaultModule
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
         AssayService.get().registerAssayProvider(new NabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new SinglePlateNabDataHandler());
-        AssayService.get().registerAssayProvider(new HighThroughputNabAssayProvider());
-        ExperimentService.get().registerExperimentDataHandler(new HighThroughputNabDataHandler());
+        AssayService.get().registerAssayProvider(new CrossPlateDilutionNabAssayProvider());
+        AssayService.get().registerAssayProvider(new SinglePlateDilutionNabAssayProvider());
+        ExperimentService.get().registerExperimentDataHandler(new CrossPlateDilutionNabDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new SinglePlateDilutionNabDataHandler());
         ContainerManager.addContainerListener(new NabContainerListener());
     }
 

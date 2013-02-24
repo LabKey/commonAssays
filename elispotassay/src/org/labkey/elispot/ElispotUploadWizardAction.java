@@ -104,7 +104,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
      * @param propName - the name of the property to set default values for
      * @param propertyNamesToValue - a map of sample group names to default values
      */
-    private void addDefaultValues(InsertView view, SamplePropertyHelper<WellGroupTemplate> helper, String propName,
+    private void addDefaultValues(InsertView view, SamplePropertyHelper<String> helper, String propName,
                                   Map<String, Object> propertyNamesToValue)
     {
         DomainProperty prop = null;

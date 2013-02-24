@@ -1,25 +1,13 @@
-/*
- * Copyright (c) 2010-2011 LabKey Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.labkey.nab;
+package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
+import org.labkey.nab.DilutionSummary;
+import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabAssayRun;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,16 +16,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * User: brittp
- * Date: Sep 2, 2010 11:43:49 AM
+ * Created by IntelliJ IDEA.
+ * User: klum
+ * Date: 2/24/13
  */
-public class HighThroughputNabAssayRun extends NabAssayRun
+public class CrossPlateDilutionNabAssayRun extends NabAssayRun
 {
     protected List<Plate> _plates;
     private DilutionSummary[] _dilutionSummaries;
 
-    public HighThroughputNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates,
-                                  User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
+    public CrossPlateDilutionNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates,
+                                         User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
         _plates = plates;

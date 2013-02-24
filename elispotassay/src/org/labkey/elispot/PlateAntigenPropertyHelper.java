@@ -32,7 +32,7 @@ import java.util.Map;
  * User: Karl Lum
  * Date: Jan 14, 2008
  */
-public class PlateAntigenPropertyHelper extends SamplePropertyHelper<WellGroupTemplate>
+public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
 {
     private List<String> _antigenNames;
     private final PlateTemplate _template;
@@ -55,7 +55,7 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<WellGroupTe
         }
     }
 
-    protected WellGroupTemplate getObject(int index, Map<DomainProperty, String> sampleProperties)
+    protected String getObject(int index, Map<DomainProperty, String> sampleProperties)
     {
         int i = 0;
         for (WellGroupTemplate wellgroup : _template.getWellGroups())
@@ -64,7 +64,7 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<WellGroupTe
             {
                 if (i == index)
                 {
-                    return wellgroup;
+                    return wellgroup.getName();
                 }
                 i++;
             }

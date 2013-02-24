@@ -13,35 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.nab;
+package org.labkey.nab.multiplate;
 
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.assay.AssayDataType;
-import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
+import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.NabManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,42 +41,24 @@ import java.util.Map;
  * User: brittp
  * Date: Aug 27, 2010 11:07:33 AM
  */
-public class HighThroughputNabDataHandler extends NabDataHandler
+public abstract class HighThroughputNabDataHandler extends NabDataHandler
 {
-    public static final AssayDataType NAB_HIGH_THROUGHPUT_DATA_TYPE = new AssayDataType("HighThroughputAssayRunNabData", new FileType(".csv"));
-
-    public Priority getPriority(ExpData data)
-    {
-        Lsid lsid = new Lsid(data.getLSID());
-        if (NAB_HIGH_THROUGHPUT_DATA_TYPE.matches(lsid))
-        {
-            return Priority.HIGH;
-        }
-        return null;
-    }
-
     @Override
     protected String getPreferredDataFileExtension()
     {
         return "csv";
     }
 
-    @Override
-    public DataType getDataType()
-    {
-        return NAB_HIGH_THROUGHPUT_DATA_TYPE;
-    }
-
     private static final String LOCATION_COLUMNN_HEADER = "Well Location";
 
-    private void throwWellLocationParseError(File dataFile, int lineNumber, Object locationValue) throws ExperimentException
+    protected void throwWellLocationParseError(File dataFile, int lineNumber, Object locationValue) throws ExperimentException
     {
         throwParseError(dataFile, "Failed to find valid location in column \"" + LOCATION_COLUMNN_HEADER + "\" on line " + lineNumber +
                     ".  Locations should be identified by a single row letter and column number, such as " +
                     "A1 or P24.  Found \"" + (locationValue != null ? locationValue.toString() : "") + "\".");
     }
 
-    private Pair<Integer, Integer> getWellLocation(PlateTemplate template, File dataFile, Map<String, Object> line, int lineNumber) throws ExperimentException
+    protected Pair<Integer, Integer> getWellLocation(PlateTemplate template, File dataFile, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(LOCATION_COLUMNN_HEADER);
         if (locationValue == null || !(locationValue instanceof String) || ((String) locationValue).length() < 2)
@@ -213,43 +187,5 @@ public class HighThroughputNabDataHandler extends NabDataHandler
             wells.addAll(group.getWellData(true));
         }
         applyDilution(wells, sampleInput, properties, reverseDirection);
-    }
-
-    @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
-    {
-        Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
-        for (ExpMaterial material : sampleInputs)
-            nameToMaterial.put(material.getName(), material);
-
-        Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<ExpMaterial, List<WellGroup>>();
-        for (Plate plate : plates)
-        {
-            List<? extends WellGroup> specimenGroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
-            for (WellGroup specimenGroup : specimenGroups)
-            {
-                String name = specimenGroup.getName();
-                ExpMaterial material = nameToMaterial.get(name);
-                if (material == null)
-                {
-                    throw new ExperimentException("Unable to find sample metadata for sample well group \"" + name +
-                            "\": your sample metadata file may contain incorrect well group names, or it may not list all required samples.");
-                }
-                List<WellGroup> materialWellGroups = mapping.get(material);
-                if (materialWellGroups == null)
-                {
-                    materialWellGroups = new ArrayList<WellGroup>();
-                    mapping.put(material, materialWellGroups);
-                }
-                materialWellGroups.add(specimenGroup);
-            }
-        }
-        return mapping;
-    }
-
-    @Override
-    protected NabAssayRun createNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
-    {
-        return new HighThroughputNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }
 }

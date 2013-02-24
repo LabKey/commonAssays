@@ -83,9 +83,9 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             _samplePropertyHelper = new PlateSamplePropertyHelper(_provider.getSampleWellGroupDomain(_protocol).getProperties(), _provider.getPlateTemplate(_protocol.getContainer(), _protocol))
             {
                 @Override
-                public Map<WellGroupTemplate, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
+                public Map<String, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
                 {
-                    Map<WellGroupTemplate, Map<DomainProperty, String>> result = new HashMap<WellGroupTemplate, Map<DomainProperty, String>>();
+                    Map<String, Map<DomainProperty, String>> result = new HashMap<String, Map<DomainProperty, String>>();
                     int index = 0;
                     for (String sampleName : getSampleNames())
                     {

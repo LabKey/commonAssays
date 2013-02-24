@@ -1521,9 +1521,6 @@ nab/src/org/labkey/nab/GetNabRunsAction.java -text
 nab/src/org/labkey/nab/GetNabRunsBaseForm.java -text
 nab/src/org/labkey/nab/GetStudyNabGraphURLAction.java -text
 nab/src/org/labkey/nab/GetStudyNabRunsAction.java -text
-nab/src/org/labkey/nab/HighThroughputNabAssayProvider.java -text
-nab/src/org/labkey/nab/HighThroughputNabAssayRun.java -text
-nab/src/org/labkey/nab/HighThroughputNabDataHandler.java -text
 nab/src/org/labkey/nab/LegacyNAbUploadContext.java -text
 nab/src/org/labkey/nab/Luc5Assay.java -text
 nab/src/org/labkey/nab/MigrateNAbPipelineJob.java -text
@@ -1556,6 +1553,15 @@ nab/src/org/labkey/nab/header.jsp -text
 nab/src/org/labkey/nab/legacyGraph.jsp -text
 nab/src/org/labkey/nab/migrateNAb.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
+nab/src/org/labkey/nab/multiplate/CrossPlateDilutionNabAssayProvider.java -text
+nab/src/org/labkey/nab/multiplate/CrossPlateDilutionNabAssayRun.java -text
+nab/src/org/labkey/nab/multiplate/CrossPlateDilutionNabDataHandler.java -text
+nab/src/org/labkey/nab/multiplate/HighThroughputNabAssayProvider.java -text
+nab/src/org/labkey/nab/multiplate/HighThroughputNabDataHandler.java -text
+nab/src/org/labkey/nab/multiplate/SinglePlateDilutionNabAssayProvider.java -text
+nab/src/org/labkey/nab/multiplate/SinglePlateDilutionNabAssayRun.java -text
+nab/src/org/labkey/nab/multiplate/SinglePlateDilutionNabDataHandler.java -text
+nab/src/org/labkey/nab/multiplate/SinglePlateDilutionSamplePropertyHelper.java -text
 nab/src/org/labkey/nab/publishChooseStudy.jsp -text
 nab/src/org/labkey/nab/publishVerify.jsp -text
 nab/src/org/labkey/nab/query/CutoffValueTable.java -text

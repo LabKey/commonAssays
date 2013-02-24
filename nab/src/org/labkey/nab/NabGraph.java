@@ -31,14 +31,18 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.WellData;
-import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.Pair;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -151,11 +155,7 @@ public class NabGraph
 
     private static String getDefaultCaption(DilutionSummary summary, boolean longForm)
     {
-        String sampleId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-        String participantId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-        Double visitId = (Double) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-        Date date = (Date) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-        NabMaterialKey materialKey = new NabMaterialKey(sampleId, participantId, visitId, date);
+        NabMaterialKey materialKey = summary.getMaterialKey();
         return materialKey.getDisplayString(longForm);
     }
 

@@ -99,6 +99,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.template.PageConfig.Template;
+import org.labkey.nab.multiplate.HighThroughputNabAssayProvider;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;

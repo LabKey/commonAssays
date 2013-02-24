@@ -39,7 +39,7 @@ public class DilutionSummary implements Serializable
     private Luc5Assay _assay;
     private String _lsid;
     private DilutionCurve.FitType _curveFitType;
-    private NabMaterialKey _materialKey = null;
+    protected NabMaterialKey _materialKey = null;
     public static final NabMaterialKey BLANK_NAB_MATERIAL = new NabMaterialKey("Blank", null, null, null);
 
 
