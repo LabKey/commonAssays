@@ -32,7 +32,8 @@ import java.sql.SQLException;
 public class NabPlateTypeHandler extends AbstractPlateTypeHandler
 {
     public static final String SINGLE_PLATE_TYPE = "single-plate";
-    public static final String HIGH_THROUGHPUT_PLATE_TYPE = "high-throughput";
+    public static final String HIGH_THROUGHPUT_PLATE_TYPE = "high-throughput (cross plate dilution)";
+    public static final String HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE = "high-throughput (single plate dilution)";
     public static final String BLANK_PLATE_TYPE = "blank";
 
     public String getAssayType()
@@ -46,6 +47,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         names.add(BLANK_PLATE_TYPE);
         names.add(SINGLE_PLATE_TYPE);
         names.add(HIGH_THROUGHPUT_PLATE_TYPE);
+        names.add(HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE);
         return names;
     }
 
@@ -61,6 +63,9 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount) throws SQLException
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+
+        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE))
+            return createHighThroughputSingleDilutionTemplate(template, container, rowCount, colCount);
 
         template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
@@ -109,6 +114,64 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
                         PlateService.get().createPosition(container, row, col+1));
                 }
             }
+        }
+        return template;
+    }
+
+    private PlateTemplate createHighThroughputSingleDilutionTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
+    {
+        template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+                PlateService.get().createPosition(c, 0, 0),
+                PlateService.get().createPosition(c, rowCount-1, 1));
+
+        template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+                PlateService.get().createPosition(c, 0, colCount-2),
+                PlateService.get().createPosition(c, rowCount-1, colCount-1));
+
+        int colsPerSample = 8;
+        int sampleIndex = 1;
+
+        for (int colGroup = 0; colGroup < 2; colGroup++)
+        {
+            int startCol = colGroup * colsPerSample + 2;
+            for (int row = 0; row < (rowCount - 1); row += 2)
+            {
+                template.addWellGroup("" + sampleIndex, WellGroup.Type.SPECIMEN,
+                        PlateService.get().createPosition(c, row, startCol),
+                        PlateService.get().createPosition(c, row+1, startCol+colsPerSample-1));
+
+                int replicateIndex = 1;
+                for (int col = startCol; col < (startCol + colsPerSample); col++)
+                {
+                    template.addWellGroup("Specimen " + sampleIndex + "-" + replicateIndex++, WellGroup.Type.REPLICATE,
+                        PlateService.get().createPosition(c, row, col),
+                        PlateService.get().createPosition(c, row+1, col));
+                }
+                sampleIndex++;
+            }
+        }
+
+        // four groups in 4x4 configuration in replicate
+        int startCol = 2 * colsPerSample + 2;
+        colsPerSample = 4;
+
+        for (int row = 0; row < (rowCount - 1); row += 4)
+        {
+            template.addWellGroup("" + sampleIndex, WellGroup.Type.SPECIMEN,
+                    PlateService.get().createPosition(c, row, startCol),
+                    PlateService.get().createPosition(c, row+3, startCol+colsPerSample-1));
+
+            int replicateIndex = 1;
+            for (int rowGroup=0; rowGroup < 2; rowGroup++)
+            {
+                for (int col = startCol; col < (startCol + colsPerSample); col++)
+                {
+                    template.addWellGroup("Specimen " + sampleIndex + "-" + replicateIndex++, WellGroup.Type.REPLICATE,
+                        PlateService.get().createPosition(c, row + (rowGroup * 2), col),
+                        PlateService.get().createPosition(c, row + (rowGroup * 2) + 1, col));
+                }
+            }
+            sampleIndex++;
         }
         return template;
     }
