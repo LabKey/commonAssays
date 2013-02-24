@@ -32,6 +32,7 @@
 <%@ page import="com.google.gson.Gson" %>
 <%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="java.util.LinkedHashSet" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     public LinkedHashSet<ClientDependency> getClientDependencies()
@@ -96,7 +97,7 @@
             autoColumnYName  : <%=q(form.getAutoColumnYName() != null ? form.getAutoColumnYName() : null)%>,
             autoColumnXName  : <%=q(form.getAutoColumnXName() != null ? form.getAutoColumnXName() : null)%>,
             defaultNumberFormat: eval(<%=q(numberFormatFn)%>),
-            allowEditMode   : <%=!ctx.getUser().isGuest() && form.allowToggleMode()%>,
+            allowEditMode   : <%=!ctx.getUser().isGuest() && c.hasPermission(ctx.getUser(), UpdatePermission.class)%>,
             curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(gson.toJson(form.getFitParams()))%>}
         }));
 

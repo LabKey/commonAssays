@@ -60,7 +60,6 @@ public class ElisaController extends SpringActionController
         private String _jsonData;
         private String _autoColumnYName;
         private String _autoColumnXName;
-        private boolean _allowToggleMode = false; // view vs. edit mode
         private String _runTableName;
         private Double[] _fitParams = new Double[0];
         private String[] _sampleColumns = new String[0];
@@ -123,16 +122,6 @@ public class ElisaController extends SpringActionController
         public void setAutoColumnXName(String autoColumnXName)
         {
             _autoColumnXName = autoColumnXName;
-        }
-
-        public boolean allowToggleMode()
-        {
-            return _allowToggleMode;
-        }
-
-        public void setAllowToggleMode(boolean allowToggleMode)
-        {
-            _allowToggleMode = allowToggleMode;
         }
 
         public String getRunTableName()
