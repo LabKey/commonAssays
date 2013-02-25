@@ -174,7 +174,7 @@ public class MS1Module extends SpringModule
         ReportService.get().registerReport(new PeaksRReport());
         ReportService.get().addUIProvider(new MS1ReportUIProvider());
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri, "FileId"));
     }
 
 

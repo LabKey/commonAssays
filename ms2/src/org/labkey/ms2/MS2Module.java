@@ -279,7 +279,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
         }
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash)
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -288,7 +288,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearRunCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri)
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction")
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -297,9 +297,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearFractionCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath));
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath));
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId"));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
     }
 
     @Override

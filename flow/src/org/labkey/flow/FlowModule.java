@@ -134,7 +134,8 @@ public class FlowModule extends DefaultModule
 
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Arrays.asList(OverviewWebPart.FACTORY,
+        return Arrays.asList(
+                OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY,
                 FlowSummaryWebPart.FACTORY,
@@ -170,7 +171,7 @@ public class FlowModule extends DefaultModule
             ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
     }
 
 
