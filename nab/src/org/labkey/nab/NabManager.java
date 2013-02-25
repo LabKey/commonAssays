@@ -17,23 +17,29 @@
 package org.labkey.nab;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DataSet;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.nab.query.NabProtocolSchema;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,6 +55,8 @@ public class NabManager extends AbstractNabManager
     private static final Logger _log = Logger.getLogger(NabManager.class);
     private static final NabManager _instance = new NabManager();
 
+    public static boolean useNewNab = false;
+
     private NabManager()
     {
     }
@@ -57,23 +65,62 @@ public class NabManager extends AbstractNabManager
     {
         return _instance;
     }
-    
+
+    public static DbSchema getSchema()
+    {
+        return DbSchema.get(NabProtocolSchema.NAB_DBSCHEMA_NAME);
+    }
+
     public void deleteContainerData(Container container) throws SQLException
     {
+        // Remove rows from NAbSpecimen and CutoffValue tables
+        // First get rows of ExperimentRun matching the container
+        Filter containerFilter = new SimpleFilter(FieldKey.fromString("Container"), container.getEntityId());
+        TableSelector expSelector = new TableSelector(ExperimentService.get().getTinfoExperimentRun().getColumn("RowId"), containerFilter, null);
+        List<Integer> runIds = expSelector.getArrayList(Integer.class);
+
+        // Now get rows of NAbSpecimen that match those runIds
+        Filter runIdFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RunId"), runIds));
+        TableInfo nabTableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        TableSelector nabSelector = new TableSelector(nabTableInfo.getColumn("RowId"), runIdFilter, null);
+        List<Integer> nabSpecimenIds = nabSelector.getArrayList(Integer.class);
+
+        // Now delete all rows in CutoffValue table that match those nabSpecimenIds
+        Filter specimenIdFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("NAbSpecimenId"), nabSpecimenIds));
+        Table.delete(getSchema().getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME), specimenIdFilter);
+
+        // Finally, delete the rows in NASpecimen
+        Table.delete(nabTableInfo, runIdFilter);
+
         PlateService.get().deleteAllPlateData(container);
     }
 
     public ExpRun getNAbRunByObjectId(int objectId)
     {
-        OntologyObject dataRow = OntologyManager.getOntologyObject(objectId);
-        if (dataRow != null)
+        if (!useNewNab)
         {
-            OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId().intValue());
-            if (dataRowParent != null)
+            OntologyObject dataRow = OntologyManager.getOntologyObject(objectId);
+            if (dataRow != null)
             {
-                ExpData data = ExperimentService.get().getExpData(dataRowParent.getObjectURI());
-                if (data != null)
-                    return data.getRun();
+                OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId().intValue());
+                if (dataRowParent != null)
+                {
+                    ExpData data = ExperimentService.get().getExpData(dataRowParent.getObjectURI());
+                    if (data != null)
+                        return data.getRun();
+                }
+            }
+        }
+        else
+        {   // objectId is really a nabSpecimenId
+            TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+            Filter filter = new SimpleFilter(new SimpleFilter(FieldKey.fromString("RowId"), objectId));
+            List<Integer> runIds = new TableSelector(tableInfo.getColumn("RunId"), filter, null).getArrayList(Integer.class);
+            if (!runIds.isEmpty())
+            {
+                ExpRun run = ExperimentService.get().getExpRun(runIds.get(0));
+                if (null != run)
+                    return run;
             }
         }
         return null;
@@ -140,5 +187,50 @@ public class NabManager extends AbstractNabManager
             }
         }
         return readableObjectIds;
+    }
+
+    public int insertNabSpecimenRow(User user, Map<String, Object> fields) throws SQLException
+    {
+        TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        Map<String, Object> newFields = Table.insert(user, tableInfo, fields);
+        return (Integer)newFields.get("RowId");
+    }
+
+    public void insertCutoffValueRow(User user, Map<String, Object> fields) throws SQLException
+    {
+        TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME);
+        Map<String, Object> newFields = Table.insert(user, tableInfo, fields);
+    }
+
+    @Nullable
+    public NabSpecimen getNabSpecimen(int rowId)
+    {
+        TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        Filter filter = new SimpleFilter(FieldKey.fromString("RowId"), rowId);
+        List<NabSpecimen> nabSpecimens = new TableSelector(tableInfo, Table.ALL_COLUMNS, filter, null).getArrayList(NabSpecimen.class);
+        if (!nabSpecimens.isEmpty())
+            return nabSpecimens.get(0);
+        return null;
+    }
+
+    @Nullable
+    public NabSpecimen getNabSpecimen(String dataRowLsid, Container container)
+    {
+        // dataRowLsid is the objectUri column
+        TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Container"), container.getEntityId());
+        filter.addCondition(FieldKey.fromString("ObjectUri"), dataRowLsid);
+        List<NabSpecimen> nabSpecimens = new TableSelector(tableInfo, Table.ALL_COLUMNS, filter, null).getArrayList(NabSpecimen.class);
+        if (!nabSpecimens.isEmpty())
+            return nabSpecimens.get(0);
+        return null;
+    }
+
+    public List<NabSpecimen> getNabSpecimens(List<Integer> rowIds)
+    {
+        TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        Filter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RowId"), rowIds));
+        List<NabSpecimen> nabSpecimens = new TableSelector(tableInfo, Table.ALL_COLUMNS, filter, null).getArrayList(NabSpecimen.class);
+        return nabSpecimens;
     }
 }

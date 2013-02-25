@@ -16,12 +16,18 @@
 
 package org.labkey.nab.query;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
+import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +37,7 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
 {
     private static final FieldKey CONTAINER_FIELD_KEY = FieldKey.fromParts("Container");
 
-    private Set<Float> _cutoffValues;
+    private Set<Double> _cutoffValues;
 
     public NAbSpecimenTable(NabProtocolSchema schema)
     {
@@ -40,6 +46,13 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
         wrapAllColumns(true);
 
         // TODO - add columns for all of the different cutoff values
+        if (NabManager.useNewNab)
+        {
+            ColumnInfo selectedAUC = new ExprColumn(this, "AUC", getSelectedCurveFitAUC(false), JdbcType.DECIMAL);
+            ColumnInfo selectedPositiveAUC = new ExprColumn(this, "PositiveAUC", getSelectedCurveFitAUC(true), JdbcType.DECIMAL);
+            addColumn(selectedAUC);
+            addColumn(selectedPositiveAUC);
+        }
 
         addCondition(getRealTable().getColumn("ProtocolID"), _userSchema.getProtocol().getRowId());
     }
@@ -57,7 +70,7 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
         addCondition(sql, CONTAINER_FIELD_KEY);
     }
 
-    public Set<Float> getCutoffValues()
+    public Set<Double> getCutoffValues()
     {
         if (_cutoffValues == null)
         {
@@ -67,8 +80,35 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
             sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
             sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
             sql.add(_userSchema.getProtocol().getRowId());
-            return new HashSet<Float>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Float.class));
+            return new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class));
         }
         return _cutoffValues;
     }
+
+    private SQLFragment getSelectedCurveFitAUC(boolean positive)
+    {
+        String prefix = positive ? "Positive" : "";
+        SQLFragment sql = new SQLFragment("CASE (SELECT op.StringValue FROM ");
+        sql.append(OntologyManager.getTinfoObject(), "o");
+        sql.append(", ");
+        sql.append(OntologyManager.getTinfoObjectProperty(), "op");
+        sql.append(", ");
+        sql.append(OntologyManager.getTinfoPropertyDescriptor(), "pd");
+        sql.append(", ");
+        sql.append(ExperimentService.get().getTinfoExperimentRun(), "er");
+        sql.append(" WHERE op.PropertyId = pd.PropertyId AND pd.PropertyURI LIKE '%#" + NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME + "'");
+        sql.append(" AND er.LSID = o.ObjectURI AND o.ObjectId = op.ObjectId AND er.RowId = RunId)");
+        sql.append("\nWHEN 'Polynomial' THEN ");
+        sql.append(prefix);
+        sql.append("AUC_Poly");
+        sql.append("\nWHEN 'Five Parameter' THEN ");
+        sql.append(prefix);
+        sql.append("AUC_5pl");
+        sql.append("\nWHEN 'Four Parameter' THEN ");
+        sql.append(prefix);
+        sql.append("AUC_4pl");
+        sql.append("\nEND\n");
+        return sql;
+    }
+
 }

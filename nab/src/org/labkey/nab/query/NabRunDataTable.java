@@ -29,9 +29,9 @@ import java.util.*;
  * Date: Jul 6, 2007
  * Time: 5:35:15 PM
  */
-public class NabRunDataTable extends PlateBasedAssayRunDataTable
+public class NabRunDataTable extends NabRunDataBaseTable
 {
-    public NabRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
+    public NabRunDataTable(final NabProtocolSchema schema, final ExpProtocol protocol)
     {
         super(schema, protocol);
         setDescription("Contains one row per data for the \"" + protocol.getName() + "\" Neutralizing Antibodies assay design.");

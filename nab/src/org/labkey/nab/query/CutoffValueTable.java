@@ -16,6 +16,7 @@
 
 package org.labkey.nab.query;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.OORDisplayColumnFactory;
@@ -28,6 +29,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabManager;
 
 public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
 {
@@ -53,9 +55,17 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_5PL"), getRealTable().getColumn("IC_5PLOORIndicator"));
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_Poly"), getRealTable().getColumn("IC_PolyOORIndicator"));
 
-        addColumn(new ExprColumn(this, "IC", getSelectedCurveFitIC(false), JdbcType.DECIMAL));
-        addColumn(new ExprColumn(this, "ICOORIndicator", getSelectedCurveFitIC(true), JdbcType.VARCHAR));
-        // TODO - still need to add InRange and Number variants for selected curve fits
+        ColumnInfo selectedIC = new ExprColumn(this, "IC", getSelectedCurveFitIC(false), JdbcType.DECIMAL);
+        ColumnInfo selectedICOOR = new ExprColumn(this, "ICOORIndicator", getSelectedCurveFitIC(true), JdbcType.VARCHAR);
+        if (!NabManager.useNewNab)
+        {
+            addColumn(selectedIC);
+            addColumn(selectedICOOR);
+        }
+        else
+        {
+            OORDisplayColumnFactory.addOORColumns(this, selectedIC, selectedICOOR, selectedIC.getLabel(), false);
+        }
 
         SQLFragment protocolSQL = new SQLFragment("NAbSpecimenID IN (SELECT RowId FROM ");
         protocolSQL.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "s");
@@ -80,11 +90,20 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         defaultICSQL.append(" WHERE op.PropertyId = pd.PropertyId AND pd.PropertyURI LIKE '%#" + NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME + "' AND ns.RowId = ");
         defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS);
         defaultICSQL.append(".NAbSpecimenID AND er.LSID = o.ObjectURI AND o.ObjectId = op.ObjectId AND er.RowId = ns.RunId)");
-        defaultICSQL.append("\nWHEN 'Polynomial' THEN IC_Poly");
+        defaultICSQL.append("\nWHEN 'Polynomial' THEN ");
+        if (NabManager.useNewNab)
+            defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        defaultICSQL.append("IC_Poly");
         defaultICSQL.append(suffix);
-        defaultICSQL.append("\nWHEN 'Five Parameter' THEN IC_5pl");
+        defaultICSQL.append("\nWHEN 'Five Parameter' THEN ");
+        if (NabManager.useNewNab)
+            defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        defaultICSQL.append("IC_5pl");
         defaultICSQL.append(suffix);
-        defaultICSQL.append("\nWHEN 'Four Parameter' THEN IC_4pl");
+        defaultICSQL.append("\nWHEN 'Four Parameter' THEN ");
+        if (NabManager.useNewNab)
+            defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        defaultICSQL.append("IC_4pl");
         defaultICSQL.append(suffix);
         defaultICSQL.append("\nEND\n");
         return defaultICSQL;

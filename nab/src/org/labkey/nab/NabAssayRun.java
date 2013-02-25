@@ -349,6 +349,8 @@ public abstract class NabAssayRun extends Luc5Assay
 
         public Integer getObjectId()
         {
+            if (!NabManager.useNewNab)
+            {
             if (_objectId == null)
             {
                 try
@@ -362,7 +364,20 @@ public abstract class NabAssayRun extends Luc5Assay
                     throw new RuntimeSQLException(e);
                 }
             }
+
             return _objectId;
+            }
+            else
+            {
+                if (null == _objectId)
+                {
+                    NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen(_dataRowLsid, _dataContainer);
+                    if (null != nabSpecimen)
+                        _objectId = nabSpecimen.getRowId();
+                }
+                return _objectId;
+            }
+
         }
 
         public DilutionSummary getDilutionSummary()

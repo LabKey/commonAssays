@@ -337,6 +337,9 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         Map<DilutionSummary, NabAssayRun> summaries = new LinkedHashMap<DilutionSummary, NabAssayRun>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
+
+    if (!NabManager.useNewNab)
+    {
         Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
         for (int dataObjectId : dataObjectIds)
         {
@@ -381,6 +384,43 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 }
             }
         }
+    }
+    else
+    {
+        Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
+        List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
+        for (int nabSpecimenId : dataObjectIds)
+            nabSpecimenIds.add(nabSpecimenId);
+        List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
+        for (NabSpecimen nabSpecimen : nabSpecimens)
+        {
+            String wellgroupName = nabSpecimen.getWellgroupName();
+            if (null == wellgroupName)
+                continue;
+
+            int runId = nabSpecimen.getRunId();
+            NabAssayRun assay = dataToAssay.get(runId);
+            if (assay == null)
+            {
+                ExpRun run = ExperimentService.get().getExpRun(runId);
+                if (null == run)
+                    continue;
+                assay = getAssayResults(run, user, fit);
+                if (null == assay)
+                    continue;
+                dataToAssay.put(runId, assay);
+            }
+
+            for (DilutionSummary summary : assay.getSummaries())
+            {
+                if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
+                {
+                    summaries.put(summary, assay);
+                    break;
+                }
+            }
+        }
+    }
         return summaries;
     }
 
@@ -400,6 +440,11 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
     protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData) throws ExperimentException
     {
+        final String polySuffix = "_poly";
+        final String oorSuffix = "OORIndicator";
+        final String pl4Suffix = "_4pl";
+        final String pl5Suffix = "_5pl";
+
         try
         {
             Container container = run.getContainer();
@@ -432,6 +477,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
                 String dataRowLsid = getDataRowLSID(data, groupName, material.getPropertyValues()).toString();
 
+                // TODO ***************** begin section that will go away when nab table transfer is complete
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
                 List<ObjectProperty> results = new ArrayList<ObjectProperty>();
 
@@ -445,6 +491,53 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                         results.add(objProp);
                 }
                 OntologyManager.insertProperties(container, dataRowLsid, results.toArray(new ObjectProperty[results.size()]));
+                int objectId = results.size() > 0 ? results.get(0).getObjectId() : 0;
+                // TODO ***************** end section
+
+                // New code to insert into NAbSpecimen and CutoffValue tables instead of Ontology properties
+                Map<String, Object> nabSpecimenEntries = new HashMap<String, Object>();
+                nabSpecimenEntries.put(WELLGROUP_NAME_PROPERTY, groupName);
+                nabSpecimenEntries.put("ObjectId", objectId);                       // TODO: this will go away  when nab table transfer is complete
+                nabSpecimenEntries.put("ObjectUri", dataRowLsid);
+                nabSpecimenEntries.put("ProtocolId", protocol.getRowId());
+                nabSpecimenEntries.put("DataId", data.getRowId());
+                nabSpecimenEntries.put("RunId", run.getRowId());
+                nabSpecimenEntries.put("SpecimenLsid", group.get("SpecimenLsid"));
+                nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
+                nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + polySuffix));
+                nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + polySuffix));
+                nabSpecimenEntries.put("Auc_4pl", group.get(AUC_PREFIX + pl4Suffix));
+                nabSpecimenEntries.put("PositiveAuc_4pl", group.get(pAUC_PREFIX + pl4Suffix));
+                nabSpecimenEntries.put("Auc_5pl", group.get(AUC_PREFIX + pl5Suffix));
+                nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + pl5Suffix));
+                int nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);
+
+                for (Integer cutoffValue : cutoffFormats.keySet())
+                {
+                    Map<String, Object> cutoffEntries = new HashMap<String, Object>();
+                    cutoffEntries.put("NabSpecimenId", nabRowid);
+                    cutoffEntries.put("Cutoff", (double)cutoffValue);
+
+                    String cutoffStr = cutoffValue.toString();
+                    String icKey = POINT_IC_PREFIX + cutoffStr;
+                    cutoffEntries.put("Point", group.get(icKey));
+                    icKey = POINT_IC_PREFIX + cutoffStr + oorSuffix;
+                    cutoffEntries.put("PointOORIndicator", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + polySuffix;
+                    cutoffEntries.put("IC_Poly", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + polySuffix + oorSuffix;
+                    cutoffEntries.put("IC_PolyOORIndicator", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + pl4Suffix;
+                    cutoffEntries.put("IC_4pl", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + pl4Suffix + oorSuffix;
+                    cutoffEntries.put("IC_4plOORIndicator", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + pl5Suffix;
+                    cutoffEntries.put("IC_5pl", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + pl5Suffix + oorSuffix;
+                    cutoffEntries.put("IC_5plOORIndicator", group.get(icKey));
+                    NabManager.get().insertCutoffValueRow(null, cutoffEntries);
+                }
+
             }
         }
         catch (ValidationException ve)

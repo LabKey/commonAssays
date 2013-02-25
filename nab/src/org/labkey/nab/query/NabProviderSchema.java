@@ -138,7 +138,7 @@ public class NabProviderSchema extends AssayProviderSchema
 
     public NabRunDataTable createDataRowTable(ExpProtocol protocol)
     {
-        return new NabRunDataTable(this, protocol);        
+        return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), protocol, getTargetStudy()), protocol);
     }
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
