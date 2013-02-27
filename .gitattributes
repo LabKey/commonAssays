@@ -132,6 +132,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/FCSKeywordData.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FJ8Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FixedCalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FlowException.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/FlowJo10_0_6Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FlowJoWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Gate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/GateExpressionTransform.java -text
@@ -322,6 +323,9 @@ flow/schemas/Gating-ML.v1.5/DataTypes.v1.5.xsd -text
 flow/schemas/Gating-ML.v1.5/Gating-ML.v1.5.xsd -text
 flow/schemas/Gating-ML.v1.5/Transformations.v1.5.xsd -text
 flow/schemas/Gating-ML.v1.5/about.xsd -text
+flow/schemas/Gating-ML.v2.0.20121207/DataTypes.v2.0.xsd -text
+flow/schemas/Gating-ML.v2.0.20121207/Gating-ML.v2.0.xsd -text
+flow/schemas/Gating-ML.v2.0.20121207/Transformations.v2.0.xsd -text
 flow/schemas/ICSMetadata.xsd -text
 flow/schemas/flowData.xsd -text
 flow/schemas/flowPipelineScript.xsd -text

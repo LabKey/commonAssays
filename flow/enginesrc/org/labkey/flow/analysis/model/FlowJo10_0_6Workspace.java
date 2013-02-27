@@ -1,55 +1,38 @@
-/*
- * Copyright (c) 2012-2013 LabKey Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.labkey.flow.analysis.model;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
-import org.isacNet.std.gatingML.v15.datatypes.ValueAttributeType;
-import org.isacNet.std.gatingML.v15.gating.AbstractGateType;
-import org.isacNet.std.gatingML.v15.gating.BooleanGateType;
-import org.isacNet.std.gatingML.v15.gating.DimensionType;
-import org.isacNet.std.gatingML.v15.gating.EllipsoidGateType;
-import org.isacNet.std.gatingML.v15.gating.GatingMLDocument;
-import org.isacNet.std.gatingML.v15.gating.Point2DType;
-import org.isacNet.std.gatingML.v15.gating.PolygonGateType;
-import org.isacNet.std.gatingML.v15.gating.RectangleGateDimensionType;
-import org.isacNet.std.gatingML.v15.gating.RectangleGateType;
+import org.isacNet.std.gatingML.v20.datatypes.ValueAttributeType;
+import org.isacNet.std.gatingML.v20.gating.AbstractGateType;
+import org.isacNet.std.gatingML.v20.gating.BooleanGateType;
+import org.isacNet.std.gatingML.v20.gating.DimensionType;
+import org.isacNet.std.gatingML.v20.gating.EllipsoidGateType;
+import org.isacNet.std.gatingML.v20.gating.GatingMLDocument;
+import org.isacNet.std.gatingML.v20.gating.Point2DType;
+import org.isacNet.std.gatingML.v20.gating.PolygonGateType;
+import org.isacNet.std.gatingML.v20.gating.RectangleGateDimensionType;
+import org.isacNet.std.gatingML.v20.gating.RectangleGateType;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.SubsetSpec;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.labkey.flow.analysis.model.WorkspaceParser.GATINGML_1_5_PREFIX_MAP;
-import static org.labkey.flow.analysis.model.WorkspaceParser.GATING_1_5_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.GATINGML_2_0_PREFIX_MAP;
 import static org.labkey.flow.analysis.model.WorkspaceParser.GATING_2_0_NS;
 
 /**
  * User: kevink
- * Date: 2/13/12
+ * Date: 2/26/13
  *
- * First version of FlowJo that supports Gating-ML v1.5.
+ * FlowJo version 10.0.6 is the first version that supports Gating-ML v2.0.
  */
-public class PC75Workspace extends PCWorkspace
+public class FlowJo10_0_6Workspace extends PC75Workspace
 {
-    public PC75Workspace(String name, String path, Element elDoc)
+    public FlowJo10_0_6Workspace(String name, String path, Element elDoc)
     {
         super(name, path, elDoc);
     }
@@ -70,8 +53,8 @@ public class PC75Workspace extends PCWorkspace
             return null;
         }
 
-        String xAxis = ___cleanName(dims[0].getParameter().getName());
-        String yAxis = ___cleanName(dims[1].getParameter().getName());
+        String xAxis = ___cleanName(dims[0].getFcsDimension().getName());
+        String yAxis = ___cleanName(dims[1].getFcsDimension().getName());
         List<Double> lstX = new ArrayList<Double>();
         List<Double> lstY = new ArrayList<Double>();
 
@@ -96,7 +79,7 @@ public class PC75Workspace extends PCWorkspace
         List<Double> lstMax = new ArrayList<Double>();
         for (RectangleGateDimensionType dim : xRectangleGate.getDimensionArray())
         {
-            axes.add(dim.getParameter().getName());
+            axes.add(dim.getFcsDimension().getName());
             lstMin.add(dim.isSetMin() ? dim.getMin() : Double.MIN_VALUE); // XXX: Comment in IntervalGate implies we use Float.MIN/MAX_VALUE instead
             lstMax.add(dim.isSetMax() ? dim.getMax() : Double.MAX_VALUE);
         }
@@ -128,50 +111,15 @@ public class PC75Workspace extends PCWorkspace
         return null;
     }
 
-    protected Gate readGate(Element elGate, SubsetSpec subset, Analysis analysis, String sampleId)
-    {
-        List<Element> elChildren = getElements(elGate);
-        if (elChildren.size() == 0)
-        {
-            warnOnce(sampleId, analysis.getName(), subset, "No gate found");
-            return null;
-        }
-
-        Element elChild = elChildren.get(0);
-        boolean invert = inverted(elChild);
-
-        Gate gate = readGate(elGate);
-
-        if (gate != null)
-        {
-            String id = gate.getId();
-            if (id == null || "".equals(id))
-                id = elGate.getAttributeNS(GATING_1_5_NS, "id");
-            if (id == null || "".equals(id))
-                id = elGate.getAttributeNS(GATING_2_0_NS, "id");
-
-            if (invert)
-            {
-                gate.setId(null);
-                gate = new NotGate(gate);
-            }
-
-            if (id != null)
-                gate.setId(id);
-        }
-
-        return gate;
-    }
-
+    @Override
     protected Gate readGate(Element elGate)
     {
         Gate gate = null;
         try
         {
             XmlOptions options = new XmlOptions();
-            options.setLoadReplaceDocumentElement(new QName(GATING_1_5_NS, "Gating-ML"));
-            options.setLoadAdditionalNamespaces(GATINGML_1_5_PREFIX_MAP);
-            //options.setLoadSubstituteNamespaces(FJ_GATINGML_NAMEPSACE_FIXUP);
+            options.setLoadReplaceDocumentElement(new QName(GATING_2_0_NS, "Gating-ML"));
+            options.setLoadAdditionalNamespaces(GATINGML_2_0_PREFIX_MAP);
 
             GatingMLDocument xGatingML = GatingMLDocument.Factory.parse(elGate, options);
             XmlObject[] xGates = xGatingML.getGatingML().selectPath("./*");
@@ -201,18 +149,4 @@ public class PC75Workspace extends PCWorkspace
         return gate;
     }
 
-    @Override
-    protected void readGates(Element elPopulation, SubsetSpec subset, SubsetSpec parentSubset, Population ret, Analysis analysis, String sampleId)
-    {
-        for (Element elGate : getElementsByTagName(elPopulation, "Gate"))
-        {
-            Gate gate = readGate(elGate, subset, analysis, sampleId);
-            if (gate != null)
-            {
-                ret.addGate(gate);
-                if (gate instanceof RegionGate)
-                    analysis.addGraph(new GraphSpec(parentSubset, ((RegionGate)gate).getAxes()));
-            }
-        }
-    }
 }

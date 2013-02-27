@@ -33,7 +33,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -117,10 +116,15 @@ public abstract class Workspace implements IWorkspace, Serializable
             {
                 return new PCWorkspace(name, path, elDoc);
             }
-            else if (version < 2.0)
+            else if (version >= 1.6 && version < 1.8)
             {
-                // GatingML appears in version >= 1.6 (FlowJo version 7.5.5)
+                // GatingML 1.5 appears in version >= 1.6 (FlowJo version > 7.5.5 and < 10.0.5)
                 return new PC75Workspace(name, path, elDoc);
+            }
+            else if (version >= 1.8 && version < 2.0)
+            {
+                // GatingML 2.0 appears in version >= 1.8 (FlowJo version > 10.0.6)
+                return new FlowJo10_0_6Workspace(name, path, elDoc);
             }
 
             if (version == 2.0)

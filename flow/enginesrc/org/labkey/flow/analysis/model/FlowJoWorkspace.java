@@ -373,7 +373,7 @@ abstract public class FlowJoWorkspace extends Workspace
 
         if (stat == StatisticSpec.STAT.Frequency)
         {
-            if (elStat.hasAttribute("ancestor") && !"Total".equals(elStat.getAttribute("ancestor")))
+            if (elStat.hasAttribute("ancestor") && !("".equals(elStat.getAttribute("ancestor")) || "Total".equals(elStat.getAttribute("ancestor"))))
             {
                 warnOnce(sampleId, analysis.getName(), subset, "Frequency of arbitrary ancestor populations not supported.");
                 return;
@@ -751,6 +751,13 @@ abstract public class FlowJoWorkspace extends Workspace
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.5.wsp");
             assertAdvanced(workspace, "10.0.5");
+        }
+
+        //@Test
+        public void loadAdvanced_10_0_6b() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.6b.wsp");
+            assertAdvanced(workspace, "10.0.6b");
         }
 
         private void assertAdvanced(Workspace workspace, String version) throws Exception
