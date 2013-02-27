@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.protein.organism;
 
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
@@ -34,17 +35,20 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedHash.CACHED_MISS_VALUE";
     private Map<String, String> _cache = new HashMap<String, String>();  // TODO: This could easily blow out all available memory for large FASTA; once we enable this guessing strategy, switch to Map with limit
     private static final DbSchema _schema = ProteinManager.getSchema();
-    private static final String HASHCMD;
+    private static final SQLFragment HASHCMD;
 
     static
     {
-        StringBuilder sb = new StringBuilder("SELECT " + _schema.getSqlDialect().concatenate("d.genus", "' '", "d.species") + 
-                " FROM " + ProteinManager.getTableInfoSequences() + " c JOIN " + ProteinManager.getTableInfoOrganisms() + " d ON (c.orgid=d.orgid)" +
-                " WHERE c.orgid IN " +
-                "   (SELECT a.orgid FROM " + ProteinManager.getTableInfoSequences() + " a JOIN " + ProteinManager.getTableInfoOrganisms() + " b ON (a.orgid=b.orgid) WHERE a.hash=?) " +
-                " GROUP BY d.orgid,d.genus,d.species ORDER BY COUNT(*) DESC");
-        _schema.getSqlDialect().limitRows(sb, 1);
-        HASHCMD = sb.toString();
+        SQLFragment sql = new SQLFragment("SELECT ");
+        sql.append(_schema.getSqlDialect().concatenate("o.genus", "' '", "o.species"));
+        sql.append(" FROM ");
+        sql.append(ProteinManager.getTableInfoSequences(), "s");
+        sql.append(" JOIN ");
+        sql.append(ProteinManager.getTableInfoOrganisms(), "o");
+        sql.append(" ON (o.orgid=s.orgid) WHERE s.hash = ? ");
+        sql.append(" GROUP BY o.orgid, o.genus, o.species ORDER BY COUNT(*) DESC");
+        _schema.getSqlDialect().limitRows(sql, 1);
+        HASHCMD = sql;
     }
 
     public String guess(ProteinPlus p)
@@ -56,7 +60,9 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         if (retVal != null)
             return retVal;
 
-        retVal = new SqlSelector(_schema, HASHCMD, p.getHash()).getObject(String.class);
+        SQLFragment sql = new SQLFragment(HASHCMD);
+        sql.add(p.getHash());
+        retVal = new SqlSelector(_schema, sql).getObject(String.class);
         _cache.put(p.getHash(), retVal != null ? retVal : CACHED_MISS_VALUE);
         stopTimer();
         return retVal;
