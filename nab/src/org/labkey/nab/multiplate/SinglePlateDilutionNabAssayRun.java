@@ -16,6 +16,8 @@
 package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
@@ -85,6 +87,38 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
     public List<Plate> getPlates()
     {
         return Collections.unmodifiableList(_plates);
+    }
+
+    /**
+     * Generate a key for the sample level property map
+     * @param material
+     * @return
+     */
+    @Override
+    protected String getSampleKey(ExpMaterial material)
+    {
+        String virusName = "";
+        String wellgroup = getWellGroupName(material);
+        for (Map.Entry<PropertyDescriptor, Object> entry : material.getPropertyValues().entrySet())
+        {
+            if (entry.getKey().getName().equals(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME))
+                virusName = entry.getValue().toString();
+        }
+        return SinglePlateDilutionSamplePropertyHelper.getKey(virusName, wellgroup);
+    }
+
+    /**
+     * Generate a key for the sample level property map
+     * @param summary
+     * @return
+     */
+    @Override
+    protected String getSampleKey(DilutionSummary summary)
+    {
+        String virusName = (String) summary.getFirstWellGroup().getProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME);
+        String wellgroup = summary.getFirstWellGroup().getName();
+
+        return SinglePlateDilutionSamplePropertyHelper.getKey(virusName, wellgroup);
     }
 
     private static class MultiVirusDilutionSummary extends DilutionSummary

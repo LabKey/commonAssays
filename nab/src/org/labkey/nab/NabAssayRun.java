@@ -253,7 +253,7 @@ public abstract class NabAssayRun extends Luc5Assay
                         longCaptions = true;
                     captions.add(shortCaption);
 
-                    NabResultProperties props = allProperties.get(summary.getFirstWellGroup().getName());
+                    NabResultProperties props = allProperties.get(getSampleKey(summary));
                     sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
                 }
             }
@@ -320,7 +320,7 @@ public abstract class NabAssayRun extends Luc5Assay
                 dataProperties.put(pd, prop.value());
             }
 
-            samplePropertyMap.put(wellGroupName, new NabResultProperties(sampleProperties,  dataProperties));
+            samplePropertyMap.put(getSampleKey(material), new NabResultProperties(sampleProperties,  dataProperties));
         }
         return samplePropertyMap;
     }
@@ -502,5 +502,25 @@ public abstract class NabAssayRun extends Luc5Assay
         // All current NAb assay types don't mix well groups for a single sample- there may be muliple
         // instances of the same well group on different plates, but they'll all have the same name.
         return groups != null ? groups.get(0).getName() : null;
+    }
+
+    /**
+     * Generate a key for the sample level property map
+     * @param material
+     * @return
+     */
+    protected String getSampleKey(ExpMaterial material)
+    {
+        return getWellGroupName(material);
+    }
+
+    /**
+     * Generate a key for the sample level property map
+     * @param summary
+     * @return
+     */
+    protected String getSampleKey(DilutionSummary summary)
+    {
+        return summary.getFirstWellGroup().getName();
     }
 }
