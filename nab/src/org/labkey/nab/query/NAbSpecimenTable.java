@@ -97,18 +97,31 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
         sql.append(", ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "er");
         sql.append(" WHERE op.PropertyId = pd.PropertyId AND pd.PropertyURI LIKE '%#" + NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME + "'");
-        sql.append(" AND er.LSID = o.ObjectURI AND o.ObjectId = op.ObjectId AND er.RowId = RunId)");
+        sql.append(" AND er.LSID = o.ObjectURI AND o.ObjectId = op.ObjectId AND er.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".RunId)");
         sql.append("\nWHEN 'Polynomial' THEN ");
+        if (NabManager.useNewNab)
+            sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
         sql.append(prefix);
         sql.append("AUC_Poly");
         sql.append("\nWHEN 'Five Parameter' THEN ");
+        if (NabManager.useNewNab)
+            sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
         sql.append(prefix);
         sql.append("AUC_5pl");
         sql.append("\nWHEN 'Four Parameter' THEN ");
+        if (NabManager.useNewNab)
+            sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
         sql.append(prefix);
         sql.append("AUC_4pl");
         sql.append("\nEND\n");
         return sql;
+    }
+
+    @Override
+    protected ColumnInfo resolveColumn(String name)
+    {
+        ColumnInfo columnInfo = super.resolveColumn(name);
+        return columnInfo;
     }
 
 }

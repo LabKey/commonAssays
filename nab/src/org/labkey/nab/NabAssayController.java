@@ -39,6 +39,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.nab.NabUrls;
 import org.labkey.api.query.CustomView;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
@@ -872,7 +873,7 @@ public class NabAssayController extends SpringActionController
                     rs = dataView.getResultSet();
                     Set<Integer> graphableIds = new HashSet<Integer>();
                     while (rs.next())
-                        graphableIds.add(rs.getInt("ObjectId"));
+                        graphableIds.add((!NabManager.useNewNab) ? rs.getInt("ObjectId") : rs.getInt("RowId"));
                     _graphableIds = new int[graphableIds.size()];
                     int i = 0;
                     for (Integer id : graphableIds)
@@ -903,8 +904,17 @@ public class NabAssayController extends SpringActionController
                         List<Integer> objectIds = new ArrayList<Integer>(_dataObjectIds.length);
                         for (int dataObjectId : _dataObjectIds)
                             objectIds.add(new Integer(dataObjectId));
-                        filter.addInClause("ObjectId", objectIds);
-                        view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+
+                        if (!NabManager.useNewNab)
+                        {
+                            filter.addInClause("ObjectId", objectIds);
+                            view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+                        }
+                        else
+                        {
+                            filter.addInClause(FieldKey.fromString("RowId"), objectIds);
+                            view.getDataRegion().setRecordSelectorValueColumns("RowId");
+                        }
                         view.getRenderContext().setBaseFilter(filter);
                         return view;
                     }

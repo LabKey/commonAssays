@@ -46,6 +46,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabManager;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
@@ -143,7 +144,10 @@ public class NabProtocolSchema extends AssayProtocolSchema
         {
             DataView view = super.createDataView();
             DataRegion rgn = view.getDataRegion();
-            rgn.setRecordSelectorValueColumns("ObjectId");
+            if (!NabManager.useNewNab)
+                rgn.setRecordSelectorValueColumns("ObjectId");
+            else
+                rgn.setRecordSelectorValueColumns("RowId");
             rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
             ButtonBar bbar = new ButtonBar(view.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
             view.getDataRegion().setButtonBar(bbar);

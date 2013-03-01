@@ -666,6 +666,19 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
+    @Override
+    public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
+    {
+        try
+        {
+            NabManager.get().deleteRunData(datas);
+        }
+        catch(SQLException e)
+        {
+            throw new ExperimentException(e);
+        }
+    }
+
     public void deleteData(ExpData data, Container container, User user)
     {
         OntologyManager.deleteOntologyObject(data.getLSID(), container, true);

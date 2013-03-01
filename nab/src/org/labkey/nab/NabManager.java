@@ -95,6 +95,25 @@ public class NabManager extends AbstractNabManager
         PlateService.get().deleteAllPlateData(container);
     }
 
+    public void deleteRunData(List<ExpData> datas) throws SQLException
+    {
+        // Get rows that match the ObjectUri
+        List<Integer> dataIDs = new ArrayList<Integer>(datas.size());
+        for (ExpData data : datas)
+            dataIDs.add(data.getRowId());
+        Filter dataIdFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("DataId"), dataIDs));
+        TableInfo nabTableInfo = NabManager.getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        TableSelector nabSelector = new TableSelector(nabTableInfo.getColumn("RowId"), dataIdFilter, null);
+        List<Integer> nabSpecimenIds = nabSelector.getArrayList(Integer.class);
+
+        // Now delete all rows in CutoffValue table that match those nabSpecimenIds
+        Filter specimenIdFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("NAbSpecimenId"), nabSpecimenIds));
+        Table.delete(NabManager.getSchema().getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME), specimenIdFilter);
+
+        // Finally, delete the rows in NASpecimen
+        Table.delete(nabTableInfo, dataIdFilter);
+    }
+
     public ExpRun getNAbRunByObjectId(int objectId)
     {
         if (!useNewNab)
@@ -156,7 +175,8 @@ public class NabManager extends AbstractNabManager
         Collection<Integer> allObjectIds = new HashSet<Integer>();
         for (int objectId : objectIds)
             allObjectIds.add(objectId);
-        SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("ObjectId", allObjectIds));
+        SimpleFilter filter = (!useNewNab) ? new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("ObjectId"), allObjectIds)) :
+                new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RowId"), allObjectIds));
 
         Map<Integer, ExpProtocol> readableObjectIds = new HashMap<Integer, ExpProtocol>();
 
@@ -165,25 +185,34 @@ public class NabManager extends AbstractNabManager
         {
             TableInfo dataTable = entry.getKey();
             ExpProtocol protocol = entry.getValue();
-            ResultSet rs = null;
-            try
+            if (!useNewNab)
             {
-                rs = Table.select(dataTable, Collections.singleton("ObjectId"), filter, null);
-
-                while (rs.next())
+                ResultSet rs = null;
+                try
                 {
-                    int objectId = rs.getInt("ObjectId");
-                    readableObjectIds.put(objectId, protocol);
+                    rs = Table.select(dataTable, Collections.singleton("ObjectId"), filter, null);
+
+                    while (rs.next())
+                    {
+                        int objectId = rs.getInt("ObjectId");
+                        readableObjectIds.put(objectId, protocol);
+                    }
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
+                finally
+                {
+                    if (rs != null)
+                        try { rs.close(); } catch (SQLException e) { }
                 }
             }
-            catch (SQLException e)
+            else
             {
-                throw new RuntimeSQLException(e);
-            }
-            finally
-            {
-                if (rs != null)
-                    try { rs.close(); } catch (SQLException e) { }
+                List<Integer> rowIds = new TableSelector(dataTable.getColumn("RowId"), filter, null).getArrayList(Integer.class);
+                if (rowIds.size() > 0)
+                    readableObjectIds.put(rowIds.get(0), protocol);
             }
         }
         return readableObjectIds;

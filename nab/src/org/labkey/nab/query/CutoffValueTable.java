@@ -51,8 +51,8 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         addWrapColumn(getRealTable().getColumn("Cutoff"));
 
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("Point"), getRealTable().getColumn("PointOORIndicator"));
-        OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_4PL"), getRealTable().getColumn("IC_4PLOORIndicator"));
-        OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_5PL"), getRealTable().getColumn("IC_5PLOORIndicator"));
+        OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_4pl"), getRealTable().getColumn("IC_4plOORIndicator"));
+        OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_5pl"), getRealTable().getColumn("IC_5plOORIndicator"));
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("IC_Poly"), getRealTable().getColumn("IC_PolyOORIndicator"));
 
         ColumnInfo selectedIC = new ExprColumn(this, "IC", getSelectedCurveFitIC(false), JdbcType.DECIMAL);

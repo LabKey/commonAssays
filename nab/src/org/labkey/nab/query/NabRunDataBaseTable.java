@@ -44,10 +44,8 @@ import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.nab.NabManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,12 +63,16 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
     public abstract String getInputMaterialPropertyName();
     public abstract String getDataRowLsidPrefix();
 
+    private NabProtocolSchema _schema;
     private NAbSpecimenTable _nabSpecimenTable;
+    private ExpProtocol _protocol;
 
     public NabRunDataBaseTable(final NabProtocolSchema schema, final ExpProtocol protocol)
     {
         super(new NAbSpecimenTable(schema), schema);
         _nabSpecimenTable = (NAbSpecimenTable)getRealTable();
+        _schema = schema;
+        _protocol = protocol;
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);
         List<FieldKey> visibleColumns = new ArrayList<FieldKey>();
@@ -127,8 +129,10 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         {
             for (DomainProperty pd : sampleSet.getPropertiesForType())
             {
-                visibleColumns.add(FieldKey.fromParts("Properties", getInputMaterialPropertyName(),
-                        ExpMaterialTable.Column.Property.toString(), pd.getName()));
+                if (!NabManager.useNewNab)
+                    visibleColumns.add(FieldKey.fromParts("Properties", getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
+                else
+                    visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }
         }
         // get all the properties from this plated-based protocol:
@@ -136,14 +140,22 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
         // add object ID to this tableinfo and set it as a key field:
         ColumnInfo objectIdColumn = addWrapColumn(_rootTable.getColumn("ObjectId"));
-        objectIdColumn.setKeyField(true);
+
+        if (NabManager.useNewNab)
+        {
+            ColumnInfo rowIdColumn = addWrapColumn(_rootTable.getColumn("RowId"));
+            rowIdColumn.setKeyField(true);
+            rowIdColumn.setHidden(true);
+            rowIdColumn.setIsUnselectable(true);
+        }
+        else
+        {
+            objectIdColumn.setKeyField(true);
+        }
 
         // add object ID again, this time as a lookup to a virtual property table that contains our selected NAB properties:
-        ColumnInfo propertyLookupColumn = wrapColumn("Properties", _rootTable.getColumn("ObjectUri"));
-        propertyLookupColumn.setKeyField(false);
-        propertyLookupColumn.setIsUnselectable(true);
 
-        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(pds, this, schema)
+        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(pds, this, schema)             // Needed by NewNab only to ger defaultHiddenProperties
         {
             @Override
             protected ColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
@@ -178,10 +190,16 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             }
         };
 
+        ColumnInfo propertyLookupColumn = wrapColumn("Properties", _rootTable.getColumn("ObjectUri"));      // TODO: Will go away with NewNab?
         if (!NabManager.useNewNab)
         {
-        propertyLookupColumn.setFk(fk);
-        addColumn(propertyLookupColumn);
+            propertyLookupColumn.setKeyField(false);
+            propertyLookupColumn.setIsUnselectable(true);
+            propertyLookupColumn.setFk(fk);
+            addColumn(propertyLookupColumn);
+        }
+        else
+        {
         }
 
         Set<String> hiddenCols = getHiddenColumns(protocol);
@@ -191,6 +209,49 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
         if (NabManager.useNewNab)
         {
+            ColumnInfo specimenColumn = wrapColumn(getInputMaterialPropertyName(), _rootTable.getColumn("SpecimenLsid"));
+            specimenColumn.setKeyField(false);
+            specimenColumn.setIsUnselectable(true);
+            LookupForeignKey lfkSpecimen = new LookupForeignKey("LSID")
+            {
+                @Override
+                public TableInfo getLookupTableInfo()
+                {
+                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema);
+                    // Make sure we are filtering to the same set of containers
+                    materials.setContainerFilter(getContainerFilter());
+                    if (sampleSet != null)
+                    {
+                        materials.setSampleSet(sampleSet, true);
+                    }
+                    ColumnInfo propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
+                    if (propertyCol.getFk() instanceof PropertyForeignKey)
+                    {
+                        ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(provider, protocol, schema));
+                    }
+                    propertyCol.setHidden(false);
+                    materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
+                    return materials;
+                }
+            };
+            specimenColumn.setFk(lfkSpecimen);
+            addColumn(specimenColumn);
+
+/*            propertyLookupColumn = wrapColumn("Properties", specimenColumn);
+            propertyLookupColumn.setIsUnselectable(true);
+            propertyLookupColumn.setHidden(true);
+            final TableInfo thisTable = this;
+            LookupForeignKey lfk1 = new LookupForeignKey()
+            {
+                public TableInfo getLookupTableInfo()
+                {
+                    return thisTable;
+                }
+
+            };
+            propertyLookupColumn.setFk(lfk1);
+//            addColumn(propertyLookupColumn);   */
+
             Set<Double> cutoffValuess = _nabSpecimenTable.getCutoffValues();
             for (Double value : cutoffValuess)
             {
@@ -210,6 +271,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
                     {
                         ColumnInfo result = super.createLookupColumn(parent, displayField);
+                        updateLabelWithCutoff(result, intCutoff);
                         return result;
                     }
                 };
@@ -225,7 +287,6 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             }
 
         }
-        Map<Integer, ColumnInfo> cutoffValues = new HashMap<Integer, ColumnInfo>();
 
         // run through the property columns, setting all to be visible by default:
         FieldKey dataKeyProp = FieldKey.fromParts(propertyLookupColumn.getName());
@@ -251,23 +312,11 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     }
                     else
                     {
+                        // Cutoff table column or calculated column
                         PropDescCategory pdCat = getPropDescCategory(lookupCol.getName());
-                        if (null == pdCat._rangeOrNum && null != cutoffValueTable.getColumn(pdCat.getColumnName()))
-                        {
-                            Integer cutoffValue = pdCat._cutoffValue;
-                            assert null != cutoffValue;
-
-                            FieldKey key = ensurePropertyColumn(pdCat, cutoffValues, cutoffValueTable);
-                            if (null != key)
-                                visibleColumns.add(key);
-                        }
-                        else
-                        {
-                            // Calculated column
-                            FieldKey key = ensureCalculatedColumn(pdCat, cutoffValues, cutoffValueTable);
-                            if (null != key)
-                                visibleColumns.add(key);
-                        }
+                        FieldKey key = getCalculatedColumn(pdCat);
+                        if (null != key)
+                            visibleColumns.add(key);
                     }
                 }
             }
@@ -334,74 +383,48 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
     private Integer cutoffValueFromName(String name)
     {
         int icIndex = name.indexOf("IC");
-        if (icIndex >= 0 && name.length() <= icIndex + 4)
+        if (icIndex >= 0 && icIndex + 4 <= name.length())
             return Integer.valueOf(name.substring(icIndex + 2, icIndex + 4));
         return null;
     }
 
-    private FieldKey ensureCalculatedColumn(PropDescCategory pdCat, Map<Integer, ColumnInfo> cutoffValues, CutoffValueTable cutoffValueTable)
+    private FieldKey getCalculatedColumn(PropDescCategory pdCat)
     {
         FieldKey fieldKey = null;
         if (null != pdCat._cutoffValue)
         {
-            ColumnInfo cutoffColumn = ensureCutoffColumn(pdCat._cutoffValue, cutoffValues, cutoffValueTable);
-            String columnName = null;
-
-            // Must be InRange or Number
-            if (null == pdCat._rangeOrNum)
-            {
-                columnName = pdCat.getColumnName();
-            }
-            else if (pdCat._rangeOrNum.equalsIgnoreCase("inrange"))
-            {
-                columnName = pdCat.getColumnName() + "InRange";
-            }
-            else if (pdCat._rangeOrNum.equalsIgnoreCase("number"))
-            {
-                columnName = pdCat.getColumnName() + "Number";
-            }
-
-            if (null != columnName)
+            ColumnInfo cutoffColumn = getCutoffColumn(pdCat._cutoffValue);
+            String columnName = getCalculatedColumnName(pdCat);
+            if (null != columnName && null != cutoffColumn)         // cutoffColumn could be null when we're deleting folders
             {
                 fieldKey = FieldKey.fromParts(cutoffColumn.getAlias(), columnName);
-            }
-        }
-        else
-        {
-            // Must be AUC or Positive AUC so no parent is needed in FieldKey
-            if (null == pdCat._rangeOrNum)
-            {
-
-            }
-            else if (pdCat._rangeOrNum.equalsIgnoreCase("auc"))
-            {
-
-            }
-            else if(pdCat._rangeOrNum.equalsIgnoreCase("positiveauc"))
-            {
-
-            }
-            else
-            {
-                assert false;       // should not happen
             }
         }
 
         return fieldKey;
     }
 
-    private ColumnInfo ensureCutoffColumn(Integer cutoffValue, Map<Integer, ColumnInfo> cutoffValues, CutoffValueTable cutoffValueTable)
+    private String getCalculatedColumnName(PropDescCategory pdCat)
     {
-        ColumnInfo cutoffColumn = getColumn("Cutoff" + cutoffValue);
-
-        return cutoffColumn;
+        String columnName = null;
+        if (null == pdCat._rangeOrNum)
+        {
+            columnName = pdCat.getColumnName();
+        }
+        else if (pdCat._rangeOrNum.equalsIgnoreCase("inrange"))
+        {
+            columnName = pdCat.getColumnName() + "InRange";
+        }
+        else if (pdCat._rangeOrNum.equalsIgnoreCase("number"))
+        {
+            columnName = pdCat.getColumnName() + "Number";
+        }
+        return columnName;
     }
 
-    private FieldKey ensurePropertyColumn(PropDescCategory pdCat, Map<Integer, ColumnInfo> cutoffValues, CutoffValueTable cutoffValueTable)
+    private ColumnInfo getCutoffColumn(Integer cutoffValue)
     {
-        assert null != pdCat._cutoffValue;
-        ColumnInfo cutoffColumn = ensureCutoffColumn(pdCat._cutoffValue, cutoffValues, cutoffValueTable);
-        return FieldKey.fromParts(cutoffColumn.getAlias(), pdCat.getColumnName());
+        return getColumn("Cutoff" + cutoffValue);
     }
 
     private ColumnInfo makeCutoffValueColumn(Integer cutoffValue, CutoffValueTable cutoffValueTable)
@@ -417,6 +440,81 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
     protected Set<String> getHiddenColumns(ExpProtocol protocol)
     {
         return new HashSet<String>();
+    }
+
+    private static void updateLabelWithCutoff(ColumnInfo column, Integer intCutoff)
+    {
+        if (null != intCutoff)
+        {
+            String label = column.getLabel();
+            if (label.startsWith("IC"))
+            {
+                column.setLabel("Curve IC" + intCutoff + label.substring(2));
+            }
+            else if (label.startsWith("Point"))
+            {
+                column.setLabel("Point IC" + intCutoff + label.substring(5));
+            }
+        }
+    }
+
+    @Override
+    protected ColumnInfo resolveColumn(String name)
+    {
+        if (!NabManager.useNewNab)
+        {
+            return super.resolveColumn(name);
+        }
+
+        ColumnInfo result = null;
+        if ("Properties".equalsIgnoreCase(name))
+        {
+            // Hook up a column that joins back to this table so that the columns formerly under the Properties
+            // node when this was OntologyManager-backed can still be queried there
+            result = wrapColumn("Properties", getRealTable().getColumn("RowId"));
+            result.setIsUnselectable(true);
+            LookupForeignKey fk = new LookupForeignKey("RowId")
+            {
+                @Override
+                public TableInfo getLookupTableInfo()
+                {
+                    return new NabRunDataTable(_schema, _protocol);
+                }
+
+                @Override
+                public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
+                {
+                    ColumnInfo result = super.createLookupColumn(parent, displayField);
+                    if (null != result && (displayField.startsWith("Curve") || displayField.startsWith("Point")))
+                    {
+                        String columnName = getCalculatedColumnName(getPropDescCategory(displayField));
+                        TableInfo tableInfo = result.getFkTableInfo();
+                        if (null != tableInfo && null != columnName)
+                            result = tableInfo.getLookupColumn(result, columnName);
+                    }
+                    return result;
+                }
+            };
+            fk.setPrefixColumnCaption(false);
+            result.setFk(fk);
+        }
+        else if ("Fit Error".equalsIgnoreCase(name))
+        {
+            result = getColumn("FitError");
+        }
+        else if ("Wellgroup Name".equals(name))
+        {
+            result = getColumn("WellGroupName");
+        }
+        else if (name.startsWith("Curve") || name.startsWith("Point"))
+        {
+            PropDescCategory pdCat = getPropDescCategory(name);
+            FieldKey fieldKey = getCalculatedColumn(pdCat);
+            if (null != fieldKey)
+                result = getCutoffColumn(pdCat._cutoffValue);
+        }
+
+        return result;
     }
 }
 

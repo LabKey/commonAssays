@@ -14,7 +14,7 @@ public class NabSpecimen
     private int _rowId;
     private int _dataId;
     private int _runId;
-    private LsidType _specimenLsid;
+    private String _specimenLsid;
     private double _fitError;
     private String _wellgroupName;
     private double _aucPoly;
@@ -47,12 +47,12 @@ public class NabSpecimen
         _runId = runId;
     }
 
-    public LsidType getSpecimenLsid()
+    public String getSpecimenLsid()
     {
         return _specimenLsid;
     }
 
-    public void setSpecimenLsid(LsidType specimenLsid)
+    public void setSpecimenLsid(String specimenLsid)
     {
         _specimenLsid = specimenLsid;
     }

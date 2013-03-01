@@ -30,10 +30,10 @@
             <column columnName="PointOORIndicator"/>
             <column columnName="IC_Poly"/>
             <column columnName="IC_PolyOORIndicator"/>
-            <column columnName="IC_4PL"/>
-            <column columnName="IC_4PLOORIndicator"/>
-            <column columnName="IC_5PL"/>
-            <column columnName="IC_5PLOORIndicator"/>
+            <column columnName="IC_4pl"/>
+            <column columnName="IC_4plOORIndicator"/>
+            <column columnName="IC_5pl"/>
+            <column columnName="IC_5plOORIndicator"/>
         </columns>
     </table>
     <table tableName="NAbSpecimen" tableDbType="TABLE">
@@ -47,12 +47,12 @@
             <column columnName="SpecimenLSID"/>
             <column columnName="WellGroupName"/>
             <column columnName="FitError"/>
-            <column columnName="AUC_poly"/>
+            <column columnName="AUC_Poly"/>
             <column columnName="PositiveAUC_Poly"/>
             <column columnName="AUC_4pl"/>
-            <column columnName="PositiveAUC_4PL"/>
+            <column columnName="PositiveAUC_4pl"/>
             <column columnName="AUC_5pl"/>
-            <column columnName="PositiveAUC_5PL"/>
+            <column columnName="PositiveAUC_5pl"/>
             <column columnName="ObjectUri"/>
             <column columnName="ObjectId"/>
             <column columnName="ProtocolId">
