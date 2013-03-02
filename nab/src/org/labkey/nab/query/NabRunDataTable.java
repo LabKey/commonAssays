@@ -18,8 +18,6 @@ package org.labkey.nab.query;
 
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.nab.SinglePlateNabDataHandler;
 
 import java.util.*;

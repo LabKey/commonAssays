@@ -19,7 +19,6 @@ import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiVersion;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;

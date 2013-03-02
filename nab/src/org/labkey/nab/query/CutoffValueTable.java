@@ -109,20 +109,40 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         return defaultICSQL;
     }
 
+    private boolean _dontNeedFilterContainer = false;
+
     @Override
     protected void applyContainerFilter(ContainerFilter filter)
     {
+        if (!_dontNeedFilterContainer)
+        {
         // We need to do our filtering based on the run since we don't have a container column of our own
-        clearConditions(CONTAINER_FIELD_KEY);
-        SQLFragment sql = new SQLFragment("NabSpecimenID IN (SELECT ns.RowId FROM ");
-        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        sql.append(", ");
-        sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
-        sql.append(" WHERE r.RowId = ns.RunId AND ");
-        sql.append(filter.getSQLFragment(getSchema(), CONTAINER_FIELD_KEY, _userSchema.getContainer()));
-        sql.append(")");
-        addCondition(sql, CONTAINER_FIELD_KEY);
+            clearConditions(CONTAINER_FIELD_KEY);
+            SQLFragment sql = new SQLFragment("NabSpecimenID IN (SELECT ns.RowId FROM ");
+            sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+            sql.append(", ");
+            sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
+            sql.append(" WHERE r.RowId = ns.RunId AND ");
+            sql.append(filter.getSQLFragment(getSchema(), CONTAINER_FIELD_KEY, _userSchema.getContainer()));
+            sql.append(")");
+            addCondition(sql, CONTAINER_FIELD_KEY);
+        }
     }
 
+    public void removeContainerFilter()
+    {
+        // When CutoffValueTable is used with NabSpecimenTable already we don't want the extra filter;
+        // Need to clear explicitly because FilteredTable contructor calls applyContainerFilter
+        clearConditions(CONTAINER_FIELD_KEY);
+        _dontNeedFilterContainer = true;
+    }
+
+    @Override
+    public boolean supportsContainerFilter()
+    {
+        if (_dontNeedFilterContainer)
+            return false;
+        return super.supportsContainerFilter();
+    }
 
 }

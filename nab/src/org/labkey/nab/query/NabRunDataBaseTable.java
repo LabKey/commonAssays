@@ -120,7 +120,8 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
     protected void addPropertyColumns(final NabProtocolSchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
     {
-        CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
+        final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
+        cutoffValueTable.removeContainerFilter();
 
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
@@ -237,21 +238,6 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             specimenColumn.setFk(lfkSpecimen);
             addColumn(specimenColumn);
 
-/*            propertyLookupColumn = wrapColumn("Properties", specimenColumn);
-            propertyLookupColumn.setIsUnselectable(true);
-            propertyLookupColumn.setHidden(true);
-            final TableInfo thisTable = this;
-            LookupForeignKey lfk1 = new LookupForeignKey()
-            {
-                public TableInfo getLookupTableInfo()
-                {
-                    return thisTable;
-                }
-
-            };
-            propertyLookupColumn.setFk(lfk1);
-//            addColumn(propertyLookupColumn);   */
-
             Set<Double> cutoffValuess = _nabSpecimenTable.getCutoffValues();
             for (Double value : cutoffValuess)
             {
@@ -265,7 +251,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        return _userSchema.getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME);
+                        return cutoffValueTable;  // _userSchema.getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME);
                     }
                     @Override
                     public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
