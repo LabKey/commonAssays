@@ -18,11 +18,15 @@ package org.labkey.nab.multiplate;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
@@ -35,14 +39,19 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
+import org.labkey.nab.DilutionSummary;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabAssayRun;
+import org.labkey.nab.NabManager;
+import org.labkey.nab.NabSpecimen;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -217,5 +226,84 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
         dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
         dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + virusName + "-" + wellGroupName);
         return dataRowLsid;
+    }
+
+    @Override
+    public Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
+    {
+        Map<DilutionSummary, NabAssayRun> summaries = new LinkedHashMap<DilutionSummary, NabAssayRun>();
+        if (dataObjectIds == null || dataObjectIds.length == 0)
+            return summaries;
+
+        Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
+        for (int dataObjectId : dataObjectIds)
+        {
+            OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
+            if (dataRow == null || dataRow.getOwnerObjectId() == null)
+                continue;
+            Map<String, ObjectProperty> properties = OntologyManager.getPropertyObjects(dataRow.getContainer(), dataRow.getObjectURI());
+            String wellgroupName = null;
+            String specimenLsid = null;
+            String virusName = null;
+
+            // samples are keyed by both sampleID and virusName
+            for (ObjectProperty property : properties.values())
+            {
+                if (WELLGROUP_NAME_PROPERTY.equals(property.getName()))
+                    wellgroupName = property.getStringValue();
+                if (NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(property.getName()))
+                    specimenLsid = property.getStringValue();
+
+                if (wellgroupName != null && specimenLsid != null)
+                    break;
+            }
+            if (wellgroupName == null || specimenLsid == null)
+                continue;
+
+            // get the virus name from the material input
+            ExpMaterial inputMaterial = ExperimentService.get().getExpMaterial(specimenLsid);
+            if (inputMaterial != null)
+            {
+                for (Map.Entry<PropertyDescriptor, Object> entry : inputMaterial.getPropertyValues().entrySet())
+                {
+                    if (NabAssayProvider.VIRUS_NAME_PROPERTY_NAME.equals(entry.getKey().getName()))
+                    {
+                        virusName = entry.getValue().toString();
+                        break;
+                    }
+                }
+            }
+
+            if (virusName == null)
+                continue;
+
+            OntologyObject dataParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
+            if (dataParent == null)
+                continue;
+            String dataLsid = dataParent.getObjectURI();
+            NabAssayRun assay = dataToAssay.get(dataLsid);
+            if (assay == null)
+            {
+                ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
+                if (dataObject == null)
+                    continue;
+                assay = getAssayResults(dataObject.getRun(), user, fit);
+                if (assay == null)
+                    continue;
+                dataToAssay.put(dataLsid, assay);
+            }
+
+            for (DilutionSummary summary : assay.getSummaries())
+            {
+                WellGroup group = summary.getFirstWellGroup();
+                Object virusProp = group.getProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME);
+
+                if (wellgroupName.equals(group.getName()) && (virusProp != null && virusProp.toString().equals(virusName)))
+                {
+                    summaries.put(summary, assay);
+                }
+            }
+        }
+        return summaries;
     }
 }

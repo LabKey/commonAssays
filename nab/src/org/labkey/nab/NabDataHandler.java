@@ -338,89 +338,89 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-    if (!NabManager.useNewNab)
-    {
-        Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
-        for (int dataObjectId : dataObjectIds)
+        if (!NabManager.useNewNab)
         {
-            OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
-            if (dataRow == null || dataRow.getOwnerObjectId() == null)
-                continue;
-            Map<String, ObjectProperty> properties = OntologyManager.getPropertyObjects(dataRow.getContainer(), dataRow.getObjectURI());
-            String wellgroupName = null;
-            for (ObjectProperty property : properties.values())
+            Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
+            for (int dataObjectId : dataObjectIds)
             {
-                if (WELLGROUP_NAME_PROPERTY.equals(property.getName()))
-                {
-                    wellgroupName = property.getStringValue();
-                    break;
-                }
-            }
-            if (wellgroupName == null)
-                continue;
-
-            OntologyObject dataParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
-            if (dataParent == null)
-                continue;
-            String dataLsid = dataParent.getObjectURI();
-            NabAssayRun assay = dataToAssay.get(dataLsid);
-            if (assay == null)
-            {
-                ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
-                if (dataObject == null)
+                OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
+                if (dataRow == null || dataRow.getOwnerObjectId() == null)
                     continue;
-                assay = getAssayResults(dataObject.getRun(), user, fit);
+                Map<String, ObjectProperty> properties = OntologyManager.getPropertyObjects(dataRow.getContainer(), dataRow.getObjectURI());
+                String wellgroupName = null;
+                for (ObjectProperty property : properties.values())
+                {
+                    if (WELLGROUP_NAME_PROPERTY.equals(property.getName()))
+                    {
+                        wellgroupName = property.getStringValue();
+                        break;
+                    }
+                }
+                if (wellgroupName == null)
+                    continue;
+
+                OntologyObject dataParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
+                if (dataParent == null)
+                    continue;
+                String dataLsid = dataParent.getObjectURI();
+                NabAssayRun assay = dataToAssay.get(dataLsid);
                 if (assay == null)
-                    continue;
-                dataToAssay.put(dataLsid, assay);
-            }
-
-            for (DilutionSummary summary : assay.getSummaries())
-            {
-                if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
                 {
-                    summaries.put(summary, assay);
-                    break;
+                    ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
+                    if (dataObject == null)
+                        continue;
+                    assay = getAssayResults(dataObject.getRun(), user, fit);
+                    if (assay == null)
+                        continue;
+                    dataToAssay.put(dataLsid, assay);
+                }
+
+                for (DilutionSummary summary : assay.getSummaries())
+                {
+                    if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
+                    {
+                        summaries.put(summary, assay);
+                        break;
+                    }
                 }
             }
         }
-    }
-    else
-    {
-        Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
-        List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
-        for (int nabSpecimenId : dataObjectIds)
-            nabSpecimenIds.add(nabSpecimenId);
-        List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
-        for (NabSpecimen nabSpecimen : nabSpecimens)
+        else
         {
-            String wellgroupName = nabSpecimen.getWellgroupName();
-            if (null == wellgroupName)
-                continue;
-
-            int runId = nabSpecimen.getRunId();
-            NabAssayRun assay = dataToAssay.get(runId);
-            if (assay == null)
+            Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
+            List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
+            for (int nabSpecimenId : dataObjectIds)
+                nabSpecimenIds.add(nabSpecimenId);
+            List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
+            for (NabSpecimen nabSpecimen : nabSpecimens)
             {
-                ExpRun run = ExperimentService.get().getExpRun(runId);
-                if (null == run)
+                String wellgroupName = nabSpecimen.getWellgroupName();
+                if (null == wellgroupName)
                     continue;
-                assay = getAssayResults(run, user, fit);
-                if (null == assay)
-                    continue;
-                dataToAssay.put(runId, assay);
-            }
 
-            for (DilutionSummary summary : assay.getSummaries())
-            {
-                if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
+                int runId = nabSpecimen.getRunId();
+                NabAssayRun assay = dataToAssay.get(runId);
+                if (assay == null)
                 {
-                    summaries.put(summary, assay);
-                    break;
+                    ExpRun run = ExperimentService.get().getExpRun(runId);
+                    if (null == run)
+                        continue;
+                    assay = getAssayResults(run, user, fit);
+                    if (null == assay)
+                        continue;
+                    dataToAssay.put(runId, assay);
+                }
+
+                for (DilutionSummary summary : assay.getSummaries())
+                {
+                    if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
+                    {
+                        summaries.put(summary, assay);
+                        break;
+                    }
                 }
             }
         }
-    }
         return summaries;
     }
 

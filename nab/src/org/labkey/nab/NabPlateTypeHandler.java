@@ -19,6 +19,7 @@ package org.labkey.nab;
 import org.labkey.api.study.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
+import org.labkey.nab.multiplate.HighThroughputNabDataHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,6 +158,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
 
         for (int row = 0; row < (rowCount - 1); row += 4)
         {
+            int replicateGroupIndex = 1;
             template.addWellGroup("" + sampleIndex, WellGroup.Type.SPECIMEN,
                     PlateService.get().createPosition(c, row, startCol),
                     PlateService.get().createPosition(c, row+3, startCol+colsPerSample-1));
@@ -166,9 +168,15 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
             {
                 for (int col = startCol; col < (startCol + colsPerSample); col++)
                 {
-                    template.addWellGroup("Specimen " + sampleIndex + "-" + replicateIndex++, WellGroup.Type.REPLICATE,
-                        PlateService.get().createPosition(c, row + (rowGroup * 2), col),
-                        PlateService.get().createPosition(c, row + (rowGroup * 2) + 1, col));
+                    List<Position> positions = new ArrayList<Position>();
+
+                    positions.add(PlateService.get().createPosition(c, row + (rowGroup % 2), col));
+                    positions.add(PlateService.get().createPosition(c, row + (rowGroup % 2) + 2, col));
+
+                    WellGroupTemplate wg = template.addWellGroup("Specimen " + sampleIndex + "-" + replicateIndex++, WellGroup.Type.REPLICATE, positions);
+
+                    // add an explicit order property to override the natural ordering
+                    wg.setProperty(HighThroughputNabDataHandler.REPLICATE_GROUP_ORDER_PROPERTY, String.valueOf(replicateGroupIndex++));
                 }
             }
             sampleIndex++;

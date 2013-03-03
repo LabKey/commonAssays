@@ -15,6 +15,7 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.property.DomainProperty;
@@ -27,6 +28,7 @@ import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.NabDataHandler;
 import org.labkey.nab.NabManager;
@@ -34,6 +36,8 @@ import org.labkey.nab.NabManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +47,9 @@ import java.util.Map;
  */
 public abstract class HighThroughputNabDataHandler extends NabDataHandler
 {
+    //
+    public static final String REPLICATE_GROUP_ORDER_PROPERTY = "Group Order";
+
     @Override
     protected String getPreferredDataFileExtension()
     {
@@ -184,8 +191,51 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler
         {
             for (DomainProperty property : properties.values())
                 group.setProperty(property.getName(), sampleInput.getProperty(property));
-            wells.addAll(group.getWellData(true));
+
+            boolean hasExplicitOrder = true;
+            List<? extends WellData> wellData = group.getWellData(true);
+            for (WellData well : wellData)
+            {
+                if (well instanceof WellGroup)
+                {
+                    // it's possible to override the natural ordering of the replicate well groups by adding a replicate
+                    // well group property : 'Group Order' with a numeric value in the plate template
+                    String order = (String)((WellGroupTemplate)well).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                    if (!NumberUtils.isDigits(order))
+                    {
+                        hasExplicitOrder = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    hasExplicitOrder = false;
+                    break;
+                }
+            }
+
+            if (hasExplicitOrder)
+            {
+                Collections.sort(wellData, new Comparator<WellData>()
+                {
+                    @Override
+                    public int compare(WellData w1, WellData w2)
+                    {
+                        if ((w1 instanceof WellGroupTemplate) && (w2 instanceof WellGroupTemplate))
+                        {
+                            String order1 = (String)((WellGroupTemplate)w1).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                            String order2 = (String)((WellGroupTemplate)w2).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+
+                            return NumberUtils.toInt(order1, 0) - NumberUtils.toInt(order2, 0);
+                        }
+                        return 0;
+                    }
+                });
+
+            }
+            wells.addAll(wellData);
         }
+
         applyDilution(wells, sampleInput, properties, reverseDirection);
     }
 }
