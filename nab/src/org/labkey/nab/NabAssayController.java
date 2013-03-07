@@ -892,7 +892,9 @@ public class NabAssayController extends SpringActionController
             if (_queryView == null)
             {
                 NabAssayProvider provider = (NabAssayProvider)AssayService.get().getProvider(_protocol);
-                QueryView dataView = new NabProtocolSchema.NabResultsQueryView(provider, _protocol, _context)
+                NabProtocolSchema schema = provider.createProtocolSchema(_context.getUser(), _context.getContainer(), _protocol, null);
+                QuerySettings settings = schema.getSettings(_context, AssayProtocolSchema.DATA_TABLE_NAME, AssayProtocolSchema.DATA_TABLE_NAME);
+                QueryView dataView = new NabProtocolSchema.NabResultsQueryView(_protocol, _context, settings)
                 {
                     public DataView createDataView()
                     {

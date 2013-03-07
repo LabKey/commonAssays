@@ -106,20 +106,14 @@ public class NabProtocolSchema extends AssayProtocolSchema
     @Override
     protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
-        return new NabResultsQueryView((NabAssayProvider)getProvider(), getProtocol(), context);
+        return new NabResultsQueryView(getProtocol(), context, settings);
     }
 
     public static class NabResultsQueryView extends ResultsQueryView
     {
-        public NabResultsQueryView(NabAssayProvider provider, ExpProtocol protocol, ViewContext context)
+        public NabResultsQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
         {
-            super(protocol, context, getDefaultSettings(provider, protocol, context));
-        }
-
-        private static QuerySettings getDefaultSettings(NabAssayProvider provider, ExpProtocol protocol, ViewContext context)
-        {
-            NabProtocolSchema schema = provider.createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
-            return schema.getSettings(context, AssayProtocolSchema.DATA_TABLE_NAME, AssayProtocolSchema.DATA_TABLE_NAME);
+            super(protocol, context, settings);
         }
 
         private void addGraphSubItems(NavTree parent, Domain domain, String dataRegionName, Set<String> excluded)
