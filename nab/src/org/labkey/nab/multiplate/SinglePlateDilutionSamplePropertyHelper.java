@@ -46,6 +46,8 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
         super(c, protocol, sampleProperties, template);
     }
 
+    public static final String WELLGROUP_COLUMN = "SampleNo";
+
     @Override
     public Map<String, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
     {
@@ -113,8 +115,10 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
                             Object value = getValue(row, property);
                             Object existing = sampleProperties.get(property);
 
+                            String msg = String.format("If there are duplicate virusID/wellGroup combinations in the metadata file, they must contain exactly the same field values." +
+                                    " virusId/wellGroup : %s, property : %s, previous : %s, newValue : %s", virusId + "/" + wellGroupName, property.getName(), existing, value);
                             if (value != null && !value.toString().equals(existing.toString()))
-                                throw new ExperimentException("If there are duplicate virusID/wellGroup combinations in the metadata file, they must contain exactly the same field values.");
+                                throw new ExperimentException(msg);
                         }
                     }
                 }
