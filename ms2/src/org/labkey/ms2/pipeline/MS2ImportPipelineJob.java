@@ -53,7 +53,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         // If there is an existing status file, make sure this job does not
         // overwrite the original provider.  Both Comet and X!Tandem legacy
         // pipeline create these jobs.
-        PipelineStatusFile sf = PipelineService.get().getStatusFile(getLogFile().getAbsolutePath());
+        PipelineStatusFile sf = PipelineService.get().getStatusFile(getLogFile());
         if (sf != null)
             setProvider(sf.getProvider());
     }

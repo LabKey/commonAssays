@@ -103,7 +103,7 @@ public class ArrayPipelineManager
                 if (logExists)
                 {
                     // Check to see if images match what is being or has been processed by the pipeline.
-                    PipelineStatusFile sf = PipelineService.get().getStatusFile(logFile.getAbsolutePath());
+                    PipelineStatusFile sf = PipelineService.get().getStatusFile(logFile);
                     if (null == sf || !sf.isActive())
                         status = FileStatus.COMPLETE;
                     else

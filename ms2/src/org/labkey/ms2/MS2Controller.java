@@ -6076,8 +6076,7 @@ public class MS2Controller extends SpringActionController
             String path = url.getParameter("path");
             if (path != null)
             {
-                path = PipelineJobService.statusPathOf(path);
-                PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
+                PipelineStatusFile sf = PipelineService.get().getStatusFile(new File(path));
                 if (sf == null)
                     status = "ERROR->path=" + path + ",message=Job not found in database";
 /*            else if (run.getDeleted())

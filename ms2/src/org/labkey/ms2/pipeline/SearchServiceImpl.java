@@ -503,8 +503,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         if (fileStatus != null)
         {
-            String path = PipelineJobService.statusPathOf(fileStatus.getAbsolutePath());
-            PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
+            PipelineStatusFile sf = PipelineService.get().getStatusFile(fileStatus);
             if (sf == null)
                 return null;
 

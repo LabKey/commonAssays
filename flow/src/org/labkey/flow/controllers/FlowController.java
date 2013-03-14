@@ -216,7 +216,7 @@ public class FlowController extends BaseFlowController
             }
             else
             {
-                PipelineStatusFile psf = PipelineService.get().getStatusFile(form.getStatusFile());
+                PipelineStatusFile psf = PipelineService.get().getStatusFile(new File(form.getStatusFile()));
                 if (psf == null)
                 {
                     errors.rejectValue("statusFile", ERROR_MSG, "Status not found.");
@@ -346,7 +346,7 @@ public class FlowController extends BaseFlowController
             }
             else
             {
-                PipelineStatusFile sf = PipelineService.get().getStatusFile(form.getStatusFile());
+                PipelineStatusFile sf = PipelineService.get().getStatusFile(new File(form.getStatusFile()));
                 if (sf == null)
                 {
                     errors.rejectValue("statusFile", ERROR_MSG, "Job " + form.getStatusFile() + " not found.");
