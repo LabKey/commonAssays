@@ -60,6 +60,7 @@ public abstract class NabAssayRun extends Luc5Assay
     private Map<PropertyDescriptor, Object> _runDisplayProperties;
     List<SampleResult> _sampleResults;
     private ExpRun _run;
+    // Be extremely careful to not leak this user out in any objects (e.g, via schemas or tables) as it may have elevated permissions.
     private User _user;
     private DilutionCurve.FitType _savedCurveFitType = null;
     private Map<ExpMaterial, List<WellGroup>> _materialWellGroupMapping;

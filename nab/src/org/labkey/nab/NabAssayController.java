@@ -46,11 +46,15 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
+import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.security.roles.Role;
+import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
@@ -697,7 +701,7 @@ public class NabAssayController extends SpringActionController
         return null;
     }
 
-    private NabAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit) throws ExperimentException
+    private NabAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit, User elevatedUser) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
         // then immediately hit the 'print' button.
@@ -708,7 +712,7 @@ public class NabAssayController extends SpringActionController
         {
             try
             {
-                assay = getDataHandler(run).getAssayResults(run, getUser(), fit);
+                assay = getDataHandler(run).getAssayResults(run, elevatedUser, fit);
                 if (assay != null && fit == null)
                     getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new NAbRunWrapper(assay, new Date()));
             }
@@ -754,7 +758,20 @@ public class NabAssayController extends SpringActionController
                 throw new RedirectException(getViewContext().getActionURL().clone().addParameter("_print", true));
             }
 
-            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
+            // If the current user doesn't have ReadPermission to the current container, but the
+            // RunDataSetContextualRoles has granted us permission to this action, we can elevate the user's
+            // permissions as accessed via the NabAssayRun.  This allows access to schemas and queries used by
+            // NabAssayRun even though the original user doesn't have permission to the container.
+            User elevatedUser = getUser();
+            if (!getContainer().hasPermission(getUser(), ReadPermission.class))
+            {
+                User currentUser = getUser();
+                Set<Role> contextualRoles = new HashSet<Role>(currentUser.getStandardContextualRoles());
+                contextualRoles.add(RoleManager.getRole(ReaderRole.class));
+                elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
+            }
+
+            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
             _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
@@ -1145,7 +1162,17 @@ public class NabAssayController extends SpringActionController
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
-            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
+
+            // See comment in DetailsAction about the elevatedUser
+            User elevatedUser = getUser();
+            if (!getContainer().hasPermission(getUser(), ReadPermission.class))
+            {
+                User currentUser = getUser();
+                Set<Role> contextualRoles = new HashSet<Role>(currentUser.getStandardContextualRoles());
+                contextualRoles.add(RoleManager.getRole(ReaderRole.class));
+                elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
+            }
+            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
             if (assay == null)
                 throw new NotFoundException("Could not load NAb results for run " + form.getRowId() + ".");
 
