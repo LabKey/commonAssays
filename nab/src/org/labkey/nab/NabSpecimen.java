@@ -15,7 +15,6 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.exp.LsidType;
 
 /**
  * Created with IntelliJ IDEA.

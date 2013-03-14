@@ -18,6 +18,7 @@ package org.labkey.nab;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -54,7 +55,7 @@ public class NabModule extends DefaultModule
 
     public double getVersion()
     {
-        return 12.32;
+        return 12.33;
     }
 
     protected void init()
@@ -120,5 +121,11 @@ public class NabModule extends DefaultModule
             defaultURL.setController("assay");
 
         return defaultURL;
+    }
+
+    @Override
+    public UpgradeCode getUpgradeCode()
+    {
+        return new NabUpgradeCode();
     }
 }

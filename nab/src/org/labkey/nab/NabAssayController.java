@@ -29,6 +29,8 @@ import org.labkey.api.data.*;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ExperimentRunListView;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -57,6 +59,7 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
@@ -492,6 +495,40 @@ public class NabAssayController extends SpringActionController
             return _assay.getRun().getRowId();
         }
 
+        public Pair<PropertyDescriptor, Object> getFitError(NabAssayRun.SampleResult result, Container container)
+        {
+            try
+            {
+                Lsid fitErrorURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), NabDataHandler.FIT_ERROR_PROPERTY);
+                PropertyDescriptor fitErrorPd = OntologyManager.getPropertyDescriptor(fitErrorURI.toString(), container);
+                if (null != fitErrorPd)
+                    return new Pair<PropertyDescriptor, Object>(fitErrorPd, result.getDilutionSummary().getFitError());
+            }
+            catch (DilutionCurve.FitFailedException e)
+            {       // ignore
+            }
+            return null;
+        }
+
+        public Pair<PropertyDescriptor, Object> getAuc(NabAssayRun.SampleResult result, Container container)
+        {
+            String aucPropertyName = getFitType() == null ? NabDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, getFitType());
+            Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
+            PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
+            if (null != aucPD)
+                return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
+            return null;
+        }
+
+        public Pair<PropertyDescriptor, Object> getPositiveAuc(NabAssayRun.SampleResult result, Container container)
+        {
+            String aucPropertyName = getFitType() == null ? NabDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, getFitType());
+            Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
+            PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
+            if (null != aucPD)
+                return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
+            return null;
+        }
     }
 
     public static class HeaderBean
@@ -725,6 +762,14 @@ public class NabAssayController extends SpringActionController
                     new RenderAssayBean(getViewContext(), assay, form.getFitTypeEnum(), form.isNewRun(), isPrint()));
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _runRowId), view);
+
+            boolean tMigrate = false;
+            if (tMigrate)
+            {
+                NabUpgradeCode upgradeCode = new NabUpgradeCode();
+//                upgradeCode.migrateToNabSpecimen(getUser());
+            }
+
             return view;
         }
 

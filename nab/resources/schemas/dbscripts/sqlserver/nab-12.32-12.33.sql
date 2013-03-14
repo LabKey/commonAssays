@@ -91,4 +91,32 @@ UPDATE nab.CutoffValue SET
 		nab.NAbSpecimen ns
 		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_polyOORIndicator');
 
+EXEC core.executeJavaUpgradeCode 'migrateToNabSpecimen'
+GO
 
+-- Change keyPropertyName in study.dataset
+UPDATE study.DataSet SET KeyPropertyName = 'RowId' WHERE ProtocolId IN (SELECT ProtocolId FROM nab.NAbSpecimen);
+
+-- Remove stuff that we moved from properties
+DELETE FROM exp.ObjectProperty
+    WHERE ObjectId IN (SELECT ObjectID FROM nab.NabSpecimen) AND
+      (PropertyId IN
+        (SELECT PropertyId FROM exp.PropertyDescriptor pd
+			WHERE
+            (pd.PropertyURI LIKE '%:SpecimenLsid' OR
+             pd.PropertyURI LIKE '%:Fit+Error' OR
+             pd.PropertyURI LIKE '%:WellgroupName' OR
+             pd.PropertyURI LIKE '%:AUC_poly' OR
+             pd.PropertyURI LIKE '%:AUC_5pl' OR
+             pd.PropertyURI LIKE '%:AUC_4pl' OR
+             pd.PropertyURI LIKE '%:PositiveAUC_poly' OR
+             pd.PropertyURI LIKE '%:PositiveAUC_5pl' OR
+             pd.PropertyURI LIKE '%:PositiveAUC_4pl' OR
+             pd.PropertyURI LIKE '%:Point+IC' OR
+             pd.PropertyURI LIKE '%:Point+ICOORIndicator' OR
+             pd.PropertyURI LIKE '%:Curve+IC%_4pl%' OR
+             pd.PropertyURI LIKE '%:Curve+IC%_4plOORIndicator'OR
+             pd.PropertyURI LIKE '%:Curve+IC%_5pl%'OR
+             pd.PropertyURI LIKE '%:Curve+IC%_5plOORIndicator'OR
+             pd.PropertyURI LIKE '%:Curve+IC%_poly' OR
+             pd.PropertyURI LIKE '%:Curve+IC%_polyOORIndicator')));

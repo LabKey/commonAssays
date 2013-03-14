@@ -39,6 +39,8 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
+import org.labkey.nab.query.NabProviderSchema;
+import org.labkey.nab.query.NabRunDataTable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -299,6 +301,9 @@ public abstract class NabAssayRun extends Luc5Assay
         Domain sampleDomain = _provider.getSampleWellGroupDomain(_protocol);
         DomainProperty[] sampleDomainProperties = sampleDomain.getProperties();
 
+        NabProviderSchema nabProviderSchema = (NabProviderSchema)_provider.createProviderSchema(_user, _run.getContainer(), null);
+        NabRunDataTable nabRunDataTable = nabProviderSchema.createDataRowTable(_protocol);
+
         for (ExpMaterial material : inputs)
         {
             Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
@@ -313,13 +318,20 @@ public abstract class NabAssayRun extends Luc5Assay
             Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
             String wellGroupName = getWellGroupName(material);
             String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName, sampleProperties).toString();
-            Map<String, ObjectProperty> outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
-            for (ObjectProperty prop : outputProperties.values())
+            if (!NabManager.useNewNab)
             {
-                PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(prop.getPropertyURI(), prop.getContainer());
-                dataProperties.put(pd, prop.value());
+                Map<String, ObjectProperty> outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
+                for (ObjectProperty prop : outputProperties.values())
+                {
+                    PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(prop.getPropertyURI(), prop.getContainer());
+                    dataProperties.put(pd, prop.value());
+                }
             }
-
+            else
+            {
+                PropertyDescriptor[] propertyDescriptors = NabProviderSchema.getExistingDataProperties(_protocol);
+                NabManager.get().getDataPropertiesFromNabRunData(nabRunDataTable, dataRowLsid, _run.getContainer(), propertyDescriptors, dataProperties);
+            }
             samplePropertyMap.put(getSampleKey(material), new NabResultProperties(sampleProperties,  dataProperties));
         }
         return samplePropertyMap;

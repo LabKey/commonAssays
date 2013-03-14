@@ -42,6 +42,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.nab.NabManager;
+import org.labkey.nab.NabManager.PropDescCategory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -144,6 +145,9 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
         if (NabManager.useNewNab)
         {
+            ColumnInfo objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
+            objectUriColumn.setIsUnselectable(true);
+            objectUriColumn.setHidden(true);
             ColumnInfo rowIdColumn = addWrapColumn(_rootTable.getColumn("RowId"));
             rowIdColumn.setKeyField(true);
             rowIdColumn.setHidden(true);
@@ -299,7 +303,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     else
                     {
                         // Cutoff table column or calculated column
-                        PropDescCategory pdCat = getPropDescCategory(lookupCol.getName());
+                        PropDescCategory pdCat = NabManager.getPropDescCategory(lookupCol.getName());
                         FieldKey key = getCalculatedColumn(pdCat);
                         if (null != key)
                             visibleColumns.add(key);
@@ -310,107 +314,20 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
     }
 
-    private class PropDescCategory
-    {
-        public String _origName = null;
-        public String _type = null;         // ic_4pl, ic_5pl, ic_poly, point, null
-        public boolean _oor = false;
-        public String _rangeOrNum = null;   // inrange, number, null
-        public Integer _cutoffValue = null; // value, null
-
-        public PropDescCategory(String name)
-        {
-            _origName = name;
-        }
-
-        public String getColumnName()
-        {
-            String colName = _type;
-            if (_oor) colName += "OORIndicator";
-            return colName;
-        }
-    }
-
-    @Nullable
-    private PropDescCategory getPropDescCategory(String name)
-    {
-        PropDescCategory pdCat = new PropDescCategory(name);
-        if (name.contains("InRange"))
-            pdCat._rangeOrNum = "inrange";
-        else if (name.contains("Number"))
-            pdCat._rangeOrNum = "number";
-
-        if (name.startsWith("Point") && name.contains("IC"))
-        {
-            pdCat._type = "Point";
-        }
-        else if (name.startsWith("Curve") && name.contains("IC"))
-        {
-            if (name.contains("4pl"))
-                pdCat._type = "IC_4pl";
-            else if (name.contains("5pl"))
-                pdCat._type = "IC_5pl";
-            else if (name.contains("poly"))
-                pdCat._type = "IC_Poly";
-            else
-                pdCat._type = "IC";
-        }
-        else if (name.equalsIgnoreCase("auc"))
-            pdCat._rangeOrNum = "auc";
-        else if (name.equalsIgnoreCase("positive auc"))
-            pdCat._rangeOrNum = "positiveauc";
-
-        pdCat._oor = name.contains("OORIndicator");
-        pdCat._cutoffValue = cutoffValueFromName(name);
-        return pdCat;
-    }
-
-    @Nullable
-    private Integer cutoffValueFromName(String name)
-    {
-        int icIndex = name.indexOf("IC");
-        if (icIndex >= 0 && icIndex + 4 <= name.length())
-            return Integer.valueOf(name.substring(icIndex + 2, icIndex + 4));
-        return null;
-    }
-
     private FieldKey getCalculatedColumn(PropDescCategory pdCat)
     {
         FieldKey fieldKey = null;
-        if (null != pdCat._cutoffValue)
+        if (null != pdCat.getCutoffValue())
         {
-            ColumnInfo cutoffColumn = getCutoffColumn(pdCat._cutoffValue);
-            String columnName = getCalculatedColumnName(pdCat);
-            if (null != columnName && null != cutoffColumn)         // cutoffColumn could be null when we're deleting folders
+            String cutoffColumnName = pdCat.getCutoffValueColumnName();
+            String columnName = pdCat.getCalculatedColumnName();
+            if (null != columnName)         // cutoffColumn could be null when we're deleting folders
             {
-                fieldKey = FieldKey.fromParts(cutoffColumn.getAlias(), columnName);
+                fieldKey = FieldKey.fromParts(cutoffColumnName, columnName);
             }
         }
 
         return fieldKey;
-    }
-
-    private String getCalculatedColumnName(PropDescCategory pdCat)
-    {
-        String columnName = null;
-        if (null == pdCat._rangeOrNum)
-        {
-            columnName = pdCat.getColumnName();
-        }
-        else if (pdCat._rangeOrNum.equalsIgnoreCase("inrange"))
-        {
-            columnName = pdCat.getColumnName() + "InRange";
-        }
-        else if (pdCat._rangeOrNum.equalsIgnoreCase("number"))
-        {
-            columnName = pdCat.getColumnName() + "Number";
-        }
-        return columnName;
-    }
-
-    private ColumnInfo getCutoffColumn(Integer cutoffValue)
-    {
-        return getColumn("Cutoff" + cutoffValue);
     }
 
     private ColumnInfo makeCutoffValueColumn(Integer cutoffValue, CutoffValueTable cutoffValueTable)
@@ -473,7 +390,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     ColumnInfo result = super.createLookupColumn(parent, displayField);
                     if (null != result && (displayField.startsWith("Curve") || displayField.startsWith("Point")))
                     {
-                        String columnName = getCalculatedColumnName(getPropDescCategory(displayField));
+                        String columnName = NabManager.getPropDescCategory(displayField).getCalculatedColumnName();
                         TableInfo tableInfo = result.getFkTableInfo();
                         if (null != tableInfo && null != columnName)
                             result = tableInfo.getLookupColumn(result, columnName);
@@ -494,10 +411,10 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         }
         else if (name.startsWith("Curve") || name.startsWith("Point"))
         {
-            PropDescCategory pdCat = getPropDescCategory(name);
+            PropDescCategory pdCat = NabManager.getPropDescCategory(name);
             FieldKey fieldKey = getCalculatedColumn(pdCat);
             if (null != fieldKey)
-                result = getCutoffColumn(pdCat._cutoffValue);
+                result = getColumn(pdCat.getCutoffValueColumnName());
         }
 
         return result;

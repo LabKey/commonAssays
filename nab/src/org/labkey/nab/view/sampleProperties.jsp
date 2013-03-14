@@ -31,6 +31,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.nab.NabManager" %>
+<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
@@ -41,37 +43,21 @@
     List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
     Set<String> pdsWithData = new HashSet<String>();
 
-    Lsid fitErrorURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), NabDataHandler.FIT_ERROR_PROPERTY);
-    PropertyDescriptor fitErrorPd = OntologyManager.getPropertyDescriptor(fitErrorURI.toString(), context.getContainer());
-
-    String aucPropertyName = bean.getFitType() == null ? NabDataHandler.AUC_PREFIX : assay.getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, bean.getFitType());
-    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), aucPropertyName);
-    PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
-
-    String paucPropertyName = bean.getFitType() == null ? NabDataHandler.pAUC_PREFIX : assay.getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, bean.getFitType());
-    Lsid pAucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), paucPropertyName);
-    PropertyDescriptor pAucPD = OntologyManager.getPropertyDescriptor(pAucURI.toString(), context.getContainer());
-
     for (NabAssayRun.SampleResult result : bean.getSampleResults())
     {
         Map<PropertyDescriptor, Object> sampleProps = new LinkedHashMap<PropertyDescriptor, Object>(result.getSampleProperties());
 
-        if (fitErrorPd != null)
-            sampleProps.put(fitErrorPd, result.getDilutionSummary().getFitError());
+        Pair<PropertyDescriptor, Object> fitErrorPair = bean.getFitError(result, context.getContainer());
+        if (fitErrorPair != null)
+            sampleProps.put(fitErrorPair.getKey(), fitErrorPair.getValue());
 
-        if (aucPD != null)
-        {
-            Object aucValue = result.getDataProperties().get(aucPD);
-            if (aucValue != null)
-                sampleProps.put(aucPD, aucValue);
-        }
+        Pair<PropertyDescriptor, Object> aucPair = bean.getAuc(result, context.getContainer());
+        if (aucPair != null)
+            sampleProps.put(aucPair.getKey(), aucPair.getValue());
 
-        if (pAucPD != null)
-        {
-            Object paucValue = result.getDataProperties().get(pAucPD);
-            if (paucValue != null)
-                sampleProps.put(pAucPD, paucValue);
-        }
+        Pair<PropertyDescriptor, Object> paucPair = bean.getPositiveAuc(result, context.getContainer());
+        if (paucPair != null)
+            sampleProps.put(paucPair.getKey(), paucPair.getValue());
 
         sampleData.add(sampleProps);
 

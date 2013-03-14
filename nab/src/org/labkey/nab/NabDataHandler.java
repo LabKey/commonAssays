@@ -33,6 +33,7 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 
@@ -477,22 +478,40 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
                 String dataRowLsid = getDataRowLSID(data, groupName, material.getPropertyValues()).toString();
 
-                // TODO ***************** begin section that will go away when nab table transfer is complete
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
-                List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+                int objectId = 0;
 
-                for (Map.Entry<String, Object> prop : group.entrySet())
+                if (!NabManager.useNewNab)
                 {
-                    if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
-                        continue;
+                    List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+                    for (Map.Entry<String, Object> prop : group.entrySet())
+                    {
+                        if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
+                            continue;
 
-                    ObjectProperty objProp = getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue(), cutoffFormats);
-                    if (objProp != null)
-                        results.add(objProp);
+                        ObjectProperty objProp = getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue(), cutoffFormats);
+                        if (objProp != null)
+                            results.add(objProp);
+                    }
+                    OntologyManager.insertProperties(container, dataRowLsid, results.toArray(new ObjectProperty[results.size()]));
+                    objectId = results.size() > 0 ? results.get(0).getObjectId() : 0;
                 }
-                OntologyManager.insertProperties(container, dataRowLsid, results.toArray(new ObjectProperty[results.size()]));
-                int objectId = results.size() > 0 ? results.get(0).getObjectId() : 0;
-                // TODO ***************** end section
+                else
+                {
+                    // Put property descriptors in the Ontology Manager, but not the properties themselves
+                    List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
+                    for (Map.Entry<String, Object> prop : group.entrySet())
+                    {
+                        if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
+                            continue;
+
+                        PropertyDescriptor objProp = getPropertyDescriptor(container, protocol, prop.getKey(), cutoffFormats);
+                        if (null != objProp)
+                            propertyDescriptors.add(objProp);
+                    }
+                    OntologyManager.ensurePropertyDescriptors(propertyDescriptors);
+                }
+
 
                 // New code to insert into NAbSpecimen and CutoffValue tables instead of Ontology properties
                 Map<String, Object> nabSpecimenEntries = new HashMap<String, Object>();
@@ -502,7 +521,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 nabSpecimenEntries.put("ProtocolId", protocol.getRowId());
                 nabSpecimenEntries.put("DataId", data.getRowId());
                 nabSpecimenEntries.put("RunId", run.getRowId());
-                nabSpecimenEntries.put("SpecimenLsid", group.get("SpecimenLsid"));
+                nabSpecimenEntries.put("SpecimenLsid", group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY));
                 nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
                 nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + polySuffix));
                 nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + polySuffix));
@@ -554,38 +573,21 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
     {
         if (isValidDataProperty(propertyName))
         {
-            PropertyType type = PropertyType.STRING;
-            String format = null;
+            Pair<PropertyType, String> typeAndFormat = determinePropertyTypeAndFormat(propertyName, cutoffFormats);
+            return getResultObjectProperty(container, protocol, objectURI, propertyName, value, typeAndFormat.getKey(), typeAndFormat.getValue());
+        }
+        return null;
+    }
 
-            if (propertyName.equals(FIT_ERROR_PROPERTY))
-            {
-                type = PropertyType.DOUBLE;
-                format = "0.0";
-            }
-            else if (propertyName.startsWith(AUC_PREFIX) || propertyName.startsWith(pAUC_PREFIX))
-            {
-                type = PropertyType.DOUBLE;
-                format = AUC_PROPERTY_FORMAT;
-            }
-            else if (propertyName.startsWith(CURVE_IC_PREFIX))
-            {
-                Integer cutoff = getCutoffFromPropertyName(propertyName);
-                if (cutoff != null)
-                {
-                    format = cutoffFormats.get(cutoff);
-                    type = PropertyType.DOUBLE;
-                }
-            }
-            else if (propertyName.startsWith(POINT_IC_PREFIX))
-            {
-                Integer cutoff = getCutoffFromPropertyName(propertyName);
-                if (cutoff != null)
-                {
-                    format = cutoffFormats.get(cutoff);
-                    type = PropertyType.DOUBLE;
-                }
-            }
-            return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, format);
+    protected PropertyDescriptor getPropertyDescriptor(Container container, ExpProtocol protocol, String propertyName, Map<Integer, String> cutoffFormats)
+    {
+        if (isValidDataProperty(propertyName))
+        {
+            Pair<PropertyType, String> typeAndFormat = determinePropertyTypeAndFormat(propertyName, cutoffFormats);
+            Lsid propertyURI = new Lsid(NAB_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
+            PropertyDescriptor pd = new PropertyDescriptor(propertyURI.toString(), typeAndFormat.getKey().getTypeUri(), propertyName, propertyName, container);
+            pd.setFormat(typeAndFormat.getValue());
+            return pd;
         }
         return null;
     }
@@ -600,6 +602,42 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 propertyName.startsWith(pAUC_PREFIX) ||
                 propertyName.startsWith(CURVE_IC_PREFIX) ||
                 propertyName.startsWith(POINT_IC_PREFIX);
+    }
+
+    protected Pair<PropertyType, String> determinePropertyTypeAndFormat(String propertyName, Map<Integer, String> cutoffFormats)
+    {
+        PropertyType type = PropertyType.STRING;
+        String format = null;
+
+        if (propertyName.equals(FIT_ERROR_PROPERTY))
+        {
+            type = PropertyType.DOUBLE;
+            format = "0.0";
+        }
+        else if (propertyName.startsWith(AUC_PREFIX) || propertyName.startsWith(pAUC_PREFIX))
+        {
+            type = PropertyType.DOUBLE;
+            format = AUC_PROPERTY_FORMAT;
+        }
+        else if (propertyName.startsWith(CURVE_IC_PREFIX))
+        {
+            Integer cutoff = getCutoffFromPropertyName(propertyName);
+            if (cutoff != null)
+            {
+                format = cutoffFormats.get(cutoff);
+                type = PropertyType.DOUBLE;
+            }
+        }
+        else if (propertyName.startsWith(POINT_IC_PREFIX))
+        {
+            Integer cutoff = getCutoffFromPropertyName(propertyName);
+            if (cutoff != null)
+            {
+                format = cutoffFormats.get(cutoff);
+                type = PropertyType.DOUBLE;
+            }
+        }
+        return new Pair<PropertyType, String>(type, format);
     }
 
     public Lsid getDataRowLSID(ExpData data, String wellGroupName, Map<PropertyDescriptor, Object> sampleProperties)
