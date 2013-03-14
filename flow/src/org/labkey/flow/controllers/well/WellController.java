@@ -472,7 +472,11 @@ public class WellController extends BaseFlowController
                 int maxEventCount = Integer.MAX_VALUE;
                 if (strEventCount != null)
                 {
-                    maxEventCount = Integer.valueOf(strEventCount);
+                    try
+                    {
+                        maxEventCount = Integer.valueOf(strEventCount);
+                    }
+                    catch (NumberFormatException ex) { }
                 }
                 byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
                 PageFlowUtil.streamFileBytes(getViewContext().getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);

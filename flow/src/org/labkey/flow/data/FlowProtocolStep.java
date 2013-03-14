@@ -106,7 +106,14 @@ public class FlowProtocolStep implements Serializable
         String strActionSequence = request.getParameter("actionSequence");
         if (strActionSequence == null || strActionSequence.length() == 0)
             return null;
-        return fromActionSequence(Integer.valueOf(strActionSequence));
+        try
+        {
+            return fromActionSequence(Integer.valueOf(strActionSequence));
+        }
+        catch (NumberFormatException ex)
+        {
+            return null;
+        }
     }
 
     public FlowProtocol ensureForContainer(User user, Container container)

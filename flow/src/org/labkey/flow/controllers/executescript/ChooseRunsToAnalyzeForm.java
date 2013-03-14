@@ -104,7 +104,14 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
     {
         if (ff_targetExperimentId == null)
             return null;
-        return FlowExperiment.fromExperimentId(Integer.valueOf(ff_targetExperimentId));
+        try
+        {
+            return FlowExperiment.fromExperimentId(Integer.valueOf(ff_targetExperimentId));
+        }
+        catch (NumberFormatException ex)
+        {
+            return null;
+        }
     }
 
     public void setFf_targetExperimentId(String experimentId)
@@ -247,7 +254,14 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             return 0;
         if (!ff_compensationMatrixOption.startsWith(COMPOPTION_COMPID))
             return 0;
-        return Integer.valueOf(ff_compensationMatrixOption.substring(COMPOPTION_COMPID.length()));
+        try
+        {
+            return Integer.valueOf(ff_compensationMatrixOption.substring(COMPOPTION_COMPID.length()));
+        }
+        catch (NumberFormatException ex)
+        {
+            return 0;
+        }
     }
 
     public String getCompensationExperimentLSID()

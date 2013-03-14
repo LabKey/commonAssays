@@ -202,7 +202,14 @@ public abstract class BaseFlowController extends SpringActionController
         String value = getParam(param);
         if (value == null)
             return 0;
-        return Integer.valueOf(value).intValue();
+        try
+        {
+            return Integer.valueOf(value).intValue();
+        }
+        catch (NumberFormatException ex)
+        {
+            return 0;
+        }
     }
 
     protected String getParam(FlowParam param)
