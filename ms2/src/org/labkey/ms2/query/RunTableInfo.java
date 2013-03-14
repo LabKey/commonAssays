@@ -18,8 +18,8 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.admin.CoreUrls;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.ContainerTable;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.FilteredTable;
@@ -41,19 +41,13 @@ public class RunTableInfo extends FilteredTable<MS2Schema>
         wrapAllColumns(true);
 
         ActionURL url = PageFlowUtil.urlProvider(CoreUrls.class).getContainerRedirectURL(ContainerManager.getRoot(), "ms2", "showList.view");
-        LookupForeignKey containerFK = new LookupForeignKey(url, "containerId", "EntityId", "Name")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return new ContainerTable(_userSchema);
-            }
-        };
-        getColumn("Container").setFk(containerFK);
-        getColumn("Container").setHidden(true);
+        ColumnInfo containerColumn = getColumn("Container");
+        ContainerForeignKey.initColumn(containerColumn, _userSchema, url);
+        containerColumn.setHidden(true);
 
         ColumnInfo folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
         folderColumn.setHidden(false);
-        folderColumn.setFk(containerFK);
+        ContainerForeignKey.initColumn(folderColumn, _userSchema, url);
         addColumn(folderColumn);
 
         ColumnInfo erLSIDColumn = getColumn("ExperimentRunLSID");
