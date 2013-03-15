@@ -131,7 +131,7 @@ public class NabAssayController extends SpringActionController
     {
         private boolean _newRun;
         private int _rowId = -1;
-        private DilutionCurve.FitType _fitType;
+        protected DilutionCurve.FitType _fitType;
 
         public boolean isNewRun()
         {
@@ -269,24 +269,21 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    public static class RenderAssayBean
+    public static class RenderAssayBean extends RenderAssayForm
     {
         private ViewContext _context;
         private NabAssayRun _assay;
-        private boolean _newRun;
         private boolean _printView;
         private Set<String> _hiddenRunColumns;
         private Map<String, Object> _displayProperties;
-        private DilutionCurve.FitType _fitType;
         private Boolean _dupFile = null;
+        private int _graphHeight = 300;
+        private int _graphWidth = 275;
+        private int _maxSamplesPerGraph = 8;
+        private int _graphsPerRow = 2;
 
-        public RenderAssayBean(ViewContext context, NabAssayRun assay, DilutionCurve.FitType fitType, boolean newRun, boolean printView)
+        public RenderAssayBean()
         {
-            _context = context;
-            _assay = assay;
-            _newRun = newRun;
-            _fitType = fitType;
-            _printView = printView;
             _hiddenRunColumns = new HashSet<String>();
             _hiddenRunColumns.add(ExpRunTable.Column.RunGroups.name());
             _hiddenRunColumns.add(ExpRunTable.Column.Links.name());
@@ -363,19 +360,14 @@ public class NabAssayController extends SpringActionController
             return _assay.getSampleResults();
         }
 
-        public DilutionCurve.FitType getFitType()
-        {
-            return _fitType;
-        }
-
         public NabAssayRun getAssay()
         {
             return _assay;
         }
 
-        public boolean isNewRun()
+        public void setAssay(NabAssayRun assay)
         {
-            return _newRun;
+            _assay = assay;
         }
 
         private boolean isDuplicateDataFile()
@@ -516,7 +508,7 @@ public class NabAssayController extends SpringActionController
 
         public Pair<PropertyDescriptor, Object> getAuc(NabAssayRun.SampleResult result, Container container)
         {
-            String aucPropertyName = getFitType() == null ? NabDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, getFitType());
+            String aucPropertyName = getFitType() == null ? NabDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, getFitTypeEnum());
             Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
             PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
             if (null != aucPD)
@@ -526,12 +518,62 @@ public class NabAssayController extends SpringActionController
 
         public Pair<PropertyDescriptor, Object> getPositiveAuc(NabAssayRun.SampleResult result, Container container)
         {
-            String aucPropertyName = getFitType() == null ? NabDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, getFitType());
+            String aucPropertyName = getFitType() == null ? NabDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, getFitTypeEnum());
             Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
             PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
             if (null != aucPD)
                 return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
             return null;
+        }
+
+        public int getGraphHeight()
+        {
+            return _graphHeight;
+        }
+
+        public void setGraphHeight(int graphHeight)
+        {
+            _graphHeight = graphHeight;
+        }
+
+        public int getGraphWidth()
+        {
+            return _graphWidth;
+        }
+
+        public void setGraphWidth(int graphWidth)
+        {
+            _graphWidth = graphWidth;
+        }
+
+        public int getMaxSamplesPerGraph()
+        {
+            return _maxSamplesPerGraph;
+        }
+
+        public void setMaxSamplesPerGraph(int maxSamplesPerGraph)
+        {
+            _maxSamplesPerGraph = maxSamplesPerGraph;
+        }
+
+        public int getGraphsPerRow()
+        {
+            return _graphsPerRow;
+        }
+
+        public void setGraphsPerRow(int graphsPerRow)
+        {
+            _graphsPerRow = graphsPerRow;
+        }
+
+        public void setPrintView(boolean printView)
+        {
+            _printView = printView;
+        }
+
+        public void setContext(ViewContext context)
+        {
+            _context = context;
         }
     }
 
@@ -728,12 +770,12 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermissionClass(ReadPermission.class)
     @ContextualRoles(RunDataSetContextualRoles.class)
-    public class DetailsAction extends SimpleViewAction<RenderAssayForm>
+    public class DetailsAction extends SimpleViewAction<RenderAssayBean>
     {
         private int _runRowId;
         private ExpProtocol _protocol;
 
-        public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
+        public ModelAndView getView(RenderAssayBean form, BindException errors) throws Exception
         {
             _runRowId = form.getRowId();
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
@@ -775,8 +817,10 @@ public class NabAssayController extends SpringActionController
             _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
-            HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/view/runDetails.jsp",
-                    new RenderAssayBean(getViewContext(), assay, form.getFitTypeEnum(), form.isNewRun(), isPrint()));
+            form.setContext(getViewContext());
+            form.setAssay(assay);
+
+            HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/view/runDetails.jsp", form);
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _runRowId), view);
 

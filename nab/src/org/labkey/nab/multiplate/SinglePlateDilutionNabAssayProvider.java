@@ -15,20 +15,44 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.RunListDetailsQueryView;
+import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.query.NabProtocolSchema;
+import org.springframework.validation.BindException;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -104,5 +128,80 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, DomainProperty[] sampleProperties, PlateTemplate template)
     {
         return new SinglePlateDilutionSamplePropertyHelper(c, protocol, sampleProperties, template);
+    }
+
+    @Override
+    public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
+    {
+        return new NabProtocolSchema(user, container, protocol, targetStudy)
+        {
+            Map<String, Object> _extraParams = new HashMap<String, Object>();
+
+            @Override
+            protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
+            {
+                NabRunListQueryView queryView = new NabRunListQueryView(this, settings);
+                queryView.setExtraDetailsUrlParams(getDetailUrlParams());
+
+                return queryView;
+            }
+
+            @Override
+            protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
+            {
+                NabResultsQueryView queryView = new NabResultsQueryView(getProtocol(), context, settings);
+                queryView.setExtraDetailsUrlParams(getDetailUrlParams());
+
+                return queryView;
+            }
+
+            private Map<String, Object> getDetailUrlParams()
+            {
+                if (_extraParams.isEmpty())
+                {
+                    _extraParams.put("maxSamplesPerGraph", 20);
+                    _extraParams.put("graphWidth", 550);
+                    _extraParams.put("graphHeight", 600);
+                    _extraParams.put("graphsPerRow", 1);
+                }
+                return _extraParams;
+            }
+        };
+    }
+
+    private static class HighThroughputRunsQueryView extends RunListQueryView
+    {
+        public HighThroughputRunsQueryView(AssayProtocolSchema schema, QuerySettings settings)
+        {
+            super(schema, settings);//, NabAssayController.DetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
+        }
+
+        @Override
+        public DataView createDataView()
+        {
+            DataView view = super.createDataView();
+            DataRegion rgn = view.getDataRegion();
+            rgn.addDisplayColumn(0, new SimpleDisplayColumn()
+            {
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    Object runId = ctx.getRow().get(ExpRunTable.Column.RowId.name());
+                    if (runId != null)
+                    {
+                        ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).
+                                addParameter("rowId", "" + runId).
+                                addParameter("maxSamplesPerGraph", 20).
+                                addParameter("graphWidth", 550).
+                                addParameter("graphHeight", 600).
+                                addParameter("graphsPerRow", 1);
+
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put("title", "View run details");
+                        out.write(PageFlowUtil.textLink("run details", url, null, null, map));
+                    }
+                }
+            });
+            return view;
+        }
     }
 }

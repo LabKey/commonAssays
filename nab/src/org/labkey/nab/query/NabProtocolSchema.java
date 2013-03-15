@@ -111,6 +111,8 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
     public static class NabResultsQueryView extends ResultsQueryView
     {
+        private Map<String, Object> _extraDetailsUrlParams = new HashMap<String, Object>();
+
         public NabResultsQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
         {
             super(protocol, context, settings);
@@ -184,6 +186,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
                     if (runId != null)
                     {
                         ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
+                        if (!_extraDetailsUrlParams.isEmpty())
+                            url.addParameters(_extraDetailsUrlParams);
+
                         Map<String, String> title = new HashMap<String, String>();
                         title.put("title", "View run details");
                         out.write(PageFlowUtil.textLink("run details", url, "", "", title));
@@ -200,6 +205,11 @@ public class NabProtocolSchema extends AssayProtocolSchema
                 }
             });
             return view;
+        }
+
+        public void setExtraDetailsUrlParams(Map<String, Object> extraDetailsUrlParams)
+        {
+            _extraDetailsUrlParams = extraDetailsUrlParams;
         }
     }
 

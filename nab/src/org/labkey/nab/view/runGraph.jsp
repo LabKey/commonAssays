@@ -31,13 +31,13 @@
     ActionURL graphAction = new ActionURL(NabAssayController.GraphAction.class, context.getContainer());
     graphAction.addParameter("rowId", bean.getRunId());
     if (bean.getFitType() != null)
-        graphAction.addParameter("fitType", bean.getFitType().name());
-    int maxSamplesPerGraph = 8;
+        graphAction.addParameter("fitType", bean.getFitType());
+    int maxSamplesPerGraph = bean.getMaxSamplesPerGraph();
     int sampleCount = bean.getSampleResults().size();
     if (sampleCount > maxSamplesPerGraph)
     {
-        graphAction.addParameter("width", 275);
-        graphAction.addParameter("height", 300);
+        graphAction.addParameter("width", bean.getGraphWidth());
+        graphAction.addParameter("height", bean.getGraphHeight());
     }
     int graphCount = 0;
     for (int firstSample = 0; firstSample < sampleCount; firstSample += maxSamplesPerGraph)
@@ -52,7 +52,7 @@
     <img src="<%= graphAction.getLocalURIString() %>" alt="Neutralization Graph">
 </a>
 <%
-        if (++graphCount % 2 == 0)
+        if (++graphCount % bean.getGraphsPerRow() == 0)
             out.write("<br>");
     }
 %>
