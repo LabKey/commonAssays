@@ -847,8 +847,8 @@ public class FlowManager
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         //TODO: multiple aggregates
         Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
-        if (result != null)
-            return ((Long)result.getValue()).intValue();
+        if (result != null && result.getValue() instanceof Number)
+            return ((Number)result.getValue()).intValue();
 
         return 0;
     }
@@ -866,8 +866,8 @@ public class FlowManager
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         //TODO: multiple aggregates
         Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
-        if (result != null)
-            return ((Long)result.getValue()).intValue();
+        if (result != null && result.getValue() instanceof Number)
+            return ((Number)result.getValue()).intValue();
 
         return 0;
     }
@@ -884,8 +884,8 @@ public class FlowManager
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         Aggregate.Result result = agg.get("RowId").get(0);
-        if (result != null)
-            return ((Long)result.getValue()).intValue();
+        if (result != null && result.getValue() instanceof Number)
+            return ((Number)result.getValue()).intValue();
 
         return 0;
     }
