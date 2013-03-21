@@ -87,7 +87,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
 
-    public static final int MINIMUM_TITRATION_COUNT = 5;
+    public static final int MINIMUM_TITRATION_SUMMARY_COUNT = 5;
+    public static final int MINIMUM_TITRATION_RAW_COUNT = 10;
 
     @Override
     public DataType getDataType()

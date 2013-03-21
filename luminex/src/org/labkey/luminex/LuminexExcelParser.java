@@ -116,7 +116,8 @@ public class LuminexExcelParser
                         row++;
                     }
 
-                    Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
+                    Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<Integer>();
+                    Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<Integer>();
                     Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<Titration>();
 
                     if (row <= sheet.getLastRowNum())
@@ -128,8 +129,17 @@ public class LuminexExcelParser
 
                             if (dataRow.getDescription() != null)
                             {
-                                Integer count = potentialTitrationCounts.get(dataRow.getDescription());
-                                potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
+                                // track the number of rows per sample for summary and raw separately
+                                if (dataRow.isSummary())
+                                {
+                                    Integer count = potentialTitrationSummaryCounts.get(dataRow.getDescription());
+                                    potentialTitrationSummaryCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                }
+                                else
+                                {
+                                    Integer count = potentialTitrationRawCounts.get(dataRow.getDescription());
+                                    potentialTitrationRawCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                }
 
                                 if (!potentialTitrations.containsKey(dataRow.getDescription()))
                                 {
@@ -162,11 +172,12 @@ public class LuminexExcelParser
                     }
 
                     // Check if we've accumulated enough instances to consider it to be a titration
-                    for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())
+                    for (String desc : potentialTitrations.keySet())
                     {
-                        if (entry.getValue().intValue() >= LuminexDataHandler.MINIMUM_TITRATION_COUNT)
+                        if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT) ||
+                            (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT))
                         {
-                            _titrations.put(entry.getKey(), potentialTitrations.get(entry.getKey()));
+                            _titrations.put(desc, potentialTitrations.get(desc));
                         }
                     }
                 }
