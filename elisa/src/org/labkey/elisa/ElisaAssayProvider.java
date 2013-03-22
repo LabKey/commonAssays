@@ -19,11 +19,8 @@ package org.labkey.elisa;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -32,11 +29,11 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.gwt.client.DefaultValueType;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.qc.PlateBasedDataExchangeHandler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -46,7 +43,6 @@ import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -64,7 +60,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.visualization.GenericChartReport;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
-import org.labkey.elisa.query.ElisaResultsTable;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
@@ -105,7 +100,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElisaAssayProvider()
     {
-        super("ElisaAssayProtocol", "ElisaAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElisaDataHandler.NAMESPACE));
+        super("ElisaAssayProtocol", "ElisaAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElisaDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElisaModule.class));
     }
 
     @NotNull

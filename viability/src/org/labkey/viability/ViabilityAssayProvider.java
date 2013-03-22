@@ -28,6 +28,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryView;
@@ -37,10 +38,8 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
-import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.api.gwt.client.DefaultValueType;
@@ -80,7 +79,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", (AssayDataType) ExperimentService.get().getDataType(GuavaDataHandler.NAMESPACE));
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", (AssayDataType) ExperimentService.get().getDataType(GuavaDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ViabilityModule.NAME));
     }
 
     /** Relative from Results table. */

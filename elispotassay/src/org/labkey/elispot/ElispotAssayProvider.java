@@ -29,16 +29,12 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.assay.plate.PlateReaderService;
-import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
@@ -46,7 +42,6 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.study.assay.plate.ExcelPlateReader;
 import org.labkey.api.study.assay.plate.TextPlateReader;
-import org.labkey.elispot.query.ElispotRunDataTable;
 
 import java.util.*;
 
@@ -81,7 +76,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElispotAssayProvider()
     {
-        super("ElispotAssayProtocol", "ElispotAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
+        super("ElispotAssayProtocol", "ElispotAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElispotModule.class));
     }
 
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)

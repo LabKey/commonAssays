@@ -19,9 +19,6 @@ package org.labkey.microarray.assay;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.ProtocolParameter;
@@ -32,17 +29,15 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.study.actions.AssayRunDetailsAction;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayResultTable;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
@@ -50,14 +45,11 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.study.assay.ThawListResolverType;
-import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.DataView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
@@ -73,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -94,7 +85,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public MicroarrayAssayProvider()
     {
-        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE);
+        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE, ModuleLoader.getInstance().getModule(MicroarrayModule.class));
     }
 
     @NotNull

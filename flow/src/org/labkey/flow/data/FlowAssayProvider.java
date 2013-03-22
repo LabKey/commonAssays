@@ -34,6 +34,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.gwt.client.DefaultValueType;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.qc.DataExchangeHandler;
@@ -56,6 +57,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunsForm;
 import org.labkey.flow.script.FlowPipelineProvider;
@@ -84,7 +86,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
         // register LSID handlers in the same mannaer the AbstractAssayProvider does.
         // FlowAssayProvider.getPriority() will find the 'Flow' protocol in the container.
         //super(FlowProtocol.getProtocolLSIDPrefix(), FlowRun.getRunLSIDPrefix(), null);
-        super(null, null, null);
+        super(null, null, null, ModuleLoader.getInstance().getModule(FlowModule.NAME));
     }
 
     private static FieldKey removeParent(FieldKey fieldKey, String root)

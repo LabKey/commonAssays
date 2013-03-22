@@ -38,6 +38,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
@@ -87,7 +88,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public LuminexAssayProvider()
     {
-        super("LuminexAssayProtocol", "LuminexAssayRun", (AssayDataType) ExperimentService.get().getDataType(LuminexDataHandler.NAMESPACE));
+        super("LuminexAssayProtocol", "LuminexAssayRun", (AssayDataType) ExperimentService.get().getDataType(LuminexDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(LuminexModule.class));
         setMaxFileInputs(10);
     }
 
