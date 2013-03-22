@@ -263,25 +263,40 @@ public class WellExclusionTable extends AbstractExclusionTable
             @Override
             public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
             {
-                List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, extraScriptContext);
-                rerunTransformScripts();
-                return result;
+                // Only allow one thread to be running a Luminex transform script and importing its results at a time
+                // See issue 17424
+                synchronized (LuminexRunCreator.LOCK_OBJECT)
+                {
+                    List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, extraScriptContext);
+                    rerunTransformScripts();
+                    return result;
+                }
             }
 
             @Override
             public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
             {
-                List<Map<String, Object>> result = super.deleteRows(user, container, keys, extraScriptContext);
-                rerunTransformScripts();
-                return result;
+                // Only allow one thread to be running a Luminex transform script and importing its results at a time
+                // See issue 17424
+                synchronized (LuminexRunCreator.LOCK_OBJECT)
+                {
+                    List<Map<String, Object>> result = super.deleteRows(user, container, keys, extraScriptContext);
+                    rerunTransformScripts();
+                    return result;
+                }
             }
 
             @Override
             public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
             {
-                List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
-                rerunTransformScripts();
-                return result;
+                // Only allow one thread to be running a Luminex transform script and importing its results at a time
+                // See issue 17424
+                synchronized (LuminexRunCreator.LOCK_OBJECT)
+                {
+                    List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
+                    rerunTransformScripts();
+                    return result;
+                }
             }
 
             private void rerunTransformScripts() throws QueryUpdateServiceException
