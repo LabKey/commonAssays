@@ -80,7 +80,7 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
             sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
             sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
             sql.add(_userSchema.getProtocol().getRowId());
-            return new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class));
+            _cutoffValues = new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class));
         }
         return _cutoffValues;
     }

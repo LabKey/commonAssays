@@ -15,7 +15,6 @@
  */
 package org.labkey.nab.query;
 
-import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
