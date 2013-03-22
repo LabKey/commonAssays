@@ -341,7 +341,28 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                         getJob().getBaseName(),
                         getJob().getGZPreference());
 
-                if (!usesIndex())
+                // Replacements that need to be made in the pepXML file so that we can resolve other files
+                // during the import process
+                Map<String, String> replacements = new HashMap<String, String>();
+                if (usesIndex())
+                {
+                    assert sequenceFiles.size() == 1;
+                    // We want the pepXML file to point at the FASTA file, not at the indexed copy
+                    String indexPath = sequenceFiles.get(0).getAbsolutePath();
+                    String fastaPath = getJob().getSequenceFiles()[0].getAbsolutePath();
+                    replacements.put(indexPath, fastaPath);
+                    getJob().info("Replacing index path (" + indexPath + ") with FASTA path (" + fastaPath + ")");
+                }
+
+                if (useGUIDFilename)
+                {
+                    // The GUID name is only used while running the search, so make sure that the pepXML
+                    // points at the real file name so that we can resolve its spectra later
+                    replacements.put(guidMzXMLFile.getName(), localMzXML.getName());
+                    getJob().info("Replacing GUID mzXML name (" + guidMzXMLFile.getName() + ") with real mzXML name (" + localMzXML.getName() + ")");
+                }
+
+                if (replacements.isEmpty())
                 {
                     if (!pepXmlFile.renameTo(fileWorkPepXMLRaw))
                     {
@@ -350,7 +371,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 }
                 else
                 {
-                    rewritePepXML(fileWorkPepXMLRaw, pepXmlFile, sequenceFiles);
+                    rewritePepXML(fileWorkPepXMLRaw, pepXmlFile, replacements);
                 }
                 // All tools have completed successfully, we won't need to copy the log file separately
                 copySequestLogFile = false;
@@ -400,15 +421,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
      * Rewrite the pepXML file so that it points to the FASTA file instead of the index file because the TPP and
      * the MS2 loading code don't know how to parse the index files. 
      */
-    private void rewritePepXML(File fileWorkPepXMLRaw, File pepXmlFile, List<File> sequenceFiles) throws PipelineJobException
+    private void rewritePepXML(File fileWorkPepXMLRaw, File pepXmlFile, Map<String, String> substitutions) throws PipelineJobException
     {
-        assert sequenceFiles.size() == 1;
-
-        String indexPath = sequenceFiles.get(0).getAbsolutePath();
-        String fastaPath = getJob().getSequenceFiles()[0].getAbsolutePath();
-
-        getJob().info("Replacing index path (" + indexPath + ") with FASTA path (" + fastaPath + ")");
-
         InputStream fIn = null;
         BufferedReader reader = null;
         OutputStream fOut = null;
@@ -423,7 +437,11 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             String line;
             while ((line = reader.readLine()) != null)
             {
-                line = line.replace(indexPath, fastaPath);
+                // Do all of the replacements
+                for (Map.Entry<String, String> entry : substitutions.entrySet())
+                {
+                    line = line.replace(entry.getKey(), entry.getValue());
+                }
                 writer.write(line);
                 writer.newLine();
             }
@@ -434,10 +452,10 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         }
         finally
         {
-            if (reader != null) { try { reader.close(); } catch (IOException e) {} }
-            if (writer != null) { try { writer.close(); } catch (IOException e) {} }
-            if (fOut != null) { try { fOut.close(); } catch (IOException e) {} }
-            if (fIn != null) { try { fIn.close(); } catch (IOException e) {} }
+            if (reader != null) { try { reader.close(); } catch (IOException ignored) {} }
+            if (writer != null) { try { writer.close(); } catch (IOException ignored) {} }
+            if (fOut != null) { try { fOut.close(); } catch (IOException ignored) {} }
+            if (fIn != null) { try { fIn.close(); } catch (IOException ignored) {} }
         }
 
         if (!pepXmlFile.delete())
