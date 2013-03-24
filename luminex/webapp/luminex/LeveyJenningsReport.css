@@ -11,22 +11,22 @@
     white-space:nowrap;
 }
 
-.ec504plTrendPlot #resultImage {
+.ec504plTrendPlot img {
     position:relative;
     top:0;
 }
 
-.ec505plTrendPlot #resultImage {
+.ec505plTrendPlot img {
     position:relative;
     top:-300px;
 }
 
-.aucTrendPlot #resultImage {
+.aucTrendPlot img {
     position:relative;
     top:-600px;
 }
 
-.mfiTrendPlot #resultImage {
+.mfiTrendPlot img {
     position:relative;
     top:-900px;
 }
