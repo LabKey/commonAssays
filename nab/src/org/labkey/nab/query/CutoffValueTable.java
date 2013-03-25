@@ -34,6 +34,7 @@ import org.labkey.nab.NabManager;
 public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
 {
     private static final FieldKey CONTAINER_FIELD_KEY = FieldKey.fromParts("Container");
+    private static final FieldKey PROTOCOL_FIELD_KEY = FieldKey.fromParts("ProtocolId");
 
     public CutoffValueTable(NabProtocolSchema schema)
     {
@@ -71,7 +72,7 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         protocolSQL.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "s");
         protocolSQL.append(" WHERE ProtocolId = ?)");
         protocolSQL.add(_userSchema.getProtocol().getRowId());
-        addCondition(protocolSQL, FieldKey.fromParts("ProtocolID"));
+        addCondition(protocolSQL, FieldKey.fromParts(PROTOCOL_FIELD_KEY));
     }
 
     private SQLFragment getSelectedCurveFitIC(boolean oorIndicator)
@@ -129,11 +130,12 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         }
     }
 
-    public void removeContainerFilter()
+    public void removeContainerAndProtocolFilters()
     {
         // When CutoffValueTable is used with NabSpecimenTable already we don't want the extra filter;
         // Need to clear explicitly because FilteredTable contructor calls applyContainerFilter
         clearConditions(CONTAINER_FIELD_KEY);
+        clearConditions(PROTOCOL_FIELD_KEY);
         _dontNeedFilterContainer = true;
     }
 

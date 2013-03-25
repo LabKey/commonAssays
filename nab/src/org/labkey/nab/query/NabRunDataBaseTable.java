@@ -18,6 +18,7 @@ package org.labkey.nab.query;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -120,9 +121,6 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
     protected void addPropertyColumns(final NabProtocolSchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
     {
-        final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
-        cutoffValueTable.removeContainerFilter();
-
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
@@ -245,11 +243,14 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             for (Double value : cutoffValuess)
             {
                 final Integer intCutoff = (int)Math.floor(value);
-                ColumnInfo cutoffColumn = makeCutoffValueColumn(intCutoff, cutoffValueTable);
+                final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
+                cutoffValueTable.removeContainerAndProtocolFilters();
+                cutoffValueTable.addCondition(new SimpleFilter(FieldKey.fromString("Cutoff"), intCutoff));
 
+                ColumnInfo cutoffColumn = wrapColumn("Cutoff" + intCutoff, _rootTable.getColumn("RowId"));
                 cutoffColumn.setKeyField(false);
                 cutoffColumn.setIsUnselectable(true);
-                LookupForeignKey lfk = new LookupForeignKey()
+                LookupForeignKey lfk = new LookupForeignKey("NabSpecimenId")
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
@@ -327,16 +328,6 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         }
 
         return fieldKey;
-    }
-
-    private ColumnInfo makeCutoffValueColumn(Integer cutoffValue, CutoffValueTable cutoffValueTable)
-    {
-        SQLFragment sql = new SQLFragment("(SELECT co.RowId FROM ");
-        sql.append(cutoffValueTable, "co");
-        sql.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".RowId = co.NAbSpecimenId");
-        sql.append("   AND co.Cutoff = " + cutoffValue + ")");
-        ExprColumn column = new ExprColumn(this, "Cutoff" + cutoffValue, sql, JdbcType.INTEGER);
-        return column;
     }
 
     protected Set<String> getHiddenColumns(ExpProtocol protocol)
