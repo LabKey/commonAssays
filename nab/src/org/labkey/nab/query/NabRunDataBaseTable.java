@@ -137,9 +137,6 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         // get all the properties from this plated-based protocol:
         PropertyDescriptor[] pds = getExistingDataProperties(protocol);
 
-        // add object ID to this tableinfo and set it as a key field:
-        ColumnInfo objectIdColumn = addWrapColumn(_rootTable.getColumn("ObjectId"));
-
         if (NabManager.useNewNab)
         {
             ColumnInfo objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
@@ -152,6 +149,8 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         }
         else
         {
+            // add object ID to this tableinfo and set it as a key field:
+            ColumnInfo objectIdColumn = addWrapColumn(_rootTable.getColumn("ObjectId"));
             objectIdColumn.setKeyField(true);
         }
 
@@ -212,6 +211,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         if (NabManager.useNewNab)
         {
             ColumnInfo specimenColumn = wrapColumn(getInputMaterialPropertyName(), _rootTable.getColumn("SpecimenLsid"));
+            specimenColumn.setLabel("Specimen");
             specimenColumn.setKeyField(false);
             specimenColumn.setIsUnselectable(true);
             LookupForeignKey lfkSpecimen = new LookupForeignKey("LSID")
@@ -246,8 +246,16 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                 final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
                 cutoffValueTable.removeContainerAndProtocolFilters();
                 cutoffValueTable.addCondition(new SimpleFilter(FieldKey.fromString("Cutoff"), intCutoff));
+                ColumnInfo nabSpecimenColumn = cutoffValueTable.getColumn("NabSpecimenId");
+                nabSpecimenColumn.setIsUnselectable(true);
+                nabSpecimenColumn.setHidden(true);
+
+                // Update column labels like IC_4pl to Curve ICxx 4pl
+                for (ColumnInfo column : cutoffValueTable.getColumns())
+                    updateLabelWithCutoff(column, intCutoff);
 
                 ColumnInfo cutoffColumn = wrapColumn("Cutoff" + intCutoff, _rootTable.getColumn("RowId"));
+                cutoffColumn.setLabel("Cutoff " + intCutoff);
                 cutoffColumn.setKeyField(false);
                 cutoffColumn.setIsUnselectable(true);
                 LookupForeignKey lfk = new LookupForeignKey("NabSpecimenId")
@@ -261,7 +269,6 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
                     {
                         ColumnInfo result = super.createLookupColumn(parent, displayField);
-                        updateLabelWithCutoff(result, intCutoff);
                         return result;
                     }
                 };
@@ -272,8 +279,16 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             for (ColumnInfo columnInfo : _rootTable.getColumns())
             {
                 String columnName = columnInfo.getColumnName().toLowerCase();
-                if (columnName.contains("auc_") || columnName.equals("fiterror") || columnName.equals("wellgroupname"))
+                if (columnName.contains("auc_") || columnName.equals("fiterror"))
+                {
                     addWrapColumn(columnInfo);
+                }
+                else if (columnName.equals("wellgroupname"))
+                {
+                    ColumnInfo wellgroupColumn = wrapColumn(columnInfo);
+                    wellgroupColumn.setLabel("Wellgroup Name");
+                    addColumn(wellgroupColumn);
+                }
             }
 
         }
