@@ -330,7 +330,10 @@ public abstract class NabAssayRun extends Luc5Assay
             }
             else
             {
-                PropertyDescriptor[] propertyDescriptors = NabProviderSchema.getExistingDataProperties(_protocol);
+                Set<Double> cutoffValues = new HashSet<Double>();
+                for (Integer value : NabDataHandler.getCutoffFormats(_protocol, _run).keySet())
+                    cutoffValues.add(value.doubleValue());
+                List<PropertyDescriptor> propertyDescriptors = NabProviderSchema.getExistingDataProperties(_protocol, cutoffValues);
                 NabManager.get().getDataPropertiesFromNabRunData(nabRunDataTable, dataRowLsid, _run.getContainer(), propertyDescriptors, dataProperties);
             }
             samplePropertyMap.put(getSampleKey(material), new NabResultProperties(sampleProperties,  dataProperties));
@@ -458,6 +461,15 @@ public abstract class NabAssayRun extends Luc5Assay
                 if (entry.getKey().getName().equals(propertyName))
                     return entry;
             }
+            return null;
+        }
+
+        public Object getDataProperty(String name)
+        {
+            // TODO: this is a shim because _dataProperties maps PropertyDescriptor; when old Nab is ripped, we'll map the name instead
+            Map.Entry<PropertyDescriptor, Object> entry = findPropertyDescriptor(_dataProperties, name);
+            if (null != entry)
+                return entry.getValue();
             return null;
         }
     }

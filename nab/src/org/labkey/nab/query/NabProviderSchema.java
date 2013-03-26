@@ -32,6 +32,8 @@ import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.NabManager;
 import org.labkey.nab.SinglePlateNabDataHandler;
 import org.labkey.nab.SampleInfo;
 
@@ -141,13 +143,42 @@ public class NabProviderSchema extends AssayProviderSchema
         return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), protocol, getTargetStudy()), protocol);
     }
 
-    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
+    private static final String[] _fixedRunDataProps = {NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, NabDataHandler.FIT_ERROR_PROPERTY, NabDataHandler.WELLGROUP_NAME_PROPERTY};
+    private static final String[] _curveFitSuffixes = {"", NabDataHandler.PL4_SUFFIX, NabDataHandler.PL5_SUFFIX, NabDataHandler.POLY_SUFFIX};
+    private static final String[] _aucPrefixes = {NabDataHandler.AUC_PREFIX, NabDataHandler.pAUC_PREFIX};
+    private static final String[] _oorSuffixes = {"", NabDataHandler.OOR_SUFFIX};
+    public static List<PropertyDescriptor> getExistingDataProperties(ExpProtocol protocol, Set<Double> cutoffValues)
     {
-        String propPrefix = new Lsid(SinglePlateNabDataHandler.NAB_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
-        SimpleFilter propertyFilter = new SimpleFilter();
-        propertyFilter.addCondition(FieldKey.fromParts("PropertyURI"), propPrefix, CompareType.STARTS_WITH);
-        propertyFilter.addCondition(FieldKey.fromParts("Project"), protocol.getContainer().getProject());
-        return new TableSelector(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
-                propertyFilter, null).getArray(PropertyDescriptor.class);
+        if (!NabManager.useNewNab)
+        {
+            String propPrefix = new Lsid(SinglePlateNabDataHandler.NAB_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
+            SimpleFilter propertyFilter = new SimpleFilter();
+            propertyFilter.addCondition(FieldKey.fromParts("PropertyURI"), propPrefix, CompareType.STARTS_WITH);
+            propertyFilter.addCondition(FieldKey.fromParts("Project"), protocol.getContainer().getProject());
+            return new TableSelector(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
+                    propertyFilter, null).getArrayList(PropertyDescriptor.class);
+        }
+        else
+        {
+            List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
+            Map<Integer, String> cutoffFormats = new HashMap<Integer, String>();
+            Container container = protocol.getContainer();
+            for (String fixedProp : _fixedRunDataProps)
+                propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, fixedProp, cutoffFormats));
+
+            for (String prefix : _aucPrefixes)
+                for (String suffix : _curveFitSuffixes)
+                    propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, prefix + suffix, cutoffFormats));
+
+            for (Double cutoffValue : cutoffValues)
+                for (String oorSuffix : _oorSuffixes)
+                {
+                    propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, NabDataHandler.POINT_IC_PREFIX + cutoffValue.intValue() + oorSuffix, cutoffFormats));
+                    for (String suffix : _curveFitSuffixes)
+                        propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, NabDataHandler.CURVE_IC_PREFIX + cutoffValue.intValue() + suffix + oorSuffix, cutoffFormats));
+                }
+
+            return propertyDescriptors;
+        }
     }
 }

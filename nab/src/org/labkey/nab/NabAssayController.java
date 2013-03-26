@@ -496,7 +496,9 @@ public class NabAssayController extends SpringActionController
             try
             {
                 Lsid fitErrorURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), NabDataHandler.FIT_ERROR_PROPERTY);
-                PropertyDescriptor fitErrorPd = OntologyManager.getPropertyDescriptor(fitErrorURI.toString(), container);
+                PropertyDescriptor fitErrorPd =
+                        (!NabManager.useNewNab) ? OntologyManager.getPropertyDescriptor(fitErrorURI.toString(), container) :
+                        NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), NabDataHandler.FIT_ERROR_PROPERTY, new HashMap<Integer, String>());
                 if (null != fitErrorPd)
                     return new Pair<PropertyDescriptor, Object>(fitErrorPd, result.getDilutionSummary().getFitError());
             }
@@ -509,20 +511,38 @@ public class NabAssayController extends SpringActionController
         public Pair<PropertyDescriptor, Object> getAuc(NabAssayRun.SampleResult result, Container container)
         {
             String aucPropertyName = getFitType() == null ? NabDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, getFitTypeEnum());
-            Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
-            PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
-            if (null != aucPD)
-                return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
+            if (!NabManager.useNewNab)
+            {
+                Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
+                PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
+                if (null != aucPD)
+                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
+            }
+            else
+            {
+                PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
+                if (null != aucPD)
+                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
+            }
             return null;
         }
 
         public Pair<PropertyDescriptor, Object> getPositiveAuc(NabAssayRun.SampleResult result, Container container)
         {
             String aucPropertyName = getFitType() == null ? NabDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, getFitTypeEnum());
-            Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
-            PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
-            if (null != aucPD)
-                return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
+            if (!NabManager.useNewNab)
+            {
+                Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
+                PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
+                if (null != aucPD)
+                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
+            }
+            else
+            {
+                PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
+                if (null != aucPD)
+                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
+            }
             return null;
         }
 

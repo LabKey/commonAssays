@@ -439,13 +439,13 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         importRows(data, run, protocol, parser.getResults());
     }
 
+    public static final String POLY_SUFFIX = "_poly";
+    public static final String OOR_SUFFIX = "OORIndicator";
+    public static final String PL4_SUFFIX = "_4pl";
+    public static final String PL5_SUFFIX = "_5pl";
+
     protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData) throws ExperimentException
     {
-        final String polySuffix = "_poly";
-        final String oorSuffix = "OORIndicator";
-        final String pl4Suffix = "_4pl";
-        final String pl5Suffix = "_5pl";
-
         try
         {
             Container container = run.getContainer();
@@ -499,7 +499,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 else
                 {
                     // Put property descriptors in the Ontology Manager, but not the properties themselves
-                    List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
+/*                    List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
                     for (Map.Entry<String, Object> prop : group.entrySet())
                     {
                         if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
@@ -509,7 +509,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                         if (null != objProp)
                             propertyDescriptors.add(objProp);
                     }
-                    OntologyManager.ensurePropertyDescriptors(propertyDescriptors);
+                    OntologyManager.ensurePropertyDescriptors(propertyDescriptors);  */
                 }
 
 
@@ -523,12 +523,12 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 nabSpecimenEntries.put("RunId", run.getRowId());
                 nabSpecimenEntries.put("SpecimenLsid", group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY));
                 nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
-                nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + polySuffix));
-                nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + polySuffix));
-                nabSpecimenEntries.put("Auc_4pl", group.get(AUC_PREFIX + pl4Suffix));
-                nabSpecimenEntries.put("PositiveAuc_4pl", group.get(pAUC_PREFIX + pl4Suffix));
-                nabSpecimenEntries.put("Auc_5pl", group.get(AUC_PREFIX + pl5Suffix));
-                nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + pl5Suffix));
+                nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + POLY_SUFFIX));
+                nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + POLY_SUFFIX));
+                nabSpecimenEntries.put("Auc_4pl", group.get(AUC_PREFIX + PL4_SUFFIX));
+                nabSpecimenEntries.put("PositiveAuc_4pl", group.get(pAUC_PREFIX + PL4_SUFFIX));
+                nabSpecimenEntries.put("Auc_5pl", group.get(AUC_PREFIX + PL5_SUFFIX));
+                nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + PL5_SUFFIX));
                 int nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);
 
                 for (Integer cutoffValue : cutoffFormats.keySet())
@@ -540,19 +540,19 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                     String cutoffStr = cutoffValue.toString();
                     String icKey = POINT_IC_PREFIX + cutoffStr;
                     cutoffEntries.put("Point", group.get(icKey));
-                    icKey = POINT_IC_PREFIX + cutoffStr + oorSuffix;
+                    icKey = POINT_IC_PREFIX + cutoffStr + OOR_SUFFIX;
                     cutoffEntries.put("PointOORIndicator", group.get(icKey));
-                    icKey = CURVE_IC_PREFIX + cutoffStr + polySuffix;
+                    icKey = CURVE_IC_PREFIX + cutoffStr + POLY_SUFFIX;
                     cutoffEntries.put("IC_Poly", group.get(icKey));
-                    icKey = CURVE_IC_PREFIX + cutoffStr + polySuffix + oorSuffix;
+                    icKey = CURVE_IC_PREFIX + cutoffStr + POLY_SUFFIX + OOR_SUFFIX;
                     cutoffEntries.put("IC_PolyOORIndicator", group.get(icKey));
-                    icKey = CURVE_IC_PREFIX + cutoffStr + pl4Suffix;
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL4_SUFFIX;
                     cutoffEntries.put("IC_4pl", group.get(icKey));
-                    icKey = CURVE_IC_PREFIX + cutoffStr + pl4Suffix + oorSuffix;
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL4_SUFFIX + OOR_SUFFIX;
                     cutoffEntries.put("IC_4plOORIndicator", group.get(icKey));
-                    icKey = CURVE_IC_PREFIX + cutoffStr + pl5Suffix;
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL5_SUFFIX;
                     cutoffEntries.put("IC_5pl", group.get(icKey));
-                    icKey = CURVE_IC_PREFIX + cutoffStr + pl5Suffix + oorSuffix;
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL5_SUFFIX + OOR_SUFFIX;
                     cutoffEntries.put("IC_5plOORIndicator", group.get(icKey));
                     NabManager.get().insertCutoffValueRow(null, cutoffEntries);
                 }
@@ -579,7 +579,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    protected PropertyDescriptor getPropertyDescriptor(Container container, ExpProtocol protocol, String propertyName, Map<Integer, String> cutoffFormats)
+    public static PropertyDescriptor getPropertyDescriptor(Container container, ExpProtocol protocol, String propertyName, Map<Integer, String> cutoffFormats)
     {
         if (isValidDataProperty(propertyName))
         {
@@ -592,7 +592,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    protected boolean isValidDataProperty(String propertyName)
+    public static boolean isValidDataProperty(String propertyName)
     {
         return DATA_ROW_LSID_PROPERTY.equals(propertyName) ||
                 NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(propertyName) ||
@@ -604,7 +604,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 propertyName.startsWith(POINT_IC_PREFIX);
     }
 
-    protected Pair<PropertyType, String> determinePropertyTypeAndFormat(String propertyName, Map<Integer, String> cutoffFormats)
+    public static Pair<PropertyType, String> determinePropertyTypeAndFormat(String propertyName, Map<Integer, String> cutoffFormats)
     {
         PropertyType type = PropertyType.STRING;
         String format = null;
@@ -625,6 +625,8 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
             if (cutoff != null)
             {
                 format = cutoffFormats.get(cutoff);
+                if (null == format)
+                    format = "0.000";
                 type = PropertyType.DOUBLE;
             }
         }
@@ -634,6 +636,8 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
             if (cutoff != null)
             {
                 format = cutoffFormats.get(cutoff);
+                if (null == format)
+                    format = "0.000";
                 type = PropertyType.DOUBLE;
             }
         }
@@ -657,7 +661,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return prop;
     }
 
-    protected Map<Integer, String> getCutoffFormats(ExpProtocol protocol, ExpRun run)
+    public static Map<Integer, String> getCutoffFormats(ExpProtocol protocol, ExpRun run)
     {
         NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
 
@@ -732,7 +736,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return prefix + "_" + type.getColSuffix();
     }
 
-    public Integer getCutoffFromPropertyName(String propertyName)
+    public static Integer getCutoffFromPropertyName(String propertyName)
     {
         if (propertyName.startsWith(CURVE_IC_PREFIX) && !propertyName.endsWith(OORDisplayColumnFactory.OORINDICATOR_COLUMN_SUFFIX))
         {

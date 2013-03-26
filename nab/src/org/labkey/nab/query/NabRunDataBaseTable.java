@@ -65,7 +65,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
     public abstract String getDataRowLsidPrefix();
 
     private NabProtocolSchema _schema;
-    private NAbSpecimenTable _nabSpecimenTable;
+    protected NAbSpecimenTable _nabSpecimenTable;
     private ExpProtocol _protocol;
 
     public NabRunDataBaseTable(final NabProtocolSchema schema, final ExpProtocol protocol)

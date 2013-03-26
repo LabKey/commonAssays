@@ -280,7 +280,7 @@ public class NabManager extends AbstractNabManager
     }
 
     public void getDataPropertiesFromNabRunData(NabRunDataTable nabRunDataTable, String dataRowLsid, Container container,
-                        PropertyDescriptor[] propertyDescriptors, Map<PropertyDescriptor, Object> dataProperties)
+                        List<PropertyDescriptor> propertyDescriptors, Map<PropertyDescriptor, Object> dataProperties)
     {
         // dataRowLsid is the objectUri column
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("ObjectUri"), dataRowLsid);
@@ -467,11 +467,11 @@ public class NabManager extends AbstractNabManager
             String typePrefix = name.toLowerCase().contains("positive") ?  "PositiveAuc" : "Auc";
 
             if (name.contains("4pl"))
-                pdCat.setType(typePrefix + "_4pl");
+                pdCat.setType(typePrefix + NabDataHandler.PL4_SUFFIX);
             else if (name.contains("5pl"))
-                pdCat.setType(typePrefix + "_5pl");
+                pdCat.setType(typePrefix + NabDataHandler.PL5_SUFFIX);
             else if (name.contains("poly"))
-                pdCat.setType(typePrefix + "_Poly");
+                pdCat.setType(typePrefix + NabDataHandler.POLY_SUFFIX);
             else
                 pdCat.setType(typePrefix);
         }
