@@ -275,7 +275,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
     {
         Set<String> result = super.getTableNames();
         result.add(CUTOFF_VALUE_TABLE_NAME);
-        result.add(NAB_SPECIMEN_TABLE_NAME);
         return result;
     }
 }
