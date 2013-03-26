@@ -47,6 +47,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.NabRunUploadForm;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 
@@ -203,5 +204,18 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
             });
             return view;
         }
+    }
+
+    @Override
+    public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
+    {
+        ActionURL url = super.getUploadWizardCompleteURL(form, run);
+
+        url.addParameter("maxSamplesPerGraph", 20).
+            addParameter("graphWidth", 550).
+            addParameter("graphHeight", 600).
+            addParameter("graphsPerRow", 1);
+
+        return url;
     }
 }

@@ -379,4 +379,10 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return new AssayPipelineProvider(NabModule.class,
                 new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import NAb");
     }
+
+    public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
+    {
+        return new ActionURL(NabAssayController.DetailsAction.class,
+                    run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");
+    }
 }

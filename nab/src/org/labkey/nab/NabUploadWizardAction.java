@@ -130,8 +130,8 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     @Override
     protected ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
     {
-        return new ActionURL(NabAssayController.DetailsAction.class,
-                    run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");
+        NabAssayProvider provider = form.getProvider();
+        return provider.getUploadWizardCompleteURL(form, run);
     }
 
     @Override

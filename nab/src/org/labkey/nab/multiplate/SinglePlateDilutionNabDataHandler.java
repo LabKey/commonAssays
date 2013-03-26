@@ -235,28 +235,17 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
-        for (int dataObjectId : dataObjectIds)
+        Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
+        List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
+        for (int nabSpecimenId : dataObjectIds)
+            nabSpecimenIds.add(nabSpecimenId);
+        List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
+        for (NabSpecimen nabSpecimen : nabSpecimens)
         {
-            OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
-            if (dataRow == null || dataRow.getOwnerObjectId() == null)
-                continue;
-            Map<String, ObjectProperty> properties = OntologyManager.getPropertyObjects(dataRow.getContainer(), dataRow.getObjectURI());
-            String wellgroupName = null;
-            String specimenLsid = null;
+            String wellgroupName = nabSpecimen.getWellgroupName();
+            String specimenLsid = nabSpecimen.getSpecimenLsid();
             String virusName = null;
 
-            // samples are keyed by both sampleID and virusName
-            for (ObjectProperty property : properties.values())
-            {
-                if (WELLGROUP_NAME_PROPERTY.equals(property.getName()))
-                    wellgroupName = property.getStringValue();
-                if (NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(property.getName()))
-                    specimenLsid = property.getStringValue();
-
-                if (wellgroupName != null && specimenLsid != null)
-                    break;
-            }
             if (wellgroupName == null || specimenLsid == null)
                 continue;
 
@@ -277,20 +266,17 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             if (virusName == null)
                 continue;
 
-            OntologyObject dataParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
-            if (dataParent == null)
-                continue;
-            String dataLsid = dataParent.getObjectURI();
-            NabAssayRun assay = dataToAssay.get(dataLsid);
+            int runId = nabSpecimen.getRunId();
+            NabAssayRun assay = dataToAssay.get(runId);
             if (assay == null)
             {
-                ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
-                if (dataObject == null)
+                ExpRun run = ExperimentService.get().getExpRun(runId);
+                if (null == run)
                     continue;
-                assay = getAssayResults(dataObject.getRun(), user, fit);
-                if (assay == null)
+                assay = getAssayResults(run, user, fit);
+                if (null == assay)
                     continue;
-                dataToAssay.put(dataLsid, assay);
+                dataToAssay.put(runId, assay);
             }
 
             for (DilutionSummary summary : assay.getSummaries())
@@ -304,6 +290,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 }
             }
         }
+
         return summaries;
     }
 }
