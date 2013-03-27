@@ -153,24 +153,12 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
-        if (!NabManager.useNewNab)
-        {
-            return new AssayTableMetadata(
+        return new AssayTableMetadata(
                 this,
                 protocol,
-                FieldKey.fromParts("Properties", SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+                FieldKey.fromParts(SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
-                FieldKey.fromParts("ObjectId"));
-        }
-        else
-        {
-            return new AssayTableMetadata(
-                    this,
-                    protocol,
-                    FieldKey.fromParts(SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
-                    FieldKey.fromParts("Run"),
-                    FieldKey.fromParts("RowId"));
-        }
+                FieldKey.fromParts("RowId"));
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
@@ -278,22 +266,12 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     {
         if (!(dataRowId instanceof Integer))
             return null;
-        if (!NabManager.useNewNab)
-        {
-            OntologyObject dataRow = OntologyManager.getOntologyObject((Integer) dataRowId);
-            if (dataRow == null)
-                return null;
-            OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
-            if (dataRowParent == null)
-                return null;
-            return ExperimentService.get().getExpData(dataRowParent.getObjectURI());
-        }
-        else
-        {
-            // dataRowId is NabSpecimen rowId
-            NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen((Integer)dataRowId);
+
+        // dataRowId is NabSpecimen rowId
+        NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen((Integer)dataRowId);
+        if (null != nabSpecimen)
             return ExperimentService.get().getExpData(nabSpecimen.getDataId());
-        }
+        return null;
     }
 
     public String getResourceName()

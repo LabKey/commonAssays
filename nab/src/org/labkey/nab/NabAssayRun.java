@@ -237,6 +237,7 @@ public abstract class NabAssayRun extends Luc5Assay
             List<SampleResult> sampleResults = new ArrayList<SampleResult>();
 
             NabDataHandler handler = _provider.getDataHandler();
+//            ExpData[] inputDatas = _run.getInputDatas(null, null);
             ExpData[] outputDatas = _run.getOutputDatas(handler.getDataType());
             if (outputDatas.length != 1)
                 throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputDatas.length);
@@ -319,23 +320,11 @@ public abstract class NabAssayRun extends Luc5Assay
             Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
             String wellGroupName = getWellGroupName(material);
             String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName, sampleProperties).toString();
-            if (!NabManager.useNewNab)
-            {
-                Map<String, ObjectProperty> outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
-                for (ObjectProperty prop : outputProperties.values())
-                {
-                    PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(prop.getPropertyURI(), prop.getContainer());
-                    dataProperties.put(pd, prop.value());
-                }
-            }
-            else
-            {
-                Set<Double> cutoffValues = new HashSet<Double>();
-                for (Integer value : NabDataHandler.getCutoffFormats(_protocol, _run).keySet())
-                    cutoffValues.add(value.doubleValue());
-                List<PropertyDescriptor> propertyDescriptors = NabProviderSchema.getExistingDataProperties(_protocol, cutoffValues);
-                NabManager.get().getDataPropertiesFromNabRunData(nabRunDataTable, dataRowLsid, _run.getContainer(), propertyDescriptors, dataProperties);
-            }
+            Set<Double> cutoffValues = new HashSet<Double>();
+            for (Integer value : NabDataHandler.getCutoffFormats(_protocol, _run).keySet())
+                cutoffValues.add(value.doubleValue());
+            List<PropertyDescriptor> propertyDescriptors = NabProviderSchema.getExistingDataProperties(_protocol, cutoffValues);
+            NabManager.get().getDataPropertiesFromNabRunData(nabRunDataTable, dataRowLsid, _run.getContainer(), propertyDescriptors, dataProperties);
             samplePropertyMap.put(getSampleKey(material), new NabResultProperties(sampleProperties,  dataProperties));
         }
         return samplePropertyMap;
@@ -365,35 +354,13 @@ public abstract class NabAssayRun extends Luc5Assay
 
         public Integer getObjectId()
         {
-            if (!NabManager.useNewNab)
+            if (null == _objectId)
             {
-            if (_objectId == null)
-            {
-                try
-                {
-                    _objectId = Table.executeSingleton(OntologyManager.getExpSchema(), "SELECT ObjectId FROM " +
-                            OntologyManager.getTinfoObject() + " WHERE ObjectURI = ? AND Container = ?",
-                            new Object[] {_dataRowLsid, _dataContainer.getId()}, Integer.class);
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
+                NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen(_dataRowLsid, _dataContainer);
+                if (null != nabSpecimen)
+                    _objectId = nabSpecimen.getRowId();
             }
-
             return _objectId;
-            }
-            else
-            {
-                if (null == _objectId)
-                {
-                    NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen(_dataRowLsid, _dataContainer);
-                    if (null != nabSpecimen)
-                        _objectId = nabSpecimen.getRowId();
-                }
-                return _objectId;
-            }
-
         }
 
         public DilutionSummary getDilutionSummary()

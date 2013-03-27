@@ -140,10 +140,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         {
             DataView view = super.createDataView();
             DataRegion rgn = view.getDataRegion();
-            if (!NabManager.useNewNab)
-                rgn.setRecordSelectorValueColumns("ObjectId");
-            else
-                rgn.setRecordSelectorValueColumns("RowId");
+            rgn.setRecordSelectorValueColumns("RowId");
             rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
             ButtonBar bbar = new ButtonBar(view.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
             view.getDataRegion().setButtonBar(bbar);

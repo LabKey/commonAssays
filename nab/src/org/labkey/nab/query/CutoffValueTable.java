@@ -58,15 +58,7 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
 
         ColumnInfo selectedIC = new ExprColumn(this, "IC", getSelectedCurveFitIC(false), JdbcType.DECIMAL);
         ColumnInfo selectedICOOR = new ExprColumn(this, "ICOORIndicator", getSelectedCurveFitIC(true), JdbcType.VARCHAR);
-        if (!NabManager.useNewNab)
-        {
-            addColumn(selectedIC);
-            addColumn(selectedICOOR);
-        }
-        else
-        {
-            OORDisplayColumnFactory.addOORColumns(this, selectedIC, selectedICOOR, selectedIC.getLabel(), false);
-        }
+        OORDisplayColumnFactory.addOORColumns(this, selectedIC, selectedICOOR, selectedIC.getLabel(), false);
 
         SQLFragment protocolSQL = new SQLFragment("NAbSpecimenID IN (SELECT RowId FROM ");
         protocolSQL.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "s");
@@ -92,18 +84,15 @@ public class CutoffValueTable extends FilteredTable<NabProtocolSchema>
         defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS);
         defaultICSQL.append(".NAbSpecimenID AND er.LSID = o.ObjectURI AND o.ObjectId = op.ObjectId AND er.RowId = ns.RunId)");
         defaultICSQL.append("\nWHEN 'Polynomial' THEN ");
-        if (NabManager.useNewNab)
-            defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
         defaultICSQL.append("IC_Poly");
         defaultICSQL.append(suffix);
         defaultICSQL.append("\nWHEN 'Five Parameter' THEN ");
-        if (NabManager.useNewNab)
-            defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
         defaultICSQL.append("IC_5pl");
         defaultICSQL.append(suffix);
         defaultICSQL.append("\nWHEN 'Four Parameter' THEN ");
-        if (NabManager.useNewNab)
-            defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        defaultICSQL.append(ExprColumn.STR_TABLE_ALIAS + ".");
         defaultICSQL.append("IC_4pl");
         defaultICSQL.append(suffix);
         defaultICSQL.append("\nEND\n");

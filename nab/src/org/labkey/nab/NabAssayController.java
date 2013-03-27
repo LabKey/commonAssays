@@ -497,7 +497,6 @@ public class NabAssayController extends SpringActionController
             {
                 Lsid fitErrorURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), NabDataHandler.FIT_ERROR_PROPERTY);
                 PropertyDescriptor fitErrorPd =
-                        (!NabManager.useNewNab) ? OntologyManager.getPropertyDescriptor(fitErrorURI.toString(), container) :
                         NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), NabDataHandler.FIT_ERROR_PROPERTY, new HashMap<Integer, String>());
                 if (null != fitErrorPd)
                     return new Pair<PropertyDescriptor, Object>(fitErrorPd, result.getDilutionSummary().getFitError());
@@ -511,38 +510,18 @@ public class NabAssayController extends SpringActionController
         public Pair<PropertyDescriptor, Object> getAuc(NabAssayRun.SampleResult result, Container container)
         {
             String aucPropertyName = getFitType() == null ? NabDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, getFitTypeEnum());
-            if (!NabManager.useNewNab)
-            {
-                Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
-                PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
-                if (null != aucPD)
-                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
-            }
-            else
-            {
-                PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
-                if (null != aucPD)
-                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
-            }
+            PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
+            if (null != aucPD)
+                return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
             return null;
         }
 
         public Pair<PropertyDescriptor, Object> getPositiveAuc(NabAssayRun.SampleResult result, Container container)
         {
             String aucPropertyName = getFitType() == null ? NabDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, getFitTypeEnum());
-            if (!NabManager.useNewNab)
-            {
-                Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), aucPropertyName);
-                PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), container);
-                if (null != aucPD)
-                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperties().get(aucPD));
-            }
-            else
-            {
-                PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
-                if (null != aucPD)
-                    return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
-            }
+            PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
+            if (null != aucPD)
+                return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
             return null;
         }
 
@@ -999,7 +978,7 @@ public class NabAssayController extends SpringActionController
                     rs = dataView.getResultSet();
                     Set<Integer> graphableIds = new HashSet<Integer>();
                     while (rs.next())
-                        graphableIds.add((!NabManager.useNewNab) ? rs.getInt("ObjectId") : rs.getInt("RowId"));
+                        graphableIds.add(rs.getInt("RowId"));
                     _graphableIds = new int[graphableIds.size()];
                     int i = 0;
                     for (Integer id : graphableIds)
@@ -1033,16 +1012,8 @@ public class NabAssayController extends SpringActionController
                         for (int dataObjectId : _dataObjectIds)
                             objectIds.add(new Integer(dataObjectId));
 
-                        if (!NabManager.useNewNab)
-                        {
-                            filter.addInClause("ObjectId", objectIds);
-                            view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
-                        }
-                        else
-                        {
-                            filter.addInClause(FieldKey.fromString("RowId"), objectIds);
-                            view.getDataRegion().setRecordSelectorValueColumns("RowId");
-                        }
+                        filter.addInClause(FieldKey.fromString("RowId"), objectIds);
+                        view.getDataRegion().setRecordSelectorValueColumns("RowId");
                         view.getRenderContext().setBaseFilter(filter);
                         return view;
                     }

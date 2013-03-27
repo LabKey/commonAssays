@@ -46,13 +46,10 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
         wrapAllColumns(true);
 
         // TODO - add columns for all of the different cutoff values
-        if (NabManager.useNewNab)
-        {
-            ColumnInfo selectedAUC = new ExprColumn(this, "AUC", getSelectedCurveFitAUC(false), JdbcType.DECIMAL);
-            ColumnInfo selectedPositiveAUC = new ExprColumn(this, "PositiveAUC", getSelectedCurveFitAUC(true), JdbcType.DECIMAL);
-            addColumn(selectedAUC);
-            addColumn(selectedPositiveAUC);
-        }
+        ColumnInfo selectedAUC = new ExprColumn(this, "AUC", getSelectedCurveFitAUC(false), JdbcType.DECIMAL);
+        ColumnInfo selectedPositiveAUC = new ExprColumn(this, "PositiveAUC", getSelectedCurveFitAUC(true), JdbcType.DECIMAL);
+        addColumn(selectedAUC);
+        addColumn(selectedPositiveAUC);
 
         addCondition(getRealTable().getColumn("ProtocolID"), _userSchema.getProtocol().getRowId());
     }
@@ -99,18 +96,15 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
         sql.append(" WHERE op.PropertyId = pd.PropertyId AND pd.PropertyURI LIKE '%#" + NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME + "'");
         sql.append(" AND er.LSID = o.ObjectURI AND o.ObjectId = op.ObjectId AND er.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".RunId)");
         sql.append("\nWHEN 'Polynomial' THEN ");
-        if (NabManager.useNewNab)
-            sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
         sql.append(prefix);
         sql.append("AUC_Poly");
         sql.append("\nWHEN 'Five Parameter' THEN ");
-        if (NabManager.useNewNab)
-            sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
         sql.append(prefix);
         sql.append("AUC_5pl");
         sql.append("\nWHEN 'Four Parameter' THEN ");
-        if (NabManager.useNewNab)
-            sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
+        sql.append(ExprColumn.STR_TABLE_ALIAS + ".");
         sql.append(prefix);
         sql.append("AUC_4pl");
         sql.append("\nEND\n");

@@ -339,86 +339,36 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        if (!NabManager.useNewNab)
+        Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
+        List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
+        for (int nabSpecimenId : dataObjectIds)
+            nabSpecimenIds.add(nabSpecimenId);
+        List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
+        for (NabSpecimen nabSpecimen : nabSpecimens)
         {
-            Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
-            for (int dataObjectId : dataObjectIds)
+            String wellgroupName = nabSpecimen.getWellgroupName();
+            if (null == wellgroupName)
+                continue;
+
+            int runId = nabSpecimen.getRunId();
+            NabAssayRun assay = dataToAssay.get(runId);
+            if (assay == null)
             {
-                OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
-                if (dataRow == null || dataRow.getOwnerObjectId() == null)
+                ExpRun run = ExperimentService.get().getExpRun(runId);
+                if (null == run)
                     continue;
-                Map<String, ObjectProperty> properties = OntologyManager.getPropertyObjects(dataRow.getContainer(), dataRow.getObjectURI());
-                String wellgroupName = null;
-                for (ObjectProperty property : properties.values())
-                {
-                    if (WELLGROUP_NAME_PROPERTY.equals(property.getName()))
-                    {
-                        wellgroupName = property.getStringValue();
-                        break;
-                    }
-                }
-                if (wellgroupName == null)
+                assay = getAssayResults(run, user, fit);
+                if (null == assay)
                     continue;
-
-                OntologyObject dataParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
-                if (dataParent == null)
-                    continue;
-                String dataLsid = dataParent.getObjectURI();
-                NabAssayRun assay = dataToAssay.get(dataLsid);
-                if (assay == null)
-                {
-                    ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
-                    if (dataObject == null)
-                        continue;
-                    assay = getAssayResults(dataObject.getRun(), user, fit);
-                    if (assay == null)
-                        continue;
-                    dataToAssay.put(dataLsid, assay);
-                }
-
-                for (DilutionSummary summary : assay.getSummaries())
-                {
-                    if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
-                    {
-                        summaries.put(summary, assay);
-                        break;
-                    }
-                }
+                dataToAssay.put(runId, assay);
             }
-        }
-        else
-        {
-            Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
-            List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
-            for (int nabSpecimenId : dataObjectIds)
-                nabSpecimenIds.add(nabSpecimenId);
-            List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
-            for (NabSpecimen nabSpecimen : nabSpecimens)
+
+            for (DilutionSummary summary : assay.getSummaries())
             {
-                String wellgroupName = nabSpecimen.getWellgroupName();
-                if (null == wellgroupName)
-                    continue;
-
-                int runId = nabSpecimen.getRunId();
-                NabAssayRun assay = dataToAssay.get(runId);
-                if (assay == null)
+                if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
                 {
-                    ExpRun run = ExperimentService.get().getExpRun(runId);
-                    if (null == run)
-                        continue;
-                    assay = getAssayResults(run, user, fit);
-                    if (null == assay)
-                        continue;
-                    dataToAssay.put(runId, assay);
-                }
-
-                for (DilutionSummary summary : assay.getSummaries())
-                {
-                    if (wellgroupName.equals(summary.getFirstWellGroup().getName()))
-                    {
-                        summaries.put(summary, assay);
-                        break;
-                    }
+                    summaries.put(summary, assay);
+                    break;
                 }
             }
         }
@@ -481,38 +431,6 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
                 int objectId = 0;
 
-                if (!NabManager.useNewNab)
-                {
-                    List<ObjectProperty> results = new ArrayList<ObjectProperty>();
-                    for (Map.Entry<String, Object> prop : group.entrySet())
-                    {
-                        if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
-                            continue;
-
-                        ObjectProperty objProp = getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue(), cutoffFormats);
-                        if (objProp != null)
-                            results.add(objProp);
-                    }
-                    OntologyManager.insertProperties(container, dataRowLsid, results.toArray(new ObjectProperty[results.size()]));
-                    objectId = results.size() > 0 ? results.get(0).getObjectId() : 0;
-                }
-                else
-                {
-                    // Put property descriptors in the Ontology Manager, but not the properties themselves
-/*                    List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
-                    for (Map.Entry<String, Object> prop : group.entrySet())
-                    {
-                        if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
-                            continue;
-
-                        PropertyDescriptor objProp = getPropertyDescriptor(container, protocol, prop.getKey(), cutoffFormats);
-                        if (null != objProp)
-                            propertyDescriptors.add(objProp);
-                    }
-                    OntologyManager.ensurePropertyDescriptors(propertyDescriptors);  */
-                }
-
-
                 // New code to insert into NAbSpecimen and CutoffValue tables instead of Ontology properties
                 Map<String, Object> nabSpecimenEntries = new HashMap<String, Object>();
                 nabSpecimenEntries.put(WELLGROUP_NAME_PROPERTY, groupName);
@@ -558,10 +476,6 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 }
 
             }
-        }
-        catch (ValidationException ve)
-        {
-            throw new ExperimentException(ve.getMessage(), ve);
         }
         catch (SQLException e)
         {
