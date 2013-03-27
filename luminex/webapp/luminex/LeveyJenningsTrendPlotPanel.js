@@ -86,7 +86,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             listeners: {
                 scope: this,
                 'valid': function (df) {
-                    if (df.getValue() != '' && this.endDateField.isValid() && this.endDateField.getValue() != '')
+                    if (df.getValue() != '' && this.endDateField.isValid() && this.endDateField.getRawValue() != '')
                         this.applyFilterButton.enable();
                 },
                 'invalid': function (df, msg) {
@@ -101,7 +101,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             listeners: {
                 scope: this,
                 'valid': function (df) {
-                    if (df.getValue() != '' && this.startDateField.isValid() && this.startDateField.getValue() != '')
+                    if (df.getValue() != '' && this.startDateField.isValid() && this.startDateField.getRawValue() != '')
                         this.applyFilterButton.enable();
                 },
                 'invalid': function (df, msg) {
@@ -317,7 +317,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
     applyDateFilter: function() {
         // make sure that both date fields are not null
-        if (this.startDateField.getValue() == '' || this.endDateField.getValue() == '')
+        if (this.startDateField.getRawValue() == '' || this.endDateField.getRawValue() == '')
         {
             Ext.Msg.show({
                 title:'ERROR',
@@ -338,8 +338,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            this.startDate = this.startDateField.getValue();
-            this.endDate = this.endDateField.getValue();
+            // get date values without the time zone info
+            this.startDate = this.startDateField.getRawValue();
+            this.endDate = this.endDateField.getRawValue();
             this.clearFilterButton.enable();
 
             this.setTabsToRender();
