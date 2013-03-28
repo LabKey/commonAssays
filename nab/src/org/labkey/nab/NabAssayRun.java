@@ -17,9 +17,8 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -237,11 +236,45 @@ public abstract class NabAssayRun extends Luc5Assay
             List<SampleResult> sampleResults = new ArrayList<SampleResult>();
 
             NabDataHandler handler = _provider.getDataHandler();
-//            ExpData[] inputDatas = _run.getInputDatas(null, null);
-            ExpData[] outputDatas = _run.getOutputDatas(handler.getDataType());
-            if (outputDatas.length != 1)
-                throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputDatas.length);
-            ExpData outputObject = outputDatas[0];
+            DataType dataType = handler.getDataType();
+
+            ExpData[] outputDatas = _run.getOutputDatas(null); //handler.getDataType());
+            ExpData outputObject = null;
+            if (outputDatas.length == 1 && outputDatas[0].getDataType() == dataType)
+            {
+                outputObject = outputDatas[0];
+            }
+            else if (outputDatas.length > 1)
+            {
+                // If there is a transformed dataType, use that
+                ExpData dataWithHandlerType = null;
+                ExpData dataWithTransformedType = null;
+                for (ExpData expData : outputDatas)
+                {
+                    if (SinglePlateNabDataHandler.NAB_TRANSFORMED_DATA_TYPE.getNamespacePrefix().equalsIgnoreCase(expData.getLSIDNamespacePrefix()))
+                    {
+                        if (null != dataWithTransformedType)
+                            throw new IllegalStateException("Expected a single data file output for this NAb run. Found at least 2 transformed expDatas and a total of " + outputDatas.length);
+                        dataWithTransformedType = expData;
+                    }
+                    else if (dataType.equals(expData.getDataType()))
+                    {
+                        if (null != dataWithHandlerType)
+                            throw new IllegalStateException("Expected a single data file output for this NAb run. Found at least 2 expDatas with the expected datatype and a total of " + outputDatas.length);
+                        dataWithHandlerType = expData;
+                    }
+                }
+                if (null != dataWithTransformedType)
+                {
+                    outputObject = dataWithTransformedType;
+                }
+                else if (null != dataWithHandlerType)
+                {
+                    outputObject = dataWithHandlerType;
+                }
+            }
+            if (null == outputObject)
+                throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.length);
 
             Map<String, NabResultProperties> allProperties = getSampleProperties(outputObject);
             Set<String> captions = new HashSet<String>();
