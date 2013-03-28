@@ -329,12 +329,12 @@ public class NabAssayController extends SpringActionController
                 if (pd.getPropertyType() == PropertyType.DOUBLE)
                 {
                     DecimalFormat format = new DecimalFormat(pd.getFormat());
-                    value = format.format(value);
+                    value = value == null ? "" : format.format(value);
                 }
                 if (pd.getPropertyType() == PropertyType.DATE_TIME)
                 {
                     DateFormat format = new SimpleDateFormat(pd.getFormat());
-                    value = format.format((Date) value);
+                    value = value == null ? "" : format.format((Date) value);
                 }
             }
             else if (pd.getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
