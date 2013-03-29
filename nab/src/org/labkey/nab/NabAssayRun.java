@@ -202,15 +202,22 @@ public abstract class NabAssayRun extends Luc5Assay
             // The list of available columns is reduced from the default set because the user may not have
             // permission to join to all of the lookups. Remove any columns that aren't part of the acceptable set,
             // which is built up by getFieldKeys()
-            for (Iterator<FieldKey> i = fieldKeysToShow.iterator(); i.hasNext();)
+            List<FieldKey> newFieldKeysToShow = new ArrayList<FieldKey>();
+            for (FieldKey fieldKey : fieldKeysToShow)
             {
-                if (!fieldKeys.containsKey(i.next()))
+                FieldKey parent = fieldKey.getParent();
+                if (null != parent && null == parent.getParent() && parent.getLabel().equalsIgnoreCase("runproperties") && fieldKeys.containsKey(parent))
                 {
-                    i.remove();
+                    fieldKey = FieldKey.fromString(fieldKey.getLabel());        // special case RunProperties for backwards compatibility; use fieldKey without "RunProperties" if it's there
+                }
+
+                if (fieldKeys.containsKey(fieldKey))
+                {
+                    newFieldKeysToShow.add(fieldKey);
                 }
             }
 
-            Map<FieldKey, ColumnInfo> selectCols = QueryService.get().getColumns(runTable, fieldKeysToShow);
+            Map<FieldKey, ColumnInfo> selectCols = QueryService.get().getColumns(runTable, newFieldKeysToShow);
             _runDisplayProperties = getRunProperties(runTable, fieldKeys, selectCols);
         }
         return Collections.unmodifiableMap(_runDisplayProperties);
