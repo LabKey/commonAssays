@@ -1542,10 +1542,12 @@ nab/resources/schemas/dbscripts/postgresql/nab-11.10-11.20.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-12.30-12.31.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-12.31-12.32.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-12.32-12.33.sql -text
+nab/resources/schemas/dbscripts/postgresql/nab-12.34-12.35.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-11.10-11.20.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-12.30-12.31.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-12.31-12.32.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-12.32-12.33.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-12.34-12.35.sql -text
 nab/resources/schemas/nab.xml -text
 nab/src/org/labkey/nab/AbstractNabManager.java -text
 nab/src/org/labkey/nab/DilutionSummary.java -text
