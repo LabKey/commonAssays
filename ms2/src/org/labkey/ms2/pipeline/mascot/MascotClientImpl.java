@@ -986,49 +986,29 @@ public class MascotClientImpl implements SearchClient
 
     private ParamParser getInputParameters(File parametersFile)
     {
-        BufferedReader inputReader = null;
-        StringBuffer xmlBuffer = new StringBuffer();
         try
         {
-            inputReader = new BufferedReader(new FileReader(parametersFile));
-            String line;
-            while ((line = inputReader.readLine()) != null)
-                xmlBuffer.append(line).append("\n");
+            ParamParser parser = PipelineJobService.get().createParamParser();
+            // CONSIDER: Set validator?
+            parser.parse(new FileInputStream(parametersFile));
+            if (parser.getErrors() != null)
+            {
+                ParamParser.Error err = parser.getErrors()[0];
+                if (err.getLine() == 0)
+                    getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
+                            err.getMessage());
+                else
+                    getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
+                            "Line " + err.getLine() + ": " + err.getMessage());
+                return null;
+            }
+            return parser;
         }
         catch (IOException eio)
         {
             getLogger().error("Failed to read Mascot input xml '" + parametersFile.getPath() + "'.");
             return null;
         }
-        finally
-        {
-            if (inputReader != null)
-            {
-                try
-                {
-                    inputReader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
-        }
-
-        ParamParser parser = PipelineJobService.get().createParamParser();
-        // CONSIDER: Set validator?
-        parser.parse(xmlBuffer.toString());
-        if (parser.getErrors() != null)
-        {
-            ParamParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-                getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
-                        err.getMessage());
-            else
-                getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
-                        "Line " + err.getLine() + ": " + err.getMessage());
-            return null;
-        }
-        return parser;
     }
 
     protected boolean submitFile (String sessionID, String taskID,

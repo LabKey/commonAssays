@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import com.google.gwt.codegen.server.StringGenerator;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -33,6 +33,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1023,7 +1024,7 @@ public abstract class SequestParamsBuilder
 
         public void parseParams(String xml)
         {
-            ip.parse(xml);
+            ip.parse(new ReaderInputStream(new StringReader(xml)));
             spb = createParamsBuilder();
         }
 

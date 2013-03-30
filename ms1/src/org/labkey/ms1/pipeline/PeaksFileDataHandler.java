@@ -25,6 +25,8 @@ import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.pipeline.ParamParser;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.massSpecDataFileType;
@@ -37,6 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -50,6 +53,9 @@ import java.sql.SQLException;
  */
 public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 {
+    private static final String IMPORT_PEAKS_SETTING_NAME = "pipeline, import peaks";
+
+
     public static final massSpecDataFileType FT_MZXML = new massSpecDataFileType();
     public static final FileType FT_PEAKS = new FileType(".peaks.xml");
 
@@ -79,12 +85,30 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
             //note that this assumes the pipeline will never allow two user to load the same file at the same time
             MS1Manager.get().deleteFailedImports(data.getRowId(), MS1Manager.FILETYPE_PEAKS);
 
+            File settingsFile = new File(dataFile.getParentFile(), "inspect.xml");
+            if (!settingsFile.isFile())
+            {
+                settingsFile = new File(dataFile.getParentFile(), "pepmatch.xml");
+            }
+            if (settingsFile.isFile())
+            {
+                ParamParser parser = PipelineJobService.get().createParamParser();
+                parser.parse(new FileInputStream(settingsFile));
+
+                String loadPeaksSetting = parser.getInputParameters().get(IMPORT_PEAKS_SETTING_NAME);
+                if ("false".equalsIgnoreCase(loadPeaksSetting) || "no".equalsIgnoreCase(loadPeaksSetting))
+                {
+                    log.info("Skipping import of data from " + dataFile.getName() + " due to setting of \"" + IMPORT_PEAKS_SETTING_NAME + "\" in protocol parameters.");
+                    return;
+                }
+            }
+
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(false);
             factory.setValidating(false);
             SAXParser parser = factory.newSAXParser();
             PeaksFileImporter importer = new PeaksFileImporter(data, getMzXmlFilePath(data), info.getUser(), log);
-            
+
             parser.parse(dataFile, importer);
         }
         catch(IOException e)
