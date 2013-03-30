@@ -129,7 +129,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
                     menuItem.setScript("document.forms['" + dataRegionName + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
                             "document.forms['" + dataRegionName + "'].captionColumn.value = '" + prop.getName() + "';\n" +
                             "document.forms['" + dataRegionName + "'].chartTitle.value = 'Neutralization by " + prop.getLabel() + "';\n" +
-                            "document.forms['" + dataRegionName + "'].method = 'GET';\n" +
+                            "document.forms['" + dataRegionName + "'].method = 'POST';\n" +
                             "document.forms['" + dataRegionName + "'].submit(); return false;");
                     parent.addChild(menuItem);
                 }
@@ -152,7 +152,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
             graphSelectedButton.addMenuItem("Default Graph", "#",
                     "document.forms['" + rgn.getName() + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
-                    "document.forms['" + rgn.getName() + "'].method = 'GET';\n" +
+                    "document.forms['" + rgn.getName() + "'].method = 'POST';\n" +
                     "document.forms['" + rgn.getName() + "'].submit(); return false;");
 
             Domain sampleDomain = ((NabAssayProvider) _provider).getSampleWellGroupDomain(_protocol);
