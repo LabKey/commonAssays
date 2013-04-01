@@ -1906,6 +1906,7 @@ public class FlowSchema extends UserSchema
                 "    exp.data.DataFileUrl,\n" +
                 "    exp.data.RunId,\n" +
                 "    exp.data.Created,\n" +
+                "    exp.data.CreatedBy,\n" +
                 "    exp.data.Container,\n" +
                 "    flow.object.RowId AS objectid,\n" +
                 "    flow.object.TypeId,\n" +
