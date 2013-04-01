@@ -482,6 +482,13 @@ public class CompensationMatrix implements Serializable
         if (null != spill)
         {
             String[] strings = StringUtils.split(spill, ",");
+            if (strings.length == 0)
+            {
+                // Attempt to parse as space separated list of values
+                String[] s = StringUtils.split(spill, " ");
+                if (s.length > 0)
+                    strings = s;
+            }
 
             int index = 0;
             int channelCount = Integer.parseInt(strings[index ++]);

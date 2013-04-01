@@ -32,24 +32,27 @@ public class EditWellForm extends ViewForm
     public void setWell(FlowWell well) throws Exception
     {
         _well = well;
-        if (ff_keywordName == null)
+        if (well != null)
         {
-            Map.Entry<String, String>[] entries = well.getKeywords().entrySet().toArray(new Map.Entry[0]);
-            ff_keywordName = new String[entries.length];
-            ff_keywordValue = new String[entries.length];
-            for (int i = 0; i < entries.length; i ++)
+            if (ff_keywordName == null)
             {
-                ff_keywordName[i] = entries[i].getKey();
-                ff_keywordValue[i] = entries[i].getValue();
+                Map.Entry<String, String>[] entries = well.getKeywords().entrySet().toArray(new Map.Entry[0]);
+                ff_keywordName = new String[entries.length];
+                ff_keywordValue = new String[entries.length];
+                for (int i = 0; i < entries.length; i ++)
+                {
+                    ff_keywordName[i] = entries[i].getKey();
+                    ff_keywordValue[i] = entries[i].getValue();
+                }
             }
-        }
-        if (ff_comment == null)
-        {
-            ff_comment = well.getComment();
-        }
-        if (ff_name == null)
-        {
-            ff_name = well.getName();
+            if (ff_comment == null)
+            {
+                ff_comment = well.getComment();
+            }
+            if (ff_name == null)
+            {
+                ff_name = well.getName();
+            }
         }
     }
 
