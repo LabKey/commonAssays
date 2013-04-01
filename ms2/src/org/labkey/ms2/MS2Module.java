@@ -44,6 +44,7 @@ import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
@@ -86,6 +87,7 @@ import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.scoring.ScoringController;
+import org.labkey.ms2.search.MS2SearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.beans.PropertyChangeEvent;
@@ -191,6 +193,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     result.setTitle(CustomProteinListView.NAME);
                     result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
                     return result;
+                }
+            },
+            new BaseWebPartFactory(MS2SearchWebpart.NAME)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws Exception
+                {
+                    return new MS2SearchWebpart();
                 }
             }
         ));
