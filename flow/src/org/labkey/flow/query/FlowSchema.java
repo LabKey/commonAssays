@@ -77,6 +77,7 @@ import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
+import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProperty;
@@ -114,6 +115,20 @@ public class FlowSchema extends UserSchema
 {
     static public final String SCHEMANAME = "flow";
     static public final String SCHEMA_DESCR = "Contains data about flow cytometry experiment runs";
+
+    // Column name constants
+    public static final String FCSFILE_NAME = "FCSFile";
+    public static final FieldKey FCSFILE_FIELDKEY = FieldKey.fromParts(FCSFILE_NAME);
+
+    public static final String ORIGINAL_FCSFILE_NAME = "OriginalFCSFile";
+    public static final FieldKey ORIGINAL_FCSFILE_FIELDKEY = FieldKey.fromParts(ORIGINAL_FCSFILE_NAME);
+    
+    public static final FieldKey SPECIMENID_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+    public static final FieldKey PARTICIPANTID_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+    public static final FieldKey VISITID_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+    public static final FieldKey DATE_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.DATE_PROPERTY_NAME);
+    public static final FieldKey TARGET_STUDY_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
+
     private FlowExperiment _experiment;
     private FlowRun _run;
 //    private FlowScript _script;
@@ -358,6 +373,8 @@ public class FlowSchema extends UserSchema
                 flag.setDescription(type.getLabel() + " Flag");
         }
         ret.addColumn(ExpRunTable.Column.Name).setURL(detailsURL);
+        ret.addColumn(ExpRunTable.Column.Created);
+        ret.addColumn(ExpRunTable.Column.CreatedBy);
         ColumnInfo containerCol = ret.addColumn(ExpRunTable.Column.Folder);
         containerCol.setHidden(true);
         ContainerForeignKey.initColumn(containerCol, this, null);
@@ -412,43 +429,11 @@ public class FlowSchema extends UserSchema
             PropertyDescriptor pd = FlowProperty.TargetStudy.getPropertyDescriptor();
             PropertyColumn colTargetStudy = new PropertyColumn(pd, colLSID, getContainer(), getUser(), true);
             colTargetStudy.setLabel(AbstractAssayProvider.TARGET_STUDY_PROPERTY_CAPTION);
-            colTargetStudy.setDisplayColumnFactory(new DisplayColumnFactory()
-            {
-                @Override
-                public DisplayColumn createRenderer(ColumnInfo colInfo)
-                {
-                    return new DataColumn(colInfo)
-                    {
-                        @Override
-                        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                        {
-                            String targetStudyId = (String)getBoundColumn().getValue(ctx);
-                            if (targetStudyId != null && targetStudyId.length() > 0)
-                            {
-                                Container c = ContainerManager.getForId(targetStudyId);
-                                if (c != null)
-                                {
-                                    Study study = StudyService.get().getStudy(c);
-                                    if (study != null)
-                                    {
-                                        out.write("<a href=\"");
-                                        out.write(PageFlowUtil.filter(PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c)));
-                                        out.write("\">");
-                                        out.write(study.getLabel().replaceAll(" ", "&nbsp;"));
-                                        out.write("</a>");
-                                    }
-                                }
-                            }
-                        }
-                    };
-                }
-            });
+            colTargetStudy.setDisplayColumnFactory(_targetStudyDisplayColumnFactory);
             ret.addColumn(colTargetStudy);
         }
 
         ret.addDataCountColumn("WellCount", InputRole.FCSFile.toString());
-        ret.addColumn(ExpRunTable.Column.Created);
-        ret.addColumn(ExpRunTable.Column.CreatedBy);
         addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
         addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
         addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
@@ -456,26 +441,37 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-/*    private SQLFragment dataIdCondition(String dataidName, ObjectType ... types)
+    private static final DisplayColumnFactory _targetStudyDisplayColumnFactory = new DisplayColumnFactory()
     {
-        SQLFragment ret = new SQLFragment("(SELECT flow.object.TypeId FROM flow.Object WHERE ");
-        ret.append(dataidName + " = flow.object.DataId)");
-
-        if (types.length == 1)
+        @Override
+        public DisplayColumn createRenderer(ColumnInfo colInfo)
         {
-            ret.append(" = " + types[0].getTypeId());
-        }
-        else
-        {
-            ret.append(" IN ( " + types[0].getTypeId());
-            for (int i = 1; i < types.length; i ++)
+            return new DataColumn(colInfo)
             {
-                ret.append(", " + types[i].getTypeId());
-            }
-            ret.append(" )");
+                @Override
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    String targetStudyId = (String)getBoundColumn().getValue(ctx);
+                    if (targetStudyId != null && targetStudyId.length() > 0)
+                    {
+                        Container c = ContainerManager.getForId(targetStudyId);
+                        if (c != null)
+                        {
+                            Study study = StudyService.get().getStudy(c);
+                            if (study != null)
+                            {
+                                out.write("<a href=\"");
+                                out.write(PageFlowUtil.filter(PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c)));
+                                out.write("\">");
+                                out.write(study.getLabel().replaceAll(" ", "&nbsp;"));
+                                out.write("</a>");
+                            }
+                        }
+                    }
+                }
+            };
         }
-        return ret;
-    } */
+    };
 
 
     /**
@@ -811,6 +807,50 @@ public class FlowSchema extends UserSchema
             return FlowSchema.this;
         }
 
+        ColumnInfo addDownloadColumn()
+        {
+            // Replace ExpDataTable's DownloadLink column with ours
+            ColumnInfo colDownload = new AliasedColumn(this, Column.DownloadLink.name(), this.getColumn(ExpDataTable.Column.RowId));
+            // Remove RowIdForeignKey
+            colDownload.setFk(null);
+            colDownload.setKeyField(false);
+            colDownload.setHidden(true);
+            colDownload.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    return new DataColumn(colInfo)
+                    {
+                        @Override
+                        public String renderURL(RenderContext ctx)
+                        {
+                            Integer dataRowId = (Integer)getBoundColumn().getValue(ctx);
+                            if (dataRowId != null)
+                            {
+                                FlowDataObject fdo = FlowDataObject.fromRowId(dataRowId);
+                                if (fdo != null)
+                                    return fdo.urlDownload().toString();
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                        {
+                            String url = renderURL(ctx);
+                            if (url != null)
+                            {
+                                out.write(PageFlowUtil.textLink("download", url, null, null));
+                            }
+                        }
+                    };
+                }
+            });
+            addColumn(colDownload);
+            return colDownload;
+        }
+
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
@@ -1002,10 +1042,10 @@ public class FlowSchema extends UserSchema
 
         public ColumnInfo addDataInputColumn(String alias, String role)
         {
-//UNDONE
-            assert false;
+            checkLocked();
             ColumnInfo col = _expData.addDataInputColumn(alias, role);
-            return addExpColumn(col);
+            col.setParentTable(this);
+            return addColumn(col);
         }
 
         public ColumnInfo addInputRunCountColumn(String alias)
@@ -1163,7 +1203,7 @@ public class FlowSchema extends UserSchema
             addAllColumns(ret, getColumn("Background"), hidden);
 
             // Include FCSFile and Sample columns
-            ColumnInfo fcsFileCol = getColumn("FCSFile");
+            ColumnInfo fcsFileCol = getColumn(FCSFILE_FIELDKEY);
             if (fcsFileCol != null)
             {
                 addAllColumns(ret, fcsFileCol, hidden);
@@ -1208,6 +1248,19 @@ public class FlowSchema extends UserSchema
                 }
             }
         }
+
+        @Override
+        protected ColumnInfo resolveColumn(String name)
+        {
+            ColumnInfo result = super.resolveColumn(name);
+            if (result == null)
+            {
+                // Rename "Specimen" to "SpecimenID" for backwards compatibility <13.1
+                if ("Specimen".equalsIgnoreCase(name))
+                    return resolveColumn(SPECIMENID_FIELDKEY.getName());
+            }
+            return result;
+        }
     }
 
 
@@ -1229,7 +1282,9 @@ public class FlowSchema extends UserSchema
         ColumnInfo flag = ret.addColumn(ExpDataTable.Column.Flag);
         if (type != null)
             flag.setDescription(type.getLabel() + " Flag");
-        ret.addColumn(ExpDataTable.Column.Created);
+        ret.addDownloadColumn();
+        ret.addColumn(ExpDataTable.Column.Created).setHidden(true);
+        ret.addColumn(ExpDataTable.Column.CreatedBy).setHidden(true);
         ret.setTitleColumn("Name");
 
         ColumnInfo sourceProtocolApplication = ret.addColumn(ExpDataTable.Column.SourceProtocolApplication);
@@ -1258,48 +1313,6 @@ public class FlowSchema extends UserSchema
         return ret;
     }
     
-
-/*    public ExpDataTable createDataTableOLD(String alias, final FlowDataType type)
-    {
-        ExpDataTable ret = ExperimentService.get().createDataTable(alias);
-        ret.setContainer(getContainer());
-        ret.setDataType(type);
-        ret.addCondition(dataIdCondition(ExpDataTable.COLUMN_ROWID, type.getObjectType()));
-        ret.addColumn(ExpDataTable.Column.RowId);
-        ret.addColumn(ExpDataTable.Column.LSID).setHidden(true);
-        ret.addColumn(ExpDataTable.Column.Name);
-        ret.addColumn(ExpDataTable.Column.Flag);
-        ret.addColumn(ExpDataTable.Column.Created);
-        ret.setTitleColumn("Name");
-        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
-        protocol.setHidden(true);
-
-        ColumnInfo colRun = ret.addColumn(ExpDataTable.Column.Run);
-        colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId,
-                FlowTableType.Runs.toString(), "RowId", "Name")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return detach().createRunTable("run", type);
-            }
-        });
-
-        if (_run != null)
-        {
-            ret.setRun(ExperimentService.get().getExpRun(_run.getRunId()));
-        }
-        return ret;
-    }
-
-    protected ColumnInfo addObjectIdColumn(ExpDataTable table, String name)
-    {
-        SQLFragment sql = new SQLFragment("(SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId = ");
-        sql.append(table.createColumn("RowId", ExpDataTable.Column.RowId).getValueSql(ExprColumn.STR_TABLE_ALIAS));
-        sql.append(")");
-        ColumnInfo ret = new ExprColumn(table, name, sql, Types.INTEGER);
-        table.addColumn(ret);
-        return ret;
-    } */
 
 
     static private class DeferredFCSFileVisibleColumns implements Iterable<FieldKey>
@@ -1335,7 +1348,7 @@ public class FlowSchema extends UserSchema
         final private ColumnInfo _colBackground;
         final private ColumnInfo _colGraph;
 
-        public DeferredFCSAnalysisVisibleColumns(ExpDataTable table, ColumnInfo colStatistic, ColumnInfo colGraph, ColumnInfo colBackground)
+        public DeferredFCSAnalysisVisibleColumns(ExpDataTable table, FlowProtocol protocol, ColumnInfo colStatistic, ColumnInfo colGraph, ColumnInfo colBackground)
         {
             _table = table;
             _colStatistic = colStatistic;
@@ -1348,7 +1361,7 @@ public class FlowSchema extends UserSchema
             Collection<FieldKey> ret = new LinkedHashSet<FieldKey>();
             ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumns()));
             ret.remove(FieldKey.fromParts("AnalysisScript"));
-            ret.remove(FieldKey.fromParts("FCSFile"));
+            ret.remove(FCSFILE_FIELDKEY);
             TableInfo lookup = _colStatistic.getFk().getLookupTableInfo();
             if (lookup != null)
             {
@@ -1396,6 +1409,7 @@ public class FlowSchema extends UserSchema
         }
     }
 
+
     public FlowDataTable createFCSFileTable(String name)
     {
         return createFCSFileTable(name, true);
@@ -1418,35 +1432,81 @@ public class FlowSchema extends UserSchema
             colMaterialInput.setHidden(true);
         }
 
-        // Add the specimen lookup if possible.
+        // SpecimenID
         ICSMetadata metadata = getProtocol() == null ? null : getProtocol().getICSMetadata();
-        if (metadata != null && metadata.getSpecimenIdColumn() != null)
+        FieldKey specimenIdFieldKey = metadata != null ? removeParent(metadata.getSpecimenIdColumn(), FCSFILE_NAME) : null;
+        if (specimenIdFieldKey != null)
         {
-            // The FieldKey is relative from the flow.FCSAnalysis table but the SpecimenFK is attached to flow.FCSFiles, so we need to remove the root 'FCSFiles' FieldKey.
-            FieldKey specimenIdFieldKey = metadata.getSpecimenIdColumn();
-            List<String> parts = specimenIdFieldKey.getParts();
-            if (parts.get(0).equals("FCSFile"))
-            {
-                parts.remove(0);
-                specimenIdFieldKey = FieldKey.fromParts(parts);
+            ColumnInfo colSpecimen = new FCSFileCoalescingColumn(ret, SPECIMENID_FIELDKEY, JdbcType.VARCHAR, metadata, true);
+            ret.addColumn(colSpecimen);
 
-                Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(ret, Collections.singleton(specimenIdFieldKey));
-                ColumnInfo specimenIdCol = cols.get(specimenIdFieldKey);
-                if (specimenIdCol != null)
-                {
-                    ColumnInfo colSpecimen = new AliasedColumn(ret, specimenIdFieldKey, specimenIdCol, false);
-                    colSpecimen.setName("Specimen");
-                    colSpecimen.setLabel("Specimen");
-                    ret.addColumn(colSpecimen);
+            ExpProtocol protocol = getProtocol().getProtocol();
+            AssayProvider provider = AssayService.get().getProvider(protocol);
+            AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), protocol, null);
+            FlowAssayProvider.FlowAssayTableMetadata tableMetadata = new FlowAssayProvider.FlowAssayTableMetadata(provider, protocol, specimenRelativeFromFCSFileTable);
+            SpecimenForeignKey specimenFK = new SpecimenForeignKey(schema, provider, protocol, tableMetadata);
+            colSpecimen.setFk(specimenFK);
+        }
+        else
+        {
+            ColumnInfo colSpecimen = new NullColumnInfo(ret, SPECIMENID_FIELDKEY, JdbcType.VARCHAR);
+            colSpecimen.setHidden(true);
+            ret.addColumn(colSpecimen);
+        }
 
-                    ExpProtocol protocol = getProtocol().getProtocol();
-                    AssayProvider provider = AssayService.get().getProvider(protocol);
-                    AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), protocol, null);
-                    FlowAssayProvider.FlowAssayTableMetadata tableMetadata = new FlowAssayProvider.FlowAssayTableMetadata(provider, protocol, specimenRelativeFromFCSFileTable);
-                    SpecimenForeignKey specimenFK = new SpecimenForeignKey(schema, provider, protocol, tableMetadata);
-                    colSpecimen.setFk(specimenFK);
-                }
-            }
+
+        // ParticipantID
+        FieldKey participantFieldKey = metadata != null ? removeParent(metadata.getParticipantColumn(), FCSFILE_NAME) : null;
+        if (participantFieldKey != null)
+        {
+            ColumnInfo col = new FCSFileCoalescingColumn(ret, PARTICIPANTID_FIELDKEY, JdbcType.VARCHAR, metadata, true);
+            ret.addColumn(col);
+            // XXX: PTID ForeignKey ?
+        }
+        else
+        {
+            ColumnInfo col = new NullColumnInfo(ret, PARTICIPANTID_FIELDKEY, JdbcType.VARCHAR);
+            col.setHidden(true);
+            ret.addColumn(col);
+        }
+
+        // VisitID
+        FieldKey visitIdFieldKey = metadata != null ? removeParent(metadata.getVisitColumn(), FCSFILE_NAME) : null;
+        if (visitIdFieldKey != null)
+        {
+            ColumnInfo col = new FCSFileCoalescingColumn(ret, VISITID_FIELDKEY, JdbcType.DOUBLE, metadata, true);
+            ret.addColumn(col);
+            // XXX: PTID/Visit ForeignKey ?
+        }
+        else
+        {
+            ColumnInfo col = new NullColumnInfo(ret, VISITID_FIELDKEY, JdbcType.VARCHAR);
+            col.setHidden(true);
+            ret.addColumn(col);
+        }
+
+        // Date
+        FieldKey dateFieldKey = metadata != null ? removeParent(metadata.getDateColumn(), FCSFILE_NAME) : null;
+        if (dateFieldKey != null)
+        {
+            ColumnInfo col = new FCSFileCoalescingColumn(ret, DATE_FIELDKEY, JdbcType.DOUBLE, metadata, true);
+            ret.addColumn(col);
+            // XXX: PTID/Date ForeignKey ?
+        }
+        else
+        {
+            ColumnInfo col = new NullColumnInfo(ret, DATE_FIELDKEY, JdbcType.DATE);
+            col.setHidden(true);
+            ret.addColumn(col);
+        }
+
+        // TargetStudy
+        {
+            ColumnInfo colTargetStudy = new FCSFileCoalescingColumn(ret, TARGET_STUDY_FIELDKEY, JdbcType.DOUBLE, metadata, true);
+            colTargetStudy.setLabel(AbstractAssayProvider.TARGET_STUDY_PROPERTY_CAPTION);
+            colTargetStudy.setDisplayColumnFactory(_targetStudyDisplayColumnFactory);
+            colTargetStudy.setHidden(true);
+            ret.addColumn(colTargetStudy);
         }
 
         String bTRUE = _dbSchema.getSqlDialect().getBooleanTRUE();
@@ -1457,8 +1517,12 @@ public class FlowSchema extends UserSchema
         ret.addColumn(colHasFile);
         colHasFile.setHidden(true);
 
+        //ColumnInfo colURI = new ExprColumn(ret, "URI", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".uri"), JdbcType.VARCHAR);
+        //ret.addColumn(colURI);
+
+
         // Original input FCSFile (the FCSFile marked as a DataInput of this FCSFile)
-        ColumnInfo colFCSFile = new ExprColumn(ret, "OriginalFCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
+        ColumnInfo colFCSFile = new ExprColumn(ret, ORIGINAL_FCSFILE_FIELDKEY, new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
         ret.addColumn(colFCSFile);
         colFCSFile.setHidden(true);
         colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
@@ -1482,65 +1546,7 @@ public class FlowSchema extends UserSchema
     }
 
 
-    public ExpDataTable createFCSAnalysisTable(String name, FlowDataType type, boolean includeCopiedToStudyColumns)
-    {
-        if (null != DbSchema.get("flow").getTable("object").getColumn("compid"))
-            return createFCSAnalysisTableNEW(name, type, includeCopiedToStudyColumns);
-
-        FlowDataTable ret = createDataTable(name, type);
-        ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.toString());
-        colAnalysisScript.setFk(new LookupForeignKey(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
-                FlowParam.scriptId.toString(), FlowTableType.AnalysisScripts.toString(), "RowId", "Name"){
-            public TableInfo getLookupTableInfo()
-            {
-                return detach().createAnalysisScriptTable("Lookup", true);
-            }
-        });
-        ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
-        colCompensationMatrix.setFk(new LookupForeignKey(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), FlowParam.compId.toString(),
-                FlowTableType.CompensationMatrices.toString(), "RowId", "Name"){
-            public TableInfo getLookupTableInfo()
-            {
-                return detach().createCompensationMatrixTable("Lookup");
-            }
-        });
-
-        DetailsURL detailsURL = new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString()));
-        ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
-        ret.setDetailsURL(detailsURL);
-        if (getExperiment() != null)
-        {
-            ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
-        }
-        ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
-        
-        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
-
-        ColumnInfo colGraph = ret.addGraphColumn("Graph");
-        ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.toString());
-        colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
-                FlowParam.wellId.toString(),
-                FlowTableType.FCSFiles.toString(), "RowId", "Name") {
-                public TableInfo getLookupTableInfo()
-                {
-                    return detach().createFCSFileTable("FCSFile", false);
-                }
-            });
-
-        for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
-        {
-            ret.addReportColumns(report, FlowTableType.FCSAnalyses);
-        }
-
-        if (includeCopiedToStudyColumns)
-            addCopiedToStudyColumns(ret);
-
-        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
-        return ret;
-    }
-
-
-    public ExpDataTable createFCSAnalysisTableNEW(String alias, FlowDataType type, boolean includeCopiedToStudyColumns)
+    public ExpDataTable createFCSAnalysisTable(String alias, FlowDataType type, boolean includeCopiedToStudyColumns)
     {
         FlowDataTable ret = createDataTable(alias, type);
 
@@ -1578,7 +1584,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
 
-        ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
+        ColumnInfo colFCSFile = new ExprColumn(ret, FCSFILE_FIELDKEY, new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
         ret.addColumn(colFCSFile);
         colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
                 FlowParam.wellId.toString(),
@@ -1597,7 +1603,7 @@ public class FlowSchema extends UserSchema
         if (includeCopiedToStudyColumns)
             addCopiedToStudyColumns(ret);
 
-        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
+        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, _protocol, colStatistic, colGraph, colBackground));
         return ret;
     }
 
@@ -1621,7 +1627,41 @@ public class FlowSchema extends UserSchema
         return copiedToStudyColumns;
     }
 
+    // Rewrite a FieldKey
+    // from "FCSFile/Foo" to "FCSFile/OriginalFCSFile/Foo" or
+    // from "Foo" to "OriginalFCSFile/Foo"
+    public static final FieldKey rewriteAsOriginalFCSFile(FieldKey fieldKey)
+    {
+        if (fieldKey != null)
+        {
+            List<String> parts = fieldKey.getParts();
+            int insertAt = 0;
+            if (parts.get(0).equals(FCSFILE_FIELDKEY.getName()))
+                insertAt = 1;
+            parts.add(insertAt, ORIGINAL_FCSFILE_FIELDKEY.getName());
+            return FieldKey.fromParts(parts);
+        }
+        
+        return null;
+    }
 
+    // Remove the root component from a FieldKey if matches the rootPart.
+    public static FieldKey removeParent(FieldKey fieldKey, String rootPart)
+    {
+        if (fieldKey != null)
+        {
+            List<String> parts = fieldKey.getParts();
+            if (parts.get(0).equalsIgnoreCase(rootPart))
+            {
+                parts.remove(0);
+                return FieldKey.fromParts(parts);
+            }
+        }
+
+        return null;
+    }
+
+    
     public ExpDataTable createCompensationControlTable(String alias)
     {
         ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl, false);
@@ -1783,7 +1823,14 @@ public class FlowSchema extends UserSchema
         String str = request.getParameter(param.toString());
         if (str == null || str.length() == 0)
             return 0;
-        return Integer.valueOf(str);
+        try
+        {
+            return Integer.valueOf(str);
+        }
+        catch (NumberFormatException ex)
+        {
+            return 0;
+        }
     }
 
 
@@ -1840,7 +1887,7 @@ public class FlowSchema extends UserSchema
     }
 
 
-    /** CONSIDER JOIN ObjectId from exp.Objects */ 
+    /** CONSIDER JOIN ObjectId from exp.Objects */
     String createFastFlowObjectTableName(Container c, int typeid)
     {
         try

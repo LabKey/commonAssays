@@ -153,6 +153,15 @@ abstract public class FlowDataType extends AssayDataType
         return null;
     }
 
+    public ActionURL getDownloadURL(ExpData dataObject)
+    {
+        FlowDataObject fdo = FlowDataObject.fromData(dataObject);
+        if (fdo != null)
+            return fdo.urlDownload();
+
+        return null;
+    }
+
     @Override
     public String getRole()
     {

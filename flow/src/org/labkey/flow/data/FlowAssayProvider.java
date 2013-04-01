@@ -60,6 +60,7 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunsForm;
+import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -89,21 +90,6 @@ public class FlowAssayProvider extends AbstractAssayProvider
         super(null, null, null, ModuleLoader.getInstance().getModule(FlowModule.NAME));
     }
 
-    private static FieldKey removeParent(FieldKey fieldKey, String root)
-    {
-        if (fieldKey != null)
-        {
-            List<String> parts = fieldKey.getParts();
-            if (parts.get(0).equalsIgnoreCase(root))
-            {
-                parts.remove(0);
-                return FieldKey.fromParts(parts);
-            }
-        }
-
-        return null;
-    }
-
     public static class FlowAssayTableMetadata extends AssayTableMetadata
     {
         final ICSMetadata _metadata;
@@ -115,19 +101,17 @@ public class FlowAssayProvider extends AbstractAssayProvider
 
             FlowProtocol fp = new FlowProtocol(protocol);
             _metadata = fp.getICSMetadata();
-            // The FieldKeys in the ICSMetadata are relative from the flow.FCSAnalysis table but the
-            // SpecimenFK is attached to flow.FCSFiles, so we need to remove the root 'FCSFiles' FieldKey.
             _relativeFromFCSFileTable = relativeFromFCSFileTable;
         }
 
         public FieldKey getSpecimenIDFieldKey()
         {
-            if (_metadata != null)
+            if (_metadata != null && _metadata.getSpecimenIdColumn() != null)
             {
-                FieldKey fieldKey = _metadata.getSpecimenIdColumn();
-                fieldKey = _relativeFromFCSFileTable ? removeParent(fieldKey, "FCSFile") : fieldKey;
-                if (fieldKey != null)
-                    return fieldKey;
+                if (_relativeFromFCSFileTable)
+                    return FlowSchema.SPECIMENID_FIELDKEY;
+                else
+                    return FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.SPECIMENID_FIELDKEY);
             }
 
             return super.getSpecimenIDFieldKey();
@@ -138,10 +122,10 @@ public class FlowAssayProvider extends AbstractAssayProvider
         {
             if (_metadata != null && _metadata.getParticipantColumn() != null)
             {
-                FieldKey fieldKey = _metadata.getParticipantColumn();
-                fieldKey = _relativeFromFCSFileTable ? removeParent(fieldKey, "FCSFile") : fieldKey;
-                if (fieldKey != null)
-                    return fieldKey;
+                if (_relativeFromFCSFileTable)
+                    return FlowSchema.PARTICIPANTID_FIELDKEY;
+                else
+                    return FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.PARTICIPANTID_FIELDKEY);
             }
 
             return super.getParticipantIDFieldKey();
@@ -154,20 +138,20 @@ public class FlowAssayProvider extends AbstractAssayProvider
             {
                 if (_metadata != null && _metadata.getDateColumn() != null)
                 {
-                    FieldKey fieldKey = _metadata.getDateColumn();
-                    fieldKey = _relativeFromFCSFileTable ? removeParent(fieldKey, "FCSFile") : fieldKey;
-                    if (fieldKey != null)
-                        return fieldKey;
+                    if (_relativeFromFCSFileTable)
+                        return FlowSchema.DATE_FIELDKEY;
+                    else
+                        FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.DATE_FIELDKEY);
                 }
             }
             else if (timepointType == TimepointType.VISIT)
             {
                 if (_metadata != null && _metadata.getVisitColumn() != null)
                 {
-                    FieldKey fieldKey = _metadata.getVisitColumn();
-                    fieldKey = _relativeFromFCSFileTable ? removeParent(fieldKey, "FCSFile") : fieldKey;
-                    if (fieldKey != null)
-                        return fieldKey;
+                    if (_relativeFromFCSFileTable)
+                        return FlowSchema.VISITID_FIELDKEY;
+                    else
+                        return FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.VISITID_FIELDKEY);
                 }
             }
 
@@ -179,9 +163,9 @@ public class FlowAssayProvider extends AbstractAssayProvider
         public FieldKey getTargetStudyFieldKey()
         {
             if (_relativeFromFCSFileTable)
-                return FieldKey.fromParts(ExpDataTable.Column.Run.toString(), FlowProperty.TargetStudy.getPropertyDescriptor().getName());
+                return FlowSchema.TARGET_STUDY_FIELDKEY;
             else
-                return FieldKey.fromParts("FCSFile", ExpDataTable.Column.Run.toString(), FlowProperty.TargetStudy.getPropertyDescriptor().getName());
+                return FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.TARGET_STUDY_FIELDKEY);
         }
 
     }

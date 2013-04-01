@@ -245,6 +245,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         String value = StringUtils.join(strings.iterator(), "&");
         setProperty(user, FlowProperty.SampleSetJoin.getPropertyDescriptor(), value);
         setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleSetLSID());
+        FlowManager.get().flowObjectModified();
     }
 
     public ActionURL urlUploadSamples(boolean importMoreSamples)
@@ -611,6 +612,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public void setICSMetadata(User user, String value) throws SQLException
     {
         setProperty(user, FlowProperty.ICSMetadata.getPropertyDescriptor(), value);
+        FlowManager.get().flowObjectModified();
     }
 
     public boolean hasICSMetadata()
