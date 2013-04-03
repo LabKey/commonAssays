@@ -141,7 +141,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
                     if (_relativeFromFCSFileTable)
                         return FlowSchema.DATE_FIELDKEY;
                     else
-                        FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.DATE_FIELDKEY);
+                        return FieldKey.fromParts(FlowSchema.FCSFILE_FIELDKEY, FlowSchema.DATE_FIELDKEY);
                 }
             }
             else if (timepointType == TimepointType.VISIT)
