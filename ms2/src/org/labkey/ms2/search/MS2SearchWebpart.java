@@ -9,8 +9,9 @@ import org.labkey.ms2.MS2Controller;
  */
 public class MS2SearchWebpart extends JspView<ProteinSearchBean>
 {
-    public static final String NAME = "MS2 Search (Tabbed)";
-    public static final String TITLE = "MS2 Search";
+    // TODO: fix class name to remove MS2 reference (in trunk)
+    public static final String NAME = "Mass Spec Search (Tabbed)";
+    public static final String TITLE = "Mass Spec Search";
 
     public MS2SearchWebpart()
     {
