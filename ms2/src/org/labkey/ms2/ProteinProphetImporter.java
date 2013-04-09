@@ -461,7 +461,7 @@ public class ProteinProphetImporter
             groupStmt.setFloat(groupIndex++, errorRate);
         }
 
-        ResultSet rs = _dialect.executeInsertWithResults(groupStmt);
+        ResultSet rs = _dialect.executeWithResults(groupStmt);
 
         if (null == rs)
         {

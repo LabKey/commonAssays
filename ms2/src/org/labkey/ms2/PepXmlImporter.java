@@ -523,7 +523,7 @@ public class PepXmlImporter extends MS2Importer
 
             try
             {
-                rs = MS2Manager.getSqlDialect().executeInsertWithResults(_stmtWithReselect);
+                rs = MS2Manager.getSqlDialect().executeWithResults(_stmtWithReselect);
 
                 if (null == rs)
                     throw new IllegalArgumentException("No peptideID reselected after peptide insert");
