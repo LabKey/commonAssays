@@ -27,8 +27,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -45,9 +43,14 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabRunDataTable;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: brittp
@@ -249,12 +252,10 @@ public class NabManager extends AbstractNabManager
         }
 
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(nabRunDataTable, fieldKeys.values());
-        Table.TableResultSet resultSet = null;
-        try
-        {
-            resultSet = new TableSelector(nabRunDataTable, columns.values(), filter, null).getResultSet();
 
-            // We're expecting only 1 row, but there could 0 in some cases
+        try (Table.TableResultSet resultSet = new TableSelector(nabRunDataTable, columns.values(), filter, null).getResultSet())
+        {
+            // We're expecting only 1 row, but there could be 0 in some cases
             if (resultSet.getSize() > 0)
             {
                 resultSet.next();
@@ -270,21 +271,11 @@ public class NabManager extends AbstractNabManager
                     }
                 }
             }
-            resultSet.close();
         }
         catch (SQLException e)
         {
-            try
-            {
-                if (null != resultSet)
-                    resultSet.close();
-            }
-            catch (SQLException ex)
-            {
-            }
             throw new RuntimeSQLException(e);
         }
-
     }
 
     // Class for parsing a Data Property Descriptor name and categorizing it

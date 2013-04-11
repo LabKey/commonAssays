@@ -117,20 +117,14 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
     protected FlowRun createExperimentRun() throws Exception
     {
-        ObjectInputStream ois = null;
-        try
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(_workspaceFile)))
         {
-            ois = new ObjectInputStream(new FileInputStream(_workspaceFile));
             Workspace workspace = (Workspace)ois.readObject();
 
             return createExperimentRun(getUser(), getContainer(), workspace,
                     getExperiment(), _workspaceName, _workspaceFile, getOriginalImportedFile(),
                     getRunFilePathRoot(), getSelectedFCSFiles(),
                     isFailOnError());
-        }
-        finally
-        {
-            PageFlowUtil.close(ois);
         }
     }
 
