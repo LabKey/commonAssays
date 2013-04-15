@@ -75,6 +75,8 @@ public class MS1Schema extends UserSchema
         super(SCHEMA_NAME, SCHEMA_DESCR, user, container, MS1Manager.get().getSchema());
         _restrictContainer = restrictContainer;
 
+        _expSchema = new ExpSchema(user, container);
+
         if (_restrictContainer)
         {
             _containerFilter = ContainerFilter.CURRENT;
@@ -82,10 +84,8 @@ public class MS1Schema extends UserSchema
         else
         {
             _containerFilter = new ContainerFilter.CurrentAndSubfolders(user);
+            _expSchema.setContainerFilter(_containerFilter);
         }
-
-        _expSchema = new ExpSchema(user, container);
-        _expSchema.setContainerFilter(_containerFilter);
     }
 
     public boolean isRestrictContainer()
