@@ -164,7 +164,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         }
 
         //if _exact, AND another contains condition against pd.Peptide
-        if(_exact && _exactSequenceColumnName != null)
+        if(_exact)
         {
             sql.append(null == pepDataAlias ? " AND " + _exactSequenceColumnName + " LIKE '%" : " AND " + pepDataAlias + "." + _exactSequenceColumnName + " LIKE '%");
             sql.append(sequence.replace("'", "''").trim()); //FIX: 6679

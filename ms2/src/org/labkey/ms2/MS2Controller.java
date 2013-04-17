@@ -49,6 +49,7 @@ import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineUrls;
@@ -4632,6 +4633,11 @@ public class MS2Controller extends SpringActionController
             NestableQueryView gridView = null;
 
             ActionURL targetURL = currentURL.clone();
+            ProteinViewBean bean = new ProteinViewBean();
+            // the all peptides matching applies to peptides matching a single protein.  Don't
+            // offer it as a choice in the case of protein groups
+
+            bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
 
             if (showPeptides)
             {
@@ -4649,11 +4655,6 @@ public class MS2Controller extends SpringActionController
 
             for (int i = 0; i < proteinCount; i++)
             {
-                ProteinViewBean bean = new ProteinViewBean();
-                // the all peptides matching applies to peptides matching a single protein.  Don't
-                // offer it as a choice in the case of protein groups
-                bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
-
                 addView(new HtmlView("<a name=\"Protein" + i + "\"></a>"));
                 proteins[i].setPeptides(peptides);
                 proteins[i].setShowEntireFragmentInCoverage(stringSearch);
