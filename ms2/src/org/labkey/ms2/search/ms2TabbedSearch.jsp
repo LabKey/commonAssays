@@ -81,7 +81,7 @@
         tabPanel.add({
             // modification search webpart from the targetedms module
             title: 'Modification Search',
-            height: 245,
+            height: 250,
             border : false,
             items : [
                 Ext4.create('Ext.Component', {
