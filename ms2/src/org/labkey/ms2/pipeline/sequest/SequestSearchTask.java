@@ -52,7 +52,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     private static final String SEQUEST_ACTION_NAME = "Sequest Search";
     private static final String MZXML2SEARCH_ACTION_NAME = "MzXML2Search";
     private static final String MAKEDB_ACTION_NAME = "MakeDB";
-    
+
     public static final String MASS_TYPE_PARENT = "sequest, mass_type_parent";
     public static final String MASS_TYPE_INDEX = "sequest, mass_type_index";
 
@@ -62,7 +62,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     public static final FileType INDEX_FILE_TYPE = new FileType(".hdr");
     public static final FileType SEQUEST_LOG_FILE_TYPE = new FileType(".sequest.log");
 
-    private static final Object INDEX_LOCK = new Object(); 
+    private static final Object INDEX_LOCK = new Object();
 
     // useful for creating an output filename that honors config preference for gzipped output
     public static File getNativeOutputFile(File dirAnalysis, String baseName,
@@ -177,7 +177,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         {
             return Arrays.asList(getJob().getSequenceFiles());
         }
-        
+
         File indexFileBase = getIndexFileWithoutExtension();
         File indexFile = new File(indexFileBase.getParentFile(), indexFileBase.getName() + INDEX_FILE_TYPE.getDefaultSuffix());
 
@@ -358,7 +358,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 {
                     // The GUID name is only used while running the search, so make sure that the pepXML
                     // points at the real file name so that we can resolve its spectra later
-                    replacements.put(guidMzXMLFile.getName(), localMzXML.getName());
+                    replacements.put(dtaDirName, getJob().getBaseName());
                     getJob().info("Replacing GUID mzXML name (" + guidMzXMLFile.getName() + ") with real mzXML name (" + localMzXML.getName() + ")");
                 }
 
@@ -419,7 +419,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     /**
      * Rewrite the pepXML file so that it points to the FASTA file instead of the index file because the TPP and
-     * the MS2 loading code don't know how to parse the index files. 
+     * the MS2 loading code don't know how to parse the index files.
      */
     private void rewritePepXML(File fileWorkPepXMLRaw, File pepXmlFile, Map<String, String> substitutions) throws PipelineJobException
     {
