@@ -57,6 +57,8 @@ dataintegration/src/org/labkey/di/api/ScheduledPipelineJobDescriptor.java -text
 dataintegration/src/org/labkey/di/pipeline/BaseQueryTransformDescriptor.java -text
 dataintegration/src/org/labkey/di/pipeline/DataIntegrationDbSchema.java -text
 dataintegration/src/org/labkey/di/pipeline/ETLPipelineProvider.java -text
+dataintegration/src/org/labkey/di/pipeline/TestTask.java -text
+dataintegration/src/org/labkey/di/pipeline/TestTaskFactory.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformConfiguration.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformJob.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformJobContext.java -text
@@ -65,12 +67,12 @@ dataintegration/src/org/labkey/di/pipeline/TransformJobSupport.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformManager.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformRun.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformTask.java -text
+dataintegration/src/org/labkey/di/pipeline/TransformTaskFactory.java -text
 dataintegration/src/org/labkey/di/pipeline/UpdatedRowsChecker.java -text
 dataintegration/src/org/labkey/di/steps/SimpleQueryTransformStep.java -text
 dataintegration/src/org/labkey/di/steps/SimpleQueryTransformStepMeta.java -text
 dataintegration/src/org/labkey/di/view/DataIntegrationController.java -text
 dataintegration/src/org/labkey/di/view/transformConfiguration.jsp -text
-dataintegration/webapp/WEB-INF/dataintegration/dataintegrationContext.xml -text
 elisa/Elisa.iml -text
 elisa/build.xml -text
 elisa/module.properties -text
