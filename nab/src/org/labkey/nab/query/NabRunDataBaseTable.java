@@ -369,6 +369,13 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         {
             result = getColumn("FitError");
         }
+        // Be backwards compatible with queries that expect there to an "ObjectId" column. It's a different value from
+        // the pre-migration value, but it's enough to make the query run and should be sufficient as long as we
+        // continue to generate the same number for a given row.
+        else if ("ObjectId".equalsIgnoreCase(name))
+        {
+            result = getColumn("RowId");
+        }
         else if ("Wellgroup Name".equals(name))
         {
             result = getColumn("WellGroupName");
