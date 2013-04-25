@@ -90,7 +90,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.initComponent.call(this);
     },
 
-    getTrackingDataStore: function(startDate, endDate) {
+    getTrackingDataStore: function(startDate, endDate, network, protocol) {
         // build the array of filters to be applied to the store
         var filterArray = [
             LABKEY.Filter.create('Titration/Name', this.titration),
@@ -98,10 +98,21 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
             LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
         ];
-        if (startDate && endDate)
+        if (startDate)
         {
             filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', startDate, LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+        }
+        if (endDate)
+        {
             filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', endDate, LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
+        }
+        if (network)
+        {
+            filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/Network', network));
+        }
+        if (protocol)
+        {
+            filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/CustomProtocol', protocol));
         }
 
         return new LABKEY.ext.Store({
@@ -110,7 +121,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             queryName: this.assayName + ' AnalyteTitration',
             columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/RowId, '
                     + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
-                    + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, '
+                    + 'Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, Titration/Run/AssayType, '
                     + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
                     + 'GuideSet/Created, IncludeInGuideSetCalculation, '
                     + 'Four ParameterCurveFit/EC50, Four ParameterCurveFit/EC50QCFlagsEnabled, '
@@ -162,6 +173,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'QC Flags', dataIndex:'QCFlags', width: 75}, 
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
+                {header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
                 {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
                 {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
@@ -184,7 +196,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
-    graphParamsSelected: function(analyte, isotype, conjugate, startDate, endDate) {
+    graphParamsSelected: function(analyte, isotype, conjugate, startDate, endDate, network, protocol) {
         // store the params locally
         this.analyte = analyte;
         this.isotype = isotype;
@@ -196,7 +208,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate));
 
         // create a new store now that the graph params are selected and bind it to the grid
-        var newStore = this.getTrackingDataStore(startDate, endDate);
+        var newStore = this.getTrackingDataStore(startDate, endDate, network, protocol);
         var newColModel = this.getTrackingDataColModel();
         this.reconfigure(newStore, newColModel);
         newStore.load();

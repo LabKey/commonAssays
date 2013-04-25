@@ -56,8 +56,20 @@ maxRows = NA;
 if (!is.null(labkey.url.params$MaxRows)) {
 	maxRows = labkey.url.params$MaxRows;
 } else {
-	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_GREATER_THAN_OR_EQUAL",labkey.url.params$StartDate)));
-	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_LESS_THAN_OR_EQUAL",labkey.url.params$EndDate)));
+    if (!is.null(labkey.url.params$StartDate)) {
+	    colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_GREATER_THAN_OR_EQUAL",labkey.url.params$StartDate)));
+    }
+    if (!is.null(labkey.url.params$EndDate)) {
+	    colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_LESS_THAN_OR_EQUAL",labkey.url.params$EndDate)));
+    }
+    # Add the filter for Network
+    if (!is.null(labkey.url.params$Network)) {
+        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
+    }
+    # Add the filter for Protocol
+    if (!is.null(labkey.url.params$CustomProtocol)) {
+        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
+    }
 }
 
 # call the selectRows function to get the data from the server

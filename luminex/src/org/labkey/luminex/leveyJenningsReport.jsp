@@ -59,7 +59,7 @@
     var defaultRowSize = 30;
 
     // local variables for storing the selected graph parameters
-    var _protocolName, _titration, _analyte, _isotype, _conjugate;
+    var _protocolName, _titration, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
 
     Ext.onReady(init);
     function init()
@@ -77,6 +77,31 @@
             Ext.get('graphParamsPanel').update("Error: no protocol specified.");
             return;
         }
+
+        var getByName, selectRows;
+        var loader = function() {
+            if (getByName && selectRows) {
+                initializeReportPanels();
+            }
+        };
+
+        // Perform an initial query to check for the Network and Protocol columns
+        LABKEY.Assay.getByName({
+            name: _protocolName,
+            success: function(data) {
+                var batchFields = data[0].domains[_protocolName + ' Batch Fields'];
+                for (var i=0; i<batchFields.length; i++) {
+                    if (batchFields[i].fieldKey.toLowerCase() == "network") {
+                        _networkExists = true;
+                    }
+                    if (batchFields[i].fieldKey.toLowerCase() == "customprotocol") {
+                        _protocolExists = true;
+                    }
+                }
+                getByName = true;
+                loader();
+            }
+        });
 
         // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
         var reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
@@ -109,7 +134,8 @@
                         return;
                     }
 
-                    initializeReportPanels();
+                    selectRows = true;
+                    loader();
                 }
             },
             failure: function(response) {
@@ -181,9 +207,11 @@
             titration: _titration,
             assayName: _protocolName,
             defaultRowSize: defaultRowSize,
+            networkExists: _networkExists,
+            protocolExists: _protocolExists,
             listeners: {
-                'reportDateRangeApplied': function(startDate, endDate) {
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate);
+                'reportFilterApplied': function(startDate, endDate, network, protocol) {
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, protocol);
                 },
                 'togglePdfBtn': function(toEnable) {
                     guideSetPanel.toggleExportBtn(toEnable);
