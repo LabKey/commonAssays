@@ -273,7 +273,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.endDateLabel,
             {xtype: 'tbspacer', width: spaceWidth},
             this.endDateField,
-            {xtype: 'tbspacer', width: spaceWidth},
+            {xtype: 'tbspacer', width: spaceWidth}
         ];
         if (this.networkExists) {
             items.push(this.networkLabel);

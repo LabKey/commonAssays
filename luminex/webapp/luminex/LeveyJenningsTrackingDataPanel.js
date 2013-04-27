@@ -228,7 +228,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // create a pop-up window to display the apply guide set UI
         var win = new Ext.Window({
             layout:'fit',
-            width:1120,
+            width:1140,
             height:500,
             closeAction:'close',
             modal: true,
