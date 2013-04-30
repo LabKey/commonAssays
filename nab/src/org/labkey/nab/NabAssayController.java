@@ -30,7 +30,6 @@ import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ExperimentRunListView;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -702,10 +701,10 @@ public class NabAssayController extends SpringActionController
     {
         ExpProtocol protocol = run.getProtocol();
         // There are two potential places the view could be saved
-        CustomView runView1 = QueryService.get().getCustomView(getUser(), getContainer(),
-               AssaySchema.NAME, AssaySchema.getLegacyProtocolTableName(protocol, AssayProtocolSchema.RUNS_TABLE_NAME), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
-        CustomView runView2 = QueryService.get().getCustomView(getUser(), getContainer(),
-               getProvider(run).createProtocolSchema(getUser(), getContainer(), protocol, null).getSchemaName(), AssayProtocolSchema.RUNS_TABLE_NAME, NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+        CustomView runView1 = QueryService.get().getCustomView(getUser(), getContainer(), getUser(),
+                AssaySchema.NAME, AssaySchema.getLegacyProtocolTableName(protocol, AssayProtocolSchema.RUNS_TABLE_NAME), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+        CustomView runView2 = QueryService.get().getCustomView(getUser(), getContainer(), getUser(),
+                getProvider(run).createProtocolSchema(getUser(), getContainer(), protocol, null).getSchemaName(), AssayProtocolSchema.RUNS_TABLE_NAME, NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
 
         // Find the newest view and return its modified date
         Date d1 = runView1 == null ? null : runView1.getModified();

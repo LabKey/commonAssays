@@ -1257,7 +1257,7 @@ public class MS2Schema extends UserSchema
             else if (form.isCustomViewPeptideFilter())
             {
                 String viewName = form.getPeptideCustomViewName(context);
-                CustomView view = QueryService.get().getCustomView(context.getUser(), context.getContainer(), MS2Schema.SCHEMA_NAME, HiddenTableType.PeptidesFilter.toString(), viewName);
+                CustomView view = QueryService.get().getCustomView(context.getUser(), context.getContainer(), context.getUser(), MS2Schema.SCHEMA_NAME, HiddenTableType.PeptidesFilter.toString(), viewName);
                 try
                 {
                     CustomViewInfo.FilterAndSort filterAndSort = CustomViewInfo.FilterAndSort.fromString(view.getFilterAndSort());
