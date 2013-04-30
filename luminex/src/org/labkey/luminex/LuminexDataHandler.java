@@ -823,10 +823,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 it.remove();
             }
-
-            // issue 15042
-            if (well.getDose() == 0.0)
+            else if (well.getDose() == 0.0)
             {
+                // issue 15042
                 throw new ExperimentException("Zero values not allowed in dose (i.e. ExpConc/Dilution) for Trapezoidal AUC calculation: "
                     + well.getDataRow().getDescription() + " (" + well.getDataRow().getType() + ").");
             }
