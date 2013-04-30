@@ -33,6 +33,8 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
+import org.labkey.microarray.assay.AffymetrixAssayProvider;
+import org.labkey.microarray.assay.AffymetrixDataHandler;
 import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
@@ -133,12 +135,14 @@ public class MicroarrayModule extends SpringModule
     {
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
+        AssayService.get().registerAssayProvider(new AffymetrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new MicroarrayContainerListener());
 
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
             public Set<ExperimentRunType> getExperimentRunTypes(Container container)
