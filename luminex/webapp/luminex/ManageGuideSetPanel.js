@@ -201,7 +201,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var guideRunSetStore = new Ext.data.JsonStore({
             storeId: 'guideRunSetStore',
             root: 'rows',
-            fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
+            fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network', 'Titration/Run/Batch/CustomProtocol',
                 'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
                 'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'Five ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
         });
