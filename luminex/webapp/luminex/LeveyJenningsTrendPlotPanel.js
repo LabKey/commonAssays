@@ -54,9 +54,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.startDate = null;
         this.endDate = null;
         this.network = null;
-        this.networkAny = false;  // turns off the filter in R and in Data Panel
+        this.networkAny = true;  // false - turns on the filter in R and in Data Panel
         this.protocol = null;
-        this.protocolAny = false; // turns off the filter in R and in Data Panel
+        this.protocolAny = true; // false - turns on the filter in R and in Data Panel
 
         // initialize the y-axis scale combo for the top toolbar
         this.scaleLabel = new Ext.form.Label({text: 'Y-Axis Scale:'});
