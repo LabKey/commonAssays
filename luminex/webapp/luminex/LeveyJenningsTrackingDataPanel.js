@@ -90,7 +90,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.initComponent.call(this);
     },
 
-    getTrackingDataStore: function(startDate, endDate, network, protocol) {
+    getTrackingDataStore: function(startDate, endDate, network, networkAny, protocol, protocolAny) {
         // build the array of filters to be applied to the store
         var filterArray = [
             LABKEY.Filter.create('Titration/Name', this.titration),
@@ -106,11 +106,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         {
             filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', endDate, LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
         }
-        if (network)
+        if (!networkAny)
         {
             filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/Network', network));
         }
-        if (protocol)
+        if (!protocolAny)
         {
             filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/CustomProtocol', protocol));
         }
@@ -196,7 +196,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
-    graphParamsSelected: function(analyte, isotype, conjugate, startDate, endDate, network, protocol) {
+    graphParamsSelected: function(analyte, isotype, conjugate, startDate, endDate, network, networkAny, protocol, protocolAny) {
         // store the params locally
         this.analyte = analyte;
         this.isotype = isotype;
@@ -208,7 +208,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate));
 
         // create a new store now that the graph params are selected and bind it to the grid
-        var newStore = this.getTrackingDataStore(startDate, endDate, network, protocol);
+        var newStore = this.getTrackingDataStore(startDate, endDate, network, networkAny, protocol, protocolAny);
         var newColModel = this.getTrackingDataColModel();
         this.reconfigure(newStore, newColModel);
         newStore.load();

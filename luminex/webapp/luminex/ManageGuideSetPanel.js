@@ -127,28 +127,34 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             var allRunsStore = new Ext.data.JsonStore({
                 storeId: 'allRunsStore',
                 root: 'rows',
-                fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
+                fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network', 'Titration/Run/Batch/CustomProtocol',
                     'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
                     'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'Five ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
             });
 
             // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
-            var allRunsColModel = new Ext.grid.ColumnModel({
-                defaults: {sortable: true},
-                columns: [
+            var allRunsCols = [
                     {header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25},
                     {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200},
-                    {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
-                    {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.encodingRenderer, width:75},
-                    {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
-                    {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
-                    {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
-                    {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-                    {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                    {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                    {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
-                    {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
-                ],
+                    ];
+            if (_networkExists) {
+                allRunsCols.push({header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer});
+            }
+            if (_protocolExists) {
+                allRunsCols.push({header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
+            }
+            allRunsCols.push({header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.encodingRenderer, width:75});
+            allRunsCols.push({header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer});
+            allRunsCols.push({header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer});
+            allRunsCols.push({header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer});
+            allRunsCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
+            allRunsCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+            allRunsCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+            allRunsCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
+            allRunsCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
+            var allRunsColModel = new Ext.grid.ColumnModel({
+                defaults: {sortable: true},
+                columns: allRunsCols,
                 scope: this
             });
 
@@ -201,22 +207,28 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
+        var guideRunSetCols = [
+                {header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: this.guideSetId && !this.currentGuideSet, width:25},
+                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200}
+                ];
+        if (_networkExists) {
+            guideRunSetCols.push({header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer});
+        }
+        if (_protocolExists) {
+            guideRunSetCols.push({header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
+        }
+        guideRunSetCols.push({header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.encodingRenderer, width:75});
+        guideRunSetCols.push({header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer});
+        guideRunSetCols.push({header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer});
+        guideRunSetCols.push({header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer});
+        guideRunSetCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
+        guideRunSetCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+        guideRunSetCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+        guideRunSetCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
+        guideRunSetCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
         var guideRunSetColModel = new Ext.grid.ColumnModel({
             defaults: {sortable: true},
-            columns: [
-                {header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: this.guideSetId && !this.currentGuideSet, width:25},
-                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200},
-                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
-                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.encodingRenderer, width:75},
-                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
-                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
-                {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
-                {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-                {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
-            ],
+            columns: guideRunSetCols,
             scope: this
         });
 
@@ -408,7 +420,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             schemaName: 'assay',
             queryName: this.assayName + ' AnalyteTitration',
             columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
-                    + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
+                    + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, '
                     + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, GuideSet, IncludeInGuideSetCalculation, '
                     + 'Four ParameterCurveFit/EC50, Five ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
             filterArray: [

@@ -47,12 +47,16 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     initComponent : function() {
+        this.ANY_FIELD = '[ANY]';  // constant value used for turning filtering off
+
         this.plotRenderedHtml = null;
         this.pdfHref = null;
         this.startDate = null;
         this.endDate = null;
         this.network = null;
+        this.networkAny = false;  // turns off the filter in R and in Data Panel
         this.protocol = null;
+        this.protocolAny = false; // turns off the filter in R and in Data Panel
 
         // initialize the y-axis scale combo for the top toolbar
         this.scaleLabel = new Ext.form.Label({text: 'Y-Axis Scale:'});
@@ -138,6 +142,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     load: function(store, records, options){
                         // load data into the stores for each of the 2 params based on unique values from this store
                         this.networkCombobox.getStore().loadData(this.getArrayStoreData(store, 'Network'));
+                        this.networkCombobox.setValue(this.ANY_FIELD);
+                        this.networkAny = true;
+                        this.network = null;
                     }
                 },
                 scope: this
@@ -148,6 +155,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.networkCombobox = new Ext.form.ComboBox({
                 id: 'network-combo-box',
                 width: 75,
+                listWidth: 180,
                 store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
                 editable: false,
                 triggerAction: 'all',
@@ -158,7 +166,13 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 listeners: {
                     scope: this,
                     'select': function(combo, record, index) {
-                        this.network = combo.getValue();
+                        if (combo.getValue() == this.ANY_FIELD) {
+                            this.networkAny = true;
+                            this.network = null;
+                        } else {
+                            this.networkAny = false;
+                            this.network = combo.getValue();
+                        }
                         this.applyFilterButton.enable();
                     }
                 }
@@ -203,6 +217,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     load: function(store, records, options){
                         // load data into the stores for each of the 2 params based on unique values from this store
                         this.protocolCombobox.getStore().loadData(this.getArrayStoreData(store, 'CustomProtocol'));
+                        this.protocolCombobox.setValue(this.ANY_FIELD);
+                        this.protocolAny = true;
+                        this.protocol = null;
                     }
                 },
                 scope: this
@@ -213,6 +230,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.protocolCombobox = new Ext.form.ComboBox({
                 id: 'protocol-combo-box',
                 width: 75,
+                listWidth: 180,
                 store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
                 editable: false,
                 triggerAction: 'all',
@@ -224,6 +242,15 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     'select': function(combo, record, index) {
                         this.protocol = combo.getValue();
+                        this.applyFilterButton.enable();
+
+                        if (combo.getValue() == this.ANY_FIELD) {
+                            this.protocolAny = true;
+                            this.protocol = null;
+                        } else {
+                            this.protocolAny = false;
+                            this.protocol = combo.getValue();
+                        }
                         this.applyFilterButton.enable();
                     }
                 }
@@ -411,7 +438,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             config['Isotype'] = this.isotype;
             config['Conjugate'] = this.conjugate;
             // provide either a start and end date or the max number of rows to display
-            if (!this.startDate && !this.endDate && !this.network && !this.protocol){
+            if (!this.startDate && !this.endDate && this.networkAny && this.protocolAny){
                 config['MaxRows'] = this.defaultRowSize;
             } else {
                 if (this.startDate) {
@@ -420,10 +447,12 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 if (this.endDate) {
                     config['EndDate'] = this.endDate;
                 }
-                if (this.network) {
+                if (this.networkExists && !this.networkAny) { // networkAny turns off the filter in R
+                    config['NetworkFilter'] = true;
                     config['Network'] = this.network;
                 }
-                if (this.protocol) {
+                if (this.protocolExists && !this.protocolAny) { // protocolAny turns off the filter in R
+                    config['CustomProtocolFilter'] = true;
                     config['CustomProtocol'] = this.protocol;
                 }
             }
@@ -500,7 +529,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
             this.setTabsToRender();
             this.displayTrendPlot();
-            this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.protocol);
+            this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.networkAny, this.protocol, this.protocolAny);
         }
     },
 
@@ -514,16 +543,22 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.network = null;
         if (this.networkCombobox) {
             this.networkCombobox.reset();
+            this.networkCombobox.setValue(this.ANY_FIELD);
+            this.networkAny = true;
+            this.network = null;
         }
         this.protocol = null;
         if (this.protocolCombobox) {
             this.protocolCombobox.reset();
+            this.protocolCombobox.setValue(this.ANY_FIELD);
+            this.protocolAny = true;
+            this.protocol = null;
         }
 
 
         this.setTabsToRender();
         this.displayTrendPlot();
-        this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.protocol);
+        this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.networkAny, this.protocol, this.protocolAny);
     },
 
     getPdfHref: function() {
@@ -539,10 +574,12 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     getArrayStoreData: function(store, colName) {
-        var storeData = [ [null, '[None]'] ];
+        var storeData = [ [this.ANY_FIELD, this.ANY_FIELD] ];
         Ext.each(store.collect(colName, true, false).sort(), function(value){
             if (value) {
                 storeData.push([value, value]);
+            } else {
+                storeData.push([value, '[Blank]']);
             }
         });
         return storeData;

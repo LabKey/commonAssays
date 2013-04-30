@@ -210,8 +210,8 @@
             networkExists: _networkExists,
             protocolExists: _protocolExists,
             listeners: {
-                'reportFilterApplied': function(startDate, endDate, network, protocol) {
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, protocol);
+                'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, networkAny, protocol, protocolAny);
                 },
                 'togglePdfBtn': function(toEnable) {
                     guideSetPanel.toggleExportBtn(toEnable);
@@ -230,7 +230,8 @@
                 'appliedGuideSetUpdated': function() {
                     trendPlotPanel.setTabsToRender();
                     trendPlotPanel.displayTrendPlot();
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
+                            trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
                 }
             }
         });

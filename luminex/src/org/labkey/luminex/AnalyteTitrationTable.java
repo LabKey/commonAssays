@@ -127,6 +127,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         defaultCols.add(FieldKey.fromParts("Titration", "Standard"));
         defaultCols.add(FieldKey.fromParts("Titration", "QCControl"));
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Batch", "Network"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "Batch", "CustomProtocol"));
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Folder"));
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "NotebookNo"));
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "AssayType"));

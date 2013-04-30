@@ -63,11 +63,11 @@ if (!is.null(labkey.url.params$MaxRows)) {
 	    colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_LESS_THAN_OR_EQUAL",labkey.url.params$EndDate)));
     }
     # Add the filter for Network
-    if (!is.null(labkey.url.params$Network)) {
+    if (!is.null(labkey.url.params$NetworkFilter)) {
         colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
     }
     # Add the filter for Protocol
-    if (!is.null(labkey.url.params$CustomProtocol)) {
+    if (!is.null(labkey.url.params$CustomProtocolFilter)) {
         colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
     }
 }
