@@ -6120,7 +6120,7 @@ public class MS2Controller extends SpringActionController
                 if (runId > 0)
                 {
                     TableInfo info = MS2Manager.getTableInfoRuns();
-                    RunStatus run = Table.selectObject(info, runId, RunStatus.class);
+                    RunStatus run = new TableSelector(info).getObject(runId, RunStatus.class);
                     if (run == null)
                         status = "ERROR->run=" + runId + ",message=Run not found in database";
                     else if (run.getDeleted())

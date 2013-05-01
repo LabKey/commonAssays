@@ -717,7 +717,7 @@ public class MS2Manager
 
         if (null == summary)
         {
-            summary = Table.selectObject(getTableInfoPeptideProphetSummaries(), runId, PeptideProphetSummary.class);
+            summary = new TableSelector(getTableInfoPeptideProphetSummaries()).getObject(runId, PeptideProphetSummary.class);
             _addPeptideProphetSummaryToCache(summary);
         }
 
@@ -1111,17 +1111,17 @@ public class MS2Manager
 
     public static PeptideQuantitation getQuantitation(long peptideId)
     {
-        return Table.selectObject(getTableInfoQuantitation(), peptideId, PeptideQuantitation.class);
+        return new TableSelector(getTableInfoQuantitation()).getObject(peptideId, PeptideQuantitation.class);
     }
 
     public static LibraQuantResult getLibraQuantResult(long peptideId)
     {
-        return Table.selectObject(getTableInfoITraqPeptideQuantitation(), peptideId, LibraQuantResult.class);
+        return new TableSelector(getTableInfoITraqPeptideQuantitation()).getObject(peptideId, LibraQuantResult.class);
     }
 
     public static ITraqProteinQuantitation getITraqProteinQuantitation(int groupId)
     {
-        return Table.selectObject(getTableInfoITraqProteinQuantitation(), groupId, ITraqProteinQuantitation.class);
+        return new TableSelector(getTableInfoITraqProteinQuantitation()).getObject(groupId, ITraqProteinQuantitation.class);
     }
 
     public static int verifyRowIndex(long[] index, int rowIndex, long peptideId)
@@ -1395,7 +1395,7 @@ public class MS2Manager
 
         if (null == fraction)
         {
-            fraction = Table.selectObject(getTableInfoFractions(), fractionId, MS2Fraction.class);
+            fraction = new TableSelector(getTableInfoFractions()).getObject(fractionId, MS2Fraction.class);
             if (fraction != null)
             {
                 _addFractionToCache(fractionId, fraction);

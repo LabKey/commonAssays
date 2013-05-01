@@ -16,13 +16,13 @@
 
 package org.labkey.ms2.protein;
 
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.protein.fasta.FastaFile;
-import org.labkey.api.data.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class FastaReloaderJob extends PipelineJob
                 // Update the SeqIds in ProteinSequences table for a previously loaded FASTA file.  This is to help fix up
                 // null SeqIds that, up until CPAS 1.4, occurred when a single mouthful contained two or more identical
                 // sequences.
-                FastaFile fasta = Table.selectObject(ProteinManager.getTableInfoFastaFiles(), oldFastaId, FastaFile.class);
+                FastaFile fasta = new TableSelector(ProteinManager.getTableInfoFastaFiles()).getObject(oldFastaId, FastaFile.class);
                 if (fasta != null)
                 {
                     String filename = fasta.getFilename();

@@ -37,6 +37,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
@@ -683,7 +684,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         SimpleFilter filter = new SimpleFilter("AnalyteId", analyte.getRowId());
         filter.addCondition("TitrationId", titration.getRowId());
 
-        AnalyteTitration analyteTitration = Table.selectObject(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
+        AnalyteTitration analyteTitration = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getObject(AnalyteTitration.class);
         boolean newRow = analyteTitration == null;
         if (analyteTitration == null)
         {

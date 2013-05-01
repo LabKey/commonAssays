@@ -23,6 +23,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
@@ -152,7 +153,7 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             public Analyte get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
             {
-                return Table.selectObject(LuminexProtocolSchema.getTableInfoAnalytes(), key, Analyte.class);
+                return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes()).getObject(key, Analyte.class);
             }
 
             @Override

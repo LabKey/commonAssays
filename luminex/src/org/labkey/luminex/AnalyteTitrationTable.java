@@ -27,6 +27,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -196,16 +197,16 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             }
 
             @Override
-            protected AnalyteTitration get(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException, SQLException
+            protected AnalyteTitration get(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException
             {
                 SimpleFilter filter = new SimpleFilter("AnalyteId", key.getKey());
                 filter.addCondition("TitrationId", key.getValue());
-                return Table.selectObject(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
+                return new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getObject(AnalyteTitration.class);
             }
 
             protected Analyte getAnalyte(int rowId)
             {
-                Analyte analyte = Table.selectObject(LuminexProtocolSchema.getTableInfoAnalytes(), rowId, Analyte.class);
+                Analyte analyte = new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes()).getObject(rowId, Analyte.class);
                 if (analyte == null)
                 {
                     throw new IllegalStateException("Unable to find referenced analyte: " + rowId);
@@ -215,7 +216,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
             protected Titration getTitration(int rowId)
             {
-                Titration titration = Table.selectObject(LuminexProtocolSchema.getTableInfoTitration(), rowId, Titration.class);
+                Titration titration = new TableSelector(LuminexProtocolSchema.getTableInfoTitration()).getObject(rowId, Titration.class);
                 if (titration == null)
                 {
                     throw new IllegalStateException("Unable to find referenced titration: " + rowId);
@@ -311,7 +312,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                 if (newGuideSetId != null)
                 {
-                    GuideSet guideSet = Table.selectObject(LuminexProtocolSchema.getTableInfoGuideSet(), newGuideSetId.intValue(), GuideSet.class);
+                    GuideSet guideSet = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(newGuideSetId.intValue(), GuideSet.class);
                     if (guideSet == null)
                     {
                         throw new ValidationException("No such guideSetId: " + newGuideSetId);

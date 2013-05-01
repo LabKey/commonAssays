@@ -23,6 +23,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
@@ -261,7 +262,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         if (dataRowIdInt == null)
             throw new IllegalArgumentException("Luminex data rows must have integer primary keys.  PK provided: " + dataRowId);
-        LuminexDataRow dataRow = Table.selectObject(LuminexProtocolSchema.getTableInfoDataRow(), dataRowIdInt, LuminexDataRow.class);
+        LuminexDataRow dataRow = new TableSelector(LuminexProtocolSchema.getTableInfoDataRow()).getObject(dataRowIdInt, LuminexDataRow.class);
         if (dataRow == null)
         {
             return null;

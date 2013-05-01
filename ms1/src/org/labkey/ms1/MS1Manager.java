@@ -127,17 +127,17 @@ public class MS1Manager
 
     public DataFile getDataFile(int fileId) throws SQLException
     {
-        return Table.selectObject(getTable(TABLE_FILES), fileId, DataFile.class);
+        return new TableSelector(getTable(TABLE_FILES)).getObject(fileId, DataFile.class);
     }
 
     public Feature getFeature(int featureId) throws SQLException
     {
-        return Table.selectObject(getTable(TABLE_FEATURES), featureId, Feature.class);
+        return new TableSelector(getTable(TABLE_FEATURES)).getObject(featureId, Feature.class);
     }
 
     public Scan getScan(int scanId) throws SQLException
     {
-        return Table.selectObject(getTable(TABLE_SCANS), scanId, Scan.class);
+        return new TableSelector(getTable(TABLE_SCANS)).getObject(scanId, Scan.class);
     }
 
     public Software[] getSoftware(int fileId) throws SQLException

@@ -20,9 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ForeignKey;
-import org.labkey.api.data.MultiValuedRenderContext;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.DefaultQueryUpdateService;
@@ -215,7 +215,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
             {
                 for (Integer analyteId : analyteIds)
                 {
-                    Analyte analyte = Table.selectObject(LuminexProtocolSchema.getTableInfoAnalytes(), analyteId, Analyte.class);
+                    Analyte analyte = new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes()).getObject(analyteId, Analyte.class);
                     if (analyte == null)
                     {
                         throw new QueryUpdateServiceException("No such analyte: " + analyteId);

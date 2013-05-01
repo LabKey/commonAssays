@@ -98,7 +98,7 @@ public class ViabilityManager
      */
     public static ViabilityResult getResult(Container c, int resultRowId) throws SQLException
     {
-        ViabilityResult result = Table.selectObject(ViabilitySchema.getTableInfoResults(), resultRowId, ViabilityResult.class);
+        ViabilityResult result = new TableSelector(ViabilitySchema.getTableInfoResults()).getObject(resultRowId, ViabilityResult.class);
         if (result == null)
             return null;
         // lazily fetch specimens and properties

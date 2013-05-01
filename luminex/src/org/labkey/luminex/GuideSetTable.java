@@ -25,6 +25,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
@@ -210,7 +211,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         @Override
         public GuideSet get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
         {
-            return Table.selectObject(LuminexProtocolSchema.getTableInfoGuideSet(), key, GuideSet.class);
+            return new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(key, GuideSet.class);
         }
 
         @Override
