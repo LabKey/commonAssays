@@ -165,7 +165,12 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
                     type.setEnabled(titration, hiddenValue.equals("true"));
                 }
             }
-            result.add(titration);
+
+            // issue 17728: only add titrations that are set as one of the specified types
+            if (titration.hasRole())
+            {
+                result.add(titration);
+            }
         }
         return result;
     }

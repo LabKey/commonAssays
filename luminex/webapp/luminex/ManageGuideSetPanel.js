@@ -135,8 +135,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
             var allRunsCols = [
                     {header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25},
-                    {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200},
-                    ];
+                    {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200}
+                ];
             if (_networkExists) {
                 allRunsCols.push({header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer});
             }

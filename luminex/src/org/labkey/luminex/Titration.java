@@ -97,6 +97,11 @@ public class Titration implements Serializable
         return _unknown;
     }
 
+    public boolean hasRole()
+    {
+        return _standard || _qcControl || _unknown;
+    }
+
     public double getMaxFI()
     {
         return _maxFI;

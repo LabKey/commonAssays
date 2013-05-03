@@ -72,8 +72,8 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     initComponent : function() {
         // query the WellExclusion table to see if there are any existing exclusions for this replicate Group
         LABKEY.Query.selectRows({
-            schemaName: 'assay',
-            queryName: this.queryName + ' WellExclusion',
+            schemaName: 'assay.Luminex.' + this.queryName,
+            queryName: 'WellExclusion',
             filterArray: [
                 LABKEY.Filter.create('description', this.description),
                 LABKEY.Filter.create('type', this.type),
@@ -189,9 +189,9 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                    + " FROM \"" + this.queryName + " Data\" AS x "
+                    + " FROM Data AS x "
                     + " WHERE x.Data.Run.RowId = " + this.runId, // todo: check if this works for 2 files in one run that have different sets of analytes
-                schemaName: this.schemaName,
+                schemaName: "assay.Luminex." + this.queryName,
                 autoLoad: true,
                 listeners: {
                     scope: this,
@@ -310,14 +310,15 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
     queryForReplicateGroupWellsAndFileName: function()
     {
-        var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name, x.Titration "
-                + "FROM \"" + this.queryName + " Data\" AS x WHERE ";
+        var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name, "
+                + "CASE WHEN (x.Titration IS NOT NULL AND (x.Titration.Standard = TRUE OR x.Titration.QCControl = TRUE OR x.Titration.Unknown = TRUE)) THEN TRUE ELSE FALSE END AS IsTitration "
+                + "FROM Data AS x WHERE ";
         sql += (this.description != null ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
         sql += " AND x.Type = '" + this.type + "' AND x.Data.RowId = " + this.dataId;
 
         // query to get the wells and data id (file name) for the given replicate group
         LABKEY.Query.executeSql({
-            schemaName: 'assay',
+            schemaName: 'assay.Luminex.' + this.queryName,
             sql: sql,
             sort: 'Well',
             success: function(data){
@@ -333,7 +334,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                     });
 
                     filename = data.rows[i].Name;
-                    isTitration = data.rows[i].Titration != null;
+                    isTitration = data.rows[i].IsTitration;
                 }
                 
                 Ext.get('replicate_group_wells').update(wells.join(", "));
@@ -348,8 +349,8 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     {
         // query to see if there are any run level exclusions for this RunId
         LABKEY.Query.selectRows({
-            schemaName: 'assay',
-            queryName: this.queryName + ' RunExclusion',
+            schemaName: "assay.Luminex." + this.queryName,
+            queryName: 'RunExclusion',
             filterArray: [LABKEY.Filter.create('RunId', this.runId)],
             columns: 'Analytes/Name',
             success: function(data){
@@ -389,8 +390,8 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
         // config of data to save for the given replicate group exclusion
         var config = {
-            schemaName: 'assay',
-            queryName: this.queryName + ' WellExclusion',
+            schemaName: "assay.Luminex." + this.queryName,
+            queryName: 'WellExclusion',
             rows: [{
                 description: this.description,
                 type: this.type,
