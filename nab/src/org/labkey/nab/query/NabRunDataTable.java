@@ -37,7 +37,7 @@ public class NabRunDataTable extends NabRunDataBaseTable
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
     {
-        List<PropertyDescriptor>pds = NabProviderSchema.getExistingDataProperties(protocol, _nabSpecimenTable.getCutoffValues());
+        List<PropertyDescriptor>pds = NabProviderSchema.getExistingDataProperties(protocol, _schema.getCutoffValues());
 
         Collections.sort(pds, new Comparator<PropertyDescriptor>()
         {

@@ -28,9 +28,10 @@
 #  - 4.1.20120806 : Issue 15709: Luminex tranform : QC Control plots not displayed when EC50 value out of acceptable range
 #  - 4.2.20121121 : Changes for LabKey server 12.3, Issue 15042: Transform script (and AUC calculation error) when luminex file uploaded that has an ExpConc value of zero for a standard well
 #  - 5.0.20121210 : Change for LabKey server 13.1
+#  - 5.1.20130424 : Move fix for Issue 15042 up to earliest curve fit calculation
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "5.0.20121210";
+transformVersion = "5.1.20130424";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -355,6 +356,14 @@ if (nrow(titration.data) > 0)
                 # use the decided upon conversion function for handling of negative values
                 dat$fi = sapply(dat$fi, fiConversion);
 
+                # Issue 15042: check to make sure all of the ExpConc/Dilution values are non-rounded (i.e. not zero)
+                zeroDoses = unique(subset(dat, dose==0, select=c("description", "well")));
+                if (nrow(zeroDoses) > 0)
+                {
+                    wells = paste(zeroDoses$description, zeroDoses$well, collapse=', ');
+                    stop(paste("Zero values not allowed in dose (i.e. ExpConc/Dilution) for titration curve fit calculation:", wells));
+                }
+
                 if (fitTypes[typeIndex] == "4pl")
                 {
                     tryCatch({
@@ -638,14 +647,6 @@ if (any(dat$isStandard) & length(standards) > 0)
             if (nrow(standard.dat) == 0 | !any(standard.dat$isStandard))
             {
                 next();
-            }
-
-            # Issue 15042: check to make sure all of the standard ExpConc values are non-rounded (i.e. not zero)
-            zeroExpConcs = unique(subset(standard.dat, well_role=="Standard" & expected_conc==0, select=c("description", "well")));
-            if (nrow(zeroExpConcs) > 0)
-            {
-                wells = paste(zeroExpConcs$description, zeroExpConcs$well, collapse=', ');
-                stop(paste("Zero values not allowed in ExpConc for standard titration curve fit calculation:", wells));
             }
 
             # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns

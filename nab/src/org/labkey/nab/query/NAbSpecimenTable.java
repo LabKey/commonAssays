@@ -20,24 +20,17 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabManager;
-
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
 {
     private static final FieldKey CONTAINER_FIELD_KEY = FieldKey.fromParts("Container");
-
-    private Set<Double> _cutoffValues;
 
     public NAbSpecimenTable(NabProtocolSchema schema)
     {
@@ -65,21 +58,6 @@ public class NAbSpecimenTable extends FilteredTable<NabProtocolSchema>
         sql.append(filter.getSQLFragment(getSchema(), CONTAINER_FIELD_KEY, _userSchema.getContainer()));
         sql.append(")");
         addCondition(sql, CONTAINER_FIELD_KEY);
-    }
-
-    public Set<Double> getCutoffValues()
-    {
-        if (_cutoffValues == null)
-        {
-            SQLFragment sql = new SQLFragment("SELECT DISTINCT Cutoff FROM ");
-            sql.append(NabProtocolSchema.getTableInfoCutoffValue(), "cv");
-            sql.append(", ");
-            sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
-            sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
-            sql.add(_userSchema.getProtocol().getRowId());
-            _cutoffValues = new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class));
-        }
-        return _cutoffValues;
     }
 
     private SQLFragment getSelectedCurveFitAUC(boolean positive)

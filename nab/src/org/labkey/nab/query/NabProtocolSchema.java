@@ -26,7 +26,9 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
@@ -68,6 +70,8 @@ public class NabProtocolSchema extends AssayProtocolSchema
     public static final String NAB_SPECIMEN_TABLE_NAME = "NAbSpecimen";
     public static final String NAB_DBSCHEMA_NAME = "nab";
 
+    private Set<Double> _cutoffValues;
+
     public NabProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         super(user, container, protocol, targetStudy);
@@ -107,6 +111,21 @@ public class NabProtocolSchema extends AssayProtocolSchema
     protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
     {
         return new NabResultsQueryView(getProtocol(), context, settings);
+    }
+
+    public Set<Double> getCutoffValues()
+    {
+        if (_cutoffValues == null)
+        {
+            SQLFragment sql = new SQLFragment("SELECT DISTINCT Cutoff FROM ");
+            sql.append(NabProtocolSchema.getTableInfoCutoffValue(), "cv");
+            sql.append(", ");
+            sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
+            sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
+            sql.add(getProtocol().getRowId());
+            _cutoffValues = new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class));
+        }
+        return _cutoffValues;
     }
 
     public static class NabResultsQueryView extends ResultsQueryView

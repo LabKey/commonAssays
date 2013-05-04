@@ -64,7 +64,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
     public abstract String getInputMaterialPropertyName();
     public abstract String getDataRowLsidPrefix();
 
-    private NabProtocolSchema _schema;
+    protected NabProtocolSchema _schema;
     protected NAbSpecimenTable _nabSpecimenTable;
     private ExpProtocol _protocol;
 
@@ -214,7 +214,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         specimenColumn.setFk(lfkSpecimen);
         addColumn(specimenColumn);
 
-        Set<Double> cutoffValuess = _nabSpecimenTable.getCutoffValues();
+        Set<Double> cutoffValuess = _schema.getCutoffValues();
         for (Double value : cutoffValuess)
         {
             final Integer intCutoff = (int)Math.floor(value);
