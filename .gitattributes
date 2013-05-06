@@ -566,15 +566,6 @@ flow/src/org/labkey/flow/webparts/FlowOverview.java -text
 flow/src/org/labkey/flow/webparts/FlowSummary.jsp -text
 flow/src/org/labkey/flow/webparts/FlowSummaryWebPart.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
-lab/Lab.iml -text
-lab/build.xml -text
-lab/module.properties -text
-lab/src/org/labkey/lab/LabController.java -text
-lab/src/org/labkey/lab/LabFolderTabs.java -text
-lab/src/org/labkey/lab/LabFolderType.java -text
-lab/src/org/labkey/lab/LabModule.java -text
-lab/src/org/labkey/lab/audit/LabEventsAuditViewFactory.java -text
-lab/src/org/labkey/lab/history.jsp -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
