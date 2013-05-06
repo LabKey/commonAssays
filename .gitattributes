@@ -569,7 +569,6 @@ flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 lab/Lab.iml -text
 lab/build.xml -text
 lab/module.properties -text
-lab/src/org/labkey/lab/LabContainerListener.java -text
 lab/src/org/labkey/lab/LabController.java -text
 lab/src/org/labkey/lab/LabFolderTabs.java -text
 lab/src/org/labkey/lab/LabFolderType.java -text
