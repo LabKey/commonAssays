@@ -220,7 +220,7 @@ public class FCSHeader
             try {dataLast = Integer.parseInt(keywords.get("$ENDDATA"));}catch(Exception x){}
         if (dataOffset != 0)
             is.skip(dataOffset - cbRead);
-        _parameterCount = Integer.parseInt(getKeyword("$PAR"));
+        try {_parameterCount = Integer.parseInt(keywords.get("$PAR"));}catch(Exception x){}
     }
 
 

@@ -363,6 +363,12 @@ public class FlowSchema extends UserSchema
 //            ret.setInputData(_script.getExpObject());
 //        }
 
+        FlowProtocol protocol = getProtocol();
+        if (protocol != null)
+        {
+            ret.setProtocol(_protocol.getProtocol());
+        }
+
         ret.addColumn(ExpRunTable.Column.RowId);
         DetailsURL detailsURL = new DetailsURL(new ActionURL(RunController.ShowRunAction.class, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString()));
         ret.setDetailsURL(detailsURL);
