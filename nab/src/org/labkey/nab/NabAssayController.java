@@ -822,13 +822,6 @@ public class NabAssayController extends SpringActionController
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _runRowId), view);
 
-            boolean tMigrate = false;
-            if (tMigrate)
-            {
-                NabUpgradeCode upgradeCode = new NabUpgradeCode();
-//                upgradeCode.migrateToNabSpecimen(getUser());
-            }
-
             return view;
         }
 
