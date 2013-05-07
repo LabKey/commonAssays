@@ -66,9 +66,6 @@ public class ElisaModule extends DefaultModule
     @Override
     public void doStartup(ModuleContext moduleContext)
     {
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(new ElisaContainerListener());
-
         PlateService.get().registerPlateTypeHandler(new ElisaPlateTypeHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElisaDataHandler());
 

@@ -85,7 +85,6 @@ elisa/Elisa.iml -text
 elisa/build.xml -text
 elisa/module.properties -text
 elisa/src/org/labkey/elisa/ElisaAssayProvider.java -text
-elisa/src/org/labkey/elisa/ElisaContainerListener.java -text
 elisa/src/org/labkey/elisa/ElisaController.java -text
 elisa/src/org/labkey/elisa/ElisaDataHandler.java -text
 elisa/src/org/labkey/elisa/ElisaModule.java -text
