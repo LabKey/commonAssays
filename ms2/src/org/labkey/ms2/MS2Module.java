@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
@@ -44,7 +43,6 @@ import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
-import org.labkey.api.view.JspView;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
@@ -87,7 +85,7 @@ import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.scoring.ScoringController;
-import org.labkey.ms2.search.MS2SearchWebpart;
+import org.labkey.ms2.search.MSSearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.beans.PropertyChangeEvent;
@@ -195,11 +193,11 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     return result;
                 }
             },
-            new BaseWebPartFactory(MS2SearchWebpart.NAME)
+            new BaseWebPartFactory(MSSearchWebpart.NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws Exception
                 {
-                    return new MS2SearchWebpart();
+                    return new MSSearchWebpart();
                 }
             }
         ));
