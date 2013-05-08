@@ -1655,7 +1655,6 @@ viability/src/org/labkey/viability/ViabilityAssayProvider.java -text
 viability/src/org/labkey/viability/ViabilityAssayRunUploadForm.java -text
 viability/src/org/labkey/viability/ViabilityAssaySchema.java -text
 viability/src/org/labkey/viability/ViabilityAssayUploadWizardAction.java -text
-viability/src/org/labkey/viability/ViabilityContainerListener.java -text
 viability/src/org/labkey/viability/ViabilityController.java -text
 viability/src/org/labkey/viability/ViabilityDataExchangeHandler.java -text
 viability/src/org/labkey/viability/ViabilityManager.java -text

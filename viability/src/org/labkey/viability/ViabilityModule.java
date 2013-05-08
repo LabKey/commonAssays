@@ -62,8 +62,6 @@ public class ViabilityModule extends DefaultModule
 
     public void doStartup(ModuleContext moduleContext)
     {
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(new ViabilityContainerListener());
         ExperimentService.get().registerExperimentDataHandler(new ViabilityTsvDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new GuavaDataHandler());
         AssayService.get().registerAssayProvider(new ViabilityAssayProvider());
