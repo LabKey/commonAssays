@@ -23,27 +23,26 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.NabAssayController" %>
-<%@ page import="org.labkey.nab.NabAssayRun" %>
-<%@ page import="org.labkey.nab.NabDataHandler" %>
+<%@ page import="org.labkey.api.assay.dilution.DilutionAssayRun" %>
+<%@ page import="org.labkey.api.assay.dilution.DilutionDataHandler" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="org.labkey.nab.NabManager" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
     NabAssayController.RenderAssayBean bean = me.getModelBean();
-    NabAssayRun assay = bean.getAssay();
+    DilutionAssayRun assay = bean.getAssay();
     ViewContext context = me.getViewContext();
     // the data for the sample properties table
     List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
     Set<String> pdsWithData = new HashSet<String>();
 
-    for (NabAssayRun.SampleResult result : bean.getSampleResults())
+    for (DilutionAssayRun.SampleResult result : bean.getSampleResults())
     {
         Map<PropertyDescriptor, Object> sampleProps = new LinkedHashMap<PropertyDescriptor, Object>(result.getSampleProperties());
 

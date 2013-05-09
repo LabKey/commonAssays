@@ -18,24 +18,20 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DefaultSchema;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabDataHandler;
-import org.labkey.nab.NabManager;
-import org.labkey.nab.SinglePlateNabDataHandler;
-import org.labkey.nab.SampleInfo;
+import org.labkey.api.assay.dilution.SampleInfo;
 
 import java.util.*;
 
@@ -44,12 +40,9 @@ import java.util.*;
  * Date: Oct 3, 2007
  * Time: 4:22:26 PM
  */
-public class NabProviderSchema extends AssayProviderSchema
+public class NabProviderSchema extends DilutionProviderSchema
 {
     public static final String SCHEMA_NAME = "Nab";
-
-    public static final String SAMPLE_PREPARATION_METHOD_TABLE_NAME = "SamplePreparationMethod";
-    public static final String CURVE_FIT_METHOD_TABLE_NAME = "CurveFitMethod";
 
     static public void register()
     {
@@ -65,29 +58,13 @@ public class NabProviderSchema extends AssayProviderSchema
 
     public NabProviderSchema(User user, Container container, AssayProvider provider, @Nullable Container targetStudy, boolean hidden)
     {
-        super(user, container, provider, targetStudy);
-        _hidden = hidden;
+        super(user, container, provider, SCHEMA_NAME, targetStudy, hidden);
     }
 
-    public Set<String> getTableNames()
+    @Override
+    protected Set<String> getTableNames(boolean visible)
     {
-        return getTableNames(false);
-    }
-
-    public Set<String> getVisibleTableNames()
-    {
-        return getTableNames(true);
-    }
-
-    private Set<String> getTableNames(boolean visible)
-    {
-        Set<String> names = new TreeSet<String>(new Comparator<String>()
-        {
-            public int compare(String o1, String o2)
-            {
-                return o1.compareToIgnoreCase(o2);
-            }
-        });
+        Set<String> names = super.getTableNames(visible);
 
         if (!visible)
         {
@@ -97,12 +74,10 @@ public class NabProviderSchema extends AssayProviderSchema
                 names.add(AssaySchema.getLegacyProtocolTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME));
             }
         }
-
-        names.add(SAMPLE_PREPARATION_METHOD_TABLE_NAME);
-        names.add(CURVE_FIT_METHOD_TABLE_NAME);
         return names;
     }
 
+    @Override
     public TableInfo createTable(String name)
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
@@ -143,28 +118,28 @@ public class NabProviderSchema extends AssayProviderSchema
         return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), protocol, getTargetStudy()), protocol);
     }
 
-    private static final String[] _fixedRunDataProps = {NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, NabDataHandler.FIT_ERROR_PROPERTY, NabDataHandler.WELLGROUP_NAME_PROPERTY};
-    private static final String[] _curveFitSuffixes = {"", NabDataHandler.PL4_SUFFIX, NabDataHandler.PL5_SUFFIX, NabDataHandler.POLY_SUFFIX};
-    private static final String[] _aucPrefixes = {NabDataHandler.AUC_PREFIX, NabDataHandler.pAUC_PREFIX};
-    private static final String[] _oorSuffixes = {"", NabDataHandler.OOR_SUFFIX};
+    private static final String[] _fixedRunDataProps = {DilutionDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, DilutionDataHandler.FIT_ERROR_PROPERTY, DilutionDataHandler.WELLGROUP_NAME_PROPERTY};
+    private static final String[] _curveFitSuffixes = {"", DilutionDataHandler.PL4_SUFFIX, DilutionDataHandler.PL5_SUFFIX, DilutionDataHandler.POLY_SUFFIX};
+    private static final String[] _aucPrefixes = {DilutionDataHandler.AUC_PREFIX, DilutionDataHandler.pAUC_PREFIX};
+    private static final String[] _oorSuffixes = {"", DilutionDataHandler.OOR_SUFFIX};
     public static List<PropertyDescriptor> getExistingDataProperties(ExpProtocol protocol, Set<Double> cutoffValues)
     {
         List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
         Map<Integer, String> cutoffFormats = new HashMap<Integer, String>();
         Container container = protocol.getContainer();
         for (String fixedProp : _fixedRunDataProps)
-            propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, fixedProp, cutoffFormats));
+            propertyDescriptors.add(DilutionDataHandler.getPropertyDescriptor(container, protocol, fixedProp, cutoffFormats));
 
         for (String prefix : _aucPrefixes)
             for (String suffix : _curveFitSuffixes)
-                propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, prefix + suffix, cutoffFormats));
+                propertyDescriptors.add(DilutionDataHandler.getPropertyDescriptor(container, protocol, prefix + suffix, cutoffFormats));
 
         for (Double cutoffValue : cutoffValues)
             for (String oorSuffix : _oorSuffixes)
             {
-                propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, NabDataHandler.POINT_IC_PREFIX + cutoffValue.intValue() + oorSuffix, cutoffFormats));
+                propertyDescriptors.add(DilutionDataHandler.getPropertyDescriptor(container, protocol, DilutionDataHandler.POINT_IC_PREFIX + cutoffValue.intValue() + oorSuffix, cutoffFormats));
                 for (String suffix : _curveFitSuffixes)
-                    propertyDescriptors.add(NabDataHandler.getPropertyDescriptor(container, protocol, NabDataHandler.CURVE_IC_PREFIX + cutoffValue.intValue() + suffix + oorSuffix, cutoffFormats));
+                    propertyDescriptors.add(DilutionDataHandler.getPropertyDescriptor(container, protocol, DilutionDataHandler.CURVE_IC_PREFIX + cutoffValue.intValue() + suffix + oorSuffix, cutoffFormats));
             }
 
         return propertyDescriptors;

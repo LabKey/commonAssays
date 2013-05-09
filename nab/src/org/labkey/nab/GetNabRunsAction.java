@@ -36,6 +36,7 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
@@ -205,7 +206,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         _properties.put("assayName", protocol.getName());
         _properties.put("assayDescription", protocol.getDescription());
         _properties.put("assayId", protocol.getRowId());
-        NabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
+        DilutionDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
         for (ExpRun run : getRuns(protocol, provider, form, errors))
         {
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),

@@ -24,6 +24,7 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.springframework.validation.BindException;
 
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
             AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
             if (!(provider instanceof NabAssayProvider))
                 throw new IllegalStateException("Non-NAb run found.");
-            NabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
+            DilutionDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
 
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));

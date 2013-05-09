@@ -39,6 +39,11 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.dilution.SampleProperty;
+import org.labkey.api.assay.nab.Luc5Assay;
+import org.labkey.api.assay.dilution.SafeTextConverter;
+import org.labkey.api.assay.dilution.SampleInfo;
 import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
@@ -1724,8 +1729,8 @@ public class NabController extends SpringActionController
             {
                 public int compare(WellGroup group1, WellGroup group2)
                 {
-                    String sampleId1 = (String) group1.getProperty(OldNabManager.SampleProperty.SampleId.name());
-                    String sampleId2 = (String) group2.getProperty(OldNabManager.SampleProperty.SampleId.name());
+                    String sampleId1 = (String) group1.getProperty(SampleProperty.SampleId.name());
+                    String sampleId2 = (String) group2.getProperty(SampleProperty.SampleId.name());
                     return sampleId1.compareToIgnoreCase(sampleId2);
                 }
             });
@@ -1733,7 +1738,7 @@ public class NabController extends SpringActionController
             Map<WellGroup, ParticipantVisit> sampleInfoMap = new LinkedHashMap<WellGroup, ParticipantVisit>();
             for (WellGroup wellgroup : sortedGroups)
             {
-                String sampleId = (String) wellgroup.getProperty(OldNabManager.SampleProperty.SampleId.name());
+                String sampleId = (String) wellgroup.getProperty(SampleProperty.SampleId.name());
                 ParticipantVisit sampleInfo = form.getReshowData(sampleId);
                 if (sampleInfo == null)
                     sampleInfo = SpecimenService.get().getSampleInfo(targetContainer, sampleId);
@@ -1953,7 +1958,7 @@ public class NabController extends SpringActionController
             Set<String> propertySet = new HashSet<String>();
             for (WellGroup group : sampleInfoMap.keySet())
                 propertySet.addAll(group.getPropertyNames());
-            propertySet.remove(OldNabManager.SampleProperty.SampleId.name());
+            propertySet.remove(SampleProperty.SampleId.name());
             _sampleProperties = new ArrayList<String>(propertySet);
             Collections.sort(_sampleProperties);
         }
@@ -2013,3 +2018,4 @@ public class NabController extends SpringActionController
         }
     }
 }
+

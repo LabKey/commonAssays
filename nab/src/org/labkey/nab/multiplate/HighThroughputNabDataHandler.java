@@ -16,6 +16,7 @@
 package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.property.DomainProperty;
@@ -186,7 +187,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler
     {
         List<WellData> wells = new ArrayList<WellData>();
         // All well groups use the same plate template, so it's okay to just check the dilution direction of the first group:
-        boolean reverseDirection = Boolean.parseBoolean((String) groups.get(0).getProperty(NabManager.SampleProperty.ReverseDilutionDirection.name()));
+        boolean reverseDirection = Boolean.parseBoolean((String) groups.get(0).getProperty(SampleProperty.ReverseDilutionDirection.name()));
         for (WellGroup group : groups)
         {
             for (DomainProperty property : properties.values())

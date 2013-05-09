@@ -15,12 +15,12 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -39,11 +39,9 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
-import org.labkey.nab.DilutionSummary;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabAssayRun;
 import org.labkey.nab.NabManager;
-import org.labkey.nab.NabSpecimen;
+import org.labkey.api.assay.nab.NabSpecimen;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,7 +172,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
         for (ExpMaterial material : sampleInputs)
@@ -209,7 +207,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected NabAssayRun createNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
     {
         return new SinglePlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }
@@ -229,13 +227,13 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    public Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
+    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
-        Map<DilutionSummary, NabAssayRun> summaries = new LinkedHashMap<DilutionSummary, NabAssayRun>();
+        Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<DilutionSummary, DilutionAssayRun>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<Integer, NabAssayRun> dataToAssay = new HashMap<Integer, NabAssayRun>();
+        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<Integer, DilutionAssayRun>();
         List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
         for (int nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
@@ -267,7 +265,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 continue;
 
             int runId = nabSpecimen.getRunId();
-            NabAssayRun assay = dataToAssay.get(runId);
+            DilutionAssayRun assay = dataToAssay.get(runId);
             if (assay == null)
             {
                 ExpRun run = ExperimentService.get().getExpRun(runId);

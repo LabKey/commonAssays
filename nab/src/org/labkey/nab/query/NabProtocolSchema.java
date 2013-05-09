@@ -51,6 +51,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
@@ -210,7 +211,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
                     "document.forms['" + rgn.getName() + "'].method = 'POST';\n" +
                     "document.forms['" + rgn.getName() + "'].submit(); return false;");
 
-            Domain sampleDomain = ((NabAssayProvider) _provider).getSampleWellGroupDomain(_protocol);
+            Domain sampleDomain = ((DilutionAssayProvider) _provider).getSampleWellGroupDomain(_protocol);
             NavTree sampleSubMenu = new NavTree("Custom Caption (Sample)");
             Set<String> excluded = new HashSet<String>();
             excluded.add(NabAssayProvider.SAMPLE_METHOD_PROPERTY_NAME);

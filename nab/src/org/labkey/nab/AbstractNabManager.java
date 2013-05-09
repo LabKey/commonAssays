@@ -15,8 +15,8 @@
  */
 package org.labkey.nab;
 
+import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
@@ -27,43 +27,9 @@ import java.sql.SQLException;
  * User: brittp
  * Date: Sep 2, 2010 11:10:01 AM
  */
-public class AbstractNabManager
+public class AbstractNabManager extends DilutionManager
 {
     public static final String DEFAULT_TEMPLATE_NAME = "NAb: 5 specimens in duplicate";
-    public static final String CELL_CONTROL_SAMPLE = "CELL_CONTROL_SAMPLE";
-    public static final String VIRUS_CONTROL_SAMPLE = "VIRUS_CONTROL_SAMPLE";
-
-    public enum SampleProperty
-    {
-        InitialDilution(PropertyType.DOUBLE, false),
-        SampleId(PropertyType.STRING, false),
-        SampleDescription(PropertyType.STRING, false),
-        Factor(PropertyType.DOUBLE, false),
-        Method(PropertyType.STRING, false),
-        Slope(PropertyType.DOUBLE, false),
-        EndpointsOptional(PropertyType.BOOLEAN, false),
-        ReverseDilutionDirection(PropertyType.BOOLEAN, true),
-        FitError(PropertyType.DOUBLE, false);
-
-        private PropertyType _type;
-        private boolean _isTemplateProperty;
-
-        private SampleProperty(PropertyType type, boolean setInTemplateEditor)
-        {
-            _type = type;
-            _isTemplateProperty = setInTemplateEditor;
-        }
-
-        public PropertyType getType()
-        {
-            return _type;
-        }
-
-        public boolean isTemplateProperty()
-        {
-            return _isTemplateProperty;
-        }
-    }
 
     public synchronized PlateTemplate ensurePlateTemplate(Container container, User user) throws SQLException
     {

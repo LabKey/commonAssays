@@ -16,7 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.nab.NabAssayRun" %>
+<%@ page import="org.labkey.api.assay.dilution.DilutionAssayRun" %>
 <%@ page import="org.labkey.nab.NabAssayController" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -29,7 +29,7 @@
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
     NabAssayController.RenderAssayBean bean = me.getModelBean();
-    NabAssayRun assay = bean.getAssay();
+    DilutionAssayRun assay = bean.getAssay();
     ViewContext context = me.getViewContext();
 
     ActionURL reRunURL = new ActionURL(NabUploadWizardAction.class, context.getContainer());

@@ -18,12 +18,14 @@ package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.AbstractDilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -34,21 +36,15 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
-import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -57,10 +53,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 
-import java.io.File;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,12 +63,13 @@ import java.util.Set;
  * Date: Sep 21, 2007
  * Time: 2:33:52 PM
  */
-public class NabAssayProvider extends AbstractPlateBasedAssayProvider
+public class NabAssayProvider extends AbstractDilutionAssayProvider
 {
     public static final String RESOURCE_NAME = "NAb";
     public static final String NAME = "TZM-bl Neutralization (NAb)";
 
     public static final String CUSTOM_DETAILS_VIEW_NAME = "CustomDetailsView";
+/*
     public static final String[] CUTOFF_PROPERTIES = { "Cutoff1", "Cutoff2", "Cutoff3" };
     public static final String SAMPLE_METHOD_PROPERTY_NAME = "Method";
     public static final String SAMPLE_METHOD_PROPERTY_CAPTION = "Method";
@@ -89,6 +83,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
     public static final String LOCK_AXES_PROPERTY_NAME = "LockYAxis";
     public static final String LOCK_AXES_PROPERTY_CAPTION = "Lock Graph Y-Axis";
+*/
     private static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
     private static final String NAB_ASSAY_PROTOCOL = "NabAssayProtocol";
     public static final String VIRUS_NAME_PROPERTY_NAME = "VirusName";
@@ -104,7 +99,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public NabAssayProvider()
     {
-        this(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, SinglePlateNabDataHandler.NAB_DATA_TYPE);
+        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, SinglePlateNabDataHandler.NAB_DATA_TYPE, ModuleLoader.getInstance().getModule(NabModule.class));
     }
 
     public NabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, AssayDataType dataType)
@@ -149,52 +144,20 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         });
     }
 
-    @NotNull
     @Override
-    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
+    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
-        return new AssayTableMetadata(
-                this,
-                protocol,
-                FieldKey.fromParts(SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
-                FieldKey.fromParts("Run"),
-                FieldKey.fromParts("RowId"));
-    }
+        if (!(dataRowId instanceof Integer))
+            return null;
 
-    protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
-    {
-        Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
-        Domain runDomain = result.getKey();
-        boolean first = true;
-        for (int i = 0; i < CUTOFF_PROPERTIES.length; i++)
-        {
-            DomainProperty cutoff = addProperty(runDomain, CUTOFF_PROPERTIES[i], "Cutoff Percentage (" + (i + 1) + ")",
-                    PropertyType.INTEGER);
-            if (first)
-            {
-                cutoff.setRequired(true);
-                first = false;
-            }
-            cutoff.setShownInUpdateView(false);
-            cutoff.setFormat("0.0##");
-        }
-
-        addPassThroughRunProperties(runDomain);
-
-        Container lookupContainer = c.getProject();
-        DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), NabProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
-        method.setRequired(true);
-        method.setShownInUpdateView(false);
-        return result;
+        // dataRowId is NabSpecimen rowId
+        NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen((Integer)dataRowId);
+        if (null != nabSpecimen)
+            return ExperimentService.get().getExpData(nabSpecimen.getDataId());
+        return null;
     }
 
     @Override
-    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
-    {
-        return super.getDataCollectors(uploadedFiles, context, false);
-    }
-
     protected void addPassThroughRunProperties(Domain runDomain)
     {
         addProperty(runDomain, VIRUS_NAME_PROPERTY_NAME, "Virus Name", PropertyType.STRING);
@@ -210,10 +173,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(runDomain, LOCK_AXES_PROPERTY_NAME, LOCK_AXES_PROPERTY_CAPTION, PropertyType.BOOLEAN);
     }
 
-    protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
+    @Override
+    protected void addPassThroughSampleWellGroupProperties(Container c, Domain sampleWellGroupDomain)
     {
-        Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
-        Domain sampleWellGroupDomain = result.getKey();
         Container lookupContainer = c.getProject();
         addProperty(sampleWellGroupDomain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
@@ -225,90 +187,47 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
         method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), NabProviderSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
         method.setRequired(true);
-        return result;
     }
 
+    @Override
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
         Set<String> sampleProperties = domainMap.get(ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        if (sampleProperties == null)
-        {
-            sampleProperties = new HashSet<String>();
-            domainMap.put(ASSAY_DOMAIN_SAMPLE_WELLGROUP, sampleProperties);
-        }
+
         sampleProperties.add(SPECIMENID_PROPERTY_NAME);
         sampleProperties.add(PARTICIPANTID_PROPERTY_NAME);
         sampleProperties.add(VISITID_PROPERTY_NAME);
         sampleProperties.add(DATE_PROPERTY_NAME);
-        sampleProperties.add(SAMPLE_INITIAL_DILUTION_PROPERTY_NAME);
-        sampleProperties.add(SAMPLE_DILUTION_FACTOR_PROPERTY_NAME);
-        sampleProperties.add(SAMPLE_METHOD_PROPERTY_NAME);
-
-        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
-        if (runProperties == null)
-        {
-            runProperties = new HashSet<String>();
-            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, runProperties);
-        }
-        runProperties.add(CURVE_FIT_METHOD_PROPERTY_NAME);
-        runProperties.add(CUTOFF_PROPERTIES[0]);
 
         return domainMap;
     }
 
-    public Domain getResultsDomain(ExpProtocol protocol)
-    {
-        return null;
-    }
-
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
-    {
-        if (!(dataRowId instanceof Integer))
-            return null;
-
-        // dataRowId is NabSpecimen rowId
-        NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen((Integer)dataRowId);
-        if (null != nabSpecimen)
-            return ExperimentService.get().getExpData(nabSpecimen.getDataId());
-        return null;
-    }
-
+    @Override
     public String getResourceName()
     {
         return RESOURCE_NAME;
     }
 
+    @Override
     public String getName()
     {
         return NAME;
     }
 
+    @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
     }
 
-    public ActionURL getImportURL(Container container, ExpProtocol protocol)
-    {
-        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
-    }
-
-    public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
-    {
-        return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
-    }
-
-    public NabDataHandler getDataHandler()
+    @Override
+    public DilutionDataHandler getDataHandler()
     {
         return new SinglePlateNabDataHandler();
     }
 
-    public boolean hasUsefulDetailsPage()
-    {
-        return true;
-    }
-
+    @Override
     public String getDescription()
     {
         return "Imports a specially formatted Excel 1997-2003 file (.xls). " +
@@ -320,6 +239,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                         "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
+    @Override
     public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)
     {
         try
@@ -333,6 +253,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return super.getAssayTemplate(user, targetContainer, toCopy);
     }
 
+    @Override
     public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer)
     {
         try
@@ -347,18 +268,20 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public DataExchangeHandler createDataExchangeHandler()
-    {
-        return new NabDataExchangeHandler();
-    }
-
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(NabModule.class,
                 new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import NAb");
     }
 
-    public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
+    @Override
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
+    {
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
+    }
+
+    @Override
+    public ActionURL getUploadWizardCompleteURL(PlateUploadForm<DilutionAssayProvider> form, ExpRun run)
     {
         return new ActionURL(NabAssayController.DetailsAction.class,
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");

@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.study.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
@@ -85,7 +86,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
                         PlateService.get().createPosition(container, 0, firstCol),
                         PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
 //                sampleGroup.setProperty(prop.name(), "");
-                for (NabManager.SampleProperty prop : NabManager.SampleProperty.values())
+                for (SampleProperty prop : SampleProperty.values())
                 {
                     if (prop.isTemplateProperty())
                         sampleGroup.setProperty(prop.name(), "");

@@ -18,7 +18,7 @@
 <%@ page import="org.labkey.api.study.WellData"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.nab.DilutionSummary"%>
+<%@ page import="org.labkey.api.assay.dilution.DilutionSummary"%>
 <%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="java.text.DecimalFormat"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>

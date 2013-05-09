@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.nab.NabAssayRun" %>
+<%@ page import="org.labkey.api.assay.dilution.DilutionAssayRun" %>
 <%@ page import="org.labkey.nab.NabAssayController" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="java.text.DecimalFormat" %>
-<%@ page import="org.labkey.nab.SampleInfo" %>
-<%@ page import="org.labkey.nab.Luc5Assay" %>
-<%@ page import="org.labkey.nab.DilutionSummary" %>
+<%@ page import="org.labkey.api.assay.dilution.SampleInfo" %>
+<%@ page import="org.labkey.api.assay.nab.Luc5Assay" %>
+<%@ page import="org.labkey.api.assay.dilution.DilutionSummary" %>
 <%@ page import="org.labkey.api.assay.dilution.DilutionCurve" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
     NabAssayController.RenderAssayBean bean = me.getModelBean();
-    NabAssayRun assay = bean.getAssay();
+    DilutionAssayRun assay = bean.getAssay();
 %>
 <style type="text/css">
 	table.cutoff-table {
@@ -78,7 +78,7 @@
         %>
     </tr>
     <%
-        for (NabAssayRun.SampleResult results : bean.getSampleResults())
+        for (DilutionAssayRun.SampleResult results : bean.getSampleResults())
         {
             String unableToFitMessage = null;
 

@@ -17,12 +17,11 @@ package org.labkey.nab.multiplate;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -31,23 +30,20 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
-import org.labkey.api.study.assay.RunListDetailsQueryView;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.dilution.DilutionRunUploadForm;
 import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabDataHandler;
-import org.labkey.nab.NabRunUploadForm;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 
@@ -97,18 +93,16 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
                         "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
-    public NabDataHandler getDataHandler()
+    public DilutionDataHandler getDataHandler()
     {
         return new SinglePlateDilutionNabDataHandler();
     }
 
-    protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
+    @Override
+    protected void addPassThroughSampleWellGroupProperties(Container c, Domain sampleWellGroupDomain)
     {
-        Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
-        Domain sampleWellGroupDomain = result.getKey();
-
+        super.addPassThroughSampleWellGroupProperties(c, sampleWellGroupDomain);
         addProperty(sampleWellGroupDomain, NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, PropertyType.STRING).setRequired(true);
-        return result;
     }
 
     protected Map<String, Set<String>> getRequiredDomainProperties()
@@ -207,7 +201,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     }
 
     @Override
-    public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
+    public ActionURL getUploadWizardCompleteURL(PlateUploadForm<DilutionAssayProvider> form, ExpRun run)
     {
         ActionURL url = super.getUploadWizardCompleteURL(form, run);
 

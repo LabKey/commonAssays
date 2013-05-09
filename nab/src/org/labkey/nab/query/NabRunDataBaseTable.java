@@ -15,6 +15,7 @@
  */
 package org.labkey.nab.query;
 
+import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -42,7 +43,6 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.nab.NabManager;
-import org.labkey.nab.NabManager.PropDescCategory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -284,7 +284,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                 else
                 {
                     // Cutoff table column or calculated column
-                    PropDescCategory pdCat = NabManager.getPropDescCategory(lookupCol.getName());
+                    DilutionManager.PropDescCategory pdCat = NabManager.getPropDescCategory(lookupCol.getName());
                     FieldKey key = getCalculatedColumn(pdCat);
                     if (null != key)
                         visibleColumns.add(key);
@@ -293,7 +293,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         }
     }
 
-    private FieldKey getCalculatedColumn(PropDescCategory pdCat)
+    private FieldKey getCalculatedColumn(DilutionManager.PropDescCategory pdCat)
     {
         FieldKey fieldKey = null;
         if (null != pdCat.getCutoffValue())
@@ -382,7 +382,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         }
         else if (name.startsWith("Curve") || name.startsWith("Point"))
         {
-            PropDescCategory pdCat = NabManager.getPropDescCategory(name);
+            DilutionManager.PropDescCategory pdCat = NabManager.getPropDescCategory(name);
             FieldKey fieldKey = getCalculatedColumn(pdCat);
             if (null != fieldKey)
             {

@@ -20,8 +20,8 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabDataHandler;
 
 /**
  * User: brittp
@@ -43,7 +43,7 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
         return new HtmlView("The high-throughput NAb data file is a specially formatted file with a .csv or .xls extension.");
     }
 
-    public abstract NabDataHandler getDataHandler();
+    public abstract DilutionDataHandler getDataHandler();
 
     @Override
     protected void addPassThroughRunProperties(Domain runDomain)

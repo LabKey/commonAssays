@@ -16,6 +16,7 @@
 package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
@@ -23,12 +24,12 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.util.DateUtil;
-import org.labkey.nab.DilutionSummary;
-import org.labkey.nab.Luc5Assay;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabAssayRun;
-import org.labkey.nab.NabMaterialKey;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
     protected List<Plate> _plates;
     private DilutionSummary[] _dilutionSummaries;
 
-    public SinglePlateDilutionNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates,
+    public SinglePlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
                                   User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
@@ -128,7 +129,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
             super(assay, sampleGroups, lsid, curveFitType);
         }
 
-        public NabMaterialKey getMaterialKey()
+        public DilutionMaterialKey getMaterialKey()
         {
             if (_materialKey == null)
             {
@@ -144,7 +145,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
                     specimenId = String.format("%s (%s)", specimenId, virusName);
 */
 
-                _materialKey = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
+                _materialKey = new DilutionMaterialKey(specimenId, participantId, visitId, visitDate);
             }
             return _materialKey;
         }

@@ -16,6 +16,8 @@
 
 package org.labkey.nab;
 
+import org.labkey.api.assay.dilution.SafeTextConverter;
+
 import java.io.Serializable;
 
 /**

@@ -15,6 +15,8 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
@@ -34,8 +36,6 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
-import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabAssayRun;
 
 import java.io.File;
 import java.io.IOException;
@@ -141,7 +141,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
         for (ExpMaterial material : sampleInputs)
@@ -173,7 +173,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     }
 
     @Override
-    protected NabAssayRun createNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
     {
         return new CrossPlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }

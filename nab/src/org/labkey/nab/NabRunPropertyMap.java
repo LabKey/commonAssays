@@ -15,8 +15,10 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.Well;
@@ -42,7 +44,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         }
     }
 
-    public NabRunPropertyMap(NabAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut, boolean includeFitParameters)
+    public NabRunPropertyMap(DilutionAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut, boolean includeFitParameters)
     {
         put("runId", assay.getRun().getRowId());
         put("properties", new PropertyNameMap(assay.getRunProperties()));
@@ -50,7 +52,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         put("containerId", assay.getRun().getContainer().getId());
         put("cutoffs", assay.getCutoffs());
         List<Map<String, Object>> samples = new ArrayList<Map<String, Object>>();
-        for (NabAssayRun.SampleResult result : assay.getSampleResults())
+        for (DilutionAssayRun.SampleResult result : assay.getSampleResults())
         {
             Map<String, Object> sample = new HashMap<String, Object>();
             sample.put("properties", new PropertyNameMap(result.getSampleProperties()));

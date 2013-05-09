@@ -16,7 +16,7 @@
 package org.labkey.nab.multiplate;
 
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.nab.NabDataHandler;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 
 /**
  * Created by IntelliJ IDEA.
@@ -57,7 +57,7 @@ public class CrossPlateDilutionNabAssayProvider extends HighThroughputNabAssayPr
                         "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
-    public NabDataHandler getDataHandler()
+    public DilutionDataHandler getDataHandler()
     {
         return new CrossPlateDilutionNabDataHandler();
     }

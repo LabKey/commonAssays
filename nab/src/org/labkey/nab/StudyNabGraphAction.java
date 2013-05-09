@@ -16,12 +16,14 @@
 package org.labkey.nab;
 
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -67,7 +69,7 @@ public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.Gra
                     throw new IllegalStateException("Cannot graph data from different providers on the same chart");
             }
         }
-        Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
+        Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
         Set<Integer> cutoffSet = new HashSet<Integer>();
         for (DilutionSummary summary : summaries.keySet())
         {

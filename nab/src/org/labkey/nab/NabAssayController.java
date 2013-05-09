@@ -25,6 +25,8 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.data.*;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
@@ -64,6 +66,9 @@ import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -271,7 +276,7 @@ public class NabAssayController extends SpringActionController
     public static class RenderAssayBean extends RenderAssayForm
     {
         private ViewContext _context;
-        private NabAssayRun _assay;
+        private DilutionAssayRun _assay;
         private boolean _printView;
         private Set<String> _hiddenRunColumns;
         private Map<String, Object> _displayProperties;
@@ -354,17 +359,17 @@ public class NabAssayController extends SpringActionController
         }
 
 
-        public List<NabAssayRun.SampleResult> getSampleResults()
+        public List<DilutionAssayRun.SampleResult> getSampleResults()
         {
             return _assay.getSampleResults();
         }
 
-        public NabAssayRun getAssay()
+        public DilutionAssayRun getAssay()
         {
             return _assay;
         }
 
-        public void setAssay(NabAssayRun assay)
+        public void setAssay(DilutionAssayRun assay)
         {
             _assay = assay;
         }
@@ -490,13 +495,13 @@ public class NabAssayController extends SpringActionController
             return _assay.getRun().getRowId();
         }
 
-        public Pair<PropertyDescriptor, Object> getFitError(NabAssayRun.SampleResult result, Container container)
+        public Pair<PropertyDescriptor, Object> getFitError(DilutionAssayRun.SampleResult result, Container container)
         {
             try
             {
-                Lsid fitErrorURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), NabDataHandler.FIT_ERROR_PROPERTY);
+                Lsid fitErrorURI = new Lsid(DilutionDataHandler.NAB_PROPERTY_LSID_PREFIX, getAssay().getProtocol().getName(), DilutionDataHandler.FIT_ERROR_PROPERTY);
                 PropertyDescriptor fitErrorPd =
-                        NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), NabDataHandler.FIT_ERROR_PROPERTY, new HashMap<Integer, String>());
+                        DilutionDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), DilutionDataHandler.FIT_ERROR_PROPERTY, new HashMap<Integer, String>());
                 if (null != fitErrorPd)
                     return new Pair<PropertyDescriptor, Object>(fitErrorPd, result.getDilutionSummary().getFitError());
             }
@@ -506,19 +511,19 @@ public class NabAssayController extends SpringActionController
             return null;
         }
 
-        public Pair<PropertyDescriptor, Object> getAuc(NabAssayRun.SampleResult result, Container container)
+        public Pair<PropertyDescriptor, Object> getAuc(DilutionAssayRun.SampleResult result, Container container)
         {
-            String aucPropertyName = getFitType() == null ? NabDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, getFitTypeEnum());
-            PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
+            String aucPropertyName = getFitType() == null ? DilutionDataHandler.AUC_PREFIX : getAssay().getDataHandler().getPropertyName(DilutionDataHandler.AUC_PREFIX, getFitTypeEnum());
+            PropertyDescriptor aucPD = DilutionDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
             if (null != aucPD)
                 return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
             return null;
         }
 
-        public Pair<PropertyDescriptor, Object> getPositiveAuc(NabAssayRun.SampleResult result, Container container)
+        public Pair<PropertyDescriptor, Object> getPositiveAuc(DilutionAssayRun.SampleResult result, Container container)
         {
-            String aucPropertyName = getFitType() == null ? NabDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, getFitTypeEnum());
-            PropertyDescriptor aucPD = NabDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
+            String aucPropertyName = getFitType() == null ? DilutionDataHandler.pAUC_PREFIX : getAssay().getDataHandler().getPropertyName(DilutionDataHandler.pAUC_PREFIX, getFitTypeEnum());
+            PropertyDescriptor aucPD = DilutionDataHandler.getPropertyDescriptor(container, getAssay().getProtocol(), aucPropertyName, new HashMap<Integer, String>());
             if (null != aucPD)
                 return new Pair<PropertyDescriptor, Object>(aucPD, result.getDataProperty(aucPropertyName));
             return null;
@@ -609,15 +614,15 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    protected NabAssayProvider getProvider(ExpRun run)
+    protected DilutionAssayProvider getProvider(ExpRun run)
     {
         AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
-        if (!(provider instanceof NabAssayProvider))
+        if (!(provider instanceof DilutionAssayProvider))
             throw new IllegalArgumentException("Run " + run.getRowId() + " is not a NAb run.");
-        return (NabAssayProvider) provider;
+        return (DilutionAssayProvider) provider;
     }
 
-    protected NabDataHandler getDataHandler(ExpRun run)
+    protected DilutionDataHandler getDataHandler(ExpRun run)
     {
         return getProvider(run).getDataHandler();
     }
@@ -723,12 +728,12 @@ public class NabAssayController extends SpringActionController
         return d1.compareTo(d2) > 0 ? d1 : d2;
     }
 
-    private NabAssayRun getCachedRun(ExpRun run)
+    private DilutionAssayRun getCachedRun(ExpRun run)
     {
         NAbRunWrapper cache = (NAbRunWrapper) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
         if (cache == null || cache.getRun() == null)
             return null;
-        NabAssayRun assay = cache.getRun();
+        DilutionAssayRun assay = cache.getRun();
         Date customViewModified = getCustomViewModifiedDate(run);
         // There's no custom view, so it can't have been modified since we cached the run:
         if (customViewModified == null)
@@ -741,11 +746,11 @@ public class NabAssayController extends SpringActionController
         return null;
     }
 
-    private NabAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit, User elevatedUser) throws ExperimentException
+    private DilutionAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit, User elevatedUser) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
         // then immediately hit the 'print' button.
-        NabAssayRun assay = getCachedRun(run);
+        DilutionAssayRun assay = getCachedRun(run);
         if (fit != null || assay == null ||
                 (assay.getRunRowId() != null && run.getRowId() != assay.getRunRowId().intValue()) ||
                 (assay.getRun() != null && run.getRowId() != assay.getRun().getRowId()))
@@ -811,7 +816,7 @@ public class NabAssayController extends SpringActionController
                 elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
             }
 
-            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
+            DilutionAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
             _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
@@ -1045,7 +1050,7 @@ public class NabAssayController extends SpringActionController
 
             Set<Integer> cutoffSet = new HashSet<Integer>();
             NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(_protocol);
-            Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), objectIds);
+            Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), objectIds);
             for (DilutionSummary summary : summaries.keySet())
             {
                 for (int cutoff : summary.getAssay().getCutoffs())
@@ -1151,7 +1156,7 @@ public class NabAssayController extends SpringActionController
             int[] ids = form.getId();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(form.getProtocolId());
             NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
-            Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), ids);
+            Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), ids);
             Set<Integer> cutoffSet = new HashSet<Integer>();
             for (DilutionSummary summary : summaries.keySet())
             {
@@ -1199,7 +1204,7 @@ public class NabAssayController extends SpringActionController
                 contextualRoles.add(RoleManager.getRole(ReaderRole.class));
                 elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
             }
-            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
+            DilutionAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
             if (assay == null)
                 throw new NotFoundException("Could not load NAb results for run " + form.getRowId() + ".");
 
@@ -1351,10 +1356,10 @@ public class NabAssayController extends SpringActionController
     /** Avoid serializing the NAb run, since many of its child objects aren't serializable themselves */
     public static class NAbRunWrapper implements Serializable
     {
-        private transient NabAssayRun _run;
+        private transient DilutionAssayRun _run;
         private transient Date _date;
 
-        public NAbRunWrapper(NabAssayRun run, Date date)
+        public NAbRunWrapper(DilutionAssayRun run, Date date)
         {
             _run = run;
             _date = date;
@@ -1365,7 +1370,7 @@ public class NabAssayController extends SpringActionController
             // For serialization
         }
 
-        public NabAssayRun getRun()
+        public DilutionAssayRun getRun()
         {
             return _run;
         }

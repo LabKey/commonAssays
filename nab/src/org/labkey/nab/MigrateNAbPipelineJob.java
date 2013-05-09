@@ -57,6 +57,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -330,7 +331,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             TableInfo resultsTableInfo = schema.createDataTable(false);
             FieldKey runFK = provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults();
             FieldKey rowIdFK = provider.getTableMetadata(protocol).getResultRowIdFieldKey();
-            FieldKey specimenNameFK = FieldKey.fromParts("Properties", NabDataHandler.WELLGROUP_NAME_PROPERTY);
+            FieldKey specimenNameFK = FieldKey.fromParts("Properties", DilutionDataHandler.WELLGROUP_NAME_PROPERTY);
 
             // Do the query to get the new run's info
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(resultsTableInfo, Arrays.asList(rowIdFK, specimenNameFK));

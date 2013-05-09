@@ -16,6 +16,8 @@
 package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 

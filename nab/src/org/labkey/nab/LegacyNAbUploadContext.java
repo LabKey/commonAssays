@@ -18,6 +18,8 @@ package org.labkey.nab;
 import junit.framework.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
@@ -29,7 +31,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformResult;
 import org.labkey.api.security.User;
 import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
@@ -115,7 +116,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
                             }
                             if (NabAssayProvider.SPECIMENID_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
                             {
-                                Object value = dilutionSummary.getWellGroups().get(0).getProperty(AbstractNabManager.SampleProperty.SampleId.name());
+                                Object value = dilutionSummary.getWellGroups().get(0).getProperty(SampleProperty.SampleId.name());
                                 props.put(property, value == null ? null : value.toString());
                             }
                         }

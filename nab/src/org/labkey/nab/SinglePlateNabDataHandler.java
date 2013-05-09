@@ -23,7 +23,10 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -96,7 +99,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs)
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs)
     {
         Plate plate = plates.get(0);
         List<? extends WellGroup> wellgroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
@@ -116,7 +119,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected NabAssayRun createNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
     {
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
     }
@@ -209,7 +212,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             group.setProperty(property.getName(), sampleInput.getProperty(property));
 
         List<? extends WellData> wells = group.getWellData(true);
-        boolean reverseDirection = Boolean.parseBoolean((String) group.getProperty(NabManager.SampleProperty.ReverseDilutionDirection.name()));
+        boolean reverseDirection = Boolean.parseBoolean((String) group.getProperty(SampleProperty.ReverseDilutionDirection.name()));
         applyDilution(wells, sampleInput, properties, reverseDirection);
     }
 
@@ -281,7 +284,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        NabDataFileParser parser = getDataFileParser(data, dataFile, info);
+        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
         datas.put(NAB_TRANSFORMED_DATA_TYPE, parser.getResults());

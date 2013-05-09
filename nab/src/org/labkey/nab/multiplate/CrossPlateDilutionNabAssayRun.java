@@ -20,8 +20,9 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
-import org.labkey.nab.DilutionSummary;
-import org.labkey.nab.NabAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.nab.NabAssayRun;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class CrossPlateDilutionNabAssayRun extends NabAssayRun
     protected List<Plate> _plates;
     private DilutionSummary[] _dilutionSummaries;
 
-    public CrossPlateDilutionNabAssayRun(NabAssayProvider provider, ExpRun run, List<Plate> plates,
+    public CrossPlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
                                          User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
