@@ -20,7 +20,11 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.files.FileContentService;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.reader.ExcelLoader;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
@@ -89,7 +93,43 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                     if (filePath == null || filePath.equals(""))
                         throw new ExperimentException("Sample File Path column cannot be blank or null");
 
+                    // First assume the filePath and fileName are an absolute path.
                     File celFile = new File(filePath + File.separator + fileName);
+
+                    if (!celFile.exists())
+                    {
+                        // Issue 17798:Support relative paths for Affy import
+                        // If the filePath + fileName does not work, then filePath may be relative to the directory of the uploaded excel file.
+
+                        // Strip beginning of filepath of path separator, add one to end if needed.
+                        if (filePath.startsWith(File.separator))
+                            filePath = filePath.substring(1, filePath.length());
+                        if (!filePath.endsWith(File.separator))
+                            filePath = filePath + File.separator;
+
+                        String absFilePath = excelFile.getAbsolutePath().replace(excelFile.getName(), "");
+                        absFilePath = absFilePath + filePath + fileName;
+                        celFile = new File(absFilePath);
+                    }
+
+                    if(!celFile.exists())
+                    {
+                        // If the file still doesn't exist then we can assume that it doesn't exist, or the data in
+                        // the excel document is incorrect.
+                        throw new ExperimentException("File with path: \"" + celFile.getAbsolutePath() + "\" was not found.");
+                    }
+
+                    //Issue 17799:Check file paths for Affy import to be sure they 're under the file/pipeline root
+                    FileContentService fileService = ServiceRegistry.get().getService(FileContentService.class);
+                    Boolean inFileRoot = fileService != null && celFile.getAbsolutePath().startsWith(fileService.getFileRoot(context.getContainer()).getAbsolutePath());
+                    PipeRoot pipelineRoot = PipelineService.get().getPipelineRootSetting(context.getContainer());
+                    Boolean inPipelineRoot = celFile.getAbsolutePath().startsWith(pipelineRoot.getRootPath().getAbsolutePath());
+
+                    if(!inFileRoot && !inPipelineRoot)
+                    {
+                        throw new ExperimentException("File must be within Pipeline Root or Folder Root path.");
+                    }
+
                     ExpData celData = DefaultAssayRunCreator.createData(context.getContainer(), celFile, fileName, AffymetrixAssayProvider.CEL_DATA_TYPE, false);
                     outputDatas.put(celData, AffymetrixAssayProvider.CEL_DATA_TYPE.getRole());
                 }

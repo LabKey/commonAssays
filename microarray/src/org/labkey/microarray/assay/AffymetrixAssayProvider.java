@@ -109,7 +109,7 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(MicroarrayModule.class,
-                        new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import GeneTitan xls");
+                        new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import Affymetrix");
     }
 
     @Override

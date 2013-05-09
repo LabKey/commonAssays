@@ -165,7 +165,7 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
     {
         for(ExpData data : dataOutputs)
         {
-            if(data.getFile().getAbsolutePath().equals(celFilePath + File.separator + celFileName))
+            if(data.getFile().getAbsolutePath().contains(celFilePath + File.separator + celFileName))
                 return data.getRowId();
         }
 
