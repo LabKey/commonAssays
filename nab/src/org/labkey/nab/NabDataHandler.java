@@ -36,6 +36,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.nab.query.NabProtocolSchema;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -474,7 +475,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                     cutoffEntries.put("IC_5plOORIndicator", group.get(icKey));
                     NabManager.get().insertCutoffValueRow(null, cutoffEntries);
                 }
-
+                NabProtocolSchema.ensureCutoffValues(protocol, cutoffFormats.keySet());
             }
         }
         catch (SQLException e)

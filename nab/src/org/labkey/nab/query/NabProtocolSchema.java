@@ -17,10 +17,15 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.cache.BlockingCache;
+import org.labkey.api.cache.Cache;
+import org.labkey.api.cache.CacheLoader;
+import org.labkey.api.cache.Wrapper;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DatabaseCache;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -54,6 +59,7 @@ import org.springframework.validation.BindException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,6 +71,8 @@ import java.util.Set;
  */
 public class NabProtocolSchema extends AssayProtocolSchema
 {
+    private static final Cache<String, Set<Double>> CUTOFF_CACHE = new BlockingCache<String, Set<Double>>(new DatabaseCache<Wrapper<Set<Double>>>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"));
+
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
     public static final String CUTOFF_VALUE_TABLE_NAME = "CutoffValue";
     public static final String NAB_SPECIMEN_TABLE_NAME = "NAbSpecimen";
@@ -117,15 +125,43 @@ public class NabProtocolSchema extends AssayProtocolSchema
     {
         if (_cutoffValues == null)
         {
-            SQLFragment sql = new SQLFragment("SELECT DISTINCT Cutoff FROM ");
-            sql.append(NabProtocolSchema.getTableInfoCutoffValue(), "cv");
-            sql.append(", ");
-            sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
-            sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
-            sql.add(getProtocol().getRowId());
-            _cutoffValues = new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class));
+            _cutoffValues = Collections.unmodifiableSet(getCutoffValues(getProtocol()));
         }
         return _cutoffValues;
+    }
+
+    /** For databases with a lot of NAb runs, it can be expensive to get the set of unique cutoff values. */
+    private static Set<Double> getCutoffValues(final ExpProtocol protocol)
+    {
+        return CUTOFF_CACHE.get(Integer.toString(protocol.getRowId()), null, new CacheLoader<String, Set<Double>>()
+        {
+            @Override
+            public Set<Double> load(String key, @Nullable Object argument)
+            {
+                SQLFragment sql = new SQLFragment("SELECT DISTINCT Cutoff FROM ");
+                sql.append(NabProtocolSchema.getTableInfoCutoffValue(), "cv");
+                sql.append(", ");
+                sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
+                sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
+                sql.add(protocol.getRowId());
+                return Collections.synchronizedSet(new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class)));
+            }
+        });
+    }
+
+    /** Add potentially new cutoff values to the cache */
+    public static void ensureCutoffValues(ExpProtocol protocol, Set<? extends Number> newValues)
+    {
+        Set<Double> values = getCutoffValues(protocol);
+        for (Number newValue : newValues)
+        {
+            values.add(newValue.doubleValue());
+        }
+    }
+
+    public static void clearProtocolFromCutoffCache(int protocolId)
+    {
+        CUTOFF_CACHE.remove(Integer.toString(protocolId));
     }
 
     public static class NabResultsQueryView extends ResultsQueryView

@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -96,13 +97,26 @@ public class NabManager extends AbstractNabManager
     {
         // Get dataIds that match the ObjectUri and make filter on NabSpecimen
         List<Integer> dataIDs = new ArrayList<Integer>(datas.size());
+        Set<Integer> protocolIds = new HashSet<Integer>();
         for (ExpData data : datas)
+        {
             dataIDs.add(data.getRowId());
+            ExpRun run = data.getRun();
+            if (null != run)
+            {
+                ExpProtocol protocol = run.getProtocol();
+                if (null != protocol)
+                    protocolIds.add(protocol.getRowId());
+            }
+        }
         SimpleFilter dataIdFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("DataId"), dataIDs));
 
         // Now delete all rows in CutoffValue table that match those nabSpecimenIds
         Filter specimenIdFilter = makeCuttoffValueSpecimenClause(dataIdFilter);
         Table.delete(NabManager.getSchema().getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME), specimenIdFilter);
+
+        for (Integer protocolId : protocolIds)
+                NabProtocolSchema.clearProtocolFromCutoffCache(protocolId);
 
         // Finally, delete the rows in NASpecimen
         TableInfo nabTableInfo = NabManager.getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);

@@ -385,7 +385,16 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             PropDescCategory pdCat = NabManager.getPropDescCategory(name);
             FieldKey fieldKey = getCalculatedColumn(pdCat);
             if (null != fieldKey)
-                result = getColumn(pdCat.getCutoffValueColumnName());
+            {
+                ColumnInfo cutoffColumn = getColumn(pdCat.getCutoffValueColumnName());
+                if (cutoffColumn != null)
+                {
+                    String columnName = pdCat.getCalculatedColumnName();
+                    TableInfo tableInfo = cutoffColumn.getFkTableInfo();
+                    if (null != tableInfo && null != columnName)
+                        result = tableInfo.getLookupColumn(cutoffColumn, columnName);
+                }
+            }
         }
 
         return result;
