@@ -242,10 +242,10 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         DbSchema schema = DbSchema.get("ms1");
         DbScope scope = schema.getScope();
 
-        try
+        //begin a transaction
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            //begin a transaction
-            cn = scope.ensureTransaction();
+            cn = transaction.getConnection();
             long startMs = System.currentTimeMillis();
 
             //insert the feature files row
@@ -313,7 +313,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
                 pstmt.executeBatch();
 
             //commit the transaction
-            scope.commitTransaction();
+            transaction.commit();
 
             log.info("Finished loading " + numRows + " features in " + (System.currentTimeMillis() - startMs) + " milliseconds.");
         }
@@ -334,7 +334,6 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         {
             //final cleanup
             try{if(null != pstmt) pstmt.close();}catch(SQLException ignore){}
-            scope.closeConnection();
         } //finally
 
     } //importFile()

@@ -95,7 +95,7 @@ public class ProteinProphetImporter
         String peptidesTempTableName = _dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
         String proteinsTempTableName = _dialect.getTempTablePrefix() +  "ProteinGroupMembershipsTemp" + suffix;
 
-        Connection connection = MS2Manager.getSchema().getScope().beginTransaction();
+        Connection connection = MS2Manager.getSchema().getScope().beginTransaction().getConnection();
 
         Statement stmt = null;
         PreparedStatement mergePeptideStmt = null;

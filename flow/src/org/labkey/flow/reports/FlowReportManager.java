@@ -19,6 +19,7 @@ import org.labkey.api.collections.CaseInsensitiveTreeMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
@@ -199,10 +200,8 @@ public class FlowReportManager
         assert properties != null && properties.size() > 0;
 
         DbSchema schema = ExperimentService.get().getSchema();
-        try
+        try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
         {
-            schema.getScope().ensureTransaction();
-
             String name = report.getDescriptor().getReportType();
             domain = PropertyService.get().createDomain(shared, typeURI, name);
             domain.setDescription("Domain for " + report.getDescriptor().getDescriptorType() + " reports on flow table " + tableType);
@@ -220,20 +219,12 @@ public class FlowReportManager
 
             domain.save(user);
 
-            schema.getScope().commitTransaction();
+            transaction.commit();
             return domain;
         }
         catch (ExperimentException e)
         {
             throw new RuntimeException(e);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            schema.getScope().closeConnection();
         }
     }
 

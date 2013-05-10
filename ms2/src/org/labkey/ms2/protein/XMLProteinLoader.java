@@ -61,7 +61,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
             info("Starting annotation load for " + _file);
             setStatus("RUNNING");
             validate();
-            Connection conn = ProteinManager.getSchema().getScope().ensureTransaction();
+            Connection conn = ProteinManager.getSchema().getScope().ensureTransaction().getConnection();
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
             handler.parse(_file);
             conn.setAutoCommit(false);
