@@ -20,6 +20,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.DelegatingContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
@@ -83,7 +84,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
             public TableInfo getLookupTableInfo()
             {
                 ExpDataTable result = _userSchema.createDataFileTable();
-                result.setContainerFilter(getContainerFilter());
+                result.setContainerFilter(new DelegatingContainerFilter(LuminexDataTable.this));
                 return result;
             }
         });
