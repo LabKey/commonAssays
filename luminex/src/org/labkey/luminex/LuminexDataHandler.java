@@ -20,7 +20,6 @@ import junit.framework.Assert;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -586,13 +585,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 {
                     // Only look for replicates within the same data file (plate)
                     if (statRow.getFi() != null && !statRow.isSummary() &&
-                        ObjectUtils.equals(statRow.getDilution(), dataRow.getDilution()) &&
-                        ObjectUtils.equals(statRow.getExpConc(), dataRow.getExpConc()) &&
-                        ObjectUtils.equals(statRow.getDescription(), dataRow.getDescription()) &&
-                        ObjectUtils.equals(statRow.getType(), dataRow.getType()) &&
-                        ObjectUtils.equals(statRow.getData(), dataRow.getData()) &&
-                        ObjectUtils.equals(statRow.getAnalyte(), dataRow.getAnalyte()) &&
-                        ObjectUtils.equals(statRow.getExtraProperties().get("Standard"), dataRow.getExtraProperties().get("Standard")))
+                        Objects.equals(statRow.getDilution(), dataRow.getDilution()) &&
+                        Objects.equals(statRow.getExpConc(), dataRow.getExpConc()) &&
+                        Objects.equals(statRow.getDescription(), dataRow.getDescription()) &&
+                        Objects.equals(statRow.getType(), dataRow.getType()) &&
+                        Objects.equals(statRow.getData(), dataRow.getData()) &&
+                        Objects.equals(statRow.getAnalyte(), dataRow.getAnalyte()) &&
+                        Objects.equals(statRow.getExtraProperties().get("Standard"), dataRow.getExtraProperties().get("Standard")))
                     {
                         fis.add(statRow.getFi());
                     }

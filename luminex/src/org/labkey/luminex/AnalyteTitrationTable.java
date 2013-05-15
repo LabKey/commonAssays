@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -55,6 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -324,11 +324,11 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                     Analyte analyte = getAnalyte(bean.getAnalyteId());
                     Titration titration = getTitration(bean.getTitrationId());
-                    if (!ObjectUtils.equals(analyte.getName(), guideSet.getAnalyteName()))
+                    if (!Objects.equals(analyte.getName(), guideSet.getAnalyteName()))
                     {
                         throw new ValidationException("GuideSet is for analyte " + guideSet.getAnalyteName(), " but this row is mapped to analyte " + analyte.getName());
                     }
-                    if (!ObjectUtils.equals(titration.getName(), guideSet.getTitrationName()))
+                    if (!Objects.equals(titration.getName(), guideSet.getTitrationName()))
                     {
                         throw new ValidationException("GuideSet is for titration " + guideSet.getTitrationName(), " but this row is mapped to titration " + titration.getName());
                     }

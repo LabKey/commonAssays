@@ -16,7 +16,6 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.FilterDef;
 import org.fhcrc.cpas.flow.script.xml.FiltersDef;
@@ -27,6 +26,7 @@ import org.labkey.api.query.FieldKey;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public class EditSettingsForm extends EditScriptForm
@@ -82,7 +82,7 @@ public class EditSettingsForm extends EditScriptForm
         ff_minValue = new String[ff_parameter.length];
         for (int i = 0; i < ff_parameter.length; i ++)
         {
-            ff_minValue[i] = ObjectUtils.toString(parameters.get(ff_parameter[i]));
+            ff_minValue[i] = Objects.toString(parameters.get(ff_parameter[i]), "");
         }
 
     }

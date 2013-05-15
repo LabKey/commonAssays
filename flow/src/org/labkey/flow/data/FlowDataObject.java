@@ -16,7 +16,6 @@
 
 package org.labkey.flow.data;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.Lsid;
@@ -32,11 +31,11 @@ import org.labkey.flow.persist.FlowManager;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 abstract public class FlowDataObject extends FlowObject<ExpData>
 {
@@ -237,7 +236,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         String lsidCompare = objs.get(0).getExperimentLSID();
         for (int i = 1; i < objs.size(); i ++)
         {
-            if (!ObjectUtils.equals(lsidCompare, objs.get(i).getExperimentLSID()))
+            if (!Objects.equals(lsidCompare, objs.get(i).getExperimentLSID()))
                 return false;
         }
         return true;

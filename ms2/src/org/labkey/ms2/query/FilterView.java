@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.query;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QuerySettings;
@@ -29,6 +28,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -82,7 +82,7 @@ public class FilterView extends QueryView
         for (Map.Entry<?, String> entry : options.entrySet())
         {
             out.write("\n<option");
-            if (ObjectUtils.equals(entry.getKey(), viewName))
+            if (Objects.equals(entry.getKey(), viewName))
             {
                 out.write(" selected");
             }

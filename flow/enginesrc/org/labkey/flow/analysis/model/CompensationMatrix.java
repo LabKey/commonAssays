@@ -21,7 +21,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.ObjectUtils;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -436,9 +435,9 @@ public class CompensationMatrix implements Serializable
             if (!Arrays.equals(_rows[i], comp._rows[i]))
                 return false;
         }
-        if (!ObjectUtils.equals(_name, comp._name))
+        if (!Objects.equals(_name, comp._name))
             return false;
-        if (!ObjectUtils.equals(_prefix, comp._prefix))
+        if (!Objects.equals(_prefix, comp._prefix))
             return false;
         return true;
     }

@@ -15,7 +15,6 @@
  */
 package org.labkey.flow.util;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.labkey.api.util.Pair;
 import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.data.FlowFCSFile;
@@ -27,6 +26,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * User: kevink
@@ -51,7 +51,7 @@ public class SampleUtil
         assert a.length == b.length;
         int dist = -1;
         for (int i = 0, len = a.length; i < len; i++)
-            if (ObjectUtils.equals(a[i], b[i]))
+            if (Objects.equals(a[i], b[i]))
                 dist++;
 
         return dist;

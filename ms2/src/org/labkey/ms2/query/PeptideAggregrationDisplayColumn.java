@@ -16,13 +16,13 @@
 
 package org.labkey.ms2.query;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.labkey.api.data.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -85,7 +85,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
 
                 while (rs.next())
                 {
-                    if (ObjectUtils.equals(rs.getObject(_groupingColumn.getAlias()), groupingValue))
+                    if (Objects.equals(rs.getObject(_groupingColumn.getAlias()), groupingValue))
                     {
                         peptides.add(rs.getString(_peptideColumn.getAlias()));
                     }

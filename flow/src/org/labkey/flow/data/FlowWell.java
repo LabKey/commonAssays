@@ -16,7 +16,6 @@
 
 package org.labkey.flow.data;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -40,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class FlowWell extends FlowDataObject
 {
@@ -296,7 +296,7 @@ public class FlowWell extends FlowDataObject
 
     public void setName(User user, String name) throws Exception
     {
-        if (ObjectUtils.equals(name, getName()))
+        if (Objects.equals(name, getName()))
             return;
         ExpData data = getData();
         data.setName(name);

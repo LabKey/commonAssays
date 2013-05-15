@@ -16,7 +16,6 @@
 
 package org.labkey.flow.data;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -61,6 +60,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
@@ -358,7 +358,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 ExpMaterial sample = sampleMap.get(key);
                 Integer newSampleId = sample == null ? null : sample.getRowId();
                 Object oldSampleId = colSampleId.getValue(rs);
-                if (ObjectUtils.equals(newSampleId, oldSampleId))
+                if (Objects.equals(newSampleId, oldSampleId))
                     continue;
                 ExpProtocolApplication app = fcsFile.getSourceApplication();
                 if (app == null)
@@ -536,7 +536,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 {
                     ExpData data = ((FlowFCSAnalysis) obj).getData();
                     String name = fs.eval(columns, rs);
-                    if (!ObjectUtils.equals(name, data.getName()))
+                    if (!Objects.equals(name, data.getName()))
                     {
                         data.setName(name);
                         data.save(user);

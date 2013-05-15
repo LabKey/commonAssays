@@ -16,7 +16,6 @@
 
 package org.labkey.flow.script;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -63,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -504,7 +504,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             if (aValue != null)
                 aValue = aValue.trim();
 
-            if (!ObjectUtils.equals(aValue, bValue))
+            if (!Objects.equals(aValue, bValue))
                 return false;
         }
 

@@ -15,11 +15,10 @@
  */
 package org.labkey.luminex;
 
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * User: jeckels
@@ -119,7 +118,7 @@ public class Titration implements Serializable
         for (LuminexDataRow dataRow : dataRows)
         {
             // look for wells with a description that matches the titration name, and skip excluded wells
-            if (!dataRow.isExcluded() && ObjectUtils.equals(dataRow.getDescription(), getName()))
+            if (!dataRow.isExcluded() && Objects.equals(dataRow.getDescription(), getName()))
             {
                 wells.add(new LuminexWell(dataRow));
                 if (firstDataRow == null)
