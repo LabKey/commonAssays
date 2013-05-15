@@ -128,7 +128,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         if (null != result)
                         {
                             // get the list of unique wells (by splitting the concatenated string)
-                            TreeSet<String> uniqueWells = new TreeSet<String>();
+                            TreeSet<String> uniqueWells = new TreeSet<>();
                             uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMETER_REGEX)));
 
                             // put the unique wells back into a comma separated string
@@ -149,7 +149,7 @@ public class WellExclusionTable extends AbstractExclusionTable
         });
         addColumn(wellsCol);
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+        List<FieldKey> defaultCols = new ArrayList<>(getDefaultVisibleColumns());
         defaultCols.remove(FieldKey.fromParts("ModifiedBy"));
         defaultCols.remove(FieldKey.fromParts("Modified"));
         defaultCols.add(0, FieldKey.fromParts("DataId", "Run"));
@@ -172,7 +172,7 @@ public class WellExclusionTable extends AbstractExclusionTable
     {
         return new ExclusionUpdateService(this, getRealTable(), LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "WellExclusionId")
         {
-            private Set<ExpRun> _runsToRefresh = new HashSet<ExpRun>();
+            private Set<ExpRun> _runsToRefresh = new HashSet<>();
 
             private Integer getDataId(Map<String, Object> rowMap) throws QueryUpdateServiceException
             {
@@ -313,11 +313,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false);
                     }
                 }
-                catch (ExperimentException e)
-                {
-                    throw new QueryUpdateServiceException(e);
-                }
-                catch (ValidationException e)
+                catch (ExperimentException | ValidationException e)
                 {
                     throw new QueryUpdateServiceException(e);
                 }
