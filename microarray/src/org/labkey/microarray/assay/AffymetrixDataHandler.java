@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray.assay;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -37,6 +38,8 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,12 +121,12 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
                 {
                     Map<String, Object> runDataRow = new HashMap<>();
                     String celFileName = (String) excelRow.get(sampleFileNameColumn);
-                    String celFilePath = (String) excelRow.get(sampleFilePathColumn);
+                    String celFilePath = StringUtils.trimToEmpty((String) excelRow.get(sampleFilePathColumn));
                     String sampleName = (String) excelRow.get(hybNameColumn);
 
                     runDataRow.put("SampleName", sampleName);
                     runDataRow.put("SampleId", getSampleId(sampleName, materialInputs));
-                    runDataRow.put("CelFileId", getCelFileId(celFilePath, celFileName, dataOutputs));
+                    runDataRow.put("CelFileId", getCelFileId(dataFile, celFilePath, celFileName, dataOutputs));
 
                     for (String key : excelRow.keySet())
                     {
@@ -161,15 +164,24 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
         return null;
     }
 
-    private Integer getCelFileId(String celFilePath, String celFileName, List<ExpData> dataOutputs)
+    private Integer getCelFileId(File dataFile, String celFilePath, String celFileName, List<ExpData> dataOutputs) throws ExperimentException
     {
+        Path path = Paths.get(celFilePath).resolve(celFileName).normalize();
+
+        if(!path.toFile().exists())
+        {
+            path = Paths.get(dataFile.getParent()).resolve(celFilePath).resolve(celFileName).normalize();
+        }
+
+        String absolutePath = path.toString();
+
         for(ExpData data : dataOutputs)
         {
-            if(data.getFile().getAbsolutePath().contains(celFilePath + File.separator + celFileName))
+            if(data.getFile().getAbsolutePath().contains(absolutePath))
                 return data.getRowId();
         }
 
-        return null;
+        throw new ExperimentException("CEL file Id not found.");
     }
 
     @Override

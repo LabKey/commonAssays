@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray.assay;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -32,6 +33,7 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -85,31 +87,21 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                 else
                 {
                     String fileName = (String) rowData.get(fileNameColumn);
-                    String filePath = (String) rowData.get(filePathColumn);
+                    String filePath = StringUtils.trimToEmpty((String) rowData.get(filePathColumn)); //Issue 17800
 
                     if (fileName == null || fileName.equals(""))
                         throw new ExperimentException("Sample File Name column cannot be blank or null");
 
-                    if (filePath == null || filePath.equals(""))
-                        throw new ExperimentException("Sample File Path column cannot be blank or null");
-
                     // First assume the filePath and fileName are an absolute path.
-                    File celFile = new File(filePath + File.separator + fileName);
+                    // Must normalize path to prevent something like /path/to/file/root/../../../../etc/passwd from being
+                    // recognized as being within the folder/pipeline root.
+                    File celFile = Paths.get(filePath).resolve(fileName).normalize().toFile();
 
                     if (!celFile.exists())
                     {
                         // Issue 17798:Support relative paths for Affy import
                         // If the filePath + fileName does not work, then filePath may be relative to the directory of the uploaded excel file.
-
-                        // Strip beginning of filepath of path separator, add one to end if needed.
-                        if (filePath.startsWith(File.separator))
-                            filePath = filePath.substring(1, filePath.length());
-                        if (!filePath.endsWith(File.separator))
-                            filePath = filePath + File.separator;
-
-                        String absFilePath = excelFile.getAbsolutePath().replace(excelFile.getName(), "");
-                        absFilePath = absFilePath + filePath + fileName;
-                        celFile = new File(absFilePath);
+                        celFile = Paths.get(excelFile.getParent()).resolve(filePath).resolve(fileName).normalize().toFile();
                     }
 
                     if(!celFile.exists())
@@ -119,7 +111,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                         throw new ExperimentException("File with path: \"" + celFile.getAbsolutePath() + "\" was not found.");
                     }
 
-                    //Issue 17799:Check file paths for Affy import to be sure they 're under the file/pipeline root
+                    //Issue 17799:Check file paths for Affy import to be sure they're under the file/pipeline root
                     FileContentService fileService = ServiceRegistry.get().getService(FileContentService.class);
                     Boolean inFileRoot = fileService != null && celFile.getAbsolutePath().startsWith(fileService.getFileRoot(context.getContainer()).getAbsolutePath());
                     PipeRoot pipelineRoot = PipelineService.get().getPipelineRootSetting(context.getContainer());
