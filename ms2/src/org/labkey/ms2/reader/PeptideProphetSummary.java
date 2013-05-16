@@ -419,20 +419,22 @@ public class PeptideProphetSummary extends SensitivitySummary
 
     public static class TestCase extends Assert
     {
+        private static final double DELTA = 1E-8;
+    
         @Test
         public void testVersionParse()
         {
             // Test some real version strings
-            assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 200909211148 (MSVC))"));
-            assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5 RAPTURE rev 1, Build 201112210851 (linux))"));
-            assertEquals(2.9, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v2.9 GALE rev.3, Build 200611090444(Win32))"));
-            assertEquals(3.2, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v3.2 SQUALL rev.0, Build 200706151416)"));
-            assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 201011301302 (linux))"));
-            assertEquals(4.4, parseTPPVersion("PeptideProphet  (TPP v4.4 VUVUZELA rev 1, Build 201012011012 (linux))"));
+            assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 200909211148 (MSVC))"), DELTA);
+            assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5 RAPTURE rev 1, Build 201112210851 (linux))"), DELTA);
+            assertEquals(2.9, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v2.9 GALE rev.3, Build 200611090444(Win32))"), DELTA);
+            assertEquals(3.2, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v3.2 SQUALL rev.0, Build 200706151416)"), DELTA);
+            assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 201011301302 (linux))"), DELTA);
+            assertEquals(4.4, parseTPPVersion("PeptideProphet  (TPP v4.4 VUVUZELA rev 1, Build 201012011012 (linux))"), DELTA);
 
             // Test some hypothetical version strings
-            assertEquals(45.33, parseTPPVersion("PeptideProphet  (TPP v45.33 JETSTREAM rev 1, Build 201011301302 (linux))"));
-            assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5.1 JETSTREAM rev 1, Build 201011301302 (linux))"));
+            assertEquals(45.33, parseTPPVersion("PeptideProphet  (TPP v45.33 JETSTREAM rev 1, Build 201011301302 (linux))"), DELTA);
+            assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5.1 JETSTREAM rev 1, Build 201011301302 (linux))"), DELTA);
 
             // Test some garbage input
             assertEquals(null, parseTPPVersion("PeptideProphet  (TPP vBAD JETSTREAM rev 1, Build 201011301302 (linux))"));

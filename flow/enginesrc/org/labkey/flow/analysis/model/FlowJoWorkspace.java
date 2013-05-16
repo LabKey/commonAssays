@@ -809,7 +809,7 @@ abstract public class FlowJoWorkspace extends Workspace
             if ("7.2.5".equals(version))
                 assertEquals(1384.662, bifurcateCD8plusGate.getMax(), 0.001d);
             else
-                assertEquals(Double.MAX_VALUE, bifurcateCD8plusGate.getMax());
+                assertEquals(Double.MAX_VALUE, bifurcateCD8plusGate.getMax(), DELTA);
 
             Population CD4CD8ellipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("CD4, CD8 ellipse"));
             //EllipseGate CD4CD8ellipseGate = (EllipseGate)CD4CD8ellipse.getGates().get(0);
@@ -980,6 +980,8 @@ abstract public class FlowJoWorkspace extends Workspace
             }
         }
 
+        private static final double DELTA = 1E-8;
+
         @Test
         public void loadBooleanSubPopulations() throws Exception
         {
@@ -1012,9 +1014,9 @@ abstract public class FlowJoWorkspace extends Workspace
             // Check count stats of the boolean populations.
             AttributeSet results = workspace.getSampleAnalysisResults(sampleInfo);
             Map<StatisticSpec, Double> stats = results.getStatistics();
-            assertEquals(10000d, stats.get(new StatisticSpec(null, StatisticSpec.STAT.Count, null)));
-            assertEquals(2983d, stats.get(new StatisticSpec(SubsetSpec.fromParts("A&B"), StatisticSpec.STAT.Count, null)));
-            assertEquals(1256d, stats.get(new StatisticSpec(SubsetSpec.fromParts("A&B", "C|D"), StatisticSpec.STAT.Count, null)));
+            assertEquals(10000d, stats.get(new StatisticSpec(null, StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(2983d, stats.get(new StatisticSpec(SubsetSpec.fromParts("A&B"), StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(1256d, stats.get(new StatisticSpec(SubsetSpec.fromParts("A&B", "C|D"), StatisticSpec.STAT.Count, null)), DELTA);
 
 
             // Check for backwards-compatibility aliases

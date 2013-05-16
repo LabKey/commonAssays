@@ -31,6 +31,8 @@ public abstract class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
         super(msLevelFilter);
     }
 
+    private static final double DELTA = 1E-8;
+
     // helper for unit testing of child classes
     static protected void compare_mzxml(Assert test, RandomAccessMzxmlIterator mzxmlA, RandomAccessMzxmlIterator mzxmlB)
     {
@@ -40,23 +42,23 @@ public abstract class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
             {
                 SimpleScan scanA = mzxmlA.next();
                 SimpleScan scanB = mzxmlB.next();
-                test.assertEquals(scanA.getScan(),scanB.getScan());
+                Assert.assertEquals(scanA.getScan(),scanB.getScan());
                 float [][]dataA = scanA.getData();
                 float [][]dataB = scanB.getData();
                 // expect that mz and intensity counts are the same all around
-                test.assertEquals(dataA[0].length,dataB[1].length);
-                test.assertEquals(dataA[1].length,dataB[0].length);
+                Assert.assertEquals(dataA[0].length,dataB[1].length);
+                Assert.assertEquals(dataA[1].length,dataB[0].length);
                 for (int i=0;i < dataA[0].length; i++)
                 {
-                    test.assertEquals(dataA[0][i],dataB[0][i]);
-                    test.assertEquals(dataA[1][i],dataB[1][i]);
+                    Assert.assertEquals(dataA[0][i],dataB[0][i], DELTA);
+                    Assert.assertEquals(dataA[1][i],dataB[1][i], DELTA);
                 }
             }
-            test.assertEquals("files should have same scan counts",mzxmlA.hasNext(), mzxmlB.hasNext());
+            Assert.assertEquals("files should have same scan counts",mzxmlA.hasNext(), mzxmlB.hasNext());
         }
         catch (IOException e)
         {
-            test.fail(e.toString());
+            Assert.fail(e.toString());
         }
     }
 }

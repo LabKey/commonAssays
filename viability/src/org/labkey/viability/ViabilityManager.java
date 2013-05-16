@@ -312,6 +312,8 @@ public class ViabilityManager
 
     public static class TestCase extends Assert
     {
+        private static final double DELTA = 1E-8;
+
         private ExpProtocol _protocol;
         private ExpData _data;
         private PropertyDescriptor _propertyA;
@@ -388,7 +390,7 @@ public class ViabilityManager
                 result.setPoolID("xxx-12345-67890");
                 result.setTotalCells(10000);
                 result.setViableCells(9000);
-                assertEquals(0.9, result.getViability());
+                assertEquals(0.9, result.getViability(), DELTA);
                 result.setSpecimenIDs(Arrays.asList("222", "111", "333"));
 
                 Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
@@ -416,7 +418,7 @@ public class ViabilityManager
                 assertEquals("xxx-12345-67890", result.getPoolID());
                 assertEquals(10000, result.getTotalCells());
                 assertEquals(9000, result.getViableCells());
-                assertEquals(0.9, result.getViability());
+                assertEquals(0.9, result.getViability(), DELTA);
 
                 objectId = result.getObjectID();
                 assertTrue(objectId > 0);
