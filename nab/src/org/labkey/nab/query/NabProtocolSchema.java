@@ -17,6 +17,9 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.nab.query.CutoffValueTable;
+import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
@@ -75,8 +78,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
     private static final Cache<String, Set<Double>> CUTOFF_CACHE = new BlockingCache<String, Set<Double>>(new DatabaseCache<Wrapper<Set<Double>>>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"));
 
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
-    public static final String CUTOFF_VALUE_TABLE_NAME = "CutoffValue";
-    public static final String NAB_SPECIMEN_TABLE_NAME = "NAbSpecimen";
     public static final String NAB_DBSCHEMA_NAME = "nab";
 
     private Set<Double> _cutoffValues;
@@ -139,13 +140,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
             @Override
             public Set<Double> load(String key, @Nullable Object argument)
             {
-                SQLFragment sql = new SQLFragment("SELECT DISTINCT Cutoff FROM ");
-                sql.append(NabProtocolSchema.getTableInfoCutoffValue(), "cv");
-                sql.append(", ");
-                sql.append(NabProtocolSchema.getTableInfoNAbSpecimen(), "ns");
-                sql.append(" WHERE ns.RowId = cv.NAbSpecimenID AND ns.ProtocolId = ?");
-                sql.add(protocol.getRowId());
-                return Collections.synchronizedSet(new HashSet<Double>(new SqlSelector(NabProtocolSchema.getSchema(), sql).getCollection(Double.class)));
+                return DilutionManager.getCutoffValues(protocol);
             }
         });
     }
@@ -286,12 +281,12 @@ public class NabProtocolSchema extends AssayProtocolSchema
     {
         if(tableType != null)
         {
-            if (CUTOFF_VALUE_TABLE_NAME.equalsIgnoreCase(tableType))
+            if (DilutionManager.CUTOFF_VALUE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createCutoffValueTable();
             }
 
-            if (NAB_SPECIMEN_TABLE_NAME.equalsIgnoreCase(tableType))
+            if (DilutionManager.NAB_SPECIMEN_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createNAbSpecimenTable();
             }
@@ -302,16 +297,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
     public static DbSchema getSchema()
     {
         return DbSchema.get(NAB_DBSCHEMA_NAME);
-    }
-
-    public static TableInfo getTableInfoNAbSpecimen()
-    {
-        return getSchema().getTable(NAB_SPECIMEN_TABLE_NAME);
-    }
-
-    public static TableInfo getTableInfoCutoffValue()
-    {
-        return getSchema().getTable(CUTOFF_VALUE_TABLE_NAME);
     }
 
     private NAbSpecimenTable createNAbSpecimenTable()
@@ -327,7 +312,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
     public Set<String> getTableNames()
     {
         Set<String> result = super.getTableNames();
-        result.add(CUTOFF_VALUE_TABLE_NAME);
+        result.add(DilutionManager.CUTOFF_VALUE_TABLE_NAME);
         return result;
     }
 }

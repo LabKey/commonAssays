@@ -19,6 +19,7 @@ package org.labkey.nab;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -81,12 +82,12 @@ public class NabManager extends AbstractNabManager
 
     public void deleteRunData(List<ExpData> datas) throws SQLException
     {
+        super.deleteRunData(datas);
+
         // Get dataIds that match the ObjectUri and make filter on NabSpecimen
-        List<Integer> dataIDs = new ArrayList<Integer>(datas.size());
         Set<Integer> protocolIds = new HashSet<Integer>();
         for (ExpData data : datas)
         {
-            dataIDs.add(data.getRowId());
             ExpRun run = data.getRun();
             if (null != run)
             {
@@ -95,24 +96,15 @@ public class NabManager extends AbstractNabManager
                     protocolIds.add(protocol.getRowId());
             }
         }
-        SimpleFilter dataIdFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("DataId"), dataIDs));
-
-        // Now delete all rows in CutoffValue table that match those nabSpecimenIds
-        Filter specimenIdFilter = makeCuttoffValueSpecimenClause(dataIdFilter);
-        Table.delete(NabManager.getSchema().getTable(NabProtocolSchema.CUTOFF_VALUE_TABLE_NAME), specimenIdFilter);
 
         for (Integer protocolId : protocolIds)
-                NabProtocolSchema.clearProtocolFromCutoffCache(protocolId);
-
-        // Finally, delete the rows in NASpecimen
-        TableInfo nabTableInfo = NabManager.getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
-        Table.delete(nabTableInfo, dataIdFilter);
+            NabProtocolSchema.clearProtocolFromCutoffCache(protocolId);
     }
 
     public ExpRun getNAbRunByObjectId(int objectId)
     {
         // objectId is really a nabSpecimenId
-        TableInfo tableInfo = getSchema().getTable(NabProtocolSchema.NAB_SPECIMEN_TABLE_NAME);
+        TableInfo tableInfo = getSchema().getTable(NAB_SPECIMEN_TABLE_NAME);
         Filter filter = new SimpleFilter(new SimpleFilter(FieldKey.fromString("RowId"), objectId));
         List<Integer> runIds = new TableSelector(tableInfo.getColumn("RunId"), filter, null).getArrayList(Integer.class);
         if (!runIds.isEmpty())

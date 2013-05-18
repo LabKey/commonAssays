@@ -41,9 +41,12 @@ import java.util.Map;
  */
 public abstract class NabDataHandler extends DilutionDataHandler
 {
-    public static final String NAB_PROPERTY_LSID_PREFIX = "NabProperty";
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
-    public static final String NAB_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
+
+    public NabDataHandler()
+    {
+        super(NAB_DATA_ROW_LSID_PREFIX);
+    }
 
     public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
@@ -109,16 +112,16 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 if (group.get(WELLGROUP_NAME_PROPERTY) == null)
                     throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
 
-                if (group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY) == null)
-                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + NAB_INPUT_MATERIAL_DATA_PROPERTY);
+                if (group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY) == null)
+                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
 
                 String groupName = group.get(WELLGROUP_NAME_PROPERTY).toString();
-                String specimenLsid = group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY).toString();
+                String specimenLsid = group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY).toString();
 
                 ExpMaterial material = inputMaterialMap.get(specimenLsid);
 
                 if (material == null)
-                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + NAB_INPUT_MATERIAL_DATA_PROPERTY);
+                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
 
                 String dataRowLsid = getDataRowLSID(data, groupName, material.getPropertyValues()).toString();
 
@@ -133,7 +136,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 nabSpecimenEntries.put("ProtocolId", protocol.getRowId());
                 nabSpecimenEntries.put("DataId", data.getRowId());
                 nabSpecimenEntries.put("RunId", run.getRowId());
-                nabSpecimenEntries.put("SpecimenLsid", group.get(NAB_INPUT_MATERIAL_DATA_PROPERTY));
+                nabSpecimenEntries.put("SpecimenLsid", group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY));
                 nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
                 nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + POLY_SUFFIX));
                 nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + POLY_SUFFIX));

@@ -44,6 +44,7 @@ import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionRunUploadForm;
 import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabRunUploadForm;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 
@@ -201,7 +202,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     }
 
     @Override
-    public ActionURL getUploadWizardCompleteURL(PlateUploadForm<DilutionAssayProvider> form, ExpRun run)
+    public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
     {
         ActionURL url = super.getUploadWizardCompleteURL(form, run);
 

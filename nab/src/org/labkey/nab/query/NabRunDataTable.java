@@ -51,7 +51,7 @@ public class NabRunDataTable extends NabRunDataBaseTable
 
     public String getInputMaterialPropertyName()
     {
-        return SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY;
+        return SinglePlateNabDataHandler.DILUTION_INPUT_MATERIAL_DATA_PROPERTY;
     }
 
     public String getDataRowLsidPrefix()

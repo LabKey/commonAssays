@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.AbstractDilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.dilution.DilutionRunUploadForm;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
@@ -63,7 +64,7 @@ import java.util.Set;
  * Date: Sep 21, 2007
  * Time: 2:33:52 PM
  */
-public class NabAssayProvider extends AbstractDilutionAssayProvider
+public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUploadForm>
 {
     public static final String RESOURCE_NAME = "NAb";
     public static final String NAME = "TZM-bl Neutralization (NAb)";
@@ -281,7 +282,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider
     }
 
     @Override
-    public ActionURL getUploadWizardCompleteURL(PlateUploadForm<DilutionAssayProvider> form, ExpRun run)
+    public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
     {
         return new ActionURL(NabAssayController.DetailsAction.class,
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");

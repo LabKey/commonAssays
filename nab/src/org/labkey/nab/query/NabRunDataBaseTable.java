@@ -16,6 +16,8 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.nab.query.CutoffValueTable;
+import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -284,29 +286,13 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                 else
                 {
                     // Cutoff table column or calculated column
-                    DilutionManager.PropDescCategory pdCat = NabManager.getPropDescCategory(lookupCol.getName());
-                    FieldKey key = getCalculatedColumn(pdCat);
+                    DilutionManager.PropDescCategory pdCat = DilutionManager.getPropDescCategory(lookupCol.getName());
+                    FieldKey key = DilutionManager.getCalculatedColumn(pdCat);
                     if (null != key)
                         visibleColumns.add(key);
                 }
             }
         }
-    }
-
-    private FieldKey getCalculatedColumn(DilutionManager.PropDescCategory pdCat)
-    {
-        FieldKey fieldKey = null;
-        if (null != pdCat.getCutoffValue())
-        {
-            String cutoffColumnName = pdCat.getCutoffValueColumnName();
-            String columnName = pdCat.getCalculatedColumnName();
-            if (null != columnName)         // cutoffColumn could be null when we're deleting folders
-            {
-                fieldKey = FieldKey.fromParts(cutoffColumnName, columnName);
-            }
-        }
-
-        return fieldKey;
     }
 
     protected Set<String> getHiddenColumns(ExpProtocol protocol)
@@ -383,7 +369,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         else if (name.startsWith("Curve") || name.startsWith("Point"))
         {
             DilutionManager.PropDescCategory pdCat = NabManager.getPropDescCategory(name);
-            FieldKey fieldKey = getCalculatedColumn(pdCat);
+            FieldKey fieldKey = DilutionManager.getCalculatedColumn(pdCat);
             if (null != fieldKey)
             {
                 ColumnInfo cutoffColumn = getColumn(pdCat.getCutoffValueColumnName());

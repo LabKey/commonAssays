@@ -43,17 +43,17 @@ import java.util.Map;
  * Time: 3:48:53 PM
  */
 @RequiresPermissionClass(InsertPermission.class)
-public class NabUploadWizardAction extends UploadWizardAction<DilutionRunUploadForm, DilutionAssayProvider>
+public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, NabAssayProvider>
 {
     public NabUploadWizardAction()
     {
-        super(DilutionRunUploadForm.class);
+        super(NabRunUploadForm.class);
     }
 
     @Override
-    protected InsertView createRunInsertView(DilutionRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
+    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
-        DilutionAssayProvider provider = newRunForm.getProvider();
+        NabAssayProvider provider = newRunForm.getProvider();
         InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(newRunForm, resolverType);
@@ -78,7 +78,7 @@ public class NabUploadWizardAction extends UploadWizardAction<DilutionRunUploadF
         private Map<String, Map<DomainProperty, String>> _postedSampleProperties = null;
 
         @Override
-        protected boolean validatePost(DilutionRunUploadForm form, BindException errors) throws ExperimentException
+        protected boolean validatePost(NabRunUploadForm form, BindException errors) throws ExperimentException
         {
             boolean runPropsValid = super.validatePost(form, errors);
 
@@ -103,7 +103,7 @@ public class NabUploadWizardAction extends UploadWizardAction<DilutionRunUploadF
             return runPropsValid && samplePropsValid && !errors.hasErrors();
         }
 
-        protected ModelAndView handleSuccessfulPost(DilutionRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
+        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
         {
             form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -121,7 +121,7 @@ public class NabUploadWizardAction extends UploadWizardAction<DilutionRunUploadF
         }
     }
 
-    protected ModelAndView afterRunCreation(DilutionRunUploadForm form, ExpRun run, BindException errors) throws ServletException, ExperimentException
+    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException, ExperimentException
     {
         if (form.getReRun() != null)
             form.getReRun().delete(getViewContext().getUser());
@@ -129,14 +129,14 @@ public class NabUploadWizardAction extends UploadWizardAction<DilutionRunUploadF
     }
 
     @Override
-    protected ActionURL getUploadWizardCompleteURL(DilutionRunUploadForm form, ExpRun run)
+    protected ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
     {
         DilutionAssayProvider provider = form.getProvider();
         return provider.getUploadWizardCompleteURL(form, run);
     }
 
     @Override
-    protected boolean shouldShowDataCollectorUI(DilutionRunUploadForm newRunForm)
+    protected boolean shouldShowDataCollectorUI(NabRunUploadForm newRunForm)
     {
         return true;
     }

@@ -93,32 +93,6 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected boolean isDilutionDownOrRight()
-    {
-        return false;
-    }
-
-    @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs)
-    {
-        Plate plate = plates.get(0);
-        List<? extends WellGroup> wellgroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
-        Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
-        for (ExpMaterial material : sampleInputs)
-            nameToMaterial.put(material.getName(), material);
-
-        Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<ExpMaterial, List<WellGroup>>();
-        for (WellGroup wellgroup : wellgroups)
-        {
-            ExpMaterial material = nameToMaterial.get(wellgroup.getName());
-            if (material == null)
-                throw new IllegalStateException("Each wellgroup should have a matching input material.");
-            mapping.put(material, Collections.singletonList(wellgroup));
-        }
-        return mapping;
-    }
-
-    @Override
     protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
     {
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);

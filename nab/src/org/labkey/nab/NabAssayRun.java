@@ -157,39 +157,4 @@ public abstract class NabAssayRun extends DilutionAssayRun
         }
         return _sampleResults;
     }
-
-    private Map<String, DilutionResultProperties> getSampleProperties(ExpData outputData)
-    {
-        Map<String, DilutionResultProperties> samplePropertyMap = new HashMap<String, DilutionResultProperties>();
-
-        Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
-        Domain sampleDomain = _provider.getSampleWellGroupDomain(_protocol);
-        DomainProperty[] sampleDomainProperties = sampleDomain.getProperties();
-
-        NabProviderSchema nabProviderSchema = (NabProviderSchema)_provider.createProviderSchema(_user, _run.getContainer(), null);
-        NabRunDataTable nabRunDataTable = nabProviderSchema.createDataRowTable(_protocol);
-
-        for (ExpMaterial material : inputs)
-        {
-            Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-            for (DomainProperty dp : sampleDomainProperties)
-            {
-                PropertyDescriptor property = dp.getPropertyDescriptor();
-                sampleProperties.put(property, material.getProperty(property));
-            }
-
-            // in addition to the properties saved on the sample object, we'll add the properties associated with each sample's
-            // "output" data object.
-            Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-            String wellGroupName = getWellGroupName(material);
-            String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName, sampleProperties).toString();
-            Set<Double> cutoffValues = new HashSet<Double>();
-            for (Integer value : DilutionDataHandler.getCutoffFormats(_protocol, _run).keySet())
-                cutoffValues.add(value.doubleValue());
-            List<PropertyDescriptor> propertyDescriptors = NabProviderSchema.getExistingDataProperties(_protocol, cutoffValues);
-            NabManager.get().getDataPropertiesFromNabRunData(nabRunDataTable, dataRowLsid, _run.getContainer(), propertyDescriptors, dataProperties);
-            samplePropertyMap.put(getSampleKey(material), new DilutionResultProperties(sampleProperties,  dataProperties));
-        }
-        return samplePropertyMap;
-    }
 }
