@@ -277,7 +277,7 @@ public class NabAssayController extends SpringActionController
                 if (assay != null && fit == null)
                     getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new NAbRunWrapper(assay, new Date()));
             }
-            catch (SinglePlateNabDataHandler.MissingDataFileException e)
+            catch (DilutionDataHandler.MissingDataFileException e)
             {
                 throw new NotFoundException(e.getMessage());
             }
