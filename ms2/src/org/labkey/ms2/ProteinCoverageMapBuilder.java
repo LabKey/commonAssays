@@ -109,7 +109,7 @@ public class ProteinCoverageMapBuilder
         SimpleFilter filter = new SimpleFilter();
         for (SimpleFilter.FilterClause clause : _peptideFilter.getClauses())
         {
-            if (clause.isUrlClause())
+            if (clause.needsTypeConversion())
                 filter.addClause(clause);
         }
         filter.deleteConditions(FieldKey.fromParts("SeqId"));
