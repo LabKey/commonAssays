@@ -98,7 +98,7 @@ public class MicroarraySchema extends SimpleUserSchema
         if(getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
-            return new SimpleUserSchema.SimpleTable(this, tableInfo);
+            return new SimpleUserSchema.SimpleTable(this, tableInfo).init();
         }
 
         return null;
