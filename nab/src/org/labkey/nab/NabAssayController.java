@@ -26,9 +26,10 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.GraphForm;
-import org.labkey.api.assay.nab.Luc5Assay;
+import org.labkey.api.assay.nab.NabGraph;
 import org.labkey.api.assay.nab.RenderAssayBean;
 import org.labkey.api.assay.nab.RenderAssayForm;
+import org.labkey.api.assay.nab.view.DilutionGraphAction;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
 import org.labkey.api.data.*;
 import org.labkey.api.defaults.DefaultValueService;
@@ -59,7 +60,6 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
-import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
@@ -652,16 +652,11 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermissionClass(ReadPermission.class)
     @ContextualRoles(RunDataSetContextualRoles.class)
-    public class GraphAction extends SimpleViewAction<GraphForm>
+    public class GraphAction extends DilutionGraphAction
     {
-        public ModelAndView getView(GraphForm form, BindException errors) throws Exception
+        @Override
+        protected User getGraphUser()
         {
-            if (form.getRowId() == -1)
-                throw new NotFoundException("Run ID not specified.");
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
-            if (run == null)
-                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
-
             // See comment in DetailsAction about the elevatedUser
             User elevatedUser = getUser();
             if (!getContainer().hasPermission(getUser(), ReadPermission.class))
@@ -671,22 +666,13 @@ public class NabAssayController extends SpringActionController
                 contextualRoles.add(RoleManager.getRole(ReaderRole.class));
                 elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
             }
-            DilutionAssayRun assay = _getNabAssayRun(run, form.getFitTypeEnum(), elevatedUser);
-            if (assay == null)
-                throw new NotFoundException("Could not load NAb results for run " + form.getRowId() + ".");
+            return elevatedUser;
+        }
 
-            NabGraph.Config config = new NabGraph.Config();
-            config.setCutoffs(assay.getCutoffs());
-            config.setLockAxes(assay.isLockAxes());
-            config.setFirstSample(form.getFirstSample());
-            config.setMaxSamples(form.getMaxSamples());
-            if (form.getHeight() > 0)
-                config.setHeight(form.getHeight());
-            if (form.getWidth() > 0)
-                config.setWidth(form.getWidth());
-
-            NabGraph.renderChartPNG(getViewContext().getResponse(), assay, config);
-            return null;
+        @Override
+        protected DilutionAssayRun getAssayRun(ExpRun run, DilutionCurve.FitType fit, User user) throws ExperimentException
+        {
+            return _getNabAssayRun(run, fit, user);
         }
 
         public NavTree appendNavTrail(NavTree root)

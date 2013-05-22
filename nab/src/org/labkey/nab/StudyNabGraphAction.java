@@ -17,6 +17,7 @@ package org.labkey.nab;
 
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabGraph;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;

@@ -1578,7 +1578,6 @@ nab/src/org/labkey/nab/NabAssayRun.java -text
 nab/src/org/labkey/nab/NabContainerListener.java -text
 nab/src/org/labkey/nab/NabController.java -text
 nab/src/org/labkey/nab/NabDataHandler.java -text
-nab/src/org/labkey/nab/NabGraph.java -text
 nab/src/org/labkey/nab/NabManager.java -text
 nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
