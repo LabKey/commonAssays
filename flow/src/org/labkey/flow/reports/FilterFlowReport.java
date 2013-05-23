@@ -81,6 +81,8 @@ public abstract class FilterFlowReport extends FlowReport
 
             String script = getScriptResource();
             _inner.getDescriptor().setProperties(getDescriptor().getProperties());
+            _inner.getDescriptor().setEntityId(getDescriptor().getEntityId());
+            _inner.getDescriptor().setContainerId(getDescriptor().getContainerId());
             _inner.setScriptSource(script);
         }
 
