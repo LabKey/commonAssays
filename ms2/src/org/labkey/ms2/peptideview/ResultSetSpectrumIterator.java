@@ -19,6 +19,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
@@ -194,7 +195,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             sql.append('\n');
             sql.append(_sort.getOrderByClause(MS2Manager.getSqlDialect()));
 
-            return Table.executeQuery(MS2Manager.getSchema(), sql.toString(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), false);
+            return new SqlSelector(MS2Manager.getSchema(), sql.toString(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides())).getResultSet(false);
         }
     }
 }

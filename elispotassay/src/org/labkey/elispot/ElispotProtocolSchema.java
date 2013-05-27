@@ -85,7 +85,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         SimpleFilter propertyFilter = new SimpleFilter();
         propertyFilter.addCondition(FieldKey.fromParts("PropertyURI"), propPrefix, CompareType.STARTS_WITH);
 
-        PropertyDescriptor[] result = new TableSelector(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
+        PropertyDescriptor[] result = new TableSelector(OntologyManager.getTinfoPropertyDescriptor(),
                 propertyFilter, null).getArray(PropertyDescriptor.class);
 
         // Merge measure/dimension properties from well group domain into ElispotProperties domain

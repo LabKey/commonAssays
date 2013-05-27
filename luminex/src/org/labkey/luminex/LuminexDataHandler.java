@@ -34,6 +34,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
@@ -244,7 +245,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             ExpProtocol protocol = form.getProtocol();
             String dataFileName = data.getFile().getName();
             LuminexAssayProvider provider = form.getProvider();
-            Set<ExpMaterial> inputMaterials = new LinkedHashSet<ExpMaterial>();
+            Set<ExpMaterial> inputMaterials = new LinkedHashSet<>();
             ParticipantVisitResolver resolver = findParticipantVisitResolver(expRun, user, provider);
 
             Domain excelRunDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
@@ -293,8 +294,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Map<String, Titration> titrations = insertTitrations(expRun, user, form.getTitrations());
 
             // Keep these in a map so that we can easily look them up against the rows that are already in the database
-            Map<DataRowKey, Map<String, Object>> rows = new LinkedHashMap<DataRowKey, Map<String, Object>>();
-            Set<ExpData> sourceFiles = new HashSet<ExpData>();
+            Map<DataRowKey, Map<String, Object>> rows = new LinkedHashMap<>();
+            Set<ExpData> sourceFiles = new HashSet<>();
 
             Map<String, Analyte> existingAnalytes = getExistingAnalytes(expRun);
 
@@ -378,7 +379,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     if (titration != null)
                     {
                         dataRow.setTitration(titration.getRowId());
-                        List<String> roles = new ArrayList<String>();
+                        List<String> roles = new ArrayList<>();
                         if (titration.isStandard())
                         {
                             roles.add("Standard");
@@ -411,7 +412,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     rows.put(new DataRowKey(dataRow), dataRow.toMap(analyte));
             }
 
-            List<Integer> dataIds = new ArrayList<Integer>();
+            List<Integer> dataIds = new ArrayList<>();
             for (ExpData sourceFile : sourceFiles)
             {
                 insertExcelProperties(excelRunDomain, sourceFile, parser, user, protocol);
@@ -454,17 +455,17 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Pull back as a map so that we get custom properties as well
         Map[] databaseMaps = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, Map.class);
 
-        Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<DataRowKey, LuminexDataRow>();
+        Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<>();
         for (Map<String, Object> databaseMap : databaseMaps)
         {
             LuminexDataRow existingRow = BeanObjectFactory.Registry.getFactory(LuminexDataRow.class).fromMap(databaseMap);
             // Make sure an extra properties are made available
-            existingRow.setExtraProperties(new CaseInsensitiveHashMap<Object>(databaseMap));
+            existingRow.setExtraProperties(new CaseInsensitiveHashMap<>(databaseMap));
             existingRows.put(new DataRowKey(existingRow), existingRow);
         }
 
-        List<Map<String, Object>> insertRows = new ArrayList<Map<String, Object>>();
-        List<Map<String, Object>> updateRows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> insertRows = new ArrayList<>();
+        List<Map<String, Object>> updateRows = new ArrayList<>();
 
         // Sort them into new and existing rows
         for (Map.Entry<DataRowKey, Map<String, Object>> entry : rows.entrySet())
@@ -519,7 +520,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         sql.append(" WHERE a.DataId = d.RowId AND d.RunId = ?");
         sql.add(expRun.getRowId());
         Analyte[] databaseAnalytes = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Analyte.class);
-        Map<String, Analyte> existingAnalytes = new HashMap<String, Analyte>();
+        Map<String, Analyte> existingAnalytes = new HashMap<>();
         for (Analyte databaseAnalyte : databaseAnalytes)
         {
             existingAnalytes.put(databaseAnalyte.getName(), databaseAnalyte);
@@ -580,7 +581,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!dataRow.isSummary() && (dataRow.getCv() == null || dataRow.getStdDev() == null))
             {
-                List<Double> fis = new ArrayList<Double>();
+                List<Double> fis = new ArrayList<>();
                 for (LuminexDataRow statRow : dataRows)
                 {
                     // Only look for replicates within the same data file (plate)
@@ -616,7 +617,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexWellGroup wellGroup = analyte.buildWellGroup(dataRows);
         List<LuminexWell> allReplicates = wellGroup.getWellData(true); // combine replicates and get mean MFI and %CV
 
-        Set<CVQCFlag> newCVQCFlags = new HashSet<CVQCFlag>();
+        Set<CVQCFlag> newCVQCFlags = new HashSet<>();
         for (LuminexWell replicate : allReplicates)
         {
             LuminexDataRow dataRow = replicate.getDataRow();
@@ -708,7 +709,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
         else
         {
-            Map<String, Object> keys = new CaseInsensitiveHashMap<Object>();
+            Map<String, Object> keys = new CaseInsensitiveHashMap<>();
             keys.put("AnalyteId", analyte.getRowId());
             keys.put("TitrationId", titration.getRowId());
             Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteTitration, keys);
@@ -723,7 +724,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             CurveFit[] existingCurveFits = Table.select(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null, CurveFit.class);
 
             // Keep track of the curve fits that should be part of this run
-            List<CurveFit> newCurveFits = new ArrayList<CurveFit>();
+            List<CurveFit> newCurveFits = new ArrayList<>();
 
             String stdCurve = analyte.getStdCurve();
             if (stdCurve != null)
@@ -955,7 +956,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         public void testAUCSummaryData() throws DilutionCurve.FitFailedException, ExperimentException
         {
             // test calculation using dilutions for a control
-            List<LuminexWell> wells = new ArrayList<LuminexWell>();
+            List<LuminexWell> wells = new ArrayList<>();
 
             wells.add(new LuminexWell(new LuminexDataRow("C1", "A1", 30427, 1, 100)));
             wells.add(new LuminexWell(new LuminexDataRow("C2", "A2", 30139, 1, 600)));
@@ -976,7 +977,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
 
             // test calculation using expected concentrations for a standard
-            wells = new ArrayList<LuminexWell>();
+            wells = new ArrayList<>();
 
             wells.add(new LuminexWell(new LuminexDataRow("S1", "A1,B1", 32320, 100, 1)));
             wells.add(new LuminexWell(new LuminexDataRow("S2", "A2,B2", 32189.5, 20, 1)));
@@ -1001,7 +1002,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         public void testAUCRawData() throws DilutionCurve.FitFailedException, ExperimentException
         {
             // test calculation using dilutions for a control
-            List<LuminexWell> wells = new ArrayList<LuminexWell>();
+            List<LuminexWell> wells = new ArrayList<>();
 
             wells.add(new LuminexWell(new LuminexDataRow("C1", "G1", 30271, 1, 100)));
             wells.add(new LuminexWell(new LuminexDataRow("C1", "H1", 30583, 1, 100)));
@@ -1032,7 +1033,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
 
             // test calculation using expected concentrations for a standard
-            wells = new ArrayList<LuminexWell>();
+            wells = new ArrayList<>();
 
             wells.add(new LuminexWell(new LuminexDataRow("S1", "A1", 32298.5, 100, 1)));
             wells.add(new LuminexWell(new LuminexDataRow("S1", "B1", 32341.5, 100, 1)));
@@ -1067,7 +1068,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         public void testRawStats()
         {
             // Test calculation of stddev and %cv
-            List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
+            List<LuminexDataRow> dataRows = new ArrayList<>();
 
             dataRows.add(new LuminexDataRow("S1", "A1", 30284.5, 500, 1));
             dataRows.add(new LuminexDataRow("S1", "B1", 30596.5, 500, 1));
@@ -1121,7 +1122,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testStatsWithMultipleStandards()
         {
-            List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
+            List<LuminexDataRow> dataRows = new ArrayList<>();
             dataRows.add(new LuminexDataRow("S1", "A1", 62.0, "Stnd1"));
             dataRows.add(new LuminexDataRow("S1", "B1", 47.0, "Stnd1"));
             dataRows.add(new LuminexDataRow("S1", "A1", 63.0, "Stnd2"));
@@ -1266,7 +1267,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         analyteTitrationFilter.addCondition("Titration", titration.getRowId());
         List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = Arrays.asList(Table.select(qcFlagTable, Table.ALL_COLUMNS, analyteTitrationFilter, null, AnalyteTitrationQCFlag.class));
 
-        List<AnalyteTitrationQCFlag> newAnalyteTitrationQCFlags = new ArrayList<AnalyteTitrationQCFlag>();
+        List<AnalyteTitrationQCFlag> newAnalyteTitrationQCFlags = new ArrayList<>();
 
         if (null != analyteTitration.getGuideSetId())
         {
@@ -1286,7 +1287,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     ec505plAverageFK, ec505plStdDevFK,
                     aucAverageFK, aucStdDevFK));
             SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
-            Map<String, Object>[] guideSetRows = Table.select(guideSetTable, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
+            Map<String, Object>[] guideSetRows = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMapArray();
+
             if (guideSetRows.length != 1)
             {
                 throw new IllegalStateException("Unable to find referenced guide set: " + analyteTitration.getGuideSetId());
@@ -1413,14 +1415,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private Map<String, Titration> insertTitrations(ExpRun expRun, User user, List<Titration> titrations)
             throws ExperimentException, SQLException
     {
-        Map<String, Titration> result = new CaseInsensitiveHashMap<Titration>();
+        Map<String, Titration> result = new CaseInsensitiveHashMap<>();
 
         // Insert the titrations first
         for (Titration titration : titrations)
         {
             SimpleFilter filter = new SimpleFilter("Name", titration.getName());
             filter.addCondition("RunId", expRun.getRowId());
-            Titration[] exitingTitrations = Table.select(LuminexProtocolSchema.getTableInfoTitration(), Table.ALL_COLUMNS, filter, null, Titration.class);
+            Titration[] exitingTitrations = new TableSelector(LuminexProtocolSchema.getTableInfoTitration(), filter, null).getArray(Titration.class);
             assert exitingTitrations.length <= 1;
 
             if (exitingTitrations.length > 0)
@@ -1452,8 +1454,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             pds[i] = props[i].getPropertyDescriptor();
         }
 
-        List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
-        Map<String, Object> excelRunPropsByProperyId = new HashMap<String, Object>();
+        List<Map<String, Object>> excelRunPropsList = new ArrayList<>();
+        Map<String, Object> excelRunPropsByProperyId = new HashMap<>();
         for (Map.Entry<DomainProperty, String> entry : parser.getExcelRunProps(data.getFile()).entrySet())
         {
             excelRunPropsByProperyId.put(entry.getKey().getPropertyURI(), entry.getValue());
@@ -1761,7 +1763,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     public void beforeDeleteData(List<ExpData> data) throws ExperimentException
     {
-        List<Integer> ids = new ArrayList<Integer>();
+        List<Integer> ids = new ArrayList<>();
         for (ExpData expData : data)
         {
             ids.add(expData.getRowId());
@@ -1864,8 +1866,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // i.e. we don't care about about resolving the study or lookup information at this time (that will happen after the transform is run)
         ParticipantVisitResolver resolver = new StudyParticipantVisitResolverType().createResolver(run, null, info.getUser());
 
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
-        List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
+        List<Map<String, Object>> dataRows = new ArrayList<>();
 
         Set<String> titrations = parser.getTitrations();
 
@@ -1899,38 +1901,34 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexDataTable table = new LuminexDataTable(schema);
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
-        Set<Object> excludedWells = new HashSet<Object>();
+        final Set<Object> excludedWells = new HashSet<>();
 
-        try
+        // Well, data file, and analyte are sufficient to identify which wells from the Excel file need to be
+        // marked as excluded
+        FieldKey wellFK = FieldKey.fromParts("Well");
+        FieldKey dataNameFK = FieldKey.fromParts("Data", "Name");
+        FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
+
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(wellFK, dataNameFK, analyteFK));
+
+        final String wellAlias = cols.get(wellFK).getAlias();
+        final String dataNameAlias = cols.get(dataNameFK).getAlias();
+        final String analyteNameAlias = cols.get(analyteFK).getAlias();
+
+        SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults().toString(), run.getRowId());
+        filter.addCondition(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, true);
+        new TableSelector(table, cols.values(), filter, null).forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
         {
-            // Well, data file, and analyte are sufficient to identify which wells from the Excel file need to be
-            // marked as excluded
-            FieldKey wellFK = FieldKey.fromParts("Well");
-            FieldKey dataNameFK = FieldKey.fromParts("Data", "Name");
-            FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
-
-            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(wellFK, dataNameFK, analyteFK));
-
-            SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults().toString(), run.getRowId());
-            filter.addCondition(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, true);
-            Map<String, Object>[] rows = Table.select(table, new ArrayList<ColumnInfo>(cols.values()), filter, null, Map.class);
-
-            String wellAlias = cols.get(wellFK).getAlias();
-            String dataNameAlias = cols.get(dataNameFK).getAlias();
-            String analyteNameAlias = cols.get(analyteFK).getAlias();
-
-            for (Map<String, Object> row : rows)
+            @Override
+            public void exec(Map<String, Object> row) throws SQLException
             {
                 String well = (String)row.get(wellAlias);
                 String dataName = (String)row.get(dataNameAlias);
                 String analyteName = (String)row.get(analyteNameAlias);
                 excludedWells.add(createKey(analyteName, dataName, well));
             }
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        });
+
         return excludedWells;
     }
 
@@ -1950,12 +1948,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         if (null == rowFactory)
             throw new ExperimentException("Could not find a matching object factory for " + LuminexDataRow.class);
 
-        Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
+        Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<>();
         for (Map<String, Object> dataMap : dataMaps)
         {
             // CONSIDER: subclass the rowFactory to ignore "titration"
             // titration==true/false so leaving it causes ConversionException(NumberFormatException)
-            CaseInsensitiveHashMap<Object> row = new CaseInsensitiveHashMap<Object>(dataMap);
+            CaseInsensitiveHashMap<Object> row = new CaseInsensitiveHashMap<>(dataMap);
             row.remove("titration");
             Analyte analyte = analyteFactory.fromMap(row);
             LuminexDataRow dataRow = rowFactory.fromMap(row);

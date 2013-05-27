@@ -4410,7 +4410,7 @@ public class MS2Controller extends SpringActionController
             QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
             SimpleFilter filter = new SimpleFilter();
             AbstractQueryMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
-            protein.setPeptides(Table.executeArray(gridView.getTable(), "Peptide", filter, new Sort("Peptide"), String.class));
+            protein.setPeptides(new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), filter, new Sort("Peptide")).getArray(String.class));
 
             PrintWriter writer = getViewContext().getResponse().getWriter();
             ActionURL searchURL = new ActionURL(DoProteinSearchAction.class, getContainer());
@@ -4639,7 +4639,7 @@ public class MS2Controller extends SpringActionController
                 {
                     allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, run);
                     gridView = peptideView.createGridView(allPeptidesQueryFilter);
-                    peptides = Table.executeArray(gridView.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
+                    peptides = new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), allPeptidesQueryFilter, new Sort("Peptide")).getArray(String.class);
                 }
                 catch (SQLGenerationException e)
                 {

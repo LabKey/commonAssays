@@ -554,10 +554,8 @@ public class AnalysisSerializer
 
     private void readStatistics(InputStream statFile, Map<String, AttributeSet> results) throws IOException
     {
-        Reader reader = null;
-        try
+        try (Reader reader = new InputStreamReader(statFile))
         {
-            reader = new InputStreamReader(statFile);
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
@@ -602,11 +600,6 @@ public class AnalysisSerializer
                 readStatsGroupedBySamplePopulation(loader, results);
             else
                 readStatsGroupBySample(loader, results);
-        }
-        finally
-        {
-            if (reader != null)
-                try { reader.close(); } catch (IOException e) { }
         }
     }
 
@@ -702,10 +695,8 @@ public class AnalysisSerializer
 
     private void readKeywords(InputStream statFile, Map<String, AttributeSet> results) throws IOException
     {
-        Reader reader = null;
-        try
+        try (Reader reader = new InputStreamReader(statFile))
         {
-            reader = new InputStreamReader(statFile);
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
@@ -738,19 +729,12 @@ public class AnalysisSerializer
             else
                 readKeywordsGroupBySample(loader, results);
         }
-        finally
-        {
-            if (reader != null)
-                try { reader.close(); } catch (IOException e) { }
-        }
     }
 
     private void readGraphs(InputStream graphsFile, Map<String, AttributeSet> results) throws IOException
     {
-        Reader reader = null;
-        try
+        try (Reader reader = new InputStreamReader(graphsFile))
         {
-            reader = new InputStreamReader(graphsFile);
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
@@ -847,19 +831,12 @@ public class AnalysisSerializer
                 attrs.setGraph(graphSpec, b);
             }
         }
-        finally
-        {
-            if (reader != null)
-                try { reader.close(); } catch (IOException e) { }
-        }
     }
 
     private void readCompMatrices(InputStream compensationFile, Map<String, CompensationMatrix> matrices) throws IOException
     {
-        Reader reader = null;
-        try
+        try (Reader reader = new InputStreamReader(compensationFile))
         {
-            reader = new InputStreamReader(compensationFile);
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
@@ -881,12 +858,6 @@ public class AnalysisSerializer
 
             readCompMatrices(loader, matrices);
         }
-        finally
-        {
-            if (reader != null)
-                try { reader.close(); } catch (IOException e) { }
-        }
-
     }
 
     private void readCompMatrices(TabLoader loader, Map<String, CompensationMatrix> matrices) throws IOException

@@ -21,7 +21,21 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Aggregate;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector.ForEachBlock;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpObject;
@@ -43,7 +57,17 @@ import org.labkey.flow.query.FlowTableType;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class FlowManager
@@ -52,8 +76,8 @@ public class FlowManager
     private static final Logger _log = Logger.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
 
-    private final HashMap<NameCacheKey, FlowEntry> _attrNameToEntryCache = new HashMap<NameCacheKey, FlowEntry>(1000);
-    private final HashMap<RowIdCacheKey, FlowEntry> _attrRowIdToEntryCache = new HashMap<RowIdCacheKey, FlowEntry>(1000);
+    private final HashMap<NameCacheKey, FlowEntry> _attrNameToEntryCache = new HashMap<>(1000);
+    private final HashMap<RowIdCacheKey, FlowEntry> _attrRowIdToEntryCache = new HashMap<>(1000);
 
     static public FlowManager get()
     {
@@ -219,7 +243,7 @@ public class FlowManager
         }
         if (!hasNulls)
             return ret;
-        ArrayList<FlowEntry> lstRet = new ArrayList<FlowEntry>();
+        ArrayList<FlowEntry> lstRet = new ArrayList<>();
         for (FlowEntry entry : ret)
         {
             if (entry != null)
@@ -306,12 +330,12 @@ public class FlowManager
         }
     }
 
-    private void quickFillCache(AttributeType type)
+    private void quickFillCache(final AttributeType type)
     {
-        try
+        new TableSelector(attributeTable(type), new HashSet<>(Arrays.asList("RowId", "Container", "Name", "Id"))).forEachMap(new ForEachBlock<Map<String, Object>>()
         {
-            Map<String, Object>[] rows = Table.selectMaps(attributeTable(type), new HashSet<String>(Arrays.asList("RowId", "Container", "Name", "Id")), null, null);
-            for (Map<String, Object> row : rows)
+            @Override
+            public void exec(Map<String, Object> row) throws SQLException
             {
                 Integer rowid = (Integer)row.get("RowId");
                 String containerId = (String)row.get("Container");
@@ -321,12 +345,7 @@ public class FlowManager
                 _attrRowIdToEntryCache.put(new RowIdCacheKey(type, rowid), entry);
                 _attrNameToEntryCache.put(new NameCacheKey(containerId, type, name), entry);
             }
-        }
-        catch (SQLException e)
-        {
-            _log.error("Unexpected error", e);
-            // fall through;
-        }
+        });
     }
 
     private void quickFillCache()
@@ -362,7 +381,7 @@ public class FlowManager
             int ret = getAttributeRowId(container, type, attr);
             if (ret != 0)
                 return ret;
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("Container", container.getId());
             map.put("Name", attr);
             map.put("Id", aliasId);
@@ -428,7 +447,7 @@ public class FlowManager
     {
         synchronized (_attrNameToEntryCache)
         {
-            List<String> names = new ArrayList<String>();
+            List<String> names = new ArrayList<>();
             names.add(name);
             for (Object alias : aliases)
                 names.add(alias.toString());
@@ -670,7 +689,7 @@ public class FlowManager
             return;
         StringBuilder sqlGetOIDs = new StringBuilder("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId IN (");
         String comma = "";
-        Set<Container> containers = new HashSet<Container>();
+        Set<Container> containers = new HashSet<>();
         for (ExpData data : datas)
         {
             sqlGetOIDs.append(comma);

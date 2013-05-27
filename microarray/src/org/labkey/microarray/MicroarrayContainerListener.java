@@ -19,6 +19,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 
@@ -39,15 +40,8 @@ public class MicroarrayContainerListener implements ContainerManager.ContainerLi
 
     public void containerDeleted(Container c, User user)
     {
-        try
-        {
-            DbSchema ms = MicroarraySchema.getSchema();
-            Table.execute(ms, "DELETE FROM " + ms.getTable(MicroarraySchema.TABLE_GEO_PROPS).getSelectName() + " WHERE container = ?", c.getId());
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        DbSchema ms = MicroarraySchema.getSchema();
+        new SqlExecutor(ms).execute("DELETE FROM " + ms.getTable(MicroarraySchema.TABLE_GEO_PROPS).getSelectName() + " WHERE container = ?", c);
     }
 
     public void propertyChange(PropertyChangeEvent evt)

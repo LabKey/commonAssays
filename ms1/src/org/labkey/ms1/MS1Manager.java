@@ -387,8 +387,8 @@ public class MS1Manager
         ResultSet rs = null;
         try
         {
-            rs = Table.executeQuery(getSchema(), "SELECT ScanId FROM ms1.Scans WHERE FileId=" + String.valueOf(fileId),
-                    null, false);
+            rs = new SqlSelector(getSchema(), "SELECT ScanId FROM ms1.Scans WHERE FileId=" + String.valueOf(fileId),
+                    null).getResultSet(false);
 
             int scanId = 0;
             long numScans = 0;

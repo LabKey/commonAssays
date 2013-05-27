@@ -16,8 +16,8 @@
 
 package org.labkey.microarray.assay;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
+import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.SimpleXMLStreamReader;
@@ -34,14 +35,21 @@ import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.microarray.MicroarrayModule;
-import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -89,7 +97,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         {
             // Return a single, empty row of results so that we get an entry in the results table and can copy it to
             // a study, which is useful because it propagates the run and batch properties
-            List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>(1);
+            List<Map<String, Object>> dataRows = new ArrayList<>(1);
             dataRows.add(new HashMap<String, Object>());
             return Collections.<DataType, List<Map<String, Object>>>singletonMap(MicroarrayModule.MAGE_ML_INPUT_TYPE, dataRows);
         }
@@ -98,7 +106,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         {
             fIn = new FileInputStream(dataFile);
             SimpleXMLStreamReader reader = new SimpleXMLStreamReader(fIn);
-            List<String> columnNames = new ArrayList<String>();
+            List<String> columnNames = new ArrayList<>();
             if (reader.skipToStart("QuantitationTypes_assnreflist"))
             {
                 boolean endOfTypes = false;
@@ -135,7 +143,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
                     InputStream tsvIn = new TrimmedFileInputStream(dataFile, startingOffset, endingOffset);
                     try
                     {
-                        Map<String, Class> expectedColumns = new HashMap<String, Class>(columns.length);
+                        Map<String, Class> expectedColumns = new HashMap<>(columns.length);
                         for (DomainProperty col : columns)
                             expectedColumns.put(col.getName().toLowerCase(), col.getPropertyDescriptor().getPropertyType().getJavaType());
                         for (DomainProperty col : columns)
@@ -161,7 +169,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
                             tabColumns[i].errorValues = ERROR_VALUE;
                         }
                         loader.setColumns(tabColumns);
-                        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
+                        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
 
                         datas.put(MicroarrayModule.MAGE_ML_INPUT_TYPE, loader.load());
                         return datas;

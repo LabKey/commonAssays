@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.ms2.MS2Run;
@@ -73,7 +74,7 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
                 joinSql = sql.getSQL().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
             }
 
-            return Table.executeQuery(ProteinManager.getSchema(), joinSql, sql.getParams().toArray(), false);
+            return new SqlSelector(ProteinManager.getSchema(), joinSql, sql.getParams()).getResultSet(false);
         }
     }
 }

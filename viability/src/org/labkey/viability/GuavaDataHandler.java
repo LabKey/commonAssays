@@ -104,18 +104,17 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
         protected void _parse() throws IOException, ExperimentException
         {
-            _runData = new HashMap<DomainProperty, Object>();
+            _runData = new HashMap<>();
 
-            BufferedReader reader = null;
-            try
+            boolean foundBlankLine = false;
+            Map<String, String> runHeaders = new HashMap<>();
+            String[] groupHeaders = null;
+            String[] headers = null;
+            int count = 0;
+            String line;
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(_dataFile)))
             {
-                reader = new BufferedReader(new FileReader(_dataFile));
-                boolean foundBlankLine = false;
-                Map<String, String> runHeaders = new HashMap<String, String>();
-                String[] groupHeaders = null;
-                String[] headers = null;
-                int count = 0;
-                String line;
                 while (null != (line = reader.readLine()))
                 {
                     String[] parts = line.split(",", -1); // include empty cells
@@ -204,10 +203,6 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                     _resultData = loadExpressPlus(tl.load());
                 else
                     _resultData = tl.load();
-            }
-            finally
-            {
-                if (reader != null) { try { reader.close(); } catch (IOException ioe) { } }
             }
         }
 
@@ -340,10 +335,10 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         // Adjust the total viable cells (based on volume) and calculate the total cells.
         private List<Map<String, Object>> loadExpressPlus(List<Map<String, Object>> rows)
         {
-            List<Map<String, Object>> newRows = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> newRows = new ArrayList<>();
             for (Map<String, Object> row : rows)
             {
-                Map<String, Object> newRow = new HashMap<String, Object>(row);
+                Map<String, Object> newRow = new HashMap<>(row);
                 Double volume = (Double)row.get("OriginalVolume");
                 Double viableCells = volume * (Double)row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME);
 
@@ -374,7 +369,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        Map<DataType, List<Map<String, Object>>> result = new HashMap<DataType, List<Map<String, Object>>>();
+        Map<DataType, List<Map<String, Object>>> result = new HashMap<>();
         if (context instanceof AssayUploadXarContext)
         {
             ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)((AssayUploadXarContext)context).getContext();

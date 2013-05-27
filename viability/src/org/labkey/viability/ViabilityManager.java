@@ -41,6 +41,7 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.JunitUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.TestContext;
 
 import java.sql.SQLException;
@@ -110,12 +111,12 @@ public class ViabilityManager
 
     static String[] getSpecimens(int resultRowId) throws SQLException
     {
-        String[] specimens = Table.executeArray(
+        String[] specimens = new TableSelector(
                 ViabilitySchema.getTableInfoResultSpecimens(),
-                "SpecimenID",
+                PageFlowUtil.set("SpecimenID"),
                 new SimpleFilter("ResultID", resultRowId),
-                new Sort("SpecimenIndex"),
-                String.class);
+                new Sort("SpecimenIndex")).getArray(String.class);
+
         return specimens;
     }
 
@@ -126,7 +127,7 @@ public class ViabilityManager
         assert obj != null;
 
         Map<String, Object> oprops = OntologyManager.getProperties(obj.getContainer(), obj.getObjectURI());
-        Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
+        Map<PropertyDescriptor, Object> properties = new HashMap<>();
         for (Map.Entry<String, Object> entry : oprops.entrySet())
         {
             String propertyURI = entry.getKey();
@@ -188,7 +189,7 @@ public class ViabilityManager
             if (specimenID == null || specimenID.length() == 0)
                 continue;
             
-            Map<String, Object> resultSpecimen = new HashMap<String, Object>();
+            Map<String, Object> resultSpecimen = new HashMap<>();
             resultSpecimen.put("ResultID", resultId);
             resultSpecimen.put("SpecimenID", specimens.get(index));
             resultSpecimen.put("SpecimenIndex", index);
@@ -206,7 +207,7 @@ public class ViabilityManager
         OntologyObject obj = OntologyManager.getOntologyObject(result.getObjectID());
         assert obj != null;
 
-        List<ObjectProperty> oprops = new ArrayList<ObjectProperty>(properties.size());
+        List<ObjectProperty> oprops = new ArrayList<>(properties.size());
         for (Map.Entry<PropertyDescriptor, Object> prop : properties.entrySet())
         {
             Object value = prop.getValue();
@@ -281,14 +282,14 @@ public class ViabilityManager
     {
         try
         {
-            List<Integer> dataIDs = new ArrayList<Integer>(datas.size());
+            List<Integer> dataIDs = new ArrayList<>(datas.size());
             for (ExpData data : datas)
                 dataIDs.add(data.getRowId());
 
             Map<String, Object>[] rows =
-                    Table.selectMaps(ViabilitySchema.getTableInfoResults(),
-                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
-                    new SimpleFilter("DataID", dataIDs, CompareType.IN), null);
+                    new TableSelector(ViabilitySchema.getTableInfoResults(),
+                    new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                    new SimpleFilter("DataID", dataIDs, CompareType.IN), null).getMapArray();
 
             int[] objectIDs = new int[rows.length];
 
@@ -352,10 +353,11 @@ public class ViabilityManager
             Container c = JunitUtil.getTestContainer();
             TestContext context = TestContext.get();
 
-            Map<String, Object>[] rows = Table.selectMaps(
+            Map<String, Object>[] rows = new TableSelector(
                     ViabilitySchema.getTableInfoResults(),
-                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
-                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null);
+                    new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null).getMapArray();
+
             for (Map<String, Object> row : rows)
             {
                 int resultId = (Integer)row.get("RowID");
@@ -393,7 +395,7 @@ public class ViabilityManager
                 assertEquals(0.9, result.getViability(), DELTA);
                 result.setSpecimenIDs(Arrays.asList("222", "111", "333"));
 
-                Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
+                Map<PropertyDescriptor, Object> properties = new HashMap<>();
                 properties.put(_propertyA, "hello property");
                 properties.put(_propertyB, true);
                 result.setProperties(properties);
@@ -440,7 +442,7 @@ public class ViabilityManager
             {
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
                 List<String> specimens = result.getSpecimenIDs();
-                specimens = new ArrayList<String>(specimens);
+                specimens = new ArrayList<>(specimens);
                 specimens.remove("222");
                 specimens.add("444");
                 specimens.add("000");
