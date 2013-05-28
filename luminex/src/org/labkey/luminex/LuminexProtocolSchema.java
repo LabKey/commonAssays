@@ -56,6 +56,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String DATA_ROW_TABLE_NAME = "DataRow";
     public static final String DATA_FILE_TABLE_NAME = "DataFile";
     public static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";
+    public static final String TITRATION_EXCLUSION_TABLE_NAME = "TitrationExclusion";
     public static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
     public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
     public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
@@ -78,6 +79,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.add(TITRATION_TABLE_NAME);
         result.add(DATA_FILE_TABLE_NAME);
         result.add(WELL_EXCLUSION_TABLE_NAME);
+        result.add(TITRATION_EXCLUSION_TABLE_NAME);
         result.add(RUN_EXCLUSION_TABLE_NAME);
         result.add(CURVE_FIT_TABLE_NAME);
         result.add(GUIDE_SET_TABLE_NAME);
@@ -143,6 +145,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createWellExclusionTable(true);
+                result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.NONBLANK));
+                SQLFragment filter = new SQLFragment("DataId");
+                filter.append(createDataFilterInClause());
+                result.addCondition(filter, FieldKey.fromParts("DataId"));
+                return result;
+            }
+            if(TITRATION_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                FilteredTable result = createWellExclusionTable(true);
+                result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK));
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
@@ -599,15 +611,19 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 if (showControls() && runId != null)
                 {
                     ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
-                    excludeAnalytes.setScript("LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
-                            + "LABKEY.requiresCss('luminex/Exclusion.css');"
-                            + "analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
+                    excludeAnalytes.setScript("analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
                     excludeAnalytes.setDisplayPermission(UpdatePermission.class);
+
+
+                    ActionButton excludeTitration = new ActionButton("Exclude Titration");
+                    excludeTitration.setScript("titrationExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
+                    excludeTitration.setDisplayPermission(UpdatePermission.class);
 
                     // todo: move the JS and CSS inclusion to the page level
 
                     ButtonBar buttonBar = new ButtonBar(result.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
                     buttonBar.add(excludeAnalytes);
+                    buttonBar.add(excludeTitration);
                     result.getDataRegion().setButtonBar(buttonBar, DataRegion.MODE_GRID);
                 }
                 return result;

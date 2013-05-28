@@ -734,6 +734,7 @@ luminex/webapp/luminex/LeveyJenningsReport.css -text
 luminex/webapp/luminex/LeveyJenningsTrackingDataPanel.js -text
 luminex/webapp/luminex/LeveyJenningsTrendPlotPanel.js -text
 luminex/webapp/luminex/ManageGuideSetPanel.js -text
+luminex/webapp/luminex/TitrationExclusionPanel.js -text
 luminex/webapp/luminex/WellExclusionPanel.js -text
 luminex/webapp/luminex/excluded.png -text
 luminex/webapp/luminex/included.png -text

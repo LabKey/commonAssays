@@ -95,6 +95,12 @@ public class LuminexController extends SpringActionController
             runsView.setTitlePopupHelp("Excluded Analytes", "Shows all of the analytes that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
             result.setupViews(runsView, false, form.getProvider(), form.getProtocol());
 
+            QuerySettings titrationsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.TITRATION_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.TITRATION_EXCLUSION_TABLE_NAME);
+            QueryView titrationsView = createQueryView(titrationsSetting, schema, errors);
+            titrationsView.setTitle("Excluded Titrations");
+            titrationsView.setTitlePopupHelp("Excluded Titrations", "Shows all of the titrations that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
+            result.addView(titrationsView);
+
             QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME);
             QueryView wellsView = createQueryView(wellsSetting, schema, errors);
             wellsView.setTitle("Excluded Wells");
