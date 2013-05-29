@@ -1455,12 +1455,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         List<Map<String, Object>> excelRunPropsList = new ArrayList<>();
-        Map<String, Object> excelRunPropsByProperyId = new HashMap<>();
+        Map<String, Object> excelRunPropsByPropertyId = new HashMap<>();
         for (Map.Entry<DomainProperty, String> entry : parser.getExcelRunProps(data.getFile()).entrySet())
         {
-            excelRunPropsByProperyId.put(entry.getKey().getPropertyURI(), entry.getValue());
+            excelRunPropsByPropertyId.put(entry.getKey().getPropertyURI(), entry.getValue());
         }
-        excelRunPropsList.add(excelRunPropsByProperyId);
+        excelRunPropsList.add(excelRunPropsByPropertyId);
         OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
         {
             public String beforeImportObject(Map<String, Object> map) throws SQLException
