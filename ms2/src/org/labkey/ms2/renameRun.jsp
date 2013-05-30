@@ -31,7 +31,7 @@
         <td><input type="text" size="70" name="description" id="description" value="<%=h(bean.description)%>"/></td>
     </tr>
     <tr>
-        <td colspan="2"><%=generateSubmitButton("Rename")%><%=generateButton("Cancel", bean.returnURL)%></td>
+        <td colspan="2" style="padding-top: 10px;"><%=generateSubmitButton("Rename")%><%=generateButton("Cancel", bean.returnURL)%></td>
     </tr>
 </table>
 </form>

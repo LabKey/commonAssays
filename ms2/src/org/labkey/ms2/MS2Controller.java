@@ -817,7 +817,11 @@ public class MS2Controller extends SpringActionController
 
             getPageConfig().setFocusId("description");
 
-            return new JspView<RenameBean>("/org/labkey/ms2/renameRun.jsp", bean);
+            JspView<RenameBean> jview = new JspView<>("/org/labkey/ms2/renameRun.jsp", bean);
+            jview.setFrame(WebPartView.FrameType.PORTAL);
+            jview.setTitle("Rename MS2 Run");
+
+            return jview;
         }
 
         public boolean handlePost(RenameForm form, BindException errors) throws Exception
