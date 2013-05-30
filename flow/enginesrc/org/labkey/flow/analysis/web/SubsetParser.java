@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.PopulationName;

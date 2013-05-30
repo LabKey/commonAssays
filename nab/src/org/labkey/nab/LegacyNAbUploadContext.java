@@ -15,7 +15,7 @@
  */
 package org.labkey.nab;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionSummary;

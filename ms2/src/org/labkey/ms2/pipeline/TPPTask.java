@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jmock.Mockery;

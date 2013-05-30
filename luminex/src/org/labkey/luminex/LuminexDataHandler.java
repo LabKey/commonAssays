@@ -16,7 +16,7 @@
 
 package org.labkey.luminex;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -909,16 +909,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     public static class TestCase extends Assert
     {
+        public static final double DELTA = 10E-10;
+
         @Test
         public void testBioPlexCurveParsingNegativeMinimum()
         {
             ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
             assertNotNull("Couldn't parse standard curve", params);
-            assertEquals(params.asymmetry, 0.215266);
-            assertEquals(params.min, -2.08995);
-            assertEquals(params.max, 29936.18995);
-            assertEquals(params.inflection, 2.49287);
-            assertEquals(params.slope, -4.99651);
+            assertEquals(params.asymmetry, 0.215266, DELTA);
+            assertEquals(params.min, -2.08995, DELTA);
+            assertEquals(params.max, 29936.18995, DELTA);
+            assertEquals(params.inflection, 2.49287, DELTA);
+            assertEquals(params.slope, -4.99651, DELTA);
         }
 
         @Test
@@ -933,11 +935,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -0.723451 + (2.48266E+006 + 0.723451) / ((1 + (Conc / 21.932)^-0.192152))^10");
             assertNotNull("Couldn't parse standard curve", params);
-            assertEquals(params.asymmetry, 10.0);
-            assertEquals(params.min, -0.723451);
-            assertEquals(params.max, 2482660.723451);
-            assertEquals(params.inflection, 21.932);
-            assertEquals(params.slope, -0.192152);
+            assertEquals(params.asymmetry, 10.0, DELTA);
+            assertEquals(params.min, -0.723451, DELTA);
+            assertEquals(params.max, 2482660.723451, DELTA);
+            assertEquals(params.inflection, 21.932, DELTA);
+            assertEquals(params.slope, -0.192152, DELTA);
         }
 
         @Test
@@ -945,11 +947,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998");
             assertNotNull("Couldn't parse standard curve", params);
-            assertEquals(0.0999998, params.asymmetry);
-            assertEquals(.441049, params.min);
-            assertEquals(30394.958951, params.max);
-            assertEquals(5.04206, params.inflection);
-            assertEquals(-11.8884, params.slope);
+            assertEquals(0.0999998, params.asymmetry, DELTA);
+            assertEquals(.441049, params.min, DELTA);
+            assertEquals(30394.958951, params.max, DELTA);
+            assertEquals(5.04206, params.inflection, DELTA);
+            assertEquals(-11.8884, params.slope, DELTA);
         }
 
         @Test
@@ -971,10 +973,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             LuminexWellGroup group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue(), DELTA);
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
-            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
 
             // test calculation using expected concentrations for a standard
             wells = new ArrayList<>();
@@ -992,10 +994,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue());
+            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue(), DELTA);
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
-            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
+            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
         }
 
         @Test
@@ -1027,10 +1029,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             LuminexWellGroup group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue(), DELTA);
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
-            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
 
             // test calculation using expected concentrations for a standard
             wells = new ArrayList<>();
@@ -1058,10 +1060,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue());
+            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue(), DELTA);
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
-            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
+            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
         }
 
         @Test
@@ -1098,25 +1100,25 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             new LuminexDataHandler().ensureSummaryStats(dataRows);
 
-            assertEquals("Wrong %CV", 0.0072475, Math.round(dataRows.get(0).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.0072475, Math.round(dataRows.get(1).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.0005863, Math.round(dataRows.get(2).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.0005863, Math.round(dataRows.get(3).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(4).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(5).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0072475, Math.round(dataRows.get(0).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.0072475, Math.round(dataRows.get(1).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.0005863, Math.round(dataRows.get(2).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.0005863, Math.round(dataRows.get(3).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(4).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(5).getCv() * 10000000) / 10000000.0, DELTA);
 
-            assertEquals("Wrong %CV", 5000.0, Math.round(dataRows.get(6).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(7).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 5000.0, Math.round(dataRows.get(6).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(7).getCv() * 10000000) / 10000000.0, DELTA);
 
-            assertEquals("Wrong StdDev", 220.61732, Math.round(dataRows.get(0).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 220.61732, Math.round(dataRows.get(1).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 17.67767, Math.round(dataRows.get(2).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 17.67767, Math.round(dataRows.get(3).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(4).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(5).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 220.61732, Math.round(dataRows.get(0).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 220.61732, Math.round(dataRows.get(1).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 17.67767, Math.round(dataRows.get(2).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 17.67767, Math.round(dataRows.get(3).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(4).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(5).getStdDev() * 100000) / 100000.0, DELTA);
 
-            assertEquals("Wrong StdDev", 5000.0, Math.round(dataRows.get(6).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(7).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 5000.0, Math.round(dataRows.get(6).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(7).getStdDev() * 100000) / 100000.0, DELTA);
         }
 
         @Test
@@ -1129,15 +1131,15 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             dataRows.add(new LuminexDataRow("S1", "B1", 46.0, "Stnd2"));
             new LuminexDataHandler().ensureSummaryStats(dataRows);
 
-            assertEquals("Wrong StdDev", 10.6066, Math.round(dataRows.get(0).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 10.6066, Math.round(dataRows.get(1).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 12.02082, Math.round(dataRows.get(2).getStdDev() * 100000) / 100000.0);
-            assertEquals("Wrong StdDev", 12.02082, Math.round(dataRows.get(3).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 10.6066, Math.round(dataRows.get(0).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 10.6066, Math.round(dataRows.get(1).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 12.02082, Math.round(dataRows.get(2).getStdDev() * 100000) / 100000.0, DELTA);
+            assertEquals("Wrong StdDev", 12.02082, Math.round(dataRows.get(3).getStdDev() * 100000) / 100000.0, DELTA);
 
-            assertEquals("Wrong %CV", 0.1946165, Math.round(dataRows.get(0).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.1946165, Math.round(dataRows.get(1).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.2205654, Math.round(dataRows.get(2).getCv() * 10000000) / 10000000.0);
-            assertEquals("Wrong %CV", 0.2205654, Math.round(dataRows.get(3).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.1946165, Math.round(dataRows.get(0).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.1946165, Math.round(dataRows.get(1).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.2205654, Math.round(dataRows.get(2).getCv() * 10000000) / 10000000.0, DELTA);
+            assertEquals("Wrong %CV", 0.2205654, Math.round(dataRows.get(3).getCv() * 10000000) / 10000000.0, DELTA);
         }
 
         @Test
