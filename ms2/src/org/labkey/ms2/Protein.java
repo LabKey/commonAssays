@@ -194,7 +194,7 @@ public class Protein
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
 
-        List<SequencePos> seqStacks = new ArrayList<SequencePos>();
+        List<SequencePos> seqStacks = new ArrayList<>();
 
         // build an arraylist of sequence objects and initialize them with the AA for their position.
         for (int i=0; i<_sequence.length(); i++)
@@ -313,7 +313,7 @@ public class Protein
     private class SequencePos {
         char _c;
         Integer _levels =0;
-        HashMap<Integer, String> tdMap =new HashMap<Integer, String>();
+        HashMap<Integer, String> tdMap =new HashMap<>();
 
         public SequencePos(char c, int curIdx) {
             _c=c;
@@ -359,9 +359,9 @@ public class Protein
                 colsNextRow = range.start + range.length - nextRowStart;
                 colsCurrentRow = colsCurrentRow - colsNextRow;
             }
-            String trimmedPeptide=null;
+            String trimmedPeptide;
             String onClickScript=null;
-            Double mass = null;
+            Double mass;
             String details = null;
             String continuationLeft="";
             String continuationRight="";
@@ -370,8 +370,11 @@ public class Protein
             if (!_forCoverageMapExport)
             {
                 trimmedPeptide= _sequence.substring(range.start,(range.start + range.length));
-                onClickScript="window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" +  trimmedPeptide
-                        +"', 'showMatchingPeptides');";
+                if (showRunViewUrl != null)
+                {
+                    onClickScript="window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" + trimmedPeptide
+                            +"', 'showMatchingPeptides');";
+                }
             }
 
             counts = range.getCounts();
@@ -404,8 +407,7 @@ public class Protein
                     if (!_forCoverageMapExport)
                     {
                         details += String.format("\nUnmodified: %d",counts.getCountUnmodifiedPeptides());
-                        String popup = helpPopup("Peptide Details", details, false, linkText, 200, onClickScript );
-                        label=popup;
+                        label = helpPopup("Peptide Details", details, false, linkText, 200, onClickScript );
                     }
                     label = continuationLeft + label + continuationRight;
                 }
@@ -476,7 +478,7 @@ public class Protein
         }
 
         public PeptideCounts() {
-            countModifications =new HashMap<String, Integer>();
+            countModifications =new HashMap<>();
             countScans=0;
             countUnmodifiedPeptides=0;
             countInstances =0;
@@ -578,13 +580,13 @@ public class Protein
         if ("".equals(_sequence) || _peptides == null)     // Optimize case where sequence isn't available (FASTA not loaded)
         {
             _computeCoverage = false;
-            _coverageRanges = new ArrayList<Range>(0);
+            _coverageRanges = new ArrayList<>(0);
             return _coverageRanges;
         }
         List<Range> ranges = getUncoalescedPeptideRanges(run);
         // Coalesce ranges
         // Code below is only used by the old-style collapsed sequence and is unchanged
-        _coverageRanges = new ArrayList<Range>(ranges.size());
+        _coverageRanges = new ArrayList<>(ranges.size());
         int start = -1;
         int end = -1;
 
@@ -622,14 +624,14 @@ public class Protein
      */
     private List<Range> getUncoalescedPeptideRanges(MS2Run run)
     {
-        List<Range> uncoalescedPeptideRanges = new ArrayList<Range>(0);
+        List<Range> uncoalescedPeptideRanges = new ArrayList<>();
 
         if ("".equals(_sequence) || _peptides == null)     // Optimize case where sequence isn't available (FASTA not loaded)
             return uncoalescedPeptideRanges;
 
         Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
 
-        List<Range> ranges = new ArrayList<Range>(uniqueMap.size());
+        List<Range> ranges = new ArrayList<>(uniqueMap.size());
 
         if (run != null)  // in new style coverage map, we always have a run and are only looking for the trimmed part of the peptide
         {
@@ -696,7 +698,6 @@ public class Protein
         // Sort ranges based on starting point
         Collections.sort(ranges);
 
-        uncoalescedPeptideRanges = ranges;
         return ranges;
     }
 
@@ -713,7 +714,7 @@ public class Protein
     */
     public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
     {
-        Map<String,PeptideCounts> uniquePeptides = new HashMap<String,PeptideCounts>();
+        Map<String,PeptideCounts> uniquePeptides = new HashMap<>();
         if (null==_peptides || _peptides.length <= 0)
             return uniquePeptides;
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
@@ -778,7 +779,7 @@ public class Protein
      */
     public static Set<String> getDistinctTrimmedPeptides(String[] peptides)
     {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (String peptide : peptides)
         {
             StringBuilder trimmedPeptide = new StringBuilder();
