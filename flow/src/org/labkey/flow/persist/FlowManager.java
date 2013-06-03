@@ -538,8 +538,7 @@ public class FlowManager
 
     public Collection<AttrObject> getAttrObjectsFromURI(Container c, URI uri)
     {
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("Container", c.getId());
+        SimpleFilter filter = SimpleFilter.createContainerFilter(c);
         filter.addCondition("URI", uri.toString());
 
         return new TableSelector(getTinfoObject(), filter, null).getCollection(AttrObject.class);

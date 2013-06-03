@@ -321,7 +321,7 @@ public class ProteinManager
             CustomAnnotationSet[] allSets = Table.executeQuery(getSchema(), sql, CustomAnnotationSet.class);
 
             Set<String> setNames = new CaseInsensitiveHashSet();
-            List<CustomAnnotationSet> dedupedSets = new ArrayList<CustomAnnotationSet>(allSets.length);
+            List<CustomAnnotationSet> dedupedSets = new ArrayList<>(allSets.length);
             // If there are any name collisions, we want sets in this container to mask the ones in the project
 
             // Take a first pass through to add all the ones from this container
@@ -350,7 +350,7 @@ public class ProteinManager
                     return o1.getName().compareTo(o2.getName());
                 }
             });
-            Map<String, CustomAnnotationSet> result = new LinkedHashMap<String, CustomAnnotationSet>();
+            Map<String, CustomAnnotationSet> result = new LinkedHashMap<>();
             for (CustomAnnotationSet set : dedupedSets)
             {
                 result.put(set.getName(), set);
@@ -514,7 +514,7 @@ public class ProteinManager
             String species = FastaDbLoader.extractSpecies(organismName);
             SimpleFilter filter = new SimpleFilter("species", species);
             filter.addCondition("genus", genus);
-            Organism organism = new TableSelector(getTableInfoOrganisms(), Table.ALL_COLUMNS, filter, null).getObject(Organism.class);
+            Organism organism = new TableSelector(getTableInfoOrganisms(), filter, null).getObject(Organism.class);
             if (organism == null)
             {
                 organism = new Organism();
@@ -526,7 +526,7 @@ public class ProteinManager
             Protein protein = getProtein(sequence, organism.getOrgId());
             if (protein == null)
             {
-                Map<String, Object> map = new CaseInsensitiveHashMap<Object>();
+                Map<String, Object> map = new CaseInsensitiveHashMap<>();
                 map.put("ProtSequence", sequence);
                 byte[] sequenceBytes = getSequenceBytes(sequence);
                 map.put("Mass", PeptideGenerator.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES));
@@ -1178,7 +1178,7 @@ public class ProteinManager
     {
         SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
 
-        ResultSet rs = Table.executeQuery(getSchema(), sql, false, true);
+        ResultSet rs = new SqlSelector(getSchema(), sql).getResultSet(false, true);
         return new GroupedResultSet(rs, "Protein");
     }
 
@@ -1221,7 +1221,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
 
-        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql, false, true);
+        return new SqlSelector(getSchema(), sql).getResultSet(false, true);
     }
 
     public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
@@ -1320,7 +1320,7 @@ public class ProteinManager
         ResultSet rs = null;
         try
         {
-            MultiMap<String, String> map = new MultiHashMap<String, String>();
+            MultiMap<String, String> map = new MultiHashMap<>();
             rs = Table.executeQuery(getSchema(),
                     "SELECT T.name AS name, I.identifier\n" +
                     "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
@@ -1351,7 +1351,7 @@ public class ProteinManager
     {
         try
         {
-            HashSet<String> retVal = new HashSet<String>();
+            HashSet<String> retVal = new HashSet<>();
             Integer paramArr[] = {id};
             List<String> rvString = new SqlSelector(getSchema(),
                     "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
@@ -1395,7 +1395,7 @@ public class ProteinManager
 
 
     static final String NOTFOUND = "NOTFOUND";
-    static final Map<String, String> cacheURLs = new ConcurrentHashMap<String, String>(200);
+    static final Map<String, String> cacheURLs = new ConcurrentHashMap<>(200);
 
     public static String makeIdentURLStringWithType(String identifier, String identType)
     {
@@ -1567,7 +1567,7 @@ public class ProteinManager
                 }
 
                 String docid = "protein:" + id;
-                Map<String,Object> m = new HashMap<String,Object>();
+                Map<String,Object> m = new HashMap<>();
                 m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
                 m.put(SearchService.PROPERTY.title.toString(), "Protein " + p.getBestName());
                 SimpleDocumentResource r = new SimpleDocumentResource(
@@ -1602,7 +1602,7 @@ public class ProteinManager
             ResultSet rs = null;
             try
             {
-                rs = Table.executeQuery(getSchema(), sql, false, false);
+                rs = new SqlSelector(getSchema(), sql).getResultSet(false);
                 int curSeqId = 0;
                 StringBuilder sb = null;
 
@@ -1611,7 +1611,8 @@ public class ProteinManager
                 String description = "";
                 String ident = "";
 
-                do {
+                do
+                {
                     seqid = 0;
                     if (rs.next())
                     {
@@ -1625,7 +1626,7 @@ public class ProteinManager
                         if (curSeqId > 0)
                         {
                             String docid = "protein:" + curSeqId;
-                            Map<String,Object> m = new HashMap<String,Object>();
+                            Map<String, Object> m = new HashMap<>();
                             m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
                             m.put(SearchService.PROPERTY.title.toString(), "Protein " + bestName);
                             SimpleDocumentResource r = new SimpleDocumentResource(

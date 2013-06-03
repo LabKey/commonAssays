@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -30,7 +31,6 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -57,7 +57,6 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.assay.dilution.DilutionDataHandler;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -135,7 +134,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
                 if (tableInfo != null)
                 {
                     // We just need the rowIds and the Created and CreatedBy data for all the runs in this container at this point
-                    Map<String, Object>[] rows = new TableSelector(tableInfo, PageFlowUtil.set("RowId", "CreatedBy", "Created"), null, null).getArray(Map.class);
+                    Map<String, Object>[] rows = new TableSelector(tableInfo, PageFlowUtil.set("RowId", "CreatedBy", "Created")).getMapArray();
                     getLogger().info("Found " + rows.length + " runs in " + getInfo().getContainer().getPath());
 
                     // Create the directory the file will live in
@@ -205,7 +204,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
         getLogger().info("Starting to re-copy migrated data to study datasets");
         // Find all the legacy NAB datasets
         SQLFragment datasetSQL = new SQLFragment("SELECT Container, DatasetId FROM study.dataset WHERE Name='NAB' AND ProtocolId IS NULL AND KeyPropertyName = ?", OldNabManager.PlateProperty.VirusId.name());
-        Map<String, Object>[] datasets = new SqlSelector(CoreSchema.getInstance().getSchema().getScope(), datasetSQL).getArray(Map.class);
+        Map<String, Object>[] datasets = new SqlSelector(CoreSchema.getInstance().getSchema().getScope(), datasetSQL).getMapArray();
 
         getLogger().info("Found " + datasets.length + " potential legacy NAb datasets");
 
@@ -337,7 +336,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(resultsTableInfo, Arrays.asList(rowIdFK, specimenNameFK));
             ColumnInfo rowIdCol = cols.get(rowIdFK);
             ColumnInfo specimenNameCol = cols.get(specimenNameFK);
-            Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK.toString(), run.getRowId()), null).getArray(Map.class);
+            Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK.toString(), run.getRowId()), null).getMapArray();
 
             // Figure out the RowId for the new assay run
             Map<String, Integer> result = new HashMap<String, Integer>();

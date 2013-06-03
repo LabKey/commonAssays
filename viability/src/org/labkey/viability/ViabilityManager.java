@@ -76,7 +76,7 @@ public class ViabilityManager
     {
         ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
                 Table.ALL_COLUMNS,
-                new SimpleFilter("DataID", data.getRowId()).addCondition("Container", container.getId()),
+                SimpleFilter.createContainerFilter(container).addCondition("DataID", data.getRowId()),
                 null,
                 ViabilityResult.class);
         return result;
@@ -86,7 +86,7 @@ public class ViabilityManager
     {
         ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
                 Table.ALL_COLUMNS,
-                new SimpleFilter("DataID/RunID", run.getRowId()).addCondition("Container", container.getId()),
+                SimpleFilter.createContainerFilter(container).addCondition("DataID/RunID", run.getRowId()),
                 null,
                 ViabilityResult.class);
         return result;

@@ -95,7 +95,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
 
     private Analyte[] getAnalytes(int dataRowId)
     {
-        return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes(), Table.ALL_COLUMNS, new SimpleFilter(FieldKey.fromParts("DataId"), dataRowId), new Sort("RowId")).getArray(Analyte.class);
+        return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes(), new SimpleFilter(FieldKey.fromParts("DataId"), dataRowId), new Sort("RowId")).getArray(Analyte.class);
     }
 
     private void removeExistingAnalyteProperties(Container container, Analyte analyte) throws ExperimentException

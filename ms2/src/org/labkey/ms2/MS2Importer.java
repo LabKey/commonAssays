@@ -280,9 +280,9 @@ public abstract class MS2Importer
 
     protected int getRun() throws SQLException
     {
-        SimpleFilter filter = new SimpleFilter("Path", _path);
+        SimpleFilter filter = SimpleFilter.createContainerFilter(_container);
+        filter.addCondition("Path", _path);
         filter.addCondition("FileName", _fileName);
-        filter.addCondition("Container", _container.getId());
         filter.addCondition("Deleted", Boolean.FALSE);
         ResultSet rs = Table.select(MS2Manager.getTableInfoRuns(), new CsvSet("Run,Path,FileName,Container,Deleted"), filter, null);
 

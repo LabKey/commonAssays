@@ -830,8 +830,7 @@ public class MS2Manager
     public static void markDeleted(List<Integer> runIds, Container c)
     {
         SQLFragment markDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = NULL, Deleted=?, Modified=? ", Boolean.TRUE, new Date());
-        SimpleFilter where = new SimpleFilter();
-        where.addCondition("Container", c.getId());
+        SimpleFilter where = SimpleFilter.createContainerFilter(c);
         where.addInClause("Run", runIds);
         markDeleted.append(where.getSQLFragment(getSqlDialect()));
 

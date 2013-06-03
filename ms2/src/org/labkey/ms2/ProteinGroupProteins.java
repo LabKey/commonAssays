@@ -121,7 +121,7 @@ public class ProteinGroupProteins
                 "   AND proteinseq.SeqId = pgm.SeqId" +
                 "\nORDER BY pg.GroupNumber, pg.IndistinguishableCollectionId, protseq.Length, proteinseq.LookupString";
 
-        Map<String, Object>[] rows = new SqlSelector(MS2Manager.getSchema(), new SQLFragment(sql)).getArray(Map.class);
+        Map<String, Object>[] rows = new SqlSelector(MS2Manager.getSchema(), new SQLFragment(sql)).getMapArray();
 
         for (Map<String, Object> row : rows)
         {
