@@ -16,7 +16,7 @@
 
 package org.labkey.ms1.model;
 
-import org.labkey.api.ProteinService;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.util.PageFlowUtil;

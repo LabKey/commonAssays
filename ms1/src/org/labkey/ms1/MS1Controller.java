@@ -16,7 +16,8 @@
 
 package org.labkey.ms1;
 
-import org.labkey.api.ProteinService;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.QueryViewAction;
@@ -663,18 +664,25 @@ public class MS1Controller extends SpringActionController
                 return searchView;
             }
 
-            //create the features view
-            FeaturesView featuresView = (FeaturesView)createInitializedQueryView(form, errors, false, FeaturesView.DATAREGION_NAME);
-            featuresView.enableExpandCollapse("features", false);
+            VBox result = new VBox(searchView);
+            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS1Module.class)))
+            {
+                //create the features view
+                FeaturesView featuresView = (FeaturesView)createInitializedQueryView(form, errors, false, FeaturesView.DATAREGION_NAME);
+                featuresView.enableExpandCollapse("features", false);
 
-            //create the peptide search results view
-            PeptidesView pepView = (PeptidesView)createInitializedQueryView(form, errors, false, PeptidesView.DATAREGION_NAME);
+                //create the peptide search results view
+                PeptidesView pepView = (PeptidesView)createInitializedQueryView(form, errors, false, PeptidesView.DATAREGION_NAME);
 
-            VBox result = new VBox(searchView, featuresView, pepView);
+                result.addView(featuresView);
+                result.addView(pepView);
+            }
 
             for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ServiceRegistry.get().getService(ProteinService.class).getPeptideSearchViews())
             {
-                result.addView(viewProvider.createView(getViewContext(), form, errors));
+                QueryView queryView = viewProvider.createView(getViewContext(), form, errors);
+                if (queryView != null)
+                    result.addView(queryView);
             }
 
             return result;
@@ -682,7 +690,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Feature Search Results");
+            return root.addChild("Peptide Search Results");
         }
     } //PepSearchAction
 

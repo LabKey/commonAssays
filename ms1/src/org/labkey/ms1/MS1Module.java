@@ -29,6 +29,7 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.ms1.MS1Urls;
+import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.util.PageFlowUtil;
@@ -54,7 +55,7 @@ import java.util.*;
  * it provides with LabKey Server.
  */
 
-public class MS1Module extends SpringModule
+public class MS1Module extends SpringModule implements ProteomicsModule
 {
     public static final String NAME = "MS1";
     public static final String CONTROLLER_NAME = "ms1";
@@ -102,7 +103,7 @@ public class MS1Module extends SpringModule
                     return view;
                 }
             },
-            new BaseWebPartFactory(WEBPART_PEP_SEARCH)
+            new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {

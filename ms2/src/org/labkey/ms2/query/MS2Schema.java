@@ -24,7 +24,8 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.Module;
+import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
@@ -96,8 +97,11 @@ public class MS2Schema extends UserSchema
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
-                    return new MS2Schema(schema.getUser(), schema.getContainer());
+                for (Module module : schema.getContainer().getActiveModules())
+                {
+                    if (module instanceof ProteomicsModule)
+                        return new MS2Schema(schema.getUser(), schema.getContainer());
+                }
                 return  null;
             }
         });

@@ -19,7 +19,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.ProteinService" %>
+<%@ page import="org.labkey.api.protein.ProteinService" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<PepSearchModel> me = (JspView<PepSearchModel>) HttpView.currentView();

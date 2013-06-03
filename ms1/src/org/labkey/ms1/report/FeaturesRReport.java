@@ -15,7 +15,7 @@
  */
 package org.labkey.ms1.report;
 
-import org.labkey.api.ProteinService;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.reports.report.CustomRReport;

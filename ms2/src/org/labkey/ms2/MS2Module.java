@@ -17,7 +17,7 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.ProteinService;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.RuntimeSQLException;
@@ -35,6 +35,7 @@ import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
@@ -44,6 +45,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.Portal;
+import org.labkey.api.view.ProteomicsWebPartFactory;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
@@ -105,7 +107,7 @@ import java.util.Set;
  * Date: Jul 18, 2005
  * Time: 3:25:52 PM
  */
-public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider
+public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider, ProteomicsModule
 {
     public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     private static final ExperimentRunType SAMPLE_PREP_RUN_TYPE = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
@@ -168,14 +170,14 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     return new MS2StatsWebPart();
                 }
             },
-            new BaseWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT)
+            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
                     return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
                 }
             },
-            new BaseWebPartFactory(ProteinSearchWebPart.NAME)
+            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
@@ -193,7 +195,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     return result;
                 }
             },
-            new BaseWebPartFactory(MSSearchWebpart.NAME)
+            new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws Exception
                 {

@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.protein;
 
-import org.labkey.api.ProteinService;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;

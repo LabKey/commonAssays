@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
-import org.labkey.api.ProteinService;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.ExportException;
 import org.labkey.api.action.FormHandlerAction;
@@ -46,6 +46,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -3432,7 +3433,6 @@ public class MS2Controller extends SpringActionController
             }
 
             QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
-            QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
 
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, form);
             if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
@@ -3452,12 +3452,20 @@ public class MS2Controller extends SpringActionController
                 catch (NumberFormatException ignored) {}
             }
             proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
-            groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
 
-            VBox result = new VBox(searchView, proteinsView, groupsView);
+
+            VBox result = new VBox(searchView, proteinsView);
+            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)))
+            {
+                QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
+                groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
+                result.addView(groupsView);
+            }
             for (ProteinService.QueryViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
             {
-                result.addView(provider.createView(getViewContext(), form, errors));
+                QueryView queryView = provider.createView(getViewContext(), form, errors);
+                if (queryView != null)
+                    result.addView(queryView);
             }
 
             return result;
@@ -3465,7 +3473,10 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, "Protein Search Results", getPageConfig(), "proteinSearch");
+            String helpTopic = "proteinSearch";
+            getPageConfig().setHelpTopic(new HelpTopic(helpTopic));
+            root.addChild("Protein Search Results");
+            return root;
         }
     }
 
