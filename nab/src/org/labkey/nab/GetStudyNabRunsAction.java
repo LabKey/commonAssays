@@ -82,7 +82,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
         {
             return new ApiResponse()
             {
-                public Map<String, Object> getProperties()
+                public Map<String, ?> getProperties()
                 {
                     return properties;
                 }

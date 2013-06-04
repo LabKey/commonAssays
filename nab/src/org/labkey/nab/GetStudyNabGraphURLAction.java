@@ -62,7 +62,7 @@ public class GetStudyNabGraphURLAction extends ApiAction<NabAssayController.Grap
 
         return new ApiResponse()
         {
-            public Map<String, Object> getProperties()
+            public Map<String, ?> getProperties()
             {
                 return returnValue;
             }

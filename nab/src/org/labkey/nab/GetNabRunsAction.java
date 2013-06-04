@@ -215,7 +215,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         }
         return new ApiResponse()
         {
-            public Map<String, Object> getProperties()
+            public Map<String, ?> getProperties()
             {
                 return _properties;
             }
