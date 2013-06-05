@@ -380,7 +380,7 @@ public abstract class GoLoader
         {
             try
             {
-                _goLoaded = new TableSelector(ProteinManager.getTableInfoGoTerm()).getRowCount() != 0;
+                _goLoaded = new TableSelector(ProteinManager.getTableInfoGoTerm()).exists();
             }
             catch(Exception e)
             {

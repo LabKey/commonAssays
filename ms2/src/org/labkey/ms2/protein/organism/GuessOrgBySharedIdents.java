@@ -79,7 +79,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
     {
         if (sprotLoadStatus == SPROTload.not_tried_yet)
         {
-            if (new TableSelector(ProteinManager.getTableInfoSprotOrgMap()).getRowCount() == 0)
+            if (!new TableSelector(ProteinManager.getTableInfoSprotOrgMap()).exists())
             {
                 try
                 {
