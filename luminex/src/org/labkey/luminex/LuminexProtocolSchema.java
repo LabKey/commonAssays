@@ -154,7 +154,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             if(TITRATION_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createWellExclusionTable(true);
+                result.setName(TITRATION_EXCLUSION_TABLE_NAME);
                 result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK));
+                result.removeColumn(new ColumnInfo("Type"));
+                result.removeColumn(new ColumnInfo("Wells"));
+                result.removeColumn(new ColumnInfo("Well Role"));
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
@@ -428,6 +432,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return getSchema().getTable(WELL_EXCLUSION_TABLE_NAME);
     }
 
+    public static TableInfo getTableInfoTitrationExclusion()
+    {
+        return getSchema().getTable(TITRATION_EXCLUSION_TABLE_NAME);
+    }
+
     public static TableInfo getTableInfoWellExclusionAnalyte()
     {
         return getSchema().getTable(WELL_EXCLUSION_ANALYTE_TABLE_NAME);
@@ -614,8 +623,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     excludeAnalytes.setScript("analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
                     excludeAnalytes.setDisplayPermission(UpdatePermission.class);
 
+                    TableSelector tbs = new TableSelector(getSchema().getTable("Titration"));
 
+                    long rows = tbs.getRowCount();
                     ActionButton excludeTitration = new ActionButton("Exclude Titration");
+                    if(rows == 0)
+                        excludeTitration.setVisible(false);
                     excludeTitration.setScript("titrationExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
                     excludeTitration.setDisplayPermission(UpdatePermission.class);
 

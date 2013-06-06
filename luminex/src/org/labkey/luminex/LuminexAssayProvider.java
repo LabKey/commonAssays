@@ -342,11 +342,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
             url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " TitrationExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
         if (null != currentRunId)
         {
             url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
             url.addParameter("RunExclusion.RunId~eq", currentRunId);
+            url.addParameter("TitrationExclusion.DataId/Run/RowId~eq", currentRunId);
         }
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
 

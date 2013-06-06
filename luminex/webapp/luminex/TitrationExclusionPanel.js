@@ -11,7 +11,7 @@ function titrationExclusionWindow(assayName, runId)
 {
     var win = new Ext.Window({
         cls: 'extContainer',
-        title: 'Exclude Analytes from Analysis',
+        title: 'Exclude Titrations from Analysis',
         layout:'fit',
         width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
         height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
@@ -106,7 +106,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         var titrationExclusionStore = new LABKEY.ext.Store({
             schemaName: 'assay.Luminex.' + this.queryName,
             queryName : 'TitrationExclusion',
-            columns: 'Description,Analytes/RowId,RowId',
+            columns: 'Description,Analytes/RowId,RowId,Comment, DataId/Run',
+            filterArray : [
+                    LABKEY.Filter.create('DataId/Run', this.runId, LABKEY.Filter.Types.EQUALS)
+            ],
             autoLoad : true,
             listeners : {
                 load : function(store, records){
@@ -120,6 +123,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
                     {
                         id = combinedStore.findExact('Name', records[i].data.Description);
                         this.preExcludedIds[id] = records[i].get('Analytes/RowId').split(",");
+                        this.comments[id] = records[i].get('Comment');
                     }
                 },
                 scope : this
@@ -214,7 +218,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         });
 
         // set the title for the grid panel based on previous exclusions
-        var titrationTitle = "Select the checkbox next to the Titrations to be excluded";
+        var titrationTitle = "Select a titration to view a list of available analytes";
 
         var title = "Select the checkbox next to the analytes within the selected titration to be excluded";
 
@@ -436,14 +440,19 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         for(var thing in this.present)
         {
             if(thing != 'remove')
-                retString += this.availableTitrationsGrid.getStore().getAt(thing).get('Name') + ': ' + this.present[thing] + ' analytes excluded.<br>'
+            {
+                if(this.present[thing] != 1)
+                    retString += this.availableTitrationsGrid.getStore().getAt(thing).get('Name') + ': ' + this.present[thing] + ' analytes excluded.<br>';
+                else
+                    retString += this.availableTitrationsGrid.getStore().getAt(thing).get('Name') + ': ' + this.present[thing] + ' analyte excluded.<br>';
+            }
         }
         return retString;
     },
 
     openConfirmWindow : function(){
         Ext.Msg.show({
-            title:'Save Changes?',
+            title:'Confirm Exclusions',
             msg: 'Would you really like to exclude analytes on the following Titrations?<br><br> ' + this.getExcludedString(),
             buttons: Ext.Msg.YESNO,
             fn: function(button){
@@ -510,24 +519,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
                 }
                 else
                 {
-                    // ask the user if they are sure they want to remove the exclusions before deleting
-                    Ext.Msg.show({
-                        title:'Warning',
-                        msg: 'Are you sure you want to remove all analyte exlusions for the titration ' + analytesForExclusion.name + '?',
-                        buttons: Ext.Msg.YESNO,
-                        fn: function(btnId, text, opt){
-                            if (btnId == 'yes')
-                            {
-                                LABKEY.Query.deleteRows(config);
-                            }
-                            else
-                            {
-                                this.findParentByType('window').getEl().unmask();
-                            }
-                        },
-                        icon: Ext.MessageBox.WARNING,
-                        scope: this
-                    });
+                   LABKEY.Query.deleteRows(config);
                 }
             }
             else
