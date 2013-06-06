@@ -271,7 +271,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                 synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
                     List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, extraScriptContext);
-                    rerunTransformScripts();
+                    rerunTransformScripts(errors);
                     return result;
                 }
             }
@@ -284,7 +284,12 @@ public class WellExclusionTable extends AbstractExclusionTable
                 synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
                     List<Map<String, Object>> result = super.deleteRows(user, container, keys, extraScriptContext);
-                    rerunTransformScripts();
+                    BatchValidationException errors = new BatchValidationException();
+                    rerunTransformScripts(errors);
+                    if (errors.hasErrors())
+                    {
+                        throw errors;
+                    }
                     return result;
                 }
             }
@@ -297,12 +302,17 @@ public class WellExclusionTable extends AbstractExclusionTable
                 synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
                     List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
-                    rerunTransformScripts();
+                    BatchValidationException errors = new BatchValidationException();
+                    rerunTransformScripts(errors);
+                    if (errors.hasErrors())
+                    {
+                        throw errors;
+                    }
                     return result;
                 }
             }
 
-            private void rerunTransformScripts() throws QueryUpdateServiceException
+            private void rerunTransformScripts(BatchValidationException errors) throws QueryUpdateServiceException
             {
                 try
                 {
@@ -313,9 +323,13 @@ public class WellExclusionTable extends AbstractExclusionTable
                         provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false);
                     }
                 }
-                catch (ExperimentException | ValidationException e)
+                catch (ExperimentException e)
                 {
                     throw new QueryUpdateServiceException(e);
+                }
+                catch (ValidationException e)
+                {
+                    errors.addRowError(e);
                 }
             }
         };
