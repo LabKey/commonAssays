@@ -133,18 +133,35 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
             value: 'Analytes excluded for a replicate group will not be re-included by changes in assay level exclusions'
         }));
 
+        var updateSaveBtn = function(sm, grid){
+            // enable the save button when changes are made to the selection or is exclusions exist
+            if (sm.getCount() > 0 || grid.exclusionsExist)
+                grid.getFooterToolbar().findById('saveBtn').enable();
+
+            // disable the save button if no exclusions exist and no selection is made
+            if(sm.getCount() == 0 && !grid.exclusionsExist)
+                grid.getFooterToolbar().findById('saveBtn').disable();
+        };
+
         // checkbox selection model for selecting which analytes to exclude
         var selMod = new Ext.grid.CheckboxSelectionModel();
         selMod.on('selectionchange', function(sm){
-            // enable the save button when changes are made to the selection or is exclusions exist
-            if (sm.getCount() > 0 || this.exclusionsExist)
-                this.getFooterToolbar().findById('saveBtn').enable();
-
-            // disable the save button if no exclusions exist and no selection is made
-            if(sm.getCount() == 0 && !this.exclusionsExist)
-                this.getFooterToolbar().findById('saveBtn').disable();
-
+            updateSaveBtn(sm, this);
         }, this, {buffer: 250});
+
+        // Issue 17974: make rowselect behave like checkbox select, i.e. keep existing other selections in the grid
+        selMod.on('beforerowselect', function(sm, rowIndex, keepExisting, record) {
+            sm.suspendEvents();
+            if (sm.isSelected(rowIndex))
+                sm.deselectRow(rowIndex);
+            else
+                sm.selectRow(rowIndex, true);
+            sm.resumeEvents();
+
+            updateSaveBtn(sm, this);
+
+            return false;
+        }, this);
 
         this.titrationSelMod = new Ext.grid.RowSelectionModel({
             singleSelect : true,
