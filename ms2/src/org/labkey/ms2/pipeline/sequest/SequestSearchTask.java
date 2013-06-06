@@ -507,6 +507,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             {
                 writer.println(dtaFile.getName());
             }
+            writer.flush();
         }
         finally
         {
