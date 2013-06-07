@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -166,6 +167,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
+            Map<String, String> defaultAnalyteColumnValues = PropertyManager.getProperties(getViewContext().getUser(),
+                            getContainer(), _protocol.getName() + ": Analyte Column");
             String calcPositivityValue = form.getRequest().getParameter(LuminexDataHandler.CALCULATE_POSITIVITY_COLUMN_NAME);
             if (null != calcPositivityValue && calcPositivityValue.equals("1"))
             {
@@ -207,7 +210,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                             };
                         }
                     });
-                    view.setInitialValue(inputName, 100); // default value is always 100 when column is shown (don't need to recall last entry)
+                    // use a default value of 100 if there is no last entry value to populate the initial value
+                    view.setInitialValue(inputName, defaultAnalyteColumnValues.containsKey(inputName) ? defaultAnalyteColumnValues.get(inputName) : 100);
                     DisplayColumn col = info.getRenderer();
                     posThresholdCols.add(col);
                 }
@@ -559,11 +563,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     ExpRun run = saveExperimentRun(form);
 
                     // Save default values for analytes
+                    PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(
+                            getViewContext().getUser(), getContainer(), _protocol.getName() + ": Analyte Column", true);
                     for (String analyteName : form.getAnalyteNames())
                     {
+                        // for analyte domain properties use the standard assay default value persistance
                         Map<DomainProperty, String> properties = form.getAnalyteProperties(analyteName);
                         form.saveDefaultValues(properties, analyteName);
+
+                        // for analyte column properties use the PropertyManager (similar to how well role and titration defaults values are persisted)
+                        for (Map.Entry<ColumnInfo, String> colPropEntry : form.getAnalyteColumnProperties(analyteName).entrySet())
+                        {
+                            // These need to be repopulated just like the rest of the analyte domain properties,
+                            // but they aren't actually part of the domain- they're hard columns on the luminex.Analyte table
+                            String inputName = getAnalytePropertyName(analyteName, colPropEntry.getKey().getName());
+                            defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
+                        }
                     }
+                    PropertyManager.saveProperties(defaultAnalyteColumnValues);
 
                     // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
                     PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
