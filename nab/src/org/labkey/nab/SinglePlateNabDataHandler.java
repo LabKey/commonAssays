@@ -155,9 +155,12 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
         for (int row = 0; row < nabTemplate.getRows(); row++)
         {
+            Row currentRow = plateSheet.getRow(row + startRow);
+            if (null == currentRow)
+                throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: row '" + row + "' is null.");
+
             for (int col = 0; col < nabTemplate.getColumns(); col++)
             {
-                Row currentRow = plateSheet.getRow(row + startRow);
                 Cell cell = currentRow.getCell(col + startColumn);
                 try
                 {
