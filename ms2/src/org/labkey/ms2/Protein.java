@@ -640,7 +640,7 @@ public class Protein
                 int start = _sequence.indexOf(trimmedPeptide);
                 if (start <= -1)
                 {
-                    _log.error("Can't find trimmed peptide " + trimmedPeptide + " in protein");
+                    _log.error("Can't find trimmed peptide '" + trimmedPeptide + "' in protein '" + _sequence + "' (SeqId: " + _seqId + ", Run: " + run.getRun() + ")");
                     continue;
                 }
                 int instanceNum=0;
