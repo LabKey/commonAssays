@@ -141,10 +141,6 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
             // enable the save button when changes are made to the selection or is exclusions exist
             if (sm.getCount() > 0 || grid.exclusionsExist)
                 grid.getFooterToolbar().findById('saveBtn').enable();
-
-            // disable the save button if no exclusions exist and no selection is made
-            if(sm.getCount() == 0 && !grid.exclusionsExist)
-                grid.getFooterToolbar().findById('saveBtn').disable();
         };
 
         // checkbox selection model for selecting which analytes to exclude

@@ -623,7 +623,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     excludeAnalytes.setScript("analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
                     excludeAnalytes.setDisplayPermission(UpdatePermission.class);
 
-                    TableSelector tbs = new TableSelector(getSchema().getTable("Titration"));
+
+                    SimpleFilter f = new SimpleFilter();
+                    f.addCondition(FieldKey.fromParts("Standard"), false, CompareType.EQUAL);
+                    f.addCondition(FieldKey.fromParts("Run"), Integer.parseInt(runId), CompareType.EQUAL);
+                    TableSelector tbs = new TableSelector(getSchema().getTable("Titration"), f, null);
 
                     long rows = tbs.getRowCount();
                     ActionButton excludeTitration = new ActionButton("Exclude Titration");
