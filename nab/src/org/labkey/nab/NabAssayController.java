@@ -23,15 +23,23 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionSummary;
-import org.labkey.api.assay.nab.GraphForm;
 import org.labkey.api.assay.nab.NabGraph;
 import org.labkey.api.assay.nab.RenderAssayBean;
 import org.labkey.api.assay.nab.RenderAssayForm;
 import org.labkey.api.assay.nab.view.DilutionGraphAction;
+import org.labkey.api.assay.nab.view.GraphSelectedAction;
+import org.labkey.api.assay.nab.view.GraphSelectedBean;
+import org.labkey.api.assay.nab.view.GraphSelectedForm;
+import org.labkey.api.assay.nab.view.MultiGraphAction;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -58,26 +66,36 @@ import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.actions.AssayHeaderView;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
+import org.labkey.api.study.assay.RunDataSetContextualRoles;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
-import org.labkey.api.assay.dilution.DilutionAssayProvider;
-import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.ViewContext;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.lang.Boolean;
-import java.lang.Number;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -304,239 +322,55 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    public static class GraphSelectedForm
+    public static class NabGraphSelectedBean extends GraphSelectedBean
     {
-        private int _protocolId;
-        private int[] _id;
-        private String _captionColumn;
-        private String _chartTitle;
-        private DilutionCurve.FitType _fitType;
-        private int _height = -1;
-        private int _width = -1;
-
-        public int[] getId()
+        public NabGraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String captionColumn, String chartTitle)
         {
-            return _id;
+            super(context, protocol, cutoffs, dataObjectIds, captionColumn, chartTitle);
         }
 
-        public void setId(int[] id)
+        @Override
+        public QueryView createQueryView()
         {
-            _id = id;
-        }
-
-        public int getProtocolId()
-        {
-            return _protocolId;
-        }
-
-        public void setProtocolId(int protocolId)
-        {
-            _protocolId = protocolId;
-        }
-
-        public String getCaptionColumn()
-        {
-            return _captionColumn;
-        }
-
-        public void setCaptionColumn(String captionColumn)
-        {
-            _captionColumn = captionColumn;
-        }
-
-        public String getChartTitle()
-        {
-            return _chartTitle;
-        }
-
-        public void setChartTitle(String chartTitle)
-        {
-            _chartTitle = chartTitle;
-        }
-
-        public String getFitType()
-        {
-            return _fitType != null ? _fitType.name() : null;
-        }
-
-        public void setFitType(String fitType)
-        {
-            _fitType = fitType != null ? DilutionCurve.FitType.valueOf(fitType) : null;
-        }
-
-        public DilutionCurve.FitType getFitTypeEnum()
-        {
-            return _fitType;
-        }
-
-        public int getHeight()
-        {
-            return _height;
-        }
-
-        public void setHeight(int height)
-        {
-            _height = height;
-        }
-
-        public int getWidth()
-        {
-            return _width;
-        }
-
-        public void setWidth(int width)
-        {
-            _width = width;
-        }
-    }
-
-    public static class GraphSelectedBean
-    {
-        private ViewContext _context;
-        private int[] _cutoffs;
-        private ExpProtocol _protocol;
-        private int[] _dataObjectIds;
-        private QueryView _queryView;
-        private int[] _graphableIds;
-        private String _captionColumn;
-        private String _chartTitle;
-
-        public GraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String captionColumn, String chartTitle)
-        {
-            _context = context;
-            _cutoffs = cutoffs;
-            _protocol = protocol;
-            _dataObjectIds = dataObjectIds;
-            _captionColumn = captionColumn;
-            _chartTitle = chartTitle;
-        }
-
-        public int[] getCutoffs()
-        {
-            return _cutoffs;
-        }
-
-        public ExpProtocol getProtocol()
-        {
-            return _protocol;
-        }
-
-        public String getCaptionColumn()
-        {
-            return _captionColumn;
-        }
-
-        public String getChartTitle()
-        {
-            return _chartTitle;
-        }
-
-        public int[] getGraphableObjectIds() throws IOException, SQLException
-        {
-            if (_graphableIds == null)
+            AssayProvider provider = AssayService.get().getProvider(_protocol);
+            AssayProtocolSchema schema = provider.createProtocolSchema(_context.getUser(), _context.getContainer(), _protocol, null);
+            QuerySettings settings = schema.getSettings(_context, AssayProtocolSchema.DATA_TABLE_NAME, AssayProtocolSchema.DATA_TABLE_NAME);
+            QueryView dataView = new NabProtocolSchema.NabResultsQueryView(_protocol, _context, settings)
             {
-                QueryView dataView = getQueryView();
-                ResultSet rs = null;
-                try
+                public DataView createDataView()
                 {
-                    rs = dataView.getResultSet();
-                    Set<Integer> graphableIds = new HashSet<Integer>();
-                    while (rs.next())
-                        graphableIds.add(rs.getInt("RowId"));
-                    _graphableIds = new int[graphableIds.size()];
-                    int i = 0;
-                    for (Integer id : graphableIds)
-                        _graphableIds[i++] = id.intValue();
+                    DataView view = super.createDataView();
+                    SimpleFilter filter = new SimpleFilter();
+                    SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
+                    if (existingFilter != null)
+                        filter.addAllClauses(existingFilter);
+                    List<Integer> objectIds = new ArrayList<Integer>(_dataObjectIds.length);
+                    for (int dataObjectId : _dataObjectIds)
+                        objectIds.add(new Integer(dataObjectId));
+
+                    filter.addInClause(FieldKey.fromString("RowId"), objectIds);
+                    view.getDataRegion().setRecordSelectorValueColumns("RowId");
+                    view.getRenderContext().setBaseFilter(filter);
+                    return view;
                 }
-                finally
-                {
-                    if (rs != null) try { rs.close(); } catch (SQLException e) {}
-                }
-            }
-            return _graphableIds;
+            };
+            return dataView;
         }
 
-        public QueryView getQueryView()
+        @Override
+        public ActionURL getGraphRenderURL()
         {
-            if (_queryView == null)
-            {
-                NabAssayProvider provider = (NabAssayProvider)AssayService.get().getProvider(_protocol);
-                NabProtocolSchema schema = provider.createProtocolSchema(_context.getUser(), _context.getContainer(), _protocol, null);
-                QuerySettings settings = schema.getSettings(_context, AssayProtocolSchema.DATA_TABLE_NAME, AssayProtocolSchema.DATA_TABLE_NAME);
-                QueryView dataView = new NabProtocolSchema.NabResultsQueryView(_protocol, _context, settings)
-                {
-                    public DataView createDataView()
-                    {
-                        DataView view = super.createDataView();
-                        SimpleFilter filter = new SimpleFilter();
-                        SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
-                        if (existingFilter != null)
-                            filter.addAllClauses(existingFilter);
-                        List<Integer> objectIds = new ArrayList<Integer>(_dataObjectIds.length);
-                        for (int dataObjectId : _dataObjectIds)
-                            objectIds.add(new Integer(dataObjectId));
-
-                        filter.addInClause(FieldKey.fromString("RowId"), objectIds);
-                        view.getDataRegion().setRecordSelectorValueColumns("RowId");
-                        view.getRenderContext().setBaseFilter(filter);
-                        return view;
-                    }
-                };
-                _queryView = dataView;
-            }
-            return _queryView;
+            return new ActionURL(NabMultiGraphAction.class, _context.getContainer());
         }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class GraphSelectedAction extends SimpleViewAction<GraphSelectedForm>
+    public class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
     {
-        private ExpProtocol _protocol;
-        public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
+        @Override
+        protected GraphSelectedBean createSelectionBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String caption, String title)
         {
-            _protocol = ExperimentService.get().getExpProtocol(form.getProtocolId());
-            if (_protocol == null)
-            {
-                throw new NotFoundException();
-            }
-            int[] objectIds;
-            if (form.getId() != null)
-                objectIds = form.getId();
-            else
-            {
-                Set<String> objectIdStrings = DataRegionSelection.getSelected(getViewContext(), false);
-                if (objectIdStrings == null || objectIdStrings.size() == 0)
-                {
-                    throw new NotFoundException("No samples specified.");
-                }
-                objectIds = new int[objectIdStrings.size()];
-                int idx = 0;
-                for (String objectIdString : objectIdStrings)
-                    objectIds[idx++] = Integer.parseInt(objectIdString);
-            }
-
-            Set<Integer> cutoffSet = new HashSet<Integer>();
-            NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(_protocol);
-            Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), objectIds);
-            for (DilutionSummary summary : summaries.keySet())
-            {
-                for (int cutoff : summary.getAssay().getCutoffs())
-                    cutoffSet.add(cutoff);
-            }
-
-            GraphSelectedBean bean = new GraphSelectedBean(getViewContext(), _protocol, toArray(cutoffSet), objectIds, form.getCaptionColumn(), form.getChartTitle());
-
-            JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp", bean);
-
-            return new VBox(new AssayHeaderView(_protocol, provider, false, true, null), multiGraphView);
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
-            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol);
-            return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
-                    " Runs", runListURL).addChild("Graph Selected Specimens");
+            return new NabGraphSelectedBean(context, protocol, cutoffs, dataObjectIds, caption, title);
         }
     }
 
@@ -616,38 +450,8 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermissionClass(ReadPermission.class)
     @ContextualRoles(RunDataSetContextualRoles.class)
-    public class MultiGraphAction extends SimpleViewAction<GraphSelectedForm>
+    public class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
     {
-        public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
-        {
-            int[] ids = form.getId();
-            ExpProtocol protocol = ExperimentService.get().getExpProtocol(form.getProtocolId());
-            NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
-            Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), ids);
-            Set<Integer> cutoffSet = new HashSet<Integer>();
-            for (DilutionSummary summary : summaries.keySet())
-            {
-                for (int cutoff : summary.getAssay().getCutoffs())
-                    cutoffSet.add(cutoff);
-            }
-
-            NabGraph.Config config = new NabGraph.Config();
-            config.setCutoffs(toArray(cutoffSet));
-            config.setLockAxes(false);
-            config.setCaptionColumn(form.getCaptionColumn());
-            config.setChartTitle(form.getChartTitle());
-            if (form.getHeight() > 0)
-                config.setHeight(form.getHeight());
-            if (form.getWidth() > 0)
-            config.setWidth(form.getWidth());
-            NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, config);
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            throw new UnsupportedOperationException();
-        }
     }
 
     @RequiresPermissionClass(ReadPermission.class)

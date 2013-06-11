@@ -16,6 +16,7 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.data.ColumnInfo;
@@ -60,8 +61,6 @@ import java.util.Set;
  */
 public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 {
-    public static final String RUN_ID_COLUMN_NAME = "RunId";
-
     public abstract PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol);
     public abstract String getInputMaterialPropertyName();
     public abstract String getDataRowLsidPrefix();
@@ -99,7 +98,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         });
         addColumn(runColumn);
 
-        ExprColumn runIdColumn = new ExprColumn(this, RUN_ID_COLUMN_NAME, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
+        ExprColumn runIdColumn = new ExprColumn(this, DilutionProviderSchema.RUN_ID_COLUMN_NAME, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
         ColumnInfo addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
 

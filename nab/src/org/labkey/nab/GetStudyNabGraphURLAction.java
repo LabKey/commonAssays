@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.springframework.validation.BindException;
 
 import java.util.*;
@@ -33,10 +34,10 @@ import java.util.*;
 
 @RequiresPermissionClass(ReadPermission.class)
 @ApiVersion(10.2)
-public class GetStudyNabGraphURLAction extends ApiAction<NabAssayController.GraphSelectedForm>
+public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
 {
     @Override
-    public ApiResponse execute(NabAssayController.GraphSelectedForm form, BindException errors) throws Exception
+    public ApiResponse execute(GraphSelectedForm form, BindException errors) throws Exception
     {
         Map<Integer, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
                 getViewContext().getUser(), form.getId());

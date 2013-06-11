@@ -1602,7 +1602,6 @@ nab/src/org/labkey/nab/editRunProperties.jsp -text
 nab/src/org/labkey/nab/header.jsp -text
 nab/src/org/labkey/nab/legacyGraph.jsp -text
 nab/src/org/labkey/nab/migrateNAb.jsp -text
-nab/src/org/labkey/nab/multiRunGraph.jsp -text
 nab/src/org/labkey/nab/multiplate/CrossPlateDilutionNabAssayProvider.java -text
 nab/src/org/labkey/nab/multiplate/CrossPlateDilutionNabAssayRun.java -text
 nab/src/org/labkey/nab/multiplate/CrossPlateDilutionNabDataHandler.java -text

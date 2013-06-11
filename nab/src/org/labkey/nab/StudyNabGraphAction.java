@@ -25,6 +25,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -39,7 +40,7 @@ import java.util.Set;
  */
 
 @RequiresPermissionClass(ReadPermission.class)
-public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.GraphSelectedForm>
+public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
 {
     private int[] toArray(Collection<Integer> integerList)
     {
@@ -51,7 +52,7 @@ public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.Gra
     }
 
     @Override
-    public ModelAndView getView(NabAssayController.GraphSelectedForm graphForm, BindException errors) throws Exception
+    public ModelAndView getView(GraphSelectedForm graphForm, BindException errors) throws Exception
     {
         Map<Integer, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(), getViewContext().getUser(), graphForm.getId());
         if (ids.values().isEmpty())
