@@ -46,8 +46,10 @@ import org.labkey.microarray.MicroarrayModule;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
@@ -56,10 +58,19 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
     public static final String NAME = "Affymetrix";
     public static final AssayDataType GENE_TITAN_DATA_TYPE = new AssayDataType("AssayRunAffymetrixData", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     public static final AssayDataType CEL_DATA_TYPE = new AssayDataType("AssayRunAffymetrixCELData", new FileType(Arrays.asList(".CEL", ".cel"), ".CEL"));
+    public static final String SAMPLE_ID_COLUMN = "SampleId";
+    public static final String SAMPLE_NAME_COLUMN = "SampleName";
+    public static final String CEL_FILE_ID_COLUMN = "CelFileId";
 
     public AffymetrixAssayProvider()
     {
         super(PROTOCOL_PREFIX, "AffymetrixAssayRun", GENE_TITAN_DATA_TYPE, ModuleLoader.getInstance().getModule(MicroarrayModule.class));
+    }
+
+    @Override
+    protected Pair<Domain, Map<DomainProperty, Object>> createBatchDomain(Container c, User user)
+    {
+        return super.createBatchDomain(c, user, false);
     }
 
     @Override
@@ -133,14 +144,14 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
         Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
         dataDomain.setDescription("The user is prompted to enter data values for row of data associated with a run, typically done as uploading a file.  This is part of the second step of the upload process.");
 
-        DomainProperty sampleId = addProperty(dataDomain, "SampleId", "Sample Id", PropertyType.INTEGER);
+        DomainProperty sampleId = addProperty(dataDomain, SAMPLE_ID_COLUMN, "Sample Id", PropertyType.INTEGER);
         sampleId.setRequired(true);
         sampleId.setHidden(true);
 
-        DomainProperty sampleName = addProperty(dataDomain, "SampleName", "Sample Name", PropertyType.STRING);
+        DomainProperty sampleName = addProperty(dataDomain, SAMPLE_NAME_COLUMN, "Sample Name", PropertyType.STRING);
         sampleName.setRequired(true);
 
-        DomainProperty celFileId = addProperty(dataDomain, "CelFileId", "CEL File Id", PropertyType.INTEGER);
+        DomainProperty celFileId = addProperty(dataDomain, CEL_FILE_ID_COLUMN, "CEL File Id", PropertyType.INTEGER);
         celFileId.setLookup(new Lookup(c, ExpSchema.SCHEMA_NAME, "Data"));
         celFileId.setRequired(true);
 
@@ -152,5 +163,25 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
         return result;
+    }
+
+    @Override
+    protected Map<String, Set<String>> getRequiredDomainProperties()
+    {
+        Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
+        Set<String> dataProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_DATA);
+
+        if (dataProperties == null)
+        {
+            dataProperties = new HashSet<>();
+            domainMap.put(ExpProtocol.ASSAY_DOMAIN_DATA, dataProperties);
+
+        }
+
+        dataProperties.add(SAMPLE_ID_COLUMN);
+        dataProperties.add(SAMPLE_NAME_COLUMN);
+        dataProperties.add(CEL_FILE_ID_COLUMN);
+
+        return domainMap;
     }
 }
