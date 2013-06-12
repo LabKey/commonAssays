@@ -478,7 +478,7 @@ public class MS2Controller extends SpringActionController
             }
 
             VBox vBox = new VBox();
-            JspView<RunSummaryBean> runSummary = new JspView<RunSummaryBean>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
+            JspView<RunSummaryBean> runSummary = new JspView<>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
             runSummary.setFrame(WebPartView.FrameType.PORTAL);
             runSummary.setTitle("Run Overview");
             RunSummaryBean bean = runSummary.getModelBean();
@@ -488,7 +488,7 @@ public class MS2Controller extends SpringActionController
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
 
-            List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
+            List<Pair<String, String>> sqlSummaries = new ArrayList<>();
             SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getViewContext().getUser(), run);
             peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
 
@@ -612,7 +612,7 @@ public class MS2Controller extends SpringActionController
      */
     private Map<String, String> getViewMap(boolean includeUser, boolean includeShared)
     {
-        Map<String, String> m = new HashMap<String, String>();
+        Map<String, String> m = new HashMap<>();
 
         if (includeUser)
         {
@@ -686,7 +686,7 @@ public class MS2Controller extends SpringActionController
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 
         // Use TreeSet to sort by name
-        TreeSet<String> names = new TreeSet<String>(m.keySet());
+        TreeSet<String> names = new TreeSet<>(m.keySet());
 
         for (String name : names)
         {
@@ -710,8 +710,8 @@ public class MS2Controller extends SpringActionController
 
     private String modificationHref(MS2Run run)
     {
-        Map<String, String> fixed = new TreeMap<String, String>();
-        Map<String, String> var = new TreeMap<String, String>();
+        Map<String, String> fixed = new TreeMap<>();
+        Map<String, String> var = new TreeMap<>();
 
         for (MS2Modification mod : run.getModifications(MassType.Average))
         {
@@ -995,7 +995,7 @@ public class MS2Controller extends SpringActionController
             }
 
             ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentURL, previousURL, nextURL, showGzURL, modificationHref(run), getContainer(), getUser());
-            JspView<ShowPeptideContext> peptideView = new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
+            JspView<ShowPeptideContext> peptideView = new JspView<>("/org/labkey/ms2/showPeptide.jsp", ctx);
             peptideView.setTitle("Peptide Details");
 
             NavTree pepNavTree = new NavTree();
@@ -1010,7 +1010,7 @@ public class MS2Controller extends SpringActionController
             PeptideQuantitation quant = peptide.getQuantitation();
             if (quant != null)
             {
-                JspView<ShowPeptideContext> quantView = new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptideQuantitation.jsp", ctx);
+                JspView<ShowPeptideContext> quantView = new JspView<>("/org/labkey/ms2/showPeptideQuantitation.jsp", ctx);
                 quantView.setTitle("Quantitation (performed on " + peptide.getCharge() + "+)");
                 getContainer().hasPermission(getUser(), UpdatePermission.class);
                 {
@@ -1230,7 +1230,7 @@ public class MS2Controller extends SpringActionController
 
             PIE_CHART_CACHE.put(bean.pieHelperObjName, pjch, CacheManager.HOUR * 2);
 
-            return new JspView<GoChartBean>("/org/labkey/ms2/peptideChart.jsp", bean);
+            return new JspView<>("/org/labkey/ms2/peptideChart.jsp", bean);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1361,7 +1361,7 @@ public class MS2Controller extends SpringActionController
 
 
             ManageViewsBean bean = new ManageViewsBean(_returnURL, defaultViewType, viewMap, viewName);
-            JspView<ManageViewsBean> view = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
+            JspView<ManageViewsBean> view = new JspView<>("/org/labkey/ms2/manageViews.jsp", bean);
             view.setFrame(WebPartView.FrameType.PORTAL);
             view.setTitle("Manage Views");
             return view;
@@ -1507,7 +1507,7 @@ public class MS2Controller extends SpringActionController
 
         protected ModelAndView getView(RunListForm form, BindException errors, int runListId)
         {
-            JspView<CompareOptionsBean> extraCompareOptions = new JspView<CompareOptionsBean>(_optionsJSP);
+            JspView<CompareOptionsBean> extraCompareOptions = new JspView<>(_optionsJSP);
 
             ActionURL nextURL = getViewContext().cloneActionURL().setAction(ApplyCompareViewAction.class);
             return pickView(nextURL, "Select a view to apply a filter to all the runs.", extraCompareOptions, runListId, "Compare");
@@ -1592,7 +1592,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
-            CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<PeptideFilteringComparisonForm>(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
+            CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
@@ -1632,7 +1632,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
-            CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<PeptideFilteringComparisonForm>(new ActionURL(ComparePeptideQueryAction.class, getContainer()), runListId, form);
+            CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(ComparePeptideQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp", bean);
         }
@@ -1936,21 +1936,21 @@ public class MS2Controller extends SpringActionController
 
             if (getTargetProtein() != null)
             {
-                ArrayList<Integer> matchingIds = new ArrayList<Integer>();
+                ArrayList<Integer> matchingIds = new ArrayList<>();
                 StringBuffer sbIds = new StringBuffer();
                 StringBuffer sbNames = new StringBuffer();
                 if (getTargetSeqId() == null) // new search)
                 {
-                    Results rsMatches = null;
                     SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(context.getUser(), context.getContainer()));
                     tableInfo.addProteinNameFilter(getTargetProtein(), false);
-                    List<ColumnInfo> cols = new ArrayList<ColumnInfo>();
+                    List<ColumnInfo> cols = new ArrayList<>();
                     cols.add(tableInfo.getColumn("SeqId"));
                     cols.add(tableInfo.getColumn("BestName"));
-                    try
+
+                    try (Results rsMatches = new TableSelector(tableInfo, cols, null, null).getResults())
                     {
-                        rsMatches = Table.select(tableInfo, cols, null, null);
                         String sep = "";
+
                         for (int i = 0; i < rsMatches.getSize(); i++)
                         {
                             rsMatches.next();
@@ -1959,7 +1959,7 @@ public class MS2Controller extends SpringActionController
                             sbIds.append(sep);
                             sbNames.append(rsMatches.getString(2));
                             sbIds.append(rsMatches.getInt(1));
-                            sep = ",";
+                            sep = ", ";
                             if (i == MAX_MATCHING_PROTEINS)
                                 break;
                         }
@@ -1968,19 +1968,7 @@ public class MS2Controller extends SpringActionController
                     {
                         throw new RuntimeSQLException(e);
                     }
-                    finally
-                    {
-                        if (rsMatches != null)
-                        {
-                            try
-                            {
-                                rsMatches.close();
-                            }
-                            catch (SQLException ignored)
-                            {
-                            }
-                        }
-                    }
+
                     if (matchingIds.size() == 1)
                     {
                         setTargetProtein(sbNames.toString());
@@ -2050,7 +2038,7 @@ public class MS2Controller extends SpringActionController
                 PropertyManager.saveProperties(prefs);
             }
 
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
             props.put("originalURL", getViewContext().getActionURL().toString());
             props.put(PEPTIDES_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME));
             props.put(PROTEIN_GROUPS_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PROTEIN_GROUPS_FILTER_VIEW_NAME));
@@ -2157,7 +2145,7 @@ public class MS2Controller extends SpringActionController
                 PropertyManager.saveProperties(prefs);
             }
 
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
    /*
             //CONSIDER:  can we support charge state filters?
             ActionURL nextURL = getViewContext().getActionURL();
@@ -2221,7 +2209,7 @@ public class MS2Controller extends SpringActionController
     // extraFormHtml gets inserted between the view dropdown and the button.
     private HttpView pickView(ActionURL nextURL, String viewInstructions, HttpView embeddedView, int runListId, String buttonText)
     {
-        JspView<PickViewBean> pickView = new JspView<PickViewBean>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
+        JspView<PickViewBean> pickView = new JspView<>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
 
         PickViewBean bean = pickView.getModelBean();
 
@@ -2524,7 +2512,7 @@ public class MS2Controller extends SpringActionController
             Map<String, String> prefs = (Map<String, String>)getViewContext().getSession().getAttribute(attributeKey);
             if (prefs == null)
             {
-                prefs = new HashMap<String, String>();
+                prefs = new HashMap<>();
                 getViewContext().getSession().setAttribute(attributeKey, prefs);
             }
             return prefs;
@@ -2564,7 +2552,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(SpectraCountForm form, BindException errors, int runListId)
         {
-            CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<SpectraCountForm>(new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
+            CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<>(new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
         }
@@ -2736,7 +2724,7 @@ public class MS2Controller extends SpringActionController
         List<RunColumn> gridColumns = query.getGridColumns();
         CompareDataRegion rgn = query.getCompareGrid(exportToExcel);
 
-        List<String> runCaptions = new ArrayList<String>(runs.size());
+        List<String> runCaptions = new ArrayList<>(runs.size());
         for (MS2Run run : runs)
             runCaptions.add(run.getDescription());
 
@@ -2755,7 +2743,7 @@ public class MS2Controller extends SpringActionController
             ew.setColSpan(gridColumns.size());
             ew.setMultiColumnCaptions(runCaptions);
 
-            List<String> headers = new ArrayList<String>();
+            List<String> headers = new ArrayList<>();
             headers.add(query.getHeader());
             headers.add("");
             for (Pair<String, String> sqlSummary : query.getSQLSummaries(getViewContext().getUser()))
@@ -2848,7 +2836,7 @@ public class MS2Controller extends SpringActionController
         public boolean handlePost(Object o, BindException errors) throws SQLException
         {
             Set<String> fastaIdStrings = DataRegionSelection.getSelected(getViewContext(), true);
-            Set<Integer> fastaIds = new HashSet<Integer>();
+            Set<Integer> fastaIds = new HashSet<>();
             for (String fastaIdString : fastaIdStrings)
             {
                 try
@@ -2911,7 +2899,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(FastaParsingForm form, BindException errors) throws Exception
         {
-            return new JspView<FastaParsingForm>("/org/labkey/ms2/testFastaParsing.jsp", form);
+            return new JspView<>("/org/labkey/ms2/testFastaParsing.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -2953,7 +2941,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getView(BlastForm form, boolean reshow, BindException errors) throws Exception
         {
-            JspView<String> blastView = new JspView<String>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
+            JspView<String> blastView = new JspView<>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
             blastView.setTitle("BLAST Configuration");
 
             GridView grid = getFastaAdminGrid();
@@ -3614,10 +3602,10 @@ public class MS2Controller extends SpringActionController
             exportRows = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
             if (exportRows == null)
             {
-                exportRows = new ArrayList<String>();
+                exportRows = new ArrayList<>();
             }
 
-            List<Long> peptideIds = new ArrayList<Long>(exportRows.size());
+            List<Long> peptideIds = new ArrayList<>(exportRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
             for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS); i++)
@@ -3798,7 +3786,7 @@ public class MS2Controller extends SpringActionController
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
-            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, ShowPeptideProphetSensitivityPlotAction.class, title));
+            JspView<PeptideProphetDetailsBean> result = new JspView<>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, ShowPeptideProphetSensitivityPlotAction.class, title));
             result.setFrame(WebPartView.FrameType.PORTAL);
             result.setTitle("PeptideProphet Details: " + run.getDescription());
             return result;
@@ -3854,7 +3842,7 @@ public class MS2Controller extends SpringActionController
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
             ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
-            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, ShowProteinProphetSensitivityPlotAction.class, title));
+            JspView<PeptideProphetDetailsBean> result = new JspView<>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, ShowProteinProphetSensitivityPlotAction.class, title));
             result.setFrame(WebPartView.FrameType.PORTAL);
             result.setTitle(title  + run.getDescription());
             return result;
@@ -3918,7 +3906,7 @@ public class MS2Controller extends SpringActionController
             bean.failedURL = showRunsURL(false, 2);
             bean.deletedURL = showRunsURL(true, null);
 
-            JspView<MS2AdminBean> result = new JspView<MS2AdminBean>("/org/labkey/ms2/ms2Admin.jsp", bean);
+            JspView<MS2AdminBean> result = new JspView<>("/org/labkey/ms2/ms2Admin.jsp", bean);
             result.setFrame(WebPartView.FrameType.PORTAL);
             result.setTitle("MS2 Data Overview");
             return result;
@@ -4086,7 +4074,7 @@ public class MS2Controller extends SpringActionController
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
 
-            JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickPeptideColumns.jsp", new PickColumnsBean());
+            JspView<PickColumnsBean> pickColumns = new JspView<>("/org/labkey/ms2/pickPeptideColumns.jsp", new PickColumnsBean());
             pickColumns.setFrame(WebPartView.FrameType.PORTAL);
             pickColumns.setTitle("Choose Peptide Columns");
             PickColumnsBean bean = pickColumns.getModelBean();
@@ -4192,7 +4180,7 @@ public class MS2Controller extends SpringActionController
             _returnURL = form.getReturnActionURL();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
 
-            JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickProteinColumns.jsp", new PickColumnsBean());
+            JspView<PickColumnsBean> pickColumns = new JspView<>("/org/labkey/ms2/pickProteinColumns.jsp", new PickColumnsBean());
             pickColumns.setFrame(WebPartView.FrameType.PORTAL);
             pickColumns.setTitle("Pick Protein Columns");
             PickColumnsBean bean = pickColumns.getModelBean();
@@ -4319,7 +4307,7 @@ public class MS2Controller extends SpringActionController
             _run = validateRun(form);
 
             _returnURL = getViewContext().cloneActionURL().setAction(ShowRunAction.class);
-            JspView<SaveViewBean> saveView = new JspView<SaveViewBean>("/org/labkey/ms2/saveView.jsp", new SaveViewBean());
+            JspView<SaveViewBean> saveView = new JspView<>("/org/labkey/ms2/saveView.jsp", new SaveViewBean());
             SaveViewBean bean = saveView.getModelBean();
             bean.returnURL = _returnURL;
             bean.canShare = getContainer().hasPermission(getUser(), InsertPermission.class);
@@ -4606,7 +4594,7 @@ public class MS2Controller extends SpringActionController
             QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run1);
 
             VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideQueryView);
-            JspView summaryView = new JspView<ProteinGroupWithQuantitation>("/org/labkey/ms2/showProteinGroup.jsp", group);
+            JspView summaryView = new JspView<>("/org/labkey/ms2/showProteinGroup.jsp", group);
             summaryView.setTitle("Protein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
@@ -4674,7 +4662,7 @@ public class MS2Controller extends SpringActionController
                 proteins[i].setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = proteins[i];
                 bean.showPeptides = showPeptides;
-                JspView proteinSummary = new JspView<ProteinViewBean>("/org/labkey/ms2/protein.jsp", bean);
+                JspView proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
                 proteinSummary.setTitle(getProteinTitle(proteins[i], true));
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
@@ -4685,14 +4673,14 @@ public class MS2Controller extends SpringActionController
                 {
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
                     VBox box = new VBox(
-                        new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
-                        new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean));
+                        new JspView<>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
+                        new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean));
                     box.setFrame(FrameType.PORTAL);
                     sequenceView = box;
                 }
                 else
                 {
-                    sequenceView = new JspView<ProteinViewBean>("/org/labkey/ms2/proteinSequence.jsp", bean);
+                    sequenceView = new JspView<>("/org/labkey/ms2/proteinSequence.jsp", bean);
                 }
                 sequenceView.enableExpandCollapse("ProteinCoverageMap", false);
                 sequenceView.setTitle("Protein Sequence");
@@ -4706,11 +4694,11 @@ public class MS2Controller extends SpringActionController
 
             if (showPeptides)
             {
-                List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-                sqlSummaries.add(new Pair<String, String>("Peptide Filter", allPeptidesQueryFilter.getFilterText()));
-                sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(targetURL, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+                List<Pair<String, String>> sqlSummaries = new ArrayList<>();
+                sqlSummaries.add(new Pair<>("Peptide Filter", allPeptidesQueryFilter.getFilterText()));
+                sqlSummaries.add(new Pair<>("Peptide Sort", new Sort(targetURL, MS2Manager.getDataRegionNamePeptides()).getSortText()));
                 Set<String> distinctPeptides = Protein.getDistinctTrimmedPeptides(peptides);
-                sqlSummaries.add(new Pair<String, String>("Peptide Counts", peptides.length + " total, " + distinctPeptides.size() + " distinct"));
+                sqlSummaries.add(new Pair<>("Peptide Counts", peptides.length + " total, " + distinctPeptides.size() + " distinct"));
                 CurrentFilterView peptideCountsView = new CurrentFilterView(null, sqlSummaries);
                 peptideCountsView.setFrame(FrameType.NONE);
                 gridView.setFrame(FrameType.NONE);
@@ -5225,7 +5213,7 @@ public class MS2Controller extends SpringActionController
             form.setMascotUserPassword(("".equals(form.getMascotUserPassword())) ? "" : "***");  // do not show password in clear
 
             getPageConfig().setTemplate(PageConfig.Template.Dialog);
-            return new JspView<TestMascotForm>("/org/labkey/ms2/testMascot.jsp", form);
+            return new JspView<>("/org/labkey/ms2/testMascot.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -5860,7 +5848,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView<LoadAnnotForm>("/org/labkey/ms2/insertAnnots.jsp", form, errors);
+            return new JspView<>("/org/labkey/ms2/insertAnnots.jsp", form, errors);
         }
 
         public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
@@ -6053,7 +6041,7 @@ public class MS2Controller extends SpringActionController
             assert insertions.length == 1;
             _insertion = insertions[0];
 
-            return new JspView<AnnotationInsertion>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
+            return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -6561,7 +6549,7 @@ public class MS2Controller extends SpringActionController
             PeptideQuantitation quant = peptide.getQuantitation();
 
             EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewContext().getActionURL(), peptide);
-            return new JspView<EditElutionGraphContext>("/org/labkey/ms2/editElution.jsp", ctx, errors);
+            return new JspView<>("/org/labkey/ms2/editElution.jsp", ctx, errors);
         }
 
         public boolean handlePost(ElutionProfileForm form, BindException errors) throws Exception
