@@ -19,6 +19,7 @@ package org.labkey.ms1;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.api.ExperimentService;
@@ -175,7 +176,12 @@ public class MS1Module extends SpringModule implements ProteomicsModule
         ReportService.get().registerReport(new PeaksRReport());
         ReportService.get().addUIProvider(new MS1ReportUIProvider());
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri, "FileId"));
+
+        SQLFragment containerFrag = new SQLFragment();
+        containerFrag.append("SELECT d.Container FROM exp.Data d ");
+        containerFrag.append("WHERE d.RowId = ").append(TableUpdaterFileListener.TABLE_ALIAS).append(".ExpDataFileId");
+
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri, "FileId", containerFrag));
     }
 
 

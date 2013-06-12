@@ -17,6 +17,7 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -297,7 +298,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearRunCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction")
+
+        SQLFragment containerFrag = new SQLFragment();
+        containerFrag.append("SELECT r.Container FROM ");
+        containerFrag.append(MS2Manager.getTableInfoRuns(), "r");
+        containerFrag.append(" WHERE r.Run = ").append(TableUpdaterFileListener.TABLE_ALIAS).append(".Run");
+
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction", containerFrag)
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -306,7 +313,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearFractionCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId"));
+        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
         ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
         ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
     }
