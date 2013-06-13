@@ -156,9 +156,10 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
                 if (_extraParams.isEmpty())
                 {
                     _extraParams.put("maxSamplesPerGraph", 20);
-                    _extraParams.put("graphWidth", 550);
-                    _extraParams.put("graphHeight", 600);
+                    _extraParams.put("graphWidth", 600);
+                    _extraParams.put("graphHeight", 550);
                     _extraParams.put("graphsPerRow", 1);
+                    _extraParams.put("sampleNoun", "Virus");
                 }
                 return _extraParams;
             }
