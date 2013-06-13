@@ -126,7 +126,7 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
     @Override
     public String getDescription()
     {
-        return "Imports Affymetrix microarray runs from GeneTitan excel files.";
+        return "Imports Affymetrix microarray runs from GeneTitan Excel files.";
     }
 
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
