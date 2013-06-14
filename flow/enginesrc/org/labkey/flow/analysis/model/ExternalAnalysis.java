@@ -47,12 +47,12 @@ public class ExternalAnalysis implements IWorkspace, Serializable
     protected String _name;
     protected String _path;
     protected Set<String> _keywords = new CaseInsensitiveTreeSet();
-    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<ParameterInfo>(new LinkedHashMap<String, ParameterInfo>());
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<String, AttributeSet>();
-    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<SampleInfo>(new LinkedHashMap<String, SampleInfo>());
-    protected List<String> _warnings = new LinkedList<String>();
-    protected Set<CompensationMatrix> _compensatrionMatrices = new LinkedHashSet<CompensationMatrix>();
-    protected Map<String, CompensationMatrix> _sampleCompensationMatrices = new HashMap<String, CompensationMatrix>();
+    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, ParameterInfo>());
+    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<>();
+    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
+    protected List<String> _warnings = new LinkedList<>();
+    protected Set<CompensationMatrix> _compensatrionMatrices = new LinkedHashSet<>();
+    protected Map<String, CompensationMatrix> _sampleCompensationMatrices = new HashMap<>();
 
     public ExternalAnalysis()
     {
@@ -157,19 +157,19 @@ public class ExternalAnalysis implements IWorkspace, Serializable
     @Override
     public List<String> getParameterNames()
     {
-        return new ArrayList<String>(_parameters.keySet());
+        return new ArrayList<>(_parameters.keySet());
     }
 
     @Override
     public List<ParameterInfo> getParameters()
     {
-        return new ArrayList<ParameterInfo>(_parameters.values());
+        return new ArrayList<>(_parameters.values());
     }
 
     @Override
     public List<String> getSampleIds()
     {
-        List<String> ret = new ArrayList<String>(_sampleInfos.size());
+        List<String> ret = new ArrayList<>(_sampleInfos.size());
         for (ISampleInfo sample : _sampleInfos.values())
             ret.add(sample.getSampleId());
 
@@ -179,7 +179,7 @@ public class ExternalAnalysis implements IWorkspace, Serializable
     @Override
     public List<String> getSampleLabels()
     {
-        List<String> ret = new ArrayList<String>(_sampleInfos.size());
+        List<String> ret = new ArrayList<>(_sampleInfos.size());
         for (ISampleInfo sample : _sampleInfos.values())
             ret.add(sample.getLabel());
 
@@ -189,7 +189,7 @@ public class ExternalAnalysis implements IWorkspace, Serializable
     @Override
     public List<? extends ISampleInfo> getSamples()
     {
-        return new ArrayList<SampleInfo>(_sampleInfos.values());
+        return new ArrayList<>(_sampleInfos.values());
     }
 
     @Override
@@ -237,7 +237,7 @@ public class ExternalAnalysis implements IWorkspace, Serializable
     @Override
     public List<CompensationMatrix> getCompensationMatrices()
     {
-        return new ArrayList<CompensationMatrix>(_compensatrionMatrices);
+        return new ArrayList<>(_compensatrionMatrices);
     }
 
     private class SampleInfo extends SampleInfoBase
