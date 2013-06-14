@@ -18,6 +18,7 @@ package org.labkey.nab.multiplate;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
@@ -57,8 +58,14 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
     }
 
     @Override
-    protected boolean isSampleMetadataFileBased()
+    protected SampleMetadataInputFormat getDefaultMetadataInputFormat()
     {
-        return true;
+        return SampleMetadataInputFormat.FILE_BASED;
+    }
+
+    @Override
+    public SampleMetadataInputFormat[] getSupportedMetadataInputFormats()
+    {
+        return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.FILE_BASED, SampleMetadataInputFormat.COMBINED};
     }
 }
