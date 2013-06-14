@@ -18,9 +18,11 @@ package org.labkey.luminex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
@@ -29,9 +31,11 @@ import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
 
@@ -88,8 +92,41 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
                     OntologyManager.insertProperties(container, analyte.getLsid(), objProperties);
                 }
             }
+        }
 
-            return batch;
+        handleReRun(uploadContext, run);
+        return batch;
+    }
+
+    private void handleReRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, ExpRun run)
+    {
+        if (uploadContext.getReRunId() != null)
+        {
+            ExpRun replacedRun = ExperimentService.get().getExpRun(uploadContext.getReRunId().intValue());
+
+            if (replacedRun != null)
+            {
+                // Migrate the original Created and CreatedBy values from the old run to the new run
+                TableInfo runTable = ExperimentService.get().getTinfoExperimentRun();
+                SQLFragment updateSQL = new SQLFragment("UPDATE ");
+                updateSQL.append(runTable);
+                updateSQL.append(" SET Created = (SELECT Created FROM ");
+                updateSQL.append(runTable, "r");
+                updateSQL.append(" WHERE RowId = ?), CreatedBy = (SELECT CreatedBy FROM ");
+                updateSQL.add(replacedRun.getRowId());
+                updateSQL.append(runTable, "r");
+                updateSQL.append(" WHERE RowId = ?) WHERE RowId = ?");
+                updateSQL.add(replacedRun.getRowId());
+                updateSQL.add(run.getRowId());
+
+                new SqlExecutor(ExperimentService.get().getSchema()).execute(updateSQL);
+
+                // Delete the old run, which has been replaced
+                if (replacedRun.getContainer().hasPermission(uploadContext.getUser(), DeletePermission.class))
+                {
+                    replacedRun.delete(uploadContext.getUser());
+                }
+            }
         }
     }
 

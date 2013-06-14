@@ -22,7 +22,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.ExperimentException;
@@ -398,6 +397,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public AssayRunCreator getRunCreator()
     {
         return new LuminexRunCreator(this);
+    }
+
+    @Override
+    public boolean supportsReRun()
+    {
+        return true;
     }
 
     @Override
