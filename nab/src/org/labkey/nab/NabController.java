@@ -880,11 +880,16 @@ public class NabController extends SpringActionController
                 1.0f, new float[]{4.0f, 4.0f}, 0.0f));
         plot.getRenderer(0).setSeriesVisibleInLegend(false);
         pointRenderer.setShapesFilled(true);
+        int count = 0;
         for (DilutionSummary summary : dilutionSummaries)
         {
+            count++;
             String sampleId = summary.getSampleId();
             if (sampleId == null)
                 sampleId = "[no sample id]";
+            // Issue 18038: avoid duplicate series ids
+            if (pointDataset.getSeriesIndex(sampleId) > -1)
+                sampleId = sampleId + ", sample " + count;
             XYSeries pointSeries = new XYSeries(sampleId);
             for (WellData well : summary.getWellData())
             {
