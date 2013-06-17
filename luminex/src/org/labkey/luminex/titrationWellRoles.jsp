@@ -30,8 +30,8 @@
     Map<String, Titration> titrationsWithTypes = bean.getParser().getTitrationsWithTypes();
 
     // separate the titrations into two groups unknowns and non-unknowns
-    Map<String, Titration> unknownTitrations = new TreeMap<String, Titration>();
-    Map<String, Titration> nonUnknownTitrations = new TreeMap<String, Titration>();
+    Map<String, Titration> unknownTitrations = new TreeMap<>();
+    Map<String, Titration> nonUnknownTitrations = new TreeMap<>();
     for (Map.Entry<String, Titration> titrationEntry : titrationsWithTypes.entrySet())
     {
         if (titrationEntry.getValue().isUnknown())
@@ -59,7 +59,7 @@
         {
 %>
             <tr>
-                <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
+                <td class="labkey-form-label"><%= PageFlowUtil.filter(titrationEntry.getValue().getName()) %></td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn();' />
@@ -91,7 +91,7 @@
         {
 %>
             <tr>
-                <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
+                <td class="labkey-form-label"><%= PageFlowUtil.filter(titrationEntry.getValue().getName()) %></td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);' />
@@ -190,7 +190,7 @@
             for (Titration.Type t : Titration.Type.values())
             {
 %>
-                var propertyName =  "<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(t, titrationEntry.getValue()) %>";
+                var propertyName = <%=PageFlowUtil.jsString(LuminexUploadWizardAction.getTitrationTypeCheckboxName(t, titrationEntry.getValue())) %>;
                 var hiddenEl = getHiddenFormElement(propertyName);
                 var inputEl = getInputFormElement(propertyName);
                 if (hiddenEl && inputEl)

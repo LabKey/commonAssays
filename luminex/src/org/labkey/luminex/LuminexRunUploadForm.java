@@ -18,20 +18,27 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.RuntimeSQLException;
 
-import java.util.*;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -54,7 +61,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 
     protected Map<DomainProperty, String> getAnalytePropertyMapFromRequest(List<DomainProperty> columns, String analyteName)
     {
-        Map<DomainProperty, String> properties = new LinkedHashMap<DomainProperty, String>();
+        Map<DomainProperty, String> properties = new LinkedHashMap<>();
         for (DomainProperty dp : columns)
         {
             String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, dp));
@@ -76,7 +83,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
-        Map<ColumnInfo, String> properties = new HashMap<ColumnInfo, String>();
+        Map<ColumnInfo, String> properties = new HashMap<>();
         ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
         value = StringUtils.trimToNull(value);
@@ -88,38 +95,51 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     public Map<DomainProperty, Object> getDefaultValues(Domain domain, String disambiguationId) throws ExperimentException
     {
         //  Issue 14851: added check for isMultiRunUpload to if statement for case when "Save and Import Another Run" gets default values for the Run properties 
-        if (!isMultiRunUpload() && !isResetDefaultValues() && LuminexUploadWizardAction.AnalyteStepHandler.NAME.equals(getUploadStep()))
+        if (!isMultiRunUpload() && !isResetDefaultValues() && domain.getDomainKind() instanceof LuminexAnalyteDomainKind)
         {
-            Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-            DomainProperty[] analyteColumns = analyteDomain.getProperties();
-            try
+            DomainProperty[] analyteColumns = domain.getProperties();
+
+            String objectURI = null;
+            if (getReRunId() != null)
             {
-                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
+                // In the re-run case we want to reuse the analyte values from the original run (if the analyte
+                // was in that version of the run)
+                SQLFragment sql = new SQLFragment("SELECT MIN(a.LSID) FROM ");
+                sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
+                sql.append(" WHERE LOWER(Name) = LOWER(?) AND a.DataId IN (SELECT d.RowId FROM ");
+                sql.add(disambiguationId);
+                sql.append(ExperimentService.get().getTinfoData(), "d");
+                sql.append(" WHERE d.RunId = ?)");
+                sql.add(getReRunId());
+                objectURI = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(String.class);
+            }
+
+            if (objectURI == null)
+            {
+                // If we don't have one yet, do a lookup against the last uploaded set of values
+                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND LOWER(a.Name) = LOWER(?))");
                 sql.add(getContainer().getId());
                 sql.add(disambiguationId);
-                String objectURI = Table.executeSingleton(LuminexProtocolSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class);
-                if (objectURI != null)
-                {
-                    Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
-                    Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
-                    for (DomainProperty analyteDP : analyteColumns)
-                    {
-                        ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
-                        if (objectProp != null)
-                        {
-                            ret.put(analyteDP, objectProp.value());
-                        }
-                    }
-                    return ret;
-                }
-                else
-                    return Collections.emptyMap();
+                objectURI = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(String.class);
+            }
 
-            }
-            catch (SQLException e)
+            if (objectURI != null)
             {
-                throw new RuntimeSQLException(e);
+                // Look up the values for that ObjectURI
+                Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
+                Map<DomainProperty, Object> ret = new HashMap<>();
+                for (DomainProperty analyteDP : analyteColumns)
+                {
+                    ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
+                    if (objectProp != null)
+                    {
+                        ret.put(analyteDP, objectProp.value());
+                    }
+                }
+                return ret;
             }
+            else
+                return Collections.emptyMap();
         }
         else
         {
@@ -138,7 +158,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
     {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (String titration : getParser().getTitrations())
         {
             if (getViewContext().getRequest().getParameter(LuminexUploadWizardAction.getTitrationCheckboxName(titration, analyteName)) != null)
@@ -151,7 +171,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 
     public List<Titration> getTitrations() throws ExperimentException
     {
-        List<Titration> result = new ArrayList<Titration>();
+        List<Titration> result = new ArrayList<>();
         for (String titrationName : getParser().getTitrations())
         {
             Titration titration = new Titration();

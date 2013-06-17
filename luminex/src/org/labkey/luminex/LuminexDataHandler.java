@@ -16,7 +16,6 @@
 
 package org.labkey.luminex;
 
-import org.junit.Assert;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -24,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.ParameterCurveImpl;
@@ -32,14 +32,25 @@ import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpQCFlagTable;
@@ -50,7 +61,15 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.ParticipantVisit;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayUploadXarContext;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolver;
+import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
@@ -61,7 +80,19 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -451,12 +482,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     {
         // Do a query to find all of the rows that have already been inserted 
         LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(false);
-        SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("Data", dataIds));
-        // Pull back as a map so that we get custom properties as well
-        Map[] databaseMaps = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, Map.class);
+        SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromParts("Data"), dataIds));
 
         Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<>();
-        for (Map<String, Object> databaseMap : databaseMaps)
+        // Pull back as a map so that we get custom properties as well
+        for (Map<String, Object> databaseMap : new TableSelector(tableInfo, Table.ALL_COLUMNS, filter, null).getMapCollection())
         {
             LuminexDataRow existingRow = BeanObjectFactory.Registry.getFactory(LuminexDataRow.class).fromMap(databaseMap);
             // Make sure an extra properties are made available
@@ -511,7 +541,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** @return Name->Analyte for all of the analytes that are already associated with this run */
-    private Map<String, Analyte> getExistingAnalytes(ExpRun expRun) throws SQLException
+    private Map<String, Analyte> getExistingAnalytes(ExpRun expRun)
     {
         SQLFragment sql = new SQLFragment("SELECT a.* FROM ");
         sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
@@ -519,7 +549,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         sql.append(ExperimentService.get().getTinfoData(), "d");
         sql.append(" WHERE a.DataId = d.RowId AND d.RunId = ?");
         sql.add(expRun.getRowId());
-        Analyte[] databaseAnalytes = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Analyte.class);
+        Analyte[] databaseAnalytes = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArray(Analyte.class);
         Map<String, Analyte> existingAnalytes = new HashMap<>();
         for (Analyte databaseAnalyte : databaseAnalytes)
         {
@@ -681,8 +711,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
 
         // Insert the mapping row, which includes the Max FI
-        SimpleFilter filter = new SimpleFilter("AnalyteId", analyte.getRowId());
-        filter.addCondition("TitrationId", titration.getRowId());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
+        filter.addCondition(FieldKey.fromParts("TitrationId"), titration.getRowId());
 
         AnalyteTitration analyteTitration = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getObject(AnalyteTitration.class);
         boolean newRow = analyteTitration == null;
@@ -719,9 +749,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         try
         {
             // Look up any existing curve fits that might already be in the database
-            SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", analyte.getRowId());
-            curveFitFilter.addCondition("TitrationId", titration.getRowId());
-            CurveFit[] existingCurveFits = Table.select(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null, CurveFit.class);
+            SimpleFilter curveFitFilter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
+            curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), titration.getRowId());
+            CurveFit[] existingCurveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null).getArray(CurveFit.class);
 
             // Keep track of the curve fits that should be part of this run
             List<CurveFit> newCurveFits = new ArrayList<>();
@@ -1192,7 +1222,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
             throws DilutionCurve.FitFailedException, SQLException
     {
-        CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, ec50, flag, fitType, source);
+        CurveFit fit = createCurveFit(titration, analyte, params, ec50, flag, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
     }
 
@@ -1220,11 +1250,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source)
+    private CurveFit createCurveFit(Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source)
             throws DilutionCurve.FitFailedException
     {
-//        ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
-
         CurveFit fit = new CurveFit();
         fit.setAnalyteId(analyte.getRowId());
         fit.setTitrationId(titration.getRowId());
@@ -1265,9 +1293,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
         ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
-        SimpleFilter analyteTitrationFilter = new SimpleFilter("Analyte", analyte.getRowId());
-        analyteTitrationFilter.addCondition("Titration", titration.getRowId());
-        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = Arrays.asList(Table.select(qcFlagTable, Table.ALL_COLUMNS, analyteTitrationFilter, null, AnalyteTitrationQCFlag.class));
+        SimpleFilter analyteTitrationFilter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
+        analyteTitrationFilter.addCondition(FieldKey.fromParts("Titration"), titration.getRowId());
+        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = new TableSelector(qcFlagTable, Table.ALL_COLUMNS, analyteTitrationFilter, null).getArrayList(AnalyteTitrationQCFlag.class);
 
         List<AnalyteTitrationQCFlag> newAnalyteTitrationQCFlags = new ArrayList<>();
 
@@ -1288,7 +1316,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     ec504plAverageFK, ec504plStdDevFK,
                     ec505plAverageFK, ec505plStdDevFK,
                     aucAverageFK, aucStdDevFK));
-            SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
+            SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("RowId"), analyteTitration.getGuideSetId());
             Map<String, Object>[] guideSetRows = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMapArray();
 
             if (guideSetRows.length != 1)
@@ -1422,8 +1450,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Insert the titrations first
         for (Titration titration : titrations)
         {
-            SimpleFilter filter = new SimpleFilter("Name", titration.getName());
-            filter.addCondition("RunId", expRun.getRowId());
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Name"), titration.getName());
+            filter.addCondition(FieldKey.fromParts("RunId"), expRun.getRowId());
             Titration[] exitingTitrations = new TableSelector(LuminexProtocolSchema.getTableInfoTitration(), filter, null).getArray(Titration.class);
             assert exitingTitrations.length <= 1;
 
@@ -1636,7 +1664,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 value = value.trim();
                 String specimenID = null;
-                if (value.indexOf(",") == -1)
+                if (!value.contains(","))
                 {
                     specimenID = value;
                 }
@@ -1784,68 +1812,58 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private void deleteDatas(List<Integer> ids)
     {
-        try
-        {
-            Object[] params = ids.toArray(new Integer[ids.size()]);
-            String idSQL = StringUtils.repeat("?", ", ", ids.size());
-            // Clean up data row properties
-            Table.execute(LuminexProtocolSchema.getSchema(),
-                    "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
-                    LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
-                    " o WHERE o.ObjectURI = dr.LSID AND dr.DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexProtocolSchema.getSchema(),
-                    "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " +
-                    LuminexProtocolSchema.getTableInfoDataRow() + " WHERE DataId IN (" + idSQL + "))", params);
+        Object[] params = ids.toArray(new Integer[ids.size()]);
+        String idSQL = StringUtils.repeat("?", ", ", ids.size());
+        // Clean up data row properties
+        SqlExecutor executor = new SqlExecutor(LuminexProtocolSchema.getSchema());
+        executor.execute("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
+                LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
+                " o WHERE o.ObjectURI = dr.LSID AND dr.DataId IN (" + idSQL + "))", params);
+        executor.execute("DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " +
+                LuminexProtocolSchema.getTableInfoDataRow() + " WHERE DataId IN (" + idSQL + "))", params);
 
-            // Clean up analyte properties
-            Table.execute(LuminexProtocolSchema.getSchema(),
-                    "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
-                    LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
-                    " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE a.RowId = dr.AnalyteId AND o.ObjectURI = " +
-                    "a.LSID AND dr.DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexProtocolSchema.getSchema(),
-                    "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT a.LSID FROM " +
-                    LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                    " a WHERE dr.AnalyteId = a.RowId AND dr.DataId IN (" + idSQL + "))", params);
+        // Clean up analyte properties
+        executor.execute("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
+                LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
+                " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE a.RowId = dr.AnalyteId AND o.ObjectURI = " +
+                "a.LSID AND dr.DataId IN (" + idSQL + "))", params);
+        executor.execute("DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT a.LSID FROM " +
+                LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + LuminexProtocolSchema.getTableInfoAnalytes() +
+                " a WHERE dr.AnalyteId = a.RowId AND dr.DataId IN (" + idSQL + "))", params);
 
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoDataRow() +
-                    " WHERE DataId IN (" + idSQL + ")", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoDataRow() +
+                " WHERE DataId IN (" + idSQL + ")", params);
 
-            // Clean up exclusions
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
-                    " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
-                    " WHERE DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
-                    " WHERE DataId IN (" + idSQL + ")", params);
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
-                    " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
-                    " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
-                    " WHERE RowId IN (" + idSQL + ")))", params);
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
-                    " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
-                    " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
-                    " WHERE RowId IN (" + idSQL + ")))", params);
+        // Clean up exclusions
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
+                " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
+                " WHERE DataId IN (" + idSQL + "))", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
+                " WHERE DataId IN (" + idSQL + ")", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
+                " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
+                " WHERE RowId IN (" + idSQL + ")))", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
+                " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
+                " WHERE RowId IN (" + idSQL + ")))", params);
 
-            // Clean up curve fits
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +
-                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                    " WHERE DataId IN (" + idSQL + "))", params);
+        // Clean up curve fits
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +
+                " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
+                " WHERE DataId IN (" + idSQL + "))", params);
 
-            // Clean up analytes and titrations
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteTitration() +
-                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                    " WHERE DataId IN (" + idSQL + "))", params);
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                    " WHERE DataId IN (" + idSQL + ")", params);
-            Table.execute(LuminexProtocolSchema.getSchema(), "DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
-                    " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
-                    " pa, " + ExperimentService.get().getTinfoData() +
-                    " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        // Clean up analytes and titrations
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteTitration() +
+                " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
+                " WHERE DataId IN (" + idSQL + "))", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
+                " WHERE DataId IN (" + idSQL + ")", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
+                " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                " pa, " + ExperimentService.get().getTinfoData() +
+                " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
     }
 
     public void deleteData(ExpData data, Container container, User user)
@@ -1917,8 +1935,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         final String dataNameAlias = cols.get(dataNameFK).getAlias();
         final String analyteNameAlias = cols.get(analyteFK).getAlias();
 
-        SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults().toString(), run.getRowId());
-        filter.addCondition(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, true);
+        SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), run.getRowId());
+        filter.addCondition(FieldKey.fromParts(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME), true);
         new TableSelector(table, cols.values(), filter, null).forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
         {
             @Override

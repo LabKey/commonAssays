@@ -15,13 +15,14 @@
  */
 package org.labkey.luminex;
 
-import org.junit.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ContainerManager;
@@ -57,10 +58,11 @@ import java.util.TreeMap;
 public class LuminexExcelParser
 {
     private Collection<File> _dataFiles;
+    @Nullable
     private Domain _excelRunDomain;
-    private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
-    private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<File, Map<DomainProperty, String>>();
-    private Map<String, Titration> _titrations = new TreeMap<String, Titration>();
+    private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<>();
+    private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<>();
+    private Map<String, Titration> _titrations = new TreeMap<>();
     private boolean _parsed;
     private boolean _imported;
 
@@ -69,7 +71,7 @@ public class LuminexExcelParser
         this(AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN), dataFiles);
     }
 
-    public LuminexExcelParser(Domain excelRunDomain, Collection<File> dataFiles)
+    private LuminexExcelParser(Domain excelRunDomain, Collection<File> dataFiles)
     {
         _excelRunDomain = excelRunDomain;
         _dataFiles = dataFiles;
@@ -104,7 +106,7 @@ public class LuminexExcelParser
                     // Skip over the blank line
                     row++;
 
-                    List<String> colNames = new ArrayList<String>();
+                    List<String> colNames = new ArrayList<>();
                     if (row <= sheet.getLastRowNum())
                     {
                         Row r = sheet.getRow(row);
@@ -116,9 +118,9 @@ public class LuminexExcelParser
                         row++;
                     }
 
-                    Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<Integer>();
-                    Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<Integer>();
-                    Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<Titration>();
+                    Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<>();
+                    Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<>();
+                    Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<>();
 
                     if (row <= sheet.getLastRowNum())
                     {
@@ -236,7 +238,7 @@ public class LuminexExcelParser
             Cell cell = sheet.getRow(peekRow).getCell(0);
             if ("Analyte".equals(ExcelFactory.getCellStringValue(cell)) && sheet.getLastRowNum() > peekRow)
             {
-                return new Pair<Boolean, Integer>(true, peekRow + 1);
+                return new Pair<>(true, peekRow + 1);
             }
 
             hasNext = false;
@@ -246,7 +248,7 @@ public class LuminexExcelParser
             hasNext = true;
         }
 
-        return new Pair<Boolean, Integer>(hasNext, row);
+        return new Pair<>(hasNext, row);
     }
 
     public static Map.Entry<Analyte, List<LuminexDataRow>> ensureAnalyte(Analyte analyte, Map<Analyte, List<LuminexDataRow>> sheets)
@@ -268,11 +270,11 @@ public class LuminexExcelParser
         if (matchingAnalyte == null)
         {
             matchingAnalyte = analyte;
-            dataRows = new ArrayList<LuminexDataRow>();
+            dataRows = new ArrayList<>();
             sheets.put(matchingAnalyte, dataRows);
         }
 
-        return new Pair<Analyte, List<LuminexDataRow>>(matchingAnalyte, dataRows);
+        return new Pair<>(matchingAnalyte, dataRows);
     }
 
     public Set<String> getTitrations() throws ExperimentException
@@ -330,7 +332,7 @@ public class LuminexExcelParser
         Map<DomainProperty, String> excelValues = _excelRunProps.get(dataFile);
         if (excelValues == null)
         {
-            excelValues = new HashMap<DomainProperty, String>();
+            excelValues = new HashMap<>();
             _excelRunProps.put(dataFile, excelValues);
         }
 

@@ -18,6 +18,7 @@ package org.labkey.luminex;
 
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
@@ -28,9 +29,12 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationError;
@@ -56,9 +60,9 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +94,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    private ModelAndView getAnalytesView(String[] analyteNames, LuminexRunUploadForm form, final boolean errorReshow, BindException errors) throws ServletException
+    private ModelAndView getAnalytesView(String[] analyteNames, final LuminexRunUploadForm form, final boolean errorReshow, BindException errors) throws ServletException
     {
         try {
             String lsidColumn = "RowId";
@@ -99,7 +103,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             // if there are titrations in the uploaded data, show the well role definition section
             if (form.getParser().getTitrations().size() > 0)
             {
-                JspView<LuminexRunUploadForm> top = new JspView<LuminexRunUploadForm>("/org/labkey/luminex/titrationWellRoles.jsp", form);
+                JspView<LuminexRunUploadForm> top = new JspView<>("/org/labkey/luminex/titrationWellRoles.jsp", form);
                 top.setTitle("Define Titration Well Roles");
                 top.setTitlePopupHelp("Define Titration Well Roles", "Samples that are titrated across different wells can used in different ways. Standards are used to calculate a titration curve against which unknowns are fit. QC Controls also define a curve and used to compare runs against each other. Choose the purpose(s) for each titration.");
                 vbox.addView(top);
@@ -117,10 +121,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             // each analyte may have a different set of default values.  Because it may be expensive to query for the
             // entire set of values for every property, we use the following map to cache the default value sets by analyte name.
-            Map<String, Map<DomainProperty, Object>> domains = new HashMap<String, Map<DomainProperty, Object>>();
+            Map<String, Map<DomainProperty, Object>> domains = new HashMap<>();
             for (DomainProperty analyteDP : analyteColumns)
             {
-                List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
+                List<DisplayColumn> cols = new ArrayList<>();
                 for (String analyte : analyteNames)
                 {
                     // from SamplePropertyHelper:
@@ -172,7 +176,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             String calcPositivityValue = form.getRequest().getParameter(LuminexDataHandler.CALCULATE_POSITIVITY_COLUMN_NAME);
             if (null != calcPositivityValue && calcPositivityValue.equals("1"))
             {
-                List<DisplayColumn> posThresholdCols = new ArrayList<DisplayColumn>();
+                List<DisplayColumn> posThresholdCols = new ArrayList<>();
                 for (String analyte : analyteNames)
                 {
                     ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
@@ -238,19 +242,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             Map<String, String> defaultWellRoleValues = PropertyManager.getProperties(getViewContext().getUser(),
                 getContainer(), _protocol.getName() + ": Well Role");
-            
+
+            final Map<String, Titration> existingTitrations = getExistingTitrations(form.getReRun());
+            final Map<String, Analyte> existingAnalytes = getExistingAnalytes(form.getReRun());
+
             // get a set of which titrations are going to be pre-selected as standards (based on default value, well type, etc.)
-            final HashSet<Titration> standardTitrations = new HashSet<Titration>();
+            final HashSet<Titration> standardTitrations = new HashSet<>();
             for (Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
             {
-                // titrations of type unknown are not availble as standards
+                // titrations of type unknown are not available as standards
                 if (titrationEntry.getValue().isUnknown())
                 {
                     continue;
                 }
 
+                Titration existingTitration = existingTitrations.get(titrationEntry.getKey());
                 String propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                String defVal = defaultWellRoleValues.get(propertyName);
+                // If we have an existing titration as a baseline from the run we're replacing, use its value
+                String defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isStandard());
 
                 // add the titration to the list of standards if reshowing on error and it was selected
                 if (errorReshow)
@@ -279,10 +288,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 String defVal;
                 String value;
 
+                Titration existingTitration = existingTitrations.get(titrationEntry.getKey());
+
                 if (!titrationEntry.getValue().isUnknown())
                 {
                     propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                    defVal = defaultWellRoleValues.get(propertyName);
+                    // If we have an existing titration as a baseline from the run we're replacing, use its value
+                    defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isStandard());
                     value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isStandard()) ? "true" : "";
                     view.getDataRegion().addHiddenFormField(propertyName, value);
 
@@ -295,14 +307,16 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     view.getDataRegion().addHiddenFormField(propertyName + "_showcol", value);
 
                     propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
-                    defVal = defaultWellRoleValues.get(propertyName);
+                    // If we have an existing titration as a baseline from the run we're replacing, use its value
+                    defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isQcControl());
                     value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isQcControl()) ? "true" : "";
                     view.getDataRegion().addHiddenFormField(propertyName, value);
                 }
                 else
                 {
                     propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
-                    defVal = defaultWellRoleValues.get(propertyName);
+                    // If we have an existing titration as a baseline from the run we're replacing, use its value
+                    defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isUnknown());
                     value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isUnknown()) ? "true" : "";
                     view.getDataRegion().addHiddenFormField(propertyName, value);
                 }
@@ -330,16 +344,39 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 else
                     hideCell = true;
 
-                List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
+                final List<DisplayColumn> cols = new ArrayList<>();
                 for (final String analyte : analyteNames)
                 {
-                    DisplayColumn col = new SimpleDisplayColumn()
+                    final DisplayColumn col = new SimpleDisplayColumn()
                     {
                         @Override
                         public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
                         {
-                            String propertyName = PageFlowUtil.filter(getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte));
+                            String titrationName = titrationEntry.getValue().getName();
+                            String propertyName = PageFlowUtil.filter(getTitrationCheckboxName(titrationName, analyte));
                             String defVal = defaultTitrationValues.get(propertyName);
+                            // If we're replacing this run, and the previous version of the run had the analyte/titration
+                            // combination, see if it they were used together
+                            if (form.getReRun() != null && existingTitrations.containsKey(titrationName) && existingAnalytes.containsKey(analyte))
+                            {
+                                SQLFragment selectedSQL = new SQLFragment("SELECT at.* FROM ");
+                                selectedSQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
+                                selectedSQL.append(", ");
+                                selectedSQL.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
+                                selectedSQL.append(", ");
+                                selectedSQL.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
+                                selectedSQL.append(" WHERE LOWER(a.Name) = LOWER(?) AND a.RowId = at.AnalyteId AND ");
+                                selectedSQL.add(analyte);
+                                selectedSQL.append("t.RowId = at.TitrationId AND t.RunId = ? AND LOWER(t.Name) = LOWER(?)");
+                                selectedSQL.add(form.getReRun().getRowId());
+                                selectedSQL.add(titrationName);
+
+                                if (new SqlSelector(LuminexProtocolSchema.getSchema(), selectedSQL).exists())
+                                {
+                                    defVal = Boolean.TRUE.toString();
+                                }
+
+                            }
                             String checked = "";
 
                             // if reshowing form on error, preselect based on request value
@@ -402,7 +439,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
                         out.write("<td name='" + titrationCellName + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
                         out.write("<input type=checkbox name='" + groupName + "CheckBox' id='" + groupName + "CheckBox' onchange=\"");
-                        out.write(" b = this.checked;" );
+                        out.write(" b = this.checked;");
                         for (int i = 1; i < getColumns().size(); i++)
                         {
                             DisplayColumn col = getColumns().get(i);
@@ -428,7 +465,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         out.write("var e = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0];\n");
                         out.write("e.onchange=" + groupName + "Updated;\n");
                         out.write("e.onkeyup=" + groupName + "Updated;\n");
-                        out.write("\n");                    }
+                        out.write("\n");
+                    }
                 });
             }
 
@@ -451,6 +489,46 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             throw new ServletException(e);
         }
+    }
+
+    private Map<String, Analyte> getExistingAnalytes(ExpRun reRun)
+    {
+        if (reRun == null)
+        {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Analyte> result = new CaseInsensitiveHashMap<>();
+        SQLFragment analyteSQL = new SQLFragment("SELECT a.* FROM ");
+        analyteSQL.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
+        analyteSQL.append(" WHERE a.DataId IN (SELECT d.RowId FROM ");
+        analyteSQL.append(ExperimentService.get().getTinfoData(), "d");
+        analyteSQL.append(" WHERE d.RunId = ?)");
+        analyteSQL.add(reRun.getRowId());
+        for (Analyte analyte : new SqlSelector(LuminexProtocolSchema.getSchema(), analyteSQL).getArrayList(Analyte.class))
+        {
+            result.put(analyte.getName(), analyte);
+        }
+        return result;
+    }
+
+    private Map<String, Titration> getExistingTitrations(ExpRun reRun)
+    {
+        if (reRun == null)
+        {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Titration> result = new CaseInsensitiveHashMap<>();
+        SQLFragment titrationSQL = new SQLFragment("SELECT t.* FROM ");
+        titrationSQL.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
+        titrationSQL.append(" WHERE t.RunId = ?");
+        titrationSQL.add(reRun.getRowId());
+        for (Titration titration : new SqlSelector(LuminexProtocolSchema.getSchema(), titrationSQL).getArrayList(Titration.class))
+        {
+            result.put(titration.getName(), titration);
+        }
+        return result;
     }
 
     public static String getTitrationCheckboxName(String titration, String analyte)
@@ -478,7 +556,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private String[] getAnalyteNames(LuminexRunUploadForm form) throws ExperimentException
     {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
 
         for (Analyte analyte : form.getParser().getSheets().keySet())
         {
