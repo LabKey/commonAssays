@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -617,7 +618,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
 
                 // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
-                if (showControls() && runId != null)
+                if (showControls() && runId != null && NumberUtils.isNumber(runId))
                 {
                     ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
                     excludeAnalytes.setScript("analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
