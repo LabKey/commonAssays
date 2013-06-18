@@ -351,7 +351,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
-                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getContainer(), provider);
+                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getUser(), form.getContainer(), provider);
                     plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
                 }
 

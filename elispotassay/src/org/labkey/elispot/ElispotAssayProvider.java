@@ -153,7 +153,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
         //addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
 
-        return new Pair<Domain, Map<DomainProperty, Object>>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
     }
 
     protected Pair<Domain,Map<DomainProperty,Object>> createRunDomain(Container c, User user)
@@ -186,10 +186,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             DomainProperty nameProperty = readerList.getDomain().getPropertyByName(PlateReaderService.PLATE_READER_PROPERTY);
             DomainProperty typeProperty = readerList.getDomain().getPropertyByName(PlateReaderService.READER_TYPE_PROPERTY);
 
-            try {
-                addItem(readerList, user, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty);
-                addItem(readerList, user, "AID", nameProperty, TextPlateReader.TYPE, typeProperty);
-                addItem(readerList, user, "Zeiss", nameProperty, TextPlateReader.TYPE, typeProperty);
+            try
+            {
+                List<ListItem> items = new ArrayList<>();
+                items.add(getItem(readerList, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty));
+                items.add(getItem(readerList, "AID", nameProperty, TextPlateReader.TYPE, typeProperty));
+                items.add(getItem(readerList, "Zeiss", nameProperty, TextPlateReader.TYPE, typeProperty));
+                readerList.insertListItems(user, items);
             }
             catch (Exception e)
             {
@@ -199,14 +202,15 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return readerList;
     }
 
-    private void addItem(ListDefinition list, User user, String name, DomainProperty nameProperty,
+    private ListItem getItem(ListDefinition list, String name, DomainProperty nameProperty,
                          String fileType, DomainProperty fileTypeProperty) throws Exception
     {
         ListItem reader = list.createListItem();
         reader.setKey(name);
         reader.setProperty(nameProperty, name);
         reader.setProperty(fileTypeProperty, fileType);
-        reader.save(user);
+
+        return reader;
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()

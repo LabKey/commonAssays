@@ -183,7 +183,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
             if (dataFile.exists())
             {
-                PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReader.toString(), getContainer(), provider);
+                PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReader.toString(), getUser(), getContainer(), provider);
                 plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
             }
             else

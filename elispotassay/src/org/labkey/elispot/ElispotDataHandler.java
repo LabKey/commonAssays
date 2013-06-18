@@ -110,7 +110,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
             PlateTemplate template = provider.getPlateTemplate(container, protocol);
 
-            Map<String, DomainProperty> runProperties = new HashMap<String, DomainProperty>();
+            Map<String, DomainProperty> runProperties = new HashMap<>();
             for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
                 runProperties.put(column.getName(), column);
 
@@ -120,11 +120,11 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                 if (_context instanceof AssayUploadXarContext)
                 {
                     Map<DomainProperty, String> runPropValues = ((AssayUploadXarContext)_context).getContext().getRunProperties();
-                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropValues.get(readerProp), _info.getContainer(), provider);
+                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropValues.get(readerProp), _info.getUser(), _info.getContainer(), provider);
                     Plate plate = initializePlate(_dataFile, template, reader);
 
-                    List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-                    Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
+                    List<Map<String, Object>> results = new ArrayList<>();
+                    Map<String, ExpMaterial> materialMap = new HashMap<>();
                     for (ExpMaterial material : run.getMaterialInputs().keySet())
                         materialMap.put(material.getName(), material);
 
@@ -136,7 +136,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             for (Position pos : group.getPositions())
                             {
                                 Well well = plate.getWell(pos.getRow(), pos.getColumn());
-                                Map<String, Object> row = new LinkedHashMap<String, Object>();
+                                Map<String, Object> row = new LinkedHashMap<>();
 
                                 row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
                                 row.put(SFU_PROPERTY_NAME, well.getValue());
@@ -170,7 +170,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     {
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
         datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, parser.getResults());
 
         return datas;
@@ -219,7 +219,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             String dataLsid = data[0].getLSID();
 
             // for each antigen well group, we want to flatten that information to the well level
-            List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+            List<ObjectProperty> results = new ArrayList<>();
             for (WellGroup group : plate.getWellGroups(WellGroup.Type.ANTIGEN))
             {
                 for (Position pos : group.getPositions())
@@ -327,7 +327,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             String dataLsid = data[0].getLSID();
 
             // calculate antigen statistics on a per sample basis
-            Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
+            Map<String, ExpMaterial> materialMap = new HashMap<>();
 
             for (ExpMaterial material : run.getMaterialInputs().keySet())
                 materialMap.put(material.getName(), material);
@@ -344,8 +344,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
                 if (material != null)
                 {
-                    List<ObjectProperty> antigenResults = new ArrayList<ObjectProperty>();
-                    Set<String> antigenNames = new HashSet<String>();
+                    List<ObjectProperty> antigenResults = new ArrayList<>();
+                    Set<String> antigenNames = new HashSet<>();
                     Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(dataLsid, material.getName());
                     Map<String, ObjectProperty> dataRow = OntologyManager.getPropertyObjects(container, rowLsid.toString());
 
