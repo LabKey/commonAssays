@@ -17,7 +17,6 @@ package org.labkey.nab.multiplate;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
@@ -31,9 +30,9 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
@@ -41,7 +40,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
-import org.labkey.api.assay.dilution.DilutionRunUploadForm;
 import org.labkey.nab.NabAssayController;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabRunUploadForm;
@@ -121,9 +119,9 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     }
 
     @Override
-    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, DomainProperty[] sampleProperties, PlateTemplate template)
+    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, DomainProperty[] sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
     {
-        return new SinglePlateDilutionSamplePropertyHelper(c, protocol, sampleProperties, template);
+        return new SinglePlateDilutionSamplePropertyHelper(c, protocol, sampleProperties, template, inputFormat);
     }
 
     @Override
@@ -131,7 +129,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     {
         return new NabProtocolSchema(user, container, protocol, targetStudy)
         {
-            Map<String, Object> _extraParams = new HashMap<String, Object>();
+            Map<String, Object> _extraParams = new HashMap<>();
 
             @Override
             protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
@@ -192,7 +190,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
                                 addParameter("graphHeight", 600).
                                 addParameter("graphsPerRow", 1);
 
-                        Map<String, String> map = new HashMap<String, String>();
+                        Map<String, String> map = new HashMap<>();
                         map.put("title", "View run details");
                         out.write(PageFlowUtil.textLink("run details", url, null, null, map));
                     }

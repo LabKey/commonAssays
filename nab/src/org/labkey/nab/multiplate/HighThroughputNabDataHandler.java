@@ -48,7 +48,6 @@ import java.util.Map;
  */
 public abstract class HighThroughputNabDataHandler extends NabDataHandler
 {
-    //
     public static final String REPLICATE_GROUP_ORDER_PROPERTY = "Group Order";
 
     @Override

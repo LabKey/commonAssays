@@ -23,8 +23,8 @@ import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.nab.NabAssayProvider;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,12 +41,14 @@ import java.util.Map;
  */
 public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFilePropertyHelper
 {
-    public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, DomainProperty[] sampleProperties, PlateTemplate template)
+    public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, DomainProperty[] sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
     {
-        super(c, protocol, sampleProperties, template);
+        super(c, protocol, sampleProperties, template, inputFormat);
     }
 
-    public static final String WELLGROUP_COLUMN = "SampleNo";
+    // Not backwards compatible with file based metadata uploads.
+    public static final String COMBINED_WELLGROUP_COLUMN = "SampleWellGroup";
+    public static final String FILE_WELLGROUP_COLUMN = "SampleNo";
 
     @Override
     public Map<String, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
@@ -58,31 +60,38 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
         if (metadataFile == null)
             return null;
 
-        Map<String, Map<DomainProperty, String>> allProperties = new HashMap<String, Map<DomainProperty, String>>();
+        Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
         try
         {
             List<WellGroupTemplate> sampleGroups = getSampleWellGroups();
-            Map<String, WellGroupTemplate> sampleGroupNames = new HashMap<String, WellGroupTemplate>(sampleGroups.size());
+            Map<String, WellGroupTemplate> sampleGroupNames = new HashMap<>(sampleGroups.size());
             for (WellGroupTemplate sampleGroup : sampleGroups)
                 sampleGroupNames.put(sampleGroup.getName(), sampleGroup);
 
             ExcelLoader loader = new ExcelLoader(metadataFile, true);
             boolean hasSampleNameCol = false;
             boolean hasVirusIdCol = false;
+            String wellGroupColumnName;
+
+            if(getMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
+                wellGroupColumnName = COMBINED_WELLGROUP_COLUMN;
+            else
+                wellGroupColumnName = FILE_WELLGROUP_COLUMN;
+
             for (ColumnDescriptor col : loader.getColumns())
             {
-                hasSampleNameCol = WELLGROUP_COLUMN.equals(col.name) || hasSampleNameCol;
+                hasSampleNameCol = wellGroupColumnName.equals(col.name) || hasSampleNameCol;
                 hasVirusIdCol = NabAssayProvider.VIRUS_NAME_PROPERTY_NAME.equals(col.name) || hasVirusIdCol;
             }
 
             if (!hasSampleNameCol)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + WELLGROUP_COLUMN + "\".");
+                throw new ExperimentException("Sample metadata file does not contain required column \"" + wellGroupColumnName + "\".");
             if (!hasVirusIdCol)
                 throw new ExperimentException("Sample metadata file does not contain required column \"" + NabAssayProvider.VIRUS_NAME_PROPERTY_NAME + "\".");
 
             for (Map<String, Object> row : loader)
             {
-                String wellGroupName = (String) row.get(WELLGROUP_COLUMN);
+                String wellGroupName = (String) row.get(wellGroupColumnName);
                 WellGroupTemplate wellgroup = wellGroupName != null ? sampleGroupNames.get(wellGroupName) : null;
 
                 if (wellgroup != null)
@@ -96,7 +105,7 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
                     Map<DomainProperty, String> sampleProperties = allProperties.get(key);
                     if (sampleProperties == null)
                     {
-                        sampleProperties = new HashMap<DomainProperty, String>();
+                        sampleProperties = new HashMap<>();
                         allProperties.put(key, sampleProperties);
 
                         for (DomainProperty property : _domainProperties)
