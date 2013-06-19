@@ -58,11 +58,19 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.colModel = this.getTrackingDataColModel();
 
         // initialize an export button for the toolbar
-        this.exportButton = new Ext.Button({
+        this.exportMenuButton = new Ext.Button({
             text: 'Export',
-            tooltip: 'Click to Export the data to Excel',
-            handler: this.exportExcelData,
-            scope: this
+            menu: [{
+                text: 'Excel',
+                tooltip: 'Click to Export the data to Excel',
+                handler: function(){ this.exportData('excel'); },
+                scope: this
+            }, {
+                text: 'TSV',
+                tooltip: 'Click to Export the data to TSV',
+                handler: function(){ this.exportData('tsv'); },
+                scope: this
+            }]
         });
 
         // initialize the apply guide set button to the toolbar
@@ -83,7 +91,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         });
 
         // if the user has permissions to update in this container, show them the Apply Guide Set button
-        this.tbar = this.userCanUpdate ? [this.exportButton, '-', this.applyGuideSetButton, '-', this.viewCurvesButton] : [this.exportButton, '-', this.viewCurvesButton];
+        this.tbar = this.userCanUpdate ? [this.exportMenuButton, '-', this.applyGuideSetButton, '-', this.viewCurvesButton] : [this.exportMenuButton, '-', this.viewCurvesButton];
 
         this.fbar = [{xtype:'label', text:'Bold values in the "Guide Set Date" column indicate assays that are members of a guide set.'}];
 
@@ -369,7 +377,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }).render();
     },
 
-    exportExcelData: function() {
+    exportData: function(type) {
         // build up the JSON to pass to the export util
         var exportJson = {
             fileName: this.title + ".xls",
@@ -440,7 +448,18 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             }, this);
         }, this);
 
-        LABKEY.Utils.convertToExcel(exportJson);
+        if (type == 'excel')
+        {
+            LABKEY.Utils.convertToExcel(exportJson);
+        }
+        else
+        {
+            LABKEY.Utils.convertToTable({
+                fileNamePrefix: this.title,
+                delim: 'TAB',
+                rows: exportJson.sheets[0].data
+            });
+        }
     },
 
     outOfRangeRenderer: function(enabledDataIndex) {
