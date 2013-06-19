@@ -41,7 +41,7 @@ public class ProtocolForm extends ViewForm
 
     public Map<FieldKey, String> getKeywordFieldMap()
     {
-        Map<FieldKey, String> options = new LinkedHashMap<FieldKey, String>();
+        Map<FieldKey, String> options = new LinkedHashMap<>();
         options.put(FieldKey.fromParts("Name"), "FCS file name");
         options.put(FieldKey.fromParts("Run", "Name"), "Run name");
         FlowSchema schema = new FlowSchema(getUser(), getContainer());

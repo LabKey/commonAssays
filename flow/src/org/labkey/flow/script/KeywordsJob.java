@@ -54,7 +54,7 @@ public class KeywordsJob extends ScriptJob
 
     List<FlowRun> go() throws Exception
     {
-        List<FlowRun> runs = new ArrayList<FlowRun>();
+        List<FlowRun> runs = new ArrayList<>();
 
         for (File path : _paths)
         {

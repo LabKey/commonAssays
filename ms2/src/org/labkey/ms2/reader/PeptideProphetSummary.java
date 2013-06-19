@@ -63,7 +63,7 @@ public class PeptideProphetSummary extends SensitivitySummary
                 // XMLBeans doesn't try to generate duplicate classes. Tell the parser to treat the alternative
                 // namespace like the real namespace so that it recognizes the document
                 XmlOptions options = new XmlOptions();
-                Map<String,String> namespaceMap = new HashMap<String,String>();
+                Map<String,String> namespaceMap = new HashMap<>();
                 namespaceMap.put("http://regis-web.systemsbiology.net/pepXML", "http://regis-web.systemsbiology.net/pepXML117");
                 options.setLoadSubstituteNamespaces(namespaceMap);
                 net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary summary = net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.Factory.parse(parser, options).getPeptideprophetSummary();

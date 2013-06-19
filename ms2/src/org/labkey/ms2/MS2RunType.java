@@ -36,30 +36,30 @@ import java.util.List;
 public enum MS2RunType
 {
     Comet(CometRun.class,
-            new Pair<String, String>("RawScore", "dotproduct"),
-            new Pair<String, String>("Delta", "delta"),
-            new Pair<String, String>("ZScore", "zscore")),
+            new Pair<>("RawScore", "dotproduct"),
+            new Pair<>("Delta", "delta"),
+            new Pair<>("ZScore", "zscore")),
     Mascot(MascotRun.class,
-            new Pair<String, String>("Ion", "ionscore"),
-            new Pair<String, String>("Identity", "identityscore"),
-            new Pair<String, String>("Homology", "homologyscore"),
-            new Pair<String, String>("NullScore", "null"),
-            new Pair<String, String>("Expect", "expect")),
+            new Pair<>("Ion", "ionscore"),
+            new Pair<>("Identity", "identityscore"),
+            new Pair<>("Homology", "homologyscore"),
+            new Pair<>("NullScore", "null"),
+            new Pair<>("Expect", "expect")),
     Phenyx(PhenyxRun.class,
-           new Pair<String, String>("OrigScore", "origScore"),
-           new Pair<String, String>("Bogus", "bogus"),
-           new Pair<String, String>("ZScore", "zscore")),
+           new Pair<>("OrigScore", "origScore"),
+           new Pair<>("Bogus", "bogus"),
+           new Pair<>("ZScore", "zscore")),
     Sequest(SequestRun.class,
-            new Pair<String, String>("SpScore", "spscore"),
-            new Pair<String, String>("DeltaCn", "deltacn"),
-            new Pair<String, String>("XCorr", "xcorr"),
-            new Pair<String, String>("SpRank", "sprank")),
+            new Pair<>("SpScore", "spscore"),
+            new Pair<>("DeltaCn", "deltacn"),
+            new Pair<>("XCorr", "xcorr"),
+            new Pair<>("SpRank", "sprank")),
     XComet(XCometRun.class,
-            new Pair<String, String>("RawScore", "dotproduct"),
-            new Pair<String, String>("Delta", "delta"),
-            new Pair<String, String>("ZScore", "zscore"),
-            new Pair<String, String>("DeltaStar", "deltastar"),
-            new Pair<String, String>("Expect", "expect"))
+            new Pair<>("RawScore", "dotproduct"),
+            new Pair<>("Delta", "delta"),
+            new Pair<>("ZScore", "zscore"),
+            new Pair<>("DeltaStar", "deltastar"),
+            new Pair<>("Expect", "expect"))
     {
         public boolean isPeptideTableHidden()
         {
@@ -67,17 +67,17 @@ public enum MS2RunType
         }
     },
     XTandem(XTandemRun.class,
-            new Pair<String, String>("Hyper", "hyperscore"),
-            new Pair<String, String>("Next", "nextscore"),
-            new Pair<String, String>("B", "bscore"),
-            new Pair<String, String>("Y", "yscore"),
-            new Pair<String, String>("Expect", "expect")),
+            new Pair<>("Hyper", "hyperscore"),
+            new Pair<>("Next", "nextscore"),
+            new Pair<>("B", "bscore"),
+            new Pair<>("Y", "yscore"),
+            new Pair<>("Expect", "expect")),
     XTandemcomet(XTandemcometRun.class,
-            new Pair<String, String>("RawScore", "dotproduct"),
-            new Pair<String, String>("Delta", "delta"),
-            new Pair<String, String>("ZScore", "zscore"),
-            new Pair<String, String>("DeltaStar", "deltastar"),
-            new Pair<String, String>("Expect", "expect"))
+            new Pair<>("RawScore", "dotproduct"),
+            new Pair<>("Delta", "delta"),
+            new Pair<>("ZScore", "zscore"),
+            new Pair<>("DeltaStar", "deltastar"),
+            new Pair<>("Expect", "expect"))
     {
         public boolean isPeptideTableHidden()
         {
@@ -94,8 +94,8 @@ public enum MS2RunType
 
     private final Class<? extends MS2Run> _runClass;
     private final String _scoreColumnNames;
-    private final List<String> _scoreColumnList = new ArrayList<String>();
-    private final List<String> _pepXmlScoreNames = new ArrayList<String>();
+    private final List<String> _scoreColumnList = new ArrayList<>();
+    private final List<String> _pepXmlScoreNames = new ArrayList<>();
 
     private MS2RunType(Class<? extends MS2Run> runClass, Pair<String, String>... scoreNames)
     {

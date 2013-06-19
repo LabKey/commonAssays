@@ -41,7 +41,7 @@ public class RunListCache
             throw new RunListException(NO_RUNS_MESSAGE);
         }
         ExpRun[] expRuns = group.getRuns();
-        List<MS2Run> ms2Runs = new ArrayList<MS2Run>();
+        List<MS2Run> ms2Runs = new ArrayList<>();
         for (ExpRun expRun : expRuns)
         {
             ms2Runs.add(MS2Manager.getRunByExperimentRunLSID(expRun.getLSID()));
@@ -68,10 +68,10 @@ public class RunListCache
             throw new RunListException(NO_RUNS_MESSAGE);
         }
 
-        List<String> parseErrors = new ArrayList<String>();
+        List<String> parseErrors = new ArrayList<>();
 
-        List<ExpRun> expRuns = new ArrayList<ExpRun>();
-        List<MS2Run> ms2Runs = new ArrayList<MS2Run>();
+        List<ExpRun> expRuns = new ArrayList<>();
+        List<MS2Run> ms2Runs = new ArrayList<>();
 
         for (String stringId : stringIds)
         {

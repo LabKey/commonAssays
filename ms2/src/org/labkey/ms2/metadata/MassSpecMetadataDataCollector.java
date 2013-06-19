@@ -52,7 +52,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         }
         else
         {
-            Map<String, File> result = new HashMap<String, File>();
+            Map<String, File> result = new HashMap<>();
             for (Map<String, File> files : getFileQueue(context))
             {
                 result.putAll(files);
@@ -146,7 +146,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
             List<Map<String,File>> fileCollection = getFileQueue(form);
             if (fileCollection.isEmpty())
             {
-                return new Pair<Integer, Integer>(0, 0);
+                return new Pair<>(0, 0);
             }
             files = fileCollection.get(0).values();
         }
@@ -158,7 +158,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
                 annotated++;
             }
         }
-        return new Pair<Integer, Integer>(files.size(), annotated);
+        return new Pair<>(files.size(), annotated);
     }
 
     public AdditionalUploadType getAdditionalUploadType(MassSpecMetadataAssayForm context)

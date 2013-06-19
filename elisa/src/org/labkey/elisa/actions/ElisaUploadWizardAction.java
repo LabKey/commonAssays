@@ -125,7 +125,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         PlateConcentrationPropertyHelper concentrationsHelper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
         concentrationsHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
-        Map<String, Object> propNameToValue = new HashMap<String, Object>();
+        Map<String, Object> propNameToValue = new HashMap<>();
         for (String name : concentrationsHelper.getSampleNames())
             propNameToValue.put(name, name);
 

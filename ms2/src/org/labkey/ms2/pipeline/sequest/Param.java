@@ -63,7 +63,7 @@ public abstract class Param implements Comparable<Param>
         this.sortOrder = sortOrder;
         this.value = value;
         this.name = name;
-        this.inputXmlLabels = new ArrayList<String>();
+        this.inputXmlLabels = new ArrayList<>();
         this.converter = converter;
         this.validator = validator;
     }

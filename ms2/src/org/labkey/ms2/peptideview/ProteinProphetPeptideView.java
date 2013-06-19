@@ -57,7 +57,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport)
     {
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
-        List<DisplayColumn> displayColumns = new ArrayList<DisplayColumn>();
+        List<DisplayColumn> displayColumns = new ArrayList<>();
         ProteinGroupProteins proteins = new ProteinGroupProteins(Arrays.asList(_runs));
         Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.SEQUENCE_COLUMN_NAMES);
 
@@ -297,7 +297,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         {
             rs = createPeptideResultSet("RowId", _maxPeptideRows, extraWhere);
             int columnIndex = rs.findColumn("RowId");
-            ArrayList<Long> rowIdsLong = new ArrayList<Long>(100);
+            ArrayList<Long> rowIdsLong = new ArrayList<>(100);
             while(rs.next())
                 rowIdsLong.add(rs.getLong(columnIndex));
 
@@ -462,11 +462,11 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
-        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+        sqlSummaries.add(new Pair<>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
 
-        sqlSummaries.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
-        sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText()));
+        sqlSummaries.add(new Pair<>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
+        sqlSummaries.add(new Pair<>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText()));
     }
 
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
@@ -481,7 +481,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
-        HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
+        HashMap<String, SimpleFilter> map = new HashMap<>();
         map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run));
         map.put("Protein group filter", ProteinManager.getProteinGroupFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, getUser(), run));
         return map;

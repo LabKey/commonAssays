@@ -45,7 +45,7 @@ public class ProteinGroup
 
     private SimpleXMLStreamReader _parser;
     private MS2Run _run;
-    private List<ProtXmlReader.Protein> _proteins = new ArrayList<ProtXmlReader.Protein>();
+    private List<ProtXmlReader.Protein> _proteins = new ArrayList<>();
     private ITraqProteinQuantitation _iTraqProteinQuantitation;
 
     public void setParser(SimpleXMLStreamReader parser, MS2Run run)

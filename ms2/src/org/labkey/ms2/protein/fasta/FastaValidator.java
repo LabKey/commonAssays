@@ -46,8 +46,8 @@ public class FastaValidator
     public List<String> validate()
     {
         // Use a trie to get space-efficient storage
-        Map<byte[], Object> proteinNames = new PatriciaTrie<byte[], Object>(ByteArrayKeyAnalyzer.VARIABLE);
-        List<String> errors = new ArrayList<String>();
+        Map<byte[], Object> proteinNames = new PatriciaTrie<>(ByteArrayKeyAnalyzer.VARIABLE);
+        List<String> errors = new ArrayList<>();
         Format lineFormat = DecimalFormat.getIntegerInstance();
         ProteinFastaLoader curLoader = new ProteinFastaLoader(_fastaFile);
 

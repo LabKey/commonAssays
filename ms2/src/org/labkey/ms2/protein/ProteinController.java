@@ -197,7 +197,7 @@ public class ProteinController extends SpringActionController
 
         public ModelAndView getView(UploadAnnotationsForm form, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView<UploadAnnotationsForm>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form, errors);
+            return new JspView<>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form, errors);
         }
 
         public boolean handlePost(UploadAnnotationsForm form, BindException errors) throws Exception
@@ -306,7 +306,7 @@ public class ProteinController extends SpringActionController
                 PreparedStatement stmt = connection.prepareStatement(sb.toString());
                 stmt.setInt(1, annotationSet.getCustomAnnotationSetId());
 
-                List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
+                List<PropertyDescriptor> descriptors = new ArrayList<>();
 
                 for (int i = 1; i < columns.length; i++)
                 {

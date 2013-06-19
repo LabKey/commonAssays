@@ -53,10 +53,10 @@ public class ComparePeptideTableInfo extends VirtualTable
         _request = request;
         _peptideViewName = peptideViewName;
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("PeptideSequence"));
 
-        List<ColumnInfo> runColumns = new ArrayList<ColumnInfo>();
+        List<ColumnInfo> runColumns = new ArrayList<>();
 
         if (runs != null)
         {

@@ -124,7 +124,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                 "are a convenience to let users set properties that seldom change in one place and import many runs " +
                 "using them. This is the first step of the import process.");
 
-        return new Pair<Domain, Map<DomainProperty, Object>>(domain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(domain, Collections.<DomainProperty, Object>emptyMap());
     }
 
     public AssayRunCreator getRunCreator()
@@ -143,7 +143,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         String domainLsid = getPresubstitutionLsid(FRACTION_DOMAIN_PREFIX);
         Domain fractionDomain = PropertyService.get().createDomain(c, domainLsid, FRACTION_SET_NAME);
         fractionDomain.setDescription(FRACTION_SET_LABEL);
-        return new Pair<Domain, Map<DomainProperty, Object>>(fractionDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(fractionDomain, Collections.<DomainProperty, Object>emptyMap());
     }
     
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)

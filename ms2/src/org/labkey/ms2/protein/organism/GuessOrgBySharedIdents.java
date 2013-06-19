@@ -43,7 +43,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
     //TODO: consider parsing TAX_ID
     private static final DbSchema _schema = ProteinManager.getSchema();
 
-    private Map<String, String> _sprotCache = new WeakHashMap<String, String>();
+    private Map<String, String> _sprotCache = new WeakHashMap<>();
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedIdents.CACHED_MISS_VALUE";
 
     private enum SPROTload

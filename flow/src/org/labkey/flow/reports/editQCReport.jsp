@@ -234,6 +234,6 @@ Ext.onReady(function() {
 </script>
 
 <%
-    JspView<Object> statPicker = new JspView<Object>(FlowReport.class, "statPicker.jsp", null, null);
+    JspView<Object> statPicker = new JspView<>(FlowReport.class, "statPicker.jsp", null, null);
     statPicker.include(statPicker, out);
 %>

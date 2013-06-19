@@ -110,7 +110,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     static public String generateUnusedName(Container container, String baseName)
     {
-        Set<String> namesInUse = new HashSet<String>();
+        Set<String> namesInUse = new HashSet<>();
         for (FlowExperiment analysis : FlowExperiment.getAnalyses(container))
             namesInUse.add(analysis.getName().toLowerCase());
 

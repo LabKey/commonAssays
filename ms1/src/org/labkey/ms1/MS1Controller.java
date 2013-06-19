@@ -242,14 +242,14 @@ public class MS1Controller extends SpringActionController
                 Software[] swares = mgr.getSoftware(fileId.intValue());
                 if(null != swares && swares.length > 0)
                 {
-                    softwareView = new JspView<Software[]>("/org/labkey/ms1/view/softwareView.jsp", swares);
+                    softwareView = new JspView<>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Processing Software Information");
                 }
 
                 DataFile dataFile = mgr.getDataFile(fileId.intValue());
                 if(null != dataFile)
                 {
-                    fileDetailsView = new JspView<DataFile>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
+                    fileDetailsView = new JspView<>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
                     fileDetailsView.setTitle("Data File Information");
                 }
             }
@@ -362,14 +362,14 @@ public class MS1Controller extends SpringActionController
                 Software[] swares = mgr.getSoftware(fileId.intValue());
                 if(null != swares && swares.length > 0)
                 {
-                    softwareView = new JspView<Software[]>("/org/labkey/ms1/view/softwareView.jsp", swares);
+                    softwareView = new JspView<>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
                 }
 
                 DataFile dataFile = mgr.getDataFile(fileId.intValue());
                 if(null != dataFile)
                 {
-                    fileDetailsView = new JspView<DataFile>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
+                    fileDetailsView = new JspView<>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
                     fileDetailsView.setTitle("Data File Information");
                 }
             }
@@ -486,7 +486,7 @@ public class MS1Controller extends SpringActionController
             //cache the form so we can build the nav trail
             _form = form;
 
-            return new JspView<FeatureDetailsModel>("/org/labkey/ms1/view/FeatureDetailView.jsp", model);
+            return new JspView<>("/org/labkey/ms1/view/FeatureDetailView.jsp", model);
         }
 
         private FeaturesView getSourceFeaturesView(ActionURL url) throws Exception
@@ -573,7 +573,7 @@ public class MS1Controller extends SpringActionController
                 MS1Manager.get().startManualPurge();
                 ctx.setPurgeRunning(true);
             }
-            return new JspView<AdminViewContext>("/org/labkey/ms1/view/AdminView.jsp", ctx);
+            return new JspView<>("/org/labkey/ms1/view/AdminView.jsp", ctx);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -620,7 +620,7 @@ public class MS1Controller extends SpringActionController
 
         protected FeaturesView getFeaturesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
-            ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
+            ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
             baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 baseFilters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
@@ -654,7 +654,7 @@ public class MS1Controller extends SpringActionController
             //create the search view
             PepSearchModel searchModel = new PepSearchModel(getViewContext().getContainer(), form.getPepSeq(),
                     form.isExact(), form.isSubfolders(), form.getRunIds());
-            JspView<PepSearchModel> searchView = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
+            JspView<PepSearchModel> searchView = new JspView<>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
             searchView.setTitle("Search Criteria");
 
             //if no search terms were specified, return just the search view
@@ -850,7 +850,7 @@ public class MS1Controller extends SpringActionController
 
         protected FeaturesView getFeaturesView(SimilarSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
-            ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
+            ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
             baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
             baseFilters.add(new MzFilter(form.getMzSource().doubleValue(), form.getMzOffset(), form.getMzUnits()));
             if(SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
@@ -874,7 +874,7 @@ public class MS1Controller extends SpringActionController
                     form.getMzOffset(), form.getMzUnits(),
                     form.getTimeOffset(), form.getTimeUnits(),
                     form.isSubfolders());
-            JspView<SimilarSearchModel> searchView = new JspView<SimilarSearchModel>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
+            JspView<SimilarSearchModel> searchView = new JspView<>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
             searchView.setTitle("Find Features Where");
 
             //if we don't have enough search info, just return the search view
@@ -966,7 +966,7 @@ public class MS1Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(CompareRunsForm form, BindException errors) throws Exception
         {
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
             props.put("originalURL", getViewContext().getActionURL().toString());
             props.put("comparisonName", MS1VennDiagramView.FEATURES_BY_PEPTIDE);
             GWTView gwtView = new GWTView(org.labkey.ms1.client.MS1VennDiagramView.class, props);

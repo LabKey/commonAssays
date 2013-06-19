@@ -79,7 +79,7 @@ public class NabManager extends AbstractNabManager
         super.deleteRunData(datas);
 
         // Get dataIds that match the ObjectUri and make filter on NabSpecimen
-        Set<Integer> protocolIds = new HashSet<Integer>();
+        Set<Integer> protocolIds = new HashSet<>();
         for (ExpData data : datas)
         {
             ExpRun run = data.getRun();
@@ -126,7 +126,7 @@ public class NabManager extends AbstractNabManager
         // Gather a list of readable study dataset TableInfos associated with NAb protocols (these are created when NAb data
         // is copied to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
         // can only be one dataset/tableinfo per protocol.
-        Map<TableInfo, ExpProtocol> dataTables = new HashMap<TableInfo, ExpProtocol>();
+        Map<TableInfo, ExpProtocol> dataTables = new HashMap<>();
         for (DataSet dataset : dataSets)
         {
             if (dataset.isAssayData() && dataset.canRead(user))
@@ -137,12 +137,12 @@ public class NabManager extends AbstractNabManager
             }
         }
 
-        Collection<Integer> allObjectIds = new HashSet<Integer>();
+        Collection<Integer> allObjectIds = new HashSet<>();
         for (int objectId : objectIds)
             allObjectIds.add(objectId);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RowId"), allObjectIds));
 
-        Map<Integer, ExpProtocol> readableObjectIds = new HashMap<Integer, ExpProtocol>();
+        Map<Integer, ExpProtocol> readableObjectIds = new HashMap<>();
 
         // For each readable study data table, find any NAb runs that match the requested objectIds, and add them to the run list:
         for (Map.Entry<TableInfo, ExpProtocol> entry : dataTables.entrySet())
@@ -161,7 +161,7 @@ public class NabManager extends AbstractNabManager
     {
         // dataRowLsid is the objectUri column
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("ObjectUri"), dataRowLsid);
-        Map<PropertyDescriptor, FieldKey> fieldKeys = new HashMap<PropertyDescriptor, FieldKey>();
+        Map<PropertyDescriptor, FieldKey> fieldKeys = new HashMap<>();
         for (PropertyDescriptor pd : propertyDescriptors)
         {
             PropDescCategory pdCat = getPropDescCategory(pd.getName());

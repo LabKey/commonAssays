@@ -51,7 +51,7 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
     protected Map<StatisticSpec, Integer> getAttributes()
     {
         Map<StatisticSpec, Integer> all = _fps.getStatistics();
-        Map<StatisticSpec, Integer> pct = new TreeMap<StatisticSpec, Integer>();
+        Map<StatisticSpec, Integer> pct = new TreeMap<>();
         for (Map.Entry<StatisticSpec, Integer> entry : all.entrySet())
         {
             pct.put(entry.getKey(), entry.getValue());

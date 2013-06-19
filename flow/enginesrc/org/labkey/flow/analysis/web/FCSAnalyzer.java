@@ -66,7 +66,7 @@ public class FCSAnalyzer
             if (alias == null)
                 return;
             if (aliases == null)
-                aliases = new ArrayList<T>(4);
+                aliases = new ArrayList<>(4);
             aliases.add(alias);
         }
     }
@@ -189,7 +189,7 @@ public class FCSAnalyzer
         {
             return Collections.EMPTY_LIST;
         }
-        Map<GraphSpec, GraphResult> ret = new LinkedHashMap<GraphSpec, GraphResult>(graphs.size());
+        Map<GraphSpec, GraphResult> ret = new LinkedHashMap<>(graphs.size());
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
         subsetMap.put(null, getSubset(uri, group.getSettings(), comp));
         for (GraphSpec graph : graphs)
@@ -198,7 +198,7 @@ public class FCSAnalyzer
                 continue;
             ret.put(graph, generateGraph(subsetMap, group, graph));
         }
-        return new ArrayList<GraphResult>(ret.values());
+        return new ArrayList<>(ret.values());
     }
 
     public PlotInfo generateDesignGraph(URI uri, CompensationMatrix comp, ScriptComponent group, GraphSpec spec, int width, int height, boolean useEmptyDataset) throws IOException
@@ -239,8 +239,8 @@ public class FCSAnalyzer
 
     private List<StatResult> calculateStatistics(Map<SubsetSpec, Subset> subsetMap, ScriptComponent group, Collection<StatisticSpec> stats) throws IOException
     {
-        List<StatResult> ret = new ArrayList<StatResult>(stats.size());
-        Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap<SubsetSpec, Map<String, Stats.DoubleStats>>();
+        List<StatResult> ret = new ArrayList<>(stats.size());
+        Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap<>();
         for (StatisticSpec stat : stats)
         {
             StatResult result = new StatResult(stat);
@@ -255,7 +255,7 @@ public class FCSAnalyzer
                 Map<String, Stats.DoubleStats> statsMap = subsetStatsMap.get(statisticSpecification.getSubset());
                 if (statsMap == null)
                 {
-                    statsMap = new HashMap<String, Stats.DoubleStats>();
+                    statsMap = new HashMap<>();
                     subsetStatsMap.put(statisticSpecification.getSubset(), statsMap);
                 }
                 result.value = StatisticSpec.calculate(subset, statisticSpecification, statsMap);

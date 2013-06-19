@@ -631,8 +631,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
         fdbu = new FastaDbHelper(conn);
         int loadCounter = 0;
-        List<ProteinPlus> mouth = new ArrayList<ProteinPlus>();
-        List<Integer> seqIds = new ArrayList<Integer>();
+        List<ProteinPlus> mouth = new ArrayList<>();
+        List<Integer> seqIds = new ArrayList<>();
 
         if (currentInsertId == 0)
         {
@@ -975,7 +975,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             parseAndCompare("IPI:IPI00844156.2|TREMBL:Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9|ENSEMBL:ENSP00000307953", idMapE, "IPI:IPI00844156.2|TREMBL:Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9|ENSEMBL:ENSP00000307953 Tax_Id=9606 Gene_Symbol=SERPINC1 SERPINC1 protein");
 
             // return empty map
-            idMapE=new HashMap<String,Set<String>>();
+            idMapE=new HashMap<>();
             parseAndCompare("GENSCAN00000048050", idMapE);
             parseAndCompare("uniparc|UPI0000503605|UPI0000503605", idMapE);
             parseAndCompare("gnl|unk|UNKNOWN_ID", idMapE);

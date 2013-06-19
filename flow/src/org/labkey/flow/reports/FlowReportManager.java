@@ -59,7 +59,7 @@ public class FlowReportManager
     {
         Report[] all = ReportService.get().getReports(user, c);
 
-        TreeMap<String, FlowReport> reports = new CaseInsensitiveTreeMap<FlowReport>();
+        TreeMap<String, FlowReport> reports = new CaseInsensitiveTreeMap<>();
 
         for (Report r : all)
         {
@@ -75,7 +75,7 @@ public class FlowReportManager
     public static Collection<FilterFlowReport> getPostAnalysisReports(Container c, User user) throws Exception
     {
         Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
-        List<FilterFlowReport> ret = new ArrayList<FilterFlowReport>(reports.size());
+        List<FilterFlowReport> ret = new ArrayList<>(reports.size());
         for (FlowReport report : reports)
         {
             // UNDONE: Need a ReportDescriptor property to identify post-analysis reports from other reports.
@@ -92,7 +92,7 @@ public class FlowReportManager
             throws Exception
     {
         Collection<FilterFlowReport> reports = getPostAnalysisReports(info.getContainer(), info.getUser());
-        List<FlowReportJob> jobs = new ArrayList<FlowReportJob>(reports.size());
+        List<FlowReportJob> jobs = new ArrayList<>(reports.size());
         for (FilterFlowReport report : reports)
         {
             jobs.add(new FlowReportJob(report, info, root));
@@ -104,7 +104,7 @@ public class FlowReportManager
     /** Get all domains from all reports. */
     public static Collection<Tuple3<FlowReport, Domain, FlowTableType>> getReportDomains(Container c, User user)
     {
-        Collection<Tuple3<FlowReport, Domain, FlowTableType>> tuples = new ArrayList<Tuple3<FlowReport, Domain, FlowTableType>>();
+        Collection<Tuple3<FlowReport, Domain, FlowTableType>> tuples = new ArrayList<>();
         for (FlowReport report : getFlowReports(c, user))
         {
             if (!report.saveToDomain())
@@ -123,7 +123,7 @@ public class FlowReportManager
     /** Get FlowTableType domains from all reports. */
     public static Collection<Domain> getReportDomains(Container c, User user, FlowTableType tableType)
     {
-        Collection<Domain> domains = new ArrayList<Domain>();
+        Collection<Domain> domains = new ArrayList<>();
         for (FlowReport report : getFlowReports(c, user))
         {
             if (!report.saveToDomain())

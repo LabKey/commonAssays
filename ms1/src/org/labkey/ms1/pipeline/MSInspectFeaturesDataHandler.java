@@ -360,7 +360,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     protected int insertFeaturesFile(User user, DbSchema schema, ExpData data) throws SQLException, ExperimentException
     {
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("FileId",null);
         map.put("ExpDataFileId", new Integer(data.getRowId()));
         map.put("Type", new Integer(MS1Manager.FILETYPE_FEATURES));
@@ -376,7 +376,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     protected void insertSoftwareInfo(Map<String, String> comments, int idFile, User user, DbSchema schema) throws SQLException
     {
-        HashMap<String,Object> software = new HashMap<String,Object>();
+        HashMap<String,Object> software = new HashMap<>();
         software.put("SoftwareId", null);
         software.put("FileId", idFile);
         software.put("Name", "msInspect");
@@ -389,7 +389,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         String algorithm = comments.get("algorithm");
         if(null != algorithm && algorithm.length() > 0)
         {
-            HashMap<String,Object> softwareParam = new HashMap<String,Object>();
+            HashMap<String,Object> softwareParam = new HashMap<>();
             softwareParam.put("SoftwareId", outMap.get("SoftwareId"));
             softwareParam.put("Name", "algorithm");
             softwareParam.put("Value", algorithm);
@@ -406,7 +406,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     protected ArrayList<ColumnBinding> selectBindings(ColumnDescriptor[] coldescrs, Logger log)
     {
-        ArrayList<ColumnBinding> ret = new ArrayList<ColumnBinding>(coldescrs.length);
+        ArrayList<ColumnBinding> ret = new ArrayList<>(coldescrs.length);
         ColumnBinding binding;
         for(ColumnDescriptor coldescr : coldescrs)
         {

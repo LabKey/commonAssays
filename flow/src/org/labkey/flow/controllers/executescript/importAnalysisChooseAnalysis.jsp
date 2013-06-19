@@ -76,10 +76,10 @@
 <%
     FlowExperiment[] analyses = FlowExperiment.getAnalyses(container);
     FlowExperiment firstNonDisabledAnalysis = null;
-    Map<Integer, String> disabledAnalyses = new HashMap<Integer, String>();
+    Map<Integer, String> disabledAnalyses = new HashMap<>();
     if (pipeRoot != null)
     {
-        List<File> keywordDirs = new ArrayList<File>();
+        List<File> keywordDirs = new ArrayList<>();
         if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
         {
             for (String dir : form.getKeywordDir())
@@ -135,7 +135,7 @@
     String newAnalysisName = form.getNewAnalysisName();
     if (StringUtils.isEmpty(newAnalysisName))
     {
-        Set<String> namesInUse = new HashSet<String>();
+        Set<String> namesInUse = new HashSet<>();
         for (FlowExperiment analysis : analyses)
             namesInUse.add(analysis.getName().toLowerCase());
 
@@ -219,7 +219,7 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
 {
     // Get set of valid copy to study targets
     Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
-    Map<String, String> targetStudies = new LinkedHashMap<String, String>();
+    Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");
     for (Study study : validStudies)
     {

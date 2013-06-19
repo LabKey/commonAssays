@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 abstract public class GateList extends Gate
 {
-    protected List<Gate> _gates = new ArrayList<Gate>();
+    protected List<Gate> _gates = new ArrayList<>();
     protected SubsetExpression _originalExpression = null;
 
     protected GateList(Gate... gates)

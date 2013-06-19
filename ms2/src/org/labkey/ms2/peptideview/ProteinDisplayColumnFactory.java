@@ -51,7 +51,7 @@ public class ProteinDisplayColumnFactory implements DisplayColumnFactory
     public DisplayColumn createRenderer(ColumnInfo colInfo)
     {
         ActionURL detailsURL = new ActionURL(MS2Controller.ShowProteinAJAXAction.class, _container);
-        Map<String, FieldKey> params = new HashMap<String, FieldKey>();
+        Map<String, FieldKey> params = new HashMap<>();
         params.put("seqId", new FieldKey(colInfo.getFieldKey().getParent(), "SeqId"));
         params.put("run", new FieldKey(new FieldKey(colInfo.getFieldKey().getParent(), "Fraction"), "Run"));
         ProteinDisplayColumn result = new ProteinDisplayColumn(colInfo, detailsURL, params);

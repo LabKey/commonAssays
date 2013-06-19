@@ -125,7 +125,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
             Object ids = rowMap.get("AnalyteId/RowId");
             if (ids != null)
             {
-                Set<Integer> result = new HashSet<Integer>();
+                Set<Integer> result = new HashSet<>();
                 String[] idStrings = ids.toString().split(",");
                 for (String idString : idStrings)
                 {
@@ -221,7 +221,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
                         throw new QueryUpdateServiceException("No such analyte: " + analyteId);
                     }
                     validateAnalyte(rowMap, analyte);
-                    Map<String, Object> fields = new HashMap<String, Object>();
+                    Map<String, Object> fields = new HashMap<>();
                     fields.put("AnalyteId", analyteId);
                     fields.put(_fkColumnName, rowId);
 

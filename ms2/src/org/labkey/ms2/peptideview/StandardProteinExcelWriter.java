@@ -45,7 +45,7 @@ public class StandardProteinExcelWriter extends AbstractProteinExcelWriter
 
         protein.setSequence((String) ctx.get("Sequence"));
 
-        List<String> peptides = new ArrayList<String>();
+        List<String> peptides = new ArrayList<>();
         ResultSet nestedRS = _groupedRS.getNextResultSet();
 
         while (nestedRS.next())

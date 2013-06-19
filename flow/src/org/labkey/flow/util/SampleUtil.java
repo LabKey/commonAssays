@@ -82,8 +82,8 @@ public class SampleUtil
             return Collections.emptyMap();
 
         // Don't include FCSFile wells created for attaching extra keywords.
-        List<FlowFCSFile> originalFiles = new ArrayList<FlowFCSFile>(files.size());
-        Map<String, FlowFCSFile> originalFileMap = new HashMap<String, FlowFCSFile>();
+        List<FlowFCSFile> originalFiles = new ArrayList<>(files.size());
+        Map<String, FlowFCSFile> originalFileMap = new HashMap<>();
         for (FlowFCSFile file : files)
         {
             if (!file.isOriginalFCSFile())
@@ -93,14 +93,14 @@ public class SampleUtil
             originalFileMap.put(file.getName(), file);
         }
 
-        Map<FlowFCSFile, String[]> fileKeywordMap = new IdentityHashMap<FlowFCSFile, String[]>();
+        Map<FlowFCSFile, String[]> fileKeywordMap = new IdentityHashMap<>();
 
-        Map<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = new LinkedHashMap<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>>();
+        Map<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = new LinkedHashMap<>();
 
         for (ISampleInfo sample : samples)
         {
             FlowFCSFile perfectMatch = null;
-            List<FlowFCSFile> partialMatches = new ArrayList<FlowFCSFile>(10);
+            List<FlowFCSFile> partialMatches = new ArrayList<>(10);
 
             Map<String, String> keywords = sample.getKeywords();
             if (keywords.size() == 0)

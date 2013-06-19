@@ -356,7 +356,7 @@ public abstract class GoLoader
 
     private static Map<String, GoLoadBean> getGoLoadMap()
     {
-        Map<String, GoLoadBean> map = new HashMap<String, GoLoadBean>(10);
+        Map<String, GoLoadBean> map = new HashMap<>(10);
 
         map.put(GOTERM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTerm(), new String[]{"Id", "Name", "TermType", "Acc", "IsObsolete", "IsRoot"}));
         map.put(GOTERM2TERM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTerm2Term(), new String[]{"Id", "RelationshipTypeId", "Term1Id", "Term2Id", "Complete"}));

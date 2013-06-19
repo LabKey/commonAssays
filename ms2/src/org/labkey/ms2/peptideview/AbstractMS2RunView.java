@@ -143,7 +143,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         if (GoLoader.isGoLoaded())
         {
             MenuButton goButton = new MenuButton("Gene Ontology Charts");
-            List<ProteinDictionaryHelpers.GoTypes> types = new ArrayList<ProteinDictionaryHelpers.GoTypes>();
+            List<ProteinDictionaryHelpers.GoTypes> types = new ArrayList<>();
             types.add(ProteinDictionaryHelpers.GoTypes.CELL_LOCATION);
             types.add(ProteinDictionaryHelpers.GoTypes.FUNCTION);
             types.add(ProteinDictionaryHelpers.GoTypes.PROCESS);
@@ -240,7 +240,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     {
         ActionURL baseURL = null != extraPeptideUrlParams ? new ActionURL(_url.toString() + "&" + extraPeptideUrlParams) : _url.clone();
         baseURL.setAction(MS2Controller.ShowPeptideAction.class);
-        Map<String, Object> peptideParams = new HashMap<String, Object>();
+        Map<String, Object> peptideParams = new HashMap<>();
         peptideParams.put("peptideId", "RowId");
         peptideParams.put("rowIndex", "_row");
         DetailsURL peptideDetailsURL = new DetailsURL(baseURL, peptideParams);
@@ -349,7 +349,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected List<DisplayColumn> getColumns(List<String> columnNames, TableInfo... tinfos)
     {
-        List<DisplayColumn> result = new ArrayList<DisplayColumn>();
+        List<DisplayColumn> result = new ArrayList<>();
 
         for (String columnName : columnNames)
         {
@@ -509,8 +509,8 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected List<String> getRunSummaryHeaders(MS2Run run)
     {
-        Map<String, String> fixedMods = new TreeMap<String, String>();
-        Map<String, String> variableMods = new TreeMap<String, String>();
+        Map<String, String> fixedMods = new TreeMap<>();
+        Map<String, String> variableMods = new TreeMap<>();
 
         for (MS2Modification mod : run.getModifications(MassType.Average))
         {
@@ -520,17 +520,17 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
                 fixedMods.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
         }
 
-        List<String> modHeaders = new ArrayList<String>(10);
+        List<String> modHeaders = new ArrayList<>(10);
 
         formatModifications("Fixed", fixedMods, modHeaders);
         formatModifications("Variable", variableMods, modHeaders);
 
-        List<String> runHeaders = new ArrayList<String>(3);
+        List<String> runHeaders = new ArrayList<>(3);
         runHeaders.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
         runHeaders.add("Search Engine: " + naForNull(run.getSearchEngine()) + "\tPath: " + naForNull(run.getPath()));
         runHeaders.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(run.getFastaFileName()));
 
-        List<String> headers = new ArrayList<String>();
+        List<String> headers = new ArrayList<>();
         headers.add("Run: " + naForNull(run.getDescription()));
         headers.add("");
 
@@ -565,7 +565,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected List<String> getAMTFileHeader()
     {
-        List<String> fileHeader = new ArrayList<String>(_runs.length);
+        List<String> fileHeader = new ArrayList<>(_runs.length);
 
         fileHeader.add("#HydrophobicityAlgorithm=" + HydrophobicityColumn.getAlgorithmVersion());
 

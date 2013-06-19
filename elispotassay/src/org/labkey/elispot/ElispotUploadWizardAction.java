@@ -82,7 +82,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             helper.addSampleColumns(view, newRunForm.getUser(), newRunForm, errorReshow);
 
-            Map<String, Object> propNameToValue = new HashMap<String, Object>();
+            Map<String, Object> propNameToValue = new HashMap<>();
             for (String name : helper.getSampleNames())
                 propNameToValue.put(name, name);
 
@@ -168,7 +168,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
             antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
-            Map<String, Object> propNameToValue = new HashMap<String, Object>();
+            Map<String, Object> propNameToValue = new HashMap<>();
             for (String name : antigenHelper.getSampleNames())
                 propNameToValue.put(name, name);
 
@@ -344,7 +344,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 Plate plate = null;
 
                 // populate property name to value map
-                Map<String, String> runPropMap = new HashMap<String, String>();
+                Map<String, String> runPropMap = new HashMap<>();
                 for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
                     runPropMap.put(entry.getKey().getName(), entry.getValue());
 
@@ -355,7 +355,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 }
 
                 boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;
-                Map<String, Object> postedPropMap = new HashMap<String, Object>();
+                Map<String, Object> postedPropMap = new HashMap<>();
 
                 for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : _postedAntigenProperties.entrySet())
                 {

@@ -87,12 +87,12 @@ public class FCSFileCoalescingColumn extends ExprColumn
     {
         TableInfo parentTable = getParentTable();
 
-        List<FieldKey> pkCols = new ArrayList<FieldKey>();
+        List<FieldKey> pkCols = new ArrayList<>();
         for (String pkCol : parentTable.getPkColumnNames())
             pkCols.add(FieldKey.fromParts(pkCol));
 
-        List<FieldKey> coalesceFields = new ArrayList<FieldKey>();
-        Map<String, Pair<FieldKey, FieldKey>> pairs = new LinkedHashMap<String, Pair<FieldKey, FieldKey>>();
+        List<FieldKey> coalesceFields = new ArrayList<>();
+        Map<String, Pair<FieldKey, FieldKey>> pairs = new LinkedHashMap<>();
         if (_specimenIdFieldKeys != null)
         {
             coalesceFields.add(_specimenIdFieldKeys.first);
@@ -128,7 +128,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
             pairs.put(FlowSchema.TARGET_STUDY_FIELDKEY.getName(), _targetStudyFieldKeys);
         }
 
-        List<FieldKey> fields = new ArrayList<FieldKey>(pkCols.size() + coalesceFields.size());
+        List<FieldKey> fields = new ArrayList<>(pkCols.size() + coalesceFields.size());
         fields.addAll(pkCols);
         fields.addAll(coalesceFields);
 

@@ -94,7 +94,7 @@ public class FlowScript extends FlowDataObject
     static public FlowScript[] getScripts(Container container)
     {
         ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script, null);
-        List<FlowScript> ret = new ArrayList<FlowScript>();
+        List<FlowScript> ret = new ArrayList<>();
         for (ExpData data : datas)
         {
             FlowScript script = new FlowScript(data);
@@ -236,7 +236,7 @@ public class FlowScript extends FlowDataObject
     {
         try
         {
-            ArrayList<String> ret = new ArrayList<String>();
+            ArrayList<String> ret = new ArrayList<>();
             CompensationCalculationDef calc = getAnalysisScriptDocument().getScript().getCompensationCalculation();
             if (calc == null)
                 return null;
@@ -280,7 +280,7 @@ public class FlowScript extends FlowDataObject
     static public List<FlowScript> getProtocolsWithStep(Container container, FlowProtocolStep step) throws SQLException
     {
         FlowScript[] protocols = getScripts(container);
-        List<FlowScript> ret = new ArrayList<FlowScript>();
+        List<FlowScript> ret = new ArrayList<>();
         for (FlowScript analysisScript : protocols)
         {
             if (analysisScript.hasStep(step))

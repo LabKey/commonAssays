@@ -205,7 +205,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 builder.writeFile(fileWorkParams);
 
                 // Invoke makedb
-                List<String> args = new ArrayList<String>();
+                List<String> args = new ArrayList<>();
                 File makeDBExecutable = new File(_factory.getSequestInstallDir(), "makedb");
                 args.add(makeDBExecutable.getAbsolutePath());
                 args.add("-O" + indexFileBase);
@@ -245,7 +245,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
     {
         try
         {
-            List<RecordedAction> actions = new ArrayList<RecordedAction>();
+            List<RecordedAction> actions = new ArrayList<>();
             Map<String, String> params = getJob().getParameters();
             params.put("list path, sequest parameters", SEQUEST_PARAMS);
             params.put("search, useremail", params.get("pipeline, email address"));
@@ -345,7 +345,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         }
 
         // Perform Sequest search
-        List<String> sequestArgs = new ArrayList<String>();
+        List<String> sequestArgs = new ArrayList<>();
         sequestArgs.add(sequestPath);
         sequestArgs.addAll(_factory.getSequestOptions());
         sequestArgs.add(FileUtil.relativize(workingDir, fileMzXMLWork, false));
@@ -428,7 +428,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 //          String szTemp3, szDisplay;
         String szDisplay = "";
 //          String szTemp4, szTemp6;
-        List<Pair<String, String>> diffMods = new ArrayList<Pair<String, String>>();
+        List<Pair<String, String>> diffMods = new ArrayList<>();
         String diffModCharacters = "*#@^~$";
         float mdif1, mdif2, mdif3, mstat, ion_cutoff;
         String szDiff1, szDiff2, szDiff3, sDif1;
@@ -582,7 +582,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 {
 
                     String[] ss = getValues(line);
-                    List<String> diffSearchCounts = new ArrayList<String>();
+                    List<String> diffSearchCounts = new ArrayList<>();
                     szMaxDiffMod = "";
                     for (String s : ss)
                     {
@@ -911,7 +911,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 {
                     //now we know that the diff mod mass is a valid float and is not zero
                     // prefix positive values with +
-                    diffMods.add(new Pair<String, String>(aminoAcid, (diffMass > 0 ? "+" : "") + Float.toString(diffMass)));
+                    diffMods.add(new Pair<>(aminoAcid, (diffMass > 0 ? "+" : "") + Float.toString(diffMass)));
                 }
             }
             catch (NumberFormatException e)

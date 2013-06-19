@@ -83,7 +83,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
     protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport)
     {
-        List<DisplayColumn> result = new ArrayList<DisplayColumn>();
+        List<DisplayColumn> result = new ArrayList<>();
 
         FilteredTable table = new FilteredTable(MS2Manager.getTableInfoProteins());
         table.wrapAllColumns(true);
@@ -236,11 +236,11 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
-        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+        sqlSummaries.add(new Pair<>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
 
-        sqlSummaries.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteins()).getFilterText()));
-        sqlSummaries.add(new Pair<String, String>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText()));
+        sqlSummaries.add(new Pair<>("Protein Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteins()).getFilterText()));
+        sqlSummaries.add(new Pair<>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText()));
     }
 
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
@@ -254,7 +254,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
-        HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
+        HashMap<String, SimpleFilter> map = new HashMap<>();
         map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run));
         map.put("Protein filter", ProteinManager.getProteinFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, getUser(), run));
         return map;

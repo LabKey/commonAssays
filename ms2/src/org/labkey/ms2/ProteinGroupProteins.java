@@ -33,7 +33,7 @@ import java.sql.ResultSet;
 public class ProteinGroupProteins
 {
     private List<MS2Run> _runs;
-    private Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<ResultSet, Map<Integer, List<ProteinSummary>>>();
+    private Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<>();
 
     public ProteinGroupProteins()
     {
@@ -47,7 +47,7 @@ public class ProteinGroupProteins
 
     private Map<Integer, List<ProteinSummary>> calculateSummaries(ResultSet rs, String columnName)
     {
-        Map<Integer, List<ProteinSummary>> result = new HashMap<Integer, List<ProteinSummary>>();
+        Map<Integer, List<ProteinSummary>> result = new HashMap<>();
 
         int firstGroupId = Integer.MAX_VALUE;
         int lastGroupId = Integer.MIN_VALUE;
@@ -136,7 +136,7 @@ public class ProteinGroupProteins
             List<ProteinSummary> summaries = result.get(rowId);
             if (summaries == null)
             {
-                summaries = new ArrayList<ProteinSummary>();
+                summaries = new ArrayList<>();
                 result.put(rowId, summaries);
             }
             summaries.add(summary);
@@ -174,7 +174,7 @@ public class ProteinGroupProteins
     {
         if (_runs != null && _runs.size() != 0)
         {
-            return _runs == runs || new HashSet<MS2Run>(runs).equals(new HashSet<MS2Run>(_runs));
+            return _runs == runs || new HashSet<>(runs).equals(new HashSet<>(_runs));
         }
         return true;
     }

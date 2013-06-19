@@ -265,7 +265,7 @@ public class EllipseGate extends RegionGate
 
         System.out.println("10\t10");
         System.out.println("20\t15");
-        List<Polygon> l = new ArrayList<Polygon>();
+        List<Polygon> l = new ArrayList<>();
 
         l.clear();
         g.getPolygons(l, "x", "y");

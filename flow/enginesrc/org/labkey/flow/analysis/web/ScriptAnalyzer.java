@@ -546,7 +546,7 @@ public class ScriptAnalyzer
             {
                 analysisElement.removeGraph(0);
             }
-            for (GraphSpec graph : new TreeSet<GraphSpec>(analysis.getGraphs()))
+            for (GraphSpec graph : new TreeSet<>(analysis.getGraphs()))
             {
                 addGraph(analysisElement, graph);
             }
@@ -573,7 +573,7 @@ public class ScriptAnalyzer
         try
         {
             ScriptDef scriptElement = parseScript(script);
-            Set<SubsetSpec> ret = new TreeSet<SubsetSpec>(SubsetSpec.COMPARATOR);
+            Set<SubsetSpec> ret = new TreeSet<>(SubsetSpec.COMPARATOR);
             PopulationDef[] pops = null;
             if (includeCompensation)
             {

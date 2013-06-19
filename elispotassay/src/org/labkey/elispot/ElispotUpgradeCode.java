@@ -91,7 +91,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                             // create an empty plate, we don't need to read the well information, just the specimen and antigen group info
                             Plate plate = PlateService.get().createPlate(template, new double[template.getRows()][template.getColumns()]);
 
-                            Map<String, Object> propMap = new HashMap<String, Object>();
+                            Map<String, Object> propMap = new HashMap<>();
                             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
 
                             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);

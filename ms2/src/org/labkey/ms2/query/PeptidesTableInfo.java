@@ -86,7 +86,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         // Stick EndScan column just after Scan column
         ColumnInfo scanColumn = getRealTable().getColumn("Scan");
         ColumnInfo endScanColumn = getRealTable().getColumn("EndScan");
-        List<ColumnInfo> columns = new ArrayList<ColumnInfo>(getRealTable().getColumns());
+        List<ColumnInfo> columns = new ArrayList<>(getRealTable().getColumns());
         columns.remove(endScanColumn);
         int i = columns.indexOf(scanColumn);
         columns.add(i + 1, endScanColumn);
@@ -387,7 +387,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     private void addScoreColumns()
     {
-        Map<String, List<Pair<MS2RunType, Integer>>> columnMap = new HashMap<String, List<Pair<MS2RunType, Integer>>>();
+        Map<String, List<Pair<MS2RunType, Integer>>> columnMap = new HashMap<>();
         for (MS2RunType runType : getRunTypes())
         {
             int index = 1;
@@ -398,10 +398,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 List<Pair<MS2RunType, Integer>> l = columnMap.get(name);
                 if (l == null)
                 {
-                    l = new ArrayList<Pair<MS2RunType, Integer>>();
+                    l = new ArrayList<>();
                     columnMap.put(name, l);
                 }
-                l.add(new Pair<MS2RunType, Integer>(runType, index++));
+                l.add(new Pair<>(runType, index++));
             }
         }
 
@@ -441,10 +441,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
     {
         List<MS2Run> runs = _userSchema.getRuns();
 
-        Collection<MS2RunType> runTypes = new HashSet<MS2RunType>(Arrays.asList(_runTypes));
+        Collection<MS2RunType> runTypes = new HashSet<>(Arrays.asList(_runTypes));
         if (runs != null && runs.size() > 0)
         {
-            Set<MS2RunType> usedRunTypes = new HashSet<MS2RunType>();
+            Set<MS2RunType> usedRunTypes = new HashSet<>();
             for (MS2Run run : runs)
             {
                 usedRunTypes.add(run.getRunType());
@@ -496,7 +496,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         if(null != _defaultVisibleColumns)
             return super.getDefaultVisibleColumns();
 
-        List<FieldKey> result = new ArrayList<FieldKey>();
+        List<FieldKey> result = new ArrayList<>();
         result.add(FieldKey.fromParts("Scan"));
         result.add(FieldKey.fromParts("Charge"));
         for (MS2RunType runType : getRunTypes())

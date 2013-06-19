@@ -147,7 +147,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         {
             super(table, ViabilityAssaySchema.this);
             _provider = ViabilityManager.get().getProvider();
-            _defaultVisibleColumns = new ArrayList<FieldKey>();
+            _defaultVisibleColumns = new ArrayList<>();
             setPublicSchemaName(ViabilityAssaySchema.this.getSchemaName());
         }
 
@@ -196,7 +196,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
 
             _resultsDomain = _provider.getResultsDomain(getProtocol());
             DomainProperty[] resultDomainProperties = _resultsDomain.getProperties();
-            Map<String, DomainProperty> propertyMap = new LinkedHashMap<String, DomainProperty>(resultDomainProperties.length);
+            Map<String, DomainProperty> propertyMap = new LinkedHashMap<>(resultDomainProperties.length);
             for (DomainProperty property : resultDomainProperties)
                 propertyMap.put(property.getName(), property);
 
@@ -380,7 +380,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 ResultSpecimensTable rs = new ResultSpecimensTable();
                 // 9024: propogate container filter
                 rs.setContainerFilter(getContainerFilter());
-                List<FieldKey> fields = new ArrayList<FieldKey>();
+                List<FieldKey> fields = new ArrayList<>();
                 FieldKey resultId = FieldKey.fromParts("ResultID");
                 FieldKey volume = FieldKey.fromParts("SpecimenID", "Volume");
                 FieldKey globalUniqueId = FieldKey.fromParts("SpecimenID", "GlobalUniqueId");
@@ -461,7 +461,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                             String[] ids = id != null ? id.split(",") : new String[0];
                             String[] matches = match != null ? match.split(",") : new String[0];
 
-                            HashSet<String> s = new LinkedHashSet<String>(Arrays.asList(ids));
+                            HashSet<String> s = new LinkedHashSet<>(Arrays.asList(ids));
                             s.removeAll(Arrays.asList(matches));
 
                             popupText += "<p>" + PageFlowUtil.filter(StringUtils.join(s, ", ")) + "</p>";

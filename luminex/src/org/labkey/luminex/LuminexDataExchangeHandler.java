@@ -45,11 +45,11 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     public Pair<File, Set<File>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         LuminexRunContext form = (LuminexRunContext)context;
-        List<Map<String, Object>> analytes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> analytes = new ArrayList<>();
 
         for (String analyteName : form.getAnalyteNames())
         {
-            Map<String, Object> row = new HashMap<String, Object>();
+            Map<String, Object> row = new HashMap<>();
             row.put("Name", analyteName);
             // get the analyte domain property values
             for (Map.Entry<DomainProperty, String> entry : form.getAnalyteProperties(analyteName).entrySet())
@@ -67,10 +67,10 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         }
         addSampleProperties(ANALYTE_DATA_PROP_NAME, analytes);
 
-        List<Map<String, Object>> titrations = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> titrations = new ArrayList<>();
         for (Titration titration : form.getTitrations())
         {
-            Map<String, Object> titrationRow = new HashMap<String, Object>();
+            Map<String, Object> titrationRow = new HashMap<>();
             titrationRow.put("Name", titration.getName());
             titrationRow.put("QCControl", titration.isQcControl());
             titrationRow.put("Standard", titration.isStandard());

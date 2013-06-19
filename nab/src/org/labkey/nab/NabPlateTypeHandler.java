@@ -45,7 +45,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
 
     public List<String> getTemplateTypes()
     {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         names.add(BLANK_PLATE_TYPE);
         names.add(SINGLE_PLATE_TYPE);
         names.add(HIGH_THROUGHPUT_PLATE_TYPE);
@@ -56,9 +56,9 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     @Override
     public List<Pair<Integer, Integer>> getSupportedPlateSizes()
     {
-        List<Pair<Integer, Integer>> sizes = new ArrayList<Pair<Integer, Integer>>();
-        sizes.add(new Pair<Integer, Integer>(8, 12));
-        sizes.add(new Pair<Integer, Integer>(16, 24));
+        List<Pair<Integer, Integer>> sizes = new ArrayList<>();
+        sizes.add(new Pair<>(8, 12));
+        sizes.add(new Pair<>(16, 24));
         return sizes;
     }
 
@@ -169,7 +169,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
             {
                 for (int col = startCol; col < (startCol + colsPerSample); col++)
                 {
-                    List<Position> positions = new ArrayList<Position>();
+                    List<Position> positions = new ArrayList<>();
 
                     positions.add(PlateService.get().createPosition(c, row + (rowGroup % 2), col));
                     positions.add(PlateService.get().createPosition(c, row + (rowGroup % 2) + 2, col));

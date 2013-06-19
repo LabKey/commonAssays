@@ -34,7 +34,7 @@ public class REProperties extends java.util.Properties
 
     private Set<String> REGetValues(Pattern pattern)
     {
-        Set<String> retVal = new HashSet<String>();
+        Set<String> retVal = new HashSet<>();
         for (Enumeration e = this.propertyNames(); e.hasMoreElements();)
         {
             String s = (String) e.nextElement();
@@ -57,7 +57,7 @@ public class REProperties extends java.util.Properties
 
     private Map<String, String> REGetProperties(Pattern pattern)
     {
-        Map<String,String> retVal = new HashMap<String,String>();
+        Map<String,String> retVal = new HashMap<>();
         for (Enumeration e = this.propertyNames(); e.hasMoreElements();)
         {
             String s = (String) e.nextElement();

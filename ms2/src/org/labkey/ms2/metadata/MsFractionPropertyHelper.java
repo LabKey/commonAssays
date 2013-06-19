@@ -42,7 +42,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         super(getProperties(sampleSet, c));
         _sampleSet = sampleSet;
         _files = files;
-        _names = new ArrayList<String>();
+        _names = new ArrayList<>();
         for (File file : files)
         {
             String fName = file.getName();

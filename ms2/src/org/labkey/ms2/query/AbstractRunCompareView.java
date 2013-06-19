@@ -70,7 +70,7 @@ public abstract class AbstractRunCompareView extends QueryView
     private SimpleFilter _runFilter = new SimpleFilter();
     private List<FieldKey> _columns;
 
-    private Collection<String> _runErrors = new ArrayList<String>();
+    private Collection<String> _runErrors = new ArrayList<>();
 
     public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName)
     {
@@ -130,7 +130,7 @@ public abstract class AbstractRunCompareView extends QueryView
     public GWTComparisonResult createCompareResult()
             throws SQLException, IOException, ServletException
     {
-        List<FieldKey> cols = new ArrayList<FieldKey>();
+        List<FieldKey> cols = new ArrayList<>();
         cols.add(FieldKey.fromParts(getGroupingColumnName()));
         cols.add(FieldKey.fromParts("Run", "RowId"));
         setColumns(cols);
@@ -146,7 +146,7 @@ public abstract class AbstractRunCompareView extends QueryView
             StringTokenizer lines = new StringTokenizer(sb.toString(), "\n");
             int proteinCount = lines.countTokens();
             GWTComparisonMember[] gwtRuns = new GWTComparisonMember[_runs.size()];
-            Map<Integer, GWTComparisonGroup> runGroups = new HashMap<Integer, GWTComparisonGroup>();
+            Map<Integer, GWTComparisonGroup> runGroups = new HashMap<>();
             boolean[][] hits = new boolean[_runs.size()][];
             for (int i = 0; i < _runs.size(); i++)
             {
@@ -218,7 +218,7 @@ public abstract class AbstractRunCompareView extends QueryView
         result.getRenderContext().setViewContext(getViewContext());
         SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());
 
-        for (SimpleFilter.FilterClause clause : new ArrayList<SimpleFilter.FilterClause>(filter.getClauses()))
+        for (SimpleFilter.FilterClause clause : new ArrayList<>(filter.getClauses()))
         {
             for (String colName : clause.getColumnNames())
             {
@@ -278,7 +278,7 @@ public abstract class AbstractRunCompareView extends QueryView
             }
         }
         rgn.setOffset(offset);
-        List<String> headings = new ArrayList<String>();
+        List<String> headings = new ArrayList<>();
         for (MS2Run run : _runs)
         {
             ActionURL url = MS2Controller.getShowRunURL(getUser(), run.getContainer(), run.getRun());
@@ -291,7 +291,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
     public List<DisplayColumn> getDisplayColumns()
     {
-        List<DisplayColumn> ret = new ArrayList<DisplayColumn>();
+        List<DisplayColumn> ret = new ArrayList<>();
         TableInfo table = getTable();
         if (table == null)
             return Collections.emptyList();
@@ -312,14 +312,14 @@ public abstract class AbstractRunCompareView extends QueryView
             cols = table.getDefaultVisibleColumns();
         }
 
-        List<FieldKey> nonRunCols = new ArrayList<FieldKey>();
-        List<FieldKey> runCols = new ArrayList<FieldKey>();
+        List<FieldKey> nonRunCols = new ArrayList<>();
+        List<FieldKey> runCols = new ArrayList<>();
         int runColCount = 0;
         for (FieldKey col : cols)
         {
             if ("Run".equalsIgnoreCase(col.getParts().get(0)))
             {
-                List<String> parts = new ArrayList<String>(col.getParts());
+                List<String> parts = new ArrayList<>(col.getParts());
                 int runOffset = 0;
                 for (MS2Run run : _runs)
                 {
@@ -335,7 +335,7 @@ public abstract class AbstractRunCompareView extends QueryView
             }
         }
 
-        List<FieldKey> newCols = new ArrayList<FieldKey>(nonRunCols);
+        List<FieldKey> newCols = new ArrayList<>(nonRunCols);
         newCols.addAll(runCols);
         if (view != null)
         {

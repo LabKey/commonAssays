@@ -39,7 +39,7 @@ public class SpectraCountConfiguration
 
     static
     {
-        LinkedHashSet<SpectraCountConfiguration> configs = new LinkedHashSet<SpectraCountConfiguration>();
+        LinkedHashSet<SpectraCountConfiguration> configs = new LinkedHashSet<>();
         configs.add(new SpectraCountConfiguration(true, false, false, false));
         configs.add(new SpectraCountConfiguration(true, true, false, false));
         configs.add(new SpectraCountConfiguration(true, false, true, true));

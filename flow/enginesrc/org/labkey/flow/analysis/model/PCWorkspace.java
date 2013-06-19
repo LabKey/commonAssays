@@ -105,8 +105,8 @@ public class PCWorkspace extends FlowJoWorkspace
     {
         String xAxis = null;
         String yAxis = null;
-        List<Double> lstX = new ArrayList<Double>();
-        List<Double> lstY = new ArrayList<Double>();
+        List<Double> lstX = new ArrayList<>();
+        List<Double> lstY = new ArrayList<>();
         for (Element elAxis : getElementsByTagName(elPolygonGate, "Axis"))
         {
             String axis = elAxis.getAttribute("dimension");
@@ -148,9 +148,9 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected PolygonGate readRectangleGate(Element elRectangleGate)
     {
-        List<String> axes = new ArrayList<String>();
-        List<Double> lstMin = new ArrayList<Double>();
-        List<Double> lstMax = new ArrayList<Double>();
+        List<String> axes = new ArrayList<>();
+        List<Double> lstMin = new ArrayList<>();
+        List<Double> lstMax = new ArrayList<>();
         for (Element elRangeGate : getElementsByTagName(elRectangleGate, "RangeGate"))
         {
             IntervalGate rangeGate = readRangeGate(elRangeGate);
@@ -169,7 +169,7 @@ public class PCWorkspace extends FlowJoWorkspace
         PopulationName name = PopulationName.fromString(elBoolNode.getAttribute("name"));
         ret.setName(name);
 
-        List<Gate> gates = new ArrayList<Gate>();
+        List<Gate> gates = new ArrayList<>();
         Element elDependents = getElementByTagName(elBoolNode, "Dependents");
         if (elDependents != null)
         {
@@ -265,7 +265,7 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected List<Population> readSubpopulations(Element elSubpopulations, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
-        List<Population> subpops = new LinkedList<Population>();
+        List<Population> subpops = new LinkedList<>();
         for (Element elPopulation : getElements(elSubpopulations))
         {
             String tagName = elPopulation.getTagName();

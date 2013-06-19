@@ -122,12 +122,12 @@ public enum QuantitationAlgorithm
                 throw new PipelineJobException("Libra config file does not exist: " + result);
             }
             wd.inputFile(result, true);
-            return new Pair<File, String>(result, TPPTask.LIBRA_CONFIG_INPUT_ROLE);
+            return new Pair<>(result, TPPTask.LIBRA_CONFIG_INPUT_ROLE);
     }};
 
     protected List<String> getCommonXpressQ3Params(Map<String, String> params, String pathMzXml)
     {
-        List<String> quantOpts = new ArrayList<String>();
+        List<String> quantOpts = new ArrayList<>();
 
         String paramQuant = params.get(ParameterNames.QUANTITATION_RESIDUE_LABEL_MASS);
         if (paramQuant != null)

@@ -239,7 +239,7 @@ public class ViabilityResult
 
     private Map<String, Object> getStringProperties()
     {
-        Map<String, Object> ret = new CaseInsensitiveHashMap<Object>();
+        Map<String, Object> ret = new CaseInsensitiveHashMap<>();
         Map<PropertyDescriptor, Object> properties = getProperties();
         for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
             ret.put(entry.getKey().getName(), entry.getValue());

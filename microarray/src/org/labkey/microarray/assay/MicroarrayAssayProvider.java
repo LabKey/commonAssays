@@ -104,7 +104,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createBatchDomain(Container c, User user)
     {
-        return new Pair<Domain, Map<DomainProperty, Object>>(
+        return new Pair<>(
             PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields"),
             Collections.<DomainProperty, Object>emptyMap());
     }
@@ -145,7 +145,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
         Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Properties");
         dataDomain.setDescription("The user is prompted to select a MAGEML file that contains the data values. If the spot-level data within the file contains a column that matches the data column name here, it will be imported.");
-        result.add(new Pair<Domain, Map<DomainProperty,  Object>>(dataDomain, Collections.<DomainProperty, Object>emptyMap()));
+        result.add(new Pair<>(dataDomain, Collections.<DomainProperty, Object>emptyMap()));
         return result;
     }
 
@@ -189,7 +189,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer)
     {
         Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> result = super.getAssayTemplate(user, targetContainer);
-        List<ProtocolParameter> params = new ArrayList<ProtocolParameter>(result.getKey().getProtocolParameters().values());
+        List<ProtocolParameter> params = new ArrayList<>(result.getKey().getProtocolParameters().values());
 
         ProtocolParameter channelCountXPathParam = new ProtocolParameter();
         channelCountXPathParam.setOntologyEntryURI(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
@@ -227,7 +227,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public Map<DomainProperty, XPathExpression> getXpathExpressions(ExpProtocol protocol)
     {
-        Map<DomainProperty, XPathExpression> result = new HashMap<DomainProperty, XPathExpression>();
+        Map<DomainProperty, XPathExpression> result = new HashMap<>();
 
         Domain domain = getRunDomain(protocol);
         for (DomainProperty runPD : domain.getProperties())

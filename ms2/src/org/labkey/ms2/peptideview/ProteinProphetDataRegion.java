@@ -51,7 +51,7 @@ public class ProteinProphetDataRegion extends AbstractNestableDataRegion
         try
         {
             int totalFilteredPeptides = 0;
-            Set<String> uniqueFilteredPeptides = new HashSet<String>();
+            Set<String> uniqueFilteredPeptides = new HashSet<>();
             // Validate that the inner and outer result sets are sorted the same
             while (nestedRS.next())
             {

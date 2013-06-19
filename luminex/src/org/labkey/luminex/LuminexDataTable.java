@@ -254,7 +254,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         });
         addColumn(exclusionUIColumn);
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(exclusionUIColumn.getFieldKey());
         defaultCols.add(FieldKey.fromParts("Analyte"));
         defaultCols.add(FieldKey.fromParts("WellRole"));
@@ -366,7 +366,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     @Override
     public CaseInsensitiveHashMap<String> remapSchemaColumns()
     {
-        CaseInsensitiveHashMap<String> result = new CaseInsensitiveHashMap<String>();
+        CaseInsensitiveHashMap<String> result = new CaseInsensitiveHashMap<>();
         result.put("PTID", "ParticipantID");
         result.put("DataId", "Data");
         result.put("AnalyteId", "Analyte");

@@ -58,7 +58,7 @@ public class FeaturesRReport extends CustomRReport
         boolean restrictContainer = true;
         boolean forSearch = false;
         ActionURL url = context.getActionURL();
-        List<FeaturesFilter> filters = new ArrayList<FeaturesFilter>();
+        List<FeaturesFilter> filters = new ArrayList<>();
 
         //add filters based on what params are present on the query string
         //NOTE: this is absolutely ridiculous. This whole R report architecture needs to be integrated

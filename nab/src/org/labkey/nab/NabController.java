@@ -326,7 +326,7 @@ public class NabController extends SpringActionController
             AttachmentFile datafile = form.getDataFile();
 
             SafeTextConverter.PercentConverter[] possibleCutoffs = form.getRunSettings().getCutoffs();
-            Set<Integer> cutoffSet = new HashSet<Integer>();
+            Set<Integer> cutoffSet = new HashSet<>();
             // eliminate duplicates and blank values:
             for (SafeTextConverter.PercentConverter possibleCutoff : possibleCutoffs)
             {
@@ -681,7 +681,7 @@ public class NabController extends SpringActionController
             if (assay == null)
                 return new HtmlView("The requested assay run is no longer available.");
 
-            JspView<RenderAssayBean> assayView = new JspView<RenderAssayBean>("/org/labkey/nab/runResults.jsp", new RenderAssayBean(assay, form.isNewRun(), form.isPrint()));
+            JspView<RenderAssayBean> assayView = new JspView<>("/org/labkey/nab/runResults.jsp", new RenderAssayBean(assay, form.isNewRun(), form.isPrint()));
 
             if (form.isPrint())
             {
@@ -736,7 +736,7 @@ public class NabController extends SpringActionController
             duplicateDataFileView.setShowExportButtons(false);
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
             selectButton.setDisplayPermission(InsertPermission.class);
-            List<ActionButton> buttons = new ArrayList<ActionButton>();
+            List<ActionButton> buttons = new ArrayList<>();
             buttons.add(selectButton);
 
             ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
@@ -778,7 +778,7 @@ public class NabController extends SpringActionController
 
     private ModelAndView addHeaderView(HttpView view, ActionURL printLink, Plate dataFilePlate) throws Exception
     {
-        JspView<HeaderBean> headerView = new JspView<HeaderBean>("/org/labkey/nab/header.jsp",
+        JspView<HeaderBean> headerView = new JspView<>("/org/labkey/nab/header.jsp",
                 new HeaderBean(getViewContext(), printLink,
                         dataFilePlate != null ? OldNabManager.get().getDataFileDownloadLink(dataFilePlate) : null));
         return new VBox(headerView, view);
@@ -979,7 +979,7 @@ public class NabController extends SpringActionController
         public ModelAndView getView(MigrateToAssayForm migrateToAssayForm, boolean reshow, BindException errors) throws Exception
         {
             List<ExpProtocol> allProtocols = AssayService.get().getAssayProtocols(getContainer());
-            Map<ExpProtocol, List<DisplayColumn>> nabProtocolsAndColumns = new LinkedHashMap<ExpProtocol, List<DisplayColumn>>();
+            Map<ExpProtocol, List<DisplayColumn>> nabProtocolsAndColumns = new LinkedHashMap<>();
 
             // Find all of the NAb assay designs that are in scope
             for (ExpProtocol protocol : allProtocols)
@@ -1000,7 +1000,7 @@ public class NabController extends SpringActionController
                     }
 
                     // Look through all of the columns on the NAb run table
-                    List<DisplayColumn> columns = new ArrayList<DisplayColumn>();
+                    List<DisplayColumn> columns = new ArrayList<>();
                     for (ColumnInfo columnInfo : tableInfo.getColumns())
                     {
                         // For ones that are admin-configurable, and that aren't part of the standard set of NAb columns,
@@ -1014,14 +1014,14 @@ public class NabController extends SpringActionController
                     nabProtocolsAndColumns.put(protocol, columns);
                 }
             }
-            return new JspView<Map<ExpProtocol, List<DisplayColumn>>>("/org/labkey/nab/migrateNAb.jsp", nabProtocolsAndColumns, errors);
+            return new JspView<>("/org/labkey/nab/migrateNAb.jsp", nabProtocolsAndColumns, errors);
         }
 
         @Override
         public boolean handlePost(MigrateToAssayForm form, BindException errors) throws Exception
         {
             // Propagate the admin-specified default run field values through 
-            Map<String, String> params = new CaseInsensitiveHashMap<String>();
+            Map<String, String> params = new CaseInsensitiveHashMap<>();
             Set<String> parameterNames = getViewContext().getRequest().getParameterMap().keySet();
             for (String paramName : parameterNames)
             {
@@ -1060,7 +1060,7 @@ public class NabController extends SpringActionController
         {
             PlateQueryView previousRuns = PlateService.get().getPlateGridView(getViewContext());
 
-            List<ActionButton> buttons = new ArrayList<ActionButton>();
+            List<ActionButton> buttons = new ArrayList<>();
 
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
             selectButton.setDisplayPermission(InsertPermission.class);
@@ -1169,7 +1169,7 @@ public class NabController extends SpringActionController
             DilutionSummary[] summaries = getDilutionSummaries(wellGroupIds);
             int[] cutoffList = getCutoffs(summaries);
             cacheSummaries(summaries);
-            JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/legacyGraph.jsp",
+            JspView<GraphSelectedBean> multiGraphView = new JspView<>("/org/labkey/nab/legacyGraph.jsp",
                     new GraphSelectedBean(summaries, cutoffList));
 
             if (form.isPrint())
@@ -1279,7 +1279,7 @@ public class NabController extends SpringActionController
 
     private DilutionSummary[] getDilutionSummaries(int[] wellGroupIds) throws SQLException, ServletException
     {
-        List<DilutionSummary> summaries = new ArrayList<DilutionSummary>(wellGroupIds.length);
+        List<DilutionSummary> summaries = new ArrayList<>(wellGroupIds.length);
 
         for (int wellgroupId : wellGroupIds)
         {
@@ -1300,7 +1300,7 @@ public class NabController extends SpringActionController
 
     private int[] getCutoffs(DilutionSummary[] summaries)
     {
-        Set<Integer> cutoffSet = new HashSet<Integer>();
+        Set<Integer> cutoffSet = new HashSet<>();
         for (DilutionSummary summary : summaries)
         {
             try
@@ -1313,7 +1313,7 @@ public class NabController extends SpringActionController
                 _log.warn("Bad post to graphSelected", e);
             }
         }
-        List<Integer> sortedUniqueCutoffs = new ArrayList<Integer>(cutoffSet);
+        List<Integer> sortedUniqueCutoffs = new ArrayList<>(cutoffSet);
         Collections.sort(sortedUniqueCutoffs);
         int[] cutoffs = new int[sortedUniqueCutoffs.size()];
         for (int i = 0; i < cutoffs.length; i++)
@@ -1413,7 +1413,7 @@ public class NabController extends SpringActionController
             }
             else
             {
-                JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
+                JspView<PublishBean> chooseStudyView = new JspView<>("/org/labkey/nab/publishChooseStudy.jsp",
                         new PublishBean(getUser(), plateIds, true));
                 return addHeaderView(chooseStudyView);
             }
@@ -1440,7 +1440,7 @@ public class NabController extends SpringActionController
             }
             else
             {
-                JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
+                JspView<PublishBean> chooseStudyView = new JspView<>("/org/labkey/nab/publishChooseStudy.jsp",
                         new PublishBean(getUser(), wellgroupIds, false));
                 return addHeaderView(chooseStudyView);
             }
@@ -1456,7 +1456,7 @@ public class NabController extends SpringActionController
     private List<Integer> getCheckboxIds()
     {
         Set<String> idStrings = DataRegionSelection.getSelected(getViewContext(), false);
-        List<Integer> ids = new ArrayList<Integer>();
+        List<Integer> ids = new ArrayList<>();
 
         if (idStrings == null)
             return ids;
@@ -1484,7 +1484,7 @@ public class NabController extends SpringActionController
         {
             PlateQueryView queryView = PlateService.get().getWellGroupGridView(getViewContext(), WellGroup.Type.SPECIMEN);
 
-            List<ActionButton> buttons = new ArrayList<ActionButton>();
+            List<ActionButton> buttons = new ArrayList<>();
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
             selectButton.setDisplayPermission(InsertPermission.class);
             buttons.add(selectButton);
@@ -1630,7 +1630,7 @@ public class NabController extends SpringActionController
 
         public void validate(Errors errors)
         {
-            Set<String> selectedSamples = new HashSet<String>();
+            Set<String> selectedSamples = new HashSet<>();
 
             if (getIncludedSampleIds() == null)
                 errors.reject("main", "You must select at least one specimen to copy to a study.");
@@ -1701,7 +1701,7 @@ public class NabController extends SpringActionController
                 throw new UnauthorizedException();
             }
 
-            List<WellGroup> sampleList = new ArrayList<WellGroup>();
+            List<WellGroup> sampleList = new ArrayList<>();
             if (form.isPlateIds())
             {
                 for (Integer plateId : form.getId())
@@ -1727,7 +1727,7 @@ public class NabController extends SpringActionController
                 }
             }
 
-            List<WellGroup> sortedGroups = new ArrayList<WellGroup>();
+            List<WellGroup> sortedGroups = new ArrayList<>();
             for (WellGroup wellgroup : sampleList)
                 sortedGroups.add(wellgroup);
             Collections.sort(sortedGroups, new Comparator<WellGroup>()
@@ -1740,7 +1740,7 @@ public class NabController extends SpringActionController
                 }
             });
 
-            Map<WellGroup, ParticipantVisit> sampleInfoMap = new LinkedHashMap<WellGroup, ParticipantVisit>();
+            Map<WellGroup, ParticipantVisit> sampleInfoMap = new LinkedHashMap<>();
             for (WellGroup wellgroup : sortedGroups)
             {
                 String sampleId = (String) wellgroup.getProperty(SampleProperty.SampleId.name());
@@ -1750,7 +1750,7 @@ public class NabController extends SpringActionController
                 sampleInfoMap.put(wellgroup, sampleInfo);
             }
 
-            JspView<PublishVerifyBean> publishVerifyView = new JspView<PublishVerifyBean>("/org/labkey/nab/publishVerify.jsp",
+            JspView<PublishVerifyBean> publishVerifyView = new JspView<>("/org/labkey/nab/publishVerify.jsp",
                     new PublishVerifyBean(targetContainer, sampleInfoMap), errors);
 
             return addHeaderView(publishVerifyView);
@@ -1770,13 +1770,13 @@ public class NabController extends SpringActionController
             }
 
             boolean dateBased = AssayPublishService.get().getTimepointType(targetContainer) != TimepointType.VISIT;
-            Set<String> includedSamples = new HashSet<String>();
+            Set<String> includedSamples = new HashSet<>();
             includedSamples.addAll(Arrays.asList(form.getIncludedSampleIds()));
 
             if (!includedSamples.isEmpty())
             {
-                List<Plate> plates = new ArrayList<Plate>();
-                List<Map<String, Object>> sampleProperties = new ArrayList<Map<String, Object>>();
+                List<Plate> plates = new ArrayList<>();
+                List<Map<String, Object>> sampleProperties = new ArrayList<>();
 
                 for (int i = 0; i < form.getSampleIds().length; i++)
                 {
@@ -1808,7 +1808,7 @@ public class NabController extends SpringActionController
                                 visitId = Double.parseDouble(visitIdString);
                             }
 
-                            Map<String, Object> samplePropertyMap = new HashMap<String, Object>();
+                            Map<String, Object> samplePropertyMap = new HashMap<>();
                             for (String property : sample.getPropertyNames())
                                 samplePropertyMap.put(property, sample.getProperty(property));
 
@@ -1833,7 +1833,7 @@ public class NabController extends SpringActionController
 
                 if (!sampleProperties.isEmpty())
                 {
-                    List<String> sampleErrors = new ArrayList<String>();
+                    List<String> sampleErrors = new ArrayList<>();
                     _returnURL = AssayPublishService.get().publishAssayData(getUser(), getContainer(), targetContainer,
                             "NAB", null, sampleProperties,
                             OldNabManager.get().getPropertyTypes(plates),
@@ -1960,11 +1960,11 @@ public class NabController extends SpringActionController
         {
             _sampleInfoMap = sampleInfoMap;
             _targetContainer = targetContainer;
-            Set<String> propertySet = new HashSet<String>();
+            Set<String> propertySet = new HashSet<>();
             for (WellGroup group : sampleInfoMap.keySet())
                 propertySet.addAll(group.getPropertyNames());
             propertySet.remove(SampleProperty.SampleId.name());
-            _sampleProperties = new ArrayList<String>(propertySet);
+            _sampleProperties = new ArrayList<>(propertySet);
             Collections.sort(_sampleProperties);
         }
 

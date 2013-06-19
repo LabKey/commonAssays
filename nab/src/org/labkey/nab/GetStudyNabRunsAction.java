@@ -61,8 +61,8 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
     @Override
     public ApiResponse execute(GetStudyNabRunsForm form, BindException errors) throws Exception
     {
-        final Map<String, Object> properties = new HashMap<String, Object>();
-        List<NabRunPropertyMap> runList = new ArrayList<NabRunPropertyMap>();
+        final Map<String, Object> properties = new HashMap<>();
+        List<NabRunPropertyMap> runList = new ArrayList<>();
         properties.put("runs", runList);
 
         for (ExpRun run : getRuns(form, errors))
@@ -95,7 +95,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
         Map<Integer, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
                 getViewContext().getUser(), form.getObjectIds());
 
-        Collection<ExpRun> runs = new ArrayList<ExpRun>();
+        Collection<ExpRun> runs = new ArrayList<>();
 
         for (Integer objectId : readableObjectIds.keySet())
         {

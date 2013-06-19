@@ -56,7 +56,7 @@ public class StandardProteinDataRegion extends AbstractNestableDataRegion
 
             if (outerSeqId != null)
             {
-                List<String> peptides = new ArrayList<String>();
+                List<String> peptides = new ArrayList<>();
                 while (nestedRS.next())
                 {
                     peptides.add(nestedRS.getString(getPeptideIndex()));

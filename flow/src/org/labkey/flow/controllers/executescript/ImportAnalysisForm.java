@@ -270,7 +270,7 @@ public class ImportAnalysisForm
         if (list == null)
             return Collections.emptyList();
 
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         for (String s : list.split(PARAMATER_SEPARATOR))
             ret.add(s.trim());
         return ret;

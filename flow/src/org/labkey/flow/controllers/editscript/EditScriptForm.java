@@ -138,7 +138,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
 
     public Map<SubsetSpec, Population> getPopulations() throws Exception
     {
-        LinkedHashMap<SubsetSpec, Population> ret = new LinkedHashMap<SubsetSpec, Population>();
+        LinkedHashMap<SubsetSpec, Population> ret = new LinkedHashMap<>();
         PopulationSet popset = getAnalysis();
         for (Population child : popset.getPopulations())
         {
@@ -231,7 +231,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
 
     static public Map<String, String> getParameterNames(FlowRun run, String[] compChannels)
     {
-        Map<String, String> ret = new LinkedHashMap<String, String>();
+        Map<String, String> ret = new LinkedHashMap<>();
         if (run == null)
             return ret;
 
@@ -285,7 +285,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
 
     public String[] getAvailableKeywords()
     {
-        HashSet<String> keywords = new HashSet<String>();
+        HashSet<String> keywords = new HashSet<>();
 
         try
         {
@@ -318,7 +318,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
 
     public Map<Integer, String> getExperimentRuns(boolean realFiles) throws Exception
     {
-        LinkedHashMap<Integer, String> ret = new LinkedHashMap<Integer, String>();
+        LinkedHashMap<Integer, String> ret = new LinkedHashMap<>();
         FlowRun[] runs = realFiles ?
                 FlowRun.getRunsWithRealFCSFiles(getContainer(), FlowProtocolStep.keywords) :
                 FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);

@@ -178,7 +178,7 @@ public class WellController extends BaseFlowController
             }
             if (form.ff_keywordName != null)
             {
-                Set<String> keywords = new HashSet<String>();
+                Set<String> keywords = new HashSet<>();
                 for (int i = 0; i < form.ff_keywordName.length; i ++)
                 {
                     String name = form.ff_keywordName[i];
@@ -552,7 +552,7 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView<UpdateKeywordsForm>(WellController.class, "bulkUpdate.jsp", form, errors);
+            return new JspView<>(WellController.class, "bulkUpdate.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -658,7 +658,7 @@ public class WellController extends BaseFlowController
         public TreeSet<String> getKeywords(ViewContext context)
         {
             Map<String,Integer> map = AttributeCache.KEYWORDS.getAttrValues(context.getContainer(), null, true);
-            return new TreeSet<String>(map.keySet());
+            return new TreeSet<>(map.keySet());
         }
 
         public TreeSet<String> getValues(ViewContext context, String keyword)
@@ -668,7 +668,7 @@ public class WellController extends BaseFlowController
             {
                 rs = Table.executeQuery(DbSchema.get("flow"),
                         "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", new Object[]{context.getContainer(), keyword});
-                TreeSet<String> set = new TreeSet<String>();
+                TreeSet<String> set = new TreeSet<>();
                 while (rs.next())
                     set.add(rs.getString(1));
                 return set;

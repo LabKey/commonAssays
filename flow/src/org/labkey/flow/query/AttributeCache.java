@@ -235,7 +235,7 @@ abstract public class AttributeCache<T>
 
     private Map<T, Integer> mapFromEntries(FlowEntry[] entries, boolean includeAliases)
     {
-        TreeMap<T, Integer> ret = new TreeMap<T, Integer>();
+        TreeMap<T, Integer> ret = new TreeMap<>();
         for (FlowEntry entry : entries)
         {
             if (includeAliases || !entry.isAlias())

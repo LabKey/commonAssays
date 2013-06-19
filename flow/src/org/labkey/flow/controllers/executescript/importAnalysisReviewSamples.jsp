@@ -58,14 +58,14 @@
     WorkspaceData workspaceData = form.getWorkspace();
     IWorkspace workspace = workspaceData.getWorkspaceObject();
 
-    Map<String, String> groupOptions = new TreeMap<String, String>();
-    Map<String, Collection<String[]>> groups = new TreeMap<String, Collection<String[]>>();
+    Map<String, String> groupOptions = new TreeMap<>();
+    Map<String, Collection<String[]>> groups = new TreeMap<>();
     if (workspace instanceof Workspace)
     {
         Workspace w = (Workspace)workspace;
         for (Workspace.GroupInfo group : w.getGroups())
         {
-            Map<String, String[]> groupSamples = new TreeMap<String, String[]>();
+            Map<String, String[]> groupSamples = new TreeMap<>();
             for (String sampleID : group.getSampleIds())
             {
                 Workspace.SampleInfo sampleInfo = w.getSample(sampleID);
@@ -82,13 +82,13 @@
     }
 
     List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
-    List<Map<String, Object>> samples = new ArrayList<Map<String, Object>>(sampleInfos.size());
+    List<Map<String, Object>> samples = new ArrayList<>(sampleInfos.size());
     for (ISampleInfo sample : sampleInfos)
     {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("sampleId", sample.getSampleId());
         map.put("label", sample.getLabel());
-        List<String> sampleGroups = new ArrayList<String>(10);
+        List<String> sampleGroups = new ArrayList<>(10);
         if (sample instanceof Workspace.SampleInfo)
             for (PopulationName pop : ((Workspace.SampleInfo)sample).getGroupNames())
                 sampleGroups.add(pop.toString());

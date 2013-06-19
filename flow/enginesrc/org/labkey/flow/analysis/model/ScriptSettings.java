@@ -28,8 +28,8 @@ import java.util.Map;
 
 public class ScriptSettings implements Serializable
 {
-    Map<String, ParameterInfo> _parameters = new CaseInsensitiveHashMap<ParameterInfo>();
-    Map<String, FilterInfo> _filters = new HashMap<String, FilterInfo>();
+    Map<String, ParameterInfo> _parameters = new CaseInsensitiveHashMap<>();
+    Map<String, FilterInfo> _filters = new HashMap<>();
 
     public static FilterInfo fromFilterDef(FilterDef filter)
     {

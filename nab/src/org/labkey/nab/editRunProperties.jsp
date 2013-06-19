@@ -36,7 +36,7 @@
     PlateTemplate[] templates = me.getModelBean().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
     int specimenCount = activeTemplate.getWellGroupCount(WellGroup.Type.SPECIMEN);
     List<? extends WellGroupTemplate> wellGroupTemplates = activeTemplate.getWellGroups();
-    List<WellGroupTemplate> specimenWellGroups = new ArrayList<WellGroupTemplate>();
+    List<WellGroupTemplate> specimenWellGroups = new ArrayList<>();
     for (WellGroupTemplate groupTemplate : wellGroupTemplates)
     {
         if (groupTemplate.getType() == WellGroup.Type.SPECIMEN)

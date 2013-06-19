@@ -99,7 +99,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
             int wellCount = 0;
             int plateCount = 0;
             double[][] wellValues = new double[template.getRows()][template.getColumns()];
-            List<Plate> plates = new ArrayList<Plate>();
+            List<Plate> plates = new ArrayList<>();
             for (Map<String, Object> rowData : loader)
             {
                 // Current line in the data file is calculated by the number of wells we've already read,
@@ -142,11 +142,11 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     @Override
     protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
     {
-        Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
+        Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
         for (ExpMaterial material : sampleInputs)
             nameToMaterial.put(material.getName(), material);
 
-        Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<ExpMaterial, List<WellGroup>>();
+        Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<>();
         for (Plate plate : plates)
         {
             List<? extends WellGroup> specimenGroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
@@ -162,7 +162,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
                 List<WellGroup> materialWellGroups = mapping.get(material);
                 if (materialWellGroups == null)
                 {
-                    materialWellGroups = new ArrayList<WellGroup>();
+                    materialWellGroups = new ArrayList<>();
                     mapping.put(material, materialWellGroups);
                 }
                 materialWellGroups.add(specimenGroup);

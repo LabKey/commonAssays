@@ -132,7 +132,7 @@ public class GroupNumberDisplayColumn extends DataColumn
         if (_fromQuery)
         {
             FieldKey thisFieldKey = FieldKey.fromString(getColumnInfo().getName());
-            List<FieldKey> keys = new ArrayList<FieldKey>();
+            List<FieldKey> keys = new ArrayList<>();
 
             FieldKey idiKey = new FieldKey(thisFieldKey.getTable(), "IndistinguishableCollectionId");
             keys.add(idiKey);

@@ -41,7 +41,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
 {
     static public List<FlowDataObject> fromDatas(ExpData[] datas)
     {
-        List<ExpData> flowDatas = new ArrayList<ExpData>(datas.length);
+        List<ExpData> flowDatas = new ArrayList<>(datas.length);
         for (ExpData data : datas)
         {
             if (data.getDataType() instanceof FlowDataType)
@@ -49,13 +49,13 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         }
 
         List<AttrObject> attrs = FlowManager.get().getAttrObjects(flowDatas);
-        Map<Integer, AttrObject> attrMap = new HashMap<Integer, AttrObject>(2*datas.length);
+        Map<Integer, AttrObject> attrMap = new HashMap<>(2*datas.length);
         for (AttrObject attr : attrs)
         {
             attrMap.put(attr.getDataId(), attr);
         }
 
-        List<FlowDataObject> ret = new ArrayList<FlowDataObject>(attrs.size());
+        List<FlowDataObject> ret = new ArrayList<>(attrs.size());
         for (ExpData data : flowDatas)
         {
             FlowDataType dataType = (FlowDataType)data.getDataType();
@@ -113,7 +113,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
     static public Collection<FlowDataObject> fromAttrObjectURI(Container c, URI uri)
     {
         Collection<AttrObject> objs = FlowManager.get().getAttrObjectsFromURI(c, uri);
-        Collection<FlowDataObject> ret = new ArrayList<FlowDataObject>(objs.size());
+        Collection<FlowDataObject> ret = new ArrayList<>(objs.size());
         for (AttrObject obj : objs)
         {
             FlowDataObject flowDataObject = fromRowId(obj.getDataId());

@@ -78,7 +78,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
             Object cachedGroupingValue = ctx.get("PeptideListGroupingValue");
             if (peptides == null || cachedGroupingValue == null || !cachedGroupingValue.equals(groupingValue))
             {
-                peptides = new ArrayList<String>();
+                peptides = new ArrayList<>();
 
                 peptides.add(originalRS.getString(_peptideColumn.getAlias()));
                 int originalRow = originalRS.getRow();

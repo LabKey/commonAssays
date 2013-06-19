@@ -183,7 +183,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         concProp.setFormat("0.000");
         concProp.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
 
-        return new Pair<Domain, Map<DomainProperty, Object>>(dataDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(dataDomain, Collections.<DomainProperty, Object>emptyMap());
     }
 
     @Override
@@ -279,7 +279,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS);
 
         Domain sampleDomain = getSampleWellGroupDomain(protocol);
-        List<String> sampleColumns = new ArrayList<String>();
+        List<String> sampleColumns = new ArrayList<>();
         for (DomainProperty property : sampleDomain.getProperties())
         {
             sampleColumns.add(property.getName());
@@ -291,14 +291,14 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
             Object fitParams = run.getProperty(prop);
             if (fitParams != null)
             {
-                List<Double> params = new ArrayList<Double>();
+                List<Double> params = new ArrayList<>();
                 for (String param : fitParams.toString().split("&"))
                     params.add(Double.parseDouble(param));
 
                 form.setFitParams(params.toArray(new Double[params.size()]));
             }
         }
-        JspView chartView = new JspView<ElisaController.GenericReportForm>("/org/labkey/elisa/view/runDetailsView.jsp", form);
+        JspView chartView = new JspView<>("/org/labkey/elisa/view/runDetailsView.jsp", form);
 
         chartView.setTitle("Calibration Curve");
         chartView.setFrame(WebPartView.FrameType.PORTAL);

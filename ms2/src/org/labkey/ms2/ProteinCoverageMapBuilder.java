@@ -63,7 +63,7 @@ public class ProteinCoverageMapBuilder
     {
         String[] peptides = getPeptidesForFilter(filter);
         Set<String> distinct = Protein.getDistinctTrimmedPeptides(peptides);
-        return new Pair<Integer, Integer>(peptides.length, distinct.size());
+        return new Pair<>(peptides.length, distinct.size());
     }
 
     public String[] getPeptidesForFilter(SimpleFilter filter)
@@ -198,8 +198,8 @@ public class ProteinCoverageMapBuilder
 
             ProteinCoverageMapBuilder pcm1 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
             pcm1.setProteinPeptides(peptides1);
-            Set<String> distinct = new HashSet<String>(Arrays.asList(peptides1));
-            Pair<Integer, Integer> counts = new Pair<Integer, Integer>(peptides1.length, distinct.size());
+            Set<String> distinct = new HashSet<>(Arrays.asList(peptides1));
+            Pair<Integer, Integer> counts = new Pair<>(peptides1.length, distinct.size());
             pcm1.setAllPeptideCounts(counts);
             pcm1.setTargetPeptideCounts(counts);
 
@@ -233,8 +233,8 @@ public class ProteinCoverageMapBuilder
             f.addCondition(FieldKey.fromParts("PeptideProhet"), 0.9, CompareType.GTE);
             ProteinCoverageMapBuilder pcm2 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
             pcm2.setProteinPeptides(peptides2);
-            distinct = new HashSet<String>(Arrays.asList(peptides2));
-            counts = new Pair<Integer, Integer>(peptides2.length, distinct.size());
+            distinct = new HashSet<>(Arrays.asList(peptides2));
+            counts = new Pair<>(peptides2.length, distinct.size());
             pcm2.setAllPeptideCounts(counts);
             exportHtml = pcm2.getProteinExportHtml();
 

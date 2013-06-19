@@ -58,7 +58,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
 
     public List<String> getTemplateTypes()
     {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         names.add(BLANK_PLATE);
         names.add(DEFAULT_PLATE);
         return names;
@@ -67,7 +67,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     @Override
     public List<Pair<Integer, Integer>> getSupportedPlateSizes()
     {
-        return Collections.singletonList(new Pair<Integer, Integer>(8, 12));
+        return Collections.singletonList(new Pair<>(8, 12));
     }
 
     public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount) throws SQLException
@@ -89,8 +89,8 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
             // populate the antigen groups
             for (int antigen = 0; antigen < 4; antigen++)
             {
-                List<Position> position1 = new ArrayList<Position>();
-                List<Position> position2 = new ArrayList<Position>();
+                List<Position> position1 = new ArrayList<>();
+                List<Position> position2 = new ArrayList<>();
 
                 for (int sample = 0; sample < 4; sample++)
                 {
@@ -151,7 +151,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
      */
     public static Map<String, Map<String, Double>> getBackgroundValues(Container container, Plate plate)
     {
-        Map<String, Map<String, Double>> backgroundMap = new HashMap<String, Map<String, Double>>();
+        Map<String, Map<String, Double>> backgroundMap = new HashMap<>();
         WellGroup backgroundGroup = null;
 
         for (WellGroup group : plate.getWellGroups(WellGroup.Type.CONTROL))
@@ -186,7 +186,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
                 {
                     statsData = Arrays.copyOf(statsData, i);
                     Stats.DoubleStats stats = new Stats.DoubleStats(statsData);
-                    Map<String, Double> values = new HashMap<String, Double>();
+                    Map<String, Double> values = new HashMap<>();
 
                     if (!Double.isNaN(stats.getMedian()))
                         values.put(MEDIAN_STAT, stats.getMedian());
@@ -204,7 +204,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     @Override
     public Map<String, List<String>> getDefaultGroupsForTypes()
     {
-        Map<String, List<String>> groupMap = new HashMap<String, List<String>>();
+        Map<String, List<String>> groupMap = new HashMap<>();
 
         groupMap.put(WellGroup.Type.CONTROL.name(), Collections.singletonList(BACKGROUND_WELL_GROUP));
 

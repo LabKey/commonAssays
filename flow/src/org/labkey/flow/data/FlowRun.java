@@ -127,7 +127,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             _allDatas = getDatas(null);
         }
         
-        List<FlowWell> wells = new ArrayList<FlowWell>();
+        List<FlowWell> wells = new ArrayList<>();
         for (FlowDataObject obj : _allDatas)
         {
             if (obj instanceof FlowWell)
@@ -355,7 +355,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     static public FlowRun[] getRunsWithRealFCSFiles(Container container, FlowProtocolStep step)
     {
         FlowRun[] runs = FlowRun.getRunsForContainer(container, step);
-        List<FlowRun> ret = new ArrayList<FlowRun>();
+        List<FlowRun> ret = new ArrayList<>();
         for (FlowRun run : runs)
         {
             if (run.hasRealWells())
@@ -369,7 +369,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         if (scriptId == 0)
             return new FlowRun[0];
 
-        List<FlowRun> ret = new ArrayList<FlowRun>();
+        List<FlowRun> ret = new ArrayList<>();
         for (FlowRun run : getRunsForContainer(container, step))
         {
             if (scriptId == run.getScriptId())
@@ -399,7 +399,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot, Comparator<FlowRun> comparator)
     {
-        List<FlowRun> ret = new ArrayList<FlowRun>();
+        List<FlowRun> ret = new ArrayList<>();
         ExpProtocol childProtocol = null;
         if (step != null)
         {
@@ -457,14 +457,14 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles");
         ColumnInfo colRowId = table.getColumn("RowId");
-        List<FlowFCSFile> ret = new ArrayList<FlowFCSFile>();
+        List<FlowFCSFile> ret = new ArrayList<>();
 
         SimpleFilter filter = new SimpleFilter();
         if (protocol != null)
             filter.addAllClauses(protocol.getFCSAnalysisFilter());
         if (settings != null)
             filter.addAllClauses(settings.getFilter());
-        ResultSet rs = QueryService.get().select(table, new ArrayList<ColumnInfo>(Arrays.asList(colRowId)), filter, null);
+        ResultSet rs = QueryService.get().select(table, new ArrayList<>(Arrays.asList(colRowId)), filter, null);
         while (rs.next())
         {
             FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));

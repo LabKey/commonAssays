@@ -123,7 +123,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
         if (includeHeaders)
         {
-            headers = new ArrayList<String>();
+            headers = new ArrayList<>();
             if (_runs.length == 1)
             {
                 headers.addAll(getRunSummaryHeaders(_runs[0]));
@@ -143,7 +143,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         {
             if (includeHeaders && runs.size() > 1)
             {
-                headers = new ArrayList<String>();
+                headers = new ArrayList<>();
 
                 if (i > 0)
                     headers.add("");

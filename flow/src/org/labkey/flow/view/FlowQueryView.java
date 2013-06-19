@@ -302,14 +302,14 @@ public class FlowQueryView extends QueryView
             {
                 ExportAnalysisForm form = new ExportAnalysisForm();
                 form.setSelectionType("runs");
-                HttpView analysisExportView = new JspView<ExportAnalysisForm>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
             }
             else if (queryName.equals(FlowTableType.FCSFiles.toString()) || queryName.equals(FlowTableType.FCSAnalyses.toString()) || queryName.equals(FlowTableType.CompensationControls.toString()))
             {
                 ExportAnalysisForm form = new ExportAnalysisForm();
                 form.setSelectionType("wells");
-                HttpView analysisExportView = new JspView<ExportAnalysisForm>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
             }
         }
@@ -351,7 +351,7 @@ public class FlowQueryView extends QueryView
         NavTrailConfig ntc = super.getNavTrailConfig();
         FlowSchema schema = getSchema();
         FlowRun run = schema.getRun();
-        List<NavTree> children = new ArrayList<NavTree>();
+        List<NavTree> children = new ArrayList<>();
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
             children.add(0, new NavTree("Flow Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer())));

@@ -86,7 +86,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
                 @Override
                 public Map<String, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
                 {
-                    Map<String, Map<DomainProperty, String>> result = new HashMap<String, Map<DomainProperty, String>>();
+                    Map<String, Map<DomainProperty, String>> result = new HashMap<>();
                     int index = 0;
                     for (String sampleName : getSampleNames())
                     {
@@ -95,7 +95,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
                         {
                             throw new IllegalStateException("Expected one well group but found " + dilutionSummary.getWellGroups().size());
                         }
-                        Map<DomainProperty, String> props = new HashMap<DomainProperty, String>();
+                        Map<DomainProperty, String> props = new HashMap<>();
                         for (DomainProperty property : _provider.getSampleWellGroupDomain(_protocol).getProperties())
                         {
                             if (NabAssayProvider.SAMPLE_INITIAL_DILUTION_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
@@ -178,7 +178,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
 
     private Map<DomainProperty, String> findProperties(Domain domain)
     {
-        Map<DomainProperty, String> result = new HashMap<DomainProperty, String>();
+        Map<DomainProperty, String> result = new HashMap<>();
         for (DomainProperty property : domain.getProperties())
         {
             // Handle all of the "built-in" NAb run/batch properties
@@ -348,7 +348,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
 
     public Map<String, String> getSpecimensToLSIDs()
     {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (DilutionSummary dilutionSummary : _legacyRun.getSummaries())
         {
             for (WellGroup wellGroup : dilutionSummary.getWellGroups())

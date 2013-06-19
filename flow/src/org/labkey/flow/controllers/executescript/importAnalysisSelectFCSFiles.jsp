@@ -123,7 +123,7 @@
 
 <%
     FlowRun[] allKeywordRuns = FlowRun.getRunsForContainer(container, FlowProtocolStep.keywords);
-    Map<FlowRun, String> keywordRuns = new LinkedHashMap<FlowRun, String>(allKeywordRuns.length);
+    Map<FlowRun, String> keywordRuns = new LinkedHashMap<>(allKeywordRuns.length);
     for (FlowRun keywordRun : allKeywordRuns)
     {
         if (keywordRun.getPath() == null)

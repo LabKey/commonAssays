@@ -73,7 +73,7 @@ public class SamplesConfirmGridView extends GridView
     static FieldKey SAMPLE_NAME_FIELD_KEY = new FieldKey(null, "SampleName");
     static FieldKey GROUP_NAMES_FIELD_KEY = new FieldKey(null, "GroupNames");
 
-    Map<Integer, FlowRun> _runs = new HashMap<Integer, FlowRun>();
+    Map<Integer, FlowRun> _runs = new HashMap<>();
 
     public SamplesConfirmGridView(SelectedSamples data, boolean resolving, Errors errors)
     {
@@ -88,7 +88,7 @@ public class SamplesConfirmGridView extends GridView
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         if (resolving)
         {
             columns.add(MATCHED_FLAG_FIELD_KEY.getName());
@@ -105,8 +105,8 @@ public class SamplesConfirmGridView extends GridView
 
 
         // Create the data maps, one for each sample in the workspace
-        List<Map<String, Object>> unmatchedList = new ArrayList<Map<String, Object>>(samples.size());
-        List<Map<String, Object>> matchedList = new ArrayList<Map<String, Object>>(samples.size());
+        List<Map<String, Object>> unmatchedList = new ArrayList<>(samples.size());
+        List<Map<String, Object>> matchedList = new ArrayList<>(samples.size());
         for (ISampleInfo sample : samples)
         {
             Object[] row = new Object[columnCount];
@@ -154,7 +154,7 @@ public class SamplesConfirmGridView extends GridView
         }
 
         // Combine unmatched and matched lists (unmatched are first so the user sees them)
-        List<Map<String, Object>> maps = new ArrayList<Map<String, Object>>(samples.size());
+        List<Map<String, Object>> maps = new ArrayList<>(samples.size());
         maps.addAll(unmatchedList);
         maps.addAll(matchedList);
 
@@ -178,7 +178,7 @@ public class SamplesConfirmGridView extends GridView
         // If the sample id selector value is present in the selection state, the row is checked.
         //dr.setRecordSelectorValueColumns(SAMPLE_ID_FIELD_KEY.getName());
         dr.setShowRecordSelectors(true);
-        Set<String> selected = new HashSet<String>();
+        Set<String> selected = new HashSet<>();
         for (Map.Entry<String, SelectedSamples.ResolvedSample> row : rows.entrySet())
         {
             if (row.getValue().isSelected())
@@ -402,7 +402,7 @@ public class SamplesConfirmGridView extends GridView
                 return _list;
 
             // Put most likely canidates on the top of the list
-            Set<Integer> candidateRowIds = new HashSet<Integer>(candidates.size());
+            Set<Integer> candidateRowIds = new HashSet<>(candidates.size());
             NamedObjectList list = new NamedObjectList();
             for (FlowFCSFile candidate : candidates)
             {

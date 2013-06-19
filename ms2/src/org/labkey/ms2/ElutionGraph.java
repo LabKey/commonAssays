@@ -53,7 +53,7 @@ public class ElutionGraph
         XYSeries selectedSeries = new XYSeries("Selected", false, false);
         XYSeries surroundingSeries = new XYSeries("Surrounding", false, false);
 
-        Set<Integer> scans = new HashSet<Integer>();
+        Set<Integer> scans = new HashSet<>();
         for (PeptideQuantitation.ScanInfo scanInfo : scanInfos)
         {
             if (!scans.contains(scanInfo.getScan()))

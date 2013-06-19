@@ -40,7 +40,7 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
     {
         super(antigenDomainProperties);
         _template = template;
-        _antigenNames = new ArrayList<String>();
+        _antigenNames = new ArrayList<>();
 
         if (template != null)
         {

@@ -157,7 +157,7 @@ public class SelectedSamples
         if (_rows.isEmpty())
             return Collections.emptyMap();
 
-        Map<String, String> hidden = new HashMap<String, String>();
+        Map<String, String> hidden = new HashMap<>();
         for (Map.Entry<String, ResolvedSample> entry : _rows.entrySet())
         {
             String sampleId = entry.getKey();

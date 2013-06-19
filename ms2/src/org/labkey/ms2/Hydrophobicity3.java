@@ -162,7 +162,7 @@ public class Hydrophobicity3 {
   without the surrounding 0s.
 */
 
-    private static final HashMap<String,Double> CLUSTCOMB = new HashMap<String,Double>();
+    private static final HashMap<String,Double> CLUSTCOMB = new HashMap<>();
     static {
         CLUSTCOMB.put("0110"     , 0.3);
         CLUSTCOMB.put("0150"     , 0.4);
@@ -290,9 +290,9 @@ public class Hydrophobicity3 {
         CLUSTCOMB.put("05555550" , 4.5);
     }
 
-    private static final HashMap<String,Double> HlxScore4 = new HashMap<String,Double>();
-    private static final HashMap<String,Double> HlxScore5 = new HashMap<String,Double>();
-    private static final HashMap<String,Double> HlxScore6 = new HashMap<String,Double>();
+    private static final HashMap<String,Double> HlxScore4 = new HashMap<>();
+    private static final HashMap<String,Double> HlxScore5 = new HashMap<>();
+    private static final HashMap<String,Double> HlxScore6 = new HashMap<>();
 
     static {
         HlxScore4.put("XXUX"  , 0.8);

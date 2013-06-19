@@ -88,7 +88,7 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
             }
         });
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> defaultCols = new ArrayList<>(result.getDefaultVisibleColumns());
         defaultCols.add(2, FieldKey.fromParts(searchLinkCol.getName()));
         result.setDefaultVisibleColumns(defaultCols);
 
@@ -175,7 +175,7 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
             }
         });
 
-        List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> cols = new ArrayList<>(result.getDefaultVisibleColumns());
         cols.remove(FieldKey.fromParts(ExpDataTable.Column.DataFileUrl));
         Domain fractionDomain = ((MassSpecMetadataAssayProvider)getProvider()).getFractionDomain(getProtocol());
         if (fractionDomain != null)

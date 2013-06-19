@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public abstract class SampleInfoBase implements ISampleInfo, Serializable
 {
-    protected Map<String, String> _keywords = new CaseInsensitiveTreeMap<String>();
+    protected Map<String, String> _keywords = new CaseInsensitiveTreeMap<>();
     protected String _sampleId;
     protected String _sampleName;
 

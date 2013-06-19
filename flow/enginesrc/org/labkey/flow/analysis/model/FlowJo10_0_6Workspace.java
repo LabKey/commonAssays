@@ -70,8 +70,8 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
 
         String xAxis = ___cleanName(dims[0].getFcsDimension().getName());
         String yAxis = ___cleanName(dims[1].getFcsDimension().getName());
-        List<Double> lstX = new ArrayList<Double>();
-        List<Double> lstY = new ArrayList<Double>();
+        List<Double> lstX = new ArrayList<>();
+        List<Double> lstY = new ArrayList<>();
 
         for (Point2DType vertex : vertices)
         {
@@ -89,9 +89,9 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
 
     private Gate readRectangleGate(RectangleGateType xRectangleGate)
     {
-        List<String> axes = new ArrayList<String>();
-        List<Double> lstMin = new ArrayList<Double>();
-        List<Double> lstMax = new ArrayList<Double>();
+        List<String> axes = new ArrayList<>();
+        List<Double> lstMin = new ArrayList<>();
+        List<Double> lstMax = new ArrayList<>();
         for (RectangleGateDimensionType dim : xRectangleGate.getDimensionArray())
         {
             axes.add(dim.getFcsDimension().getName());

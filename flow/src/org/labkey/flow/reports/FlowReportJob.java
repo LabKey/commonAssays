@@ -95,7 +95,7 @@ public class FlowReportJob extends RReportJob
     {
         super.processOutputs(report, outputSubst);
 
-        List<Tuple3<TsvOutput, Domain, FlowTableType>> tuples = new ArrayList<Tuple3<TsvOutput, Domain, FlowTableType>>();
+        List<Tuple3<TsvOutput, Domain, FlowTableType>> tuples = new ArrayList<>();
 
         // Create the domains in a separate transaction from saving the data.
         DbSchema schema = ExperimentService.get().getSchema();

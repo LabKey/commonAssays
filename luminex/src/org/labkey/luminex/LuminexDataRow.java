@@ -35,7 +35,7 @@ public class LuminexDataRow
     private int _analyte;
     private int _rowId;
 
-    private Map<String, Object> _extraProperties = new CaseInsensitiveHashMap<Object>();
+    private Map<String, Object> _extraProperties = new CaseInsensitiveHashMap<>();
 
     private String _lsid;
     private String _type;
@@ -108,7 +108,7 @@ public class LuminexDataRow
         setFi(fiBackground);
         setFiBackground(fiBackground);
 
-        Map<String, Object> extraProperties = new CaseInsensitiveHashMap<Object>();
+        Map<String, Object> extraProperties = new CaseInsensitiveHashMap<>();
         extraProperties.put("Standard", standard);
         setExtraProperties(extraProperties);
 
@@ -545,7 +545,7 @@ public class LuminexDataRow
 
     public Map<String, Object> toMap(Analyte analyte)
     {
-        Map<String, Object> row = new CaseInsensitiveHashMap<Object>(_extraProperties);
+        Map<String, Object> row = new CaseInsensitiveHashMap<>(_extraProperties);
 
         ObjectFactory<Analyte> af = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == af)

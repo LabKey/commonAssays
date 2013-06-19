@@ -110,14 +110,14 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
         Container container = data.getContainer();
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
         if (provider instanceof PlateBasedAssayProvider)
         {
-            Map<String, DomainProperty> runProperties = new HashMap<String, DomainProperty>();
+            Map<String, DomainProperty> runProperties = new HashMap<>();
             for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
                 runProperties.put(column.getName(), column);
 
@@ -143,11 +143,11 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                         WellGroup controlGroup = controlGroups.get(0);
                         SimpleRegression regression = new SimpleRegression(true);
 
-                        Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
+                        Map<String, ExpMaterial> materialMap = new HashMap<>();
                         for (ExpMaterial material : data.getRun().getMaterialInputs().keySet())
                             materialMap.put(material.getName(), material);
 
-                        Map<Position, String> specimenGroupMap = new HashMap<Position, String>();
+                        Map<Position, String> specimenGroupMap = new HashMap<>();
                         for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                         {
                             for (Position pos : sample.getPositions())
@@ -169,7 +169,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             // save the individual well values for the control group
                             for (Position position : replicate.getPositions())
                             {
-                                Map<String, Object> row = new HashMap<String, Object>();
+                                Map<String, Object> row = new HashMap<>();
 
                                 Well well = plate.getWell(position.getRow(), position.getColumn());
                                 row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
@@ -206,7 +206,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             {
                                 for (Position position : replicate.getPositions())
                                 {
-                                    Map<String, Object> row = new HashMap<String, Object>();
+                                    Map<String, Object> row = new HashMap<>();
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
 
                                     row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
@@ -235,7 +235,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 }
             }
         }
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
         datas.put(getDataType(), results);
 
         return datas;
@@ -243,7 +243,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
     private Map<String, Double> getStandardConcentrations(AssayRunUploadContext context) throws ExperimentException
     {
-        Map<String, Double> concentrations = new HashMap<String, Double>();
+        Map<String, Double> concentrations = new HashMap<>();
         if (context instanceof ElisaRunUploadForm)
         {
             Map<String, Map<DomainProperty, String>> props = ((ElisaRunUploadForm)context).getConcentrationProperties();

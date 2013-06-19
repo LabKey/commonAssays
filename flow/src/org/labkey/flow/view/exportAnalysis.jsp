@@ -32,7 +32,7 @@
     ExportAnalysisForm bean = me.getModelBean();
     Container container = getViewContext().getContainer();
     
-    Map<AnalysisSerializer.Options, String> exportFormats = new EnumMap<AnalysisSerializer.Options, String>(AnalysisSerializer.Options.class);
+    Map<AnalysisSerializer.Options, String> exportFormats = new EnumMap<>(AnalysisSerializer.Options.class);
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySample, "Grouped by sample");
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySamplePopulation, "Grouped by sample and population");
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySamplePopulationParameter, "Grouped by sample, popuplation, and parameter");

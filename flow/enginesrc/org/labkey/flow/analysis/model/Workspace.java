@@ -52,18 +52,18 @@ public abstract class Workspace implements IWorkspace, Serializable
     protected String _path = null;
     
     // group name -> analysis
-    protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<PopulationName, Analysis>();
+    protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<>();
     // sample id -> analysis
-    protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<String, Analysis>();
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<String, AttributeSet>();
-    protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<String, GroupInfo>();
-    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<SampleInfo>(new LinkedHashMap<String, SampleInfo>());
-    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<ParameterInfo>(new LinkedHashMap<String, ParameterInfo>());
-    protected List<CalibrationTable> _calibrationTables = new ArrayList<CalibrationTable>();
+    protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<>();
+    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<>();
+    protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<>();
+    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
+    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, ParameterInfo>());
+    protected List<CalibrationTable> _calibrationTables = new ArrayList<>();
     protected ScriptSettings _settings = new ScriptSettings();
-    protected List<String> _warnings = new LinkedList<String>();
-    protected List<CompensationMatrix> _compensationMatrices = new ArrayList<CompensationMatrix>();
-    protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<AutoCompensationScript>();
+    protected List<String> _warnings = new LinkedList<>();
+    protected List<CompensationMatrix> _compensationMatrices = new ArrayList<>();
+    protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<>();
     protected Set<String> _keywords = new CaseInsensitiveTreeSet();
 
     protected Workspace()
@@ -203,7 +203,7 @@ public abstract class Workspace implements IWorkspace, Serializable
 
     public Set<CompensationMatrix> getUsedCompensationMatrices()
     {
-        Set<CompensationMatrix> ret = new LinkedHashSet<CompensationMatrix>();
+        Set<CompensationMatrix> ret = new LinkedHashSet<>();
         for (SampleInfo sample : getSamplesComplete())
         {
             CompensationMatrix comp = sample.getCompensationMatrix();
@@ -221,7 +221,7 @@ public abstract class Workspace implements IWorkspace, Serializable
 
     public List<GroupInfo> getGroups()
     {
-        return new ArrayList<GroupInfo>(_groupInfos.values());
+        return new ArrayList<>(_groupInfos.values());
     }
 
     public GroupInfo getGroup(String groupId)
@@ -265,7 +265,7 @@ public abstract class Workspace implements IWorkspace, Serializable
      */
     public List<SampleInfo> getSamplesComplete()
     {
-        return new ArrayList<SampleInfo>(_sampleInfos.values());
+        return new ArrayList<>(_sampleInfos.values());
     }
 
     /**
@@ -278,9 +278,9 @@ public abstract class Workspace implements IWorkspace, Serializable
     public Set<SampleInfo> getSamples(Collection<PopulationName> groupNames, Collection<String> sampleNames)
     {
         if (groupNames.isEmpty() && sampleNames.isEmpty())
-            return new LinkedHashSet<SampleInfo>(getSamplesComplete());
+            return new LinkedHashSet<>(getSamplesComplete());
 
-        Set<Workspace.SampleInfo> sampleInfos = new LinkedHashSet<Workspace.SampleInfo>();
+        Set<Workspace.SampleInfo> sampleInfos = new LinkedHashSet<>();
         if (!groupNames.isEmpty())
         {
             for (Workspace.GroupInfo group : getGroups())
@@ -331,7 +331,7 @@ public abstract class Workspace implements IWorkspace, Serializable
         if (allSamples == null)
             return Collections.emptyList();
 
-        List<String> allSampleIds = new ArrayList<String>(allSamples.size());
+        List<String> allSampleIds = new ArrayList<>(allSamples.size());
         for (SampleInfo sample : allSamples)
             allSampleIds.add(sample.getSampleId());
 
@@ -345,7 +345,7 @@ public abstract class Workspace implements IWorkspace, Serializable
         if (allSamples == null || allSamples.size() == 0)
             return Collections.emptyList();
 
-        List<String> allSampleLabels = new ArrayList<String>(allSamples.size());
+        List<String> allSampleLabels = new ArrayList<>(allSamples.size());
         for (SampleInfo sample : allSamples)
             allSampleLabels.add(sample.getLabel());
 
@@ -394,12 +394,12 @@ public abstract class Workspace implements IWorkspace, Serializable
 
     public List<String> getParameterNames()
     {
-        return new ArrayList<String>(_parameters.keySet());
+        return new ArrayList<>(_parameters.keySet());
     }
 
     public List<ParameterInfo> getParameters()
     {
-        return new ArrayList<ParameterInfo>(_parameters.values());
+        return new ArrayList<>(_parameters.values());
     }
 
     public SampleInfo findSampleWithKeywordValue(String keyword, String value)
@@ -560,7 +560,7 @@ public abstract class Workspace implements IWorkspace, Serializable
         public List<PopulationName> getGroupNames()
         {
             List<GroupInfo> groups = getGroups();
-            List<PopulationName> groupNames = new ArrayList<PopulationName>(groups.size());
+            List<PopulationName> groupNames = new ArrayList<>(groups.size());
             for (GroupInfo group : groups)
                 groupNames.add(group.getGroupName());
             return groupNames;
@@ -568,7 +568,7 @@ public abstract class Workspace implements IWorkspace, Serializable
 
         public List<GroupInfo> getGroups()
         {
-            List<GroupInfo> groups = new ArrayList<GroupInfo>(4);
+            List<GroupInfo> groups = new ArrayList<>(4);
             for (GroupInfo group : _groupInfos.values())
             {
                 if (group.getSampleIds().contains(getSampleId()))
@@ -583,7 +583,7 @@ public abstract class Workspace implements IWorkspace, Serializable
     {
         String _groupId;
         PopulationName _groupName;
-        List<String> _sampleIds = new ArrayList<String>();
+        List<String> _sampleIds = new ArrayList<>();
 
         public boolean isAllSamples()
         {
@@ -593,14 +593,14 @@ public abstract class Workspace implements IWorkspace, Serializable
         public List<String> getSampleIds()
         {
             if (_sampleIds.size() == 0 && isAllSamples())
-                return new ArrayList<String>(Workspace.this._sampleInfos.keySet());
+                return new ArrayList<>(Workspace.this._sampleInfos.keySet());
             return _sampleIds;
         }
 
         public List<SampleInfo> getSampleInfos()
         {
             List<String> sampleIds = getSampleIds();
-            ArrayList<SampleInfo> sampleInfos = new ArrayList<SampleInfo>(sampleIds.size());
+            ArrayList<SampleInfo> sampleInfos = new ArrayList<>(sampleIds.size());
             for (String sampleId : sampleIds)
             {
                 SampleInfo sampleInfo = getSample(sampleId);

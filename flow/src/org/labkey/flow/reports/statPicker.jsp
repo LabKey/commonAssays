@@ -57,7 +57,7 @@
 
     StringBuilder jsonSamples = new StringBuilder();
     jsonSamples.append("[");
-    List<String> sampleSetProperties = new ArrayList<String>();
+    List<String> sampleSetProperties = new ArrayList<>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(context.getUser(), context.getContainer());
     if (protocol != null)
     {

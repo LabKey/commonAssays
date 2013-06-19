@@ -120,7 +120,7 @@ public class EditSettingsForm extends EditScriptForm
 
     public Map<FieldKey, String> getFieldOptions()
     {
-        Map<FieldKey, String> options = new LinkedHashMap<FieldKey, String>();
+        Map<FieldKey, String> options = new LinkedHashMap<>();
         options.put(null, "");
         options.put(FieldKey.fromParts("Name"), "FCS file name");
         options.put(FieldKey.fromParts("Run", "Name"), "Run name");
@@ -135,7 +135,7 @@ public class EditSettingsForm extends EditScriptForm
 
     public Map<String, String> getOpOptions()
     {
-        Map<String, String> options = new LinkedHashMap<String, String>();
+        Map<String, String> options = new LinkedHashMap<>();
         addCompare(options, CompareType.EQUAL);
         addCompare(options, CompareType.NEQ_OR_NULL);
         addCompare(options, CompareType.ISBLANK);

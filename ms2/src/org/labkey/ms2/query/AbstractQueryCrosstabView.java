@@ -77,7 +77,7 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
     {
         List<MS2Run> runs = _schema.getRuns();
         GWTComparisonMember[] gwtMembers = new GWTComparisonMember[runs.size()];
-        Map<Integer, GWTComparisonGroup> groups = new HashMap<Integer, GWTComparisonGroup>();
+        Map<Integer, GWTComparisonGroup> groups = new HashMap<>();
         for (int i = 0; i < runs.size(); i++)
         {
             MS2Run run = runs.get(i);

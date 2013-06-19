@@ -483,7 +483,7 @@ public class PipelineController extends SpringActionController
             ActionURL returnURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlReferer(getContainer());
            
             //properties to send to GWT page
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
             props.put("errors", getErrors(errors));
             props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
             props.put(ActionURL.Param.returnUrl.name(), returnURL.getLocalURIString() );
@@ -606,7 +606,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<SetDefaultsForm>(XTandemPipelineProvider.class, "setTandemDefaults.jsp", form, errors);
+            return new JspView<>(XTandemPipelineProvider.class, "setTandemDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -630,7 +630,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<SetDefaultsForm>(MascotCPipelineProvider.class, "setMascotDefaults.jsp", form, errors);
+            return new JspView<>(MascotCPipelineProvider.class, "setMascotDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -654,7 +654,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<SetDefaultsForm>(SequestPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
+            return new JspView<>(SequestPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()

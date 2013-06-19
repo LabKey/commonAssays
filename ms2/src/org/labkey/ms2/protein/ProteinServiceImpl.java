@@ -39,8 +39,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ProteinServiceImpl implements ProteinService
 {
     private List<OrganismGuessStrategy> _strategies;
-    private List<QueryViewProvider<ProteinSearchForm>> _proteinSearchViewProviders = new CopyOnWriteArrayList<QueryViewProvider<ProteinSearchForm>>();
-    private List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<QueryViewProvider<PeptideSearchForm>>();
+    private List<QueryViewProvider<ProteinSearchForm>> _proteinSearchViewProviders = new CopyOnWriteArrayList<>();
+    private List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<>();
 
     public ProteinServiceImpl()
     {
@@ -51,7 +51,7 @@ public class ProteinServiceImpl implements ProteinService
         // Populate lazily since some implementations need access to DbSchemas, etc
         if (_strategies == null)
         {
-            _strategies = new ArrayList<OrganismGuessStrategy>();
+            _strategies = new ArrayList<>();
             _strategies.add(new GuessOrgByParsing());
             _strategies.add(new GuessOrgBySharedHash());
             _strategies.add(new GuessOrgBySharedIdents());
@@ -103,7 +103,7 @@ public class ProteinServiceImpl implements ProteinService
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setPeptides(peptides);
         bean.aaRowWidth = aaRowWidth;
-        return new JspView<MS2Controller.ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
+        return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 
     public WebPartView getAnnotationsView(int seqId)

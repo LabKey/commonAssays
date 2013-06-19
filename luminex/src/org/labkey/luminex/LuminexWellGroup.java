@@ -60,7 +60,7 @@ public class LuminexWellGroup implements WellGroup
         {
             return _wells;
         }
-        Map<LuminexReplicate, List<LuminexWell>> allReplicates = new HashMap<LuminexReplicate, List<LuminexWell>>();
+        Map<LuminexReplicate, List<LuminexWell>> allReplicates = new HashMap<>();
         for (LuminexWell well : _wells)
         {
             // if there is both raw and summary data for this wellgroup, only use the raw data
@@ -71,13 +71,13 @@ public class LuminexWellGroup implements WellGroup
             List<LuminexWell> wells = allReplicates.get(replicate);
             if (wells == null)
             {
-                wells = new ArrayList<LuminexWell>();
+                wells = new ArrayList<>();
                 allReplicates.put(replicate, wells);
             }
             wells.add(well);
         }
 
-        List<LuminexWell> result = new ArrayList<LuminexWell>();
+        List<LuminexWell> result = new ArrayList<>();
         for (Map.Entry<LuminexReplicate, List<LuminexWell>> entry : allReplicates.entrySet())
         {
             double sumFi = 0;
@@ -171,7 +171,7 @@ public class LuminexWellGroup implements WellGroup
     @Override
     public List<Position> getPositions()
     {
-        List<Position> result = new ArrayList<Position>();
+        List<Position> result = new ArrayList<>();
         for (LuminexWell well : _wells)
         {
             String wellNames = well.getDataRow().getWell();

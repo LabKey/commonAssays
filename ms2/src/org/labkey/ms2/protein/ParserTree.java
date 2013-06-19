@@ -86,7 +86,7 @@ public class ParserTree
 
     private class ParserTreeNode
     {
-        private final Map<String, ParserTreeNode> _children = new HashMap<String, ParserTreeNode>();
+        private final Map<String, ParserTreeNode> _children = new HashMap<>();
         private final ParserTreeNode _parent;
         private final String _elementName;
         private final ParseActions _parseActions;

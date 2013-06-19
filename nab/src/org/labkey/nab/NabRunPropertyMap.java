@@ -51,10 +51,10 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         put("containerPath", assay.getRun().getContainer().getPath());
         put("containerId", assay.getRun().getContainer().getId());
         put("cutoffs", assay.getCutoffs());
-        List<Map<String, Object>> samples = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> samples = new ArrayList<>();
         for (DilutionAssayRun.SampleResult result : assay.getSampleResults())
         {
-            Map<String, Object> sample = new HashMap<String, Object>();
+            Map<String, Object> sample = new HashMap<>();
             sample.put("properties", new PropertyNameMap(result.getSampleProperties()));
             DilutionSummary dilutionSummary = result.getDilutionSummary();
             sample.put("objectId", result.getObjectId());
@@ -79,12 +79,12 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 {
                     sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getRenderedCurveFitType()).toMap());
                 }
-                List<Map<String, Object>> replicates = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> replicates = new ArrayList<>();
                 for (WellGroup sampleGroup : dilutionSummary.getWellGroups())
                 {
                     for (WellGroup replicate : sampleGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
                     {
-                        Map<String, Object> replicateProps = new HashMap<String, Object>();
+                        Map<String, Object> replicateProps = new HashMap<>();
                         replicateProps.put("dilution", replicate.getDilution());
                         if (calculateNeut)
                         {
@@ -114,12 +114,12 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 String indexSuffix = plates.size() > 1 ? "" + (i + 1) : "";
                 Plate plate = plates.get(i);
                 WellGroup cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
-                Map<String, Object> cellControlProperties = new HashMap<String, Object>();
+                Map<String, Object> cellControlProperties = new HashMap<>();
                 addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
                 put("cellControl" + indexSuffix, cellControlProperties);
 
                 WellGroup virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
-                Map<String, Object> virusControlProperties = new HashMap<String, Object>();
+                Map<String, Object> virusControlProperties = new HashMap<>();
                 addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
                 put("virusControl" + indexSuffix, virusControlProperties);
             }
@@ -137,10 +137,10 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         }
         if (includeWells)
         {
-            List<Map<String, Object>> wellList = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> wellList = new ArrayList<>();
             for (Position position : group.getPositions())
             {
-                Map<String, Object> wellProps = new HashMap<String, Object>();
+                Map<String, Object> wellProps = new HashMap<>();
                 Well well = group.getPlate().getWell(position.getRow(), position.getColumn());
                 wellProps.put("row", well.getRow());
                 wellProps.put("column", well.getColumn());

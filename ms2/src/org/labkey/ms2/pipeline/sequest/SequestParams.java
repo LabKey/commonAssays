@@ -573,7 +573,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
 
     public Collection<SequestParam> getPassThroughs()
     {
-        ArrayList<SequestParam> passThroughs = new ArrayList<SequestParam>();
+        ArrayList<SequestParam> passThroughs = new ArrayList<>();
         for (Param prop : _params)
         {
             SequestParam castProp = (SequestParam) prop;

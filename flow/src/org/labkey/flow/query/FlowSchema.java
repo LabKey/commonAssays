@@ -242,7 +242,7 @@ public class FlowSchema extends UserSchema
 
     public Set<String> getVisibleTableNames()
     {
-        Set<String> ret = new HashSet<String>();
+        Set<String> ret = new HashSet<>();
         for (FlowTableType tt : FlowTableType.values())
         {
             if (!tt.isHidden())
@@ -263,7 +263,7 @@ public class FlowSchema extends UserSchema
 
     public Set<String> getTableNames()
     {
-        Set<String> ret = new LinkedHashSet<String>();
+        Set<String> ret = new LinkedHashSet<>();
         for (FlowTableType type : FlowTableType.values())
         {
             ret.add(type.toString());
@@ -1201,7 +1201,7 @@ public class FlowSchema extends UserSchema
         @Override
         public Map<FieldKey, ColumnInfo> getExtendedColumns(boolean hidden)
         {
-            LinkedHashMap<FieldKey, ColumnInfo> ret = new LinkedHashMap<FieldKey, ColumnInfo>(super.getExtendedColumns(hidden));
+            LinkedHashMap<FieldKey, ColumnInfo> ret = new LinkedHashMap<>(super.getExtendedColumns(hidden));
 
             // Add Keyword, Statistics, Background, Sample, and Report columns
             addAllColumns(ret, getColumn("Keyword"), hidden);
@@ -1364,7 +1364,7 @@ public class FlowSchema extends UserSchema
 
         public Iterator<FieldKey> iterator()
         {
-            Collection<FieldKey> ret = new LinkedHashSet<FieldKey>();
+            Collection<FieldKey> ret = new LinkedHashSet<>();
             ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumns()));
             ret.remove(FieldKey.fromParts("AnalysisScript"));
             ret.remove(FCSFILE_FIELDKEY);
@@ -1615,7 +1615,7 @@ public class FlowSchema extends UserSchema
 
     private Collection<FieldKey> addCopiedToStudyColumns(AbstractTableInfo ret)
     {
-        List<FieldKey> copiedToStudyColumns = new ArrayList<FieldKey>(10);
+        List<FieldKey> copiedToStudyColumns = new ArrayList<>(10);
         FlowProtocol protocol = getProtocol();
         if (protocol == null)
             protocol = FlowProtocol.getForContainer(getContainer());
@@ -1671,7 +1671,7 @@ public class FlowSchema extends UserSchema
     public ExpDataTable createCompensationControlTable(String alias)
     {
         ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl, false);
-        List<FieldKey> defColumns = new ArrayList<FieldKey>(ret.getDefaultVisibleColumns());
+        List<FieldKey> defColumns = new ArrayList<>(ret.getDefaultVisibleColumns());
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Count, null).toString()));
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Freq_Of_Parent, null).toString()));
         ret.setDefaultVisibleColumns(defColumns);
@@ -1795,7 +1795,7 @@ public class FlowSchema extends UserSchema
 
     private TableInfo createAttributeTable(String alias, TableInfo realTable)
     {
-        FilteredTable ret = new FilteredTable<FlowSchema>(realTable, this);
+        FilteredTable ret = new FilteredTable<>(realTable, this);
         ret.setName(alias);
         ret.addWrapColumn(ret.getRealTable().getColumn("RowId")).setHidden(true);
         ret.addWrapColumn(ret.getRealTable().getColumn("Container")).setHidden(true);
@@ -1857,7 +1857,7 @@ public class FlowSchema extends UserSchema
      * need better notification of changes per container
      */
 
-    private Map<String, TempTableToken> instanceCache = new HashMap<String,TempTableToken>();
+    private Map<String, TempTableToken> instanceCache = new HashMap<>();
     private static final Cache<String, TempTableToken> staticCache = CacheManager.getSharedCache();
 
     String getFastFlowObjectTableName(Container c, int typeid)
@@ -1992,13 +1992,13 @@ public class FlowSchema extends UserSchema
         // BACKGROUND
         FlowDataTable bg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
         bg.addObjectIdColumn("objectid");
-        Set<FieldKey> allColumns = new TreeSet<FieldKey>(ics.getMatchColumns());
+        Set<FieldKey> allColumns = new TreeSet<>(ics.getMatchColumns());
         for (FilterInfo f : ics.getBackgroundFilter())
             allColumns.add(f.getField());
         Map<FieldKey,ColumnInfo> bgMap = QueryService.get().getColumns(bg, allColumns);
         if (bgMap.size() != allColumns.size())
             return null;
-        ArrayList<ColumnInfo> bgFields = new ArrayList<ColumnInfo>();
+        ArrayList<ColumnInfo> bgFields = new ArrayList<>();
         bgFields.add(bg.getColumn("objectid"));
         bgFields.addAll(bgMap.values());
         SimpleFilter filter = new SimpleFilter();
@@ -2024,11 +2024,11 @@ public class FlowSchema extends UserSchema
         // FOREGROUND
         FlowDataTable fg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
         fg.addObjectIdColumn("objectid");
-        Set<FieldKey> setMatchColumns = new HashSet<FieldKey>(ics.getMatchColumns());
+        Set<FieldKey> setMatchColumns = new HashSet<>(ics.getMatchColumns());
         Map<FieldKey,ColumnInfo> fgMap = QueryService.get().getColumns(fg, setMatchColumns);
         if (fgMap.size() != setMatchColumns.size())
             return null;
-        ArrayList<ColumnInfo> fgFields = new ArrayList<ColumnInfo>();
+        ArrayList<ColumnInfo> fgFields = new ArrayList<>();
         fgFields.add(fg.getColumn("objectid"));
         fgFields.addAll(fgMap.values());
         SQLFragment fgSQL = Table.getSelectSQL(fg, fgFields, null, null);

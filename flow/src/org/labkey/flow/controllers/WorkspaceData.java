@@ -212,7 +212,7 @@ public class WorkspaceData implements Serializable
     {
         if (path != null)
         {
-            Map<String, String> ret = new HashMap<String, String>();
+            Map<String, String> ret = new HashMap<>();
             ret.put("path", path);
             if (originalPath != null)
                 ret.put("originalPath", originalPath);
@@ -220,7 +220,7 @@ public class WorkspaceData implements Serializable
         }
         else
         {
-            Map<String, String> ret = new HashMap<String, String>();
+            Map<String, String> ret = new HashMap<>();
             if (_object != null)
             {
                 try

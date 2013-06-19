@@ -40,7 +40,7 @@ public class ProteinPieDataset extends DefaultPieDataset
         this.extraInfo = extraInfo;
     }
 
-    protected HashMap<String, HashSet<Integer>> extraInfo = new HashMap<String, HashSet<Integer>>();
+    protected HashMap<String, HashSet<Integer>> extraInfo = new HashMap<>();
 
     public ProteinPieDataset()
     {

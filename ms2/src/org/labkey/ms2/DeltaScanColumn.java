@@ -49,7 +49,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
         if (colInfo != null)
         {
             _fractionColInfo = colInfo;
-            List<FieldKey> keys = new ArrayList<FieldKey>();
+            List<FieldKey> keys = new ArrayList<>();
             FieldKey scanKey = FieldKey.fromParts("Scan");
             keys.add(scanKey);
             FieldKey peptideKey = FieldKey.fromParts("Peptide");
@@ -114,7 +114,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
 
     private Map runRegression(MS2Fraction fraction)
     {
-        Map<String, Float> map = new HashMap<String, Float>();
+        Map<String, Float> map = new HashMap<>();
         ResultSet rs = null;
 
         try

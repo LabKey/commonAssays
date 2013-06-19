@@ -115,7 +115,7 @@ public class StatisticSpec implements Serializable, Comparable
 
     static
     {
-        List<String> stats = new ArrayList<String>();
+        List<String> stats = new ArrayList<>();
         for (STAT stat : STAT.values())
             stats.add(stat.name());
 
@@ -379,7 +379,7 @@ public class StatisticSpec implements Serializable, Comparable
             DataFrame.Field field = frame.getField(p);
             System.out.print(field.getName());
 
-            java.util.Map<String, Stats.DoubleStats> map = new java.util.HashMap<String, Stats.DoubleStats>();
+            java.util.Map<String, Stats.DoubleStats> map = new java.util.HashMap<>();
             Subset subset = new Subset(null, null, fcs, frame);
             StatisticSpec[] stats = new StatisticSpec[] {
                 new StatisticSpec(null, STAT.Min, field.getName()),

@@ -38,7 +38,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
 
     static
     {
-        Map<String, Integer> m = new CaseInsensitiveHashMap<Integer>();
+        Map<String, Integer> m = new CaseInsensitiveHashMap<>();
 
         m.put("[X]|[X]", 0);        // None
         m.put("[KR]|{P}", 1);       // Trypsin
@@ -436,7 +436,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testUWSpecificParams() throws SequestParamsException
         {
-            Map<String, String> params = new HashMap<String, String>();
+            Map<String, String> params = new HashMap<>();
             params.put("pipeline, database", "Bovine_mini.fasta");
             params.put("sequest, max_precursor_charge", "4");
             UWSequestParamsBuilder spb = new UWSequestParamsBuilder(params, _root);
@@ -465,7 +465,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testGenerateFile() throws SequestParamsException
         {
-            Map<String, String> paramMap = new HashMap<String, String>();
+            Map<String, String> paramMap = new HashMap<>();
 
             paramMap.put(ParameterNames.STATIC_MOD, "50.43@[,90.12@]");
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
@@ -483,14 +483,14 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testAlternateXmlInputs() throws SequestParamsException
         {
-            Map<String, String> paramMap = new HashMap<String, String>();
+            Map<String, String> paramMap = new HashMap<>();
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("spectrum, fragment mass error", "500.0");
             UWSequestParamsBuilder spb = new UWSequestParamsBuilder(paramMap, _root);
             spb.initPassThroughs();
             assertEquals("fragment_ion_tolerance", "500.0", spb.getPropertyValue("fragment_ion_tolerance"));
 
-            paramMap = new HashMap<String, String>();
+            paramMap = new HashMap<>();
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("sequest, fragment_ion_tolerance", "500.0");
             spb = new UWSequestParamsBuilder(paramMap, _root);

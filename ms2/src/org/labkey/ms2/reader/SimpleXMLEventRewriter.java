@@ -283,7 +283,7 @@ public class SimpleXMLEventRewriter
         public SimpleStartElement(String name, Attribute[] attrs)
         {
             this.name = name;
-            this.attrs = new ArrayList<Attribute>(Arrays.asList(attrs));
+            this.attrs = new ArrayList<>(Arrays.asList(attrs));
         }
 
         /**
@@ -293,7 +293,7 @@ public class SimpleXMLEventRewriter
             throws XMLStreamException
         {
             if (null == attrs)
-                attrs = new ArrayList<Attribute>();
+                attrs = new ArrayList<>();
             attrs.add(eventFactory.createAttribute(name, value));
         }
 

@@ -22,7 +22,7 @@ public class FlowThreadPool
 {
     private static FlowThreadPool instance;
     private Thread[] _threads;
-    private LinkedList<FlowTaskSet> _taskSets = new LinkedList<FlowTaskSet>();
+    private LinkedList<FlowTaskSet> _taskSets = new LinkedList<>();
     private boolean _alive = true;
     private int _idleCount;
 

@@ -33,9 +33,9 @@ import java.util.Set;
 public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayProvider> implements LuminexRunContext
 {
     private String[] _analyteNames;
-    private Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<String, Map<Integer, String>>();
-    private Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<String, Map<String, String>>();
-    private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<String, Set<String>>();
+    private Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<>();
+    private Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<>();
+    private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
     private List<Titration> _titrations;
 
     private transient Map<String, Map<DomainProperty, String>> _analyteProperties;
@@ -68,7 +68,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     {
         if (_analyteProperties == null)
         {
-            _analyteProperties = new HashMap<String, Map<DomainProperty, String>>();
+            _analyteProperties = new HashMap<>();
         }
         Map<DomainProperty, String> result = _analyteProperties.get(analyteName);
         if (result == null)
@@ -89,7 +89,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     {
         if (_analyteColumnProperties == null)
         {
-            _analyteColumnProperties = new HashMap<String, Map<ColumnInfo, String>>();
+            _analyteColumnProperties = new HashMap<>();
         }
         Map<ColumnInfo, String> result = _analyteColumnProperties.get(analyteName);
         if (result == null)
@@ -135,7 +135,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     /** Convert to a map that can be serialized - ColumnInfo can't be */
     private Map<String, String> convertColumnPropertiesToNames(Map<ColumnInfo, String> properties)
     {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (Map.Entry<ColumnInfo, String> entry : properties.entrySet())
         {
             result.put(entry.getKey().getName(), entry.getValue());
@@ -146,7 +146,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     /** Convert from a serialized map by looking up the ColumnInfo from the Analyte table */
     private Map<ColumnInfo, String> convertColumnPropertiesFromNames(Map<String, String> properties)
     {
-        Map<ColumnInfo, String> result = new HashMap<ColumnInfo, String>();
+        Map<ColumnInfo, String> result = new HashMap<>();
         for (Map.Entry<String, String> entry : properties.entrySet())
         {
             result.put(findColumn(entry.getKey()), entry.getValue());

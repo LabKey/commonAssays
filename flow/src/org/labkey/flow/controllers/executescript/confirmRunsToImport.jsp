@@ -43,7 +43,7 @@
 
     // Get set of valid copy to study targets
     Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
-    Map<String, String> targetStudies = new LinkedHashMap<String, String>();
+    Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");
     for (Study study : validStudies)
     {

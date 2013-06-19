@@ -40,7 +40,7 @@ public class FlowServiceImpl implements FlowService
     @Override
     public List<ExpData> getExpDataByURL(String canonicalURL, @Nullable Container container)
     {
-        List<ExpData> ret = new LinkedList<ExpData>();
+        List<ExpData> ret = new LinkedList<>();
         SQLFragment sql = new SQLFragment("SELECT dataid FROM " + FlowManager.get().getTinfoObject().getFromSQL("O") + " WHERE uri=?");
         sql.add(canonicalURL);
 

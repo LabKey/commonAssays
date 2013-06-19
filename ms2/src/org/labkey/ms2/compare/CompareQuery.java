@@ -45,7 +45,7 @@ public abstract class CompareQuery extends SQLFragment
 {
     protected ActionURL _currentUrl;
     protected String _compareColumn;
-    protected List<RunColumn> _gridColumns = new ArrayList<RunColumn>();
+    protected List<RunColumn> _gridColumns = new ArrayList<>();
     protected int _columnsPerRun;
     protected List<MS2Run> _runs;
     protected int _runCount;

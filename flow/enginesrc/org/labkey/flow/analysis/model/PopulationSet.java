@@ -38,7 +38,7 @@ public class PopulationSet implements Serializable, Cloneable
         }
     };
 
-    List<Population> _populations = new ArrayList<Population>();
+    List<Population> _populations = new ArrayList<>();
     PopulationName _name;
 
     public PopulationName getName()
@@ -111,10 +111,10 @@ public class PopulationSet implements Serializable, Cloneable
         if (getPopulations().size() != other.getPopulations().size())
             return false;
 
-        ArrayList<Population> thisSortedPopulation = new ArrayList<Population>(getPopulations());
+        ArrayList<Population> thisSortedPopulation = new ArrayList<>(getPopulations());
         Collections.sort(thisSortedPopulation, NAME_COMPARATOR);
 
-        ArrayList<Population> otherSortedPopulation = new ArrayList<Population>(other.getPopulations());
+        ArrayList<Population> otherSortedPopulation = new ArrayList<>(other.getPopulations());
         Collections.sort(otherSortedPopulation, NAME_COMPARATOR);
 
         for (int i = 0; i < thisSortedPopulation.size(); i++)

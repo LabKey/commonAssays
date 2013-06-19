@@ -75,7 +75,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         _protocol = protocol;
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);
-        List<FieldKey> visibleColumns = new ArrayList<FieldKey>();
+        List<FieldKey> visibleColumns = new ArrayList<>();
 
         // add any property columns
         addPropertyColumns(schema, protocol, provider, visibleColumns);
@@ -100,7 +100,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         ColumnInfo addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
 
-        Set<String> hiddenProperties = new HashSet<String>();
+        Set<String> hiddenProperties = new HashSet<>();
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME);
         Domain runDomain = provider.getRunDomain(protocol);
@@ -294,7 +294,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
     protected Set<String> getHiddenColumns(ExpProtocol protocol)
     {
-        return new HashSet<String>();
+        return new HashSet<>();
     }
 
     private static void updateLabelWithCutoff(ColumnInfo column, Integer intCutoff)

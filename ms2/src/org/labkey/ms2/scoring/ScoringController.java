@@ -77,7 +77,7 @@ public class ScoringController extends SpringActionController
             if (form.getRuns().length == 0)
                 errors.reject(ERROR_MSG, "No runs specified.");
 
-            return new JspView<ChartForm>("/org/labkey/ms2/scoring/compare.jsp", form);
+            return new JspView<>("/org/labkey/ms2/scoring/compare.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -417,7 +417,7 @@ public class ScoringController extends SpringActionController
 
             form.setRun(run);
 
-            return new JspView<ChartDiscForm>("/org/labkey/ms2/scoring/discriminate.jsp", form);
+            return new JspView<>("/org/labkey/ms2/scoring/discriminate.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)

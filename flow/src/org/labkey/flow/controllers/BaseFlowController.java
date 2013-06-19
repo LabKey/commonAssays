@@ -104,7 +104,7 @@ public abstract class BaseFlowController extends SpringActionController
 
     public NavTree appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
     {
-        ArrayList<NavTree> children = new ArrayList<NavTree>();
+        ArrayList<NavTree> children = new ArrayList<>();
         while (object != null)
         {
             children.add(0, new NavTree(object.getLabel(), object.urlShow()));

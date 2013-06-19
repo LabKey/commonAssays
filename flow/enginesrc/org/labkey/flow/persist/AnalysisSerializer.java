@@ -301,7 +301,7 @@ public class AnalysisSerializer
 
     private void readStatsRowPerStatistic(TabLoader loader, Map<String, AttributeSet> results)
     {
-        Map<String, StatisticSpec> stats = new TreeMap<String, StatisticSpec>();
+        Map<String, StatisticSpec> stats = new TreeMap<>();
         int index = 0;
         for (Map<String, Object> row : loader)
         {
@@ -371,7 +371,7 @@ public class AnalysisSerializer
 
             if (stats == null)
             {
-                stats = new LinkedHashMap<String, StatisticSpec>();
+                stats = new LinkedHashMap<>();
                 for (String statistic : row.keySet())
                 {
                     if (StringUtils.isEmpty(statistic))
@@ -426,7 +426,7 @@ public class AnalysisSerializer
 
             if (stats == null)
             {
-                stats = new LinkedHashMap<String, StatisticSpec>();
+                stats = new LinkedHashMap<>();
                 for (String statistic : row.keySet())
                 {
                     if (StringUtils.isEmpty(statistic))
@@ -501,7 +501,7 @@ public class AnalysisSerializer
 
             if (stats == null)
             {
-                stats = new LinkedHashMap<String, StatisticSpec>();
+                stats = new LinkedHashMap<>();
                 for (String statistic : row.keySet())
                 {
                     if (StringUtils.isEmpty(statistic))
@@ -604,7 +604,7 @@ public class AnalysisSerializer
 
     private void readKeywordsRowPerKeyword(TabLoader loader, Map<String, AttributeSet> results)
     {
-        Map<String, String> keywords = new TreeMap<String, String>();
+        Map<String, String> keywords = new TreeMap<>();
         int index = 0;
         for (Map<String, Object> row : loader)
         {
@@ -665,7 +665,7 @@ public class AnalysisSerializer
 
             if (keywords == null)
             {
-                keywords = new LinkedHashSet<String>();
+                keywords = new LinkedHashSet<>();
                 for (String keyword : row.keySet())
                 {
                     if (StringUtils.isEmpty(keyword))
@@ -758,7 +758,7 @@ public class AnalysisSerializer
             if (!foundSampleColumn || !foundPopulationColumn || !foundGraphColumn || !foundPathColumn)
                 throw new RuntimeException("Graphs file must contain sample, population, graph, and path columns.");
 
-            Map<String, GraphSpec> graphs = new TreeMap<String, GraphSpec>();
+            Map<String, GraphSpec> graphs = new TreeMap<>();
             int index = 0;
             ROWS_LOOP: for (Map<String, Object> row : loader)
             {
@@ -862,7 +862,7 @@ public class AnalysisSerializer
     private void readCompMatrices(TabLoader loader, Map<String, CompensationMatrix> matrices) throws IOException
     {
         int index = 0;
-        Map<String, CompensationMatrix> compPaths = new HashMap<String, CompensationMatrix>();
+        Map<String, CompensationMatrix> compPaths = new HashMap<>();
         for (Map<String, Object> row : loader)
         {
             index++;
@@ -917,9 +917,9 @@ public class AnalysisSerializer
     // Read keywords, stats, graphs, and compensation matrices.
     public Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysisTuple() throws IOException
     {
-        Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
-        Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
-        Map<String, CompensationMatrix> matrices = new LinkedHashMap<String, CompensationMatrix>();
+        Map<String, AttributeSet> keywords = new LinkedHashMap<>();
+        Map<String, AttributeSet> results = new LinkedHashMap<>();
+        Map<String, CompensationMatrix> matrices = new LinkedHashMap<>();
 
         InputStream keywordsFile = _rootDir.getInputStream(KEYWORDS_FILENAME);
         if (keywordsFile != null)
@@ -987,7 +987,7 @@ public class AnalysisSerializer
 
     private Pair<List<String>, List<Map<String, Object>>> writeRowPerStatistic(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         columns.add(StatColumnName.Sample.toString());
         columns.add(StatColumnName.Population.toString());
         columns.add(StatColumnName.Statistic.toString());
@@ -995,7 +995,7 @@ public class AnalysisSerializer
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1008,7 +1008,7 @@ public class AnalysisSerializer
                 Double value = statistics.get(stat);
 
                 // now create a row to be written
-                List<Object> values = new ArrayList<Object>(columns.size());
+                List<Object> values = new ArrayList<>(columns.size());
                 values.add(sampleName);
                 values.add(stat.getSubset());
                 StatisticSpec statOnly = new StatisticSpec(null, stat.getStatistic(), stat.getParameter());
@@ -1025,7 +1025,7 @@ public class AnalysisSerializer
     private Pair<List<String>, List<Map<String, Object>>> writeGroupBySample(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics
-        Set<StatisticSpec> stats = new TreeSet<StatisticSpec>();
+        Set<StatisticSpec> stats = new TreeSet<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1035,14 +1035,14 @@ public class AnalysisSerializer
             stats.addAll(attrs.getStatisticNames());
         }
 
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         columns.add(StatColumnName.Sample.toString());
         for (StatisticSpec stat : stats)
             columns.add(shortStatNames ? stat.toShortString(true) : stat.toString());
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1050,7 +1050,7 @@ public class AnalysisSerializer
                 continue;
 
             // now create a row to be written
-            List<Object> values = new ArrayList<Object>(columns.size());
+            List<Object> values = new ArrayList<>(columns.size());
             values.add(sampleName);
 
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
@@ -1069,7 +1069,7 @@ public class AnalysisSerializer
     private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulation(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population removed
-        Set<StatisticSpec> stats = new TreeSet<StatisticSpec>();
+        Set<StatisticSpec> stats = new TreeSet<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1081,7 +1081,7 @@ public class AnalysisSerializer
         }
 
         // Columns in the statistics.tsv output
-        List<String> columns = new ArrayList<String>(2+stats.size());
+        List<String> columns = new ArrayList<>(2+stats.size());
         columns.add(StatColumnName.Sample.toString());
         columns.add(StatColumnName.Population.toString());
         for (StatisticSpec stat : stats)
@@ -1089,7 +1089,7 @@ public class AnalysisSerializer
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1097,7 +1097,7 @@ public class AnalysisSerializer
                 continue;
 
             // collect the samples statistics grouped by population
-            Map<SubsetSpec, Map<StatisticSpec, Double>> populations = new TreeMap<SubsetSpec, Map<StatisticSpec, Double>>(SubsetSpec.COMPARATOR);
+            Map<SubsetSpec, Map<StatisticSpec, Double>> populations = new TreeMap<>(SubsetSpec.COMPARATOR);
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
             for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
             {
@@ -1107,7 +1107,7 @@ public class AnalysisSerializer
 
                 Map<StatisticSpec, Double> statsByPopulation = populations.get(pop);
                 if (statsByPopulation == null)
-                    populations.put(pop, statsByPopulation = new HashMap<StatisticSpec, Double>());
+                    populations.put(pop, statsByPopulation = new HashMap<>());
 
                 statsByPopulation.put(s, value);
             }
@@ -1115,7 +1115,7 @@ public class AnalysisSerializer
             // now create the rows to be written
             for (Map.Entry<SubsetSpec, Map<StatisticSpec, Double>> entry : populations.entrySet())
             {
-                List<Object> values = new ArrayList<Object>(columns.size());
+                List<Object> values = new ArrayList<>(columns.size());
                 values.add(sampleName);
                 values.add(entry.getKey());
 
@@ -1135,8 +1135,8 @@ public class AnalysisSerializer
     private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulationParameter(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population and parameter removed
-        Set<StatisticSpec> stats = new TreeSet<StatisticSpec>();
-        Set<String> parameters = new TreeSet<String>();
+        Set<StatisticSpec> stats = new TreeSet<>();
+        Set<String> parameters = new TreeSet<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1166,7 +1166,7 @@ public class AnalysisSerializer
         }
 
         // Columns in the statistics.tsv output
-        List<String> columns = new ArrayList<String>(2+stats.size());
+        List<String> columns = new ArrayList<>(2+stats.size());
         columns.add(StatColumnName.Sample.toString());
         columns.add(StatColumnName.Population.toString());
         columns.add(StatColumnName.Parameter.toString());
@@ -1175,7 +1175,7 @@ public class AnalysisSerializer
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1183,7 +1183,7 @@ public class AnalysisSerializer
                 continue;
 
             // collect the samples statistics grouped by population and parameter
-            Map<Pair<SubsetSpec, String>, Map<StatisticSpec, Double>> map = new TreeMap<Pair<SubsetSpec, String>, Map<StatisticSpec, Double>>(SUBSET_POPULATION_COMPARATOR);
+            Map<Pair<SubsetSpec, String>, Map<StatisticSpec, Double>> map = new TreeMap<>(SUBSET_POPULATION_COMPARATOR);
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
             for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
             {
@@ -1202,14 +1202,14 @@ public class AnalysisSerializer
                     }
                 }
 
-                Pair<SubsetSpec, String> pair = new Pair<SubsetSpec, String>(pop, parameter);
+                Pair<SubsetSpec, String> pair = new Pair<>(pop, parameter);
 
                 StatisticSpec s = new StatisticSpec(null, stat, remainingParameter);
                 Double value = entry.getValue();
 
                 Map<StatisticSpec, Double> statsByPopulationParameter = map.get(pair);
                 if (statsByPopulationParameter == null)
-                    map.put(pair, statsByPopulationParameter = new HashMap<StatisticSpec, Double>());
+                    map.put(pair, statsByPopulationParameter = new HashMap<>());
 
                 statsByPopulationParameter.put(s, value);
             }
@@ -1217,7 +1217,7 @@ public class AnalysisSerializer
             // now create the rows to be written
             for (Map.Entry<Pair<SubsetSpec, String>, Map<StatisticSpec, Double>> entry : map.entrySet())
             {
-                List<Object> values = new ArrayList<Object>(columns.size());
+                List<Object> values = new ArrayList<>(columns.size());
                 values.add(sampleName);
                 values.add(entry.getKey().first);
                 values.add(entry.getKey().second);
@@ -1294,14 +1294,14 @@ public class AnalysisSerializer
 
     private Pair<List<String>, List<Map<String, Object>>> writeRowPerKeyword(Map<String, AttributeSet> keywords)
     {
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         columns.add(KeywordColumnName.Sample.toString());
         columns.add(KeywordColumnName.Keyword.toString());
         columns.add(KeywordColumnName.Value.toString());
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : keywords.keySet())
         {
             AttributeSet attrs = keywords.get(sampleName);
@@ -1314,7 +1314,7 @@ public class AnalysisSerializer
                 String value = keys.get(key);
 
                 // now create a row to be written
-                List<Object> values = new ArrayList<Object>(columns.size());
+                List<Object> values = new ArrayList<>(columns.size());
                 values.add(sampleName);
                 values.add(key);
                 values.add(value);
@@ -1329,7 +1329,7 @@ public class AnalysisSerializer
     private Pair<List<String>, List<Map<String, Object>>> writeGroupByKeyword(Map<String, AttributeSet> keywords)
     {
         // collect all used keywords
-        Set<String> allKeywords = new TreeSet<String>();
+        Set<String> allKeywords = new TreeSet<>();
         for (String sampleName : keywords.keySet())
         {
             AttributeSet attrs = keywords.get(sampleName);
@@ -1339,14 +1339,14 @@ public class AnalysisSerializer
             allKeywords.addAll(attrs.getKeywordNames());
         }
 
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         columns.add(KeywordColumnName.Sample.toString());
         for (String keyword : allKeywords)
             columns.add(keyword);
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : keywords.keySet())
         {
             AttributeSet attrs = keywords.get(sampleName);
@@ -1354,7 +1354,7 @@ public class AnalysisSerializer
                 continue;
 
             // now create a row to be written
-            List<Object> values = new ArrayList<Object>(columns.size());
+            List<Object> values = new ArrayList<>(columns.size());
             values.add(sampleName);
 
             Map<String, String> keys = attrs.getKeywords();
@@ -1403,9 +1403,9 @@ public class AnalysisSerializer
 
         List<String> columns = Arrays.asList(CompensationColumnName.Sample.toString(), CompensationColumnName.Path.toString());
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[0]));
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
 
-        Map<CompensationMatrix, String> compPaths = new HashMap<CompensationMatrix, String>();
+        Map<CompensationMatrix, String> compPaths = new HashMap<>();
         for (String sampleName : matrices.keySet())
         {
             CompensationMatrix matrix = matrices.get(sampleName);
@@ -1473,7 +1473,7 @@ public class AnalysisSerializer
         if (analysis == null || analysis.isEmpty())
             return;
 
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         columns.add(GraphColumnName.Sample.toString());
         columns.add(GraphColumnName.Population.toString());
         columns.add(GraphColumnName.Graph.toString());
@@ -1481,7 +1481,7 @@ public class AnalysisSerializer
 
         RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
 
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
         {
             AttributeSet attrs = analysis.get(sampleName);
@@ -1515,7 +1515,7 @@ public class AnalysisSerializer
                 os.close();
 
                 // create a row to be written
-                List<Object> values = new ArrayList<Object>(columns.size());
+                List<Object> values = new ArrayList<>(columns.size());
                 values.add(sampleName);
                 values.add(graph.getSubset()); // XXX: need to write "" instead of null
                 String graphParams = null;
@@ -1567,8 +1567,8 @@ public class AnalysisSerializer
 
         static class TestLog implements AnalysisSerializer.JobLog
         {
-            List<String> _info = new ArrayList<String>();
-            List<String> _error = new ArrayList<String>();
+            List<String> _info = new ArrayList<>();
+            List<String> _error = new ArrayList<>();
 
             public void info(String msg) { _info.add(msg); }
             public void info(String msg, Throwable t) { _info.add(msg); }

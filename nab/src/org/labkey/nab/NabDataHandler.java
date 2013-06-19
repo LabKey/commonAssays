@@ -49,12 +49,12 @@ public abstract class NabDataHandler extends DilutionDataHandler
 
     public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
-        Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<DilutionSummary, DilutionAssayRun>();
+        Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<Integer, DilutionAssayRun>();
-        List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
+        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<>();
+        List<Integer> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
         for (int nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
@@ -98,7 +98,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             OntologyManager.ensureObject(container, data.getLSID());
             Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
 
-            Map<String, ExpMaterial> inputMaterialMap = new HashMap<String, ExpMaterial>();
+            Map<String, ExpMaterial> inputMaterialMap = new HashMap<>();
 
             for (ExpMaterial material : run.getMaterialInputs().keySet())
                 inputMaterialMap.put(material.getLSID(), material);
@@ -128,7 +128,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 int objectId = 0;
 
                 // New code to insert into NAbSpecimen and CutoffValue tables instead of Ontology properties
-                Map<String, Object> nabSpecimenEntries = new HashMap<String, Object>();
+                Map<String, Object> nabSpecimenEntries = new HashMap<>();
                 nabSpecimenEntries.put(WELLGROUP_NAME_PROPERTY, groupName);
                 nabSpecimenEntries.put("ObjectId", objectId);                       // TODO: this will go away  when nab table transfer is complete
                 nabSpecimenEntries.put("ObjectUri", dataRowLsid);
@@ -147,7 +147,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
 
                 for (Integer cutoffValue : cutoffFormats.keySet())
                 {
-                    Map<String, Object> cutoffEntries = new HashMap<String, Object>();
+                    Map<String, Object> cutoffEntries = new HashMap<>();
                     cutoffEntries.put("NabSpecimenId", nabRowid);
                     cutoffEntries.put("Cutoff", (double)cutoffValue);
 

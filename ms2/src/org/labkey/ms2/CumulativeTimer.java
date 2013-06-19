@@ -33,7 +33,7 @@ import org.labkey.api.util.Formats;
 public class CumulativeTimer
 {
     // Map of TimerTask -> Long (cumulative task time)
-    private final OrderedMap<TimerTask, Long> _cumulativeTime = new ListOrderedMap<TimerTask, Long>();
+    private final OrderedMap<TimerTask, Long> _cumulativeTime = new ListOrderedMap<>();
     private Task _currentTask = null;
     private Logger _log;
 

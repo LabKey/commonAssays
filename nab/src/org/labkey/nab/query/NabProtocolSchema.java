@@ -56,7 +56,7 @@ import java.util.Set;
  */
 public class NabProtocolSchema extends AssayProtocolSchema
 {
-    private static final Cache<String, Set<Double>> CUTOFF_CACHE = new BlockingCache<String, Set<Double>>(new DatabaseCache<Wrapper<Set<Double>>>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"));
+    private static final Cache<String, Set<Double>> CUTOFF_CACHE = new BlockingCache<>(new DatabaseCache<Wrapper<Set<Double>>>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"));
 
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
     public static final String NAB_DBSCHEMA_NAME = "nab";

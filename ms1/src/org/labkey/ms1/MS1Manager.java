@@ -233,7 +233,7 @@ public class MS1Manager
 
     public Collection<String> getContainerSummary(Container container) throws SQLException
     {
-        ArrayList<String> items = new ArrayList<String>();
+        ArrayList<String> items = new ArrayList<>();
 
         String sql = "select count(*) as NumRuns \n" +
                 "from ms1.Files as f inner join exp.data as d on (f.ExpDataFileId=d.RowId)\n" +

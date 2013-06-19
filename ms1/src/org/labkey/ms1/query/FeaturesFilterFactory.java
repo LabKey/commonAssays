@@ -41,7 +41,7 @@ public class FeaturesFilterFactory
 
     public static ArrayList<FeaturesFilter> createFilters(ActionURL url, User user)
     {
-        ArrayList<FeaturesFilter> filters = new ArrayList<FeaturesFilter>();
+        ArrayList<FeaturesFilter> filters = new ArrayList<>();
 
         //start with the container filter
         String scParam = url.getParameter(NAMESPACE_PREFIX + PARAM_SOURCE_CONTAINER);

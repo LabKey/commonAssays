@@ -29,12 +29,12 @@ import java.sql.SQLException;
 public class ParseContext
 {
     private uniprot _uniprotRoot;
-    private List<UniprotAnnotation> _annotations = new ArrayList<UniprotAnnotation>();
-    private List<UniprotIdentifier> _identifiers = new ArrayList<UniprotIdentifier>();
-    private Map<String, UniprotSequence> _sequences = new HashMap<String, UniprotSequence>();
+    private List<UniprotAnnotation> _annotations = new ArrayList<>();
+    private List<UniprotIdentifier> _identifiers = new ArrayList<>();
+    private Map<String, UniprotSequence> _sequences = new HashMap<>();
     private UniprotSequence _currentSequence;
     private UniprotOrganism _currentOrganism;
-    private Map<String, UniprotOrganism> _organisms = new HashMap<String, UniprotOrganism>();
+    private Map<String, UniprotOrganism> _organisms = new HashMap<>();
     private final Connection _conn;
     private boolean _clearExisting;
 

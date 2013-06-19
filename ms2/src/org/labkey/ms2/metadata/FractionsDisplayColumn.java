@@ -55,7 +55,7 @@ public class FractionsDisplayColumn extends SimpleDisplayColumn
 
     public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
     {
-        JspView<MassSpecMetadataAssayForm> view = new JspView<MassSpecMetadataAssayForm>("/org/labkey/ms2/metadata/fractionsInput.jsp", _form);
+        JspView<MassSpecMetadataAssayForm> view = new JspView<>("/org/labkey/ms2/metadata/fractionsInput.jsp", _form);
         try
         {
             view.render(ctx.getRequest(), ctx.getViewContext().getResponse());

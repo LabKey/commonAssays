@@ -78,7 +78,7 @@ public class PositivityFlowReport extends FilterFlowReport
     @Override
     public HttpView getConfigureForm(ViewContext context, ActionURL returnURL)
     {
-        return new JspView<Pair<PositivityFlowReport, ActionURL>>(PositivityFlowReport.class, "editPositivityReport.jsp", Pair.of(this, returnURL));
+        return new JspView<>(PositivityFlowReport.class, "editPositivityReport.jsp", Pair.of(this, returnURL));
     }
 
     SubsetSpec getSubset()
@@ -201,7 +201,7 @@ public class PositivityFlowReport extends FilterFlowReport
     @Override
     public Collection<PropertyDescriptor> getDomainPrototypeProperties()
     {
-        Collection<PropertyDescriptor> ret = new ArrayList<PropertyDescriptor>();
+        Collection<PropertyDescriptor> ret = new ArrayList<>();
 
         Container shared = ContainerManager.getSharedContainer();
         PropertyDescriptor response = new PropertyDescriptor(null, PropertyType.INTEGER.getTypeUri(), "Response", shared);

@@ -176,7 +176,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, resultDomainProperties, errorReshow, ResultsStepHandler.NAME, form, errors);
 
         boolean firstPass = true;
-        List<String> poolIDs = new ArrayList<String>(rows.size());
+        List<String> poolIDs = new ArrayList<>(rows.size());
         for (DomainProperty resultDomainProperty : resultDomainProperties)
         {
             String propertyName = resultDomainProperty.getName();
@@ -189,7 +189,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             boolean copyReRunValue = editable && !resultDomainProperty.getName().equalsIgnoreCase("Unreliable");
             boolean copyable = editable;
 
-            List<DisplayColumn> columns = new ArrayList<DisplayColumn>(rows.size());
+            List<DisplayColumn> columns = new ArrayList<>(rows.size());
             int rowIndex = 0;
             for (ListIterator<Map<String, Object>> iter = rows.listIterator(); iter.hasNext(); rowIndex++)
             {
@@ -285,7 +285,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
     protected void addHiddenRunProperties(ViabilityAssayRunUploadForm form, InsertView insertView) throws ExperimentException
     {
-        Map<DomainProperty, String> runProperties = new HashMap<DomainProperty, String>();
+        Map<DomainProperty, String> runProperties = new HashMap<>();
         Map<DomainProperty, Object> runData = form.getParsedRunData();
         for (Map.Entry<DomainProperty, Object> entry : runData.entrySet())
         {

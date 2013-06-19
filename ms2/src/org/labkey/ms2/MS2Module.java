@@ -247,7 +247,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
-        final Set<ExperimentRunType> runTypes = new HashSet<ExperimentRunType>();
+        final Set<ExperimentRunType> runTypes = new HashSet<>();
         runTypes.add(SAMPLE_PREP_RUN_TYPE);
         runTypes.add(SEARCH_RUN_TYPE);
         runTypes.add(new MS2SearchExperimentRunType("Imported Searches", MS2Schema.TableType.ImportedSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX));
@@ -321,7 +321,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     @Override
     public Collection<String> getSummary(Container c)
     {
-        Collection<String> list = new LinkedList<String>();
+        Collection<String> list = new LinkedList<>();
         try
         {
             long count = MS2Manager.getRunCount(c);

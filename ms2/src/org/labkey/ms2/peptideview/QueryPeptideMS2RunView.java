@@ -61,7 +61,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
                 view = def.createCustomView(getUser(), "columns");
             }
             StringTokenizer st = new StringTokenizer(columnNames, ", ");
-            List<FieldKey> fieldKeys = new ArrayList<FieldKey>();
+            List<FieldKey> fieldKeys = new ArrayList<>();
             while (st.hasMoreTokens())
             {
                 fieldKeys.add(FieldKey.fromString(st.nextToken()));
@@ -119,7 +119,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         {
             if (_overrideColumns != null)
             {
-                List<DisplayColumn> result = new ArrayList<DisplayColumn>();
+                List<DisplayColumn> result = new ArrayList<>();
                 for (ColumnInfo colInfo : QueryService.get().getColumns(getTable(), _overrideColumns).values())
                 {
                     result.add(colInfo.getRenderer());
@@ -159,7 +159,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     {
         if (_peptidesTable == null)
         {
-            Set<MS2RunType> runTypes = new HashSet<MS2RunType>(_runs.length);
+            Set<MS2RunType> runTypes = new HashSet<>(_runs.length);
             for (MS2Run run : _runs)
             {
                 runTypes.add(run.getRunType());

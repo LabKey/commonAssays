@@ -108,7 +108,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                 Object visitID = row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
                 if (participantID == null && visitID == null)
                 {
-                    row = new HashMap<String, Object>(row);
+                    row = new HashMap<>(row);
 
                     // At a minimum, set the ParticipantID to the PoolID
                     String ptid = poolID;
@@ -268,7 +268,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     @Override
     protected void insertRowData(ExpData data, User user, Container container, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo) throws SQLException, ValidationException
     {
-        Map<String, PropertyDescriptor> importMap = new HashMap<String, PropertyDescriptor>();
+        Map<String, PropertyDescriptor> importMap = new HashMap<>();
         for (DomainProperty prop : dataDomain.getProperties())
         {
             importMap.put(prop.getName(), prop.getPropertyDescriptor());
@@ -295,8 +295,8 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
     private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap)
     {
-        Map<String, Object> base = new CaseInsensitiveHashMap<Object>();
-        Map<PropertyDescriptor, Object> extra = new HashMap<PropertyDescriptor, Object>();
+        Map<String, Object> base = new CaseInsensitiveHashMap<>();
+        Map<PropertyDescriptor, Object> extra = new HashMap<>();
         for (Map.Entry<String, Object> entry : row.entrySet())
         {
             if (ViabilityAssayProvider.RESULT_DOMAIN_PROPERTIES.containsKey(entry.getKey()))
@@ -311,6 +311,6 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             }
         }
 
-        return new Pair<Map<String, Object>, Map<PropertyDescriptor, Object>>(base, extra);
+        return new Pair<>(base, extra);
     }
 }

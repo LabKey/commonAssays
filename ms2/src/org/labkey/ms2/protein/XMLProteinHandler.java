@@ -195,7 +195,7 @@ public class XMLProteinHandler extends DefaultHandler
         this.skipMe = skipMe;
     }
 
-    private Set<String> skipTheseTags = new HashSet<String>();
+    private Set<String> skipTheseTags = new HashSet<>();
 
     public Set<String> getSkipTheseTags()
     {

@@ -64,7 +64,7 @@
     IWorkspace workspace = form.getWorkspace().getWorkspaceObject();
 
     SelectedSamples selectedSamples = form.getSelectedSamples();
-    List<String> sampleIds = new ArrayList<String>(selectedSamples.getRows().size());
+    List<String> sampleIds = new ArrayList<>(selectedSamples.getRows().size());
     for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : selectedSamples.getRows().entrySet())
     {
         if (entry.getValue().isSelected())

@@ -183,7 +183,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     public List<File> getInteractInputFiles()
     {
-        ArrayList<File> files = new ArrayList<File>();
+        ArrayList<File> files = new ArrayList<>();
         for (File fileSpectra : getInputFiles())
         {
             files.add(getPepXMLConvertFile(getAnalysisDirectory(),
@@ -210,7 +210,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             }
         }
 
-        ArrayList<File> files = new ArrayList<File>();
+        ArrayList<File> files = new ArrayList<>();
         for (File fileSpectra : getInputFiles())
         {
             // Look at the different types in priority order
@@ -240,7 +240,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     public File[] getSequenceFiles()
     {
-        ArrayList<File> arrFiles = new ArrayList<File>();
+        ArrayList<File> arrFiles = new ArrayList<>();
 
         String paramDatabase = getParameters().get("pipeline, database");
         if (paramDatabase != null)

@@ -48,13 +48,13 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
 
     static
     {
-        Map<String, SequenceColumnType> values = new CaseInsensitiveHashMap<SequenceColumnType>();
+        Map<String, SequenceColumnType> values = new CaseInsensitiveHashMap<>();
         for (SequenceColumnType sequenceColumnType : SequenceColumnType.values())
         {
             values.put(sequenceColumnType.toString(), sequenceColumnType);
         }
 
-        SEQUENCE_COLUMN_NAMES = Collections.unmodifiableList(new ArrayList<String>(values.keySet()));
+        SEQUENCE_COLUMN_NAMES = Collections.unmodifiableList(new ArrayList<>(values.keySet()));
         ALL_SEQUENCE_COLUMNS_MAP = Collections.unmodifiableMap(values);
     }
 

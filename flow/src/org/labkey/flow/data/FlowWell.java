@@ -55,7 +55,7 @@ public class FlowWell extends FlowDataObject
 
     static public List<? extends FlowWell> fromWellIds(int... ids)
     {
-        List<FlowWell> wells = new ArrayList<FlowWell>(ids.length);
+        List<FlowWell> wells = new ArrayList<>(ids.length);
         List<FlowDataObject> flowobjs = fromRowIds(ids);
         for (FlowDataObject flowobj : flowobjs)
             if (flowobj instanceof FlowWell)
@@ -65,7 +65,7 @@ public class FlowWell extends FlowDataObject
 
     static public List<FlowWell> fromWellIds(Collection<Integer> ids)
     {
-        List<FlowWell> wells = new ArrayList<FlowWell>(ids.size());
+        List<FlowWell> wells = new ArrayList<>(ids.size());
         List<FlowDataObject> flowobjs = fromRowIds(ids);
         for (FlowDataObject flowobj : flowobjs)
             if (flowobj instanceof FlowWell)
@@ -143,7 +143,7 @@ public class FlowWell extends FlowDataObject
     public List<FlowFCSFile> getFCSFileOutputs()
     {
         ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
-        List<FlowFCSFile> ret = new ArrayList<FlowFCSFile>();
+        List<FlowFCSFile> ret = new ArrayList<>();
         for (ExpProtocolApplication app : apps)
         {
             addDataOfType(app.getOutputDatas(), FlowDataType.FCSFile, ret);
@@ -158,7 +158,7 @@ public class FlowWell extends FlowDataObject
     public List<FlowFCSAnalysis> getFCSAnalysisOutputs() throws SQLException
     {
         ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
-        List<FlowFCSAnalysis> ret = new ArrayList<FlowFCSAnalysis>();
+        List<FlowFCSAnalysis> ret = new ArrayList<>();
         for (ExpProtocolApplication app : apps)
         {
             addDataOfType(app.getOutputDatas(), FlowDataType.FCSAnalysis, ret);

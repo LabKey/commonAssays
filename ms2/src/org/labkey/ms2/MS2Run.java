@@ -43,9 +43,9 @@ public abstract class MS2Run implements Serializable
     protected Date loaded;
     protected int fastaId;
     protected String searchEnzyme;
-    protected Map<MassType, MS2Modification[]> modifications = new HashMap<MassType, MS2Modification[]>();
-    protected Map<MassType, Map<String, Double>> varModifications = new HashMap<MassType, Map<String, Double>>();
-    protected Map<MassType, double[]> massTables = new HashMap<MassType, double[]>();
+    protected Map<MassType, MS2Modification[]> modifications = new HashMap<>();
+    protected Map<MassType, Map<String, Double>> varModifications = new HashMap<>();
+    protected Map<MassType, double[]> massTables = new HashMap<>();
     protected MS2Fraction[] fractions;
     protected int statusId;
     protected boolean deleted;
@@ -75,7 +75,7 @@ public abstract class MS2Run implements Serializable
         if (null == staticModifications)
             staticModifications = MS2Manager.getModifications(this);
 
-        Map<String, Double> variableModifications = new HashMap<String, Double>(10);
+        Map<String, Double> variableModifications = new HashMap<>(10);
         double[] massTable = massType.getAaMasses().clone();
 
         // Store variable modifications in HashMap; apply fixed modifications to massTable

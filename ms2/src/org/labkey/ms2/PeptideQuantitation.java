@@ -313,8 +313,8 @@ public class PeptideQuantitation
         _lightProfiles = new List[MAX_CHARGE];
         for (int i = 0; i < MAX_CHARGE; i++)
         {
-            _heavyProfiles[i] = new ArrayList<ScanInfo>();
-            _lightProfiles[i] = new ArrayList<ScanInfo>();
+            _heavyProfiles[i] = new ArrayList<>();
+            _lightProfiles[i] = new ArrayList<>();
         }
 
         RandomAccessMzxmlIterator iterator = null;

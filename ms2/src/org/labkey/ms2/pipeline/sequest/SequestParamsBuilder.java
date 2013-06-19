@@ -56,7 +56,7 @@ public abstract class SequestParamsBuilder
     Map<String, String> sequestInputParams;
     File sequenceRoot;
     char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O','[',']'};
-    protected HashMap<String, String> supportedEnzymes = new HashMap<String, String>();
+    protected HashMap<String, String> supportedEnzymes = new HashMap<>();
     protected final SequestParams _params;
     protected final SequestParams.Variant _variant;
     private List<File> _databaseFiles;
@@ -106,7 +106,7 @@ public abstract class SequestParamsBuilder
 
     public void initXmlValues() throws SequestParamsException
     {
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         errors.addAll(initDatabases());
         errors.addAll(initPeptideMassTolerance());
         errors.addAll(initMassUnits());
@@ -139,7 +139,7 @@ public abstract class SequestParamsBuilder
         List<File> databaseFiles = _databaseFiles;
         if (databaseFiles == null)
         {
-            databaseFiles = new ArrayList<File>();
+            databaseFiles = new ArrayList<>();
             String value = sequestInputParams.get("pipeline, database");
             if (value == null || value.equals(""))
             {
@@ -273,7 +273,7 @@ public abstract class SequestParamsBuilder
             ionZ.append(st.nextToken());
         }
 
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         setIonSeriesParam("scoring, a ions", ionA, errors);
         setIonSeriesParam("scoring, b ions", ionB, errors);
         setIonSeriesParam("scoring, c ions", ionC, errors);
@@ -366,9 +366,9 @@ public abstract class SequestParamsBuilder
 
     protected boolean sameEnzyme(String enzyme1, String enzyme2) throws SequestParamsException
     {
-        Set<Character> e1Block = new TreeSet<Character>();
+        Set<Character> e1Block = new TreeSet<>();
 
-        Set<Character> e2Block = new TreeSet<Character>();
+        Set<Character> e2Block = new TreeSet<>();
 
         try
         {
@@ -405,8 +405,8 @@ public abstract class SequestParamsBuilder
 
     protected String combineEnzymes(String[] enzymes) throws SequestParamsException
     {
-        Set<Character> block1 = new TreeSet<Character>();
-        Set<Character> block2 = new TreeSet<Character>();
+        Set<Character> block1 = new TreeSet<>();
+        Set<Character> block2 = new TreeSet<>();
         char bracketOpen1 = 0;
         char bracketClose1 = 0;
         char bracketOpen2 = 0;
@@ -513,8 +513,8 @@ public abstract class SequestParamsBuilder
 
     List<String> initDynamicMods()
     {
-        ArrayList<Character> defaultMods = new ArrayList<Character>();
-        ArrayList<ResidueMod> workList = new ArrayList<ResidueMod>();
+        ArrayList<Character> defaultMods = new ArrayList<>();
+        ArrayList<ResidueMod> workList = new ArrayList<>();
         // default weight "0.000000"
         defaultMods.add('S');
         defaultMods.add('C');
@@ -526,8 +526,8 @@ public abstract class SequestParamsBuilder
         String mods = sequestInputParams.get(ParameterNames.DYNAMIC_MOD);
         if (mods == null || mods.equals("")) return Collections.emptyList();
         mods = removeWhiteSpace(mods);
-        ArrayList<Character> residues = new ArrayList<Character>();
-        ArrayList<String> masses = new ArrayList<String>();
+        ArrayList<Character> residues = new ArrayList<>();
+        ArrayList<String> masses = new ArrayList<>();
 
         List<String> parserError = parseMods(mods, residues, masses);
         if (!parserError.isEmpty()) return parserError;
@@ -575,8 +575,8 @@ public abstract class SequestParamsBuilder
     {
         String mods = sequestInputParams.get(ParameterNames.STATIC_MOD);
 
-        ArrayList<Character> residues = new ArrayList<Character>();
-        ArrayList<String> masses = new ArrayList<String>();
+        ArrayList<Character> residues = new ArrayList<>();
+        ArrayList<String> masses = new ArrayList<>();
 
         List<String> parserError = parseMods(mods, residues, masses);
         if (!parserError.isEmpty()) return parserError;
@@ -648,10 +648,10 @@ public abstract class SequestParamsBuilder
         {
             if (sequestInputParams.containsKey(parameterName))
             {
-                return new Pair<String, String>(parameterName, sequestInputParams.get(parameterName));
+                return new Pair<>(parameterName, sequestInputParams.get(parameterName));
             }
         }
-        return new Pair<String, String>(parameterNames[0], null);
+        return new Pair<>(parameterNames[0], null);
     }
 
     List<String> initMassType()
@@ -744,7 +744,7 @@ public abstract class SequestParamsBuilder
 
     List<String> initPassThroughs()
     {
-        List<String> parserError = new ArrayList<String>();
+        List<String> parserError = new ArrayList<>();
         Collection<SequestParam> passThroughs = _params.getPassThroughs();
         for (SequestParam passThrough : passThroughs)
         {

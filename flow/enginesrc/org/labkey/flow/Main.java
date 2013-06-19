@@ -144,7 +144,7 @@ public class Main
         Workspace workspace = readWorkspace(workspaceFile, false);
 
         // First, hash the group analysis...
-        Map<Analysis, PopulationName> analysisToGroup = new HashMap<Analysis, PopulationName>();
+        Map<Analysis, PopulationName> analysisToGroup = new HashMap<>();
         Map<PopulationName, Analysis> groupAnalyses = workspace.getGroupAnalyses();
         for (PopulationName groupName : groupAnalyses.keySet())
         {
@@ -155,20 +155,20 @@ public class Main
         }
 
         // ... then, hash the sample analysis
-        Map<Analysis, List<Workspace.SampleInfo>> analysisToSamples = new HashMap<Analysis, List<Workspace.SampleInfo>>();
-        Map<String, List<Workspace.SampleInfo>> sampleLabels = new HashMap<String, List<Workspace.SampleInfo>>();
+        Map<Analysis, List<Workspace.SampleInfo>> analysisToSamples = new HashMap<>();
+        Map<String, List<Workspace.SampleInfo>> sampleLabels = new HashMap<>();
         for (Workspace.SampleInfo sample : workspace.getSamplesComplete())
         {
             Analysis analysis = workspace.getSampleAnalysis(sample);
             List<Workspace.SampleInfo> samples = analysisToSamples.get(analysis);
             if (samples == null)
-                analysisToSamples.put(analysis, samples = new ArrayList<Workspace.SampleInfo>());
+                analysisToSamples.put(analysis, samples = new ArrayList<>());
 
             samples.add(sample);
 
             List<Workspace.SampleInfo> dups = sampleLabels.get(sample.getLabel());
             if (dups == null)
-                sampleLabels.put(sample.getLabel(), dups = new ArrayList<Workspace.SampleInfo>());
+                sampleLabels.put(sample.getLabel(), dups = new ArrayList<>());
             dups.add(sample);
         }
 
@@ -196,7 +196,7 @@ public class Main
                 else
                 {
                     List<String> sampleIDs = group.getSampleIds();
-                    List<Workspace.SampleInfo> samples = new ArrayList<Workspace.SampleInfo>(sampleIDs.size());
+                    List<Workspace.SampleInfo> samples = new ArrayList<>(sampleIDs.size());
                     for (String sampleId : sampleIDs)
                     {
                         Workspace.SampleInfo sample = workspace.getSample(sampleId);
@@ -343,9 +343,9 @@ public class Main
 
         Set<Workspace.SampleInfo> sampleInfos = workspace.getSamples(groupNames, sampleIds);
 
-        Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
-        Map<String, AttributeSet> analysis = new LinkedHashMap<String, AttributeSet>();
-        Map<String, CompensationMatrix> matrices = new LinkedHashMap<String, CompensationMatrix>();
+        Map<String, AttributeSet> keywords = new LinkedHashMap<>();
+        Map<String, AttributeSet> analysis = new LinkedHashMap<>();
+        Map<String, CompensationMatrix> matrices = new LinkedHashMap<>();
         for (Workspace.SampleInfo sampleInfo : sampleInfos)
         {
             if (analysis.containsKey(sampleInfo.getLabel()))
@@ -537,8 +537,8 @@ public class Main
         String outArg = null;
         String outputFormatArg = null;
         String commandArg = null;
-        Set<PopulationName> groupArgs = new LinkedHashSet<PopulationName>();
-        Set<String> sampleArgs = new LinkedHashSet<String>();
+        Set<PopulationName> groupArgs = new LinkedHashSet<>();
+        Set<String> sampleArgs = new LinkedHashSet<>();
         Set<StatisticSet> statArgs = EnumSet.noneOf(StatisticSet.class);
 
         for (int i = 0; i < args.length; i++)

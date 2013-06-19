@@ -75,7 +75,7 @@ public class ProtocolFileBuilder
             outputWriter = new PrintWriter(new FileWriter(protocolFile));
 
             //Determine extraction sets by finding unique extraction names
-            HashSet<String> extractions = new HashSet<String>();
+            HashSet<String> extractions = new HashSet<>();
             for (File image : images)
             {
                 extractions.add(getExtractionName(image));
@@ -279,7 +279,7 @@ public class ProtocolFileBuilder
     protected List<String> getDesignIds(Connection connection) throws PipelineJobException, SQLException
     {
         ResultSet rs = null;
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         try
         {

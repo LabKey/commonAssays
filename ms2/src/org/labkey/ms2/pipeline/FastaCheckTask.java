@@ -41,7 +41,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 
     public static final String DECOY_DATABASE_PARAM_NAME = "pipeline, decoy database"; 
 
-    private static List<String> DECOY_FILE_SUFFIXES = new ArrayList<String>(Arrays.asList("-reverse", "-decoy", "-rev"));
+    private static List<String> DECOY_FILE_SUFFIXES = new ArrayList<>(Arrays.asList("-reverse", "-decoy", "-rev"));
 
     public static class Factory extends AbstractTaskFactory<FastaCheckTaskFactorySettings, Factory>
     {
@@ -166,7 +166,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 
     public static List<File> getDecoySequenceFiles(MS2SearchJobSupport job) throws IOException
     {
-        List<File> result = new ArrayList<File>();
+        List<File> result = new ArrayList<>();
         if (job.getParameters().get(DECOY_DATABASE_PARAM_NAME) != null)
         {
             String decoyPath = job.getParameters().get(DECOY_DATABASE_PARAM_NAME);

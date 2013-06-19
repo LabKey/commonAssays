@@ -113,7 +113,7 @@ public class Titration implements Serializable
 
     public LuminexWellGroup buildWellGroup(List<LuminexDataRow> dataRows)
     {
-        List<LuminexWell> wells = new ArrayList<LuminexWell>();
+        List<LuminexWell> wells = new ArrayList<>();
         LuminexDataRow firstDataRow = null;
         for (LuminexDataRow dataRow : dataRows)
         {

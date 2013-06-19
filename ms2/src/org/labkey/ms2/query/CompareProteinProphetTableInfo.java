@@ -52,10 +52,10 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         _request = request;
         _peptideViewName = peptideViewName;
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("BestName"));
 
-        List<ColumnInfo> runColumns = new ArrayList<ColumnInfo>();
+        List<ColumnInfo> runColumns = new ArrayList<>();
 
         if (runs != null)
         {

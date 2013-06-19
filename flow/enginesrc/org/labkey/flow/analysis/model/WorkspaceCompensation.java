@@ -189,11 +189,11 @@ public class WorkspaceCompensation implements Serializable
 
     private CompensationCalculation simplify(CompensationCalculation calc)
     {
-        Map<SubsetSpec, SubsetSpec> subsetMap = new LinkedHashMap<SubsetSpec, SubsetSpec>();
-        List<Map<SubsetSpec, Population>> lstPopulationMap = new ArrayList<Map<SubsetSpec, Population>>();
+        Map<SubsetSpec, SubsetSpec> subsetMap = new LinkedHashMap<>();
+        List<Map<SubsetSpec, Population>> lstPopulationMap = new ArrayList<>();
         for (Population pop : calc.getPopulations())
         {
-            Map<SubsetSpec, Population> map = new HashMap<SubsetSpec, Population>();
+            Map<SubsetSpec, Population> map = new HashMap<>();
             for (Population child : pop.getPopulations())
             {
                 addPopulationMap(map, null, child);

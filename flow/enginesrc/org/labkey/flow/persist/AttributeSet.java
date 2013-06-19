@@ -67,15 +67,15 @@ public class AttributeSet implements Serializable
         FlowData.Keywords keywords = data.getKeywords();
         if (keywords != null)
         {
-            _keywords = new TreeMap<String, String>();
-            _keywordAliases = new TreeMap<String, Set<String>>();
+            _keywords = new TreeMap<>();
+            _keywordAliases = new TreeMap<>();
             for (Keyword keyword : keywords.getKeywordArray())
             {
                 String name = keyword.getName();
                 _keywords.put(name, keyword.getValue());
                 if (keyword.isSetAliases())
                 {
-                    Set<String> aliases = new LinkedHashSet<String>();
+                    Set<String> aliases = new LinkedHashSet<>();
                     _keywordAliases.put(name, aliases);
                     for (String alias : keyword.getAliases().getAliasArray())
                         aliases.add(alias);
@@ -86,15 +86,15 @@ public class AttributeSet implements Serializable
         FlowData.Statistics statistics = data.getStatistics();
         if (statistics != null)
         {
-            _statistics = new TreeMap<StatisticSpec, Double>();
-            _statisticAliases = new TreeMap<StatisticSpec, Set<StatisticSpec>>();
+            _statistics = new TreeMap<>();
+            _statisticAliases = new TreeMap<>();
             for (Statistic statistic : statistics.getStatisticArray())
             {
                 StatisticSpec spec = new StatisticSpec(statistic.getName());
                 _statistics.put(spec, statistic.getValue());
                 if (statistic.isSetAliases())
                 {
-                    Set<StatisticSpec> aliases = new LinkedHashSet<StatisticSpec>();
+                    Set<StatisticSpec> aliases = new LinkedHashSet<>();
                     _statisticAliases.put(spec, aliases);
                     for (String alias : statistic.getAliases().getAliasArray())
                         aliases.add(new StatisticSpec(alias));
@@ -105,15 +105,15 @@ public class AttributeSet implements Serializable
         FlowData.Graphs graphs = data.getGraphs();
         if (graphs != null)
         {
-            _graphs = new TreeMap<GraphSpec, byte[]>();
-            _graphAliases = new TreeMap<GraphSpec, Set<GraphSpec>>();
+            _graphs = new TreeMap<>();
+            _graphAliases = new TreeMap<>();
             for (Graph graph : graphs.getGraphArray())
             {
                 GraphSpec spec = new GraphSpec(graph.getName());
                 _graphs.put(spec, graph.getData());
                 if (graph.isSetAliases())
                 {
-                    Set<GraphSpec> aliases = new LinkedHashSet<GraphSpec>();
+                    Set<GraphSpec> aliases = new LinkedHashSet<>();
                     _graphAliases.put(spec, aliases);
                     for (String alias : graph.getAliases().getAliasArray())
                         aliases.add(new GraphSpec(alias));
@@ -240,22 +240,22 @@ public class AttributeSet implements Serializable
     public void addKeywordAlias(String spec, String alias)
     {
         if (_keywordAliases == null)
-            _keywordAliases = new TreeMap<String, Set<String>>();
+            _keywordAliases = new TreeMap<>();
 
         Set<String> aliases = _keywordAliases.get(spec);
         if (aliases == null)
-            _keywordAliases.put(spec, aliases = new LinkedHashSet<String>());
+            _keywordAliases.put(spec, aliases = new LinkedHashSet<>());
         aliases.add(alias);
     }
 
     public void setKeywordAliases(Map<String, Set<String>> keywordAliases)
     {
-        _keywordAliases = new TreeMap<String, Set<String>>();
+        _keywordAliases = new TreeMap<>();
 
         for (String keyword : keywordAliases.keySet())
         {
             Set<String> aliases = keywordAliases.get(keyword);
-            _keywordAliases.put(keyword, new LinkedHashSet<String>(aliases));
+            _keywordAliases.put(keyword, new LinkedHashSet<>(aliases));
         }
     }
 
@@ -287,29 +287,29 @@ public class AttributeSet implements Serializable
 
     public void setStatistics(Map<StatisticSpec, Double> statistics)
     {
-        _statistics = new TreeMap<StatisticSpec, Double>();
+        _statistics = new TreeMap<>();
         _statistics.putAll(statistics);
     }
 
     public void addStatisticAlias(StatisticSpec spec, StatisticSpec alias)
     {
         if (_statisticAliases == null)
-            _statisticAliases = new TreeMap<StatisticSpec, Set<StatisticSpec>>();
+            _statisticAliases = new TreeMap<>();
 
         Set<StatisticSpec> aliases = _statisticAliases.get(spec);
         if (aliases == null)
-            _statisticAliases.put(spec, aliases = new LinkedHashSet<StatisticSpec>());
+            _statisticAliases.put(spec, aliases = new LinkedHashSet<>());
         aliases.add(alias);
     }
 
     public void setStatisticAliases(Map<StatisticSpec, Set<StatisticSpec>> statisticAliases)
     {
-        _statisticAliases = new TreeMap<StatisticSpec, Set<StatisticSpec>>();
+        _statisticAliases = new TreeMap<>();
 
         for (StatisticSpec statisticSpec : statisticAliases.keySet())
         {
             Set<StatisticSpec> aliases = statisticAliases.get(statisticSpec);
-            _statisticAliases.put(statisticSpec, new LinkedHashSet<StatisticSpec>(aliases));
+            _statisticAliases.put(statisticSpec, new LinkedHashSet<>(aliases));
         }
     }
 
@@ -337,29 +337,29 @@ public class AttributeSet implements Serializable
 
     public void setGraphs(Map<GraphSpec, byte[]> graphs)
     {
-        _graphs = new TreeMap<GraphSpec, byte[]>();
+        _graphs = new TreeMap<>();
         _graphs.putAll(graphs);
     }
 
     public void addGraphAlias(GraphSpec spec, GraphSpec alias)
     {
         if (_graphAliases == null)
-            _graphAliases = new TreeMap<GraphSpec, Set<GraphSpec>>();
+            _graphAliases = new TreeMap<>();
 
         Set<GraphSpec> aliases = _graphAliases.get(spec);
         if (aliases == null)
-            _graphAliases.put(spec, aliases = new LinkedHashSet<GraphSpec>());
+            _graphAliases.put(spec, aliases = new LinkedHashSet<>());
         aliases.add(alias);
     }
 
     public void setGraphAliases(Map<GraphSpec, Set<GraphSpec>> graphAliases)
     {
-        _graphAliases = new TreeMap<GraphSpec, Set<GraphSpec>>();
+        _graphAliases = new TreeMap<>();
 
         for (GraphSpec graphSpec : graphAliases.keySet())
         {
             Set<GraphSpec> aliases = graphAliases.get(graphSpec);
-            _graphAliases.put(graphSpec, new LinkedHashSet<GraphSpec>(aliases));
+            _graphAliases.put(graphSpec, new LinkedHashSet<>(aliases));
         }
     }
 

@@ -72,7 +72,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
             barcodeFieldNames = barcodeFieldNamesParam.getStringValue().split(",");
         }
 
-        List<ExpMaterial> matchingMaterials = new ArrayList<ExpMaterial>();
+        List<ExpMaterial> matchingMaterials = new ArrayList<>();
         if (barcodeFieldNames != null && _barcode != null)
         {
             // Look through all the sample sets that are visible from this folder to check for samples where
@@ -141,7 +141,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
 
     protected InsertView createRunInsertView(MicroarrayRunUploadForm form, boolean errorReshow, BindException errors)
     {
-        List<DomainProperty> userProperties = new ArrayList<DomainProperty>();
+        List<DomainProperty> userProperties = new ArrayList<>();
         Map<DomainProperty, String> mageMLProperties;
         try
         {
@@ -150,7 +150,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         catch (ExperimentException e)
         {
             errors.addError(new LabkeyError("Unable to get properties from MageML file: " + e.getMessage()));
-            mageMLProperties = new HashMap<DomainProperty, String>();
+            mageMLProperties = new HashMap<>();
         }
 
         try

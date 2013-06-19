@@ -57,6 +57,6 @@ public class GraphCache
     public synchronized void setGraphInfo(GWTGraphOptions options, GWTGraphInfo info, PlotInfo plotInfo)
     {
         this.graphOptions = options;
-        this.ref = new SoftReference<Pair<GWTGraphInfo,PlotInfo>>(new Pair<GWTGraphInfo,PlotInfo>(info,plotInfo));
+        this.ref = new SoftReference<>(new Pair<>(info,plotInfo));
     }
 }

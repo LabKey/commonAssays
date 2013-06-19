@@ -28,7 +28,7 @@ import java.util.HashMap;
  */
 public abstract class PepXmlAnalysisResultHandler
 {
-    private static final Map<String, PepXmlAnalysisResultHandler> _handlers = new HashMap<String, PepXmlAnalysisResultHandler>();
+    private static final Map<String, PepXmlAnalysisResultHandler> _handlers = new HashMap<>();
 
     static
     {

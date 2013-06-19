@@ -67,7 +67,7 @@ public class WorkspaceParser
     protected static Map<String, String> GATINGML_1_5_PREFIX_MAP;
     static
     {
-        GATINGML_1_5_PREFIX_MAP = new HashMap<String, String>();
+        GATINGML_1_5_PREFIX_MAP = new HashMap<>();
         GATINGML_1_5_PREFIX_MAP.put("gating", GATING_1_5_NS);
         GATINGML_1_5_PREFIX_MAP.put("transforms", TRANSFORMATIONS_1_5_NS);
         GATINGML_1_5_PREFIX_MAP.put("data-type", DATATYPES_1_5_NS);
@@ -77,7 +77,7 @@ public class WorkspaceParser
     protected static Set<String> GATINGML_1_5_NAMESPACES;
     static
     {
-        GATINGML_1_5_NAMESPACES = new HashSet<String>();
+        GATINGML_1_5_NAMESPACES = new HashSet<>();
         GATINGML_1_5_NAMESPACES.add(GATING_1_5_NS);
         GATINGML_1_5_NAMESPACES.add(TRANSFORMATIONS_1_5_NS);
         GATINGML_1_5_NAMESPACES.add(DATATYPES_1_5_NS);
@@ -88,7 +88,7 @@ public class WorkspaceParser
     protected static Map<String, String> FJ_GATINGML_1_5_NAMEPSACE_FIXUP;
     static
     {
-        FJ_GATINGML_1_5_NAMEPSACE_FIXUP = new HashMap<String, String>();
+        FJ_GATINGML_1_5_NAMEPSACE_FIXUP = new HashMap<>();
         FJ_GATINGML_1_5_NAMEPSACE_FIXUP.put(FJ_GATING_1_5_NS, GATING_1_5_NS);
         FJ_GATINGML_1_5_NAMEPSACE_FIXUP.put(FJ_TRANSFORMATIONS_1_5_NS, TRANSFORMATIONS_1_5_NS);
         FJ_GATINGML_1_5_NAMEPSACE_FIXUP.put(FJ_DATATYPES_1_5_NS, DATATYPES_1_5_NS);
@@ -98,7 +98,7 @@ public class WorkspaceParser
     protected static Map<String, String> GATINGML_2_0_PREFIX_MAP;
     static
     {
-        GATINGML_2_0_PREFIX_MAP = new HashMap<String, String>();
+        GATINGML_2_0_PREFIX_MAP = new HashMap<>();
         GATINGML_2_0_PREFIX_MAP.put("gating", GATING_2_0_NS);
         GATINGML_2_0_PREFIX_MAP.put("transforms", TRANSFORMATIONS_2_0_NS);
         GATINGML_2_0_PREFIX_MAP.put("data-type", DATATYPES_2_0_NS);
@@ -108,7 +108,7 @@ public class WorkspaceParser
     protected static Set<String> GATINGML_2_0_NAMESPACES;
     static
     {
-        GATINGML_2_0_NAMESPACES = new HashSet<String>();
+        GATINGML_2_0_NAMESPACES = new HashSet<>();
         GATINGML_2_0_NAMESPACES.add(GATING_2_0_NS);
         GATINGML_2_0_NAMESPACES.add(TRANSFORMATIONS_2_0_NS);
         GATINGML_2_0_NAMESPACES.add(DATATYPES_2_0_NS);
@@ -314,7 +314,7 @@ public class WorkspaceParser
 
     static final short defaultFilter = LSParserFilter.FILTER_SKIP;
 
-    final static HashMap<String,Short> noNamespaceElements = new HashMap<String, Short>(100);
+    final static HashMap<String,Short> noNamespaceElements = new HashMap<>(100);
 
     static
     {
@@ -355,7 +355,7 @@ public class WorkspaceParser
     static class FJParseFilter implements LSParserFilter
     {
         SymbolTable fSymbolTable = new SymbolTable();
-        Set<String> rejected = new HashSet<String>();
+        Set<String> rejected = new HashSet<>();
 
         public short startElement(Element element)
         {

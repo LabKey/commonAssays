@@ -68,7 +68,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
             propertyCol.setFk(new PropertyForeignKey(_domain, schema));
         }
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("LookupString"));
         PropertyDescriptor[] props = OntologyManager.getPropertiesForType(annotationSet.getLsid(), annotationSet.lookupContainer());
         for (PropertyDescriptor prop : props)

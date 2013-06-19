@@ -66,7 +66,7 @@ public class RunExclusionTable extends AbstractExclusionTable
             }
         }, "AnalyteId"));
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+        List<FieldKey> defaultCols = new ArrayList<>(getDefaultVisibleColumns());
         defaultCols.remove(FieldKey.fromParts("Modified"));
         defaultCols.remove(FieldKey.fromParts("ModifiedBy"));
         setDefaultVisibleColumns(defaultCols);

@@ -45,7 +45,7 @@ public class ElisaResultsTable extends AssayResultTable
     {
         super(schema, includeCopiedToStudyColumns);
 
-        List<FieldKey> visibleColumns = new ArrayList<FieldKey>();
+        List<FieldKey> visibleColumns = new ArrayList<>();
 
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);

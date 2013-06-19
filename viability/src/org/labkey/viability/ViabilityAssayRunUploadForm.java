@@ -119,7 +119,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
             Domain resultsDomain = getProvider().getResultsDomain(getProtocol());
             List<DomainProperty> domainProperties = Arrays.asList(resultsDomain.getProperties());
 
-            List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>(_poolIDs.length);
+            List<Map<String, Object>> rows = new ArrayList<>(_poolIDs.length);
             for (int rowIndex = 0; rowIndex < _poolIDs.length; rowIndex++)
             {
                 String poolID = _poolIDs[rowIndex];
@@ -136,7 +136,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     private Map<String, Object> getPropertyMapFromRequest(List<DomainProperty> columns, int rowIndex, String poolID, BindException errors) throws ExperimentException
     {
         String inputPrefix = INPUT_PREFIX + poolID + "_" + rowIndex;
-        Map<String, Object> properties = new LinkedHashMap<String, Object>();
+        Map<String, Object> properties = new LinkedHashMap<>();
         for (DomainProperty dp : columns)
         {
             Object value = null;
@@ -168,7 +168,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 {
                     // get SpecimenIDs from request as a List<String>
                     String[] values = getRequest().getParameterValues(paramName);
-                    List<String> specimenIDs = new ArrayList<String>(values.length);
+                    List<String> specimenIDs = new ArrayList<>(values.length);
                     for (String specimenID : values)
                     {
                         if (specimenID != null)
@@ -218,7 +218,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         ExpRun reRun = getReRun();
         if (reRun != null)
         {
-            ret = new HashMap<String, Map<String, Object>>();
+            ret = new HashMap<>();
             try
             {
                 ViabilityResult[] results = ViabilityManager.getResults(reRun, reRun.getContainer());

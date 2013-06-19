@@ -225,7 +225,7 @@ public class SubsetParser
         /** are we in a spot where we might have an unescaped name? */
         boolean _allowUnescapedName = false;
 
-        static Map<Character, Tok> _charTok = new HashMap<Character, Tok>();
+        static Map<Character, Tok> _charTok = new HashMap<>();
         static
         {
             _charTok.put('/', Tok.nameDivider);

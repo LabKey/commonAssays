@@ -41,7 +41,7 @@
         <% String name = form.ff_analysisName;
             if (StringUtils.isEmpty(name))
             {
-                Set<String> namesInUse = new HashSet<String>();
+                Set<String> namesInUse = new HashSet<>();
                 for (FlowExperiment experiment : FlowExperiment.getExperiments(context.getContainer()))
                 {
                     namesInUse.add(experiment.getName().toLowerCase());

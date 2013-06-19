@@ -68,7 +68,7 @@ public class JoinSampleSetForm extends ProtocolForm
 
     public Map<String, String> getAvailableSampleKeyFields()
     {
-        LinkedHashMap<String,String> ret = new LinkedHashMap<String, String>();
+        LinkedHashMap<String,String> ret = new LinkedHashMap<>();
         ret.put("", "");
         ExpSampleSet sampleSet = getProtocol().getSampleSet();
         if (sampleSet != null)
@@ -85,7 +85,7 @@ public class JoinSampleSetForm extends ProtocolForm
 
     public Map<FieldKey, String> getAvailableDataKeyFields()
     {
-        LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<FieldKey, String>();
+        LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<>();
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
         TableInfo tableFCSFiles = schema.getTable(FlowTableType.FCSFiles.toString());
 

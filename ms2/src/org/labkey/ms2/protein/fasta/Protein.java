@@ -37,7 +37,7 @@ public class Protein
 
     //known identifier types.  Multiple identifiers found in fasta files can often
     //boil down to the same thing
-    public static HashMap<String, String> IdentTypeMap = new HashMap<String, String>();
+    public static HashMap<String, String> IdentTypeMap = new HashMap<>();
 
     /* for parsing header lines of FASTA files */
     public static final String SEPARATOR_PATTERN = "\\|";
@@ -225,7 +225,7 @@ public class Protein
      */
     public static Map<String, Set<String>> identParse(String fastaIdentifierString, String wholeHeader)
     {
-        Map<String, Set<String>> identifiers = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> identifiers = new HashMap<>();
         if (fastaIdentifierString == null) return identifiers;
         if (fastaIdentifierString.indexOf(" ") != -1) fastaIdentifierString = fastaIdentifierString.substring(0, fastaIdentifierString.indexOf(" "));
         fastaIdentifierString = fastaIdentifierString.replaceAll(":", "|");

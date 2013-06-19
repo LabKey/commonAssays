@@ -122,7 +122,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         addCurveTypeColumns();
 
         // set the default columns for this table to be those used for the QC Report
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Name"));
         defaultCols.add(FieldKey.fromParts("Titration"));
         defaultCols.add(FieldKey.fromParts("Titration", "Standard"));
@@ -193,7 +193,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             {
                 Integer analyteId = getInteger(map, map.containsKey("analyte") ? "analyte" : "analyteid");
                 Integer titrationId = getInteger(map, map.containsKey("titration") ? "titration" : "titrationid");
-                return new Pair<Integer, Integer>(analyteId, titrationId);
+                return new Pair<>(analyteId, titrationId);
             }
 
             @Override
@@ -236,7 +236,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
             protected Map<String, String> getIsotypeAndConjugate(ExpRun run)
             {
-                Map<String, String> isotypeConjugate = new HashMap<String, String>();
+                Map<String, String> isotypeConjugate = new HashMap<>();
                 isotypeConjugate.put("Isotype", null);
                 isotypeConjugate.put("Conjugate", null);
                 Map<String, ObjectProperty> runProps = run.getObjectProperties();
@@ -276,8 +276,8 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                 // If any of the updated rows includes a change to the guide set calculation (i.e. has IncludeInGuideSetCalculation as an updated value)
                 // then we need to update the AnalyteTitration QC Flags for all AnalyteTitrations that are associated with the given guide set(s)
-                Set<Integer> guideSetIds = new HashSet<Integer>();
-                Set<AnalyteTitration> analyteTitrationsForUpdate = new HashSet<AnalyteTitration>();
+                Set<Integer> guideSetIds = new HashSet<>();
+                Set<AnalyteTitration> analyteTitrationsForUpdate = new HashSet<>();
                 for (Map<String, Object> row : rows)
                 {
                     // add the current row to the set of AnalyteTitrations that need to have their QC Flags updated

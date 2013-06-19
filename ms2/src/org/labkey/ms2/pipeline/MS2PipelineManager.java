@@ -98,7 +98,7 @@ public class MS2PipelineManager
         if (dbFiles == null)
             return null;
 
-        ArrayList<String> dirList = new ArrayList<String>();
+        ArrayList<String> dirList = new ArrayList<>();
 
         for (File dbFile : dbFiles)
         {
@@ -117,7 +117,7 @@ public class MS2PipelineManager
 
         if (dbFiles == null)
             return null;
-        ArrayList<File> listSubdirs = new ArrayList<File>();
+        ArrayList<File> listSubdirs = new ArrayList<>();
         int fileCount  = 0;
         for (File dbFile : dbFiles)
         {

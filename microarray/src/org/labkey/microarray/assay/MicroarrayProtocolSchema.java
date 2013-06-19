@@ -73,7 +73,7 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
         AssayResultTable result = new AssayResultTable(this, includeCopiedToStudyColumns);
         if (AbstractAssayProvider.getDomainByPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
         {
-            List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+            List<FieldKey> cols = new ArrayList<>(result.getDefaultVisibleColumns());
             Iterator<FieldKey> iterator = cols.iterator();
             while (iterator.hasNext())
             {

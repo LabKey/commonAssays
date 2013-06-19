@@ -1536,7 +1536,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testGenerateFile() throws SequestParamsException
         {
-            Map<String, String> paramMap = new HashMap<String, String>();
+            Map<String, String> paramMap = new HashMap<>();
 
             paramMap.put(ParameterNames.STATIC_MOD, "50.43@[,90.12@]");
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);

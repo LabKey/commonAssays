@@ -43,11 +43,11 @@ public class ProteinProphetFile extends SensitivitySummary
 
     public ProteinProphetFile(SimpleXMLStreamReader parser) throws XMLStreamException
     {
-        List<Float> minimumProbabilities = new ArrayList<Float>();
-        List<Float> sensitivities = new ArrayList<Float>();
-        List<Float> falsePositiveErrorRate = new ArrayList<Float>();
-        List<Float> predictedNumberCorrect = new ArrayList<Float>();
-        List<Float> predictedNumberIncorrect = new ArrayList<Float>();
+        List<Float> minimumProbabilities = new ArrayList<>();
+        List<Float> sensitivities = new ArrayList<>();
+        List<Float> falsePositiveErrorRate = new ArrayList<>();
+        List<Float> predictedNumberCorrect = new ArrayList<>();
+        List<Float> predictedNumberIncorrect = new ArrayList<>();
 
         while (parser.hasNext() && !(parser.isEndElement() && "proteinprophet_details".equals(parser.getLocalName())))
         {

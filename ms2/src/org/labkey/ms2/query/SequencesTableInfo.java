@@ -141,7 +141,7 @@ public class SequencesTableInfo extends FilteredTable<MS2Schema>
             addColumn(firstIdentColumn);
         }
 
-        List<FieldKey> cols = new ArrayList<FieldKey>();
+        List<FieldKey> cols = new ArrayList<>();
         cols.add(FieldKey.fromParts("BestName"));
         cols.add(FieldKey.fromParts("Description"));
         cols.add(FieldKey.fromParts("BestGeneName"));
@@ -196,7 +196,7 @@ public class SequencesTableInfo extends FilteredTable<MS2Schema>
 
     /*package*/ static List<String> getIdentifierParameters(String identifiers)
     {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         if (identifiers == null || identifiers.trim().equals(""))
         {
             return result;
@@ -255,7 +255,7 @@ public class SequencesTableInfo extends FilteredTable<MS2Schema>
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {
-            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<Container>(containers)));
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers)));
         }
         else
         {

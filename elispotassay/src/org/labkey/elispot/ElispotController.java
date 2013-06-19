@@ -132,7 +132,7 @@ public class ElispotController extends SpringActionController
 
             VBox view = new VBox();
 
-            JspView plateView = new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
+            JspView plateView = new JspView<>("/org/labkey/elispot/view/plateSummary.jsp", bean);
 
             plateView.setTitle("Plate Summary Information Run: " + form.getRowId());
             plateView.setFrame(WebPartView.FrameType.PORTAL);
@@ -209,7 +209,7 @@ public class ElispotController extends SpringActionController
     private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
                                                       PlateTemplate template) throws SQLException
     {
-        Map<Position, WellInfo> map = new HashMap<Position, WellInfo>();
+        Map<Position, WellInfo> map = new HashMap<>();
 
         ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         assert(data.length == 1);
@@ -217,7 +217,7 @@ public class ElispotController extends SpringActionController
         Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
         DomainProperty[] sampleProperties = sampleDomain.getProperties();
 
-        Map<String, ExpMaterial> inputs = new HashMap<String, ExpMaterial>();
+        Map<String, ExpMaterial> inputs = new HashMap<>();
         for (ExpMaterial material : run.getMaterialInputs().keySet())
             inputs.put(material.getName(), material);
 
@@ -272,7 +272,7 @@ public class ElispotController extends SpringActionController
 
     private class ElispotDetailsHeaderView extends AssayHeaderView
     {
-        List<NavTree> _links = new ArrayList<NavTree>();
+        List<NavTree> _links = new ArrayList<>();
 
         public ElispotDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, ContainerFilter containerFilter)
         {
@@ -364,8 +364,8 @@ public class ElispotController extends SpringActionController
     {
         private String _dataRowLsid;
         private String _title = "";
-        private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<String, ObjectProperty>();
-        private Map<DomainProperty, String> _specimenProperties = new LinkedHashMap<DomainProperty, String>();
+        private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
+        private Map<DomainProperty, String> _specimenProperties = new LinkedHashMap<>();
 
         public String getDataRowLsid()
         {

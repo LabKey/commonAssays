@@ -110,8 +110,8 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         info(String.format(UPGRADE_RUN, run.getContainer().getPath(), run.getName()));
         try
         {
-            Map<File, String> filesToAdd = new HashMap<File, String>();
-            Set<File> existingFiles = new HashSet<File>();
+            Map<File, String> filesToAdd = new HashMap<>();
+            Set<File> existingFiles = new HashSet<>();
 
             // Find the mzXML file(s) to figure out the base name for the files
             findRelatedFiles(run, filesToAdd, existingFiles, run.getDataOutputs());

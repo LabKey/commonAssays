@@ -35,7 +35,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
 {
     private File _sequestInstallDir;
     private File _indexRootDir;
-    private List<String> _sequestOptions = new ArrayList<String>();
+    private List<String> _sequestOptions = new ArrayList<>();
 
     protected AbstractSequestSearchTaskFactory(Class namespaceClass)
     {

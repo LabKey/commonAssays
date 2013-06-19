@@ -53,7 +53,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
         super(provider, run, user, cutoffs, renderCurveFitType);
         _plates = plates;
 
-        Map<String, List<WellGroup>> sampleGroups = new LinkedHashMap<String, List<WellGroup>>();
+        Map<String, List<WellGroup>> sampleGroups = new LinkedHashMap<>();
         for (Plate plate : plates)
         {
             for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))
@@ -63,13 +63,13 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
                 List<WellGroup> groups = sampleGroups.get(key);
                 if (groups == null)
                 {
-                    groups = new ArrayList<WellGroup>();
+                    groups = new ArrayList<>();
                     sampleGroups.put(key, groups);
                 }
                 groups.add(sample);
             }
         }
-        List<DilutionSummary> dilutionSummaries = new ArrayList<DilutionSummary>();
+        List<DilutionSummary> dilutionSummaries = new ArrayList<>();
 
         for (Map.Entry<String, List<WellGroup>> sample : sampleGroups.entrySet())
             dilutionSummaries.add(new MultiVirusDilutionSummary(this, sample.getValue(), null, _renderedCurveFitType));

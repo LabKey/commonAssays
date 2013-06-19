@@ -92,7 +92,7 @@ public class KeywordUtil
 
     public static Collection<String> filterHidden(Collection<String> keywords)
     {
-        ArrayList<String> ret = new ArrayList<String>(keywords.size());
+        ArrayList<String> ret = new ArrayList<>(keywords.size());
         for (String s : keywords)
             if (!isHidden(s))
                 ret.add(s);

@@ -39,10 +39,10 @@ public class IdPattern
     private SortedMap<Integer, Pattern> _mapReplPatterns =null;
 
     // poplulate the map of id patterns
-    public static final Map<String,IdPattern> ID_PATTERN_MAP = new HashMap<String,IdPattern>();
-    public static final List<String> UNTYPED_ID_PATTERN_LIST = new ArrayList<String>();
-    public static final List<String> TYPED_ID_PATTERN_LIST = new ArrayList<String>();
-    public static final List<String> WHOLE_HEADER_ID_PATTERN_LIST = new ArrayList<String>();
+    public static final Map<String,IdPattern> ID_PATTERN_MAP = new HashMap<>();
+    public static final List<String> UNTYPED_ID_PATTERN_LIST = new ArrayList<>();
+    public static final List<String> TYPED_ID_PATTERN_LIST = new ArrayList<>();
+    public static final List<String> WHOLE_HEADER_ID_PATTERN_LIST = new ArrayList<>();
     static
     {
         addUntypedIdPattern("IPI", "IPI..*");
@@ -86,7 +86,7 @@ public class IdPattern
         _typeAfter = following;
         if (null != _strReplace)
         {
-            _mapReplPatterns = new TreeMap<Integer,Pattern>();
+            _mapReplPatterns = new TreeMap<>();
             int c=0;
             while (c <= 9)
             {
@@ -169,8 +169,8 @@ public class IdPattern
      */
     public static Map<String, Set<String>> createIdMap(String key, String value)
     {
-        Map<String, Set<String>> idMap = new HashMap<String, Set<String>>();
-        Set<String> vals = new HashSet<String>();
+        Map<String, Set<String>> idMap = new HashMap<>();
+        Set<String> vals = new HashSet<>();
         if (null!=value)
         {
             String[] valArray = value.split(";");

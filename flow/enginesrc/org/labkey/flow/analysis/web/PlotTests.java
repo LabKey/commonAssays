@@ -80,7 +80,7 @@ public class PlotTests extends Assert
             throw new Exception("Failed to create output dir: " + outDir);
         System.out.println("Generating graphs for '" + fcsFile.getName() + "'...");
 
-        Map<String, GraphSpec> images = new LinkedHashMap<String, GraphSpec>();
+        Map<String, GraphSpec> images = new LinkedHashMap<>();
         URI uri = fcsFile.toURI();
         List<FCSAnalyzer.GraphResult> graphs = FCSAnalyzer.get().generateGraphs(uri, comp, analysis, analysis.getGraphs());
         for (FCSAnalyzer.GraphResult graph : graphs)
@@ -123,7 +123,7 @@ public class PlotTests extends Assert
             }
         });
 
-        Map<String, GraphSpec> allImages = new LinkedHashMap<String, GraphSpec>(generatedImages);
+        Map<String, GraphSpec> allImages = new LinkedHashMap<>(generatedImages);
         for (String expectedImage : expectedImages)
         {
             if (!allImages.containsKey(expectedImage))

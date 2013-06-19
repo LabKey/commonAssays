@@ -102,7 +102,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler
             throwParseError(dataFile, "Invalid column " + col + " specified on line " + lineNumber +
                     ".  The current plate template defines " + template.getColumns() + " columns.");
         }
-        return new Pair<Integer, Integer>(row, col);
+        return new Pair<>(row, col);
     }
 
     @Override
@@ -135,7 +135,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler
             int wellCount = 0;
             int plateCount = 0;
             double[][] wellValues = new double[template.getRows()][template.getColumns()];
-            List<Plate> plates = new ArrayList<Plate>();
+            List<Plate> plates = new ArrayList<>();
             for (Map<String, Object> rowData : loader)
             {
                 // Current line in the data file is calculated by the number of wells we've already read,
@@ -184,7 +184,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler
     @Override
     protected void prepareWellGroups(List<WellGroup> groups, ExpMaterial sampleInput, Map<String, DomainProperty> properties)
     {
-        List<WellData> wells = new ArrayList<WellData>();
+        List<WellData> wells = new ArrayList<>();
         // All well groups use the same plate template, so it's okay to just check the dilution direction of the first group:
         boolean reverseDirection = Boolean.parseBoolean((String) groups.get(0).getProperty(SampleProperty.ReverseDilutionDirection.name()));
         for (WellGroup group : groups)

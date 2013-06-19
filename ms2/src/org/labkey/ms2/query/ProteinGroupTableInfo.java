@@ -163,7 +163,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         ExprColumn proteinCountColumn = new ExprColumn(this, "ProteinCount", proteinCountSQL, JdbcType.INTEGER);
         addColumn(proteinCountColumn);
 
-        List<FieldKey> defaultColumns = new ArrayList<FieldKey>();
+        List<FieldKey> defaultColumns = new ArrayList<>();
         defaultColumns.add(FieldKey.fromParts("Group"));
         defaultColumns.add(FieldKey.fromParts("GroupProbability"));
         defaultColumns.add(FieldKey.fromParts("ErrorRate"));
@@ -358,7 +358,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         if (includeSubfolders)
         {
             List<Container> containers = ContainerManager.getAllChildren(c, u);
-            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<Container>(containers)));
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers)));
         }
         else
         {

@@ -76,7 +76,7 @@ public class FlowPipelineProvider extends PipelineProvider
         if (!hasFlowModule(context))
             return;
 
-        final Set<String> usedRelativePaths = new HashSet<String>();
+        final Set<String> usedRelativePaths = new HashSet<>();
 
         for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
         {
@@ -174,7 +174,7 @@ public class FlowPipelineProvider extends PipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfig()
     {
-        List<PipelineActionConfig> configs = new ArrayList<PipelineActionConfig>();
+        List<PipelineActionConfig> configs = new ArrayList<>();
 
         // import directory of fcs files
         String actionId = createActionId(this.getClass(), null);

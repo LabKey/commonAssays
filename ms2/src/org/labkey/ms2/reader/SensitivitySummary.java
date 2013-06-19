@@ -86,7 +86,7 @@ public class SensitivitySummary
             _sensitivity.length == _minProb.length &&
             _minProb.length == _error.length)
         {
-            List<ProbabilityInfo> infos = new ArrayList<ProbabilityInfo>(_sensitivity.length);
+            List<ProbabilityInfo> infos = new ArrayList<>(_sensitivity.length);
             for (int i = 0; i < _sensitivity.length; i++)
             {
                 infos.add(new ProbabilityInfo(_minProb[i], _sensitivity[i], _error[i]));

@@ -129,8 +129,8 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
         sql.append("ORDER BY SeqId, LocId, ThirdLevelId");
 
         PieJChartHelper retVal = new PieJChartHelper(title);
-        HashMap<String, Integer> thirdLevTallies = new HashMap<String, Integer>();
-        HashMap<String, HashSet<Integer>> extra = new HashMap<String, HashSet<Integer>>();
+        HashMap<String, Integer> thirdLevTallies = new HashMap<>();
+        HashMap<String, HashSet<Integer>> extra = new HashMap<>();
 
         ResultSet rs = null;
 
@@ -169,7 +169,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
                 HashSet<Integer> sqids = extra.get(key);
                 if (sqids == null)
                 {
-                    sqids = new HashSet<Integer>();
+                    sqids = new HashSet<>();
                     extra.put(key, sqids);
                 }
                 //store a copy of each seqid for each 3rd level GO accn.  sqids gets
@@ -229,7 +229,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
         if (otherCount > 0)
         {
             retVal.getDataset().setValue("Other", otherCount);
-            HashSet<Integer> otherSet = new HashSet<Integer>();
+            HashSet<Integer> otherSet = new HashSet<>();
             extra.put("Other", otherSet);
             for (String k : list)
             {

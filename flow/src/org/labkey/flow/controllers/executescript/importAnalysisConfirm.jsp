@@ -61,7 +61,7 @@
     boolean hasPipelineRoot = pipeRoot != null;
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 
-    List<String> selectedSamples = new ArrayList<String>(form.getSelectedSamples().getRows().size());
+    List<String> selectedSamples = new ArrayList<>(form.getSelectedSamples().getRows().size());
     for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : form.getSelectedSamples().getRows().entrySet())
     {
         SelectedSamples.ResolvedSample resolvedSample = entry.getValue();
@@ -160,7 +160,7 @@
     <li style="padding-bottom:0.5em;">
         <b>Existing FCS files:</b>
         <%
-            Set<String> rowIds = new HashSet<String>();
+            Set<String> rowIds = new HashSet<>();
             for (String sampleId : selectedSamples)
             {
                 SelectedSamples.ResolvedSample sample = form.getSelectedSamples().getRows().get(sampleId);

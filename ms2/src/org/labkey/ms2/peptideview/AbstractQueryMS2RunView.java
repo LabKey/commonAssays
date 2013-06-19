@@ -62,7 +62,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
     {
         AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
 
-        List<FieldKey> keys = new ArrayList<FieldKey>();
+        List<FieldKey> keys = new ArrayList<>();
         keys.add(FieldKey.fromParts("Fraction", "Run", "Run"));
         keys.add(FieldKey.fromParts("Fraction", "Fraction"));
         keys.add(FieldKey.fromParts("Mass"));
@@ -99,7 +99,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         ColumnInfo desiredCol = QueryService.get().getColumns(tinfo, Collections.singletonList(desiredFK)).get(desiredFK);
         assert desiredCol != null : "Couldn't find column " + desiredFK;
 
-        List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
+        List<ColumnInfo> columns = new ArrayList<>();
         columns.add(desiredCol);
 
         QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<FieldKey>());
@@ -190,7 +190,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         {
             if (selectedRows != null)
             {
-                _selectedRows = new ArrayList<Integer>();
+                _selectedRows = new ArrayList<>();
                 for (String selectedRow : selectedRows)
                 {
                     Integer row = new Integer(selectedRow);

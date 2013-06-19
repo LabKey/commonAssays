@@ -72,13 +72,13 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
         Collection<String> RefSeqIds = identifiers.get("refseq");
         Collection<String> GOCategories = identifiers.get("go");
 
-        HashSet<String> allGbIds = new HashSet<String>();
+        HashSet<String> allGbIds = new HashSet<>();
         if (null != GenBankIds)
             allGbIds.addAll(GenBankIds);
         if (null != RefSeqIds)
             allGbIds.addAll(RefSeqIds);
 
-        Set<String> allGbURLs = new HashSet<String>();
+        Set<String> allGbURLs = new HashSet<>();
 
         for (String ident : allGbIds)
         {
@@ -94,7 +94,7 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
         // duplicates
         if (null != IPIds && !IPIds.isEmpty())
         {
-            Set<String> IPIset = new HashSet<String>();
+            Set<String> IPIset = new HashSet<>();
 
             for (String idWithoutVersion : IPIds)
             {

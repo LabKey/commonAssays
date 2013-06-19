@@ -95,7 +95,7 @@ public class MS1Schema extends UserSchema
 
     public Set<String> getTableNames()
     {
-        HashSet<String> ret = new HashSet<String>();
+        HashSet<String> ret = new HashSet<>();
         ret.add(TABLE_FEATURE_RUNS);
         ret.add(TABLE_FEATURES);
         ret.add(TABLE_FEATURES_SEARCH);
@@ -128,7 +128,7 @@ public class MS1Schema extends UserSchema
     public CrosstabTableInfo getComparePeptideTableInfo(int[] runIds)
     {
         FeaturesTableInfo tinfo = getFeaturesTableInfo(true, true);
-        ArrayList<FeaturesFilter> filters = new ArrayList<FeaturesFilter>();
+        ArrayList<FeaturesFilter> filters = new ArrayList<>();
         //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
         filters.add(runFilter);
@@ -167,7 +167,7 @@ public class MS1Schema extends UserSchema
         settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
         CrosstabMeasure firstFeature = settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.MIN, "First Feature");
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.runId.name(), CrosstabMember.VALUE_NAME);
         parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name(), AliasManager.makeLegalName(FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "/Peptide", getDbSchema().getSqlDialect()));
         for(CrosstabMeasure measure : settings.getMeasures())
@@ -180,7 +180,7 @@ public class MS1Schema extends UserSchema
         CrosstabTableInfo cti;
         if(null != runIds)
         {
-            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            ArrayList<CrosstabMember> members = new ArrayList<>();
             //build up the list of column members
             for(int runId : runIds)
             {
@@ -192,7 +192,7 @@ public class MS1Schema extends UserSchema
         else
             cti = new CrosstabTable(settings);
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>(cti.getDefaultVisibleColumns());   // Make a copy so we can modify
+        List<FieldKey> defaultCols = new ArrayList<>(cti.getDefaultVisibleColumns());   // Make a copy so we can modify
         defaultCols.remove(FieldKey.fromParts(firstFeature.getName()));
         defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "Time"));
         defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "MZ"));
@@ -211,7 +211,7 @@ public class MS1Schema extends UserSchema
         FeaturesTableInfo table = getFeaturesTableInfo(true);
 
         //change the default visible columnset
-        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(table.getDefaultVisibleColumns());
+        ArrayList<FieldKey> visibleColumns = new ArrayList<>(table.getDefaultVisibleColumns());
         visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run"));
         visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
         visibleColumns.remove(FieldKey.fromParts("Mass"));
@@ -283,7 +283,7 @@ public class MS1Schema extends UserSchema
         }
 
         //set the default visible columns list
-        List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> columns = new ArrayList<>(result.getDefaultVisibleColumns());
 
         //remove unecessary columns
         columns.remove(FieldKey.fromParts("CreatedBy"));

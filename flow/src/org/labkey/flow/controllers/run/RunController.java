@@ -125,7 +125,7 @@ public class RunController extends BaseFlowController
             {
                 throw new NotFoundException("Run not found: " + PageFlowUtil.filter(form.getRunId()));
             }
-            return new JspView<RunForm>(RunController.class, "showRun.jsp", form, errors);
+            return new JspView<>(RunController.class, "showRun.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -145,7 +145,7 @@ public class RunController extends BaseFlowController
         {
             experiment = form.getExperiment();
 //            script = form.getScript();
-            return new JspView<RunsForm>(RunController.class, "showRuns.jsp", form, errors);
+            return new JspView<>(RunController.class, "showRuns.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -169,8 +169,8 @@ public class RunController extends BaseFlowController
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
         private FlowRun _run;
-        private Map<String, File> _files = new TreeMap<String, File>();
-        private List<File> _missing = new LinkedList<File>();
+        private Map<String, File> _files = new TreeMap<>();
+        private List<File> _missing = new LinkedList<>();
 
         @Override
         public void validate(DownloadRunForm form, BindException errors)
@@ -209,7 +209,7 @@ public class RunController extends BaseFlowController
         {
             if (errors.hasErrors())
             {
-                return new JspView<DownloadRunBean>("/org/labkey/flow/controllers/run/download.jsp", new DownloadRunBean(_run, _files, _missing), errors);
+                return new JspView<>("/org/labkey/flow/controllers/run/download.jsp", new DownloadRunBean(_run, _files, _missing), errors);
             }
             else
             {
@@ -224,8 +224,8 @@ public class RunController extends BaseFlowController
                     out.println();
                     out.println("--END");
 
-                    List<File> files = new ArrayList<File>();
-                    Set<String> seen = new HashSet<String>();
+                    List<File> files = new ArrayList<>();
+                    Set<String> seen = new HashSet<>();
                     for (FlowWell well : _run.getWells(true))
                     {
                         URI uri = well.getFCSURI();
@@ -317,7 +317,7 @@ public class RunController extends BaseFlowController
     {
         // 118754: The list of wells may contain both FlowFCSFile and FlowFCSAnalysis wells representing the same FCS file URI.
         // Keep track of which ones we've already seen during export.
-        Set<String> seen = new HashSet<String>();
+        Set<String> seen = new HashSet<>();
         byte[] buffer = new byte[524288];
         for (FlowWell well : wells)
         {
@@ -379,7 +379,7 @@ public class RunController extends BaseFlowController
 
             if (runId != null && runId.length > 0)
             {
-                List<FlowRun> runs = new ArrayList<FlowRun>();
+                List<FlowRun> runs = new ArrayList<>();
                 for (int id : runId)
                 {
                     FlowRun run = FlowRun.fromRunId(id);
@@ -392,7 +392,7 @@ public class RunController extends BaseFlowController
             }
             else if (wellId != null && wellId.length > 0)
             {
-                List<FlowWell> wells = new ArrayList<FlowWell>();
+                List<FlowWell> wells = new ArrayList<>();
                 for (int id : wellId)
                 {
                     FlowWell well = FlowWell.fromWellId(id);
@@ -419,7 +419,7 @@ public class RunController extends BaseFlowController
             else
             {
                 form._renderForm = true;
-                return new JspView<ExportAnalysisForm>("/org/labkey/flow/view/exportAnalysis.jsp", form, errors);
+                return new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form, errors);
             }
         }
 
@@ -446,9 +446,9 @@ public class RunController extends BaseFlowController
                 ZipFile zipFile = new ZipFile(response, zipName);
                 for (FlowRun run : _runs)
                 {
-                    Map<String, AttributeSet> keywords = new TreeMap<String, AttributeSet>();
-                    Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
-                    Map<String, CompensationMatrix> matrices = new TreeMap<String, CompensationMatrix>();
+                    Map<String, AttributeSet> keywords = new TreeMap<>();
+                    Map<String, AttributeSet> analysis = new TreeMap<>();
+                    Map<String, CompensationMatrix> matrices = new TreeMap<>();
                     getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                     String dirName = getBaseName(run.getName());
@@ -472,9 +472,9 @@ public class RunController extends BaseFlowController
                     zipName = getBaseName(well.getName()) + ".zip";
                 }
 
-                Map<String, AttributeSet> keywords = new TreeMap<String, AttributeSet>();
-                Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
-                Map<String, CompensationMatrix> matrices = new TreeMap<String, CompensationMatrix>();
+                Map<String, AttributeSet> keywords = new TreeMap<>();
+                Map<String, AttributeSet> analysis = new TreeMap<>();
+                Map<String, CompensationMatrix> matrices = new TreeMap<>();
                 getAnalysis(_wells, keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                 ZipFile zipFile = new ZipFile(response, zipName);
@@ -555,7 +555,7 @@ public class RunController extends BaseFlowController
         public ModelAndView getView(RunForm form, boolean reshow, BindException errors) throws Exception
         {
             run = form.getRun();
-            return new JspView<RunForm>(RunController.class, "moveToWorkspace.jsp", form, errors);
+            return new JspView<>(RunController.class, "moveToWorkspace.jsp", form, errors);
         }
 
         public boolean handlePost(RunForm form, BindException errors) throws Exception
@@ -602,7 +602,7 @@ public class RunController extends BaseFlowController
         public ModelAndView getView(MoveToAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
             run = form.getRun();
-            return new JspView<MoveToAnalysisForm>(RunController.class, "moveToAnalysis.jsp", form, errors);
+            return new JspView<>(RunController.class, "moveToAnalysis.jsp", form, errors);
         }
 
         public boolean handlePost(MoveToAnalysisForm form, BindException errors) throws Exception

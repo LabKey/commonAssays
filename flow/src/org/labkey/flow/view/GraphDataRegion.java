@@ -48,8 +48,8 @@ public class GraphDataRegion extends DataRegion
             return _dataColumns;
 
         List<DisplayColumn> renderers = super.getDisplayColumns();
-        _dataColumns = new ArrayList<DisplayColumn>(renderers.size());
-        _graphColumns = new ArrayList<GraphColumn>(10);
+        _dataColumns = new ArrayList<>(renderers.size());
+        _graphColumns = new ArrayList<>(10);
 
         for (DisplayColumn dc : renderers)
         {

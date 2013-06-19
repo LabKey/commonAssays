@@ -81,7 +81,7 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable<LuminexProtocolSchema>(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema);
+                FilteredTable result = new FilteredTable<>(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema);
                 ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
                 titrationColumn.setFk(new LookupForeignKey("RowId")
                 {
@@ -114,7 +114,7 @@ public class AnalyteTable extends AbstractLuminexTable
 
         ColumnInfo colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_userSchema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-        Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
+        Map<String, PropertyDescriptor> map = new TreeMap<>();
         for(DomainProperty pd : analyteDomain.getProperties())
         {
             map.put(pd.getName(), pd.getPropertyDescriptor());

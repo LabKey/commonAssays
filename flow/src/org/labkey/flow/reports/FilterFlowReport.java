@@ -102,7 +102,7 @@ public abstract class FilterFlowReport extends FlowReport
 
     protected Collection<FieldKey> getMetadataColumns(ICSMetadata metadata)
     {
-        Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>();
+        Collection<FieldKey> fieldKeys = new ArrayList<>();
         fieldKeys.add(metadata.getParticipantColumn());
 
         if (metadata.getVisitColumn() != null)
@@ -117,7 +117,7 @@ public abstract class FilterFlowReport extends FlowReport
 
     protected Collection<FieldKey> getMatchColumns(ICSMetadata metadata)
     {
-        Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>();
+        Collection<FieldKey> fieldKeys = new ArrayList<>();
         for (FieldKey fieldKey : metadata.getMatchColumns())
         {
             // Use the 'Run' RowId instead of Run.  The 'Run' display name is already added to the select list.
@@ -245,7 +245,7 @@ public abstract class FilterFlowReport extends FlowReport
         if (null == start && null == end)
             return rs;
         int size = rs.getSize();
-        ArrayList<Map<String, Object>> rows = new ArrayList<Map<String, Object>>(size);
+        ArrayList<Map<String, Object>> rows = new ArrayList<>(size);
         rs.beforeFirst();
 
         while (rs.next())
@@ -275,7 +275,7 @@ public abstract class FilterFlowReport extends FlowReport
     protected List<Filter> getFilters()
     {
         ReportDescriptor d = getDescriptor();
-        List<Filter> filters = new ArrayList<Filter>(20);
+        List<Filter> filters = new ArrayList<>(20);
         for (int i = 0; i < 20; i++)
         {
             Filter f = new Filter(d, i);
@@ -309,7 +309,7 @@ public abstract class FilterFlowReport extends FlowReport
         String and = "\nWHERE ";
 
         // UNDONE: use SimpleFilter instead of FilterFlowReport.Filter
-        Set<FieldKey> fieldKeys = new HashSet<FieldKey>();
+        Set<FieldKey> fieldKeys = new HashSet<>();
         SimpleFilter filter = new SimpleFilter();
         List<Filter> filters = getFilters();
         for (Filter f : filters)
@@ -360,7 +360,7 @@ public abstract class FilterFlowReport extends FlowReport
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(fcsAnalysesTable, fieldKeys);
 
         // Add "A" prefix to column map FieldKeys
-        Map<FieldKey, ColumnInfo> prefixedColumnMap = new HashMap<FieldKey, ColumnInfo>(columnMap.size());
+        Map<FieldKey, ColumnInfo> prefixedColumnMap = new HashMap<>(columnMap.size());
         FieldKey A = new FieldKey(null, "A");
         for (Map.Entry<FieldKey, ColumnInfo> entry : columnMap.entrySet())
         {

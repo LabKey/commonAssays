@@ -206,7 +206,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 {
                     // add one to row and col, since (row,col) is the index of the data grid
                     // where the first row is column labels and the first column is row labels.
-                    return new Pair<Integer, Integer>(currentRow.getRowNum() + 1, cell.getColumnIndex() + 1);
+                    return new Pair<>(currentRow.getRowNum() + 1, cell.getColumnIndex() + 1);
                 }
             }
         }
@@ -263,7 +263,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
 
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
         datas.put(NAB_TRANSFORMED_DATA_TYPE, parser.getResults());
 
         return datas;

@@ -32,7 +32,7 @@ public class FlowFCSFile extends FlowWell
 
     static public List<FlowFCSFile> fromWellIds(int... ids)
     {
-        List<FlowFCSFile> wells = new ArrayList<FlowFCSFile>(ids.length);
+        List<FlowFCSFile> wells = new ArrayList<>(ids.length);
         List<FlowDataObject> flowobjs = fromRowIds(ids);
         for (FlowDataObject flowobj : flowobjs)
             if (flowobj instanceof FlowFCSFile)

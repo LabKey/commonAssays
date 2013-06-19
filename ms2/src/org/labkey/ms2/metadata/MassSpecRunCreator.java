@@ -78,7 +78,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
 
         Map<File, Map<DomainProperty, String>> mapFilesToFractionProperties = form.getFractionProperties(fractionSet);
 
-        Map<ExpMaterial, String> derivedSamples = new HashMap<ExpMaterial, String>();
+        Map<ExpMaterial, String> derivedSamples = new HashMap<>();
 
         try
         {

@@ -103,7 +103,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
 
                 File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");
 
-                List<String> args = new ArrayList<String>();
+                List<String> args = new ArrayList<>();
                 String version = getJob().getParameters().get("sqt2pin, version");
                 args.add(PipelineJobService.get().getExecutablePath("sqt2pin_v" + PipelineJobService.VERSION_SUBSTITUTION, null, null, version, getJob().getLogger()));
                 args.add("-M");

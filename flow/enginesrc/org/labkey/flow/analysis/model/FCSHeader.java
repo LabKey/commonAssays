@@ -37,7 +37,7 @@ public class FCSHeader
 {
     public static final String CONTENT_TYPE = "application/vnd.isac.fcs";
     
-    private Map<String, String> keywords = new TreeMap<String,  String>();
+    private Map<String, String> keywords = new TreeMap<>();
     int dataLast;
     int dataOffset;
     int textOffset;

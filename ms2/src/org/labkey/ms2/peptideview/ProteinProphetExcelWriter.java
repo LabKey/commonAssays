@@ -42,7 +42,7 @@ public class ProteinProphetExcelWriter extends AbstractProteinExcelWriter
         try
         {
             int totalFilteredPeptides = 0;
-            Set<String> uniqueFilteredPeptides = new HashSet<String>();
+            Set<String> uniqueFilteredPeptides = new HashSet<>();
 
             while (nestedRS.next())
             {

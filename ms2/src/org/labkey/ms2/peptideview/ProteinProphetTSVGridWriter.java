@@ -42,7 +42,7 @@ public class ProteinProphetTSVGridWriter extends ProteinTSVGridWriter
     protected void addCalculatedValues(RenderContext ctx, ResultSet nestedRS) throws SQLException
     {
         int totalFilteredPeptides = 0;
-        Set<String> uniqueFilteredPeptides = new HashSet<String>();
+        Set<String> uniqueFilteredPeptides = new HashSet<>();
         while (nestedRS.next())
         {
             totalFilteredPeptides++;

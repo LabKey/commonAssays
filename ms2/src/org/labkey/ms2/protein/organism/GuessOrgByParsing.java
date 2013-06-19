@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
 {
-    private Map<String, String> _cache = new HashMap<String, String>();
+    private Map<String, String> _cache = new HashMap<>();
     private static final DbSchema _schema = ProteinManager.getSchema();
     private static final String CACHED_MISS_VALUE = "GuessOrgByParsing.CACHED_MISS_VALUE";
     private static Logger _log = Logger.getLogger(GuessOrgByParsing.class);
@@ -110,7 +110,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
         int leftPos;
         int rightPos = 0;
         String phrase;
-        Hashtable<String, String> org = new Hashtable<String, String>();
+        Hashtable<String, String> org = new Hashtable<>();
         String key = null;
 
         while ((leftPos = line.indexOf('[', rightPos)) > -1)

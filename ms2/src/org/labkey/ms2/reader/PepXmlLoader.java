@@ -34,7 +34,7 @@ public class PepXmlLoader extends MS2Loader
 {
     private PeptideProphetSummary _ppSummary;
 
-    private ArrayList<RelativeQuantAnalysisSummary> _quantSummaries = new ArrayList<RelativeQuantAnalysisSummary>();
+    private ArrayList<RelativeQuantAnalysisSummary> _quantSummaries = new ArrayList<>();
 
     public PepXmlLoader(File f, Logger log) throws FileNotFoundException, XMLStreamException
     {
@@ -380,8 +380,8 @@ public class PepXmlLoader extends MS2Loader
         private MS2ModificationList _modifications;
         private final PepXmlFraction _fraction;
 
-        private Map<Character, Integer> _unknownNTerminalModifications = new HashMap<Character, Integer>();
-        private Map<Character, Integer> _unknownNonNTerminalModifications = new HashMap<Character, Integer>();
+        private Map<Character, Integer> _unknownNTerminalModifications = new HashMap<>();
+        private Map<Character, Integer> _unknownNonNTerminalModifications = new HashMap<>();
 
         protected PeptideIterator(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
         {
@@ -536,7 +536,7 @@ public class PepXmlLoader extends MS2Loader
 
         static
         {
-            elements = new HashMap<String, Integer>();
+            elements = new HashMap<>();
             elements.put("search_result", SEARCH_RESULT);
             elements.put("search_hit", SEARCH_HIT);
             elements.put("alternative_protein", ALTERNATIVE_PROTEIN);
@@ -552,8 +552,8 @@ public class PepXmlLoader extends MS2Loader
             endOfSpectrumQuery = false;
             endOfRun = false;
             hitRank = null;
-            _scores = new HashMap<String, String>(10);
-            _alternativeProteins = new ArrayList<String>();
+            _scores = new HashMap<>(10);
+            _alternativeProteins = new ArrayList<>();
 
             while (!endOfSpectrumQuery && !endOfRun)
             {
@@ -878,7 +878,7 @@ public class PepXmlLoader extends MS2Loader
                                          PepXmlAnalysisResultHandler.PepXmlAnalysisResult analysisResult)
         {
             if (_analysisResultMap == null)
-               _analysisResultMap = new HashMap<String, PepXmlAnalysisResultHandler.PepXmlAnalysisResult>();
+               _analysisResultMap = new HashMap<>();
             _analysisResultMap.put(analysisType, analysisResult);
         }
 

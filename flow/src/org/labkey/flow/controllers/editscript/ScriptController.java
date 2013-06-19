@@ -185,7 +185,7 @@ public class ScriptController extends BaseFlowController
 
             EditPage page = (EditPage)getPage("editScript.jsp", form);
             page.scriptParseError = error;
-            return new JspView<EditScriptForm>(page, form, errors);
+            return new JspView<>(page, form, errors);
         }
 
         public String getPageTitle()
@@ -278,7 +278,7 @@ public class ScriptController extends BaseFlowController
                     return HttpView.redirect(forward);
             }
 
-            return new JspView<AnalysisForm>(getPage("editAnalysis.jsp", form), form, errors);
+            return new JspView<>(getPage("editAnalysis.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -290,7 +290,7 @@ public class ScriptController extends BaseFlowController
         {
             try
             {
-                Set<StatisticSpec> stats = new LinkedHashSet<StatisticSpec>();
+                Set<StatisticSpec> stats = new LinkedHashSet<>();
                 StringTokenizer stStats = new StringTokenizer(StringUtils.trimToEmpty(form.statistics), "\n");
                 while (stStats.hasMoreElements())
                 {
@@ -300,7 +300,7 @@ public class ScriptController extends BaseFlowController
                         stats.add(new StatisticSpec(strStat));
                     }
                 }
-                Set<GraphSpec> graphs = new LinkedHashSet<GraphSpec>();
+                Set<GraphSpec> graphs = new LinkedHashSet<>();
                 StringTokenizer stGraphs = new StringTokenizer(StringUtils.trimToEmpty(form.graphs), "\n");
                 while (stGraphs.hasMoreElements())
                 {
@@ -310,7 +310,7 @@ public class ScriptController extends BaseFlowController
                         graphs.add(new GraphSpec(strGraph));
                     }
                 }
-                Set<SubsetSpec> subsets = new LinkedHashSet<SubsetSpec>();
+                Set<SubsetSpec> subsets = new LinkedHashSet<>();
                 StringTokenizer stSubsets = new StringTokenizer(StringUtils.trimToEmpty(form.subsets), "\n");
                 while (stSubsets.hasMoreElements())
                 {
@@ -408,7 +408,7 @@ public class ScriptController extends BaseFlowController
         {
             if (form._workspaceObject == null)
                 return new PopulationName[0];
-            List<PopulationName> ret = new ArrayList<PopulationName>();
+            List<PopulationName> ret = new ArrayList<>();
             for (Analysis analysis : form._workspaceObject.getGroupAnalyses().values())
             {
                 if (analysis.getPopulations().size() > 0)
@@ -424,7 +424,7 @@ public class ScriptController extends BaseFlowController
             if (form._workspaceObject == null)
                 return Collections.emptyMap();
 
-            Map<String, String> ret = new LinkedHashMap<String, String>();
+            Map<String, String> ret = new LinkedHashMap<>();
 
             for (Workspace.SampleInfo sample : form._workspaceObject.getSamplesComplete())
             {
@@ -454,7 +454,7 @@ public class ScriptController extends BaseFlowController
 
             UploadAnalysisPage page = (UploadAnalysisPage) getPage("uploadAnalysis.jsp", form);
             page.form = form;
-            return new JspView<UploadAnalysisForm>(page, form, errors);
+            return new JspView<>(page, form, errors);
         }
 
         public String getPageTitle()
@@ -527,7 +527,7 @@ public class ScriptController extends BaseFlowController
             {
                 throw new UnsupportedOperationException("should call post on EditCompensationCalculationAction");
             }
-            return new JspView<EditCompensationCalculationForm>(getPage("uploadCompensationCalculation.jsp", form), form, errors);
+            return new JspView<>(getPage("uploadCompensationCalculation.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -546,7 +546,7 @@ public class ScriptController extends BaseFlowController
             {
                 throw new UnsupportedOperationException("should call post on EditCompensationCalculationAction");
             }
-            return new JspView<EditCompensationCalculationForm>(getPage("chooseCompensationRun.jsp", form), form, errors);
+            return new JspView<>(getPage("chooseCompensationRun.jsp", form), form, errors);
         }
 
         @Override
@@ -583,7 +583,7 @@ public class ScriptController extends BaseFlowController
 
             String pageName = form.workspace == null ? "showCompensationCalculation.jsp" : "editCompensationCalculation.jsp";
             CompensationCalculationPage page = (CompensationCalculationPage) getPage(pageName, form);
-            return new JspView<EditCompensationCalculationForm>(page, form, errors);
+            return new JspView<>(page, form, errors);
         }
 
         public String getPageTitle()
@@ -634,7 +634,7 @@ public class ScriptController extends BaseFlowController
             if (form.workspace == null)
                 return null;
             workspace = form.workspace;
-            Map<String, Workspace.CompensationChannelData> dataMap = new HashMap<String, Workspace.CompensationChannelData>();
+            Map<String, Workspace.CompensationChannelData> dataMap = new HashMap<>();
             for (int i = 0; i < form.parameters.length; i ++)
             {
                 String parameter = form.parameters[i];
@@ -651,7 +651,7 @@ public class ScriptController extends BaseFlowController
                 cd.negativeSubset = StringUtils.trimToNull(form.negativeSubset[i]);
                 dataMap.put(parameter, cd);
             }
-            List<String> errorslist = new ArrayList<String>();
+            List<String> errorslist = new ArrayList<>();
             PopulationName groupName = null;
             if (StringUtils.isNotEmpty(form.selectGroupName))
                 groupName = PopulationName.fromString(form.selectGroupName);
@@ -809,7 +809,7 @@ public class ScriptController extends BaseFlowController
                 }
                 else
                 {
-                    java.util.List<org.labkey.flow.analysis.model.Polygon> list = new ArrayList<org.labkey.flow.analysis.model.Polygon>();
+                    java.util.List<org.labkey.flow.analysis.model.Polygon> list = new ArrayList<>();
                     gate.getPolygons(list, xAxis, yAxis);
                     if (list.size() != 1)
                         return imageIn;
@@ -875,7 +875,7 @@ public class ScriptController extends BaseFlowController
                 }
             }
 
-            return new JspView<EditGateTreeForm>(getPage("editGateTree.jsp", form), form, errors);
+            return new JspView<>(getPage("editGateTree.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -942,7 +942,7 @@ public class ScriptController extends BaseFlowController
             }
 
             scriptName = form.getFlowScript().getName();
-            return new JspView<CopyProtocolForm>(getPage("copy.jsp", form), form, errors);
+            return new JspView<>(getPage("copy.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -997,7 +997,7 @@ public class ScriptController extends BaseFlowController
                 protocol.setComment(getUser(), form.ff_description);
                 return HttpView.redirect(form.urlFor(BeginAction.class));
             }
-            return new JspView<EditPropertiesForm>(getPage("editProperties.jsp", form), form, errors);
+            return new JspView<>(getPage("editProperties.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -1022,7 +1022,7 @@ public class ScriptController extends BaseFlowController
                 }
             }
 
-            return new JspView<EditSettingsForm>(getPage("editSettings.jsp", form), form, errors);
+            return new JspView<>(getPage("editSettings.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -1122,7 +1122,7 @@ public class ScriptController extends BaseFlowController
                 protocol.delete(getUser());
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
-            return new JspView<EditScriptForm>(getPage("delete.jsp", form), form, errors);
+            return new JspView<>(getPage("delete.jsp", form), form, errors);
         }
 
         public String getPageTitle()

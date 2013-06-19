@@ -102,7 +102,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
             }
             else
             {
-                headers = new ArrayList<String>();
+                headers = new ArrayList<>();
                 headers.add("Multiple runs showing " + (selectedRows == null ? "all" : "hand selected") + " peptides matching the following query:");
                 addPeptideFilterText(headers, run, currentUrl);  // TODO: Version that takes runs[]
             }
@@ -121,7 +121,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         {
             if (includeHeaders)
             {
-                headers = new ArrayList<String>();
+                headers = new ArrayList<>();
 
                 if (runs.size() > 1)
                 {
@@ -148,7 +148,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
         if (selectedRows != null)
         {
-            List<Long> peptideIds = new ArrayList<Long>(selectedRows.size());
+            List<Long> peptideIds = new ArrayList<>(selectedRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
             for (int i = 0; i < Math.min(selectedRows.size(), ExcelWriter.MAX_ROWS); i++)
@@ -200,8 +200,8 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
-        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+        sqlSummaries.add(new Pair<>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
     }
 
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
@@ -218,7 +218,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
-        HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
+        HashMap<String, SimpleFilter> map = new HashMap<>();
         map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run));
         return map;
     }

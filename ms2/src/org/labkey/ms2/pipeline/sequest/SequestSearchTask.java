@@ -197,7 +197,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 builder.writeFile(fileWorkParams);
 
                 // Invoke makedb
-                List<String> args = new ArrayList<String>();
+                List<String> args = new ArrayList<>();
                 File makeDBExecutable = new File(_factory.getSequestInstallDir(), "makedb");
                 args.add(makeDBExecutable.getAbsolutePath());
                 args.add("-O" + indexFileBase);
@@ -237,7 +237,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     {
         try
         {
-            List<RecordedAction> actions = new ArrayList<RecordedAction>();
+            List<RecordedAction> actions = new ArrayList<>();
             Map<String, String> params = getJob().getParameters();
             params.put("list path, sequest parameters", SEQUEST_PARAMS);
             params.put("search, useremail", params.get("pipeline, email address"));
@@ -273,7 +273,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             FileUtils.copyFileToDirectory(fileWorkParams, dirOutputDta);
 
             // Perform Sequest search
-            List<String> sequestArgs = new ArrayList<String>();
+            List<String> sequestArgs = new ArrayList<>();
             File sequestExecutable = new File(_factory.getSequestInstallDir(), "sequest");
             sequestArgs.add(sequestExecutable.getAbsolutePath());
             sequestArgs.addAll(_factory.getSequestOptions());
@@ -298,7 +298,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 }
 
                 // Convert to pepXML using out2xml
-                List<String> out2XMLArgs = new ArrayList<String>();
+                List<String> out2XMLArgs = new ArrayList<>();
                 String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", null, "tpp", tppVersion, getJob().getLogger());
                 out2XMLArgs.add(out2XMLPath);
                 String enzyme =
@@ -343,7 +343,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 // Replacements that need to be made in the pepXML file so that we can resolve other files
                 // during the import process
-                Map<String, String> replacements = new HashMap<String, String>();
+                Map<String, String> replacements = new HashMap<>();
                 if (usesIndex())
                 {
                     assert sequenceFiles.size() == 1;
@@ -469,7 +469,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     {
         if (!dirOutputDta.mkdir())
             throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
-        ArrayList<String> mzXML2SearchArgs = new ArrayList<String>();
+        ArrayList<String> mzXML2SearchArgs = new ArrayList<>();
         mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", null, "tpp", tppVersion, getJob().getLogger()));
         mzXML2SearchArgs.add("-dta");
         mzXML2SearchArgs.add("-O" + dirOutputDta.getName());
@@ -518,7 +518,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     Collection<String> convertParams(Collection<Param> converters, Map<String, String> paramsXml) throws SequestParamsException
     {
-        ArrayList<String> paramsCmd = new ArrayList<String>();
+        ArrayList<String> paramsCmd = new ArrayList<>();
         for (Param conv : converters)
         {
             String value = paramsXml.get(conv.getInputXmlLabels().get(0));

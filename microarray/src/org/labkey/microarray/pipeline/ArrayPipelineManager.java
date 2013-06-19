@@ -67,7 +67,7 @@ public class ArrayPipelineManager
     public static File[] getImageFiles(File imageDir, FileStatus status, Container c) throws IOException
     {
         Map<File, FileStatus> imageFileStatus = getExtractionStatus(imageDir, c);
-        List<File> fileList = new ArrayList<File>();
+        List<File> fileList = new ArrayList<>();
         for (File imageFile : imageFileStatus.keySet())
         {
             if (status == null || status.equals(imageFileStatus.get(imageFile)))
@@ -78,12 +78,12 @@ public class ArrayPipelineManager
     
     public static Map<File, FileStatus> getExtractionStatus(File imageDir, Container c) throws IOException
     {
-        Set<File> knownFiles = new HashSet<File>();
-        Set<File> checkedDirectories = new HashSet<File>();
+        Set<File> knownFiles = new HashSet<>();
+        Set<File> checkedDirectories = new HashSet<>();
         
         File[] imageFiles = imageDir.listFiles(getImageFileFilter());
 
-        Map<File, FileStatus> imageFileMap = new LinkedHashMap<File, FileStatus>();
+        Map<File, FileStatus> imageFileMap = new LinkedHashMap<>();
         if (imageFiles != null && imageFiles.length > 0)
         {
             Arrays.sort(imageFiles, new Comparator<File>()

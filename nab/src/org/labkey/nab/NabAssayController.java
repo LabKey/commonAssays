@@ -344,7 +344,7 @@ public class NabAssayController extends SpringActionController
                     SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
                     if (existingFilter != null)
                         filter.addAllClauses(existingFilter);
-                    List<Integer> objectIds = new ArrayList<Integer>(_dataObjectIds.length);
+                    List<Integer> objectIds = new ArrayList<>(_dataObjectIds.length);
                     for (int dataObjectId : _dataObjectIds)
                         objectIds.add(new Integer(dataObjectId));
 
@@ -466,7 +466,7 @@ public class NabAssayController extends SpringActionController
             if (!getContainer().hasPermission(getUser(), ReadPermission.class))
             {
                 User currentUser = getUser();
-                Set<Role> contextualRoles = new HashSet<Role>(currentUser.getStandardContextualRoles());
+                Set<Role> contextualRoles = new HashSet<>(currentUser.getStandardContextualRoles());
                 contextualRoles.add(RoleManager.getRole(ReaderRole.class));
                 elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
             }
@@ -522,12 +522,12 @@ public class NabAssayController extends SpringActionController
             sheet.getPrintSetup().setPaperSize(PrintSetup.LETTER_PAPERSIZE);
 
             // Render the header row:
-            List<String> headers = new ArrayList<String>();
+            List<String> headers = new ArrayList<>();
             headers.add(PlateSampleFilePropertyHelper.WELLGROUP_COLUMN);
             headers.add(PlateSampleFilePropertyHelper.PLATELOCATION_COLUMN);
 
             Map<DomainProperty, Object> defaultValues = DefaultValueService.get().getDefaultValues(_container, _sampleDomain);
-            Map<Integer, Object> columnToDefaultValue = new HashMap<Integer, Object>();
+            Map<Integer, Object> columnToDefaultValue = new HashMap<>();
             for (DomainProperty property : _sampleDomain.getProperties())
             {
                 columnToDefaultValue.put(headers.size(), defaultValues.get(property));
@@ -597,7 +597,7 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");
             }
-            List<WellGroupTemplate> sampleGroups = new ArrayList<WellGroupTemplate>();
+            List<WellGroupTemplate> sampleGroups = new ArrayList<>();
             for (WellGroupTemplate group : template.getWellGroups())
             {
                 if (group.getType() == WellGroup.Type.SPECIMEN)

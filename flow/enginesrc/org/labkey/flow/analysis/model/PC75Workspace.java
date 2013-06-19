@@ -72,8 +72,8 @@ public class PC75Workspace extends PCWorkspace
 
         String xAxis = ___cleanName(dims[0].getParameter().getName());
         String yAxis = ___cleanName(dims[1].getParameter().getName());
-        List<Double> lstX = new ArrayList<Double>();
-        List<Double> lstY = new ArrayList<Double>();
+        List<Double> lstX = new ArrayList<>();
+        List<Double> lstY = new ArrayList<>();
 
         for (Point2DType vertex : vertices)
         {
@@ -91,9 +91,9 @@ public class PC75Workspace extends PCWorkspace
 
     private Gate readRectangleGate(RectangleGateType xRectangleGate)
     {
-        List<String> axes = new ArrayList<String>();
-        List<Double> lstMin = new ArrayList<Double>();
-        List<Double> lstMax = new ArrayList<Double>();
+        List<String> axes = new ArrayList<>();
+        List<Double> lstMin = new ArrayList<>();
+        List<Double> lstMax = new ArrayList<>();
         for (RectangleGateDimensionType dim : xRectangleGate.getDimensionArray())
         {
             axes.add(dim.getParameter().getName());

@@ -159,7 +159,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             new ResultDomainProperty(RECOVERY_PROPERTY_NAME, RECOVERY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
         };
 
-        LinkedHashMap<String, ResultDomainProperty> map = new LinkedHashMap<String, ResultDomainProperty>();
+        LinkedHashMap<String, ResultDomainProperty> map = new LinkedHashMap<>();
         for (ResultDomainProperty prop : props)
         {
             map.put(prop.name, prop);
@@ -244,7 +244,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
-        Set<String> propertyNames = new HashSet<String>();
+        Set<String> propertyNames = new HashSet<>();
         for (Map.Entry<String, ResultDomainProperty> entry : RESULT_DOMAIN_PROPERTIES.entrySet())
         {
             ResultDomainProperty prop = entry.getValue();
@@ -306,7 +306,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             pd.setInputLength(rdp.inputLength);
         }
 
-        return new Pair<Domain, Map<DomainProperty, Object>>(resultDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(resultDomain, Collections.<DomainProperty, Object>emptyMap());
     }
 
     @Override

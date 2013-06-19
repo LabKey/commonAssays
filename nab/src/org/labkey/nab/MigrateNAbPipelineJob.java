@@ -148,7 +148,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
                         throw new IOException("Unable to create directory " + migratedNAbDir);
                     }
 
-                    Map<String, Integer> legacyLSIDsToAssayRowIds = new HashMap<String, Integer>();
+                    Map<String, Integer> legacyLSIDsToAssayRowIds = new HashMap<>();
 
                     // Iterate over all of the runs and migrate them
                     for (Map<String, Object> row : rows)
@@ -214,7 +214,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             Container container = ContainerManager.getForId(containerId);
             int datasetId = ((Number)dataset.get("DatasetId")).intValue();
 
-            List<Map<String, Object>> datasetRows = findMatchingDatasetRows(container, datasetId, new ArrayList<String>(legacyLSIDsToAssayRowId.keySet()));
+            List<Map<String, Object>> datasetRows = findMatchingDatasetRows(container, datasetId, new ArrayList<>(legacyLSIDsToAssayRowId.keySet()));
 
             getLogger().info("Found " + datasetRows.size() + " rows that had been copied to NAb dataset in " + container.getPath());
 
@@ -222,7 +222,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             {
                 // Found some dataset rows. Need to recopy, using the same Participant and SequenceNum/Date combination
                 Study study = StudyService.get().getStudy(container);
-                Map<Integer, AssayPublishKey> publishKeys = new HashMap<Integer, AssayPublishKey>(datasetRows.size());
+                Map<Integer, AssayPublishKey> publishKeys = new HashMap<>(datasetRows.size());
                 for (Map<String, Object> row : datasetRows)
                 {
                     String participantId = (String)row.get(study.getSubjectColumnName());
@@ -247,7 +247,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
                     publishKeys.put(newRowId, publishKey);
                 }
 
-                List<String> errors = new ArrayList<String>();
+                List<String> errors = new ArrayList<>();
                 provider.copyToStudy(getUser(), getContainer(), protocol, study.getContainer(), publishKeys, errors);
                 if (!errors.isEmpty())
                 {
@@ -266,7 +266,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
         DataSet set = StudyService.get().getDataSet(container, datasetId);
         TableInfo datasetTableInfo = set.getTableInfo(getUser(), false);
 
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> result = new ArrayList<>();
 
         // Batch it up to stay below any limits for IN clauses or JDBC parameters
         final int batchSize = 200;
@@ -339,7 +339,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK.toString(), run.getRowId()), null).getMapArray();
 
             // Figure out the RowId for the new assay run
-            Map<String, Integer> result = new HashMap<String, Integer>();
+            Map<String, Integer> result = new HashMap<>();
 
             for (Map.Entry<String, String> entry : legacyLSIDs.entrySet())
             {

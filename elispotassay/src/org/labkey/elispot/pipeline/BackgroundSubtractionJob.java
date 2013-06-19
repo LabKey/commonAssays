@@ -60,7 +60,7 @@ import java.util.Set;
 public class BackgroundSubtractionJob extends PipelineJob
 {
     public static final String PROCESSING_STATUS = "Processing";
-    Set<String> _runs = new HashSet<String>();
+    Set<String> _runs = new HashSet<>();
 
     public BackgroundSubtractionJob(String provider, ViewBackgroundInfo info, PipeRoot root, Set<String> runs) throws IOException, SQLException
     {
@@ -108,7 +108,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                     if (data.length != 1)
                         throw new ExperimentException("Elispot should only upload a single file per run.");
 
-                    Map<String, DomainProperty> runPropMap = new HashMap<String, DomainProperty>();
+                    Map<String, DomainProperty> runPropMap = new HashMap<>();
                     for (DomainProperty column : provider.getRunDomain(run.getProtocol()).getProperties())
                         runPropMap.put(column.getName(), column);
 
@@ -117,7 +117,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                     if (plate != null)
                     {
                         String dataLsid = data[0].getLSID();
-                        Map<String, Object> propMap = new HashMap<String, Object>();
+                        Map<String, Object> propMap = new HashMap<>();
                         Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
 
                         DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);

@@ -125,26 +125,26 @@ public class MS2Modification
         @Test
         public void test()
         {
-            List<Pair<String, Boolean>> testAminoAcids = new ArrayList<Pair<String, Boolean>>(300);
+            List<Pair<String, Boolean>> testAminoAcids = new ArrayList<>(300);
 
             // Add all characters 0 - 255, marking each as valid or not
             for (int i = 0; i < 256; i++)
             {
                 String aa = String.valueOf((char)i);
-                testAminoAcids.add(new Pair<String, Boolean>(aa, VALID_CHARS.contains(aa)));
+                testAminoAcids.add(new Pair<>(aa, VALID_CHARS.contains(aa)));
             }
 
             // Add a few more bogus amino acids
-            testAminoAcids.add(new Pair<String, Boolean>("", false));
-            testAminoAcids.add(new Pair<String, Boolean>("AA", false));
-            testAminoAcids.add(new Pair<String, Boolean>("z", false));
-            testAminoAcids.add(new Pair<String, Boolean>("a", false));
-            testAminoAcids.add(new Pair<String, Boolean>("[", false));
-            testAminoAcids.add(new Pair<String, Boolean>("]", false));
-            testAminoAcids.add(new Pair<String, Boolean>("0", false));
-            testAminoAcids.add(new Pair<String, Boolean>("9", false));
-            testAminoAcids.add(new Pair<String, Boolean>("hello", false));
-            testAminoAcids.add(new Pair<String, Boolean>("$", false));
+            testAminoAcids.add(new Pair<>("", false));
+            testAminoAcids.add(new Pair<>("AA", false));
+            testAminoAcids.add(new Pair<>("z", false));
+            testAminoAcids.add(new Pair<>("a", false));
+            testAminoAcids.add(new Pair<>("[", false));
+            testAminoAcids.add(new Pair<>("]", false));
+            testAminoAcids.add(new Pair<>("0", false));
+            testAminoAcids.add(new Pair<>("9", false));
+            testAminoAcids.add(new Pair<>("hello", false));
+            testAminoAcids.add(new Pair<>("$", false));
 
             MS2Modification mod = new MS2Modification();
 

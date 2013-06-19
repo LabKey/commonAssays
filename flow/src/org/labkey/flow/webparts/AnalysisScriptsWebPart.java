@@ -71,7 +71,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 
     public List<DisplayColumn> getDisplayColumns()
     {
-        List<DisplayColumn> ret = new ArrayList<DisplayColumn>();
+        List<DisplayColumn> ret = new ArrayList<>();
         TableInfo table = getTable();
         ret.addAll(getQueryDef().getDisplayColumns(null, table));
 

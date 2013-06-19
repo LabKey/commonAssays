@@ -114,27 +114,27 @@
         switch (form.getWizardStep())
         {
             case SELECT_ANALYSIS:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp", form);
+                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp", form);
                 break;
 
             case SELECT_FCSFILES:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp", form);
+                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp", form);
                 break;
 
             case REVIEW_SAMPLES:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp", form);
+                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp", form);
                 break;
 
             case ANALYSIS_ENGINE:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisAnalysisEngine.jsp", form);
+                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisAnalysisEngine.jsp", form);
                 break;
 
             case ANALYSIS_OPTIONS:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisAnalysisOptions.jsp", form);
+                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisAnalysisOptions.jsp", form);
                 break;
 
             case CHOOSE_ANALYSIS:
-                view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp", form);
+                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp", form);
                 break;
         }
         include(view, out);
@@ -146,7 +146,7 @@
     
 <% } else { %>
     <%
-    JspView<ImportAnalysisForm> view = new JspView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp", form);
+    JspView<ImportAnalysisForm> view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp", form);
     include(view, out);
     %>
 <% } %>

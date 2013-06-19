@@ -237,7 +237,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
     private void getProtocols(String defaultProtocol, String searchEngine, String path, String[] fileNames)
     {
-        ArrayList<String> protocolList = new ArrayList<String>();
+        ArrayList<String> protocolList = new ArrayList<>();
         if(defaultProtocol == null || defaultProtocol.length() == 0 )
         {
             if(provider == null)
@@ -343,7 +343,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         List<String> sequenceDbs = null;
         String defaultDbPath;
-        ArrayList<String> returnList = new ArrayList<String>();
+        ArrayList<String> returnList = new ArrayList<>();
         if(defaultDb != null && defaultDb.endsWith("/"))
         {
             String savedDb =
@@ -413,7 +413,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         if(sequenceDbs == null || sequenceDbs.size() == 0  )
         {
-            sequenceDbs = new ArrayList<String>();
+            sequenceDbs = new ArrayList<>();
             sequenceDbs.add("None found.");
             results.setSequenceDbs(sequenceDbs, relativePath);
             return results;
@@ -429,7 +429,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         if(returnList.size() == 0  )
         {
-            returnList = new ArrayList<String>();
+            returnList = new ArrayList<>();
             returnList.add("None found.");
         }
         results.setSequenceDbs(returnList, relativePath);

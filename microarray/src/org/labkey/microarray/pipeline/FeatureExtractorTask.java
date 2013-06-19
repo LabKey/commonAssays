@@ -89,7 +89,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
             ProtocolFileBuilder builder = new ProtocolFileBuilder();
             builder.build(protocolFile, _factory, getJob().getInputFiles());
 
-            List<String> args = new ArrayList<String>();
+            List<String> args = new ArrayList<>();
             args.add(_factory.getExecutable());
             args.add(protocolFile.getAbsolutePath());
 
@@ -268,7 +268,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
 
         public void validate() throws ConfigurationException
         {
-            List<String> missingProperties = new ArrayList<String>();
+            List<String> missingProperties = new ArrayList<>();
             if (_jdbcURL == null)
             {
                 missingProperties.add("jdbcURL");

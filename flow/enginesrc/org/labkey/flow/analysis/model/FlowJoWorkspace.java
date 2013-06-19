@@ -35,7 +35,7 @@ import java.util.*;
 
 abstract public class FlowJoWorkspace extends Workspace
 {
-    static Map<String, StatisticSpec.STAT> STATS = new HashMap<String, StatisticSpec.STAT>();
+    static Map<String, StatisticSpec.STAT> STATS = new HashMap<>();
     static
     {
         STATS.put("Count", StatisticSpec.STAT.Count);
@@ -136,7 +136,7 @@ abstract public class FlowJoWorkspace extends Workspace
 
     private void createAliases()
     {
-        Map<SubsetSpec, SubsetSpec> aliases = new HashMap<SubsetSpec, SubsetSpec>();
+        Map<SubsetSpec, SubsetSpec> aliases = new HashMap<>();
 
         for (SampleInfo sampleInfo : getSamplesComplete())
         {
@@ -203,7 +203,7 @@ abstract public class FlowJoWorkspace extends Workspace
             }
 
             // Fill in the Freq_Of_Parent and Frequency stats that can be determined from the existing stats
-            for (Map.Entry<StatisticSpec, Double> entry : new HashMap<StatisticSpec, Double>(statistics).entrySet())
+            for (Map.Entry<StatisticSpec, Double> entry : new HashMap<>(statistics).entrySet())
             {
                 final StatisticSpec spec = entry.getKey();
                 if (spec.getStatistic() != StatisticSpec.STAT.Count)
@@ -249,7 +249,7 @@ abstract public class FlowJoWorkspace extends Workspace
 
     static List<Element> getElements(Element parent)
     {
-        List<Element> ret = new ArrayList<Element>();
+        List<Element> ret = new ArrayList<>();
         NodeList nl = parent.getChildNodes();
         for (int i = 0; i < nl.getLength(); i ++)
         {
@@ -263,7 +263,7 @@ abstract public class FlowJoWorkspace extends Workspace
 
     static List<Element> getElementsByTagName(Element parent, String tagName)
     {
-        List<Element> ret = new ArrayList<Element>();
+        List<Element> ret = new ArrayList<>();
         NodeList nl = parent.getChildNodes();
         for (int i = 0; i < nl.getLength(); i ++)
         {
@@ -928,7 +928,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 StatisticSpec stat = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
                 assertTrue("Expected statistic '" + stat + "' in analysis results.", stats.contains(stat));
 
-                List<String> aliases = new ArrayList<String>();
+                List<String> aliases = new ArrayList<>();
                 for (Object alias : attrs.getStatisticAliases(stat))
                     aliases.add(alias.toString());
 
@@ -952,7 +952,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 // Name as it will appear in the UI
                 assertEquals("B/Z,|;<z>!:%P", stat.toShortString());
 
-                List<String> aliases = new ArrayList<String>();
+                List<String> aliases = new ArrayList<>();
                 for (Object alias : attrs.getStatisticAliases(stat))
                     aliases.add(alias.toString());
 
@@ -969,7 +969,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 StatisticSpec stat = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
                 assertTrue("Expected statistic '" + stat + "' in analysis results.", stats.contains(stat));
 
-                List<String> aliases = new ArrayList<String>();
+                List<String> aliases = new ArrayList<>();
                 for (Object alias : attrs.getStatisticAliases(stat))
                     aliases.add(alias.toString());
 

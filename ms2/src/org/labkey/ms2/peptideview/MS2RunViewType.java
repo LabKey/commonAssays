@@ -176,7 +176,7 @@ public enum MS2RunViewType
 
     public static List<MS2RunViewType> getTypesForRun(MS2Run run) throws SQLException
     {
-        List<MS2RunViewType> result = new ArrayList<MS2RunViewType>();
+        List<MS2RunViewType> result = new ArrayList<>();
         for (MS2RunViewType type : values())
         {
             if (type.supportsRun(run))

@@ -127,7 +127,7 @@ public class PepXmlImporter extends MS2Importer
                 float importSpectraMinProbability = (null == fraction.getImportSpectraMinProbability() ? -Float.MAX_VALUE : fraction.getImportSpectraMinProbability());
                 progress.setImportSpectra(shouldImportSpectra);
                 // Initialize scans to a decent size, but only if we're going to load spectra
-                HashSet<Integer> scans = new HashSet<Integer>(shouldImportSpectra ? 1000 : 0);
+                HashSet<Integer> scans = new HashSet<>(shouldImportSpectra ? 1000 : 0);
                 _conn.setAutoCommit(false);
 
                 boolean retentionTimesInPepXml = false;
@@ -213,7 +213,7 @@ public class PepXmlImporter extends MS2Importer
         _run = MS2Run.getRunFromTypeString(fraction.getSearchEngine());
         _scoreColumnNames = _run.getPepXmlScoreColumnNames();
 
-        Map<String, Object> m = new HashMap<String, Object>();
+        Map<String, Object> m = new HashMap<>();
         m.put("Type", _run.getType());
         m.put("SearchEngine", fraction.getSearchEngine());
         m.put("MassSpecType", fraction.getMassSpecType());

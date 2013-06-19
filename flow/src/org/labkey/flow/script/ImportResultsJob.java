@@ -100,7 +100,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         //Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         //Map<Analysis, FlowScript> scripts = new HashMap();
 
-        Set<String> sampleLabels = new LinkedHashSet<String>();
+        Set<String> sampleLabels = new LinkedHashSet<>();
 
         Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> analysis = loadAnalysis();
         if (analysis == null)
@@ -184,7 +184,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 Collections.<String, Analysis>emptyMap(),
                 Collections.<Analysis, ScriptDocument>emptyMap(),
                 Collections.<Analysis, FlowScript>emptyMap(),
-                new ArrayList<String>(sampleLabels));
+                new ArrayList<>(sampleLabels));
     }
 
     @Override

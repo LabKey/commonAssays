@@ -372,8 +372,8 @@ public class MS2Manager
 
             ExpRun expRun = ExperimentService.get().createExperimentRun(container, run.getDescription());
             expRun.setProtocol(protocol);
-            Map<ExpData, String> inputDatas = new HashMap<ExpData, String>();
-            Map<ExpData, String> outputDatas = new HashMap<ExpData, String>();
+            Map<ExpData, String> inputDatas = new HashMap<>();
+            Map<ExpData, String> outputDatas = new HashMap<>();
             XarSource source = new AbstractFileXarSource("Wrap MS2 Run", container, user)
             {
                 public File getLogFile() throws IOException
@@ -468,7 +468,7 @@ public class MS2Manager
 
     public static List<Integer> getRunIds(List<MS2Run> runs)
     {
-        List<Integer> runIds = new ArrayList<Integer>(runs.size());
+        List<Integer> runIds = new ArrayList<>(runs.size());
 
         for (MS2Run run : runs)
             runIds.add(run.getRun());
@@ -552,7 +552,7 @@ public class MS2Manager
                     "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, runs.FastaId, ff.FileName AS FastaFileName, Loaded, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount FROM " + getTableInfoRuns() + " runs LEFT OUTER JOIN " + ProteinManager.getTableInfoFastaFiles() + " ff ON runs.FastaId = ff.FastaId WHERE " + whereClause,
                     params);
 
-            List<MS2Run> runs = new ArrayList<MS2Run>();
+            List<MS2Run> runs = new ArrayList<>();
 
             while (rs.next())
             {
@@ -561,7 +561,7 @@ public class MS2Manager
                 MS2RunType runType = MS2RunType.lookupType(type);
                 if (runType != null)
                 {
-                    BeanObjectFactory<MS2Run> bof = new BeanObjectFactory<MS2Run>((Class<MS2Run>)runType.getRunClass());
+                    BeanObjectFactory<MS2Run> bof = new BeanObjectFactory<>((Class<MS2Run>)runType.getRunClass());
                     runs.add(bof.handle(rs));
                 }
                 else
@@ -731,7 +731,7 @@ public class MS2Manager
     {
         ResultSet rs = null;
 
-        List<Integer> runIds = new ArrayList<Integer>(runList.size());
+        List<Integer> runIds = new ArrayList<>(runList.size());
 
         for (MS2Run run : runList)
             runIds.add(run.getRun());
@@ -792,7 +792,7 @@ public class MS2Manager
             return;
 
         // Save these to delete after we've deleted the runs
-        List<ExpRun> experimentRunsToDelete = new ArrayList<ExpRun>();
+        List<ExpRun> experimentRunsToDelete = new ArrayList<>();
 
         for (Integer runId : runIds)
         {
@@ -1209,7 +1209,7 @@ public class MS2Manager
                 float[][] data = sscan.getData();
                 if (data != null)
                 {
-                    return new Pair<float[], float[]>(data[0], data[1]);
+                    return new Pair<>(data[0], data[1]);
                 }
                 else
                 {
@@ -1269,7 +1269,7 @@ public class MS2Manager
 
     public static Map<String, String> getStats(int days)
     {
-        Map<String, String> stats = new HashMap<String, String>(20);
+        Map<String, String> stats = new HashMap<>(20);
 
         addStats(stats, "successful", "Deleted = ? AND StatusId = 1", new Object[]{Boolean.FALSE});
         addStats(stats, "failed", "Deleted = ? AND StatusId = 2", new Object[]{Boolean.FALSE});
@@ -1365,14 +1365,14 @@ public class MS2Manager
 
     private static Map<String, String> computeBasicStats()
     {
-        Map<String, String> stats = new HashMap<String, String>();
+        Map<String, String> stats = new HashMap<>();
         addStats(stats, "", "DELETED = ? AND StatusId = 1", new Object[]{Boolean.FALSE});
         return stats;
     }
 
     private static void insertStats(long runs, long peptides)
     {
-        Map<String, Object> m = new HashMap<String, Object>();
+        Map<String, Object> m = new HashMap<>();
         m.put("date", new Date());
         m.put("runs", runs);
         m.put("peptides", peptides);
@@ -1487,7 +1487,7 @@ public class MS2Manager
 
     public static class XYSeriesROC extends XYSeries
     {
-        private List<XYAnnotation> annotations = new ArrayList<XYAnnotation>();
+        private List<XYAnnotation> annotations = new ArrayList<>();
 
         public XYSeriesROC(Comparable key)
         {
@@ -1955,7 +1955,7 @@ public class MS2Manager
     public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException
     {
         String type = null;
-        Set<String> errors = new LinkedHashSet<String>();
+        Set<String> errors = new LinkedHashSet<>();
 
         for (MS2Run run : runs)
         {

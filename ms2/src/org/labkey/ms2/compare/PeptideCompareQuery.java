@@ -114,11 +114,11 @@ public class PeptideCompareQuery extends CompareQuery
 
     public List<Pair<String, String>> getSQLSummaries(User user)
     {
-        List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
+        List<Pair<String, String>> result = new ArrayList<>();
         SimpleFilter peptideFilter = new SimpleFilter();
         addWhereClauses(peptideFilter);
         String filterString = peptideFilter.getFilterText();
-        result.add(new Pair<String, String>("Peptide Filter", filterString));
+        result.add(new Pair<>("Peptide Filter", filterString));
         return result;
     }
 

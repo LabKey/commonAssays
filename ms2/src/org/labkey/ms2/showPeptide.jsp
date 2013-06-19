@@ -248,7 +248,7 @@ for (int i = 0; i < trimmedWithMods.length(); i++)
 var peaks = [
     <%
     boolean firstPeak = true;
-    java.util.Map<String, java.util.List<Pair<Float, Float>>> customHits = new java.util.HashMap<String, java.util.List<Pair<Float, Float>>>();
+    java.util.Map<String, java.util.List<Pair<Float, Float>>> customHits = new java.util.HashMap<>();
     for (int i = 0; i < mzs.length; i++)
     {
         String libraMatch = libra != null ? libra.getMatch(mzs[i], 0.2) : null;
@@ -257,10 +257,10 @@ var peaks = [
             java.util.List<Pair<Float, Float>> peaks = customHits.get(libraMatch);
             if (peaks == null)
             {
-                peaks = new ArrayList<Pair<Float, Float>>();
+                peaks = new ArrayList<>();
                 customHits.put(libraMatch, peaks);
             }
-            peaks.add(new Pair<Float, Float>(mzs[i], intensities[i]));
+            peaks.add(new Pair<>(mzs[i], intensities[i]));
         }
         else
         { %>

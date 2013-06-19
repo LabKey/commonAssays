@@ -63,7 +63,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     public static final FileType FT_PROT_XML = new ProtXMLFileType();
 
     /** Map of optional file outputs from the TPP to their input role names */
-    public static final Map<FileType, String> FT_OPTIONAL_AND_IGNORABLES = new HashMap<FileType, String>();
+    public static final Map<FileType, String> FT_OPTIONAL_AND_IGNORABLES = new HashMap<>();
 
     static
     {
@@ -270,7 +270,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         {
             Map<String, String> params = getJob().getParameters();
 
-            List<RecordedAction> actions = new ArrayList<RecordedAction>();
+            List<RecordedAction> actions = new ArrayList<>();
 
             QuantitationAlgorithm quantitationAlgorithm = getQuantitionAlgorithm(params);
             // Non-null if we're doing Libra quantitation
@@ -341,7 +341,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             File fileWorkPepXML = _wd.newFile(FT_PEP_XML);
 
             String ver = getTPPVersion(getJob());
-            List<String> interactCmd = new ArrayList<String>();
+            List<String> interactCmd = new ArrayList<>();
             String xinteractPath = PipelineJobService.get().getExecutablePath("xinteract", null, "tpp", ver, getJob().getLogger());
             File xinteractFile = new File(xinteractPath);
             interactCmd.add(xinteractPath);
@@ -652,19 +652,19 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         @Test
         public void testXpressCommandLine() throws PipelineJobException, FileNotFoundException
         {
-            Map<String, String> params1 = new HashMap<String, String>();
+            Map<String, String> params1 = new HashMap<>();
             params1.put("pipeline quantitation, residue label mass", "4.027@[,4.027@K");
             params1.put("residue, modification mass", "28.029@K,28.029@[,57.02146@C");
             params1.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@[");
             assertTrue(Arrays.equals(new String[] { "-X-nn,4.027 -nK,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params1, "/pathToMzXML", _factory, null)));
 
-            Map<String, String> params2 = new HashMap<String, String>();
+            Map<String, String> params2 = new HashMap<>();
             params2.put("pipeline quantitation, residue label mass", "4.027@A,4.027@K");
             params2.put("residue, modification mass", "28.029@K,28.029@A,57.02146@C");
             params2.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@A");
             assertTrue(Arrays.equals(new String[] { "-X-nA,4.027 -nK,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params2, "/pathToMzXML", _factory, null)));
 
-            Map<String, String> params3 = new HashMap<String, String>();
+            Map<String, String> params3 = new HashMap<>();
             params3.put("pipeline quantitation, residue label mass", "4.027@]");
             params3.put("residue, modification mass", "28.029@K,28.029@],57.02146@C");
             params3.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@]");

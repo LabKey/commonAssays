@@ -28,7 +28,7 @@
 <%
     JspView<NabController.HeaderBean> me = (JspView<NabController.HeaderBean>) HttpView.currentView();
     NabController.HeaderBean bean = me.getModelBean();
-    Map<String, String> print = new HashMap<String, String>();
+    Map<String, String> print = new HashMap<>();
     print.put("target", "_blank");
 %>
 <%

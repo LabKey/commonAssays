@@ -71,7 +71,7 @@ public class ProteinDictionaryHelpers
                                 " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
                                 " VALUES (?,?,?,?,?,?,?,?)");
 
-                Set<String> sprotSuffixes = new HashSet<String>();
+                Set<String> sprotSuffixes = new HashSet<>();
 
                 for (Map<String, Object> curRec : t)
                 {

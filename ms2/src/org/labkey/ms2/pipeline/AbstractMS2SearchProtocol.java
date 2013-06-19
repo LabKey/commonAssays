@@ -87,7 +87,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
     {
         if (addParams == null)
-            addParams = new HashMap<String, String>();
+            addParams = new HashMap<>();
 
         StringBuffer dbs = new StringBuffer();
         for (String dbName : _dbNames)

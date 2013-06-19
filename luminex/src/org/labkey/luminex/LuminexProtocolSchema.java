@@ -99,7 +99,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + CURVE_FIT_TABLE_NAME+ "\"");
             queryDef.setContainerFilter(ContainerFilter.EVERYTHING);
 
-            ArrayList<QueryException> errors = new ArrayList<QueryException>();
+            ArrayList<QueryException> errors = new ArrayList<>();
             TableInfo table = queryDef.getTable(this, errors, false);
             String[] curveTypes = new TableSelector(table.getColumn("CurveType"), null, new Sort("CurveType")).getArray(String.class);
             _curveTypes = Arrays.asList(curveTypes);
@@ -302,7 +302,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         Domain domain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
         ret.addColumns(domain, null);
 
-        List<FieldKey> visibleColumns = new ArrayList<FieldKey>(ret.getDefaultVisibleColumns());
+        List<FieldKey> visibleColumns = new ArrayList<>(ret.getDefaultVisibleColumns());
         for (DomainProperty domainProperty : domain.getProperties())
         {
             visibleColumns.add(FieldKey.fromParts(domainProperty.getName()));
@@ -450,7 +450,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public TableInfo createWellExclusionAnalyteTable()
     {
-        FilteredTable result = new FilteredTable<LuminexProtocolSchema>(getTableInfoWellExclusionAnalyte(), this);
+        FilteredTable result = new FilteredTable<>(getTableInfoWellExclusionAnalyte(), this);
         result.wrapAllColumns(true);
         result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
         return result;
@@ -458,7 +458,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public TableInfo createRunExclusionAnalyteTable()
     {
-        FilteredTable result = new FilteredTable<LuminexProtocolSchema>(getTableInfoRunExclusionAnalyte(), this);
+        FilteredTable result = new FilteredTable<>(getTableInfoRunExclusionAnalyte(), this);
         result.wrapAllColumns(true);
         result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
         return result;
@@ -476,7 +476,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         curvesColumn.setShownInInsertView(false);
         curvesColumn.setShownInUpdateView(false);
         curvesColumn.setDescription("Link to titration curves in PDF format. Available if assay design is configured to generate them.");
-        List<FieldKey> visibleColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> visibleColumns = new ArrayList<>(result.getDefaultVisibleColumns());
         visibleColumns.add(Math.min(visibleColumns.size(), 3), curvesColumn.getFieldKey());
         result.setDefaultVisibleColumns(visibleColumns);
 
@@ -488,7 +488,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 return new DataColumn(colInfo)
                 {
                     /** RowId -> Name */
-                    private Map<FieldKey, FieldKey> _pdfColumns = new HashMap<FieldKey, FieldKey>();
+                    private Map<FieldKey, FieldKey> _pdfColumns = new HashMap<>();
 
                     {
                         TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
@@ -514,7 +514,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
-                        Map<Integer, String> pdfs = new HashMap<Integer, String>();
+                        Map<Integer, String> pdfs = new HashMap<>();
                         for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
                         {
                             Number rowId = (Number)ctx.get(entry.getKey());

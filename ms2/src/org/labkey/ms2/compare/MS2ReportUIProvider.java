@@ -42,7 +42,7 @@ import java.util.Set;
 
 public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
-    private static Map<String, String> _typeToIconMap = new HashMap<String, String>();
+    private static Map<String, String> _typeToIconMap = new HashMap<>();
     static {
         _typeToIconMap.put(SpectraCountRReport.TYPE, "/reports/r.gif");
         _typeToIconMap.put(SingleMS2RunRReport.TYPE, "/reports/r.gif");
@@ -50,7 +50,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
 
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
-        List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
+        List<ReportService.DesignerInfo> reportDesigners = new ArrayList<>();
 
         boolean canCreateScript = ReportUtil.canCreateScript(context);
         if (canCreateScript && RReport.isEnabled())

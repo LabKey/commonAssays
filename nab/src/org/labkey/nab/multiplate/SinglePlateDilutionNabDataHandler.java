@@ -108,8 +108,8 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             int wellCount = 0;
             int plateCount = 0;
             double[][] wellValues = new double[template.getRows()][template.getColumns()];
-            List<Plate> plates = new ArrayList<Plate>();
-            Map<Integer, String> plateToVirusMap = new HashMap<Integer, String>();
+            List<Plate> plates = new ArrayList<>();
+            Map<Integer, String> plateToVirusMap = new HashMap<>();
 
             for (Map<String, Object> rowData : loader)
             {
@@ -173,11 +173,11 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     @Override
     protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
     {
-        Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
+        Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
         for (ExpMaterial material : sampleInputs)
             nameToMaterial.put(material.getName(), material);
 
-        Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<ExpMaterial, List<WellGroup>>();
+        Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<>();
         for (Plate plate : plates)
         {
             List<? extends WellGroup> specimenGroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
@@ -196,7 +196,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 List<WellGroup> materialWellGroups = mapping.get(material);
                 if (materialWellGroups == null)
                 {
-                    materialWellGroups = new ArrayList<WellGroup>();
+                    materialWellGroups = new ArrayList<>();
                     mapping.put(material, materialWellGroups);
                 }
                 materialWellGroups.add(specimenGroup);
@@ -228,12 +228,12 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     @Override
     public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
-        Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<DilutionSummary, DilutionAssayRun>();
+        Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<Integer, DilutionAssayRun>();
-        List<Integer> nabSpecimenIds = new ArrayList<Integer>(dataObjectIds.length);
+        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<>();
+        List<Integer> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
         for (int nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);

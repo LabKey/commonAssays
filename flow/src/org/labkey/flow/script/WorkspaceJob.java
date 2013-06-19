@@ -140,7 +140,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         Map<String, Analysis> analysisMap = new LinkedHashMap();
         Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         Map<Analysis, FlowScript> scripts = new HashMap();
-        List<String> sampleLabels = new ArrayList<String>(workspace.getSampleCount());
+        List<String> sampleLabels = new ArrayList<>(workspace.getSampleCount());
 
         if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
             return null;
@@ -174,7 +174,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         {
             info("Using protocol FCS analysis filter: " + analysisFilter.getFilterText());
 
-            List<String> filteredSampleIDs = new ArrayList<String>(sampleIDs.size());
+            List<String> filteredSampleIDs = new ArrayList<>(sampleIDs.size());
             for (String sampleID : sampleIDs)
             {
                 Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
@@ -204,7 +204,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         }
         else
         {
-            sampleIDs = new ArrayList<String>(workspace.getSampleCount());
+            sampleIDs = new ArrayList<>(workspace.getSampleCount());
             for (Map.Entry<String, FlowFCSFile> entry : selectedFCSFile.entrySet())
             {
                 String sampleLabel = entry.getKey();

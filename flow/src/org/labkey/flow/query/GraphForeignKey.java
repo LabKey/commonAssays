@@ -107,7 +107,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         // instead of the current container (which may be a different container for flow copied-to-study datasets.)
         // If we ever make FlowProtocol work in multiple containers, we will need to pull the Container from the ResultSet instead.
         ActionURL baseURL = new ActionURL(WellController.ShowGraphAction.class, null);
-        Map<String, FieldKey> graphParams = new HashMap<String, FieldKey>();
+        Map<String, FieldKey> graphParams = new HashMap<>();
         graphParams.put(FlowParam.objectId.toString(), column.getFieldKey());
         graphParams.put(FlowParam.graph.toString(), new FieldKey(column.getFieldKey(), "$"));
         DetailsURL urlGraph = new DetailsURL(baseURL, graphParams);

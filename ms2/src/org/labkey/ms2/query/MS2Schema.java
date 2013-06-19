@@ -76,7 +76,7 @@ public class MS2Schema extends UserSchema
 
     static
     {
-        Set<String> names = new HashSet<String>();
+        Set<String> names = new HashSet<>();
         for (TableType tableType : TableType.values())
         {
             names.add(tableType.toString());
@@ -363,7 +363,7 @@ public class MS2Schema extends UserSchema
     public ProteinGroupTableInfo createProteinGroupsForSearchTable()
     {
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(this);
-        List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> defaultColumns = new ArrayList<>(result.getDefaultVisibleColumns());
         defaultColumns.add(0, FieldKey.fromParts("ProteinProphet","Run"));
         defaultColumns.add(0, FieldKey.fromParts("ProteinProphet", "Run", "Folder"));
         result.setDefaultVisibleColumns(defaultColumns);
@@ -379,7 +379,7 @@ public class MS2Schema extends UserSchema
     {
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(this, includeFirstProteinColumn);
         result.addProteinsColumn();
-        List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> defaultColumns = new ArrayList<>(result.getDefaultVisibleColumns());
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestGeneName"));
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Mass"));
@@ -762,7 +762,7 @@ public class MS2Schema extends UserSchema
         ms2DetailsColumn.setHidden(false);
 
         //adjust the default visible columns
-        List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> columns = new ArrayList<>(result.getDefaultVisibleColumns());
         columns.remove(FieldKey.fromParts("MS2Details"));
         columns.remove(FieldKey.fromParts("Protocol"));
         columns.remove(FieldKey.fromParts("CreatedBy"));
@@ -820,13 +820,13 @@ public class MS2Schema extends UserSchema
     {
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(tableInfo, fieldKeys);
 
-        Collection<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(columnMap.values());
-        Set<FieldKey> unresolvedColumns = new HashSet<FieldKey>();
+        Collection<ColumnInfo> reqCols = new ArrayList<>(columnMap.values());
+        Set<FieldKey> unresolvedColumns = new HashSet<>();
         reqCols = QueryService.get().ensureRequiredColumns(tableInfo, reqCols, filter, null, unresolvedColumns);
 
         SQLFragment innerSelect = Table.getSelectSQL(tableInfo, reqCols, null, null);
 
-        Map<FieldKey, ColumnInfo> map = new HashMap<FieldKey, ColumnInfo>(reqCols.size());
+        Map<FieldKey, ColumnInfo> map = new HashMap<>(reqCols.size());
         for(ColumnInfo col : reqCols)
         {
             map.put(col.getFieldKey(), col);
@@ -1031,7 +1031,7 @@ public class MS2Schema extends UserSchema
 
         if(null != _runs)
         {
-            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            ArrayList<CrosstabMember> members = new ArrayList<>();
             //build up the list of column members
             for (MS2Run run : _runs)
             {
@@ -1057,7 +1057,7 @@ public class MS2Schema extends UserSchema
         {
             result.setOrAggFitlers(form.isOrCriteriaForEachRun());
         }
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts(CrosstabTable.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, groupCountMeasure)));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "Group"));
@@ -1082,7 +1082,7 @@ public class MS2Schema extends UserSchema
         }
     }
 
-    private final static Map<Integer, NormalizedProteinGroupsTracker> NORMALIZED_PROTEIN_GROUP_CACHE = new HashMap<Integer, NormalizedProteinGroupsTracker>();
+    private final static Map<Integer, NormalizedProteinGroupsTracker> NORMALIZED_PROTEIN_GROUP_CACHE = new HashMap<>();
 
     private String ensureNormalizedProteinGroups(int runListId) throws SQLException
     {
@@ -1166,7 +1166,7 @@ public class MS2Schema extends UserSchema
 
         //todo: can we support column ordering that matches the MS2 Runs grid on the dashboard?
         
-        List<Integer> runIds = new ArrayList<Integer>();
+        List<Integer> runIds = new ArrayList<>();
         if (_runs != null)
         {
             for (MS2Run run : _runs)
@@ -1215,7 +1215,7 @@ public class MS2Schema extends UserSchema
 
         if(null != _runs)
         {
-            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            ArrayList<CrosstabMember> members = new ArrayList<>();
             //build up the list of column members
             for (MS2Run run : _runs)
             {
@@ -1241,7 +1241,7 @@ public class MS2Schema extends UserSchema
         {
             result.setOrAggFitlers(form.isOrCriteriaForEachRun());
         }
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("SeqId"));
         defaultCols.add(FieldKey.fromParts(CrosstabTable.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(proteinGroupMeasure.getName(), "Group"));
@@ -1293,7 +1293,7 @@ public class MS2Schema extends UserSchema
 
         CrosstabSettings settings = new CrosstabSettings(baseTable);
         SimpleFilter filter = new SimpleFilter();
-        List<Integer> runIds = new ArrayList<Integer>();
+        List<Integer> runIds = new ArrayList<>();
         if (_runs != null)
         {
             for (MS2Run run : _runs)
@@ -1353,7 +1353,7 @@ public class MS2Schema extends UserSchema
         settings.addMeasure(FieldKey.fromParts("DecimalRatio"), CrosstabMeasure.AggregateFunction.MAX, "Max decimal ratio");
         settings.addMeasure(FieldKey.fromParts("DecimalRatio"), CrosstabMeasure.AggregateFunction.MIN, "Min decimal ratio");
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("run", CrosstabMember.VALUE_NAME);
         parameters.put("MS2Peptides.Peptide~eq", FieldKey.fromParts("peptide"));
         scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.ShowPeptidePopupAction.class, getContainer()), parameters));
@@ -1374,7 +1374,7 @@ public class MS2Schema extends UserSchema
 
         if(null != _runs)
         {
-            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            ArrayList<CrosstabMember> members = new ArrayList<>();
             //build up the list of column members
             for (MS2Run run : _runs)
             {
@@ -1387,7 +1387,7 @@ public class MS2Schema extends UserSchema
             result = new CrosstabTable(settings);
         }
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts(rowDim.getName()));
         defaultCols.add(FieldKey.fromParts(CrosstabTable.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(scansMeasure.getName()));

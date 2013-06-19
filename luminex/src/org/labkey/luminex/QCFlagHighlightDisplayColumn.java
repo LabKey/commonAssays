@@ -66,7 +66,7 @@ public class QCFlagHighlightDisplayColumn extends DataColumn
 
     private List<Boolean> parseBooleans(String s)
     {
-        List<Boolean> enabled = new ArrayList<Boolean>();
+        List<Boolean> enabled = new ArrayList<>();
         if (s != null)
         {
             String[] enabledSplit = s.split(",");

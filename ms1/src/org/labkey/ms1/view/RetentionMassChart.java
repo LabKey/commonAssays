@@ -234,7 +234,7 @@ public class RetentionMassChart extends FeatureChart
      */
     private static class IntensityXYZSeries
     {
-        private ArrayList<XYZDataItem> _vals = new ArrayList<XYZDataItem>();
+        private ArrayList<XYZDataItem> _vals = new ArrayList<>();
         private final LogarithmicAxis logaxis = new LogarithmicAxis("temp");
         private double _minY = Double.MAX_VALUE;
         private double _maxY = Double.MIN_VALUE;
@@ -364,7 +364,7 @@ public class RetentionMassChart extends FeatureChart
      */
     private static class IntensityXYZDataset extends AbstractXYZDataset
     {
-        private ArrayList<IntensityXYZSeries> _series = new ArrayList<IntensityXYZSeries>();
+        private ArrayList<IntensityXYZSeries> _series = new ArrayList<>();
 
         public IntensityXYZDataset(IntensityXYZSeries... series)
         {

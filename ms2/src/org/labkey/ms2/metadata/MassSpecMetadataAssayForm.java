@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpecMetadataAssayProvider>
 {
-    private Map<File, ExpMaterial> _fileFractionMap = new HashMap<File, ExpMaterial>();
+    private Map<File, ExpMaterial> _fileFractionMap = new HashMap<>();
 
     private static final String SAMPLE_COLUMN_PREFIX = "Sample";
 
@@ -50,7 +50,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
 
     public Map<ExpMaterial, String> getInputMaterials() throws ExperimentException
     {
-        Map<ExpMaterial, String> result = new HashMap<ExpMaterial, String>();
+        Map<ExpMaterial, String> result = new HashMap<>();
         if (isBulkUploadAttempted())
         {
             Map<String, Object> values = getBulkProperties();
@@ -103,7 +103,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
 
     public List<File> getAllFiles()
     {
-        List<File> result = new ArrayList<File>();
+        List<File> result = new ArrayList<>();
         for (Map<String, File> fileSet : getSelectedDataCollector().getFileQueue(this))
         {
             result.addAll(fileSet.values());
@@ -156,11 +156,11 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
         else
         {
             DomainProperty[] props = sampleSet.getPropertiesForType();
-            Map<File, Map<DomainProperty, String>> result = new HashMap<File, Map<DomainProperty, String>>();
+            Map<File, Map<DomainProperty, String>> result = new HashMap<>();
             for (File file : files)
             {
                 Map<String, Object> fileRawValues = getProperties(file);
-                Map<DomainProperty, String> fileValues = new HashMap<DomainProperty, String>();
+                Map<DomainProperty, String> fileValues = new HashMap<>();
                 for (DomainProperty prop : props)
                 {
                     fileValues.put(prop, getPropertyValue(fileRawValues, prop));

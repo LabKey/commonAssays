@@ -37,7 +37,7 @@
         </tr>
         <%
         // Use TreeSet to sort by name
-        TreeSet<String> names = new TreeSet<String>(bean.getViews().keySet());
+        TreeSet<String> names = new TreeSet<>(bean.getViews().keySet());
         for (String name : names)
         { %>
             <tr>

@@ -467,7 +467,7 @@ public class OldNabManager extends AbstractNabManager
 
     public Map<String, PropertyType> getPropertyTypes(List<Plate> plates)
     {
-        Map<String, PropertyType> types = new HashMap<String, PropertyType>();
+        Map<String, PropertyType> types = new HashMap<>();
         for (SampleProperty property : SampleProperty.values())
             types.put(property.name(), property.getType());
         for (PlateProperty property : PlateProperty.values())
@@ -535,12 +535,12 @@ public class OldNabManager extends AbstractNabManager
     public List<String> isValidNabPlateTemplate(Container container, User user, String plateTemplate)
     {
         PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, plateTemplate);
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         if (nabTemplate == null)
             errors.add("Plate template " + plateTemplate + " no longer exists.");
         else
         {
-            Set<String> controlGroups = new HashSet<String>();
+            Set<String> controlGroups = new HashSet<>();
             int specimenCount = 0;
             for (WellGroupTemplate groupTemplate : nabTemplate.getWellGroups())
             {

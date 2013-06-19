@@ -396,11 +396,11 @@ public class ProteinProphetImporter
     private void insertPeptides(ProtXmlReader.Protein protein, PreparedStatement peptideStatement, int groupId)
         throws SQLException
     {
-        Set<Pair<String, Integer>> insertedSequences = new HashSet<Pair<String, Integer>>();
+        Set<Pair<String, Integer>> insertedSequences = new HashSet<>();
 
         for (ProtXmlReader.Peptide pep : protein.getPeptides())
         {
-            if (insertedSequences.add(new Pair<String, Integer>(pep.getPeptideSequence(), pep.getCharge())))
+            if (insertedSequences.add(new Pair<>(pep.getPeptideSequence(), pep.getCharge())))
             {
                 int index = 1;
                 peptideStatement.setString(index++, pep.getPeptideSequence());

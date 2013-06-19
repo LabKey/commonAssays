@@ -173,7 +173,7 @@ public class RScriptJob extends FlowExperimentJob
         Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         Map<String, String> replacements = (Map<String, String>)bindings.get(ExternalScriptEngine.PARAM_REPLACEMENT_MAP);
         if (replacements == null)
-            bindings.put(ExternalScriptEngine.PARAM_REPLACEMENT_MAP, replacements = new HashMap<String, String>());
+            bindings.put(ExternalScriptEngine.PARAM_REPLACEMENT_MAP, replacements = new HashMap<>());
 
         replacements.put(WORKSPACE_PATH, _workspaceFile.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(FCSFILE_DIRECTORY, _runFilePathRoot.getAbsolutePath().replaceAll("\\\\", "/"));
@@ -235,7 +235,7 @@ public class RScriptJob extends FlowExperimentJob
     {
         info("Writing compensation matrices...");
         Workspace workspace = Workspace.readWorkspace(new FileInputStream(_workspaceFile));
-        Map<String, CompensationMatrix> matrices = new HashMap<String, CompensationMatrix>();
+        Map<String, CompensationMatrix> matrices = new HashMap<>();
         for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
         {
             CompensationMatrix matrix = null;

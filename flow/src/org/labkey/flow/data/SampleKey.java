@@ -27,7 +27,7 @@ public class SampleKey
 
     public SampleKey()
     {
-        _values = new ArrayList<Object>();
+        _values = new ArrayList<>();
     }
 
     public void addValue(Object value)

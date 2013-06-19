@@ -44,7 +44,7 @@ public class DataFrame
 {
     protected NumberArray[] data;
     protected Field[] fields;
-    protected Map<String, Field> fieldsMap = new CaseInsensitiveHashMap<Field>();
+    protected Map<String, Field> fieldsMap = new CaseInsensitiveHashMap<>();
     protected String version = "";
 
     public DataFrame(Field[] fields, int rows)

@@ -72,7 +72,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
             }
         }
         Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
-        Set<Integer> cutoffSet = new HashSet<Integer>();
+        Set<Integer> cutoffSet = new HashSet<>();
         for (DilutionSummary summary : summaries.keySet())
         {
             for (int cutoff : summary.getAssay().getCutoffs())

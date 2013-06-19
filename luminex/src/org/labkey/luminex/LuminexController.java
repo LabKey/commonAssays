@@ -195,7 +195,7 @@ public class LuminexController extends SpringActionController
             VBox result = new VBox();
             AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
             result.addView(header);
-            JspView report = new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
+            JspView report = new JspView<>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
             result.addView(report);
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             return result;

@@ -135,7 +135,7 @@ Ext.QuickTips.init();
     jsonStats.append("]");
 
     Map<String,String> keywords = getKeywords();
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>();
     names.add("");
     for (int i=1 ; keywords.containsKey("$P" + i + "N"); i++)
         names.add(PageFlowUtil.jsString(keywords.get("$P" + i + "N")));
@@ -503,7 +503,7 @@ if (relatedFiles.size() > 0)
     %></table><%
 }
 
-LinkedHashMap<Integer, FlowFCSAnalysis> allAnalyses = new LinkedHashMap<Integer, FlowFCSAnalysis>(10);
+LinkedHashMap<Integer, FlowFCSAnalysis> allAnalyses = new LinkedHashMap<>(10);
 for (FlowFCSAnalysis analysis : well.getFCSAnalysisOutputs())
     allAnalyses.put(analysis.getRowId(), analysis);
 if (originalFile != null)

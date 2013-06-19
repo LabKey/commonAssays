@@ -51,7 +51,7 @@ public class SpectraCountTableInfo extends VirtualTable
     private final SpectraCountConfiguration _config;
     private final ViewContext _context;
 
-    private List<PeptideAggregate> _aggregates = new ArrayList<PeptideAggregate>();
+    private List<PeptideAggregate> _aggregates = new ArrayList<>();
     private MS2Controller.SpectraCountForm _form;
 
     private class PeptideAggregate
@@ -137,7 +137,7 @@ public class SpectraCountTableInfo extends VirtualTable
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("Quantitation", "HeavyArea"), true, true, true, true, true));
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("Quantitation", "DecimalRatio"), true, true, true, true, false));
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        List<FieldKey> defaultCols = new ArrayList<>();
 
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
         runColumn.setFk(new LookupForeignKey(MS2Controller.getShowRunURL(_ms2Schema.getUser(), _ms2Schema.getContainer()), "run", "MS2Details", "Name")
@@ -304,7 +304,7 @@ public class SpectraCountTableInfo extends VirtualTable
 
         sql.append("INNER JOIN (");
 
-        List<FieldKey> peptideFieldKeys = new ArrayList<FieldKey>();
+        List<FieldKey> peptideFieldKeys = new ArrayList<>();
         for (PeptideAggregate aggregate : _aggregates)
         {
             peptideFieldKeys.add(aggregate.getKey());

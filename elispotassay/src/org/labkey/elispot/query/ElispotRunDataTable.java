@@ -76,7 +76,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
     protected void addPropertyColumns(final AssaySchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
     {
         // get all the properties from this plated-based protocol:
-        List<PropertyDescriptor> properties = new ArrayList<PropertyDescriptor>();
+        List<PropertyDescriptor> properties = new ArrayList<>();
         PropertyDescriptor materialProperty = null;
         Set<String> hiddenCols = getHiddenColumns(protocol);
 

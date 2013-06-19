@@ -188,7 +188,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                 List<String> subsets = valueSampleMap.get(param.getSearchValue());
                 if (subsets == null)
                 {
-                    subsets = new ArrayList<String>();
+                    subsets = new ArrayList<>();
                     valueSampleMap.put(param.getSearchValue(), subsets);
                 }
 

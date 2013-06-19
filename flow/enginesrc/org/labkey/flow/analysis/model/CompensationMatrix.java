@@ -517,7 +517,7 @@ public class CompensationMatrix implements Serializable
         {
             // Not sure how I'm supposed to know which parameters to compensate
             // Skip FS, SS, TIME, and take the rest in order
-            ArrayList<String> channelNames = new ArrayList<String>();
+            ArrayList<String> channelNames = new ArrayList<>();
             for (int p=1 ; ; p++)
             {
                 String name;

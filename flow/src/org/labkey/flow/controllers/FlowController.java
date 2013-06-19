@@ -212,7 +212,7 @@ public class FlowController extends BaseFlowController
         {
             if (errors.hasErrors())
             {
-                return new JspView<StatusJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);
+                return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
             }
             else
             {
@@ -220,7 +220,7 @@ public class FlowController extends BaseFlowController
                 if (psf == null)
                 {
                     errors.rejectValue("statusFile", ERROR_MSG, "Status not found.");
-                    return new JspView<StatusJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);
+                    return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
                 }
 
                 if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
@@ -308,7 +308,7 @@ public class FlowController extends BaseFlowController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return new JspView<Object>(FlowController.class, "runningJobs.jsp", null, errors);
+            return new JspView<>(FlowController.class, "runningJobs.jsp", null, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -368,7 +368,7 @@ public class FlowController extends BaseFlowController
                     errors.rejectValue("statusFile", ERROR_MSG, "Data for " + form.getStatusFile() + " not found.");
                 }
             }
-            return new JspView<CancelJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -418,7 +418,7 @@ public class FlowController extends BaseFlowController
         {
             checkPerms();
             getPageConfig().setFocusId("folderName");
-            return new JspView<NewFolderForm>(FlowController.class, "newFolder.jsp", form, errors);
+            return new JspView<>(FlowController.class, "newFolder.jsp", form, errors);
         }
 
         public boolean handlePost(NewFolderForm form, BindException errors) throws Exception
@@ -521,7 +521,7 @@ public class FlowController extends BaseFlowController
         public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors) throws Exception
         {
             getPageConfig().setFocusId("workingDirectory");
-            return new JspView<FlowAdminForm>(FlowController.class, "flowAdmin.jsp", form, errors);
+            return new JspView<>(FlowController.class, "flowAdmin.jsp", form, errors);
         }
 
         public boolean handlePost(FlowAdminForm form, BindException errors) throws Exception

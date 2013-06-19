@@ -298,7 +298,7 @@ public abstract class MS2Importer
 
     protected int createRun() throws SQLException
     {
-        HashMap<String, Object> runMap = new HashMap<String, Object>();
+        HashMap<String, Object> runMap = new HashMap<>();
 
         MS2Run run = MS2Manager.getRunByFileName(_path, _fileName, _container);
         if (run != null)

@@ -48,7 +48,7 @@ import java.util.Set;
  */
 public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAssayProvider> implements LuminexRunContext
 {
-    private Map<String, Analyte> _analytes = new LinkedHashMap<String, Analyte>();
+    private Map<String, Analyte> _analytes = new LinkedHashMap<>();
     private LuminexExcelParser _parser;
 
     public LuminexRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
@@ -95,7 +95,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     @Override
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
-        Map<ColumnInfo, String> properties = new HashMap<ColumnInfo, String>();
+        Map<ColumnInfo, String> properties = new HashMap<>();
         Analyte analyte = getAnalyte(analyteName);
         ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         Integer value = analyte.getPositivityThreshold();
@@ -127,7 +127,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         sql.add(Boolean.TRUE);
         sql.add(analyte.getRowId());
 
-        return new HashSet<String>(new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getCollection(String.class));
+        return new HashSet<>(new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getCollection(String.class));
     }
 
     @Override

@@ -89,7 +89,7 @@ public class PlotFactory
                 root = root.getParent();
 
             // UNDONE: Share this rootStatsMap
-            Map<String, Stats.DoubleStats> rootStatsMap = new HashMap<String, Stats.DoubleStats>();
+            Map<String, Stats.DoubleStats> rootStatsMap = new HashMap<>();
             min = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Min, field.getName()), rootStatsMap);
             min = field.getScalingFunction().translate(min);
 

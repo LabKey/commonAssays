@@ -239,7 +239,7 @@ public class ReportsController extends BaseFlowController
             if (form.getReportName() == null || form.getReportName().length() == 0)
                 form.setReportName("Copy of " + r.getDescriptor().getReportName());
             getPageConfig().setFocusId("reportName");
-            return new JspView<Pair<CopyForm, FlowReport>>(ReportsController.class, "copyReport.jsp", Pair.of(form, r), errors);
+            return new JspView<>(ReportsController.class, "copyReport.jsp", Pair.of(form, r), errors);
         }
 
         public boolean handlePost(CopyForm form, BindException errors) throws Exception
@@ -358,7 +358,7 @@ public class ReportsController extends BaseFlowController
                 else
                 {
                     // Prompt for confirmation
-                    view = new JspView<Pair<ExecuteForm, FlowReport>>(ReportsController.class, "confirmExecuteReport.jsp", Pair.of(form, r), errors);
+                    view = new JspView<>(ReportsController.class, "confirmExecuteReport.jsp", Pair.of(form, r), errors);
                 }
             }
             else

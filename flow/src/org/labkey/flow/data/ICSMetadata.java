@@ -94,7 +94,7 @@ public class ICSMetadata
 
     public List<String> getErrors()
     {
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         if (hasPartialStudyMeta())
         {
             if (getSpecimenIdColumn() == null)
@@ -222,7 +222,7 @@ public class ICSMetadata
 
             if (getMatchColumns() != null && getMatchColumns().size() > 0)
             {
-                List<String> matchColumns = new ArrayList<String>(getMatchColumns().size());
+                List<String> matchColumns = new ArrayList<>(getMatchColumns().size());
                 for (FieldKey fieldKey : getMatchColumns())
                 {
                     if (fieldKey != null)
@@ -295,7 +295,7 @@ public class ICSMetadata
 
             if (xBackground.getMatchColumns() != null)
             {
-                List<FieldKey> matchColumns = new LinkedList<FieldKey>();
+                List<FieldKey> matchColumns = new LinkedList<>();
                 for (Object field : xBackground.getMatchColumns().getFieldArray())
                 {
                     matchColumns.add(FieldKey.fromString((String)field));
@@ -303,7 +303,7 @@ public class ICSMetadata
                 result.setMatchColumns(matchColumns);
             }
 
-            List<FilterInfo> backgroundFilters = new ArrayList<FilterInfo>();
+            List<FilterInfo> backgroundFilters = new ArrayList<>();
 
             // 'backgroundColumn' element is deprecated
             FilterDef xBackgroundColumn = xBackground.getBackgroundColumn();

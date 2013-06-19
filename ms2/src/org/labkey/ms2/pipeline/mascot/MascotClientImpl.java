@@ -215,7 +215,7 @@ public class MascotClientImpl implements SearchClient
             //http://mascot.server.org/
             //mascot.server.org
 
-            List<String> possibleURLs = new ArrayList<String>();
+            List<String> possibleURLs = new ArrayList<>();
             // user provided a http://host/path, we shall test this first
             if (!"".equals(url.getPath()))
                 possibleURLs.add(_url);
@@ -315,7 +315,7 @@ public class MascotClientImpl implements SearchClient
         parameters.setProperty("release", release);
 
         results = request (parameters, true);
-        Map<String,String> returns=new HashMap<String,String>();
+        Map<String,String> returns=new HashMap<>();
         for(Map.Entry<Object,Object> entry: results.entrySet()) {
             returns.put((String)entry.getKey(),(String)entry.getValue());
         }
@@ -691,7 +691,7 @@ public class MascotClientImpl implements SearchClient
         else
             results = new Properties();
 
-        List<String> taxonomies = new ArrayList<String>();
+        List<String> taxonomies = new ArrayList<>();
         String dbsString = results.getProperty("HTTPContent", "");
         String[] contentLines = dbsString.split("\n");
         boolean sectionTAXONOMY = false;
@@ -722,7 +722,7 @@ public class MascotClientImpl implements SearchClient
         else
             results = new Properties();
 
-        List<String> dbNames = new ArrayList<String>();
+        List<String> dbNames = new ArrayList<>();
         String dbsString = results.getProperty("HTTPContent", "");
         String[] contentLines = dbsString.split("\n");
         boolean sectionDB = false;
@@ -753,7 +753,7 @@ public class MascotClientImpl implements SearchClient
         else
             results = new Properties();
 
-        Map<String, String> mods = new HashMap<String, String>();
+        Map<String, String> mods = new HashMap<>();
         String dbsString = results.getProperty("HTTPContent", "");
         String[] contentLines = dbsString.split("\n");
         boolean sectionMODS = false;
@@ -1309,7 +1309,7 @@ public class MascotClientImpl implements SearchClient
         // let's check that we have the right file
         BufferedReader resultStream = null;
         final int maxLines=20;
-        List<String> contentLines = new ArrayList<String>();
+        List<String> contentLines = new ArrayList<>();
         String firstLine = "";
         try
         {

@@ -136,7 +136,7 @@ public class AttributeSetHelper
             if (!keywords.isEmpty())
             {
                 String sql = "INSERT INTO " + mgr.getTinfoKeyword() + " (ObjectId, KeywordId, Value) VALUES (?,?,?)";
-                List<List<?>> paramsList = new ArrayList<List<?>>();
+                List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<String, String> entry : keywords.entrySet())
                 {
                     paramsList.add(Arrays.asList(obj.getRowId(), mgr.getAttributeId(c, AttributeType.keyword, entry.getKey()), entry.getValue()));
@@ -148,7 +148,7 @@ public class AttributeSetHelper
             if (!statistics.isEmpty())
             {
                 String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, Value) VALUES (?,?,?)";
-                List<List<?>> paramsList = new ArrayList<List<?>>();
+                List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
                 {
                     paramsList.add(Arrays.<Object>asList(obj.getRowId(), mgr.getAttributeId(c, AttributeType.statistic, entry.getKey().toString()), entry.getValue()));
@@ -160,7 +160,7 @@ public class AttributeSetHelper
             if (!graphs.isEmpty())
             {
                 String sql = "INSERT INTO " + mgr.getTinfoGraph() + " (ObjectId, GraphId, Data) VALUES (?, ?, ?)";
-                List<List<?>> paramsList = new ArrayList<List<?>>();
+                List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
                 {
                     paramsList.add(Arrays.asList(obj.getRowId(), mgr.getAttributeId(c, AttributeType.graph, entry.getKey().toString()), entry.getValue()));
@@ -187,7 +187,7 @@ public class AttributeSetHelper
                 "INNER JOIN flow.KeywordAttr ON flow.keyword.keywordid = flow.KeywordAttr.rowid " +
                 "WHERE flow.keyword.objectId = ?";
         ResultSet rsKeywords = Table.executeQuery(mgr.getSchema(), sqlKeywords, params);
-        List<Integer> keywordIDs = new ArrayList<Integer>();
+        List<Integer> keywordIDs = new ArrayList<>();
         Map<String, String> keywords = new TreeMap();
         while (rsKeywords.next())
         {
@@ -219,7 +219,7 @@ public class AttributeSetHelper
                 "INNER JOIN flow.StatisticAttr ON flow.statistic.statisticid = flow.StatisticAttr.rowid " +
                 "WHERE flow.statistic.objectId = ?";
         ResultSet rsStatistics = Table.executeQuery(mgr.getSchema(), sqlStatistics, params);
-        List<Integer> statisticIDs = new ArrayList<Integer>();
+        List<Integer> statisticIDs = new ArrayList<>();
         while (rsStatistics.next())
         {
             statisticIDs.add(rsStatistics.getInt(1));
@@ -263,7 +263,7 @@ public class AttributeSetHelper
                         "WHERE flow.graph.objectid = ?";
                 rsGraphs = Table.executeQuery(mgr.getSchema(), sqlGraphs, params);
             }
-            List<Integer> graphIDs = new ArrayList<Integer>();
+            List<Integer> graphIDs = new ArrayList<>();
             while (rsGraphs.next())
             {
                 graphIDs.add(rsGraphs.getInt(1));

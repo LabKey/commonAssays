@@ -93,7 +93,7 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
     {
         if (_mageMLProperties == null)
         {
-            _mageMLProperties = new HashMap<DomainProperty, String>();
+            _mageMLProperties = new HashMap<>();
             // Create a document for the MageML
             Document document = getCurrentMageML();
             if (document == null)

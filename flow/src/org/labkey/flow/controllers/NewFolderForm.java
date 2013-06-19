@@ -39,7 +39,7 @@ public class NewFolderForm
 
     public void setCopyAnalysisScript(String[] analysisScript)
     {
-        _copyAnalysisScript = new HashSet<String>(Arrays.asList(analysisScript));
+        _copyAnalysisScript = new HashSet<>(Arrays.asList(analysisScript));
     }
 
     public Set<String> getCopyAnalysisScript()

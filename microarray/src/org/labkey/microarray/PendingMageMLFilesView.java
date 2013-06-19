@@ -63,7 +63,7 @@ public class PendingMageMLFilesView extends QueryView
     {
 //        super.populateButtonBar(view, bar);
 
-        List<ExpProtocol> microarrayProtocols = new ArrayList<ExpProtocol>();
+        List<ExpProtocol> microarrayProtocols = new ArrayList<>();
         for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
         {
             if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)

@@ -179,11 +179,11 @@ public class ProteinCompareQuery extends CompareQuery
 
     public List<Pair<String, String>> getSQLSummaries(User user)
     {
-        List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
+        List<Pair<String, String>> result = new ArrayList<>();
         SimpleFilter peptideFilter = new SimpleFilter();
         addWhereClauses(peptideFilter);
-        result.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
-        result.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText()));
+        result.add(new Pair<>("Peptide Filter", peptideFilter.getFilterText()));
+        result.add(new Pair<>("Protein Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText()));
         return result;
     }
 }

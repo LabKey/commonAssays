@@ -199,7 +199,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 // Consider the newly imported files as the resolved FCSFiles, but don't add any new selectedFCSFiles unless there are no selected files.
                 // NOTE: Duplicate samples are ignored.
                 if (_selectedFCSFiles == null)
-                    _selectedFCSFiles = new HashMap<String, FlowFCSFile>();
+                    _selectedFCSFiles = new HashMap<>();
                 boolean addNewFCSFiles = _selectedFCSFiles.isEmpty();
                 for (FlowRun run : runs)
                 {
@@ -265,7 +265,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     {
         // Build a map that uses FieldKey strings as keys to represent a fake row of the FCSFiles table.
         // The pairs in the map are those allowed by the ProtocolForm.getKeywordFieldMap().
-        Map<String, String> fakeRow = new HashMap<String, String>();
+        Map<String, String> fakeRow = new HashMap<>();
         fakeRow.put("Name", sampleName);
         //fakeRow.put(FieldKey.fromParts("Run", "Name").toString(), "run name?");
 
@@ -304,8 +304,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         URI dataFileURI = new File(externalAnalysisFile.getParent(), "attributes.flowdata.xml").toURI();
 
         // Prepare comp matrices for saving
-        Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<CompensationMatrix, AttributeSet>();
-        Set<CompensationMatrix> comps = new HashSet<CompensationMatrix>(sampleCompMatrixMap.values());
+        Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<>();
+        Set<CompensationMatrix> comps = new HashSet<>(sampleCompMatrixMap.values());
         if (comps.size() > 0)
             info("Preparing " + comps.size() + " comp. matrices...");
         for (CompensationMatrix comp : comps)

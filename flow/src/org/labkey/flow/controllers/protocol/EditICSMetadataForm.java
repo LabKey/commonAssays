@@ -167,7 +167,7 @@ public class EditICSMetadataForm extends ProtocolForm
     /** Get match columns from form posted values. */
     public List<FieldKey> getMatchColumns()
     {
-        List<FieldKey> matchColumns = new ArrayList<FieldKey>(ff_matchColumn.length);
+        List<FieldKey> matchColumns = new ArrayList<>(ff_matchColumn.length);
         for (String field : ff_matchColumn)
         {
             if (field != null)
@@ -179,7 +179,7 @@ public class EditICSMetadataForm extends ProtocolForm
     /** Get background filters from form posted values. */
     public List<FilterInfo> getBackgroundFilters()
     {
-        List<FilterInfo> filters = new ArrayList<FilterInfo>(ff_backgroundFilterField.length);
+        List<FilterInfo> filters = new ArrayList<>(ff_backgroundFilterField.length);
         if (ff_backgroundFilterField != null && ff_backgroundFilterOp != null)
         {
             for (int i = 0; i < ff_backgroundFilterField.length; i++)
@@ -209,7 +209,7 @@ public class EditICSMetadataForm extends ProtocolForm
 
     public Map<FieldKey, String> getKeywordAndSampleFieldMap(boolean includeStatistics)
     {
-        LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<FieldKey, String>();
+        LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<>();
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
         TableInfo tableFCSFiles = schema.getTable(FlowTableType.FCSFiles.toString());
 

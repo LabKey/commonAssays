@@ -163,8 +163,8 @@ public class ProtXmlReader
         private Float _pctSpectrumIds;
         private String _proteinDescription;
 
-        private List<Peptide> _peptides = new ArrayList<Peptide>();
-        private List<String> _indistinguishableProteinNames = new ArrayList<String>();
+        private List<Peptide> _peptides = new ArrayList<>();
+        private List<String> _indistinguishableProteinNames = new ArrayList<>();
         private IcatProteinQuantitation _quantRatio;
         private ITraqProteinQuantitation _iTraqQuantRatio;
         private MS2Run _run;

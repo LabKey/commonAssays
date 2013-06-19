@@ -147,7 +147,7 @@ public class MicroarraySchema extends SimpleUserSchema
         });
         result.addColumn(qcReportColumn);
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        List<FieldKey> defaultCols = new ArrayList<>(result.getDefaultVisibleColumns());
         defaultCols.remove(FieldKey.fromParts(qcReportColumn.getName()));
         defaultCols.remove(FieldKey.fromParts(thumbnailColumn.getName()));
         defaultCols.add(2, FieldKey.fromParts(qcReportColumn.getName()));

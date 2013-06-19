@@ -54,7 +54,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
 
         StringBuilder header = new StringBuilder(HEADER_PREFIX);
 
-        List<String> descriptions = new ArrayList<String>();
+        List<String> descriptions = new ArrayList<>();
 
         addGridColumn("GroupNumber", "GroupNumber", "MAX");
         addGridColumn("CollectionId", "IndistinguishableCollectionId", "MAX");
@@ -190,8 +190,8 @@ public class ProteinProphetCompareQuery extends CompareQuery
 
     public List<Pair<String, String>> getSQLSummaries(User user)
     {
-        List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
-        result.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
+        List<Pair<String, String>> result = new ArrayList<>();
+        result.add(new Pair<>("Protein Group Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
         return result;
     }
 

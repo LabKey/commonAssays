@@ -57,7 +57,7 @@ public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
         url.addParameters(getPropertyValues());
         url.replaceParameter("id", objectIdParam.toString());
 
-        final Map<String, Object> returnValue = new HashMap<String, Object>();
+        final Map<String, Object> returnValue = new HashMap<>();
         returnValue.put("url", url.getLocalURIString());
         returnValue.put("objectIds", readableIds.keySet());
 

@@ -211,7 +211,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 if (lock != null) { lock.release(); }
             }
 
-            List<RecordedAction> actions = new ArrayList<RecordedAction>();
+            List<RecordedAction> actions = new ArrayList<>();
             if (!searchComplete)
             {
                 RecordedAction xtandemAction = new RecordedAction(X_TANDEM_ACTION_NAME);
@@ -242,7 +242,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
     public void writeRunParameters(String pathSpectra, File fileParameters, File fileTaxonomy, File fileWorkOutputXML) throws IOException
     {
-        Map<String, String> params = new HashMap<String, String>(getJobSupport().getParameters());
+        Map<String, String> params = new HashMap<>(getJobSupport().getParameters());
         
         try
         {

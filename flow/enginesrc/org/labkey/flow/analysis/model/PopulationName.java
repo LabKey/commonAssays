@@ -38,7 +38,7 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
     public static final Character ESCAPE_END = '}';
 
     // Characters not allowed to appear within a top-level population name.
-    private static Set<Character> illegalTopLevelChars = new HashSet<Character>();
+    private static Set<Character> illegalTopLevelChars = new HashSet<>();
     static
     {
         illegalTopLevelChars.add('/');
@@ -47,7 +47,7 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
     }
 
     // Characters not allowed to appear within a population name inside of boolean expression.
-    private static Set<Character> illegalExpressionChars = new HashSet<Character>();
+    private static Set<Character> illegalExpressionChars = new HashSet<>();
     static
     {
         illegalExpressionChars.add('(');

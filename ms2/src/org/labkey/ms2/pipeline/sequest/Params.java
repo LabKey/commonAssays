@@ -27,7 +27,7 @@ import java.util.TreeSet;
  */
 public abstract class Params
 {
-    TreeSet<Param> _params = new TreeSet<Param>();
+    TreeSet<Param> _params = new TreeSet<>();
 
     abstract void initProperties();
 
@@ -63,7 +63,7 @@ public abstract class Params
 
     public Collection<String> getInputXmlLabels()
     {
-        HashSet<String> labels = new HashSet<String>();
+        HashSet<String> labels = new HashSet<>();
         for (Param prop : _params)
         {
             labels.addAll(prop.getInputXmlLabels());

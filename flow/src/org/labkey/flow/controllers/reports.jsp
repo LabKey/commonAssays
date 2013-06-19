@@ -52,7 +52,7 @@
     ActionURL deleteURL = new ActionURL(ReportsController.DeleteAction.class, c).addReturnURL(currentURL);
 
     Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
-    Map<String, List<FlowReport>> reportsByType = new TreeMap<String, List<FlowReport>>();
+    Map<String, List<FlowReport>> reportsByType = new TreeMap<>();
 
     for (FlowReport r : reports)
     {
@@ -61,7 +61,7 @@
 
         List<FlowReport> rs = reportsByType.get(type);
         if (rs == null)
-            reportsByType.put(type, rs = new ArrayList<FlowReport>(reports.size()));
+            reportsByType.put(type, rs = new ArrayList<>(reports.size()));
 
         rs.add(r);
     }

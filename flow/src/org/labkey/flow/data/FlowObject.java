@@ -93,7 +93,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     final public ActionURL addParams(ActionURL url)
     {
-        EnumMap<FlowParam, Object> map = new EnumMap<FlowParam, Object>(FlowParam.class);
+        EnumMap<FlowParam, Object> map = new EnumMap<>(FlowParam.class);
         addParams(map);
 
         for (Map.Entry<FlowParam,Object> param : map.entrySet())
@@ -106,7 +106,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     final public Map<FlowParam, Object> getParams()
     {
-        Map<FlowParam, Object> ret = new EnumMap<FlowParam, Object>(FlowParam.class);
+        Map<FlowParam, Object> ret = new EnumMap<>(FlowParam.class);
         addParams(ret);
         return ret;
     }

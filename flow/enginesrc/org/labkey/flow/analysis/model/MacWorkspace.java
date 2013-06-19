@@ -159,7 +159,7 @@ public class MacWorkspace extends FlowJoWorkspace
         List<Element> nlStrings = getElementsByTagName(elStringArray, "String");
 
         int count = 0;
-        Map<SubsetSpec, SubsetSpec> mapping = new HashMap<SubsetSpec, SubsetSpec>();
+        Map<SubsetSpec, SubsetSpec> mapping = new HashMap<>();
         for (Element elString : nlStrings)
         {
             String str = getInnerText(elString);
@@ -204,13 +204,13 @@ public class MacWorkspace extends FlowJoWorkspace
         return gate;
     }
 
-    Set<Pair<String, String>> seenGateSpecfication = new HashSet<Pair<String, String>>();
+    Set<Pair<String, String>> seenGateSpecfication = new HashSet<>();
 
     // Silly debugging tool to find swapped gates.
     private boolean checkGateCodesInOrder(SubsetSpec parentSubset, String name, String specification)
     {
         String fullGateName = (parentSubset == null ? "" : parentSubset.toString()) + "/" + name;
-        if (!seenGateSpecfication.add(new Pair<String, String>(fullGateName, specification)))
+        if (!seenGateSpecfication.add(new Pair<>(fullGateName, specification)))
             return true;
 
         StringTokenizer st = new StringTokenizer(specification, "&|", true);
@@ -274,8 +274,8 @@ public class MacWorkspace extends FlowJoWorkspace
         String xAxis = getNormalizedParameterName(el.getAttribute("xAxisName"));
         String yAxis = getNormalizedParameterName(el.getAttribute("yAxisName"));
 
-        List<Double> lstX = new ArrayList<Double>();
-        List<Double> lstY = new ArrayList<Double>();
+        List<Double> lstX = new ArrayList<>();
+        List<Double> lstY = new ArrayList<>();
         for (Element elPolygon : getElementsByTagName(el, "Polygon"))
         {
             for (Element elVertex : getElementsByTagName(elPolygon, "Vertex"))
@@ -309,7 +309,7 @@ public class MacWorkspace extends FlowJoWorkspace
         PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
         ret.setName(name);
         SubsetSpec subset = new SubsetSpec(parentSubset, name);
-        Set<String> gatedParams = new LinkedHashSet<String>();
+        Set<String> gatedParams = new LinkedHashSet<>();
 
         for (Element elBooleanGate : getElementsByTagName(elPopulation, "BooleanGate"))
         {
@@ -340,7 +340,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 {
                     String axis = ___cleanName(el.getAttribute("xAxisName"));
                     gatedParams.add(axis);
-                    List<Double> lstValues = new ArrayList<Double>();
+                    List<Double> lstValues = new ArrayList<>();
                     for (Element elPolygon : getElementsByTagName(el, "Polygon"))
                     {
                         for (Element elVertex : getElementsByTagName(elPolygon, "Vertex"))

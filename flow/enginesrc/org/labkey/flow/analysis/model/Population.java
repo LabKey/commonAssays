@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 public class Population extends PopulationSet
 {
-    List<Gate> _gates = new ArrayList<Gate>();
+    List<Gate> _gates = new ArrayList<>();
 
     public List<Gate> getGates()
     {
@@ -80,10 +80,10 @@ public class Population extends PopulationSet
         if (getGates().size() != other.getGates().size())
             return false;
 
-        ArrayList<Gate> thisSortedGates = new ArrayList<Gate>(getGates());
+        ArrayList<Gate> thisSortedGates = new ArrayList<>(getGates());
         Collections.sort(thisSortedGates, Gate.NAME_COMPARATOR);
 
-        ArrayList<Gate> otherSortedGates = new ArrayList<Gate>(other.getGates());
+        ArrayList<Gate> otherSortedGates = new ArrayList<>(other.getGates());
         Collections.sort(otherSortedGates, Gate.NAME_COMPARATOR);
 
         for (int i = 0; i < thisSortedGates.size(); i++)

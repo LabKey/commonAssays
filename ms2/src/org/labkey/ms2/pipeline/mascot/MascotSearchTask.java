@@ -196,7 +196,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot using MzXML2Search
             File fileWorkSpectra = _wd.inputFile(fileMzXML, true);
-            ArrayList<String> argsM2S = new ArrayList<String>();
+            ArrayList<String> argsM2S = new ArrayList<>();
             String ver = TPPTask.getTPPVersion(getJob());
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", null, "tpp", ver, getJob().getLogger()));
             argsM2S.add("-mgf");
@@ -472,7 +472,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
     {
         final File hashFile = new File(filepath);
 
-        Map<String,String> returns=new HashMap<String,String>();
+        Map<String,String> returns=new HashMap<>();
 
         if (hashFile.exists()) {
             InputStream datIn;

@@ -47,7 +47,7 @@ public class StandardProteinTSVGridWriter extends ProteinTSVGridWriter
 
         protein.setSequence((String) ctx.get("Sequence"));
 
-        List<String> peptides = new ArrayList<String>();
+        List<String> peptides = new ArrayList<>();
 
         while (nestedRS.next())
             peptides.add(nestedRS.getString(getPeptideIndex()));

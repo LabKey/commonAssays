@@ -321,7 +321,7 @@ public class SpectrumImporter
             }
         }
 
-        return new Pair<float[], float[]>(x, y);
+        return new Pair<>(x, y);
     }
 
     public static byte[] floatArraysToByteArray(float[] x, float[] y)

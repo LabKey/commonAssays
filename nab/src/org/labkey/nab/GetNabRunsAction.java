@@ -152,7 +152,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
         DataView dataView = queryView.createDataView();
         ResultSet rs = null;
-        List<Integer> rowIds = new ArrayList<Integer>();
+        List<Integer> rowIds = new ArrayList<>();
         try
         {
             rs = dataView.getDataRegion().getResultSet(dataView.getRenderContext());
@@ -172,7 +172,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
             if (rs != null)
                 try { rs.close(); } catch (SQLException e) {}
         }
-        List<ExpRun> runs = new ArrayList<ExpRun>();
+        List<ExpRun> runs = new ArrayList<>();
         for (Integer rowId : rowIds)
         {
             ExpRun run = ExperimentService.get().getExpRun(rowId.intValue());
@@ -186,8 +186,8 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
     {
         if (form.getAssayName() == null)
             throw new IllegalArgumentException("Assay name is a required parameter.");
-        final Map<String, Object> _properties = new HashMap<String, Object>();
-        List<NabRunPropertyMap> runList = new ArrayList<NabRunPropertyMap>();
+        final Map<String, Object> _properties = new HashMap<>();
+        List<NabRunPropertyMap> runList = new ArrayList<>();
         _properties.put("runs", runList);
         Container container = form.getViewContext().getContainer();
         ExpProtocol protocol = null;

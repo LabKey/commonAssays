@@ -45,11 +45,11 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
     {
         super(domainProperties);
         _template = template;
-        _controlNames = new TreeSet<String>();
+        _controlNames = new TreeSet<>();
 
         if (template != null)
         {
-            Map<String, Position> controls = new HashMap<String, Position>();
+            Map<String, Position> controls = new HashMap<>();
             for (WellGroupTemplate group : template.getWellGroups())
             {
                 if (group.getType() == WellGroup.Type.CONTROL)

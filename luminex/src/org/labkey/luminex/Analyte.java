@@ -162,7 +162,7 @@ public class Analyte
 
     public LuminexWellGroup buildWellGroup(List<LuminexDataRow> dataRows)
     {
-        List<LuminexWell> wells = new ArrayList<LuminexWell>();
+        List<LuminexWell> wells = new ArrayList<>();
         for (LuminexDataRow dataRow : dataRows)
         {
             // look for wells with a matching analyteId, and skip excluded wells

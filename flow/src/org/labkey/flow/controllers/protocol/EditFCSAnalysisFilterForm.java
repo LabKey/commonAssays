@@ -33,9 +33,9 @@ public class EditFCSAnalysisFilterForm extends ProtocolForm
 
     public void init() throws UnauthorizedException
     {
-        List<FieldKey> fields = new ArrayList<FieldKey>();
-        List<String> ops = new ArrayList<String>();
-        List<String> values = new ArrayList<String>();
+        List<FieldKey> fields = new ArrayList<>();
+        List<String> ops = new ArrayList<>();
+        List<String> values = new ArrayList<>();
         String prop = getProtocol().getFCSAnalysisFilterString();
         for (Map.Entry<String, String> entry : PageFlowUtil.fromQueryString(prop))
         {

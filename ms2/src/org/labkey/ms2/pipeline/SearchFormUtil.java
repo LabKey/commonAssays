@@ -39,7 +39,7 @@ public class SearchFormUtil
     public static List<Enzyme> getDefaultEnzymeList()
     {
         if(tppEnzymeList != null) return tppEnzymeList;
-        tppEnzymeList = new ArrayList<Enzyme>();
+        tppEnzymeList = new ArrayList<>();
         tppEnzymeList.add(new Enzyme("Trypsin",new String[]{"trypsin"},
                 new CutSite[]{new CutSite( new char[]{'K','R'}, new char[]{'P'},"[KR]|{P}", false)}));
         tppEnzymeList.add(new Enzyme("Strict Trypsin",new String[]{"stricttrypsin"},
@@ -104,7 +104,7 @@ public class SearchFormUtil
 
     public static Map<String, String> getDefaultEnzymeMap()
     {
-        Map<String, String> enzymeMap = new HashMap<String, String>();
+        Map<String, String> enzymeMap = new HashMap<>();
         getDefaultEnzymeList();
         for(Enzyme enz: tppEnzymeList)
         {
@@ -123,7 +123,7 @@ public class SearchFormUtil
 
     public static Map<String, String> mascot2Tpp(List<Enzyme> mascotEnzymeList)
     {
-        Map<String, String> enzymeMap = new HashMap<String, String>();
+        Map<String, String> enzymeMap = new HashMap<>();
         getDefaultEnzymeList();
         for(Enzyme mascotEnz: mascotEnzymeList)
         {
@@ -149,7 +149,7 @@ public class SearchFormUtil
     {
         if( mod1Map == null)
         {
-            mod1Map = new HashMap<String, String>();
+            mod1Map = new HashMap<>();
             mod1Map.put("Oxidation (15.994915@M)", "15.994915@M");
             mod1Map.put("Oxidation (15.994915@W)", "15.994915@W");
             mod1Map.put("Deamidation (0.984016@N)", "0.984016@N");
@@ -181,7 +181,7 @@ public class SearchFormUtil
     {
         if( mod0Map == null)
         {
-            mod0Map = new HashMap<String, String>();
+            mod0Map = new HashMap<>();
             mod0Map.put("Carbamidomethyl (57.021464@C)", "57.021464@C");
             mod0Map.put("Carboxymethyl (58.005479@C)", "58.005479@C");
             mod0Map.put("ICAT-D (442.224991@C)","442.224991@C");
@@ -199,7 +199,7 @@ public class SearchFormUtil
     {
         if(residues == null)
         {
-            residues = new TreeSet<String>();
+            residues = new TreeSet<>();
             residues.add("A");
             residues.add("B");
             residues.add("C");

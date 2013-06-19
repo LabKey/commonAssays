@@ -132,7 +132,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
             catch (SpectrumException e)
             {
-                _pair = new Pair<float[], float[]>(new float[0], new float[0]);  // Ignore spectrum exceptions -- just return empty spectrum
+                _pair = new Pair<>(new float[0], new float[0]);  // Ignore spectrum exceptions -- just return empty spectrum
             }
         }
 

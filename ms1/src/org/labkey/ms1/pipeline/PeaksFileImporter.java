@@ -81,7 +81,7 @@ public class PeaksFileImporter extends DefaultHandler
         //set imported flag on file to true
         try
         {
-            HashMap<String,Object> map = new HashMap<String,Object>();
+            HashMap<String,Object> map = new HashMap<>();
             map.put("Imported", Boolean.TRUE);
             Table.update(_user, MS1Manager.get().getTable(MS1Manager.TABLE_FILES), map, _idFile);
 
@@ -215,7 +215,7 @@ public class PeaksFileImporter extends DefaultHandler
 
         map = Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS), map);
 
-        HashMap<String,Object> mapP2F = new HashMap<String,Object>();
+        HashMap<String,Object> mapP2F = new HashMap<>();
         mapP2F.put("PeakFamilyId", idPeakFamily);
         mapP2F.put("PeakId", map.get("PeakId"));
         Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS_TO_FAMILIES), mapP2F);
@@ -282,7 +282,7 @@ public class PeaksFileImporter extends DefaultHandler
 
     protected HashMap<String,Object> newMap(String pkName, String fkName, Integer fkValue)
     {
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         if(null != pkName)
             map.put(pkName, null);
         if(null != fkName)

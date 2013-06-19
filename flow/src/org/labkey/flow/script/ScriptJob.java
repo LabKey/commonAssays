@@ -219,7 +219,7 @@ abstract public class ScriptJob extends FlowExperimentJob
 
     public Map<FlowProtocolStep, String[]> getProcessedRunLSIDs()
     {
-        TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<FlowProtocolStep, String[]>(new Comparator<FlowProtocolStep>() {
+        TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<>(new Comparator<FlowProtocolStep>() {
             public int compare(FlowProtocolStep o1, FlowProtocolStep o2)
             {
                 return o1.getDefaultActionSequence() - o2.getDefaultActionSequence();
@@ -406,7 +406,7 @@ abstract public class ScriptJob extends FlowExperimentJob
             List<String> list = _processedRunLSIDs.get(step);
             if (list == null)
             {
-                list = new ArrayList<String>();
+                list = new ArrayList<>();
                 _processedRunLSIDs.put(step, list);
             }
             list.addAll(lsids);

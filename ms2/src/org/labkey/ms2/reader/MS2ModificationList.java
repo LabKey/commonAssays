@@ -42,7 +42,7 @@ public class MS2ModificationList extends ArrayList<MS2Modification>
     // This needs to be called explicitly after all modifications have been added.
     public void initializeSymbols()
     {
-        Set<String> symbolSet = new LinkedHashSet<String>(30);
+        Set<String> symbolSet = new LinkedHashSet<>(30);
 
         for (int i=0; i<_symbols.length(); i++)
             symbolSet.add(_symbols.substring(i, i+1));

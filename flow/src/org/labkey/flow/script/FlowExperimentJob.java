@@ -202,7 +202,7 @@ public abstract class FlowExperimentJob extends FlowJob
             _run = run;
         }
         ExperimentRunType _run;
-        List<String> _errors = new ArrayList<String>();
+        List<String> _errors = new ArrayList<>();
         Map<String, ScriptJob.StartingInput> _runOutputs = new LinkedHashMap();
         Map<String, ScriptJob.StartingInput> _startingDataInputs = new HashMap();
         Map<String, ScriptJob.StartingInput> _startingMaterialInputs = new HashMap();

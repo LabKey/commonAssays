@@ -115,7 +115,7 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
 
         int row = 1;
         // Create a copy in case another HTTP request modifies the set of files
-        List<Map<String, File>> allFiles = new ArrayList<Map<String, File>>(form.getSelectedDataCollector().getFileQueue(form));
+        List<Map<String, File>> allFiles = new ArrayList<>(form.getSelectedDataCollector().getFileQueue(form));
         for (Map<String, File> files : allFiles)
         {
             for (File file : files.values())

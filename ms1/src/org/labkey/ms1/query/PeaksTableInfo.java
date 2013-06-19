@@ -69,7 +69,7 @@ public class PeaksTableInfo extends FilteredTable<MS1Schema>
         });
 
         //display only a subset by default
-        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+        ArrayList<FieldKey> visibleColumns = new ArrayList<>(getDefaultVisibleColumns());
         visibleColumns.remove(FieldKey.fromParts("PeakId"));
         visibleColumns.remove(FieldKey.fromParts("ScanId"));
         visibleColumns.add(0, FieldKey.fromParts("ScanId", "Scan"));

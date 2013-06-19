@@ -48,7 +48,7 @@ public class CrossPlateDilutionNabAssayRun extends NabAssayRun
 
         int sampleCount = plates.get(0).getWellGroupCount(WellGroup.Type.SPECIMEN);
         _dilutionSummaries = new DilutionSummary[sampleCount];
-        Map<String, List<WellGroup>> sampleGroups = new LinkedHashMap<String, List<WellGroup>>();
+        Map<String, List<WellGroup>> sampleGroups = new LinkedHashMap<>();
         for (Plate plate : plates)
         {
             for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))
@@ -56,7 +56,7 @@ public class CrossPlateDilutionNabAssayRun extends NabAssayRun
                 List<WellGroup> groups = sampleGroups.get(sample.getName());
                 if (groups == null)
                 {
-                    groups = new ArrayList<WellGroup>();
+                    groups = new ArrayList<>();
                     sampleGroups.put(sample.getName(), groups);
                 }
                 groups.add(sample);

@@ -52,12 +52,12 @@ public class MS2Peptide
     private Integer _seqId;
 
     // Calculated variables
-    private Map<MassType, double[]> _massTables = new HashMap<MassType, double[]>();
-    private Map<MassType, Map<String, Double>> _variableModifications = new HashMap<MassType, Map<String, Double>>();
-    private Map<MassType, double[][]> _b = new HashMap<MassType, double[][]>();
-    private Map<MassType, double[][]> _y = new HashMap<MassType, double[][]>();
-    private Map<MassType, FragmentIon[][]> _yIons = new HashMap<MassType, FragmentIon[][]>();
-    private Map<MassType, FragmentIon[][]> _bIons = new HashMap<MassType, FragmentIon[][]>();
+    private Map<MassType, double[]> _massTables = new HashMap<>();
+    private Map<MassType, Map<String, Double>> _variableModifications = new HashMap<>();
+    private Map<MassType, double[][]> _b = new HashMap<>();
+    private Map<MassType, double[][]> _y = new HashMap<>();
+    private Map<MassType, FragmentIon[][]> _yIons = new HashMap<>();
+    private Map<MassType, FragmentIon[][]> _bIons = new HashMap<>();
     private float[] _spectrumMZ = null;
     private float[] _spectrumIntensity = null;
     private String[] _aa = {};
@@ -181,7 +181,7 @@ public class MS2Peptide
         String trimmedPeptide = trimPeptide(_peptide);
 
         // Break up peptide into amino acid ArrayList
-        List<String> aaList = new ArrayList<String>(trimmedPeptide.length());
+        List<String> aaList = new ArrayList<>(trimmedPeptide.length());
         String prev = null;
 
         for (int i = 0; i < trimmedPeptide.length(); i++)

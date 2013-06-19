@@ -111,7 +111,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
             if (_runDomain != null)
             {
                 Map<String, String> comments = tl.getComments();
-                Map<DomainProperty, Object> runData = new HashMap<DomainProperty, Object>(comments.size());
+                Map<DomainProperty, Object> runData = new HashMap<>(comments.size());
                 for (Map.Entry<String, String> comment : comments.entrySet())
                 {
                     DomainProperty property = _runDomain.getPropertyByName(comment.getKey());
@@ -134,7 +134,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         
         // Uck.  The TsvDataExchangeHandler writes out GuavaDataHandler.getValidationDataMap() bfore running the transform script.
         // After the transform has run, this method is called to read that output back in.
-        Map<DataType, List<Map<String, Object>>> result = new HashMap<DataType, List<Map<String, Object>>>();
+        Map<DataType, List<Map<String, Object>>> result = new HashMap<>();
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
         AssayProvider provider = AssayService.get().getProvider(protocol);

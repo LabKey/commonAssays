@@ -98,7 +98,7 @@ public class AnalysisScriptController extends BaseFlowController
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
             FlowPreference.showRuns.updateValue(getRequest());
-            return new JspView<FlowScript>(AnalysisScriptController.class, "showScript.jsp", script, errors);
+            return new JspView<>(AnalysisScriptController.class, "showScript.jsp", script, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -121,22 +121,22 @@ public class AnalysisScriptController extends BaseFlowController
 
         protected ModelAndView chooseRunsToAnalyze(ChooseRunsToAnalyzeForm form, BindException errors)
         {
-            nav = new Pair<String, Action>("Choose runs", Action.chooseRunsToAnalyze);
+            nav = new Pair<>("Choose runs", Action.chooseRunsToAnalyze);
             form.populate(errors);
-            return new JspView<ChooseRunsToAnalyzeForm>(AnalysisScriptController.class, "chooseRunsToAnalyze.jsp", form, errors);
+            return new JspView<>(AnalysisScriptController.class, "chooseRunsToAnalyze.jsp", form, errors);
         }
 
         protected ModelAndView chooseAnalysisName(ChooseRunsToAnalyzeForm form, BindException errors)
         {
-            nav = new Pair<String, Action>("Choose new analysis name", Action.chooseAnalysisName);
-            return new JspView<ChooseRunsToAnalyzeForm>(AnalysisScriptController.class, "chooseAnalysisName.jsp", form, errors);
+            nav = new Pair<>("Choose new analysis name", Action.chooseAnalysisName);
+            return new JspView<>(AnalysisScriptController.class, "chooseAnalysisName.jsp", form, errors);
         }
 
         protected ModelAndView analyzeRuns(ChooseRunsToAnalyzeForm form, BindException errors,
                                          int[] runIds, String experimentLSID)
                 throws Exception
         {
-            nav = new Pair<String, Action>(null, Action.analyzeSelectedRuns);
+            nav = new Pair<>(null, Action.analyzeSelectedRuns);
             DataRegionSelection.clearAll(getViewContext());
 
             FlowExperiment experiment = FlowExperiment.fromLSID(experimentLSID);
@@ -230,7 +230,7 @@ public class AnalysisScriptController extends BaseFlowController
             return;
         }
 
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         if (form.isCurrent())
         {
             files.add(directory);
@@ -246,7 +246,7 @@ public class AnalysisScriptController extends BaseFlowController
             files.addAll(form.getValidatedFiles(getContainer()));
         }
 
-        Set<File> usedPaths = new HashSet<File>();
+        Set<File> usedPaths = new HashSet<>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
             // skip FlowJo workspace imported runs
@@ -254,7 +254,7 @@ public class AnalysisScriptController extends BaseFlowController
                 usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
 
-        Map<String, String> ret = new TreeMap<String, String>();
+        Map<String, String> ret = new TreeMap<>();
         boolean anyFCSDirectories = false;
         for (File file : files)
         {
@@ -500,7 +500,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
 
-            List<Pair<String, String>> inputs = new ArrayList<Pair<String, String>>();
+            List<Pair<String, String>> inputs = new ArrayList<>();
             inputs.add(Pair.of("workspace.path", workspacePath));
             inputs.add(Pair.of("step", String.valueOf(ImportAnalysisStep.SELECT_ANALYSIS.getNumber())));
 
@@ -536,7 +536,7 @@ public class AnalysisScriptController extends BaseFlowController
                 validateCommand(form, errors);
 
             title = form.getWizardStep().getTitle();
-            return new JspView<ImportAnalysisForm>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
+            return new JspView<>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
         }
 
         public boolean handlePost(ImportAnalysisForm form, BindException errors) throws Exception
@@ -775,7 +775,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (rows.size() == 0)
                 return null;
 
-            Map<String, FlowFCSFile> fcsFiles = new HashMap<String, FlowFCSFile>(rows.size());
+            Map<String, FlowFCSFile> fcsFiles = new HashMap<>(rows.size());
             int keywordRunId = form.getExistingKeywordRunId();
             if (keywordRunId > 0)
             {
@@ -942,7 +942,7 @@ public class AnalysisScriptController extends BaseFlowController
                 WorkspaceData workspaceData = form.getWorkspace();
                 IWorkspace workspace = workspaceData.getWorkspaceObject();
                 List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
-                Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
+                Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<>();
                 for (ISampleInfo sampleInfo : sampleInfos)
                 {
                     SelectedSamples.ResolvedSample resolvedSample = new SelectedSamples.ResolvedSample(true, 0, null);
@@ -1030,7 +1030,7 @@ public class AnalysisScriptController extends BaseFlowController
                     boolean found = false;
                     IWorkspace workspace = workspaceData.getWorkspaceObject();
                     List<? extends ISampleInfo> sampleInfos = workspace.getSamples();
-                    Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
+                    Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<>();
                     for (ISampleInfo sampleInfo : sampleInfos)
                     {
                         File sampleFile = new File(keywordDir, sampleInfo.getLabel());
@@ -1091,7 +1091,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                 Map<ISampleInfo, Pair<FlowFCSFile, List<FlowFCSFile>>> resolved = SampleUtil.resolveSamples(sampleInfos, files);
 
-                Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<String, SelectedSamples.ResolvedSample>();
+                Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<>();
                 for (ISampleInfo sample : sampleInfos)
                 {
                     SelectedSamples.ResolvedSample resolvedSample = null;
@@ -1137,7 +1137,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             // Verify all all selected files have a match.
-            Set<String> selectedWithoutMatch = new LinkedHashSet<String>();
+            Set<String> selectedWithoutMatch = new LinkedHashSet<>();
             boolean hasSelected = false;
             boolean hasMatched = false;
             for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : rows.entrySet())
@@ -1297,7 +1297,7 @@ public class AnalysisScriptController extends BaseFlowController
                 }
 
                 // All samples in group should have the same staining panel for normalization to succeed.
-                List<ISampleInfo> sampleInfos = new ArrayList<ISampleInfo>();
+                List<ISampleInfo> sampleInfos = new ArrayList<>();
                 Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles(form, errors);
                 for (String sampleId : selectedFCSFiles.keySet())
                 {

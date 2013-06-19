@@ -138,7 +138,7 @@ public class FeaturesTableInfo extends VirtualTable
         });
 
         //only display a subset of the columns by by default
-        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+        ArrayList<FieldKey> visibleColumns = new ArrayList<>(getDefaultVisibleColumns());
         visibleColumns.remove(FieldKey.fromParts("FeatureId"));
         visibleColumns.remove(FieldKey.fromParts("FileId"));
         visibleColumns.remove(FieldKey.fromParts("Description"));
@@ -274,7 +274,7 @@ public class FeaturesTableInfo extends VirtualTable
 
     public Map<String,String> getAliasMap()
     {
-        HashMap<String,String> aliasMap = new HashMap<String,String>();
+        HashMap<String,String> aliasMap = new HashMap<>();
         aliasMap.put(MS1Service.Tables.Features.getFullName(), "fe");
         aliasMap.put(MS1Service.Tables.Files.getFullName(), "fi");
         aliasMap.put("exp.Data", "d");
