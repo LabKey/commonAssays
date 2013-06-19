@@ -261,12 +261,9 @@
 		<note> # of top hits to report [1,10]</note>
     <note type="input" label="out2xml, maldi mode">0</note>
 		<note>true = -M </note>
-    <note type="input" label="out2xml, all">0</note>
-		<note>1 = -all(1=true,0=false): output all peptides don't filter out X containing peptides.</note>
     <note type="input" label="out2xml, pI">0</note>
 		<note>1 = -pI(1=true,0=false): compute and report peptide pI's.</note>
     <note type="input" label="out2xml, all">0</note>
 		<note>1 = -all(1=true,0=false): output all peptides, don't filter out X containing peptides</note>
-    out2xml, all
 
 </bioml>
