@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Karl Lum
  * Date: Jan 9, 2008
  */

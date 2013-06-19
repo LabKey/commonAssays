@@ -33,11 +33,9 @@ import java.text.DecimalFormat;
 
 /**
  * Creates the elution line chart in the features detail view
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 15, 2007
  * Time: 4:21:09 PM
- * To change this template use File | Settings | File Templates.
  */
 public class ElutionChart extends FeatureChart
 {

@@ -35,7 +35,6 @@ import java.util.*;
  * Provides a filtered table implementation for the Features table, allowing clients
  * to add more conditions (e.g., filtering for features from a specific run)
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 3, 2007
  * Time: 11:00:43 AM

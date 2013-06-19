@@ -24,7 +24,6 @@ import org.labkey.ms1.query.MS1Schema;
 
 /**
  * Implementation of MS1Service.Service
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 26, 2007
  * Time: 10:41:11 AM

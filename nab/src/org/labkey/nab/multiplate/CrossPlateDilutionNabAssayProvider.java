@@ -19,7 +19,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: 2/24/13
  */

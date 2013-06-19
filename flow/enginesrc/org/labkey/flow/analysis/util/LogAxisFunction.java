@@ -21,7 +21,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import java.io.Serializable;
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 13, 2007
  * Time: 2:41:32 PM

@@ -22,7 +22,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.study.assay.plate.ExcelPlateReader;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: 10/14/12
  */

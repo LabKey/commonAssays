@@ -20,7 +20,6 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.ms1.MS1Manager;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 11, 2008
  * Time: 2:51:07 PM

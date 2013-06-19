@@ -37,7 +37,7 @@ import java.sql.SQLException;
 
 /**
  * Implements a simple, flat QueryView over the Scan/Peaks data
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Oct 5, 2007
  * Time: 11:04:01 AM

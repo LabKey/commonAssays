@@ -24,7 +24,6 @@ import java.sql.SQLException;
 /**
  * Represents information about a software package used to produce an MS1 data file
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 10, 2007
  * Time: 1:53:24 PM

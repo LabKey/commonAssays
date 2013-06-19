@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: 10/9/12
  */

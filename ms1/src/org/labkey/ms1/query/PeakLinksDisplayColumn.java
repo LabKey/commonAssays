@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.Collections;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 11, 2008
  * Time: 3:01:59 PM

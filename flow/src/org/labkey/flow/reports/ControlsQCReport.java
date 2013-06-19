@@ -28,7 +28,6 @@ import org.springframework.validation.BindException;
 import java.io.IOException;
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 1, 2009
  * Time: 3:30:40 PM
@@ -57,7 +56,7 @@ public class ControlsQCReport extends FilterFlowReport
     @Override
     public HttpView getConfigureForm(ViewContext context, ActionURL returnURL)
     {
-        return new JspView<Pair<ControlsQCReport, ActionURL>>(ControlsQCReport.class, "editQCReport.jsp", Pair.of(this, returnURL));
+        return new JspView<>(ControlsQCReport.class, "editQCReport.jsp", Pair.of(this, returnURL));
     }
 
     @Override

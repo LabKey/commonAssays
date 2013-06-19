@@ -23,7 +23,6 @@ import org.labkey.flow.analysis.data.DoubleArray;
 import static java.lang.Math.max;
 
 /**
- * Created by IntelliJ IDEA.
  * User: mbellew
  * Date: May 2, 2005
  * Time: 3:08:10 PM

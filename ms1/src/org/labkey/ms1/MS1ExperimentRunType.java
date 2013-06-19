@@ -28,7 +28,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms1.query.MS1Schema;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 28, 2008
  * Time: 2:24:01 PM

@@ -25,7 +25,6 @@ import java.util.*;
 /**
  * Use with the FeaturesView and TableInfo to filter on one or more runs
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 14, 2008
  * Time: 9:48:41 AM

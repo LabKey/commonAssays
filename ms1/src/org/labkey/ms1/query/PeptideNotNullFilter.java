@@ -21,8 +21,8 @@ import org.labkey.api.data.dialect.SqlDialect;
 import java.util.Map;
 
 /**
- * Features filter for associated peptide id is not null; 
- * Created by IntelliJ IDEA.
+ * Features filter for associated peptide id is not null
+ *
  * User: Dave
  * Date: Mar 13, 2008
  * Time: 12:04:28 PM

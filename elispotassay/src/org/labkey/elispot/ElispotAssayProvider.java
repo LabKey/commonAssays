@@ -46,7 +46,6 @@ import org.labkey.api.study.assay.plate.TextPlateReader;
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Karl Lum
  * Date: Jan 7, 2008
  */

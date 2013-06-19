@@ -43,7 +43,6 @@ import java.io.InputStream;
 import java.util.Collection;
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 1, 2009
  * Time: 5:23:36 PM

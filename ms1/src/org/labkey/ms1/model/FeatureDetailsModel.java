@@ -32,7 +32,6 @@ import java.text.DecimalFormat;
 
 /**
  * Used as a context object for the FeatureDetailsView
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 17, 2007
  * Time: 3:03:23 PM

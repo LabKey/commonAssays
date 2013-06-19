@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Feb 29, 2008
  * Time: 11:01:37 AM

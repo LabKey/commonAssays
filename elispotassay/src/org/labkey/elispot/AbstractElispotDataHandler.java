@@ -19,16 +19,24 @@ package org.labkey.elispot;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ConvertHelper;
-import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.util.PageFlowUtil;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -37,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: May 29, 2009
  */
@@ -93,7 +100,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                 String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData[0].getLSID(), rowPos, colPos).toString();
 
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
-                List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+                List<ObjectProperty> results = new ArrayList<>();
 
                 for (Map.Entry<String, Object> prop : row.entrySet())
                 {

@@ -29,7 +29,6 @@ import java.sql.SQLException;
 
 /**
  * Can be used to recreate a set of features filters based on a set of query string parameters
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 14, 2008
  * Time: 12:47:33 PM

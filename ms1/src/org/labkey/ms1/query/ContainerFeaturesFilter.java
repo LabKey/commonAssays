@@ -27,7 +27,6 @@ import java.util.Map;
 /**
  * Use with FeaturesView and TableInfo to filter on a given set of containers
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 14, 2008
  * Time: 9:58:27 AM

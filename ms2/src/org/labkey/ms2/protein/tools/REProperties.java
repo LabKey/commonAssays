@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 package org.labkey.ms2.protein.tools;
+
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
 
 /**
- * Created by IntelliJ IDEA.
  * User: tholzman
  * Date: Mar 10, 2005
  * Time: 5:26:38 PM
- * To change this template use File | Settings | File Templates.
  */
 public class REProperties extends java.util.Properties
 {

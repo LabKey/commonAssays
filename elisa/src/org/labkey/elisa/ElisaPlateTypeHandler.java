@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: 10/7/12
  */

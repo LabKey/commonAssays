@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * Features filter for mz values
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Jan 16, 2008
  * Time: 2:43:03 PM

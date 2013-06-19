@@ -16,21 +16,19 @@
 
 package org.labkey.ms1.query;
 
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.SQLFragment;
 import org.labkey.ms1.MS1Manager;
-
-import java.util.Collection;
 
 /**
  * User schema table info for the ms1.Files table
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Oct 23, 2007
  * Time: 2:01:34 PM

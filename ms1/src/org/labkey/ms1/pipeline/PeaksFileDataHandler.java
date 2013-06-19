@@ -46,7 +46,6 @@ import java.sql.SQLException;
 /**
  * Imports the Peaks XML file format used by Ceadars-Sinai
  *
- * Created by IntelliJ IDEA.
  * User: DaveS
  * Date: Sep 25, 2007
  * Time: 9:15:46 AM

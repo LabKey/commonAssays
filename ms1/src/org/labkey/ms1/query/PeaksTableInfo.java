@@ -30,7 +30,6 @@ import java.util.ArrayList;
 /**
  * Represents a user schema table info over the peaks data
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 5, 2007
  * Time: 11:10:38 AM

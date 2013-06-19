@@ -33,7 +33,6 @@ import org.labkey.flow.util.KeywordUtil;
 
 
 /**
- * Created by IntelliJ IDEA.
  * User: mbellew
  * Date: May 2, 2005
  * Time: 3:30:51 PM

@@ -18,7 +18,6 @@ package org.labkey.ms1.model;
 
 /**
  * Represents an MS1 Scan
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 16, 2007
  * Time: 3:01:26 PM

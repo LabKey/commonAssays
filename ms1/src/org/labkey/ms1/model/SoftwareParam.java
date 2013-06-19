@@ -19,7 +19,6 @@ package org.labkey.ms1.model;
 /**
  * Represents a parameter setting for a software package used to create an MS1 data file
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 10, 2007
  * Time: 2:31:27 PM

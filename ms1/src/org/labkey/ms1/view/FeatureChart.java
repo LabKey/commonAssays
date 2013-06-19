@@ -27,11 +27,9 @@ import java.sql.SQLException;
 
 /**
  * This class can create a feature chart of the requested type for the requested feature Id
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 12, 2007
  * Time: 12:00:16 PM
- * To change this template use File | Settings | File Templates.
  */
 public abstract class FeatureChart
 {

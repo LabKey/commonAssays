@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: 10/14/12
  */

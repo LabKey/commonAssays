@@ -26,7 +26,6 @@ import org.labkey.ms1.query.FeaturesTableInfo;
 import org.labkey.ms1.query.MS1Schema;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 22, 2008
  * Time: 3:56:33 PM

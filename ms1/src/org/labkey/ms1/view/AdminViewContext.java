@@ -21,7 +21,7 @@ import org.labkey.ms1.MS1Controller;
 
 /**
  * Context object for AdminView.jsp
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Nov 1, 2007
  * Time: 11:10:05 AM

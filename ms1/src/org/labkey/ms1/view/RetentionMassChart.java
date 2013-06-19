@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 /**
  * Produces the retention time vs. m/z chart for the feature details view
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Oct 15, 2007
  * Time: 12:44:30 PM

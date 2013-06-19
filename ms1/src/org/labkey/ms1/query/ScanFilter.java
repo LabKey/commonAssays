@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * Features filter for scan numbers
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Jan 16, 2008
  * Time: 2:44:13 PM

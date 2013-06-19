@@ -23,7 +23,6 @@ import java.util.Map;
 /**
  * Interface for objects that wish to establish base filters on a FeaturesTableInfo
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 14, 2008
  * Time: 9:45:50 AM

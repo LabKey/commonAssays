@@ -30,7 +30,7 @@ import java.awt.*;
 
 /**
  * Can produce a spectrum chart for a given feature/scan
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Oct 15, 2007
  * Time: 9:41:38 AM

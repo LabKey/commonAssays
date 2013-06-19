@@ -22,7 +22,6 @@ import org.labkey.ms1.MS1Controller;
 /**
  * Model for the PepSearchView.jsp
  * 
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 9, 2008
  * Time: 9:25:10 AM

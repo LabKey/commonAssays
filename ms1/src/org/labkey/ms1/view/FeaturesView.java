@@ -35,7 +35,6 @@ import java.util.List;
 /**
  * Implements a query view over the features data, allows filtering for features from a specific run
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 3, 2007
  * Time: 11:27:01 AM

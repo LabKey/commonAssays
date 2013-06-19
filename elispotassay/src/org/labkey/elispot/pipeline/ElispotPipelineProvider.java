@@ -22,7 +22,6 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.ViewContext;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: Jun 14, 2012
  */

@@ -18,7 +18,6 @@ package org.labkey.ms2.reader;
 import java.util.Iterator;
 
 /**
- * Created by IntelliJ IDEA.
  * User: mbellew
  * Date: Oct 6, 2005
  * Time: 9:03:09 AM

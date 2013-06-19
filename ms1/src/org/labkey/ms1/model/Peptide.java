@@ -18,7 +18,6 @@ package org.labkey.ms1.model;
 
 /**
  * Simple bean representing a row in ms2.PeptideData
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 26, 2007
  * Time: 1:45:37 PM

@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Karl Lum
  * Date: Jan 14, 2008
  */

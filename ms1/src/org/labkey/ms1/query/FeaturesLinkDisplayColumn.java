@@ -29,7 +29,6 @@ import java.io.IOException;
 /**
  * Renders the features link column
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Feb 28, 2008
  * Time: 1:19:34 PM

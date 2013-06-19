@@ -17,7 +17,6 @@
 package org.labkey.flow.analysis.util;
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 13, 2007
  * Time: 2:35:11 PM

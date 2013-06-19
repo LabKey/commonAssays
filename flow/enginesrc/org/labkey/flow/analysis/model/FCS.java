@@ -23,7 +23,6 @@ import java.io.*;
 import java.util.Arrays;
 
 /**
- * Created by IntelliJ IDEA.
  * User: mbellew
  * Date: Apr 26, 2005
  * Time: 3:19:22 PM

@@ -19,7 +19,6 @@ package org.labkey.ms1.model;
 /**
  * Simple bean to hold info about the real min/max scan and retention time within a scan range
  * Used by the feature detail charts
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 25, 2007
  * Time: 1:56:59 PM

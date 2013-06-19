@@ -53,11 +53,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
  * User: davebradlee
  * Date: 2/20/13
  * Time: 6:36 PM
- * To change this template use File | Settings | File Templates.
  */
 public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 {

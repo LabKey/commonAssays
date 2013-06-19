@@ -35,7 +35,6 @@ import java.util.Map;
  * <p>
  * This class is stateful, so create one per parse.
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 8, 2007
  * Time: 5:07:47 PM

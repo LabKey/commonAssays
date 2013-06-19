@@ -28,7 +28,6 @@ import java.sql.SQLException;
 /**
  * Represents an MS1 Feature.
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 12, 2007
  * Time: 10:17:09 AM

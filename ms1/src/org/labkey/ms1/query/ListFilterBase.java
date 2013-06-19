@@ -18,7 +18,6 @@ package org.labkey.ms1.query;
 /**
  * Base class for all filters that deal with lists of items
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 14, 2008
  * Time: 10:01:12 AM

@@ -24,7 +24,6 @@ import java.text.DecimalFormat;
 /**
  * Model used by SimilarSearchView.jsp
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 16, 2008
  * Time: 11:17:19 AM

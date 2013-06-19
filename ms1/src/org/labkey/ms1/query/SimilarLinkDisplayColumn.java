@@ -29,7 +29,6 @@ import java.sql.SQLException;
 /**
  * Used when displaying the similar search link
  * 
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Feb 26, 2008
  * Time: 4:41:05 PM

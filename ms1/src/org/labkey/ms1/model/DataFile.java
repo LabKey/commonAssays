@@ -21,7 +21,6 @@ import org.labkey.api.exp.api.ExperimentService;
 
 /**
  * Represents a row in the ms1.Files table
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Nov 2, 2007
  * Time: 9:52:10 AM

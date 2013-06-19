@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: 2/24/13
  */

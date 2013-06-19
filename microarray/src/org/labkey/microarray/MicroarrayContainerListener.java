@@ -27,7 +27,6 @@ import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
 
 /**
- * Created by IntelliJ IDEA.
  * User: bbimber
  * Date: 2/23/12
  * Time: 4:42 PM

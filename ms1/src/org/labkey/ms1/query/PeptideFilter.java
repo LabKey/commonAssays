@@ -28,7 +28,6 @@ import java.util.Map;
 /**
  * Used to filter for a given set of peptide sequences
  *
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Jan 14, 2008
  * Time: 10:17:45 AM
