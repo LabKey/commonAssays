@@ -46,6 +46,8 @@ import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -55,6 +57,7 @@ import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,6 +106,13 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new NabProtocolSchema(user, container, protocol, targetStudy);
+    }
+
+    @Override
+    public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
+    {
+        return Arrays.asList(new ParticipantVisitLookupResolverType(), new ParticipantDateLookupResolverType(), new ParticipantVisitDateLookupResolverType(),
+                new SpecimenIDLookupResolverType(), new ThawListResolverType());
     }
 
     public void registerLsidHandler()
