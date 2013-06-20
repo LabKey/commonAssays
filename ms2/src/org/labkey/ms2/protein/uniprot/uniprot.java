@@ -390,7 +390,7 @@ public class uniprot extends ParseActions
                         ")";
 
         StringBuilder initialInsertionCommand = new StringBuilder("INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
-        _dialect.appendSelectAutoIncrement(initialInsertionCommand, ProteinManager.getTableInfoAnnotInsertions(), "InsertId");
+        _dialect.appendSelectAutoIncrement(initialInsertionCommand, "InsertId");
         _initialInsertion = c.prepareStatement(initialInsertionCommand.toString());
         String getCurrentInsertStatsCommand =
                 "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
