@@ -18,6 +18,8 @@ package org.labkey.flow.persist;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSKeywordData;
@@ -144,7 +146,7 @@ public class AttributeSet implements Serializable
         _keywords = new TreeMap();
         for (String keyword : data.getKeywordNames())
         {
-            _keywords.put(keyword, data.getKeyword(keyword));
+            setKeyword(keyword, data.getKeyword(keyword));
         }
     }
 
@@ -217,18 +219,20 @@ public class AttributeSet implements Serializable
             aliasesXb.addAlias(alias.toString());
     }
 
-    public void setKeyword(String keyword, String value)
+    public void setKeyword(@NotNull String keyword, @Nullable String value)
     {
         if (_keywords == null)
             _keywords = new TreeMap();
-        if (StringUtils.isEmpty(value))
-        {
-            _keywords.remove(keyword);
-        }
-        else
-        {
-            _keywords.put(keyword, value);
-        }
+        if (StringUtils.isBlank(value))
+            value = null;
+        _keywords.put(keyword, value);
+    }
+
+    public String removeKeyword(@NotNull String keyword)
+    {
+        if (_keywords == null)
+            return null;
+        return _keywords.remove(keyword);
     }
 
     public void setKeywords(Map<String, String> keywords)

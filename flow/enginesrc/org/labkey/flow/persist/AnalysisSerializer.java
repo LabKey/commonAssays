@@ -625,11 +625,8 @@ public class AnalysisSerializer
                 continue;
             }
 
-            if (value == null)
-            {
-                _log.error(String.format("Keyword value on row %d must not be empty", index));
-                continue;
-            }
+            // Trim keyword values to null -- FCS files encode empty keyword values as a single space character.
+            value = StringUtils.trimToNull(value);
 
             AttributeSet attrs = results.get(name);
             if (attrs == null)
@@ -683,10 +680,8 @@ public class AnalysisSerializer
 
             for (String keyword : keywords)
             {
-                String value = (String)row.get(keyword);
-                if (value == null)
-                    continue;
-
+                // Trim keyword values to null -- FCS files encode empty keyword values as a single space character.
+                String value = StringUtils.trimToNull((String)row.get(keyword));
                 attrs.setKeyword(keyword, value);
             }
         }

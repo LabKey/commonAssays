@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.collections.CaseInsensitiveTreeSet;
 import org.labkey.flow.analysis.web.SubsetExpression;
@@ -480,6 +481,8 @@ public abstract class Workspace implements IWorkspace, Serializable
         }
         public void putKeyword(String keyword, String value)
         {
+            // FCS format encodes empty keyword values as a single space character -- convert it to null.
+            value = StringUtils.trimToNull(value);
             _keywords.put(keyword, value);
             Workspace.this._keywords.add(keyword);
         }

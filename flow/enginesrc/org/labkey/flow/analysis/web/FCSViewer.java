@@ -73,7 +73,8 @@ public class FCSViewer
             Map.Entry entry = (Map.Entry) it.next();
             writer.write((String)entry.getKey());
             writer.write("=");
-            writer.write((String)entry.getValue());
+            if (entry.getValue() != null)
+                writer.write((String)entry.getValue());
             writer.write("\n");
             }
         }

@@ -66,6 +66,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -733,8 +734,9 @@ public class FlowManager
     // UNDONE: add audit log entries for keyword updates
     public void setKeyword(Container c, ExpData data, String keyword, String value) throws SQLException
     {
+        value = StringUtils.trimToNull(value);
         String oldValue = getKeyword(data, keyword);
-        if (ObjectUtils.equals(oldValue, value))
+        if (Objects.equals(oldValue, value))
         {
             return;
         }

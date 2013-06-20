@@ -356,7 +356,9 @@ abstract public class FlowJoWorkspace extends Workspace
             String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
             if (null == name)
                 continue;
-            sample.putKeyword(name, elKeyword.getAttribute("value"));
+            // FCS format encodes empty keyword values as a single space character -- convert it to null.
+            String value = StringUtils.trimToNull(elKeyword.getAttribute("value"));
+            sample.putKeyword(name, value);
         }
     }
 

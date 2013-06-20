@@ -209,7 +209,11 @@ public class FCSHeader
                 }
                 String strKey = fullText.substring(ichStart + 1, ichMid);
                 String strValue = fullText.substring(ichMid + 1, ichEnd);
-                keywords.put(strKey, strValue.trim());
+                // FCS format encodes empty keyword values as a single space character -- convert it to null.
+                strValue = strValue.trim();
+                if (strValue.length() == 0)
+                    strValue = null;
+                keywords.put(strKey, strValue);
                 ichStart = ichEnd;
             }
         }
