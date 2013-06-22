@@ -22,6 +22,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.TableInfo;
@@ -377,10 +378,8 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         @Override
         protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
-            try
+            try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
             {
-                ExperimentService.get().ensureTransaction();
-
                 ExpRun run = saveExperimentRun(form);
 
                 ExpExperiment experiment = null;
@@ -407,7 +406,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                     experiment = createExperiment(form);
                 experiment.addRuns(form.getUser(), run);
 
-                ExperimentService.get().commitTransaction();
+                transaction.commit();
 
                 return afterRunCreation(form, run, errors);
             }
@@ -427,10 +426,6 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
                 return getResultsView(form, true, errors);
-            }
-            finally
-            {
-                ExperimentService.get().closeTransaction();
             }
         }
 

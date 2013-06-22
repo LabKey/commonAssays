@@ -31,6 +31,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Selector;
@@ -270,9 +271,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
      */
     private void importData(ExpData data, ExpRun expRun, User user, @NotNull Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunContext form, boolean parseDescription) throws ExperimentException
     {
-        try
+        try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
         {
-            ExperimentService.get().ensureTransaction();
             ExpProtocol protocol = form.getProtocol();
             String dataFileName = data.getFile().getName();
             LuminexAssayProvider provider = form.getProvider();
@@ -459,7 +459,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             AbstractAssayProvider.addInputMaterials(expRun, user, inputMaterials);
 
-            ExperimentService.get().commitTransaction();
+            transaction.commit();
         }
         catch (ValidationException ve)
         {
@@ -469,10 +469,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
             throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
-        }
-        finally
-        {
-            ExperimentService.get().closeTransaction();
         }
     }
 

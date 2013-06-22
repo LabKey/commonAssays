@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -191,8 +192,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         }
         else
         {
-            ExperimentService.get().ensureTransaction();
-            try
+            try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
             {
                 for (Map.Entry<File, String> entry : filesToAdd.entrySet())
                 {
@@ -225,11 +225,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
                         outputProtocolApp.addDataInput(getUser(), outputData, roleName);
                     }
                 }
-                ExperimentService.get().commitTransaction();
-            }
-            finally
-            {
-                ExperimentService.get().closeTransaction();
+                transaction.commit();
             }
         }
     }
