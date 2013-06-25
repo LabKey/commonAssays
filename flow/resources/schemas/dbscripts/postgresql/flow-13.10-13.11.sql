@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+-- Drop the NOT NULL constraint on the keyword value column
+ALTER TABLE flow.keyword ALTER COLUMN value DROP NOT NULL;
+
 -- Keyword values are trimmed to null on import as of r27096.
 UPDATE flow.keyword
 SET value = NULL
