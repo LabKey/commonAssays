@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -90,7 +91,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 13.10;
+        return 13.11;
     }
 
     protected void init()
@@ -204,5 +205,11 @@ public class FlowModule extends DefaultModule
     public static String getLongProductName()
     {
         return "LabKey Flow";
+    }
+
+    @Override
+    public UpgradeCode getUpgradeCode()
+    {
+        return new FlowUpgradeCode();
     }
 }

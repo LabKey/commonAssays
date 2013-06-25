@@ -336,8 +336,9 @@ abstract public class FlowJoWorkspace extends Workspace
         name = StringUtils.replace(name, "<", CompensationMatrix.PREFIX);
         name = StringUtils.replace(name, ">", CompensationMatrix.SUFFIX);
         name = StringUtils.replaceChars(name, ',', ';');
-        name = StringUtils.replaceChars(name, (char) 209, '-'); // crazy mac em-dash (unicode mis-encoding?)
-        name = StringUtils.replaceChars(name, (char) 208, '-'); // and another?
+        // replace MacRoman em-dash and en-dash
+        name = StringUtils.replaceChars(name, PopulationName.MAC_EMDASH, '-');
+        name = StringUtils.replaceChars(name, PopulationName.MAC_ENDASH, '-');
         return name;
     }
 

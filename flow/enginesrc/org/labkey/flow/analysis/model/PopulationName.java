@@ -37,6 +37,9 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
     public static final Character ESCAPE_START = '{';
     public static final Character ESCAPE_END = '}';
 
+    public static final Character MAC_ENDASH = (char)208;
+    public static final Character MAC_EMDASH = (char)209;
+
     // Characters not allowed to appear within a top-level population name.
     private static Set<Character> illegalTopLevelChars = new HashSet<>();
     static
@@ -71,8 +74,9 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
         if (str == null || str.length() == 0)
             return null;
 
-        // replace mac em-dash
-        str = StringUtils.replaceChars(str, (char) 209, '-');
+        // replace MacRoman em-dash and en-dash
+        str = StringUtils.replaceChars(str, MAC_ENDASH, '-');
+        str = StringUtils.replaceChars(str, MAC_EMDASH, '-');
 
         String raw = str;
 
