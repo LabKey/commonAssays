@@ -80,6 +80,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
     public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
     {
         super(MS2Manager.getTableInfoPeptidesData(), schema);
+        if (runTypes != null && runTypes.length == 1)
+        {
+            setName(runTypes[0].getPeptideTableName());
+        }
         _runTypes = runTypes;
         setContainerFilter(containerFilter);
 
