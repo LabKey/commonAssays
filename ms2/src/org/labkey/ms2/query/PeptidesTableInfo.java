@@ -170,7 +170,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                     sql.append(sumSQL);
                     sql.append(" END");
                     ExprColumn nonNormalizedRatio = new ExprColumn(result, "NonNormalized" + i, sql, JdbcType.REAL);
-                    nonNormalizedRatio.setLabel("Non-normlized " + i);
+                    nonNormalizedRatio.setLabel("Non-normalized " + i);
                     nonNormalizedRatio.setFormat("0.00");
                     result.addColumn(nonNormalizedRatio);
                 }
