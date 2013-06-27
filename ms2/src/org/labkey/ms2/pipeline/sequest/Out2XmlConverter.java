@@ -15,12 +15,12 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
-import java.util.StringTokenizer;
-
 /**
  * User: billnelson@uky.edu
  * Date: May 16, 2008
  */
+
+import org.apache.commons.beanutils.ConvertUtils;
 
 /**
  * <code>Out2XmlConverter</code>
@@ -31,10 +31,14 @@ public class Out2XmlConverter implements IInputXMLConverter
     {
         String value = out2XmlParam.getValue();
         if (value.equals("")) return "";
-        if (value.equals("1") &&
-            out2XmlParam.getValidator().getClass().getName().equals("org.labkey.ms2.pipeline.sequest.BooleanParamsValidator"))
+        if (out2XmlParam.getValidator() instanceof BooleanParamsValidator)
         {
-            return out2XmlParam.getName();
+            Boolean b = (Boolean) ConvertUtils.convert(value, Boolean.class);
+            if (b != null && b.booleanValue())
+            {
+                return out2XmlParam.getName();
+            }
+            return "";
         }
         return out2XmlParam.getName() + value;
     }

@@ -70,6 +70,7 @@ import org.labkey.ms2.pipeline.sequest.NonNegativeIntegerParamsValidator;
 import org.labkey.ms2.pipeline.sequest.PositiveDoubleParamsValidator;
 import org.labkey.ms2.pipeline.sequest.RealNumberParamsValidator;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
 import org.labkey.ms2.pipeline.sequest.UWSequestParamsBuilder;
 import org.labkey.ms2.pipeline.sequest.UWSequestSearchTask;
@@ -407,7 +408,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ProteinCoverageMapBuilder.TestCase.class,
             UWSequestSearchTask.TestCase.class,
             TPPTask.TestCase.class,
-            Protein.TestCase.class
+            Protein.TestCase.class,
+            SequestSearchTask.TestCase.class
         ));
     }
 

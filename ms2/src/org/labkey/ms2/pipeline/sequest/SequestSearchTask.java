@@ -17,12 +17,22 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.pipeline.*;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobException;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.RecordedAction;
+import org.labkey.api.pipeline.RecordedActionSet;
+import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.BufferedReader;
@@ -38,7 +48,13 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.CRC32;
 
 /**
@@ -306,7 +322,6 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 Out2XmlParams out2XmlParams = new Out2XmlParams();
                 out2XMLArgs.add(dirOutputDta.getName());
                 out2XMLArgs.add("1");
-                out2XMLArgs.add("-all");
                 out2XmlParams.getParam("-E").setValue(enzyme);
                 out2XMLArgs.addAll(convertParams(out2XmlParams.getParams(), params));
                 ProcessBuilder out2XMLPB = new ProcessBuilder(out2XMLArgs);
@@ -516,7 +531,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return result;
     }
 
-    Collection<String> convertParams(Collection<Param> converters, Map<String, String> paramsXml) throws SequestParamsException
+    static Collection<String> convertParams(Collection<Param> converters, Map<String, String> paramsXml) throws SequestParamsException
     {
         ArrayList<String> paramsCmd = new ArrayList<>();
         for (Param conv : converters)
@@ -540,5 +555,26 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         }
 
         return paramsCmd;
+    }
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testOut2XmlAll() throws SequestParamsException
+        {
+            Out2XmlParams out2XmlParams = new Out2XmlParams();
+            assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.<String, String>emptyMap()));
+            assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "0")));
+            assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "")));
+
+            assertEquals(Arrays.asList("-all"), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "1")));
+        }
+
+        @Test
+        public void testOut2XmlEnzyme() throws SequestParamsException
+        {
+            assertEquals(Arrays.asList("-EtestEnzyme"), convertParams(new Out2XmlParams().getParams(), Collections.singletonMap("out2xml, enzyme", "testEnzyme")));
+            assertEquals(Collections.<String>emptyList(), convertParams(new Out2XmlParams().getParams(), Collections.singletonMap("out2xml, enzyme", "")));
+        }
     }
 }
