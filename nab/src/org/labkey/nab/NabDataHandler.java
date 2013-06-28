@@ -40,6 +40,7 @@ import java.util.Map;
  */
 public abstract class NabDataHandler extends DilutionDataHandler
 {
+    public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
 
     public NabDataHandler()

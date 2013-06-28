@@ -16,10 +16,17 @@
 package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.qc.DataLoaderSettings;
+import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
@@ -30,7 +37,9 @@ import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
+import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.NabDataHandler;
 import org.labkey.nab.NabManager;
 
@@ -39,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +56,7 @@ import java.util.Map;
  * User: brittp
  * Date: Aug 27, 2010 11:07:33 AM
  */
-public abstract class HighThroughputNabDataHandler extends NabDataHandler
+public abstract class HighThroughputNabDataHandler extends NabDataHandler implements TransformDataHandler
 {
     public static final String REPLICATE_GROUP_ORDER_PROPERTY = "Group Order";
 
@@ -237,5 +247,21 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler
         }
 
         applyDilution(wells, sampleInput, properties, reverseDirection);
+    }
+
+    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    {
+        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
+
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
+        datas.put(NAB_TRANSFORMED_DATA_TYPE, parser.getResults());
+
+        return datas;
+    }
+
+    @Override
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        importRows(data, run, context.getProtocol(), dataMap);
     }
 }
