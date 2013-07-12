@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-ALTER TABLE dataintegration.TransformRun
-  ADD ExpRunId INT;
+/* nab-13.10-13.11.sql */
 
-ALTER TABLE dataintegration.TransformRun
-  ADD CONSTRAINT FK_TransformRun_ExpRunId FOREIGN KEY (ExpRunId) REFERENCES exp.ExperimentRun (RowId);
+SELECT core.fn_dropifexists('NAbSpecimen', 'nab', 'INDEX', 'IDX_NAbSpecimen_ProtocolId');
+CREATE INDEX IDX_NAbSpecimen_ProtocolId ON nab.NAbSpecimen(ProtocolId);
+
+/* nab-13.11-13.12.sql */
+
+SELECT core.fn_dropifexists('CutoffValue', 'nab', 'INDEX', 'IDX_CutoffValue_NabSpecimenId');
+CREATE INDEX IDX_CutoffValue_NabSpecimenId ON nab.cutoffvalue USING btree (NabSpecimenId);

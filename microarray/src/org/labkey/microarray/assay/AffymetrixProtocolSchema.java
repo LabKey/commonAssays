@@ -49,7 +49,7 @@ public class AffymetrixProtocolSchema extends AssayProtocolSchema
 
         if (null != table)
         {
-            ColumnInfo columnInfo = table.getColumn("SampleName");
+            ColumnInfo columnInfo = table.getColumn(AffymetrixAssayProvider.SAMPLE_NAME_COLUMN);
             columnInfo.setDisplayColumnFactory(new DisplayColumnFactory()
             {
                 @Override

@@ -16,11 +16,13 @@
 package org.labkey.microarray.assay;
 
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.data.ImportAliasable;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -34,6 +36,7 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -143,14 +146,20 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
             String hybColumn = null;
             Integer rowCounter = 0;
 
+            // Check if there are aliases
+            Map<String, DomainProperty> importMap = ImportAliasable.Helper.createImportMap(Arrays.asList(context.getProvider().getResultsDomain(context.getProtocol()).getProperties()), false);
+
             for(Map<String, Object> rowData : loader)
             {
                 if(rowCounter == 0){
-                    for (Map.Entry column : rowData.entrySet())
+                    for (Map.Entry<String, Object> column : rowData.entrySet())
                     {
-                        if (column.getValue().equals("hyb_name"))
+                        DomainProperty domainProperty = importMap.get(column.getValue());
+                        // Support original Excel column name, or any alias for the "SampleName" field in the assay design
+                        if ((column.getValue() instanceof String && "hyb_name".equalsIgnoreCase((String)column.getValue())) ||
+                                (domainProperty != null && AffymetrixAssayProvider.SAMPLE_NAME_COLUMN.equalsIgnoreCase(domainProperty.getName())))
                         {
-                            hybColumn = (String) column.getKey();
+                            hybColumn = column.getKey();
                         }
                     }
 

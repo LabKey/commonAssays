@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.ImportAliasable;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
@@ -27,12 +27,14 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
-import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 
@@ -41,6 +43,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +64,11 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
-        AssayProtocolSchema protocolSchema = new AffymetrixAssayProvider().createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
-        TableInfo dataTable = protocolSchema.createDataTable(); // Need the columns from this.
+        AssayProvider provider = AssayService.get().getProvider(protocol);
         List<ExpData> dataOutputs = run.getDataOutputs();
         Map<ExpMaterial, String> materialInputs = run.getMaterialInputs();
+
+        Map<String, DomainProperty> importMap = ImportAliasable.Helper.createImportMap(Arrays.asList(provider.getResultsDomain(protocol).getProperties()), false);
 
         try
         {
@@ -82,30 +86,29 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
             {
                 String value = firstRow[i];
 
-                if (value.equals("hyb_name"))
+                // Look for a property that matches based on aliases, labels, etc
+                DomainProperty property = importMap.get(value);
+
+                if ("hyb_name".equalsIgnoreCase(value) || (property != null && AffymetrixAssayProvider.SAMPLE_NAME_COLUMN.equalsIgnoreCase(property.getName())))
                 {
                     hybNameColumn = columns[i].name;
                 }
-
-                if (value.equals("Sample File Path"))
+                else if ("Sample File Path".equalsIgnoreCase(value) || "SampleFilePath".equalsIgnoreCase(value))
                 {
                      sampleFilePathColumn = columns[i].name;
                 }
-
-                if (value.equals("Sample File Name"))
+                else if ("Sample File Name".equalsIgnoreCase(value) || "SampleFileName".equalsIgnoreCase(value))
                 {
                     sampleFileNameColumn = columns[i].name;
                 }
-
-                if (dataTable.getColumn(value) != null)
+                else if (property != null)
                 {
-                    columnMap.put(columns[i].name, value);
+                    columnMap.put(columns[i].name, property.getName());
                 }
             }
 
-            for (int i = 0; i < columns.length; i++)
+            for (ColumnDescriptor column : columns)
             {
-                ColumnDescriptor column = columns[i];
                 if (column.name.equals(hybNameColumn) || column.name.equals(sampleFilePathColumn) ||
                         column.name.equals(sampleFileNameColumn) || columnMap.containsKey(column.name))
                 {
@@ -124,9 +127,9 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
                     String celFilePath = StringUtils.trimToEmpty((String) excelRow.get(sampleFilePathColumn));
                     String sampleName = (String) excelRow.get(hybNameColumn);
 
-                    runDataRow.put("SampleName", sampleName);
-                    runDataRow.put("SampleId", getSampleId(sampleName, materialInputs));
-                    runDataRow.put("CelFileId", getCelFileId(dataFile, celFilePath, celFileName, dataOutputs));
+                    runDataRow.put(AffymetrixAssayProvider.SAMPLE_NAME_COLUMN, sampleName);
+                    runDataRow.put(AffymetrixAssayProvider.SAMPLE_ID_COLUMN, getSampleId(sampleName, materialInputs));
+                    runDataRow.put(AffymetrixAssayProvider.CEL_FILE_ID_COLUMN, getCelFileId(dataFile, celFilePath, celFileName, dataOutputs));
 
                     for (String key : excelRow.keySet())
                     {

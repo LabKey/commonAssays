@@ -18,7 +18,6 @@ package org.labkey.ms1;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
@@ -33,10 +32,17 @@ import org.labkey.api.ms1.MS1Urls;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
-import org.labkey.api.view.*;
-import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.BaseWebPartFactory;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ProteomicsWebPartFactory;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.PepSearchModel;
 import org.labkey.ms1.model.SimilarSearchModel;
@@ -48,7 +54,11 @@ import org.labkey.ms1.report.MS1ReportUIProvider;
 import org.labkey.ms1.report.PeaksRReport;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 
 /**
@@ -73,7 +83,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
 
     public double getVersion()
     {
-        return 13.10;
+        return 13.20;
     }
 
     protected void init()

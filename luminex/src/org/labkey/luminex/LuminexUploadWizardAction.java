@@ -31,12 +31,15 @@ import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -47,6 +50,8 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.RedirectException;
@@ -99,6 +104,36 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         try {
             String lsidColumn = "RowId";
             VBox vbox = new VBox();
+
+            if (form.getReRun() != null)
+            {
+                // In the case of a re-run, check if the old run has any exclusions. If so, warn the user that
+                // they won't be carried over to the new run.
+                long exclusionCount = new TableSelector(LuminexProtocolSchema.getTableInfoRunExclusion(), new SimpleFilter(FieldKey.fromParts("RunId"), form.getReRunId()), null).getRowCount();
+                exclusionCount += new TableSelector(LuminexProtocolSchema.getTableInfoWellExclusion(), new SimpleFilter(FieldKey.fromParts("DataId", "RunId"), form.getReRunId()), null).getRowCount();
+
+                if (exclusionCount > 0)
+                {
+                    StringBuilder sb = new StringBuilder("<span class=\"labkey-error\">The run you are replacing has ");
+                    if (exclusionCount == 1)
+                    {
+                        sb.append("one exclusion");
+                    }
+                    else
+                    {
+                        sb.append(exclusionCount);
+                        sb.append(" exclusions");
+                    }
+                    sb.append(", which will not be carried over to the replacement run. You may want to review the ");
+                    ActionURL url = new ActionURL(LuminexController.ExcludedDataAction.class, form.getContainer());
+                    url.addParameter("rowId", form.getRowId());
+                    sb.append(PageFlowUtil.textLink("exclusions report", url));
+                    sb.append("before proceeding.</span>");
+                    HtmlView warningView = new HtmlView(sb.toString());
+                    warningView.setTitle("Exclusion Warning");
+                    vbox.addView(warningView);
+                }
+            }
 
             // if there are titrations in the uploaded data, show the well role definition section
             if (form.getParser().getTitrations().size() > 0)

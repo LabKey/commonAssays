@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
+/* nab-13.10-13.11.sql */
+
 EXEC core.fn_dropifexists 'NAbSpecimen', 'nab', 'INDEX', 'IDX_NAbSpecimen_ProtocolId';
 CREATE INDEX IDX_NAbSpecimen_ProtocolId ON nab.NAbSpecimen(ProtocolId);
+
+/* nab-13.11-13.12.sql */
+
+EXEC core.fn_dropifexists 'CutoffValue', 'nab', 'INDEX', 'IDX_CutoffValue_NabSpecimenId';
+CREATE INDEX IDX_CutoffValue_NabSpecimenId ON nab.cutoffvalue(NabSpecimenId);
