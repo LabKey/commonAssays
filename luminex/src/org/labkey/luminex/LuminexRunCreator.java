@@ -107,19 +107,9 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
             if (replacedRun != null)
             {
                 // Migrate the original Created and CreatedBy values from the old run to the new run
-                TableInfo runTable = ExperimentService.get().getTinfoExperimentRun();
-                SQLFragment updateSQL = new SQLFragment("UPDATE ");
-                updateSQL.append(runTable);
-                updateSQL.append(" SET Created = (SELECT Created FROM ");
-                updateSQL.append(runTable, "r");
-                updateSQL.append(" WHERE RowId = ?), CreatedBy = (SELECT CreatedBy FROM ");
-                updateSQL.add(replacedRun.getRowId());
-                updateSQL.append(runTable, "r");
-                updateSQL.append(" WHERE RowId = ?) WHERE RowId = ?");
-                updateSQL.add(replacedRun.getRowId());
-                updateSQL.add(run.getRowId());
-
-                new SqlExecutor(ExperimentService.get().getSchema()).execute(updateSQL);
+                run.setCreated(replacedRun.getCreated());
+                run.setCreatedBy(replacedRun.getCreatedBy());
+                run.save(uploadContext.getUser());
 
                 // Delete the old run, which has been replaced
                 if (replacedRun.getContainer().hasPermission(uploadContext.getUser(), DeletePermission.class))

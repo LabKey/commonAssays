@@ -15,6 +15,7 @@
  */
 package org.labkey.nab.query;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
@@ -359,11 +360,11 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         {
             result = getColumn("RowId");
         }
-        else if ("Wellgroup Name".equals(name))
+        else if ("Wellgroup Name".equalsIgnoreCase(name))
         {
             result = getColumn("WellGroupName");
         }
-        else if (name.startsWith("Curve") || name.startsWith("Point"))
+        else if (StringUtils.startsWithIgnoreCase(name, "curve") || StringUtils.startsWithIgnoreCase(name, "point"))
         {
             DilutionManager.PropDescCategory pdCat = NabManager.getPropDescCategory(name);
             FieldKey fieldKey = DilutionManager.getCalculatedColumn(pdCat);
