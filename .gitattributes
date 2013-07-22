@@ -19,7 +19,6 @@ authentication/src/org/labkey/authentication/opensso/view/configure.jsp -text
 authentication/src/org/labkey/authentication/opensso/view/currentSettings.jsp -text
 authentication/src/org/labkey/authentication/opensso/view/referrerPrefix.jsp -text
 cbcassay/CBCAssay.iml -text
-cbcassay/build.xml -text
 cbcassay/data/ex_20081016_131859.small.dat -text
 cbcassay/data/ex_20090115_jul08BAD.dat -text
 cbcassay/module.properties -text
@@ -89,7 +88,6 @@ dataintegration/src/org/labkey/di/view/DataIntegrationController.java -text
 dataintegration/src/org/labkey/di/view/processedETLJobs.jsp -text
 dataintegration/src/org/labkey/di/view/transformConfiguration.jsp -text
 elisa/Elisa.iml -text
-elisa/build.xml -text
 elisa/module.properties -text
 elisa/src/org/labkey/elisa/ElisaAssayProvider.java -text
 elisa/src/org/labkey/elisa/ElisaController.java -text
@@ -133,6 +131,7 @@ elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
 elispotassay/webapp/elispot/PlateSummary.js -text
 flow/FlowEngine.iml -text
+flow/build.xml -text
 flow/enginesrc/org/labkey/flow/Main.java -text
 flow/enginesrc/org/labkey/flow/analysis/chart/DataFrameXYDataset.java -text
 flow/enginesrc/org/labkey/flow/analysis/chart/DatasetFactory.java -text
@@ -1628,7 +1627,6 @@ nab/src/org/labkey/nab/query/NabRunDataBaseTable.java -text
 nab/src/org/labkey/nab/query/NabRunDataTable.java -text
 nab/src/org/labkey/nab/runResults.jsp -text
 viability/Viability.iml -text
-viability/build.xml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.00-0.10.sql -text
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.10-0.20.sql -text

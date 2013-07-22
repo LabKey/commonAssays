@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project name="Build Flow" default="build" basedir="../../">
+    <dirname property="moduleDir" file="${ant.file}"/>
+
+    <!-- TODO: Need to set more properties for this to work standalone -->
+    <target name="init">
+        <property name="build.dir" value="${basedir}${file.separator}..${file.separator}build" />
+    </target>
+
+    <target name="build" depends="init, build_module" />
+
+    <!-- Called by the main build.xml with inheritall = true; other callers (e.g., top-level build target)
+         must define all the properties used below. -->
+    <target name="build_module" depends="flow-engine"
+            description="Builds flow engine and flow module, and deploys into LabKey installation.">
+        <ant antfile="${basedir}/build.xml"
+             target="sub_build_module"
+             inheritall="true">
+        </ant>
+    </target>
+
+    <target name="flow-schemas">
+        <!-- flow-engine depends on lib/schemas.jar -->
+        <ant antfile="${basedir}/build.xml" target="sub_compile_module_schemas" inheritall="false">
+            <property name="moduleName" value="flow"/>
+            <property name="moduleSchemasDir" value="${modules.dir}/flow/schemas"/>
+            <property name="explodedModuleLibDir" value="${build.modules.dir}/flow/explodedModule/lib"/>
+        </ant>
+    </target>
+
+    <target name="flow-engine" depends="flow-schemas">
+        <mkdir dir="${build.dir}/flow-engine/classes" />
+        <javac
+            srcdir="${modules.dir}/flow/enginesrc"
+            destdir="${build.dir}/flow-engine/classes"
+            debug="true"
+            optimize="true"
+            source="1.7"
+            target="1.7"
+            bootclasspathref="java7.bootclasspath"
+            memoryInitialSize="256m"
+            memoryMaximumSize="256m"
+            fork="true">
+            <classpath>
+                <path refid="component.class.path"/>
+                <pathelement path="${build.modules.dir}/flow/explodedModule/lib/schemas.jar"/>
+            </classpath>
+        </javac>
+
+        <mkdir dir="${build.dir}/flow-engine/lib" />
+        <jar jarfile="${build.dir}/flow-engine/lib/flow-engine.jar">
+            <fileset dir="${build.dir}/flow-engine/classes" />
+        </jar>
+
+        <copy todir="${modules.dir}/flow/lib" file="${build.dir}/flow-engine/lib/flow-engine.jar"/>
+    </target>
+</project>
