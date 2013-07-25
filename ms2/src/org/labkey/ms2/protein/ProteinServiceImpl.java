@@ -30,6 +30,7 @@ import org.labkey.ms2.protein.organism.OrganismGuessStrategy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -61,6 +62,20 @@ public class ProteinServiceImpl implements ProteinService
 
     public int ensureProtein(String sequence, String organism, String name, String description)
     {
+        organism = guessOrganism(sequence, organism, name);
+
+        return ProteinManager.ensureProtein(sequence, organism, name, description);
+    }
+
+    public int ensureProteinAndIdentifier(String sequence, String organism, String identifier, String description, String identifierType)
+    {
+        organism = guessOrganism(sequence, organism, identifier);
+
+        return ProteinManager.ensureProteinAndIdentifier(sequence, organism, identifier, description, identifierType);
+    }
+
+    private String guessOrganism(String sequence, String organism, String name)
+    {
         ProteinPlus pp = new ProteinPlus(new Protein(name, sequence.getBytes()));
         if (organism == null)
         {
@@ -77,8 +92,12 @@ public class ProteinServiceImpl implements ProteinService
                 organism = FastaDbLoader.UNKNOWN_ORGANISM;
             }
         }
+        return organism;
+    }
 
-        return ProteinManager.ensureProtein(sequence, organism, name, description);
+    public void ensureIdentifiers(int seqId, Map<String, String> identifierAndTypes)
+    {
+        ProteinManager.ensureIdentifiers(seqId, identifierAndTypes);
     }
 
     public void registerProteinSearchView(QueryViewProvider<ProteinSearchForm> provider)

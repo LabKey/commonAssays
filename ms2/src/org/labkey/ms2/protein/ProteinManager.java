@@ -508,6 +508,12 @@ public class ProteinManager
 
     public static int ensureProtein(String sequence, String organismName, String name, String description)
     {
+        Protein protein = ensureProteinInDatabase(sequence, organismName, name, description);
+        return protein.getSeqId();
+    }
+
+    private static Protein ensureProteinInDatabase(String sequence, String organismName, String name, String description)
+    {
         try
         {
             String genus = FastaDbLoader.extractGenus(organismName);
@@ -541,12 +547,106 @@ public class ProteinManager
                 Table.insert(null, getTableInfoSequences(), map);
                 protein = getProtein(sequence, organism.getOrgId());
             }
-            return protein.getSeqId();
+            return protein;
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    public static int ensureProteinAndIdentifier(String sequence, String organismName, String identifier, String description, String identifierType)
+    {
+        Protein protein = ensureProteinInDatabase(sequence, organismName, identifier, description);
+
+        Map<String, String> identifierAndTypes= new HashMap<>();
+        identifierAndTypes.put(identifier, identifierType);
+        ensureIdentifiers(protein, identifierAndTypes);
+
+        return protein.getSeqId();
+    }
+
+    public static void ensureIdentifiers(int seqId, Map<String, String> identifierAndTypes)
+    {
+        Protein protein = getProtein(seqId);
+        if(protein == null)
+        {
+            throw new NotFoundException("SeqId " + seqId + " does not exist.");
+        }
+        ensureIdentifiers(protein, identifierAndTypes);
+    }
+
+    private static void ensureIdentifiers(Protein protein, Map<String, String> identifierAndTypes)
+    {
+        int seqId = protein.getSeqId();
+
+        // identifier type name --> identifier type id
+        Map<String, Integer> identifierTypeIds = new HashMap<>();
+
+        for(Map.Entry<String, String> identifierAndType: identifierAndTypes.entrySet())
+        {
+            String identifier = identifierAndType.getKey();
+            String identifierType = identifierAndType.getValue();
+
+            if(identifier == null || identifier.equalsIgnoreCase(protein.getBestName()))
+            {
+                continue;
+            }
+
+            Integer identifierTypeId = identifierTypeIds.get(identifierType);
+            if(identifierTypeId == null)
+            {
+                identifierTypeId = getIdentifierTypeId(identifierType);
+
+                if(identifierTypeId == null)
+                {
+                    throw new NotFoundException("Identifier type " + identifierType + " does not exist in the database.");
+                }
+
+                identifierTypeIds.put(identifierType, identifierTypeId);
+            }
+
+            if(!identifierExists(identifier, identifierTypeId, seqId))
+            {
+               addIdentifier(identifier, identifierTypeId, seqId);
+            }
+        }
+    }
+
+    private static void addIdentifier(String identifier, int identifierTypeId, int seqId)
+    {
+        Map<String, Object> values = new HashMap<>();
+        values.put("identifier", identifier);
+        values.put("identTypeId", identifierTypeId);
+        values.put("seqId", seqId);
+        values.put("entryDate", new Date());
+        try
+        {
+            Table.insert(null, getTableInfoIdentifiers(), values);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
+
+    private static boolean identifierExists(String identifier, int identifierTypeId, int seqId)
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromParts("identifier"), identifier);
+        filter.addCondition(FieldKey.fromParts("identTypeId"), identifierTypeId);
+        filter.addCondition(FieldKey.fromParts("seqId"), seqId);
+        return new TableSelector(getTableInfoIdentifiers(), Table.ALL_COLUMNS, filter, null).exists();
+    }
+
+    private static Integer getIdentifierTypeId(String identifierType)
+    {
+        if(identifierType == null)
+            return null;
+
+        return new SqlSelector(getSchema(),
+                "SELECT identTypeId FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
+                identifierType.toLowerCase()).getObject(Integer.class);
     }
 
     private static String hashSequence(String sequence)
