@@ -374,7 +374,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 final boolean hideCell;
                 if (errorReshow && getViewContext().getRequest().getParameter(titrationCheckboxName + "_showcol").equals("true"))
                     hideCell = false;
-                else if (!errorReshow && standardTitrations.size() > 1 && standardTitrations.contains(titrationEntry.getValue()))
+                else if (!errorReshow && standardTitrations.contains(titrationEntry.getValue()))
                     hideCell = false;
                 else
                     hideCell = true;
