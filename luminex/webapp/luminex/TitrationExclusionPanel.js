@@ -435,7 +435,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         console.log(this.present);
         for(var thing in this.present)
         {
-            if(thing != 'remove')
+            if(thing != 'remove' && !(this.preExcludedIds[thing] == undefined && this.present[thing] == 0))
             {
                 if(this.present[thing] != 1)
                     retString += this.availableTitrationsGrid.getStore().getAt(thing).get('Name') + ': ' + this.present[thing] + ' analytes excluded.<br>';
