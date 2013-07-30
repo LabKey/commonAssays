@@ -21,6 +21,7 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 
 import java.io.*;
@@ -174,7 +175,7 @@ public class MS2PipelineManager
                     return file;
                 }
             }
-            return null;
+            throw new NotFoundException("Could not find database sequence root for " + container.getPath());
         }
         return dbRoot.getRootPath();
     }
