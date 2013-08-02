@@ -447,18 +447,26 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
     },
 
     openConfirmWindow : function(){
-        Ext.Msg.show({
-            title:'Confirm Exclusions',
-            msg: 'Would you really like to exclude analytes on the following Titrations?<br><br> ' + this.getExcludedString(),
-            buttons: Ext.Msg.YESNO,
-            fn: function(button){
-                if(button == 'yes'){
-                    this.insertUpdateWellExclusions();
-                }
-            },
-            icon: Ext.MessageBox.QUESTION,
-            scope : this
-        });
+        var excludedMessage = this.getExcludedString();
+        if(excludedMessage == '')
+        {
+            this.fireEvent('closeWindow');
+        }
+        else
+        {
+            Ext.Msg.show({
+                title:'Confirm Exclusions',
+                msg: 'Would you really like to exclude analytes on the following Titrations?<br><br> ' + this.getExcludedString(),
+                buttons: Ext.Msg.YESNO,
+                fn: function(button){
+                    if(button == 'yes'){
+                        this.insertUpdateWellExclusions();
+                    }
+                },
+                icon: Ext.MessageBox.QUESTION,
+                scope : this
+            });
+        }
     },
 
     insertUpdateWellExclusions: function(){
