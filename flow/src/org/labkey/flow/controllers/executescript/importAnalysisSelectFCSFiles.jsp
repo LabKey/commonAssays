@@ -45,7 +45,7 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
     boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
+    boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 
     IWorkspace workspace = form.getWorkspace().getWorkspaceObject();
     List<String> warnings = workspace.getWarnings();

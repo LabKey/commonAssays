@@ -59,7 +59,7 @@
 
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
     boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
+    boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 
     List<String> selectedSamples = new ArrayList<>(form.getSelectedSamples().getRows().size());
     for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : form.getSelectedSamples().getRows().entrySet())
