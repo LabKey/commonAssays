@@ -27,7 +27,7 @@ import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.MultiValuedRenderContext;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpData;
@@ -225,12 +225,13 @@ public class WellExclusionTable extends AbstractExclusionTable
                     String type = rowMap.get("Type") == null ? null : rowMap.get("Type").toString();
                     String bTRUE = getSchema().getSqlDialect().getBooleanTRUE();
 
-                    SQLFragment dataRowSQL = new SQLFragment("SELECT COUNT(*) FROM ");
+                    SQLFragment dataRowSQL = new SQLFragment("SELECT * FROM ");
                     dataRowSQL.append(LuminexProtocolSchema.getTableInfoDataRow(), "dr");
                     dataRowSQL.append(" LEFT JOIN ").append(LuminexProtocolSchema.getTableInfoTitration(), "t").append(" ON dr.TitrationId = t.RowId ");
-                    dataRowSQL.append(" WHERE dr.TitrationId IS NOT NULL AND (t.Standard="+bTRUE+" OR t.QCControl="+bTRUE+" OR t.Unknown="+bTRUE+") ");
+                    dataRowSQL.append(" WHERE dr.TitrationId IS NOT NULL AND (t.Standard=").append(bTRUE).append(" OR t.QCControl=").append(bTRUE).append(" OR t.Unknown=").append(bTRUE).append(") ");
                     dataRowSQL.append(" AND dr.DataId = ? AND dr.Description ");
                     dataRowSQL.add(data.getRowId());
+
                     if (description == null)
                     {
                         dataRowSQL.append("IS NULL");
@@ -242,6 +243,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                     }
 
                     dataRowSQL.append(" AND dr.Type ");
+
                     if (type == null)
                     {
                         dataRowSQL.append("IS NULL");
@@ -252,9 +254,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         dataRowSQL.add(type);
                     }
 
-
-                    Integer count = Table.executeSingleton(LuminexProtocolSchema.getSchema(), dataRowSQL.getSQL(), dataRowSQL.getParamsArray(), Integer.class);
-                    if (count.intValue() > 0)
+                    if (new SqlSelector(LuminexProtocolSchema.getSchema(), dataRowSQL).exists())
                     {
                         _runsToRefresh.add(run);
                     }
