@@ -112,7 +112,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         this.add(new Ext.form.DisplayField({
             hideLabel: true,
             style: 'font-style: italic; font-size: 90%',
-            value: 'Analytes excluded at the assay level will not be re-included by changes in replicate group exclusions'
+            value: 'Analytes excluded for a titration or at the assay level will not be re-included by changes in replicate group exclusions'
         }));
 
         // radio group for selecting "exclude all" or "exclude selected"

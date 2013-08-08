@@ -134,7 +134,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         this.add(new Ext.form.DisplayField({
             hideLabel: true,
             style: 'font-style: italic; font-size: 90%',
-            value: 'Analytes excluded for a replicate group will not be re-included by changes in assay level exclusions'
+            value: 'Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions'
         }));
 
         var updateSaveBtn = function(sm, grid){
