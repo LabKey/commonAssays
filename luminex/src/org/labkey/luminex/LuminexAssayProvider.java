@@ -296,17 +296,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 this, "Import Luminex");
     }
 
-    @Override
-    public void upgradeAssayDefinitions(User user, ExpProtocol protocol, double targetVersion)
-    {
-        if (targetVersion == LuminexModule.LuminexUpgradeCode.ADD_RESULTS_DOMAIN_UPGRADE)
-        {
-            // 11.11 is when we started supporting custom results/data fields for Luminex
-            // Add the domain to any existing assay designs
-            addResultsDomain(user, protocol);
-        }
-    }
-
     private void addResultsDomain(User user, ExpProtocol protocol)
     {
         String domainURI = new Lsid(ASSAY_DOMAIN_CUSTOM_DATA, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString();
@@ -318,11 +307,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             ObjectProperty prop = new ObjectProperty(protocol.getLSID(), protocol.getContainer(), domainURI, domainURI);
             OntologyManager.insertProperties(protocol.getContainer(), protocol.getLSID(), prop);
         }
-        catch (ChangePropertyDescriptorException e)
-        {
-            throw new UnexpectedException(e);
-        }
-        catch (ValidationException e)
+        catch (ChangePropertyDescriptorException | ValidationException e)
         {
             throw new UnexpectedException(e);
         }

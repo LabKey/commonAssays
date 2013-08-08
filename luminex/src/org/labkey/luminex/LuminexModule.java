@@ -18,19 +18,15 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.assay.AssayQCFlagColumn;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.util.ContextListener;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.StartupListener;
 import org.labkey.api.view.WebPartFactory;
 
-import javax.servlet.ServletContext;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -87,31 +83,5 @@ public class LuminexModule extends DefaultModule
     public Set<Class> getUnitTests()
     {
         return PageFlowUtil.<Class>set(LuminexDataHandler.TestCase.class, LuminexExcelParser.TestCase.class, AssayQCFlagColumn.TestCase.class);
-    }
-
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new LuminexUpgradeCode();
-    }
-
-    public static class LuminexUpgradeCode implements UpgradeCode
-    {
-        public static final double ADD_RESULTS_DOMAIN_UPGRADE = 11.11;
-
-        /** called at 11.10->11.11 */
-        @SuppressWarnings({"UnusedDeclaration"})
-        public void addResultsDomain(final ModuleContext moduleContext)
-        {
-            // This needs to happen later, after all of the AssayProviders have been registered
-            ContextListener.addStartupListener(new StartupListener()
-            {
-                @Override
-                public void moduleStartupComplete(ServletContext servletContext)
-                {
-                    AssayService.get().upgradeAssayDefinitions(moduleContext.getUpgradeUser(), ADD_RESULTS_DOMAIN_UPGRADE);
-                }
-            });
-        }
     }
 }
