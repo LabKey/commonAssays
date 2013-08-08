@@ -16,31 +16,31 @@
 
 package org.labkey.flow.persist;
 
-import org.labkey.api.exp.*;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.AbstractExperimentDataHandler;
-import org.labkey.api.data.Container;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.flowdata.xml.FlowdataDocument;
 import org.labkey.flow.flowdata.xml.FlowData;
-import org.apache.log4j.Logger;
+import org.labkey.flow.flowdata.xml.FlowdataDocument;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.sql.SQLException;
-import java.util.List;
 import java.net.URI;
+import java.util.List;
 
 public class FlowDataHandler extends AbstractExperimentDataHandler
 {
@@ -57,14 +57,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 
     public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
     {
-        try
-        {
-            FlowManager.get().deleteData(datas);
-        }
-        catch (SQLException e)
-        {
-            throw new ExperimentException("Exception", e);
-        }
+        FlowManager.get().deleteData(datas);
     }
 
     public void exportFile(ExpData data, File dataFile, OutputStream out) throws ExperimentException
