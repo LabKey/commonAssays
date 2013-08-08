@@ -24,7 +24,6 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewForm;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -33,14 +32,22 @@ import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowObjectForm;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowCompensationMatrix;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.query.FlowSchema;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class EditScriptForm extends FlowObjectForm<FlowScript>
@@ -311,12 +318,12 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         return getContainer().hasPermission(getUser(), UpdatePermission.class) && _runCount == 0;
     }
 
-    public Map<Integer, String> getExperimentRuns() throws Exception
+    public Map<Integer, String> getExperimentRuns()
     {
         return getExperimentRuns(false);
     }
 
-    public Map<Integer, String> getExperimentRuns(boolean realFiles) throws Exception
+    public Map<Integer, String> getExperimentRuns(boolean realFiles)
     {
         LinkedHashMap<Integer, String> ret = new LinkedHashMap<>();
         FlowRun[] runs = realFiles ?

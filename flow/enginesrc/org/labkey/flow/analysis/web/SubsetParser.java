@@ -16,19 +16,26 @@
 
 package org.labkey.flow.analysis.web;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.SubsetPart;
-import org.labkey.flow.analysis.web.SubsetExpression.*;
+import org.labkey.flow.analysis.web.SubsetExpression.AndTerm;
+import org.labkey.flow.analysis.web.SubsetExpression.BinaryTerm;
+import org.labkey.flow.analysis.web.SubsetExpression.NotTerm;
+import org.labkey.flow.analysis.web.SubsetExpression.OrTerm;
+import org.labkey.flow.analysis.web.SubsetExpression.SubsetTerm;
 
-import static org.labkey.flow.analysis.web.SubsetExpression.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import static org.labkey.flow.analysis.web.SubsetExpression.And;
+import static org.labkey.flow.analysis.web.SubsetExpression.Group;
+import static org.labkey.flow.analysis.web.SubsetExpression.Not;
+import static org.labkey.flow.analysis.web.SubsetExpression.Or;
+import static org.labkey.flow.analysis.web.SubsetExpression.Subset;
 
 public class SubsetParser
 {
@@ -246,7 +253,7 @@ public class SubsetParser
             _lookahead = 0;
         }
 
-        void reset() throws IOException
+        void reset()
         {
             if (_index >= _str.length())
                 throw new IllegalStateException("EOF");
@@ -256,7 +263,7 @@ public class SubsetParser
                 read();
         }
 
-        void read() throws IOException
+        void read()
         {
             if (_index >= _str.length() || _lookahead >= _str.length())
                 throw new IllegalStateException("EOF");
@@ -283,7 +290,7 @@ public class SubsetParser
             _allowUnescapedName = true;
         }
 
-        void lex() throws IOException
+        void lex()
         {
             try
             {
@@ -295,7 +302,7 @@ public class SubsetParser
             }
         }
 
-        void _lex() throws IOException
+        void _lex()
         {
             reset();
 
@@ -364,14 +371,7 @@ public class SubsetParser
                 return true;
             if (_index == _str.length())
                 return false;
-            try
-            {
-                lex();
-            }
-            catch (IOException ioe)
-            {
-                throw new FlowException("Error", ioe);
-            }
+            lex();
             return true;
         }
 

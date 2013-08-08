@@ -678,7 +678,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertPC(workspace, "10.0.5");
         }
 
-        private void assertPC(Workspace workspace, String version) throws Exception
+        private void assertPC(Workspace workspace, String version)
         {
             assertEquals(72, workspace.getSampleCount());
             assertEquals(72, workspace._sampleAnalyses.size());
@@ -763,7 +763,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertAdvanced(workspace, "10.0.6b");
         }
 
-        private void assertAdvanced(Workspace workspace, String version) throws Exception
+        private void assertAdvanced(Workspace workspace, String version)
         {
             assertEquals(16, workspace.getSampleCount());
             assertEquals(16, workspace._sampleAnalyses.size());

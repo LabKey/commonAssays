@@ -22,7 +22,6 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExperimentService;
@@ -35,15 +34,14 @@ import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.sql.SQLException;
@@ -119,14 +117,7 @@ public class FlowScript extends FlowDataObject
     {
         if (strScript == null)
         {
-            try
-            {
-                strScript = FlowManager.get().getScript(getData());
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            strScript = FlowManager.get().getScript(getData());
         }
         return strScript;
     }
@@ -166,7 +157,7 @@ public class FlowScript extends FlowDataObject
         data.setDataFileURI(new File("script." + FlowDataHandler.EXT_SCRIPT).toURI());
     }
 
-    static public FlowScript create(User user, Container container, String name, String analysisScript) throws Exception
+    static public FlowScript create(User user, Container container, String name, String analysisScript) throws SQLException
     {
         ExpData data = ExperimentService.get().createData(container, FlowDataType.Script, name);
         initScript(data);
@@ -176,7 +167,7 @@ public class FlowScript extends FlowDataObject
         return ret;
     }
 
-    static public FlowWell createScriptForWell(User user, FlowWell well, String name, ScriptDocument analysisScript, ExpData input, InputRole inputRole) throws Exception
+    static public FlowWell createScriptForWell(User user, FlowWell well, String name, ScriptDocument analysisScript, ExpData input, InputRole inputRole) throws SQLException
     {
         Container container = well.getContainer();
         FlowRun run = well.getRun();
@@ -227,7 +218,7 @@ public class FlowScript extends FlowDataObject
         return null;
     }
 
-    public Collection<SubsetSpec> getSubsets() throws Exception
+    public Collection<SubsetSpec> getSubsets()
     {
         return FlowAnalyzer.getSubsets(this);
     }
@@ -277,7 +268,7 @@ public class FlowScript extends FlowDataObject
         return false;
     }
 
-    static public List<FlowScript> getProtocolsWithStep(Container container, FlowProtocolStep step) throws SQLException
+    static public List<FlowScript> getProtocolsWithStep(Container container, FlowProtocolStep step)
     {
         FlowScript[] protocols = getScripts(container);
         List<FlowScript> ret = new ArrayList<>();

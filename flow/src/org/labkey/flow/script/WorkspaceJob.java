@@ -229,7 +229,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     Map<String, AttributeSet> resultsMap,
                                     Map<String, Analysis> analysisMap,
                                     Map<Analysis, ScriptDocument> scriptDocs,
-                                    Collection<String> sampleLabels) throws SQLException, IOException
+                                    Collection<String> sampleLabels) throws IOException
     {
         List<String> sampleIDs = getSampleIDs(workspace, selectedFCSFiles);
         if (sampleIDs == null || sampleIDs.isEmpty())
@@ -347,7 +347,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                                  User user, Container container,
                                                  String analysisName,
                                                  File externalAnalysisFile,
-                                                 File originalImportedFile) throws SQLException
+                                                 File originalImportedFile)
     {
         addStatus("Saving Workspace Analysis " + originalImportedFile.getName());
         ExpData workspaceData = svc.createData(container, FlowDataType.Workspace);

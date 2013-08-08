@@ -51,7 +51,7 @@ public class AnalysisHandler extends BaseHandler
     int _wellIndex;
     boolean _getScriptFromWells;
 
-    public AnalysisHandler(ScriptJob job, SettingsDef settings, AnalysisDef analysis) throws Exception
+    public AnalysisHandler(ScriptJob job, SettingsDef settings, AnalysisDef analysis)
     {
         super(job, FlowProtocolStep.analysis);
         _analysis = analysis;

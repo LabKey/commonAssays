@@ -20,7 +20,6 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.data.FlowCompensationControl;
 import org.labkey.flow.data.FlowExperiment;
@@ -110,50 +109,42 @@ public class ChooseRunsRegion extends DataRegion
 
     String getDisabledReason(RenderContext ctx)
     {
-        try
+        FlowRun run = FlowRun.fromRunId((Integer)ctx.getRow().get("RowId"));
+        FlowExperiment experiment = _form.getTargetExperiment();
+        if (run.getPath() == null)
         {
-            FlowRun run = FlowRun.fromRunId((Integer)ctx.getRow().get("RowId"));
-            FlowExperiment experiment = _form.getTargetExperiment();
-            if (run.getPath() == null)
-            {
-                return null;
-            }
-            if (experiment != null && experiment.hasRun(new File(run.getPath()), _form.getProtocolStep()))
-            {
-                return "The '" + experiment.getName() + "' analysis folder already contains this run.";
-            }
-            if (_form.getProtocol().requiresCompensationMatrix(_form.getProtocolStep()))
-            {
-                if (_form.getCompensationExperimentLSID() != null)
-                {
-                    FlowExperiment expComp = FlowExperiment.fromLSID(_form.getCompensationExperimentLSID());
-                    if (expComp.findCompensationMatrix(run) == null)
-                    {
-                        return "There is no compensation matrix for this run in the '" + expComp.getName() + "' analysis folder";
-                    }
-                }
-                else if (_form.useSpillCompensationMatrix())
-                {
-                    for (FlowWell well : run.getWells())
-                    {
-                        if (well instanceof FlowCompensationControl)
-                            continue;
-
-                        FlowFCSFile fcsFile = well.getFCSFileInput();
-                        CompensationMatrix matrix = CompensationMatrix.fromSpillKeyword(fcsFile.getKeywords());
-                        if (matrix != null)
-                            return null;
-                    }
-
-                    return "There are no FCSFile wells with a spill matrix in this run.";
-                }
-            }
             return null;
         }
-        catch (SQLException e)
+        if (experiment != null && experiment.hasRun(new File(run.getPath()), _form.getProtocolStep()))
         {
-            throw UnexpectedException.wrap(e);
+            return "The '" + experiment.getName() + "' analysis folder already contains this run.";
         }
+        if (_form.getProtocol().requiresCompensationMatrix(_form.getProtocolStep()))
+        {
+            if (_form.getCompensationExperimentLSID() != null)
+            {
+                FlowExperiment expComp = FlowExperiment.fromLSID(_form.getCompensationExperimentLSID());
+                if (expComp.findCompensationMatrix(run) == null)
+                {
+                    return "There is no compensation matrix for this run in the '" + expComp.getName() + "' analysis folder";
+                }
+            }
+            else if (_form.useSpillCompensationMatrix())
+            {
+                for (FlowWell well : run.getWells())
+                {
+                    if (well instanceof FlowCompensationControl)
+                        continue;
 
+                    FlowFCSFile fcsFile = well.getFCSFileInput();
+                    CompensationMatrix matrix = CompensationMatrix.fromSpillKeyword(fcsFile.getKeywords());
+                    if (matrix != null)
+                        return null;
+                }
+
+                return "There are no FCSFile wells with a spill matrix in this run.";
+            }
+        }
+        return null;
     }
 }

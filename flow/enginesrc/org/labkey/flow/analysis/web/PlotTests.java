@@ -104,7 +104,7 @@ public class PlotTests extends Assert
         return dumpPlots(outDir, comp, analysis, fcsFile);
     }
 
-    private void compare(File outDir, File workspaceFile, File fcsFile, File expectedImageDir, Map<String, GraphSpec> generatedImages) throws IOException, InterruptedException
+    private void compare(File outDir, File workspaceFile, File fcsFile, File expectedImageDir, Map<String, GraphSpec> generatedImages) throws IOException
     {
         generateHtml(outDir, workspaceFile, fcsFile, expectedImageDir, generatedImages);
 

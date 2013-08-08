@@ -55,7 +55,7 @@ public class ReportsController extends BaseFlowController
     private static final Logger _log = Logger.getLogger(ReportsController.class);
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ReportsController.class);
 
-    public ReportsController() throws Exception
+    public ReportsController()
     { 
         setActionResolver(_actionResolver);
     }
@@ -124,7 +124,7 @@ public class ReportsController extends BaseFlowController
                 errors.reject(ERROR_MSG, "No flow protocol in this container.  Please upload FCS files to create a flow protocol.");
         }
 
-        public abstract void initReport(FORM form) throws Exception;
+        public abstract void initReport(FORM form);
 
         @Override
         protected String getCommandClassMethodName()
@@ -180,7 +180,7 @@ public class ReportsController extends BaseFlowController
     public static class UpdateAction extends CreateOrUpdateAction<IdForm>
     {
         @Override
-        public void initReport(IdForm form) throws Exception
+        public void initReport(IdForm form)
         {
             r = getReport(getViewContext(), form);
         }
@@ -409,7 +409,7 @@ public class ReportsController extends BaseFlowController
         }
     }
 
-    public static FlowReport getReport(ViewContext context, IdForm form) throws Exception
+    public static FlowReport getReport(ViewContext context, IdForm form)
     {
         if (null == form.getReportId())
         {

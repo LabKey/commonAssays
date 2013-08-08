@@ -17,7 +17,6 @@ package org.labkey.flow.reports;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
@@ -194,7 +193,7 @@ public class FlowReportJob extends RReportJob
         info("Imported tsv file '" + tsv + "' into domain " + domain.getName());
     }
 
-    private void mapTsvColumns(Domain domain, TabLoader loader) throws IOException, ExperimentException
+    private void mapTsvColumns(Domain domain, TabLoader loader) throws IOException
     {
         loader.setScanAheadLineCount(1000);
         ColumnDescriptor[] cols = loader.getColumns();
@@ -224,7 +223,7 @@ public class FlowReportJob extends RReportJob
             error("LSID column required to save tsv output file");
     }
 
-    private void deleteSavedResults() throws SQLException
+    private void deleteSavedResults()
     {
         info("Deleting results from previous runs");
         // Delete any objects from a previous run, but don't delete the attached ExpData object

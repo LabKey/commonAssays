@@ -56,7 +56,6 @@ public abstract class FlowJob extends PipelineJob
     FlowProtocol _protocol;
 
     public FlowJob(String provider, ViewBackgroundInfo info, PipeRoot root)
-            throws SQLException
     {
         super(provider, info, root);
     }

@@ -79,7 +79,7 @@ public class FlowController extends BaseFlowController
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowController.class);
 
-    public FlowController() throws Exception
+    public FlowController()
     {
         setActionResolver(_actionResolver);
     }
@@ -318,7 +318,7 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    FlowJob findJob(String statusFile) throws Exception
+    FlowJob findJob(String statusFile)
     {
         PipelineService service = PipelineService.get();
         try

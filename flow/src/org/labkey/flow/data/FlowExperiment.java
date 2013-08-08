@@ -28,10 +28,8 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.query.FlowSchema;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -125,13 +123,13 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return newAnalysisName;
     }
 
-    static public FlowExperiment getForName(User user, Container container, String name) throws Exception
+    static public FlowExperiment getForName(User user, Container container, String name)
     {
         String lsid = ExperimentService.get().generateLSID(container, ExpExperiment.class, name);
         return FlowExperiment.fromLSID(lsid);
     }
 
-    static public FlowExperiment createForName(User user, Container container, String name) throws Exception
+    static public FlowExperiment createForName(User user, Container container, String name)
     {
         FlowExperiment ret = getForName(user, container, name);
         if (ret != null)
@@ -184,7 +182,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowWorkspaceExperimentName;
     }
 
-    static public FlowExperiment fromURL(ActionURL url) throws ServletException
+    static public FlowExperiment fromURL(ActionURL url)
     {
         return fromURL(url, null);
     }
@@ -251,7 +249,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return false;
     }
 
-    public FlowRun[] findRun(File filePath, FlowProtocolStep step) throws SQLException
+    public FlowRun[] findRun(File filePath, FlowProtocolStep step)
     {
         List<FlowRun> ret = new ArrayList();
         FlowRun[] runs = getRuns(step);
@@ -354,7 +352,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowExperiment.fromLSID(getWorkspaceLSID(container));
     }
 
-    static public FlowExperiment ensureWorkspace(User user, Container container) throws Exception
+    static public FlowExperiment ensureWorkspace(User user, Container container)
     {
         FlowExperiment ret = getWorkspace(container);
         if (ret != null)
@@ -364,7 +362,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return new FlowExperiment(exp);
     }
 
-    public FlowCompensationMatrix findCompensationMatrix(FlowRun run) throws SQLException
+    public FlowCompensationMatrix findCompensationMatrix(FlowRun run)
     {
         List<FlowRun> runs = new ArrayList();
         runs.addAll(Arrays.asList(findRun(new File(run.getPath()), FlowProtocolStep.analysis)));

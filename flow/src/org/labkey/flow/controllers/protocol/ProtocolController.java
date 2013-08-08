@@ -42,7 +42,7 @@ public class ProtocolController extends BaseFlowController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ProtocolController.class);
 
-    public ProtocolController() throws Exception
+    public ProtocolController()
     {
         setActionResolver(_actionResolver);
     }

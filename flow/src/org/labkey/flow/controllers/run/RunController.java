@@ -93,7 +93,7 @@ public class RunController extends BaseFlowController
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(RunController.class);
 
-    public RunController() throws Exception
+    public RunController()
     {
         setActionResolver(_actionResolver);
     }
@@ -511,7 +511,6 @@ public class RunController extends BaseFlowController
                             Map<String, AttributeSet> analysisAttrs,
                             Map<String, CompensationMatrix> matrices,
                             boolean includeKeywords, boolean includeGraphBytes, boolean includeCompMatrices, boolean includeStatistics)
-            throws SQLException
     {
         for (FlowWell well : wells)
         {

@@ -84,14 +84,14 @@ public class AttributeSetHelper
      * names from the cache, or two threads each trying to insert the same attribute name.
      * @throws SQLException
      */
-    public static void prepareForSave(AttributeSet attrs, Container c) throws SQLException
+    public static void prepareForSave(AttributeSet attrs, Container c)
     {
         ensureKeywordNames(attrs, c, attrs.getKeywordNames());
         ensureStatisticNames(attrs, c, attrs.getStatisticNames());
         ensureGraphNames(attrs, c, attrs.getGraphNames());
     }
 
-    private static void ensureKeywordNames(AttributeSet attrs, Container c, Collection<String> specs) throws SQLException
+    private static void ensureKeywordNames(AttributeSet attrs, Container c, Collection<String> specs)
     {
         for (String spec : specs)
         {
@@ -99,7 +99,7 @@ public class AttributeSetHelper
         }
     }
 
-    private static void ensureStatisticNames(AttributeSet attrs, Container c, Collection<StatisticSpec> specs) throws SQLException
+    private static void ensureStatisticNames(AttributeSet attrs, Container c, Collection<StatisticSpec> specs)
     {
         for (StatisticSpec spec : specs)
         {
@@ -108,7 +108,7 @@ public class AttributeSetHelper
         }
     }
 
-    private static void ensureGraphNames(AttributeSet attrs, Container c, Collection<GraphSpec> specs) throws SQLException
+    private static void ensureGraphNames(AttributeSet attrs, Container c, Collection<GraphSpec> specs)
     {
         for (GraphSpec spec : specs)
         {

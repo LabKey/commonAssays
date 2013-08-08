@@ -33,7 +33,7 @@ import java.util.*;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
-    public MacWorkspace(String name, String path, Element elDoc) throws Exception
+    public MacWorkspace(String name, String path, Element elDoc)
     {
         super(name, path, elDoc);
     }

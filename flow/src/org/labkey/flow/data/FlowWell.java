@@ -34,7 +34,6 @@ import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -73,12 +72,12 @@ public class FlowWell extends FlowDataObject
         return wells;
     }
 
-    static public FlowWell fromURL(ActionURL url) throws Exception
+    static public FlowWell fromURL(ActionURL url)
     {
         return fromURL(url, null);
     }
 
-    static public FlowWell fromURL(ActionURL url, HttpServletRequest request) throws Exception
+    static public FlowWell fromURL(ActionURL url, HttpServletRequest request)
     {
         int wellId = getIntParam(url, request, FlowParam.wellId);
         if (wellId == 0)
@@ -88,7 +87,6 @@ public class FlowWell extends FlowDataObject
             return null;
         ret.checkContainer(url);
         return ret;
-
     }
 
     public FlowWell(ExpData data)
@@ -155,7 +153,7 @@ public class FlowWell extends FlowDataObject
      * Get all FlowFCSAnalysis wells that are DataOutputs of this FCSFile well.
      * @return
      */
-    public List<FlowFCSAnalysis> getFCSAnalysisOutputs() throws SQLException
+    public List<FlowFCSAnalysis> getFCSAnalysisOutputs()
     {
         ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
         List<FlowFCSAnalysis> ret = new ArrayList<>();
@@ -186,7 +184,7 @@ public class FlowWell extends FlowDataObject
         return FlowManager.get().getKeywords(getData(), keywords);
     }
 
-    public void setKeyword(String keyword, String value) throws SQLException
+    public void setKeyword(String keyword, String value)
     {
         FlowManager.get().setKeyword(getContainer(), getData(), keyword, value);
     }
@@ -196,17 +194,17 @@ public class FlowWell extends FlowDataObject
         return getAttributeSet().getKeywords();
     }
 
-    public Map<StatisticSpec, Double> getStatistics() throws SQLException
+    public Map<StatisticSpec, Double> getStatistics()
     {
         return getAttributeSet().getStatistics();
     }
 
-    public GraphSpec[] getGraphs() throws SQLException
+    public GraphSpec[] getGraphs()
     {
         return getAttributeSet().getGraphNames().toArray(new GraphSpec[0]);
     }
 
-    public byte[] getGraphBytes(GraphSpec graph) throws SQLException
+    public byte[] getGraphBytes(GraphSpec graph)
     {
         return FlowManager.get().getGraphBytes(getData(), graph);
     }
@@ -254,7 +252,7 @@ public class FlowWell extends FlowDataObject
         return urlFor(WellController.DownloadAction.class);
     }
 
-    public ActionURL urlEditAnalysisScript() throws Exception
+    public ActionURL urlEditAnalysisScript()
     {
         FlowScript analysisScript = getScript();
         ActionURL ret = analysisScript.urlFor(ScriptController.BeginAction.class);
@@ -294,7 +292,7 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    public void setName(User user, String name) throws Exception
+    public void setName(User user, String name)
     {
         if (Objects.equals(name, getName()))
             return;
@@ -303,7 +301,7 @@ public class FlowWell extends FlowDataObject
         data.save(user);
     }
 
-    public String getComment() throws SQLException
+    public String getComment()
     {
         return getExpObject().getComment();
     }

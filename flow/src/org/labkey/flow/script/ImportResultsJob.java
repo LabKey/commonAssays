@@ -193,7 +193,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                                                  User user, Container container,
                                                  String analysisName,
                                                  File externalAnalysisFile,
-                                                 File originalImportedFile) throws SQLException
+                                                 File originalImportedFile)
     {
         addStatus("Saving External Analysis " + originalImportedFile.getName());
         ExpData data = svc.createData(container, new DataType("Flow-ExternalAnalysis"));

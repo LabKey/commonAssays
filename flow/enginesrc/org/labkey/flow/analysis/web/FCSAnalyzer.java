@@ -166,7 +166,7 @@ public class FCSAnalyzer
         return generateGraph(title, subset, axes, polys);
     }
 
-    private GraphResult generateGraph(Map<SubsetSpec, Subset> subsetMap, PopulationSet group, GraphSpec graphSpecification) throws IOException
+    private GraphResult generateGraph(Map<SubsetSpec, Subset> subsetMap, PopulationSet group, GraphSpec graphSpecification)
     {
         GraphResult ret = new GraphResult(graphSpecification);
         // XXX: get alias
@@ -237,7 +237,7 @@ public class FCSAnalyzer
         return new PlotInfo(subset, img, info, domainAxis, rangeAxis);
     }
 
-    private List<StatResult> calculateStatistics(Map<SubsetSpec, Subset> subsetMap, ScriptComponent group, Collection<StatisticSpec> stats) throws IOException
+    private List<StatResult> calculateStatistics(Map<SubsetSpec, Subset> subsetMap, ScriptComponent group, Collection<StatisticSpec> stats)
     {
         List<StatResult> ret = new ArrayList<>(stats.size());
         Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap<>();

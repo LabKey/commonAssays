@@ -37,7 +37,7 @@ public class ScriptXarSource extends XarSource
     File _logFile;
     ExperimentArchiveDocument _doc;
 
-    public ScriptXarSource(ExperimentArchiveDocument doc, File root, File workingDirectory, PipelineJob job) throws Exception
+    public ScriptXarSource(ExperimentArchiveDocument doc, File root, File workingDirectory, PipelineJob job)
     {
         super(job);
         _root = root;

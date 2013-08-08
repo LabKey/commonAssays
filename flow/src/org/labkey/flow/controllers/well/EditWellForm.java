@@ -29,7 +29,7 @@ public class EditWellForm extends ViewForm
     public String[] ff_keywordValue;
     public String ff_comment;
 
-    public void setWell(FlowWell well) throws Exception
+    public void setWell(FlowWell well)
     {
         _well = well;
         if (well != null)

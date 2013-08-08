@@ -182,7 +182,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return getDatas(FlowDataType.FCSAnalysis).toArray(new FlowFCSAnalysis[0]);
     }
 
-    public FlowFCSFile findFCSFile(URI uri) throws Exception
+    public FlowFCSFile findFCSFile(URI uri)
     {
         FlowFCSFile[] wells = getFCSFiles();
         for (FlowFCSFile well : wells)
@@ -544,7 +544,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return ret;
     }
 
-    public void moveToWorkspace(User user) throws Exception
+    public void moveToWorkspace(User user)
     {
         try
         {

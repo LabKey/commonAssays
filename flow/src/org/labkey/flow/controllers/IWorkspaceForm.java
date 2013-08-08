@@ -22,6 +22,6 @@ import java.util.Map;
 
 public interface IWorkspaceForm
 {
-    Map<String, String> getHiddenFields() throws Exception;
-    Workspace getWorkspace() throws Exception;
+    Map<String, String> getHiddenFields();
+    Workspace getWorkspace();
 }

@@ -37,10 +37,11 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
+<%@ page import="java.sql.SQLException" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
-    String compImg(FlowWell well, String param, String graphSize) throws Exception
+    String compImg(FlowWell well, String param, String graphSize)
     {
         if (well == null)
             return "N/A";
@@ -135,7 +136,7 @@
             this.title = title;
         }
 
-        abstract String render(int iChannel, int iChannelValue) throws Exception;
+        abstract String render(int iChannel, int iChannelValue);
     }
 
     final String graphSize = FlowPreference.graphSize.getValue(request);
@@ -143,14 +144,14 @@
             {
                     new Callback("Uncompensated Graphs")
                     {
-                        String render(int iChannel, int iChannelValue) throws Exception
+                        String render(int iChannel, int iChannelValue)
                         {
                             return compImg(wellMap.get(channelNames[iChannel] + "+"), channelNames[iChannelValue], graphSize);
                         }
                     },
                     new Callback("Compensated Graphs")
                     {
-                        String render(int iChannel, int iChannelValue) throws Exception
+                        String render(int iChannel, int iChannelValue)
                         {
                             return compImg(wellMap.get(channelNames[iChannel] + "+"), "<" + channelNames[iChannelValue] + ">", graphSize);
                         }

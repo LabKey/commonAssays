@@ -16,19 +16,18 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocolAction;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
-import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
+import org.labkey.flow.controllers.FlowParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.Serializable;
-
-import org.labkey.flow.controllers.FlowParam;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FlowProtocolStep implements Serializable
 {
@@ -53,7 +52,7 @@ public class FlowProtocolStep implements Serializable
         this.predecessors = predecessors;
     }
 
-    public ExpProtocolAction addAction(User user, ExpProtocol parentProtocol) throws Exception
+    public ExpProtocolAction addAction(User user, ExpProtocol parentProtocol)
     {
         return parentProtocol.addStep(user, ensureForContainer(user, parentProtocol.getContainer()).getExpObject(), getDefaultActionSequence());
     }

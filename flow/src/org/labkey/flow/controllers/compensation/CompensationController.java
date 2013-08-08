@@ -48,7 +48,7 @@ public class CompensationController extends BaseFlowController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(CompensationController.class);
 
-    public CompensationController() throws Exception
+    public CompensationController()
     {
         setActionResolver(_actionResolver);
     }

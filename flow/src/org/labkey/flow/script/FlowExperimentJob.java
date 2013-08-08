@@ -83,7 +83,7 @@ public abstract class FlowExperimentJob extends FlowJob
         return experiment.urlShow();
     }
 
-    public FlowRun[] findRuns(File path, FlowProtocolStep step) throws SQLException
+    public FlowRun[] findRuns(File path, FlowProtocolStep step)
     {
         FlowExperiment experiment = getExperiment();
         if (experiment == null)
@@ -111,7 +111,7 @@ public abstract class FlowExperimentJob extends FlowJob
         }
     }
 
-    protected boolean checkProcessPath(File path, FlowProtocolStep step) throws SQLException
+    protected boolean checkProcessPath(File path, FlowProtocolStep step)
     {
         FlowRun[] existing = findRuns(path, step);
         if (existing.length > 0)

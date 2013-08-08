@@ -33,15 +33,12 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.flow.controllers.FlowParam;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -205,7 +202,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return getExpObject().getProperty(property.getPropertyDescriptor());
     }
 
-    public Object getProperty(PropertyDescriptor pd) throws SQLException
+    public Object getProperty(PropertyDescriptor pd)
     {
         if (pd == null)
             return null;

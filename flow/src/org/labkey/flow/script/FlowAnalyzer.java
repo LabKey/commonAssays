@@ -30,7 +30,7 @@ import java.util.List;
 
 public class FlowAnalyzer
 {
-    static public List<FCSRef> getFCSRefs(FlowRun run) throws Exception
+    static public List<FCSRef> getFCSRefs(FlowRun run)
     {
         FlowWell[] wells = run.getWells();
         List<FCSRef> refs = new ArrayList();
@@ -97,7 +97,7 @@ public class FlowAnalyzer
         return FCSAnalyzer.get().getParameterNames(getFCSUri(well), comp);
     }
 
-    static public Collection<SubsetSpec> getSubsets(FlowScript script) throws Exception
+    static public Collection<SubsetSpec> getSubsets(FlowScript script)
     {
         if (script == null)
         {
@@ -106,7 +106,7 @@ public class FlowAnalyzer
         return ScriptAnalyzer.getSubsets(script.getAnalysisScript(), true, false, true);
     }
 
-    static public CompensationMatrix getCompensationMatrix(FlowRun run) throws SQLException
+    static public CompensationMatrix getCompensationMatrix(FlowRun run)
     {
         FlowCompensationMatrix comp = run.getCompensationMatrix();
         if (comp == null)

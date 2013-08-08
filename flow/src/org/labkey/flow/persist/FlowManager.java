@@ -17,7 +17,6 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.collections15.iterators.ArrayIterator;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +37,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
@@ -370,7 +368,7 @@ public class FlowManager
      * @return The RowId of the rewly inserted or existing attribute.
      * @throws SQLException
      */
-    private int ensureAttributeName(Container container, AttributeType type, String attr, int aliasId) throws SQLException
+    private int ensureAttributeName(Container container, AttributeType type, String attr, int aliasId)
     {
         DbSchema schema = getSchema();
         if (schema.getScope().isTransactionActive())
@@ -388,63 +386,69 @@ public class FlowManager
             map.put("Id", aliasId);
 
             TableInfo table = attributeTable(type);
-            map = Table.insert(null, table, map);
-
-            // Set Id to RowId if we aren't inserting an alias
-            if (aliasId <= 0)
+            try
             {
-                map.put("Id", map.get("RowId"));
-                Table.update(null, table, map, map.get("RowId"));
+                map = Table.insert(null, table, map);
+
+                // Set Id to RowId if we aren't inserting an alias
+                if (aliasId <= 0)
+                {
+                    map.put("Id", map.get("RowId"));
+                    Table.update(null, table, map, map.get("RowId"));
+                }
+                _attrNameToEntryCache.remove(new NameCacheKey(container.getId(), type, attr));
+                return getAttributeRowId(container, type, attr);
             }
-            _attrNameToEntryCache.remove(new NameCacheKey(container.getId(), type, attr));
-            return getAttributeRowId(container, type, attr);
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
         }
     }
 
-    private int ensureAttributeName(Container container, AttributeType type, String name) throws SQLException
+    private int ensureAttributeName(Container container, AttributeType type, String name)
     {
         return ensureAttributeName(container, type, name, -1);
     }
 
 
-    public int ensureStatisticName(Container c, String name) throws SQLException
+    public int ensureStatisticName(Container c, String name)
     {
         return ensureAttributeNameAndAliases(c, AttributeType.statistic, name, Collections.<Object>emptyList());
     }
 
 
-    public int ensureKeywordName(Container c, String name) throws SQLException
+    public int ensureKeywordName(Container c, String name)
     {
         return ensureAttributeNameAndAliases(c, AttributeType.keyword, name, Collections.<Object>emptyList());
     }
 
 
-    public int ensureGraphName(Container c, String name) throws SQLException
+    public int ensureGraphName(Container c, String name)
     {
         return ensureAttributeNameAndAliases(c, AttributeType.graph, name, Collections.<Object>emptyList());
     }
 
 
-    public int ensureStatisticNameAndAliases(Container c, String name, Iterable<? extends Object> aliases) throws SQLException
+    public int ensureStatisticNameAndAliases(Container c, String name, Iterable<? extends Object> aliases)
     {
         return ensureAttributeNameAndAliases(c, AttributeType.statistic, name, aliases);
     }
 
 
-    public int ensureKeywordNameAndAliases(Container c, String name, Iterable<? extends Object> aliases) throws SQLException
+    public int ensureKeywordNameAndAliases(Container c, String name, Iterable<? extends Object> aliases)
     {
         return ensureAttributeNameAndAliases(c, AttributeType.keyword, name, aliases);
     }
 
 
-    public int ensureGraphNameAndAliases(Container c, String name, Iterable<? extends Object> aliases) throws SQLException
+    public int ensureGraphNameAndAliases(Container c, String name, Iterable<? extends Object> aliases)
     {
         return ensureAttributeNameAndAliases(c, AttributeType.graph, name, aliases);
     }
 
 
     private int ensureAttributeNameAndAliases(Container c, AttributeType type, String name, Iterable<? extends Object> aliases)
-            throws SQLException
     {
         synchronized (_attrNameToEntryCache)
         {
@@ -500,25 +504,18 @@ public class FlowManager
 
     public List<AttrObject> getAttrObjects(Collection<ExpData> datas)
     {
-        try
+        if (datas.isEmpty())
+            return Collections.emptyList();
+        SQLFragment sql = new SQLFragment ("SELECT * FROM " + getTinfoObject().toString() + " WHERE DataId IN (");
+        String comma = "";
+        for (ExpData data : datas)
         {
-            if (datas.isEmpty())
-                return Collections.emptyList();
-            SQLFragment sql = new SQLFragment ("SELECT * FROM " + getTinfoObject().toString() + " WHERE DataId IN (");
-            String comma = "";
-            for (ExpData data : datas)
-            {
-                sql.append(comma).append(data.getRowId());
-                comma = ",";
-            }
-            sql.append(")");
-            AttrObject[] array = Table.executeQuery(getSchema(), sql.getSQL(), sql.getParamsArray(), AttrObject.class);
-            return Arrays.asList(array);
+            sql.append(comma).append(data.getRowId());
+            comma = ",";
         }
-        catch (SQLException e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
+        sql.append(")");
+        AttrObject[] array = new SqlSelector(getSchema(), sql).getArray(AttrObject.class);
+        return Arrays.asList(array);
     }
 
     public AttrObject getAttrObject(ExpData data)
@@ -584,7 +581,7 @@ public class FlowManager
         return StringUtils.join(i, ',');
     }
 
-    private void deleteAttributes(Integer[] oids) throws SQLException
+    private void deleteAttributes(Integer[] oids)
     {
         if (oids.length == 0)
             return;
@@ -607,7 +604,7 @@ public class FlowManager
     }
 
 
-    private void deleteAttributes(SQLFragment sqlObjectIds) throws SQLException
+    private void deleteAttributes(SQLFragment sqlObjectIds)
     {
         DbScope scope = getSchema().getScope();
         try
@@ -624,7 +621,7 @@ public class FlowManager
         }
     }
 
-    public void deleteAttributes(ExpData data) throws SQLException
+    public void deleteAttributes(ExpData data)
     {
         AttrObject obj = getAttrObject(data);
         if (obj == null)
@@ -633,7 +630,7 @@ public class FlowManager
     }
 
 
-    private void deleteObjectIds(Integer[] oids, Set<Container> containers) throws SQLException
+    private void deleteObjectIds(Integer[] oids, Set<Container> containers)
     {
         DbScope scope = getSchema().getScope();
         try
@@ -660,7 +657,7 @@ public class FlowManager
     }
     
 
-    private void deleteObjectIds(SQLFragment sqlOIDs, Set<Container> containers) throws SQLException
+    private void deleteObjectIds(SQLFragment sqlOIDs, Set<Container> containers)
     {
         DbScope scope = getSchema().getScope();
         try
@@ -668,7 +665,7 @@ public class FlowManager
             scope.ensureTransaction();
 
             deleteAttributes(sqlOIDs);
-            Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN (" + sqlOIDs.getSQL() + ")", sqlOIDs.getParamsArray());
+            new SqlExecutor(getSchema()).execute("DELETE FROM flow.Object WHERE RowId IN (" + sqlOIDs.getSQL() + ")", sqlOIDs.getParamsArray());
             scope.commitTransaction();
         }
         finally
@@ -683,7 +680,7 @@ public class FlowManager
         }
     }
 
-    public void deleteData(List<ExpData> datas) throws SQLException
+    public void deleteData(List<ExpData> datas)
     {
         if (datas.size() == 0)
             return;
@@ -732,7 +729,7 @@ public class FlowManager
     static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, Value) VALUES (?, ?, ?)";
 
     // UNDONE: add audit log entries for keyword updates
-    public void setKeyword(Container c, ExpData data, String keyword, String value) throws SQLException
+    public void setKeyword(Container c, ExpData data, String keyword, String value)
     {
         value = StringUtils.trimToNull(value);
         String oldValue = getKeyword(data, keyword);
@@ -751,10 +748,10 @@ public class FlowManager
         {
             schema.getScope().ensureTransaction();
 
-            Table.execute(schema, sqlDeleteKeyword, obj.getRowId(), keywordId);
+            new SqlExecutor(schema).execute(sqlDeleteKeyword, obj.getRowId(), keywordId);
             if (value != null)
             {
-                Table.execute(schema, sqlInsertKeyword, obj.getRowId(), keywordId, value);
+                new SqlExecutor(schema).execute(sqlInsertKeyword, obj.getRowId(), keywordId, value);
             }
             schema.getScope().commitTransaction();
         }
@@ -770,26 +767,26 @@ public class FlowManager
                                             "\nINNER JOIN flow.statistic on flow.object.rowid = flow.statistic.objectid" +
                                             "\nINNER JOIN flow.StatisticAttr ON flow.StatisticAttr.rowid = flow.statistic.statisticid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.StatisticAttr.name = ?";
-    public Double getStatistic(ExpData data, StatisticSpec stat) throws SQLException
+    public Double getStatistic(ExpData data, StatisticSpec stat)
     {
-        return Table.executeSingleton(getSchema(), sqlSelectStat, new Object[] { data.getRowId(), stat.toString() }, Double.class);
+        return new SqlSelector(getSchema(), sqlSelectStat, data.getRowId(), stat.toString()).getObject(Double.class);
     }
 
     static private String sqlSelectGraph = "SELECT flow.graph.data FROM flow.object" +
                                             "\nINNER JOIN flow.graph on flow.object.rowid = flow.graph.objectid" +
                                             "\nINNER JOIN flow.GraphAttr ON flow.GraphAttr.rowid = flow.graph.graphid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.GraphAttr.name = ?";
-    public byte[] getGraphBytes(ExpData data, GraphSpec graph) throws SQLException
+    public byte[] getGraphBytes(ExpData data, GraphSpec graph)
     {
-        return Table.executeSingleton(getSchema(), sqlSelectGraph, new Object[] { data.getRowId(), graph.toString() }, byte[].class);
+        return new SqlSelector(getSchema(), sqlSelectGraph, data.getRowId(), graph.toString()).getObject(byte[].class);
     }
 
     static private String sqlSelectScript = "SELECT flow.script.text from flow.object" +
                                             "\nINNER JOIN flow.script ON flow.object.rowid = flow.script.objectid" +
                                             "\nWHERE flow.object.dataid = ?";
-    public String getScript(ExpData data) throws SQLException
+    public String getScript(ExpData data)
     {
-        return Table.executeSingleton(getSchema(), sqlSelectScript, new Object[] { data.getRowId() }, String.class);
+        return new SqlSelector(getSchema(), sqlSelectScript, data.getRowId()).getObject(String.class);
     }
 
     public void setScript(User user, ExpData data, String scriptText) throws SQLException
@@ -818,35 +815,20 @@ public class FlowManager
 
     public int getObjectCount(Container container, ObjectType type)
     {
-        try
-        {
-            String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
-                    "WHERE flow.object.container = ? AND flow.object.typeid = ?";
-            return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+        String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
+                "WHERE flow.object.container = ? AND flow.object.typeid = ?";
+        return new SqlSelector(getSchema(), sqlFCSFileCount, container.getId(), type.getTypeId()).getObject(Integer.class);
     }
 
     // CONSIDER: move to experiment module
     public int getFlaggedCount(Container container)
     {
-        try
-        {
-            ExpObject o;
-            String sql = "SELECT COUNT(OP.objectid) FROM exp.object OB, exp.objectproperty OP, exp.propertydescriptor PD\n" +
-                    "WHERE OB.container = ? AND\n" +
-                    "OB.objectid = OP.objectid AND\n" +
-                    "OP.propertyid = PD.propertyid AND\n" +
-                    "PD.propertyuri = '" + ExperimentProperty.COMMENT.getPropertyDescriptor().getPropertyURI() + "'";
-            return Table.executeSingleton(getSchema(), sql, new Object[] { container.getId() }, Integer.class);
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+        String sql = "SELECT COUNT(OP.objectid) FROM exp.object OB, exp.objectproperty OP, exp.propertydescriptor PD\n" +
+                "WHERE OB.container = ? AND\n" +
+                "OB.objectid = OP.objectid AND\n" +
+                "OP.propertyid = PD.propertyid AND\n" +
+                "PD.propertyuri = '" + ExperimentProperty.COMMENT.getPropertyDescriptor().getPropertyURI() + "'";
+        return new SqlSelector(getSchema(), sql, container.getId()).getObject(Integer.class);
     }
 
     // counts FCSFiles in Keyword runs
@@ -912,56 +894,35 @@ public class FlowManager
 
     public int getRunCount(Container container, ObjectType type)
     {
-        try
-        {
-            String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                    "WHERE exp.ExperimentRun.RowId IN (" +
-                    "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                    "AND exp.data.container = ?\n" +
-                    "AND flow.object.container = ?\n" +
-                    "AND flow.object.typeid = ?)";
-            return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), container.getId(), type.getTypeId() }, Integer.class);
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
+                "WHERE exp.ExperimentRun.RowId IN (" +
+                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
+                "AND exp.data.container = ?\n" +
+                "AND flow.object.container = ?\n" +
+                "AND flow.object.typeid = ?)";
+        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), container.getId(), type.getTypeId()).getObject(Integer.class);
     }
 
     public int getFCSRunCount(Container container)
     {
-        try
-        {
-            String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                    "WHERE exp.ExperimentRun.RowId IN (" +
-                    "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                    "AND exp.data.container = ?\n" +
-                    "AND flow.object.container = ?\n" +
-                    "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
-            return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), container.getId(), ObjectType.fcsKeywords.getTypeId() }, Integer.class);
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
+                "WHERE exp.ExperimentRun.RowId IN (" +
+                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
+                "AND exp.data.container = ?\n" +
+                "AND flow.object.container = ?\n" +
+                "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
+        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), container.getId(), ObjectType.fcsKeywords.getTypeId()).getObject(Integer.class);
     }
 
     public void deleteContainer(Container container)
     {
-        try
-        {
-            SQLFragment sqlOIDs = new SQLFragment("SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?", container.getId());
-            deleteObjectIds(sqlOIDs, Collections.singleton(container));
-            Table.execute(getSchema(), "DELETE FROM " + getTinfoKeywordAttr() + " WHERE container=?", container);
-            Table.execute(getSchema(), "DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
-            Table.execute(getSchema(), "DELETE FROM " + getTinfoGraphAttr() + " WHERE container=?", container);
-            vacuum();
-            analyze();
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+        SQLFragment sqlOIDs = new SQLFragment("SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?", container.getId());
+        deleteObjectIds(sqlOIDs, Collections.singleton(container));
+        new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoKeywordAttr() + " WHERE container=?", container);
+        new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
+        new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoGraphAttr() + " WHERE container=?", container);
+        vacuum();
+        analyze();
     }
 
 
@@ -979,7 +940,7 @@ public class FlowManager
 
             if (o.getColumn("container") != null)
             {
-                Table.execute(s,
+                new SqlExecutor(s).execute(
                         "UPDATE flow.object "+
                         "SET container = ? " +
                         "WHERE container IS NULL AND dataid IN (select rowid from exp.data WHERE exp.data.container = ?)", c.getId(), c.getId());
@@ -989,7 +950,7 @@ public class FlowManager
             {
                 // Update FCSAnalysis and FCSFile rows to point to their inputs.
                 // The 'fake' workspace FCSFiles may have original FCSFile as inputs.
-                Table.execute(s,
+                new SqlExecutor(s).execute(
                         "UPDATE flow.object SET "+
                         "compid = COALESCE(compid,"+
                         "    (SELECT MIN(DI.dataid) "+
@@ -1006,10 +967,6 @@ public class FlowManager
                         "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid IN (1,3) AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", c.getId());
             }
             s.getScope().commitTransaction();
-        }
-        catch (SQLException sqlx)
-        {
-            throw new RuntimeSQLException(sqlx);
         }
         finally
         {
@@ -1031,15 +988,8 @@ public class FlowManager
 
             if (db.getSqlDialect().isPostgreSQL())
             {
-                try
-                {
-                    if (null != Table.executeSingleton(db, "SELECT version() WHERE version() like '% 8.2%'", null, String.class))
-                        _postgreSQL82 = true;
-                }
-                catch (SQLException x)
-                {
-                    throw new RuntimeSQLException(x);
-                }
+                if (null != new SqlSelector(db, "SELECT version() WHERE version() like '% 8.2%'").getObject(String.class))
+                    _postgreSQL82 = true;
             }
         }
 

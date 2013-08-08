@@ -29,7 +29,6 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -286,7 +285,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                                  User user, Container container,
                                                  String analysisName,
                                                  File externalAnalysisFile,
-                                                 File originalImportedFile) throws SQLException;
+                                                 File originalImportedFile);
 
     protected FlowRun saveAnalysis(User user, Container container, FlowExperiment experiment,
                                    String analysisName, File externalAnalysisFile, File originalImportedFile,
@@ -520,7 +519,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                    ExpData externalAnalysisData,
                                    int iSample,
                                    int totSamples,
-                                   String sampleLabel) throws SQLException, ValidationException
+                                   String sampleLabel) throws SQLException
     {
         ExperimentService.Interface svc = ExperimentService.get();
         FlowProtocol flowProtocol = getProtocol();

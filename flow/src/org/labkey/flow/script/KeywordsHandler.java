@@ -69,7 +69,7 @@ public class KeywordsHandler extends BaseHandler
         return true;
     }
 
-    public KeywordsHandler(ScriptJob job) throws Exception
+    public KeywordsHandler(ScriptJob job)
     {
         super(job, FlowProtocolStep.keywords);
     }

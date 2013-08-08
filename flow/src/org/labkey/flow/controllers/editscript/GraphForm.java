@@ -100,7 +100,7 @@ public class GraphForm extends EditScriptForm
         this.ptY = ptY;
     }
 
-    public FlowWell getWell() throws Exception
+    public FlowWell getWell()
     {
         return FlowWell.fromURL(getViewContext().getActionURL(), getRequest());
     }

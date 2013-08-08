@@ -35,7 +35,7 @@ public class FlowRemoteController extends SpringActionController
 {
     static DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowRemoteController.class);
 
-    public FlowRemoteController() throws Exception
+    public FlowRemoteController()
     {
         super();
         setActionResolver(_actionResolver);

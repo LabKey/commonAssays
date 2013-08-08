@@ -66,7 +66,7 @@ abstract public class BaseHandler
         return _job.getContainer();
     }
 
-    public DataBaseType duplicateWell(ProtocolApplicationBaseType app, FlowWell src, FlowDataType type) throws SQLException
+    public DataBaseType duplicateWell(ProtocolApplicationBaseType app, FlowWell src, FlowDataType type)
     {
         _job.addInput(app, src, InputRole.FCSFile);
         DataBaseType ret = app.getOutputDataObjects().addNewData();
@@ -76,7 +76,7 @@ abstract public class BaseHandler
         return ret;
     }
 
-    synchronized public void addResults(DataBaseType dbt, AttributeSet attrs, List<? extends FCSAnalyzer.Result> results) throws Exception
+    synchronized public void addResults(DataBaseType dbt, AttributeSet attrs, List<? extends FCSAnalyzer.Result> results)
     {
         for (FCSAnalyzer.Result result : results)
         {

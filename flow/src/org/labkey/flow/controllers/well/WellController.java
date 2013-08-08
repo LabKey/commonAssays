@@ -93,7 +93,7 @@ public class WellController extends BaseFlowController
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
 
-    public WellController() throws Exception
+    public WellController()
     {
         super();
         setActionResolver(_actionResolver);
@@ -113,19 +113,18 @@ public class WellController extends BaseFlowController
         }
     }
 
-    public FlowWell getWell() throws Exception
+    public FlowWell getWell()
     {
         return FlowWell.fromURL(getActionURL(), getRequest());
     }
 
-    public Page getPage(String name) throws Exception
+    public Page getPage(String name)
     {
         Page ret = (Page) getFlowPage(name);
         FlowWell well = getWell();
         if (well == null)
-        {
             throw new NotFoundException("well not found");
-        }
+
         ret.setWell(well);
         return ret;
     }
@@ -161,16 +160,10 @@ public class WellController extends BaseFlowController
 
         public void validateCommand(EditWellForm form, Errors errors)
         {
-            try
-            {
-                well = getWell();
-                form.setWell(well);
-            }
-            catch (Exception e)
-            {
-                errors.reject(ERROR_MSG, e.getMessage());
-                return;
-            }
+            well = getWell();
+            if (well == null)
+                throw new NotFoundException("Well not found");
+            form.setWell(well);
 
             if (StringUtils.isEmpty(form.ff_name))
             {
@@ -204,6 +197,8 @@ public class WellController extends BaseFlowController
             if (well == null)
             {
                 well = getWell();
+                if (well == null)
+                    throw new NotFoundException("Well not found");
                 form.setWell(well);
             }
             return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
@@ -315,10 +310,6 @@ public class WellController extends BaseFlowController
                 GraphSpec spec = new GraphSpec(graph);
                 bytes = well.getGraphBytes(spec);
             }
-            catch (IOException ioe)
-            {
-                _log.error("Error retrieving graph", ioe);
-            }
             catch (Exception ex)
             {
                 _log.error("Error retrieving graph", ex);
@@ -392,9 +383,7 @@ public class WellController extends BaseFlowController
         {
             FlowWell well = getWell();
             if (null == well)
-            {
-                throw new NotFoundException();
-            }
+                throw new NotFoundException("Well not found");
 
             try
             {
@@ -693,7 +682,7 @@ public class WellController extends BaseFlowController
         Map<StatisticSpec, Double> _statistics;
         GraphSpec[] _graphs;
 
-        public void setWell(FlowWell well) throws Exception
+        public void setWell(FlowWell well)
         {
             _run = well.getRun();
             _well = well;

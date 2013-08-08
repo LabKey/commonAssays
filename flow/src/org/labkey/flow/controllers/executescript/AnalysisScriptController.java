@@ -19,7 +19,9 @@ package org.labkey.flow.controllers.executescript;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.action.*;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
@@ -35,8 +37,17 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AssayFileWriter;
-import org.labkey.api.util.*;
-import org.labkey.api.view.*;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpPostRedirectView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
@@ -52,10 +63,22 @@ import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.controllers.executescript.ImportAnalysisForm.SelectFCSFileOption;
-import org.labkey.flow.data.*;
-import org.labkey.flow.persist.AnalysisSerializer;
+import org.labkey.flow.data.FlowCompensationMatrix;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowFCSFile;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.script.*;
+import org.labkey.flow.script.AnalyzeJob;
+import org.labkey.flow.script.FlowJob;
+import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.flow.script.ImportResultsJob;
+import org.labkey.flow.script.KeywordsJob;
+import org.labkey.flow.script.RScriptJob;
+import org.labkey.flow.script.WorkspaceJob;
 import org.labkey.flow.util.SampleUtil;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -63,9 +86,17 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class AnalysisScriptController extends BaseFlowController
 {
@@ -80,7 +111,7 @@ public class AnalysisScriptController extends BaseFlowController
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(AnalysisScriptController.class);
 
-    public AnalysisScriptController() throws Exception
+    public AnalysisScriptController()
     {
         setActionResolver(_actionResolver);
     }
@@ -107,7 +138,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    protected Page getPage(String name) throws Exception
+    protected Page getPage(String name)
     {
         Page ret = (Page) getFlowPage(name);
         ret.setScript(getScript());
@@ -194,7 +225,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    protected void collectNewPaths(ImportRunsForm form, Errors errors) throws Exception
+    protected void collectNewPaths(ImportRunsForm form, Errors errors)
     {
         PipelineService service = PipelineService.get();
         PipeRoot root = service.findPipelineRoot(getContainer());
@@ -318,7 +349,7 @@ public class AnalysisScriptController extends BaseFlowController
             root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
         }
 
-        protected ModelAndView confirmRuns(ImportRunsForm form, BindException errors) throws Exception
+        protected ModelAndView confirmRuns(ImportRunsForm form, BindException errors)
         {
             validatePipeline();
 
@@ -410,7 +441,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    private Container getTargetStudy(String targetStudyId, Errors errors) throws Exception
+    private Container getTargetStudy(String targetStudyId, Errors errors)
     {
         Container targetStudy = null;
         if (targetStudyId != null && targetStudyId.length() > 0)
@@ -677,7 +708,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
 
         // Get the directory to use as the file path root of the flow analysis run.
-        private File getRunPathRoot(FlowRun keywordRun, List<File> keywordDirs, Map<String, FlowFCSFile> resolvedFCSFiles, File workspacePath, Errors errors) throws Exception
+        private File getRunPathRoot(FlowRun keywordRun, List<File> keywordDirs, Map<String, FlowFCSFile> resolvedFCSFiles, File workspacePath, Errors errors)
         {
             if (keywordRun != null && keywordRun.getPath() != null)
             {
@@ -718,7 +749,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         // Get the path to either the previously imported keyword run or
         // to the selected pipeline browser directory under the pipeline root.
-        private List<File> getKeywordDirs(ImportAnalysisForm form, Errors errors) throws Exception
+        private List<File> getKeywordDirs(ImportAnalysisForm form, Errors errors)
         {
             FlowRun keywordRun = getExistingKeywordRun(form, errors);
             if (errors.hasErrors())
@@ -767,7 +798,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         // Returns a map of workspace sample label -> FlowFCSFile from either
         // the resolved FCSFiles previously imported or from an existing keyword run.
-        private Map<String, FlowFCSFile> getSelectedFCSFiles(ImportAnalysisForm form, Errors errors) throws Exception
+        private Map<String, FlowFCSFile> getSelectedFCSFiles(ImportAnalysisForm form, Errors errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
@@ -837,7 +868,7 @@ public class AnalysisScriptController extends BaseFlowController
             return fcsFiles;
         }
 
-        private AnalysisEngine getAnalysisEngine(ImportAnalysisForm form, Errors errors) throws Exception
+        private AnalysisEngine getAnalysisEngine(ImportAnalysisForm form, Errors errors)
         {
             // UNDONE: validate pipeline root is available for rEngine
             if (form.getSelectAnalysisEngine() != null)
@@ -845,7 +876,7 @@ public class AnalysisScriptController extends BaseFlowController
             return AnalysisEngine.FlowJoWorkspace;
         }
 
-        private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
@@ -925,7 +956,7 @@ public class AnalysisScriptController extends BaseFlowController
             form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
         }
 
-        private void stepSelectFCSFiles(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepSelectFCSFiles(ImportAnalysisForm form, BindException errors)
         {
             SelectFCSFileOption fcsFilesOption = form.getSelectFCSFilesOption();
 
@@ -1118,7 +1149,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
 
 
-        private void stepReviewSamples(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepReviewSamples(ImportAnalysisForm form, BindException errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
@@ -1190,7 +1221,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        private void stepAnalysisEngine(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepAnalysisEngine(ImportAnalysisForm form, BindException errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             assert workspaceData.getWorkspaceObject().hasAnalysis();
@@ -1242,7 +1273,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        private void stepAnalysisOptions(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepAnalysisOptions(ImportAnalysisForm form, BindException errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             List<File> keywordDirs = getKeywordDirs(form, errors);
@@ -1329,7 +1360,7 @@ public class AnalysisScriptController extends BaseFlowController
             form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
         }
 
-        private void stepChooseAnalysis(ImportAnalysisForm form, BindException errors) throws Exception
+        private void stepChooseAnalysis(ImportAnalysisForm form, BindException errors)
         {
             List<File> keywordDirs = getKeywordDirs(form, errors);
             if (errors.hasErrors())

@@ -111,7 +111,7 @@ public class ScriptController extends BaseFlowController
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ScriptController.class);
 
-    public ScriptController() throws Exception
+    public ScriptController()
     {
         setActionResolver(_actionResolver);
     }
@@ -193,7 +193,7 @@ public class ScriptController extends BaseFlowController
             return "Source Editor";
         }
 
-        ScriptParser.Error validateScript(FlowScript script) throws SQLException
+        ScriptParser.Error validateScript(FlowScript script)
         {
             ScriptParser parser = new ScriptParser();
             parser.parse(script.getAnalysisScript());
@@ -227,7 +227,7 @@ public class ScriptController extends BaseFlowController
             return root;
         }
 
-        protected ActionURL createScript(NewProtocolForm form, BindException errors) throws Exception
+        protected ActionURL createScript(NewProtocolForm form, BindException errors) throws SQLException
         {
             if (form.ff_name == null || form.ff_name.length() == 0)
             {
@@ -253,13 +253,13 @@ public class ScriptController extends BaseFlowController
 
     }
 
-    protected boolean isScriptNameUnique(Container c, String name) throws Exception
+    protected boolean isScriptNameUnique(Container c, String name)
     {
         String lsid = FlowScript.lsidForName(c, name);
         return ExperimentService.get().getExpData(lsid) == null;
     }
 
-    public Page getPage(String name, EditScriptForm form) throws Exception
+    public Page getPage(String name, EditScriptForm form)
     {
         Page ret = (Page)getFlowPage(name);
         ret.setForm(form);
@@ -622,7 +622,7 @@ public class ScriptController extends BaseFlowController
             return handleWorkspaceUpload(file, errors);
         }
 
-        protected ActionURL doEditCompensationCalculation(EditCompensationCalculationForm form, BindException errors) throws Exception
+        protected ActionURL doEditCompensationCalculation(EditCompensationCalculationForm form, BindException errors)
         {
             Workspace workspace = handleCompWorkspaceUpload(form, errors);
             if (workspace != null)
@@ -913,7 +913,7 @@ public class ScriptController extends BaseFlowController
             return fSuccess;
         }
 
-        protected boolean saveAnalysisOrComp(FlowScript analysisScript, ScriptDocument doc, ScriptComponent popset, BindException errors) throws SQLException
+        protected boolean saveAnalysisOrComp(FlowScript analysisScript, ScriptDocument doc, ScriptComponent popset, BindException errors)
         {
             if (popset instanceof CompensationCalculation)
             {
@@ -1068,7 +1068,7 @@ public class ScriptController extends BaseFlowController
 
     }
 
-    protected boolean updateSettingsFilter(EditSettingsForm form, ScriptDocument doc) throws Exception
+    protected boolean updateSettingsFilter(EditSettingsForm form, ScriptDocument doc)
     {
         boolean success = true;
         SettingsDef settingsDef = doc.getScript().getSettings();

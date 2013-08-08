@@ -164,7 +164,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         return _compensationMatrix;
     }
 
-    public FlowCompensationMatrix findCompensationMatrix(FlowRun run) throws SQLException
+    public FlowCompensationMatrix findCompensationMatrix(FlowRun run)
     {
         if (_compensationMatrix != null)
             return _compensationMatrix;
@@ -269,7 +269,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         return ret;
     }
 
-    public void finishExperimentRun(ExperimentArchiveType xar, ExperimentRunType run) throws SQLException
+    public void finishExperimentRun(ExperimentArchiveType xar, ExperimentRunType run)
     {
         assert run == _runData._run;
         ProtocolApplicationBaseType appInput = insertProtocolApplication(run, 0);
@@ -375,7 +375,7 @@ abstract public class ScriptJob extends FlowExperimentJob
     }
 
 
-    public void importRuns(ExperimentArchiveDocument xardoc, File root, File workingDirectory, FlowProtocolStep step) throws Exception
+    public void importRuns(ExperimentArchiveDocument xardoc, File root, File workingDirectory, FlowProtocolStep step)
     {
         if (xardoc.getExperimentArchive().getExperimentRuns().getExperimentRunArray().length > 0)
         {

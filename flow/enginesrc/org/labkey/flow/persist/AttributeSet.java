@@ -63,7 +63,7 @@ public class AttributeSet implements Serializable
         _uri = uri;
     }
 
-    public AttributeSet(FlowData data, URI uri) throws Exception
+    public AttributeSet(FlowData data, URI uri)
     {
         this(ObjectType.valueOf(data.getType()), uri);
         FlowData.Keywords keywords = data.getKeywords();

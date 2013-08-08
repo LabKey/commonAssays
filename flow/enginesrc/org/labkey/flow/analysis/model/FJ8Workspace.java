@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 
 public class FJ8Workspace extends MacWorkspace
 {
-    public FJ8Workspace(String name, String path, Element elDoc) throws Exception
+    public FJ8Workspace(String name, String path, Element elDoc)
     {
        super(name, path, elDoc);
     }

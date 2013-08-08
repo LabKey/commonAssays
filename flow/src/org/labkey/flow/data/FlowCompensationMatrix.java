@@ -16,26 +16,29 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.api.view.ActionURL;
+import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowDataHandler;
-import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.web.StatisticSpec;
-
-import java.util.*;
-import java.io.File;
-import java.io.Serializable;
-
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.compensation.CompensationController;
-import org.labkey.flow.FlowSettings;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class FlowCompensationMatrix extends FlowDataObject implements Serializable
 {
@@ -52,7 +55,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return null;
     }
 
-    static public FlowCompensationMatrix fromURL(ActionURL url, HttpServletRequest request) throws Exception
+    static public FlowCompensationMatrix fromURL(ActionURL url, HttpServletRequest request)
     {
         FlowCompensationMatrix ret = fromCompId(getIntParam(url, request, FlowParam.compId));
         if (ret != null)

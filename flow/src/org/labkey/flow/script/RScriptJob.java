@@ -161,7 +161,7 @@ public class RScriptJob extends FlowExperimentJob
         }
     }
 
-    private void runScript(File rAnalysisDir, File normalizedDir) throws IOException, ScriptException
+    private void runScript(File rAnalysisDir, File normalizedDir) throws IOException
     {
         ScriptEngine engine = ServiceRegistry.get().getService(ScriptEngineManager.class).getEngineByExtension("r");
         if (engine == null)

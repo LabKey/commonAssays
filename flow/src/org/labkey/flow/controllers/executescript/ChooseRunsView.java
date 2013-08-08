@@ -16,19 +16,23 @@
 
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.Filter;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.flow.view.FlowQueryView;
 
-import java.util.List;
-
 public class ChooseRunsView extends FlowQueryView
 {
     ChooseRunsToAnalyzeForm _form;
 
-    public ChooseRunsView(ChooseRunsToAnalyzeForm form) throws Exception
+    public ChooseRunsView(ChooseRunsToAnalyzeForm form)
     {
         super(form);
         getSettings().setAllowChooseView(false);

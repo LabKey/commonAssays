@@ -40,7 +40,7 @@ public class CompensationCalculationHandler extends BaseHandler
     SettingsDef _settings;
     CompensationCalculationDef _compensationCalculationElement;
 
-    public CompensationCalculationHandler(ScriptJob job, SettingsDef settings, CompensationCalculationDef calc) throws Exception
+    public CompensationCalculationHandler(ScriptJob job, SettingsDef settings, CompensationCalculationDef calc)
     {
         super(job, FlowProtocolStep.calculateCompensation);
         _settings = settings;

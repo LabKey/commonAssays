@@ -56,7 +56,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         FACTORY.addLegacyNames("Flow Analysis Scripts");
     }
 
-    public AnalysisScriptsWebPart(ViewContext portalCtx, Portal.WebPart wp) throws Exception
+    public AnalysisScriptsWebPart(ViewContext portalCtx, Portal.WebPart wp)
     {
         super(new FlowSchema(portalCtx.getUser(), portalCtx.getContainer()), null, null);
         FlowQuerySettings settings = (FlowQuerySettings)getSchema().getSettings(wp, portalCtx);

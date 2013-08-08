@@ -190,16 +190,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<String, FieldKey> getSampleSetJoinFields()
     {
-        String prop;
-
-        try
-        {
-            prop = (String) getProperty(FlowProperty.SampleSetJoin.getPropertyDescriptor());
-        }
-        catch (SQLException e)
-        {
-            return Collections.emptyMap();
-        }
+        String prop = (String) getProperty(FlowProperty.SampleSetJoin.getPropertyDescriptor());
 
         if (prop == null)
             return Collections.emptyMap();
@@ -220,18 +211,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public String getSampleSetLSID()
     {
-        try
-        {
-            String propValue = (String) getProperty(ExperimentProperty.SampleSetLSID.getPropertyDescriptor());
-            if (propValue != null)
-            {
-                return propValue;
-            }
-        }
-        catch (SQLException e)
-        {
-            _log.error("Error", e);
-        }
+        String propValue = (String) getProperty(ExperimentProperty.SampleSetLSID.getPropertyDescriptor());
+        if (propValue != null)
+            return propValue;
+
         return ExperimentService.get().generateLSID(getContainer(), ExpSampleSet.class, SAMPLESET_NAME);
     }
 

@@ -72,7 +72,7 @@ public class FlowReportManager
         return reports.values();
     }
 
-    public static Collection<FilterFlowReport> getPostAnalysisReports(Container c, User user) throws Exception
+    public static Collection<FilterFlowReport> getPostAnalysisReports(Container c, User user)
     {
         Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
         List<FilterFlowReport> ret = new ArrayList<>(reports.size());

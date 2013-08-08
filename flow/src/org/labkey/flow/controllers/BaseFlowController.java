@@ -24,6 +24,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HelpTopic;
@@ -42,7 +43,6 @@ import org.labkey.flow.webparts.FlowFolderType;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
@@ -51,31 +51,31 @@ public abstract class BaseFlowController extends SpringActionController
 {
     public static HelpTopic DEFAULT_HELP_TOPIC = new HelpTopic("flowDefault");
     
-    protected BaseFlowController.FlowPage getFlowPage(String name) throws Exception
+    protected BaseFlowController.FlowPage getFlowPage(String name)
     {
         return getFlowPage(name, getClass().getPackage());
     }
 
-    protected BaseFlowController.FlowPage getFlowPage(String name, Package thePackage) throws Exception
+    protected BaseFlowController.FlowPage getFlowPage(String name, Package thePackage)
     {
         BaseFlowController.FlowPage ret = (BaseFlowController.FlowPage) JspLoader.createPage(thePackage.getName(), name);
         ret._controller = this;
         return ret;
     }
 
-    protected FlowScript getScript() throws Exception
+    protected FlowScript getScript()
     {
         return FlowScript.fromURL(getActionURL(), getRequest());
     }
 
-    public FlowRun getRun() throws Exception
+    public FlowRun getRun()
     {
         FlowRun ret;
         ret = FlowRun.fromURL(getActionURL());
         return ret;
     }
 
-    protected ActionURL executeScript(FlowJob job) throws Exception
+    protected ActionURL executeScript(FlowJob job) throws Exception, PipelineValidationException
     {
         FlowProtocol.ensureForContainer(getUser(), job.getContainer());
         PipelineService service = PipelineService.get();
@@ -179,12 +179,12 @@ public abstract class BaseFlowController extends SpringActionController
             return _controller.getUser();
         }
 
-        public Container getContainer() throws ServletException
+        public Container getContainer()
         {
             return _controller.getContainer();
         }
 
-        public String getContainerPath() throws ServletException
+        public String getContainerPath()
         {
             return getContainer().getPath();
         }

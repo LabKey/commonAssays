@@ -43,7 +43,7 @@ public class FlowSummaryWebPart extends JspView<FlowSummaryWebPart>
     // web parts shouldn't assume the current container
     public Container c;
 
-    public FlowSummaryWebPart(ViewContext portalCtx) throws Exception
+    public FlowSummaryWebPart(ViewContext portalCtx)
     {
         this(portalCtx.getContainer());
     }

@@ -52,7 +52,7 @@ public class KeywordsJob extends ScriptJob
         go();
     }
 
-    List<FlowRun> go() throws Exception
+    List<FlowRun> go()
     {
         List<FlowRun> runs = new ArrayList<>();
 
