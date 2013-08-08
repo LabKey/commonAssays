@@ -19,6 +19,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -55,6 +56,35 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             _titrationsByAnalyte.put(analyteName, originalContext.getTitrationsForAnalyte(analyteName));
         }
         _titrations = originalContext.getTitrations();
+    }
+
+    @Override
+    public void logProperties(Logger logger)
+    {
+        super.logProperties(logger);
+        logger.info("-----  Start Luminex Analyte Properties -----");
+        for(Map.Entry<String, Map<String, String>> entry : this._analyteColumnPropertiesByName.entrySet())
+        {
+            logger.info("\tProperties for " + entry.getKey() + ":");
+            for(Map.Entry<String, String> props : entry.getValue().entrySet())
+            {
+                logger.info("\t\t*"+props.getKey() + ":  " + props.getValue());
+            }
+        }
+        logger.info("-----  Stop Luminex Analyte Properties -----");
+        logger.info("-----  Start Luminex Titration Properties -----");
+        for(Titration titration : this._titrations)
+        {
+            logger.info("\tProperties for " + titration.getName());
+            logger.info("\t\t*Row ID:  " + titration.getRowId());
+            logger.info("\t\t*Run ID:  " + titration.getRunId());
+            logger.info("\t\t*Standard:  " + titration.isStandard());
+            logger.info("\t\t*QC Control:  " + titration.isQcControl());
+            logger.info("\t\t*Unknown:  " + titration.isUnknown());
+            logger.info("\t\t*Max FI:  " + titration.getMaxFI());
+        }
+        logger.info("-----  Stop Luminex Titration Properties -----");
+
     }
 
     @Override
