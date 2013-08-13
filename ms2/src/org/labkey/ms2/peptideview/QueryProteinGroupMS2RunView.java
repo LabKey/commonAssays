@@ -19,6 +19,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
+import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
@@ -27,7 +28,6 @@ import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
 
-import javax.servlet.ServletException;
 import java.util.List;
 import java.util.Arrays;
 import java.sql.SQLException;
@@ -54,7 +54,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
-    public ProteinGroupQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException
+    public ProteinGroupQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting)
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
@@ -106,16 +106,6 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -154,8 +144,8 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
-    protected List<MS2Controller.MS2ExportType> getExportTypes()
+    protected List<MS2ExportType> getExportTypes()
     {
-        return Arrays.asList(MS2Controller.MS2ExportType.Excel, MS2Controller.MS2ExportType.TSV);
+        return Arrays.asList(MS2ExportType.Excel, MS2ExportType.TSV);
     }
 }

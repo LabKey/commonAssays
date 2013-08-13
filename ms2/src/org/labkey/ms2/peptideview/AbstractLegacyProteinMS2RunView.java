@@ -24,6 +24,7 @@ import org.labkey.ms2.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.*;
@@ -39,7 +40,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         super(viewContext, columnPropertyName, runs);
     }
 
-    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
@@ -108,7 +109,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         return rgn;
     }
 
-    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
         String where = createExtraWhere(selectedRows);
 
@@ -167,12 +168,12 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
     protected abstract void addGroupingFilterText(List<String> headers, ActionURL currentUrl, boolean handSelected);
 
-    protected abstract void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException;
+    protected abstract void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where);
 
-    public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
+    public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames);
     
-    protected List<MS2Controller.MS2ExportType> getExportTypes()
+    protected List<MS2ExportType> getExportTypes()
     {
-        return Arrays.asList(MS2Controller.MS2ExportType.values());
+        return Arrays.asList(MS2ExportType.values());
     }
 }

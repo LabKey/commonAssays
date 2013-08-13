@@ -16,22 +16,44 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.Filter;
+import org.labkey.api.data.NestableDataRegion;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.query.CustomView;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryException;
+import org.labkey.api.query.QueryNestingOption;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
-import org.labkey.api.view.*;
-import org.labkey.api.query.*;
-import org.labkey.api.util.Pair;
-
-import java.sql.SQLException;
-import java.util.*;
-
-import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.validation.BindException;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * User: jeckels
@@ -78,7 +100,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
-    public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws RedirectException
+    public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);
@@ -175,16 +197,6 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     {
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -234,8 +246,8 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
-    protected List<MS2Controller.MS2ExportType> getExportTypes()
+    protected List<MS2ExportType> getExportTypes()
     {
-        return Arrays.asList(MS2Controller.MS2ExportType.Excel, MS2Controller.MS2ExportType.TSV, MS2Controller.MS2ExportType.AMT, MS2Controller.MS2ExportType.MS2Ions);
+        return Arrays.asList(MS2ExportType.Excel, MS2ExportType.TSV, MS2ExportType.AMT, MS2ExportType.MS2Ions, MS2ExportType.Bibliospec);
     }
 }

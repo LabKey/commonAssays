@@ -16,25 +16,43 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.data.*;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.util.Pair;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2ExportType;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.RunListException;
+import org.labkey.ms2.SpectrumIterator;
+import org.labkey.ms2.SpectrumRenderer;
+import org.labkey.ms2.protein.ProteinManager;
+import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
-import java.util.*;
 import java.io.IOException;
-
-import org.labkey.ms2.MS2Controller;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -58,7 +76,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     }
 
 
-    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
@@ -66,7 +84,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         return exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
         List<MS2Run> runs = Arrays.asList(_runs);
         SimpleFilter filter = createFilter(selectedRows);
@@ -162,7 +180,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         return filter;
     }
 
-    private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run) throws ServletException, SQLException, IOException
+    private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run) throws IOException
     {
         String columnNames = getPeptideColumnNames(requestedPeptideColumns);
         DataRegion rgn = getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS, 0);
@@ -173,9 +191,16 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         ctx.setContainer(c);
         ctx.setBaseFilter(filter);
         ctx.setBaseSort(ProteinManager.getPeptideBaseSort());
-        ew.setResultSet(rgn.getResultSet(ctx));
-        ew.setDisplayColumns(rgn.getDisplayColumns());
-        ew.setAutoSize(true);
+        try
+        {
+            ew.setResultSet(rgn.getResultSet(ctx));
+            ew.setDisplayColumns(rgn.getDisplayColumns());
+            ew.setAutoSize(true);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
     private DataRegion getPeptideGridForDisplay(String columnNames) throws SQLException
@@ -228,17 +253,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         throw new UnsupportedOperationException();
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
     {
         List<MS2Run> runs = Arrays.asList(_runs);
         SimpleFilter filter = createFilter(selectedRows);
@@ -272,8 +287,23 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         return null;
     }
 
-    protected List<MS2Controller.MS2ExportType> getExportTypes()
+    protected List<MS2ExportType> getExportTypes()
     {
-        return Arrays.asList(MS2Controller.MS2ExportType.values());
+        return Arrays.asList(MS2ExportType.values());
+    }
+
+    @Override
+    public void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException
+    {
+        List<MS2Run> runs = form.validateRuns();
+        SimpleFilter baseFilter = new SimpleFilter();
+        baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER, form.getViewContext().getUser()));
+        Sort sort = ProteinManager.getPeptideBaseSort();
+        sort.addURLSort(currentURL, MS2Manager.getDataRegionNamePeptides());
+        try (SpectrumIterator iter = new ResultSetSpectrumIterator(runs, baseFilter, sort))
+        {
+            spectrumRenderer.render(iter);
+            spectrumRenderer.close();
+        }
     }
 }

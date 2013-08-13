@@ -1208,7 +1208,7 @@ public class ProteinManager
         sql.append(proteinSql);
     }
 
-    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user) throws SQLException
+    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user)
     {
         SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, user);
 
@@ -1235,7 +1235,7 @@ public class ProteinManager
         return sql;
     }
 
-    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user) throws SQLException
+    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user)
     {
         return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, "Scan", user), "ProteinGroupId", maxRows);
     }
@@ -1274,7 +1274,7 @@ public class ProteinManager
 
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user) throws SQLException
+    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
     {
         SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
 
@@ -1317,7 +1317,7 @@ public class ProteinManager
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user) throws SQLException
+    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
 

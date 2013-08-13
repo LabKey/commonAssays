@@ -35,7 +35,6 @@ import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -68,7 +67,7 @@ public class SpectraCountQueryView extends QueryView
     }
 
     @Override
-    public ExcelWriter getExcelWriter(ExcelWriter.ExcelDocumentType docType) throws Exception
+    public ExcelWriter getExcelWriter(ExcelWriter.ExcelDocumentType docType) throws IOException
     {
         ExcelWriter result = super.getExcelWriter(docType);
         String header = getExportHeader();
@@ -79,7 +78,7 @@ public class SpectraCountQueryView extends QueryView
         return result;
     }
 
-    public TSVGridWriter getTsvWriter() throws SQLException, IOException
+    public TSVGridWriter getTsvWriter() throws IOException
     {
         TSVGridWriter result = super.getTsvWriter();
         String header = getExportHeader();

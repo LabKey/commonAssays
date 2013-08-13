@@ -63,7 +63,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
         _nestedTSVGridWriter = nestedTSVGridWriter;
     }
 
-    public void setGroupedResultSet(GroupedResultSet groupedRS) throws SQLException
+    public void setGroupedResultSet(GroupedResultSet groupedRS)
     {
         _groupedRS = groupedRS;
     }

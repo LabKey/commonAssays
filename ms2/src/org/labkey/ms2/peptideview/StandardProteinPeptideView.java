@@ -30,7 +30,6 @@ import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.Table;
 import org.labkey.api.query.DetailsURL;
@@ -43,6 +42,9 @@ import org.labkey.ms2.AACoverageColumn;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.RunListException;
+import org.labkey.ms2.SpectrumIterator;
+import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -151,7 +153,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return ProteinManager.getPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames, getUser());
     }
 
-    public StandardProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
+    public StandardProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames)
     {
         StandardProteinExcelWriter ew = new StandardProteinExcelWriter();
         ew.setDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
@@ -170,7 +172,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return run.getSQLPeptideColumnNames(peptideColumnNames + ", Protein, Peptide, RowId", true, MS2Manager.getTableInfoPeptides());
     }
 
-    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
+    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where)
     {
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
         String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
@@ -194,7 +196,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
 
-    public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where) throws SQLException
+    public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where)
     {
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
         String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
@@ -277,32 +279,14 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
                     // Close the outer result set after we're done with it
                     groupedResultSet.close();
                 }
-                catch (SQLException e) {}
+                catch (SQLException ignored) {}
             }
         };
         view.setResultSet(groupedResultSet.getNextResultSet());
         return view;
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), true);
-        GridView gridView = new GridView(rgn, (BindException)null);
-        SimpleFilter gridFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER + ProteinManager.PROTEIN_FILTER, getUser(), getSingleRun());
-        gridView.setFilter(gridFilter);
-        gridView.setSort(ProteinManager.getPeptideBaseSort());
-        return gridView;
-    }
-
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.ALL_FILTERS, getUser(), getSingleRun());
-        SimpleFilter validFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides());
-
-        return new SqlSelector(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + validFilter.getWhereSQL(ProteinManager.getSqlDialect()), validFilter.getWhereParams(MS2Manager.getTableInfoPeptides())).getArray(String.class);
-    }
-
-    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
     {
         String where = createExtraWhere(selectedRows);
 
@@ -324,6 +308,19 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         tw.close();
         return null;
+    }
+
+    @Override
+    public void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException
+    {
+        List<MS2Run> runs = form.validateRuns();
+        String where = createExtraWhere(exportRows);
+
+        try (SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentURL, this, where, form.getViewContext().getUser()))
+        {
+            spectrumRenderer.render(iter);
+            spectrumRenderer.close();
+        }
     }
 
     protected String createExtraWhere(List<String> selectedRows)

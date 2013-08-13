@@ -1185,6 +1185,7 @@ ms2/src/org/labkey/ms2/Hydrophobicity3.java -text
 ms2/src/org/labkey/ms2/HydrophobicityColumn.java -text
 ms2/src/org/labkey/ms2/IcatProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/MS2Controller.java -text
+ms2/src/org/labkey/ms2/MS2ExportType.java -text
 ms2/src/org/labkey/ms2/MS2FolderType.java -text
 ms2/src/org/labkey/ms2/MS2GZFileRenderer.java -text
 ms2/src/org/labkey/ms2/MS2Importer.java -text

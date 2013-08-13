@@ -54,7 +54,7 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
         _nestedExcelWriter = nestedExcelWriter;
     }
 
-    public void setGroupedResultSet(GroupedResultSet groupedRS) throws SQLException
+    public void setGroupedResultSet(GroupedResultSet groupedRS)
     {
         _groupedRS = groupedRS;
     }

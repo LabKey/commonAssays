@@ -40,6 +40,7 @@ import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -108,12 +109,12 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     {
         ButtonBar result = new ButtonBar();
 
-        List<MS2Controller.MS2ExportType> exportFormats = getExportTypes();
+        List<MS2ExportType> exportFormats = getExportTypes();
 
         ActionURL exportUrl = _url.clone();
         exportUrl.setAction(exportAllAction);
         MenuButton exportAll = new MenuButton("Export All");
-        for (MS2Controller.MS2ExportType exportFormat : exportFormats)
+        for (MS2ExportType exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat.name());
             NavTree menuItem = exportAll.addMenuItem(exportFormat.toString(), null, dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
@@ -126,7 +127,8 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
         MenuButton exportSelected = new MenuButton("Export Selected");
         exportUrl.setAction(exportSelectedAction);
-        for (MS2Controller.MS2ExportType exportFormat : exportFormats)
+        exportSelected.setRequiresSelection(true);
+        for (MS2ExportType exportFormat : exportFormats)
         {
             if (exportFormat.supportsSelectedOnly())
             {
@@ -158,7 +160,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return result;
     }
 
-    protected abstract List<MS2Controller.MS2ExportType> getExportTypes();
+    protected abstract List<MS2ExportType> getExportTypes();
 
     public void changePeptideCaptionsForTsv(List<DisplayColumn> displayColumns)
     {
@@ -292,7 +294,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         }
     }
 
-    public DataRegion getPeptideGrid(String peptideColumnNames, int maxRows, long offset) throws SQLException
+    public DataRegion getPeptideGrid(String peptideColumnNames, int maxRows, long offset)
     {
         DataRegion rgn = new DataRegion();
 
@@ -428,19 +430,13 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return _runs[0];
     }
 
-    /**
-     * Creates a grid view to show the peptides that are part of the grouping assignment
-     * that's specified by the form. For example, for a given SeqId or a ProteinProphet ProteinGroup. 
-     */
-    public abstract GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException;
+    public abstract ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException;
 
-    public abstract String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException;
+    public abstract ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException;
 
-    public abstract ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
+    public abstract ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException;
 
-    public abstract ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
-
-    public abstract ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException;
 
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {

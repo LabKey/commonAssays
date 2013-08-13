@@ -16,29 +16,42 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.NestableQueryView;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryNestingOption;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.DisplayElement;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.*;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.RunListException;
+import org.labkey.ms2.SpectrumIterator;
+import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -52,13 +65,13 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         super(viewContext, columnPropertyName, runs);
     }
 
-    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
     {
         createGridView(form.getExpanded(), "", "", false).exportToTSV(form, response, selectedRows, headers);
         return null;
     }
 
-    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
         AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
 
@@ -132,13 +145,41 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         return Collections.singletonMap("Filter", context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort));
     }
 
-    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
         createGridView(form.getExpanded(), "", "", false).exportToExcel(response, selectedRows);
         return null;
     }
 
-    public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException;
+    @Override
+    public void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException
+    {
+        List<MS2Run> runs = form.validateRuns();
+        String where = null;
+        if (exportRows != null && !exportRows.isEmpty())
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+            sb.append(".RowId IN (");
+            String separator = "";
+            for (String protein : exportRows)
+            {
+                sb.append(separator);
+                separator = ", ";
+                sb.append(new Long(protein));
+            }
+            sb.append(")");
+            where = sb.toString();
+        }
+
+        try (SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentURL, this, where, form.getViewContext().getUser()))
+        {
+            spectrumRenderer.render(iter);
+            spectrumRenderer.close();
+        }
+    }
+
+    public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting);
 
     public abstract class AbstractMS2QueryView extends NestableQueryView
     {
@@ -167,7 +208,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             }
         }
 
-        public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+        public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
         {
             createRowIdFragment(selectedRows);
             TSVGridWriter tsvWriter = getTsvWriter();
@@ -179,7 +220,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             return null;
         }
 
-        public ModelAndView exportToExcel(HttpServletResponse response, List<String> selectedRows) throws Exception
+        public ModelAndView exportToExcel(HttpServletResponse response, List<String> selectedRows) throws IOException
         {
             createRowIdFragment(selectedRows);
             exportToExcel(response);

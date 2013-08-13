@@ -17,29 +17,55 @@
 package org.labkey.ms2.peptideview;
 
 import com.google.common.collect.Iterables;
-import org.labkey.api.query.FieldKey;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.ExcelColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.ResultSetCollapser;
+import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.Table;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.api.view.NotFoundException;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Manager;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.data.*;
+import org.labkey.ms2.FirstProteinDisplayColumn;
+import org.labkey.ms2.GroupNumberDisplayColumn;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.ProteinGroupProteins;
+import org.labkey.ms2.ProteinListDisplayColumn;
+import org.labkey.ms2.RunListException;
+import org.labkey.ms2.SpectrumIterator;
+import org.labkey.ms2.SpectrumRenderer;
+import org.labkey.ms2.TotalFilteredPeptidesColumn;
+import org.labkey.ms2.UniqueFilteredPeptidesColumn;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.util.Pair;
-
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.util.*;
-
-import org.labkey.ms2.*;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -144,7 +170,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return getColumns(new PeptideColumnNameList(peptideColumnNames), createLegacyWrappedPeptidesTable(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
-    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
     {
         String where = createExtraWhere(selectedRows);
 
@@ -162,6 +188,19 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
         tw.close();
         return null;
+    }
+
+    @Override
+    public void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException
+    {
+        List<MS2Run> runs = form.validateRuns();
+        String where = createExtraWhere(exportRows);
+
+        try (SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentURL, this, where, form.getViewContext().getUser()))
+        {
+            spectrumRenderer.render(iter);
+        }
+        spectrumRenderer.close();
     }
 
     protected String createExtraWhere(List<String> selectedRows)
@@ -305,66 +344,8 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         }
         finally
         {
-            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
+            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
         }
-    }
-
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        GridView peptidesGridView;
-        DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), false);
-
-        peptidesGridView = new GridView(rgn, (BindException)null);
-
-        String columnNames = getPeptideColumnNames(form.getColumns());
-        String sqlColumnNames = getPeptideSQLColumnNames(columnNames, getSingleRun());
-        String extraWhere;
-        if (form.getGroupNumber() != 0)
-        {
-            extraWhere = MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".GroupNumber = " + form.getGroupNumber() + " AND " +
-                MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".IndistinguishableCollectionId = " + form.getIndistinguishableCollectionId();
-            peptidesGridView.setResultSet(ProteinManager.getProteinProphetPeptideRS(_url, getSingleRun(), extraWhere, 250, sqlColumnNames, getUser()));
-        }
-        return peptidesGridView;
-    }
-
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        SimpleFilter coverageFilter = null;
-
-        if (form.getSeqIdInt() != 0)
-        {
-            coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), getSingleRun());
-            // Can't use addCondition below because it's too dumb to handle alias.columnName
-            coverageFilter.addWhereClause("pgm.SeqId = ?", new Object[]{form.getSeqIdInt()}, FieldKey.fromParts("SeqId"));
-        }
-        else if (form.getGroupNumber() != 0)
-        {
-            coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), getSingleRun());
-            // Can't use addCondition below because it's too dumb to handle alias.columnName
-            coverageFilter.addWhereClause("pg.GroupNumber = ?", new Object[]{form.getGroupNumber()}, FieldKey.fromParts("GroupNumber"));
-            coverageFilter.addWhereClause("pg.IndistinguishableCollectionId = ?", new Object[]{form.getIndistinguishableCollectionId()}, FieldKey.fromParts("IndistinguishableCollectionId"));
-        }
-
-        if (coverageFilter != null)
-        {
-            coverageFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoProteinGroups(), MS2Manager.getTableInfoPeptideMemberships(), MS2Manager.getTableInfoProteinProphetFiles());
-            String sql = "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " p, " +
-                    MS2Manager.getTableInfoPeptideMemberships() + " pm, " +
-                    MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
-                    MS2Manager.getTableInfoProteinGroups() + " pg, " +
-                    "(SELECT Run as PPRun, RowId FROM " + MS2Manager.getTableInfoProteinProphetFiles() + ") ppf " +
-                    coverageFilter.getWhereSQL(ProteinManager.getSqlDialect()) +
-                    " AND pg.RowId = pgm.ProteinGroupId" +
-                    " AND pm.PeptideId = p.RowId" +
-                    " AND pm.ProteinGroupId = pgm.ProteinGroupId" +
-                    " AND ppf.PPRun = p.Run" +
-                    " AND ppf.RowId = pg.ProteinProphetFileId";
-
-            return new SqlSelector(ProteinManager.getSchema(), sql, coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides())).getArray(String.class);
-        }
-
-        return null;
     }
 
     public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
@@ -387,7 +368,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return proteinView;
     }
 
-    public ProteinProphetExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
+    public ProteinProphetExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames)
     {
         ProteinProphetExcelWriter ew = new ProteinProphetExcelWriter();
         ew.setDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
@@ -399,7 +380,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return new ProteinProphetTSVGridWriter(proteinDisplayColumns, peptideDisplayColumns);
     }
 
-    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
+    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where)
     {
         ResultSet proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0, getUser());
 
@@ -425,7 +406,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
     // TODO: Put in base class?
-    public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where) throws SQLException
+    public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where)
     {
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
         String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
@@ -455,8 +436,8 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         }
         finally
         {
-            if (proteinRS != null) try { proteinRS.close(); } catch (SQLException e) {}
-            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException e) {}
+            if (proteinRS != null) try { proteinRS.close(); } catch (SQLException ignored) {}
+            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException ignored) {}
         }
     }
 

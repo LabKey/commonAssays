@@ -1,3 +1,5 @@
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.ms2.MS2ExportType" %>
 <%
 /*
  * Copyright (c) 2008 LabKey Corporation
@@ -17,10 +19,10 @@
 %>
 <p>
     Choose an export format:<br/>
-    <input type="radio" name="exportFormat" value="Excel" checked="checked">Excel (limited to 65,535 rows)<br/>
-    <input type="radio" name="exportFormat" value="ExcelBare">Excel with minimal header text (limited to 65,535 rows)<br/>
-    <input type="radio" name="exportFormat" value="TSV">TSV<br/>
-    <input type="radio" name="exportFormat" value="DTA">Spectra as DTA<br/>
-    <input type="radio" name="exportFormat" value="PKL">Spectra as PKL<br/>
-    <input type="radio" name="exportFormat" value="AMT">AMT (Accurate Mass &amp; Time) file<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.Excel) %>" checked="checked">Excel (limited to 65,535 rows)<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.TSV) %>">TSV<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.DTA) %>">Spectra as DTA<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.PKL) %>">Spectra as PKL<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.AMT) %>">AMT (Accurate Mass &amp; Time) file<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.Bibliospec) %>">BiblioSpec spectra library file<br/>
 </p>
