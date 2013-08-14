@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
 <%@ page import="java.util.TreeMap" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="java.util.Set" %>
 
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
@@ -43,6 +44,9 @@
             nonUnknownTitrations.put(titrationEntry.getKey(), titrationEntry.getValue());
         }
     }
+
+    // retrieve a set of all SinglePointControls
+    Set<String> trackedSinglePointControls = bean.getParser().getSinglePointControls();
 
     // show a table for the user to select which titrations are Standards and/or QC Controls
     if (nonUnknownTitrations.size() > 0)
@@ -73,6 +77,9 @@
         }
 %>
         </table>
+        <br/>
+        <table> <!-- Show a table containing both Titrated Unknowns and Tracked single point controls -->
+        <td>
 <%
     }
 
@@ -81,6 +88,7 @@
     {
 %>
         <br/>
+        <td>
         <table>
             <tr>
                 <td>&nbsp;</td>
@@ -101,9 +109,39 @@
         }
 %>
         </table>
+        </td>
+<%
+    }
+    if (trackedSinglePointControls.size() >0)
+    {
+%>
+        <td>
+            <table>
+                <tr>
+                <td>&nbsp;</td>
+                <td class="labkey-form-label">Tracked Single Point Controls</td>
+                </tr>
+<%
+                    for (String trackedSinglePointControl : trackedSinglePointControls)
+                    {
+%>
+                <tr>
+                    <td class="labkey-form-label"><%= PageFlowUtil.filter(trackedSinglePointControl) %></td>
+                    <td>
+                        <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl)) %>'
+                               value='1' onClick='titrationRoleChecked(this);' />
+                    </td>
+                </tr>
+<%
+                    }
+%>
+
+            </table>
+        </td>
 <%
     }
 %>
+        </table>
 
 
 <script type="text/javascript">
@@ -199,6 +237,18 @@
                 }
 <%
             }
+        }
+        for (String singlePointControl : trackedSinglePointControls)
+        {
+%>
+            var propertyName = <%=PageFlowUtil.jsString(LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControl)) %>;
+            var hiddenEl = getHiddenFormElement(propertyName);
+            var inputEl = getInputFormElement(propertyName);
+            if (hiddenEl && inputEl)
+            {
+                inputEl.checked = hiddenEl.value == "true";
+            }
+<%
         }
 %>
     }

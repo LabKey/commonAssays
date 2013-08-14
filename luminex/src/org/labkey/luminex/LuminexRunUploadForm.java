@@ -194,4 +194,22 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         }
         return result;
     }
+
+    public List<SinglePointControl> getSinglePointControls() throws ExperimentException
+    {
+        List<SinglePointControl> result = new ArrayList<>();
+        for (String singlePointControlName : getParser().getSinglePointControls())
+        {
+            SinglePointControl singlePointControl = new SinglePointControl();
+            singlePointControl.setName(singlePointControlName);
+            String propertyName = LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControlName);
+            if (getViewContext().getRequest().getParameter(propertyName) != "")
+            {
+                result.add(singlePointControl);
+            }
+
+        }
+        return result;
+    }
+
 }

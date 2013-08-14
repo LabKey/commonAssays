@@ -123,6 +123,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final int MINIMUM_TITRATION_SUMMARY_COUNT = 5;
     public static final int MINIMUM_TITRATION_RAW_COUNT = 10;
 
+    public static final int SINGLE_POINT_CONTROL_SUMMARY_COUNT = 1;
+    public static final int SINGLE_POINT_CONTROL_RAW_COUNT = 2;
+
     @Override
     public DataType getDataType()
     {
@@ -323,6 +326,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             
             // Name -> Titration
             Map<String, Titration> titrations = insertTitrations(expRun, user, form.getTitrations());
+
+            // Name -> SinglePointControl
+            Map<String, SinglePointControl> singlePointControls = insertSinglePointControls(expRun, user, form.getSinglePointControls());
 
             // Keep these in a map so that we can easily look them up against the rows that are already in the database
             Map<DataRowKey, Map<String, Object>> rows = new LinkedHashMap<>();
@@ -1466,6 +1472,35 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return result;
     }
 
+    /** @return Name->Titration */
+        private Map<String, SinglePointControl> insertSinglePointControls(ExpRun expRun, User user, List<SinglePointControl> singlePointControls)
+                throws ExperimentException, SQLException
+        {
+            Map<String, SinglePointControl> result = new CaseInsensitiveHashMap<>();
+
+            // Insert the singlePointControls first
+            for (SinglePointControl singlePointControl : singlePointControls)
+            {
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Name"), singlePointControl.getName());
+                filter.addCondition(FieldKey.fromParts("RunId"), expRun.getRowId());
+                SinglePointControl[] exitingSinglePointControls = new TableSelector(LuminexProtocolSchema.getTableInfoSinglePointControl(), filter, null).getArray(SinglePointControl.class);
+                assert exitingSinglePointControls.length <= 1;
+
+                if (exitingSinglePointControls.length > 0)
+                {
+                    singlePointControl = exitingSinglePointControls[0];
+                }
+                else
+                {
+                    singlePointControl.setRunId(expRun.getRowId());
+
+                    singlePointControl = Table.insert(user, LuminexProtocolSchema.getTableInfoSinglePointControl(), singlePointControl);
+                }
+                result.put(singlePointControl.getName(), singlePointControl);
+            }
+            return result;
+        }
+
     private void insertExcelProperties(Domain domain, final ExpData data, LuminexExcelParser parser, User user, ExpProtocol protocol) throws SQLException, ValidationException, ExperimentException
     {
         Container container = data.getContainer();
@@ -1860,6 +1895,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                 " pa, " + ExperimentService.get().getTinfoData() +
                 " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
+        // Delete entries in the SinglePointControl table
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
+                        " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                        " pa, " + ExperimentService.get().getTinfoData() +
+                        " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
     }
 
     public void deleteData(ExpData data, Container container, User user)

@@ -53,6 +53,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String GUIDE_SET_TABLE_NAME = "GuideSet";
     public static final String GUIDE_SET_CURVE_FIT_TABLE_NAME = "GuideSetCurveFit";
     public static final String TITRATION_TABLE_NAME = "Titration";
+    public static final String SINGLE_POINT_CONTROL_TABLE_NAME = "SinglePointControl";
     public static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
     public static final String DATA_ROW_TABLE_NAME = "DataRow";
     public static final String DATA_FILE_TABLE_NAME = "DataFile";
@@ -88,6 +89,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.add(ANALYTE_TITRATION_TABLE_NAME);
         result.add(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME);
         result.add(CV_QC_FLAG_TABLE_NAME);
+        result.add(SINGLE_POINT_CONTROL_TABLE_NAME);
         return result;
     }
 
@@ -201,6 +203,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             {
                 return createCVQCFlagTable();
             }
+            if (SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                SinglePointControlTable result = createSinglePointControlTable(true);
+                return result;
+            }
         }
         return super.createProviderTable(tableType);
     }
@@ -234,6 +241,23 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     private WellExclusionTable createWellExclusionTable(boolean filterTable)
     {
         return new WellExclusionTable(this, filterTable);
+    }
+
+    private SinglePointControlTable createSinglePointControlTable(boolean filterTable)
+    {
+        SinglePointControlTable result = new SinglePointControlTable(this, filterTable);
+        if (filterTable)
+        {
+            SQLFragment sql = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
+            sql.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
+            sql.append(", ");
+            sql.append(ExperimentService.get().getTinfoData(), "d");
+            sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
+            sql.append(createDataFilterInClause());
+            sql.append(")");
+            result.addCondition(sql);
+        }
+        return result;
     }
 
     private RunExclusionTable createRunExclusionTable(boolean filterTable)
@@ -416,6 +440,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static TableInfo getTableInfoTitration()
     {
         return getSchema().getTable(TITRATION_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoSinglePointControl()
+    {
+        return getSchema().getTable(SINGLE_POINT_CONTROL_TABLE_NAME);
     }
 
     public static TableInfo getTableInfoAnalyteTitration()

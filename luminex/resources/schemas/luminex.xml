@@ -215,5 +215,12 @@
         </columns>
     </table>
 
+    <table tableName="SinglePointControl" tableDbType="TABLE">
+        <columns>
+            <column columnName="RowId" />
+            <column columnName="RunId" />
+            <column columnName="Name" />
+        </columns>
+    </table>
 
 </tables>

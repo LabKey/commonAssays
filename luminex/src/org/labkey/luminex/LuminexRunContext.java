@@ -20,8 +20,6 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 
-import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +40,8 @@ public interface LuminexRunContext extends AssayRunUploadContext<LuminexAssayPro
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException;
 
     public List<Titration> getTitrations() throws ExperimentException;
+
+    public List<SinglePointControl> getSinglePointControls() throws ExperimentException;
 
     public LuminexExcelParser getParser() throws ExperimentException;
 }

@@ -38,6 +38,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     private Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<>();
     private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
     private List<Titration> _titrations;
+    private List<SinglePointControl> _singlePointControls;
 
     private transient Map<String, Map<DomainProperty, String>> _analyteProperties;
     private transient Map<String, Map<ColumnInfo, String>> _analyteColumnProperties;
@@ -56,6 +57,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             _titrationsByAnalyte.put(analyteName, originalContext.getTitrationsForAnalyte(analyteName));
         }
         _titrations = originalContext.getTitrations();
+        _singlePointControls = originalContext.getSinglePointControls();
     }
 
     @Override
@@ -195,5 +197,11 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             }
         }
         throw new IllegalStateException("Could not find property: " + columnName);
+    }
+
+    @Override
+    public List<SinglePointControl> getSinglePointControls() throws ExperimentException
+    {
+        return _singlePointControls;
     }
 }

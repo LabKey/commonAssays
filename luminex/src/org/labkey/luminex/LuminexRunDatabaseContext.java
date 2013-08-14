@@ -139,15 +139,8 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         sql.add(_run.getRowId());
         sql.append(" ORDER BY t.Name");
 
-        try
-        {
-            Titration[] titrations = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Titration.class);
-            return Arrays.asList(titrations);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        SqlSelector sqlSelector = new SqlSelector(LuminexProtocolSchema.getSchema(), sql);
+        return sqlSelector.getArrayList(Titration.class);
     }
 
     @Override
@@ -159,5 +152,18 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         }
         return _parser;
 
+    }
+
+    @Override
+    public List<SinglePointControl> getSinglePointControls() throws ExperimentException
+    {
+        SQLFragment sql = new SQLFragment("SELECT t.* FROM ");
+        sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "t");
+        sql.append(" WHERE t.RunId = ?");
+        sql.add(_run.getRowId());
+        sql.append(" ORDER BY t.Name");
+
+        SqlSelector sqlSelector = new SqlSelector(LuminexProtocolSchema.getSchema(), sql);
+        return sqlSelector.getArrayList(SinglePointControl.class);
     }
 }

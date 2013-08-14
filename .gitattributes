@@ -577,12 +577,14 @@ flow/src/org/labkey/flow/webparts/FlowSummary.jsp -text
 flow/src/org/labkey/flow/webparts/FlowSummaryWebPart.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 luminex/module.properties -text
+luminex/resources/assay/Luminex/queries/SinglePointControlAnalyte.sql -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-11.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.20-11.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.30-12.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.31-12.10.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-10.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-11.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-2.20.sql -text
@@ -634,6 +636,7 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-11.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.20-11.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.30-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.31-12.10.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-10.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-11.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-2.20.sql -text
@@ -728,6 +731,8 @@ luminex/src/org/labkey/luminex/LuminexWell.java -text
 luminex/src/org/labkey/luminex/LuminexWellGroup.java -text
 luminex/src/org/labkey/luminex/QCFlagHighlightDisplayColumn.java -text
 luminex/src/org/labkey/luminex/RunExclusionTable.java -text
+luminex/src/org/labkey/luminex/SinglePointControl.java -text
+luminex/src/org/labkey/luminex/SinglePointControlTable.java -text
 luminex/src/org/labkey/luminex/Titration.java -text
 luminex/src/org/labkey/luminex/TitrationForm.java -text
 luminex/src/org/labkey/luminex/TitrationTable.java -text

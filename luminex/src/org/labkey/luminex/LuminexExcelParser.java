@@ -63,6 +63,7 @@ public class LuminexExcelParser
     private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<>();
     private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<>();
     private Map<String, Titration> _titrations = new TreeMap<>();
+    private Map<String, SinglePointControl> _singlePointControls = new TreeMap<>();
     private boolean _parsed;
     private boolean _imported;
 
@@ -181,6 +182,15 @@ public class LuminexExcelParser
                         {
                             _titrations.put(desc, potentialTitrations.get(desc));
                         }
+                        // detect potential single point controls
+                        if (potentialTitrations.get(desc) != null && potentialTitrations.get(desc).isQcControl() == true) // Type starts with 'C'
+                        {
+                            if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT) ||
+                                    (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT))
+                            {
+                                _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
+                            }
+                        }
                     }
                 }
             }
@@ -288,6 +298,12 @@ public class LuminexExcelParser
         parseFile();
          return _titrations;
      }
+
+    public Set<String> getSinglePointControls() throws ExperimentException
+    {
+        parseFile();
+        return _singlePointControls.keySet();
+    }
 
     public int getStandardTitrationCount() throws ExperimentException
     {

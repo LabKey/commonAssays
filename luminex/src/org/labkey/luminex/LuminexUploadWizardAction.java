@@ -68,8 +68,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -280,6 +282,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             final Map<String, Titration> existingTitrations = getExistingTitrations(form.getReRun());
             final Map<String, Analyte> existingAnalytes = getExistingAnalytes(form.getReRun());
+            final Set<String> existingSinglePointControls = getExistingSinglePointControls(form.getReRun());
 
             // get a set of which titrations are going to be pre-selected as standards (based on default value, well type, etc.)
             final HashSet<Titration> standardTitrations = new HashSet<>();
@@ -355,6 +358,22 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isUnknown()) ? "true" : "";
                     view.getDataRegion().addHiddenFormField(propertyName, value);
                 }
+            }
+
+            // add hidden form fields for the single point control section (controlled by titrationWellRoles.jsp after render)
+            for (final String singlePointControl : form.getParser().getSinglePointControls())
+            {
+                String propertyName;
+                String defVal;
+                String value;
+
+                boolean existingSinglePointControl = existingSinglePointControls.contains(singlePointControl);
+
+                propertyName = getSinglePointControlCheckboxName(singlePointControl);
+                // If we have an existing singlePointControl as a baseline from the run we're replacing, use its value
+                defVal = existingSinglePointControl ? "true" : defaultWellRoleValues.get(propertyName);
+                value = setInitialSinglePointControlInput(errorReshow, propertyName, defVal) ? "true" : "";
+                view.getDataRegion().addHiddenFormField(propertyName, value);
             }
 
             // add a column to the analyte properties section for each of the titrations that might be used for a Standard
@@ -566,6 +585,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return result;
     }
 
+    private Set<String> getExistingSinglePointControls(ExpRun reRun)
+    {
+        if (reRun == null)
+        {
+            return Collections.emptySet();
+        }
+        Set<String> result = new HashSet<>();
+        SQLFragment titrationSQL = new SQLFragment("SELECT t.* FROM ");
+        titrationSQL.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "t");
+        titrationSQL.append(" WHERE t.RunId = ?");
+        titrationSQL.add(reRun.getRowId());
+        for (SinglePointControl singlePointControl : new SqlSelector(LuminexProtocolSchema.getSchema(), titrationSQL).getArrayList(SinglePointControl.class))
+        {
+            result.add(singlePointControl.getName());
+        }
+        return result;
+    }
+
     public static String getTitrationCheckboxName(String titration, String analyte)
     {
         return "titration_" + analyte + "_" + titration;
@@ -587,7 +624,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return (errorReshow && getViewContext().getRequest().getParameter(propName).equals("true"))
                 || (!errorReshow && defVal != null && defVal.toLowerCase().equals("true"))
                 || (!errorReshow && defVal == null && typeMatch);
-    }    
+    }
+
+    private boolean setInitialSinglePointControlInput(boolean errorReshow, String propName, String defVal)
+    {
+        // return true if 1. errorReshow and previously checked, 2. has a default value that was checked
+        return (errorReshow && getViewContext().getRequest().getParameter(propName).equals("true"))
+                || (!errorReshow && defVal != null && defVal.toLowerCase().equals("true"));
+    }
 
     private String[] getAnalyteNames(LuminexRunUploadForm form) throws ExperimentException
     {
@@ -614,6 +658,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     public static String getTitrationTypeCheckboxName(Titration.Type type, Titration titration)
     {
         return "_titrationRole_" + type + "_" + titration.getName();
+    }
+
+    public static String getSinglePointControlCheckboxName(String singlePointControl)
+    {
+        return "_singlePointControl_" + singlePointControl;
     }
 
     public static String getTitrationColumnCellName(String titrationName)
@@ -738,6 +787,18 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                             PropertyManager.saveProperties(defaultTitrationValues);
                         }
                     }
+                    // save default values for SinglePointControls
+                    for (String singlePointControl : form.getParser().getSinglePointControls())
+                    {
+                        String propertyName;
+                        Boolean value;
+
+                        // add the name/value pairs for the singlePointControl well role definition section
+                        propertyName = getSinglePointControlCheckboxName(singlePointControl);
+                        value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                        defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                    }
+
                     PropertyManager.saveProperties(defaultWellRoleValues);
 
                     LuminexProtocolSchema.getSchema().getScope().commitTransaction();
