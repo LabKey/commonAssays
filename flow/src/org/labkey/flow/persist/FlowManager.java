@@ -976,7 +976,7 @@ public class FlowManager
     }
 
 
-    // postgres 8.2 workaround
+    // postgres 8.2 workaround   // TODO: This code never runs (we stopped supported PostgreSQL 8.2 years ago). Delete or revise if it's still needed. #18409
     private static Boolean _postgreSQL82 = null;
 
     private static boolean isPostgresSQL82()
