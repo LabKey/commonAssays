@@ -22,7 +22,6 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
@@ -247,35 +246,32 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         SQLFragment trypticSQL = new SQLFragment();
         trypticSQL.append("((CASE WHEN (");
         trypticSQL.append(strippedPeptideSQL);
-        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '[KR][^P]%' OR ");
+        trypticSQL.append(" ").append(dialect.getCharClassLikeOperator()).append(" '[KR][^P]%' OR ");
         trypticSQL.append(strippedPeptideSQL);
-        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '-%') THEN 1 ELSE 0 END) + ");
+        trypticSQL.append(" ").append(dialect.getCharClassLikeOperator()).append(" '-%') THEN 1 ELSE 0 END) + ");
         trypticSQL.append("(CASE WHEN (");
         trypticSQL.append(strippedPeptideSQL);
-        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR ");
+        trypticSQL.append(" ").append(dialect.getCharClassLikeOperator()).append(" '%[KR][^P]' OR ");
         trypticSQL.append(strippedPeptideSQL);
-        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '%-') THEN 1 ELSE 0 END))");
+        trypticSQL.append(" ").append(dialect.getCharClassLikeOperator()).append(" '%-') THEN 1 ELSE 0 END))");
         ExprColumn trypricEndsColumn = new ExprColumn(this, "TrypticEnds", trypticSQL, JdbcType.INTEGER);
         addColumn(trypricEndsColumn);
 
-        if (!MS2Manager.getSqlDialect().isSqlServer() || !DbScope.getLabkeyScope().getDatabaseProductVersion().startsWith("08."))
-        {
-            // Add this column if we're not on SQLServer 2000, which doesn't support BLOBs in a subselect like this
-            // This is an ugly way to conditionalize the column - remove the check as soon as we drop support for SQL Server 2000
-            SQLFragment spectrumSQL = new SQLFragment();
-            spectrumSQL.append("(SELECT Spectrum FROM ");
-            spectrumSQL.append(MS2Manager.getTableInfoSpectraData(), "sd");
-            spectrumSQL.append(" WHERE sd.Fraction = ");
-            spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
-            spectrumSQL.append(".fraction AND sd.Scan = ");
-            spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
-            spectrumSQL.append(".Scan)");
-            ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, JdbcType.LONGVARBINARY);
-            spectrumColumn.setHidden(true);
-            addColumn(spectrumColumn);
-        }
+        // Add this column if we're not on SQLServer 2000, which doesn't support BLOBs in a subselect like this
+        // This is an ugly way to conditionalize the column - remove the check as soon as we drop support for SQL Server 2000
+        SQLFragment spectrumSQL = new SQLFragment();
+        spectrumSQL.append("(SELECT Spectrum FROM ");
+        spectrumSQL.append(MS2Manager.getTableInfoSpectraData(), "sd");
+        spectrumSQL.append(" WHERE sd.Fraction = ");
+        spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        spectrumSQL.append(".fraction AND sd.Scan = ");
+        spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        spectrumSQL.append(".Scan)");
+        ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, JdbcType.LONGVARBINARY);
+        spectrumColumn.setHidden(true);
+        addColumn(spectrumColumn);
 
-        if(includeFeatureFk)
+        if (includeFeatureFk)
             addFeatureInfoColumn();
     }
 
