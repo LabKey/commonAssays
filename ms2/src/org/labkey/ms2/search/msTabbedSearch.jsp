@@ -41,84 +41,79 @@
 
 <script type="text/javascript">
 
-    Ext4.onReady(function(){
+    Ext4.onReady(function() {
 
-        var tabPanel = Ext4.create('Ext.tab.Panel', {
-            anchor: '100%',
+        Ext4.create('Ext.tab.Panel', {
             renderTo: <%=q(renderId)%>,
-            defaults: { padding: 10 },
+            defaults: { bodyPadding: 10, flex: 1, border: false },
+            activeTab: 0,
+            layout: 'fit',
             items: [{
                 // protein search webpart from the ... module
+                xtype: 'panel',
                 title: 'Protein Search',
                 cls: 'non-ext-search-tab-panel',
-                height: <%=(targetedMSModuleActive ? 100 : 170)%>,
-                border : false,
-                items : [
-                    Ext4.create('Ext.Component', {
-                        border : false,
-                        listeners : {
-                            scope: this,
-                            render : function(cmp) {
-                                var wp = new LABKEY.WebPart({
-                                    partName: <%=q(targetedMSModuleActive ? "Targeted MS Protein Search" : "Protein Search")%>,
-                                    frame: 'none',
-                                    renderTo: cmp.getId()
-                                });
-                                wp.render();
-                            }
-                        }
-                    })
-                ]
-            },{
-                // peptide search webpart from the ... module
-                title: 'Peptide Search',
-                cls: 'non-ext-search-tab-panel',
-                height: 100,
-                border : false,
-                items : [
-                    Ext4.create('Ext.Component', {
-                        border : false,
-                        listeners : {
-                            scope: this,
-                            render : function(cmp) {
-                                var wp = new LABKEY.WebPart({
-                                    partName: 'Peptide Search',
-                                    frame: 'none',
-                                    renderTo: cmp.getId()
-                                });
-                                wp.render();
-                            }
-                        }
-                    })
-                ]
-            }]
-        });
-
-<% if (targetedMSModuleActive) { %>
-        tabPanel.add({
-            // modification search webpart from the targetedms module
-            title: 'Modification Search',
-            height: 250,
-            border : false,
-            items : [
-                Ext4.create('Ext.Component', {
+                items : [{
+                    xtype: 'component',
                     border : false,
                     listeners : {
                         scope: this,
-                        render : function(cmp) {
+                        afterrender : function(cmp) {
                             var wp = new LABKEY.WebPart({
-                                partName: 'Targeted MS Modification Search',
+                                partName: <%=q(targetedMSModuleActive ? "Targeted MS Protein Search" : "Protein Search")%>,
                                 frame: 'none',
-                                renderTo: cmp.getId()
+                                renderTo: cmp.getId(),
+                                success: function() { cmp.up('panel').doLayout(); }
                             });
                             wp.render();
                         }
                     }
-                })
+                }]
+            },{
+                // peptide search webpart from the ... module
+                title: 'Peptide Search',
+                cls: 'non-ext-search-tab-panel',
+                items : [{
+                    xtype: 'component',
+                    border : false,
+                    listeners : {
+                        scope: this,
+                        afterrender : function(cmp) {
+                            var wp = new LABKEY.WebPart({
+                                partName: 'Peptide Search',
+                                frame: 'none',
+                                renderTo: cmp.getId(),
+                                success: function() { cmp.up('panel').doLayout(); }
+                            });
+                            wp.render();
+                        }
+                    }
+                }]
+            }
+<% if (targetedMSModuleActive) { %>
+            ,{
+                // modification search webpart from the targetedms module
+                title: 'Modification Search',
+                items : [{
+                    xtype: 'component',
+                    border : false,
+                    listeners : {
+                        scope: this,
+                        afterrender : function(cmp) {
+                            var wp = new LABKEY.WebPart({
+                                partName: 'Targeted MS Modification Search',
+                                frame: 'none',
+                                renderTo: cmp.getId(),
+                                success: function() { cmp.up('panel').doLayout(); }
+                            });
+                            wp.render();
+                        }
+                    }
+                }]
+            }
+<% }%>
             ]
         });
-<% } %>
-
     });
 
 </script>
