@@ -63,14 +63,15 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
             SQLFragment sql;
             String joinSql;
 
+            String columnNames = "Peptide, TrimmedPeptide, NextAA, PrevAA, Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum";
             if (_peptideView instanceof StandardProteinPeptideView)
             {
-                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum", _user);
+                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, columnNames + ", Run", _user);
                 joinSql = sql.getSQL().replaceFirst("RIGHT OUTER JOIN", "LEFT OUTER JOIN (SELECT Run AS fRun, Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + ") spec ON Run=fRun AND Scan = fScan\nRIGHT OUTER JOIN");
             }
             else
             {
-                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum", _user);
+                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, columnNames + ", ms2.SimplePeptides.Run", _user);
                 joinSql = sql.getSQL().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
             }
 

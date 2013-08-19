@@ -24,7 +24,7 @@ import java.io.IOException;
  * Date: May 10, 2006
  * Time: 12:51:22 PM
  */
-public class DtaSpectrumRenderer extends SpectrumRenderer
+public class DtaSpectrumRenderer extends AbstractTextSpectrumRenderer
 {
     public DtaSpectrumRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
     {

@@ -1,11 +1,17 @@
 package org.labkey.ms2;
 
+import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 /**
@@ -57,9 +63,9 @@ public enum MS2ExportType
     Bibliospec
     {
         @Override
-        public void export(AbstractMS2RunView peptideView, MS2Controller.ExportForm form, List<String> exportRows, ActionURL currentURL, SimpleFilter baseFilter) throws IOException
+        public void export(AbstractMS2RunView peptideView, MS2Controller.ExportForm form, List<String> exportRows, ActionURL currentURL, SimpleFilter baseFilter) throws IOException, RunListException
         {
-            throw new UnsupportedOperationException();
+            peptideView.exportSpectra(form, currentURL, new BibliospecSpectrumRenderer(form.getViewContext()), exportRows);
         }
     },
     MS2Ions("MS2 Ions TSV")
@@ -79,8 +85,66 @@ public enum MS2ExportType
         @Override
         public void export(AbstractMS2RunView peptideView, MS2Controller.ExportForm form, List<String> exportRows, ActionURL currentURL, SimpleFilter baseFilter) throws IOException
         {
-            MS2Controller.exportMS2Ions(form, form.getViewContext().getResponse());
+            HttpServletResponse response = form.getViewContext().getResponse();
+            MS2Run run = form.validateRun();
+            Filter filter = new SimpleFilter("Run", run.getRun());
+            MS2Peptide[] peptides = new TableSelector(MS2Manager.getTableInfoPeptides(), Table.ALL_COLUMNS, filter, new Sort("Scan")).getArray(MS2Peptide.class);
+            response.setContentType("text/tab-separated-values");
+            response.setHeader("Content-disposition", "attachment; filename=\"" + run.getDescription() + ".MS2Ions.tsv");
+            response.getWriter().write("Scan\tPeptide\tPeptideProphet\tProtein\tIonType\tFragmentLength\tAverageTheoreticalMass\tAverageObservedMass\tAverageDeltaMass\tAverageIntensity\tMonoisotopicTheoreticalMass\tMonoisotopicObservedMass\tMonoisotopicDeltaMass\tMonoisotopicIntesity\n");
+            for (MS2Peptide peptide : peptides)
+            {
+                peptide.init(0.5, 0, 10000);
+                exportPeptideIonRows(response.getWriter(), peptide, "y",
+                        peptide.getYIons(MassType.Average),
+                        peptide.getYIons(MassType.Monoisotopic));
+                exportPeptideIonRows(response.getWriter(), peptide, "b",
+                        peptide.getBIons(MassType.Average),
+                        peptide.getBIons(MassType.Monoisotopic));
+            }
         }
+
+        private void exportPeptideIonRows(Writer writer, MS2Peptide peptide, String ionType,
+                                MS2Peptide.FragmentIon[][] allAverageIons,
+                                MS2Peptide.FragmentIon[][] allMonoisotopicIons) throws IOException
+        {
+            for (int i = 0; i < allAverageIons.length; i++)
+            {
+                MS2Peptide.FragmentIon[] averageIons = allAverageIons[i];
+                MS2Peptide.FragmentIon[] monoisotopicIons = allMonoisotopicIons[i];
+
+                for (int j = 0; j < averageIons.length; j++)
+                {
+                    writer.write(peptide.getScan() + "\t");
+                    writer.write(peptide.getPeptide() + "\t");
+                    writer.write(peptide.getPeptideProphet() + "\t");
+                    writer.write(peptide.getProtein() + "\t");
+                    writer.write(ionType + (i + 1) + "+\t");
+                    writer.write((j + 1) + "\t");
+                    writeIonColumns(writer, averageIons[j], i + 1);
+                    writer.write("\t");
+                    writeIonColumns(writer, monoisotopicIons[j], i + 1);
+
+                    writer.write("\n");
+                }
+            }
+        }
+
+        private void writeIonColumns(Writer writer, MS2Peptide.FragmentIon ion, int chargeState) throws IOException
+        {
+            writer.write(ion.getTheoreticalMZ() * chargeState + "\t");
+            if (ion.isMatch())
+            {
+                writer.write(ion.getObservedMZ() * chargeState + "\t");
+                writer.write((ion.getTheoreticalMZ() * chargeState - ion.getObservedMZ() * chargeState) + "\t");
+                writer.write(Double.toString(ion.getIntensity()));
+            }
+            else
+            {
+                writer.write("\t\t");
+            }
+        }
+
     };
 
     private final String _name;

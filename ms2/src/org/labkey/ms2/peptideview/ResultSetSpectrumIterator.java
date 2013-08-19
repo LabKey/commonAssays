@@ -20,10 +20,14 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
-import org.labkey.ms2.*;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.Spectrum;
+import org.labkey.ms2.SpectrumException;
+import org.labkey.ms2.SpectrumImporter;
+import org.labkey.ms2.SpectrumIterator;
+import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -148,6 +152,78 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        public String getTrimmedSequence()
+        {
+            try
+            {
+                return _rs.getString("TrimmedPeptide");
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public int getFraction()
+        {
+            try
+            {
+                return _rs.getInt("Fraction");
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public int getRun()
+        {
+            try
+            {
+                return _rs.getInt("Run");
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public String getSequence()
+        {
+            try
+            {
+                return _rs.getString("Peptide");
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public String getNextAA()
+        {
+            try
+            {
+                return _rs.getString("NextAA");
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public String getPrevAA()
+        {
+            try
+            {
+                return _rs.getString("PrevAA");
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
         public double getMZ()
         {
             try
@@ -186,7 +262,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
 
             StringBuilder sql = new StringBuilder();
-            sql.append("SELECT Fraction, Scan, Charge, PrecursorMass, MZ, Spectrum FROM (SELECT pep.*, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
+            sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum FROM (SELECT pep.*, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
             sql.append(MS2Manager.getTableInfoPeptides());
             sql.append(" pep LEFT OUTER JOIN ");         // We want all peptides, even those without spectra in the database
             sql.append(MS2Manager.getTableInfoSpectraData());

@@ -43,7 +43,7 @@ public abstract class MS2Run implements Serializable
     protected Date loaded;
     protected int fastaId;
     protected String searchEnzyme;
-    protected Map<MassType, MS2Modification[]> modifications = new HashMap<>();
+    protected Map<MassType, List<MS2Modification>> modifications = new HashMap<>();
     protected Map<MassType, Map<String, Double>> varModifications = new HashMap<>();
     protected Map<MassType, double[]> massTables = new HashMap<>();
     protected MS2Fraction[] fractions;
@@ -71,7 +71,7 @@ public abstract class MS2Run implements Serializable
 
     protected void initModifications(MassType massType)
     {
-        MS2Modification[] staticModifications = modifications.get(massType);
+        List<MS2Modification> staticModifications = modifications.get(massType);
         if (null == staticModifications)
             staticModifications = MS2Manager.getModifications(this);
 
@@ -96,7 +96,7 @@ public abstract class MS2Run implements Serializable
     }
 
 
-    public MS2Modification[] getModifications(MassType massType)
+    public List<MS2Modification> getModifications(MassType massType)
     {
         if (null ==  modifications.get(massType))
             initModifications(massType);

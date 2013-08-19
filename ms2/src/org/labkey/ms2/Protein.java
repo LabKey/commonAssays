@@ -484,7 +484,7 @@ public class Protein
             countInstances =0;
         }
 
-        public void addPeptide(String peptide, MS2Modification[] mods )
+        public void addPeptide(String peptide, List<MS2Modification> mods )
         {
             countScans++;
             boolean unmodified = true;
@@ -718,7 +718,7 @@ public class Protein
         if (null==_peptides || _peptides.length <= 0)
             return uniquePeptides;
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
-        MS2Modification[] mods = new MS2Modification[0];
+        List<MS2Modification> mods = Collections.emptyList();
         if (run != null && run.getRun() > -1)
             mods = MS2Manager.getModifications(run);
 

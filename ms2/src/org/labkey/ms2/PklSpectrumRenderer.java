@@ -24,7 +24,7 @@ import java.io.IOException;
  * Date: May 10, 2006
  * Time: 12:51:22 PM
  */
-public class PklSpectrumRenderer extends SpectrumRenderer
+public class PklSpectrumRenderer extends AbstractTextSpectrumRenderer
 {
     public PklSpectrumRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
     {

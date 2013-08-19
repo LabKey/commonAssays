@@ -573,11 +573,11 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             header.append(run.getFileName()).append("|");
             header.append(run.getLoaded()).append("|");
 
-            MS2Modification[] mods = run.getModifications(MassType.Average);
+            List<MS2Modification> mods = run.getModifications(MassType.Average);
 
             for (MS2Modification mod : mods)
             {
-                if (mod != mods[0])
+                if (mod != mods.get(0))
                     header.append(';');
                 header.append(mod.getAminoAcid());
                 if (mod.getVariable())

@@ -16,25 +16,26 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 
 /**
+ * A renderer of spectrum information that ends up as some type of text file
  * User: adam
- * Date: May 6, 2006
- * Time: 4:35 pm
+ * Date: May 8, 2006
+ * Time: 5:23:26 PM
  */
-public class PlainTextRenderer
+public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
 {
-    private static Logger _log = Logger.getLogger(PlainTextRenderer.class);
+    protected static DecimalFormat df1 = new DecimalFormat("0.0");
+    protected static DecimalFormat df4 = new DecimalFormat("0.0000");
 
     HttpServletResponse _response;
     PrintWriter _out;
 
-    public PlainTextRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
+    protected AbstractTextSpectrumRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
     {
         // Flush any extraneous output (e.g., <CR><LF> from JSPs)
         response.reset();
@@ -46,7 +47,31 @@ public class PlainTextRenderer
         _response = response;
     }
 
+    @Override
+    public void render(SpectrumIterator iter) throws IOException
+    {
+        while (iter.hasNext())
+        {
+            Spectrum spectrum = iter.next();
+            renderFirstLine(spectrum);
+            renderSpectrum(spectrum);
+        }
+    }
 
+    protected void renderSpectrum(Spectrum spectrum)
+    {
+        float[] x = spectrum.getX();
+        float[] y = spectrum.getY();
+
+        for (int i = 0; i < x.length; i++)
+        {
+            _out.println(df1.format(x[i]) + " " + df1.format(y[i]));
+        }
+
+        _out.println();
+    }
+
+    @Override
     public void close() throws IOException
     {
         // Flush the writer
@@ -54,4 +79,6 @@ public class PlainTextRenderer
         // Finally, close the writer
         _out.close();
     }
+
+    protected abstract void renderFirstLine(Spectrum spectrum);
 }

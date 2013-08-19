@@ -26,6 +26,12 @@ public interface Spectrum
     public float[] getX();
     public float[] getY();
     public int getCharge();
+    public int getFraction();
+    public int getRun();
     public double getPrecursorMass();
     public double getMZ();
+    public String getSequence();
+    public String getTrimmedSequence();
+    public String getNextAA();
+    public String getPrevAA();
 }

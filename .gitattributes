@@ -1174,7 +1174,9 @@ ms2/src/META-INF/ms2/scripts.txt -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/AbstractPeptideDisplayColumn.java -text
 ms2/src/org/labkey/ms2/AbstractProteinQuantitation.java -text
+ms2/src/org/labkey/ms2/AbstractTextSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/AnnotationView.java -text
+ms2/src/org/labkey/ms2/BibliospecSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/CumulativeTimer.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
@@ -1208,7 +1210,6 @@ ms2/src/org/labkey/ms2/PepXmlImporter.java -text
 ms2/src/org/labkey/ms2/PeptideProphetGraphs.java -text
 ms2/src/org/labkey/ms2/PeptideQuantitation.java -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
-ms2/src/org/labkey/ms2/PlainTextRenderer.java -text
 ms2/src/org/labkey/ms2/Protein.java -text
 ms2/src/org/labkey/ms2/ProteinCoverageMapBuilder.java -text
 ms2/src/org/labkey/ms2/ProteinDisplayColumn.java -text

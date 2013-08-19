@@ -56,6 +56,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -1087,18 +1088,11 @@ public class MS2Manager
         }
     }
 
-    public static MS2Modification[] getModifications(MS2Run run)
+    public static List<MS2Modification> getModifications(MS2Run run)
     {
-        SimpleFilter filter = new SimpleFilter("run", run.getRun());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("run"), run.getRun());
 
-        try
-        {
-            return Table.select(getTableInfoModifications(), Table.ALL_COLUMNS, filter, null, MS2Modification.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return new TableSelector(getTableInfoModifications(), Table.ALL_COLUMNS, filter, null).getArrayList(MS2Modification.class);
     }
 
     public static MS2Peptide getPeptide(long peptideId)
