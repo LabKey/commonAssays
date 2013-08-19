@@ -217,6 +217,11 @@ public class ProteinManager
                 hashSequence(sequence), organismId).getObject(Protein.class);
     }
 
+    public static String getProteinSequence(int seqId)
+    {
+        Protein protein = getProtein(seqId);
+        return protein != null ? protein.getSequence() : null;
+    }
 
     public static Protein[] getProteinsContainingPeptide(int fastaId, MS2Peptide peptide) throws SQLException
     {

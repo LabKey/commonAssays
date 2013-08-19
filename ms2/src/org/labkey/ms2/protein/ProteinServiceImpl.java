@@ -131,6 +131,11 @@ public class ProteinServiceImpl implements ProteinService
         return new AnnotationView(protein);
     }
 
+    public String getProteinSequence(int seqId)
+    {
+        return ProteinManager.getProteinSequence(seqId);
+    }
+
     public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()
     {
         return Collections.unmodifiableList(_proteinSearchViewProviders);
