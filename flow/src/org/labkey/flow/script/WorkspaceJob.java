@@ -27,32 +27,34 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
-import org.labkey.flow.analysis.web.ScriptAnalyzer;
-import org.labkey.flow.controllers.executescript.AnalysisEngine;
-import org.labkey.flow.data.FlowFCSFile;
-import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.ScriptAnalyzer;
+import org.labkey.flow.controllers.WorkspaceData;
+import org.labkey.flow.controllers.executescript.AnalysisEngine;
+import org.labkey.flow.data.FlowDataType;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowFCSFile;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.controllers.WorkspaceData;
-import org.labkey.flow.data.FlowDataType;
-import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.FlowProtocol;
-import org.labkey.flow.FlowSettings;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.persist.FlowManager;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -147,8 +149,6 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
         if (checkInterrupted())
             return null;
-
-        FlowManager.vacuum();
 
         return saveAnalysis(user, container, experiment,
                 workspaceName, workspaceFile,

@@ -23,7 +23,6 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.persist.FlowManager;
 
 import java.io.File;
 
@@ -64,8 +63,6 @@ public class AnalyzeJob extends ScriptJob
 
     public void doRun() throws Exception
     {
-        FlowManager.vacuum();
-
         for (int runId : _runIds)
         {
             FlowRun srcRun = FlowRun.fromRunId(runId);
@@ -81,7 +78,5 @@ public class AnalyzeJob extends ScriptJob
                 error("Exception: " + t);
             }
         }
-
-        FlowManager.analyze();
     }
 }

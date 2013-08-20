@@ -478,7 +478,6 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             {
                 addStatus("Transaction failed to complete for " + analysisName);
             }
-            FlowManager.analyze();
         }
     }
 

@@ -921,8 +921,6 @@ public class FlowManager
         new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoKeywordAttr() + " WHERE container=?", container);
         new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
         new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoGraphAttr() + " WHERE container=?", container);
-        vacuum();
-        analyze();
     }
 
 
@@ -975,40 +973,4 @@ public class FlowManager
         }
     }
 
-
-    // postgres 8.2 workaround   // TODO: This code never runs (we stopped supported PostgreSQL 8.2 years ago). Delete or revise if it's still needed. #18409
-    private static Boolean _postgreSQL82 = null;
-
-    private static boolean isPostgresSQL82()
-    {
-        if (null == _postgreSQL82)
-        {
-            _postgreSQL82 = false;
-            DbSchema db = FlowManager.get().getSchema();
-
-            if (db.getSqlDialect().isPostgreSQL())
-            {
-                if (null != new SqlSelector(db, "SELECT version() WHERE version() like '% 8.2%'").getObject(String.class))
-                    _postgreSQL82 = true;
-            }
-        }
-
-        return _postgreSQL82.booleanValue();
-    }
-
-    static public void vacuum()
-    {
-        if (isPostgresSQL82())
-        {
-            new SqlExecutor(FlowManager.get().getSchema()).execute("VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.keywordattr; VACUUM flow.statistic; VACUUM flow.statisticattr; VACUUM flow.graph; VACUUM flow.graphattr;");
-        }
-    }
-
-    static public void analyze()
-    {
-        if (isPostgresSQL82())
-        {
-            new SqlExecutor(FlowManager.get().getSchema()).execute("ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.keywordattr; ANALYZE flow.statistic; ANALYZE flow.statisticattr; ANALYZE flow.graph; ANALYZE flow.graphattr;");
-        }
-    }
 }
