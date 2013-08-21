@@ -136,8 +136,8 @@
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <input type="checkbox" name="rEngineNormalization" id="rEngineNormalization" onchange="onNormalizationChange();"
-        <%=text(normalizationEnabled && form.isrEngineNormalization() ? "checked" : "")%>
-        <%=text(normalizationEnabled ? "" : "disabled")%> >
+        <%=checked(normalizationEnabled && form.isrEngineNormalization())%>
+        <%=disabled(!normalizationEnabled)%> >
     <input type="hidden" name="<%=text(SpringActionController.FIELD_MARKER)%>rEngineNormalization"/>
     <label for="rEngineNormalization">Perform normalization using flowWorkspace R library? (experimental)</label>
 </div>
@@ -146,7 +146,7 @@
     <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
     <em>NOTE:</em> The list of available samples is restricted to those selected in a previous step.<br>
     <select name="rEngineNormalizationReference" id="rEngineNormalizationReference"
-        <%=text(normalizationEnabled ? "" : "disabled")%> onchange="onNormalizationReferenceChanged(this.value);" >
+        <%=disabled(!normalizationEnabled)%> onchange="onNormalizationReferenceChanged(this.value);" >
         <option value="">&lt;Select sample&gt;</option>
         <%
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();

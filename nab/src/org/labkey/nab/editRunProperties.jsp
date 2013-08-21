@@ -76,7 +76,7 @@
                             for (PlateTemplate current : templates)
                             {
                         %>
-                            <option value="<%= h(current.getName()) %>" <%= activeTemplate.getName().equals(current.getName()) ? "SELECTED" : ""%>>
+                            <option value="<%= h(current.getName()) %>"<%=selected(activeTemplate.getName().equals(current.getName()))%>>
                             <%= h(current.getName()) %></option>
                         <%
                             }
@@ -144,9 +144,9 @@
                                             name="sampleInfos[<%= sampId %>].methodName"
                                             style="display:<%= sampId > 0 && form.getRunSettings().isSameMethod() ? "none" : "block" %>">
                                         <option value="<%= SampleInfo.Method.Dilution.name() %>"
-                                                <%= SampleInfo.Method.Dilution == sampleInfo.getMethod() ? "SELECTED" : "" %>>Dilution</option>
+                                                <%=selected(SampleInfo.Method.Dilution == sampleInfo.getMethod())%>>Dilution</option>
                                         <option value="<%= SampleInfo.Method.Concentration.name() %>"
-                                                <%= SampleInfo.Method.Concentration == sampleInfo.getMethod() ? "SELECTED" : "" %>>Concentration</option>
+                                                <%=selected(SampleInfo.Method.Concentration == sampleInfo.getMethod())%>>Concentration</option>
                                     </select>
                                 </td>
                                 <td>
@@ -251,11 +251,11 @@
                     <td style="<%= labelStyle %>">Experiment Date</td>
                     <td><input type="text" id="experimentDate" name="metadata.experimentDateString"
                                size="35"
-                               value="<%= form.getRunSettings().isInferFromFile() ? "" : h(form.getMetadata().getExperimentDateString()) %>"  <%= form.getRunSettings().isInferFromFile() ? "DISABLED" : "" %>>
+                               value="<%=h(form.getRunSettings().isInferFromFile() ? "" : form.getMetadata().getExperimentDateString())%>"<%=disabled(form.getRunSettings().isInferFromFile())%>>
                     </td>
                     <td style="<%= labelStyle %>">File ID</td>
                     <td><input type="text" id="fileId" name="metadata.fileId" size="35"
-                               value="<%= form.getRunSettings().isInferFromFile() ? "" : h(form.getMetadata().getFileId()) %>"  <%= form.getRunSettings().isInferFromFile() ? "DISABLED" : "" %>>
+                               value="<%=h(form.getRunSettings().isInferFromFile() ? "" : form.getMetadata().getFileId())%>"<%=disabled(form.getRunSettings().isInferFromFile())%>>
                     </td>
                 </tr>
             </table>

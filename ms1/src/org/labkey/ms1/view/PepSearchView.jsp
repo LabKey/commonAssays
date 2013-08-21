@@ -38,11 +38,11 @@
         </tr>
         <tr>
             <td class="labkey-form-label"><label for="cbxExact">Exact matches only</label><%=helpPopup("Exact matches only", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%></td>
-            <td><input id="cbxExact" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.exact.name()%>" style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
+            <td><input id="cbxExact" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.exact.name()%>" style="vertical-align:middle"<%=checked(model.isExact())%> />
         </tr>
         <tr>
             <td class="labkey-form-label"><label for="cbxSubfolders">Search in subfolders</label><%=helpPopup("Search in subfolders", "Check to search this folder and all of its descendants.")%></td>
-            <td><input id="cbxSubfolders" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle" <%=model.includeSubfolders() ? "checked" : ""%> /></td>
+            <td><input id="cbxSubfolders" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle"<%=checked(model.includeSubfolders())%> /></td>
         </tr>
     </table>
 </form>

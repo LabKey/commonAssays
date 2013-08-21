@@ -144,8 +144,8 @@
 %>
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
-        <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Previous ? "checked" : "")%>
-        <%=text(keywordRuns.isEmpty() ? "disabled" : "")%>
+        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Previous)%>
+        <%=disabled(keywordRuns.isEmpty())%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" style="<%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</label>
 <div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">

@@ -15,18 +15,16 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.metadata.FractionsDisplayColumn" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.ms2.metadata.FractionsDisplayColumn" %>
 <%@ page import="org.labkey.ms2.metadata.MassSpecMetadataAssayForm" %>
-
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ViewContext context = HttpView.currentContext();
     MassSpecMetadataAssayForm form = ((JspView<MassSpecMetadataAssayForm>)HttpView.currentView()).getModelBean();
     boolean fractions = form.isFractions();
 %>
-<input type="checkbox" id="<%= FractionsDisplayColumn.FRACTIONS_FIELD_NAME %>" value="true" <%= fractions ? "checked" : "" %>
+<input type="checkbox" id="<%= FractionsDisplayColumn.FRACTIONS_FIELD_NAME %>" value="true"<%=checked(fractions)%>
        name="<%= FractionsDisplayColumn.FRACTIONS_FIELD_NAME %>"> All the files are fractions of a single sample<%= PageFlowUtil.helpPopup("Fractions", "<p>Check the box if the files in this directory are the results from fractionating a single sample and running the individual files through the mass spec.</p><p>Leave the box unchecked if the files are from unrelated samples.</p>", true)%>

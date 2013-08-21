@@ -168,7 +168,7 @@ those results must be put into different analysis folders.
     <table>
         <tr>
             <td valign="top">
-                <input type="radio" id="chooseExistingAnalysis" name="createAnalysis" value="false" checked="true">
+                <input type="radio" id="chooseExistingAnalysis" name="createAnalysis" value="false" checked>
             </td>
             <td>
                 <label for="chooseExistingAnalysis">Choose an analysis folder to put the results into:</label>
