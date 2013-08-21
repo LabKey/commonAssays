@@ -64,7 +64,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     public void logProperties(Logger logger)
     {
         super.logProperties(logger);
-        logger.info("-----  Start Luminex Analyte Properties -----");
+        logger.info("----- Start Luminex Analyte Properties -----");
         for(Map.Entry<String, Map<String, String>> entry : this._analyteColumnPropertiesByName.entrySet())
         {
             logger.info("\tProperties for " + entry.getKey() + ":");
@@ -73,8 +73,8 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
                 logger.info("\t\t*"+props.getKey() + ":  " + props.getValue());
             }
         }
-        logger.info("-----  Stop Luminex Analyte Properties -----");
-        logger.info("-----  Start Luminex Titration Properties -----");
+        logger.info("----- Stop Luminex Analyte Properties -----");
+        logger.info("----- Start Luminex Titration Properties -----");
         for(Titration titration : this._titrations)
         {
             logger.info("\tProperties for " + titration.getName());
@@ -85,7 +85,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             logger.info("\t\t*Unknown:  " + titration.isUnknown());
             logger.info("\t\t*Max FI:  " + titration.getMaxFI());
         }
-        logger.info("-----  Stop Luminex Titration Properties -----");
+        logger.info("----- Stop Luminex Titration Properties -----");
 
     }
 
