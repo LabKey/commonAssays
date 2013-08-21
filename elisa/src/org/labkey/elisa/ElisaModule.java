@@ -16,6 +16,7 @@
 
 package org.labkey.elisa;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
@@ -50,6 +51,7 @@ public class ElisaModule extends DefaultModule
         return false;
     }
 
+    @NotNull
     @Override
     protected Collection<WebPartFactory> createWebPartFactories()
     {
@@ -74,6 +76,7 @@ public class ElisaModule extends DefaultModule
         PlateReaderService.registerPlateReader(provider, new BioTekPlateReader());
     }
 
+    @NotNull
     @Override
     public Collection<String> getSummary(Container c)
     {

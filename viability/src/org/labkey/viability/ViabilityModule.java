@@ -18,7 +18,6 @@ package org.labkey.viability;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -50,6 +49,7 @@ public class ViabilityModule extends DefaultModule
         return true;
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
@@ -67,6 +67,7 @@ public class ViabilityModule extends DefaultModule
         AssayService.get().registerAssayProvider(new ViabilityAssayProvider());
     }
 
+    @NotNull
     @Override
     public Collection<String> getSummary(Container c)
     {

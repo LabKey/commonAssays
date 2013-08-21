@@ -100,6 +100,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
         SystemMaintenance.addTask(new PurgeTask());
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return new ArrayList<WebPartFactory>(Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
@@ -142,6 +143,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
         return true;
     }
 
+    @NotNull
     @Override
     public Collection<String> getSummary(Container c)
     {

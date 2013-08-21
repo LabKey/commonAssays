@@ -83,6 +83,7 @@ public class MicroarrayModule extends SpringModule
         MicroarraySchema.register();
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return new ArrayList<WebPartFactory>(Arrays.asList(
@@ -125,6 +126,7 @@ public class MicroarrayModule extends SpringModule
         return true;
     }
 
+    @NotNull
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();

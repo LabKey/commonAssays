@@ -140,6 +140,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return 13.20;
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         BaseWebPartFactory runsFactory = new BaseWebPartFactory(MS2_RUNS_NAME)
@@ -319,6 +320,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
     }
 
+    @NotNull
     @Override
     public Collection<String> getSummary(Container c)
     {

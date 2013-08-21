@@ -48,6 +48,7 @@ public class LuminexModule extends DefaultModule
         addController("luminex", LuminexController.class);
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
@@ -58,6 +59,7 @@ public class LuminexModule extends DefaultModule
         return true;
     }
 
+    @NotNull
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();

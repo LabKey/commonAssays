@@ -132,6 +132,7 @@ public class FlowModule extends DefaultModule
         ServiceRegistry.get().registerService(FlowService.class, new FlowServiceImpl());
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Arrays.asList(

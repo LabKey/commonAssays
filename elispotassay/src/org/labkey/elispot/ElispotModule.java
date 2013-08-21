@@ -17,6 +17,7 @@
 package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
@@ -54,6 +55,7 @@ public class ElispotModule extends DefaultModule
         addController("elispot-assay", ElispotController.class);
     }
 
+    @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
@@ -64,6 +66,7 @@ public class ElispotModule extends DefaultModule
         return true;
     }
 
+    @NotNull
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();
