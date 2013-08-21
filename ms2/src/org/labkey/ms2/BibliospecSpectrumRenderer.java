@@ -7,21 +7,23 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewContext;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +69,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
                 int spectraCount = 0;
 
-                try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, prevAA, nextAA, copies, numPeaks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, copies, numPeaks) VALUES (?, ?, ?, ?, ?, ?)");
                      PreparedStatement spectraPS = connection.prepareStatement("INSERT INTO RefSpectraPeaks(RefSpectraId, PeakMZ, PeakIntensity) VALUES (?, ?, ?)");
                      PreparedStatement modificationPS = connection.prepareStatement("INSERT INTO Modifications (RefSpectraId, Position, Mass) VALUES (?, ?, ?)");
                      PreparedStatement sourceFilePS = connection.prepareStatement("INSERT INTO SpectrumSourceFiles (fileName) VALUES (?)"))
@@ -126,10 +128,10 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         peptidePS.setString(2, getExportModifiedSequence(split[1], modifications, peptideModifications));
                         peptidePS.setInt(3, spectrum.getCharge());
                         peptidePS.setDouble(4, spectrum.getMZ());
-                        peptidePS.setString(5, spectrum.getNextAA());
-                        peptidePS.setString(6, spectrum.getPrevAA());
-                        peptidePS.setInt(7, 1);  // TODO - real value
-                        peptidePS.setInt(8, mzFloats.length);
+//                        peptidePS.setString(5, spectrum.getNextAA());
+//                        peptidePS.setString(6, spectrum.getPrevAA());
+                        peptidePS.setInt(5, 1);  // TODO - real value
+                        peptidePS.setInt(6, mzFloats.length);
                         peptidePS.execute();
                         spectraCount++;
 
@@ -141,22 +143,23 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             modificationPS.execute();
                         }
 
-                        ByteArrayOutputStream mzByteOut = new ByteArrayOutputStream(mzFloats.length * 4);
-                        ByteArrayOutputStream intensityByteOut = new ByteArrayOutputStream(intensityFloats.length * 8);
-                        DataOutputStream mzDataOut = new DataOutputStream(mzByteOut);
-                        DataOutputStream intensityDataOut = new DataOutputStream(intensityByteOut);
-                        assert mzFloats.length == intensityFloats.length : "Mismatched spectra";
+                        assert mzFloats.length == intensityFloats.length : "Mismatched spectra arrays";
+                        // Write out mz as doubles
+                        ByteBuffer mzBuffer = ByteBuffer.allocate(mzFloats.length * Double.SIZE / 8);
+                        mzBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                        // Write out mz as floats
+                        ByteBuffer intensityBuffer = ByteBuffer.allocate(intensityFloats.length * Float.SIZE / 8);
+                        intensityBuffer.order(ByteOrder.LITTLE_ENDIAN);
                         for (int i = 0; i < mzFloats.length; i++)
                         {
-                            mzDataOut.writeFloat(mzFloats[i]);
-                            intensityDataOut.writeDouble(intensityFloats[i]);
+                            mzBuffer.putDouble(mzFloats[i]);
+                            intensityBuffer.putFloat(intensityFloats[i]);
                         }
-                        mzDataOut.close();
-                        intensityDataOut.close();
 
                         spectraPS.setInt(1, spectraCount);
-                        spectraPS.setBytes(2, compress(mzByteOut.toByteArray()));
-                        spectraPS.setBytes(3, compress(intensityByteOut.toByteArray()));
+                        // For now output as uncompressed data - must need to use a newer version to allow compression
+                        spectraPS.setBytes(2, mzBuffer.array());
+                        spectraPS.setBytes(3, intensityBuffer.array());
                         spectraPS.execute();
                     }
                 }
@@ -165,7 +168,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                 try (PreparedStatement ps = connection.prepareStatement("INSERT INTO LibInfo(libLSID, createTime, numSpecs, majorVersion, minorVersion) VALUES (?, ?, ?, ?, ?)"))
                 {
                     ps.setString(1, new Lsid("spectral_library", "bibliospec").setVersion("nr") + _context.getContainer().getName());
-                    ps.setDate(2, new Date(new java.util.Date().getTime()));
+                    ps.setString(2, new SimpleDateFormat("EEE MMM HH:mm:ss yyyy").format(new Date()));
                     ps.setInt(3, spectraCount);
                     ps.setInt(4, 1);
                     ps.setInt(5, 0);
@@ -246,6 +249,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
         {
             bOut.write(b, 0, i);
         }
+        deflater.end();
         return bOut.toByteArray();
     }
 
