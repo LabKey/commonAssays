@@ -152,7 +152,8 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
         sampleName.setRequired(true);
 
         DomainProperty celFileId = addProperty(dataDomain, CEL_FILE_ID_COLUMN, "CEL File Id", PropertyType.INTEGER);
-        celFileId.setLookup(new Lookup(c, ExpSchema.SCHEMA_NAME, "Data"));
+        // Don't set a target container so that it's interpreted relative to the data, not the assay design's container
+        celFileId.setLookup(new Lookup(null, ExpSchema.SCHEMA_NAME, "Data"));
         celFileId.setRequired(true);
 
         return new Pair<>(dataDomain, Collections.<DomainProperty, Object>emptyMap());
