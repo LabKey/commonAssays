@@ -134,7 +134,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class QcReportAction extends BaseAssayAction<ProtocolIdForm>
+    public class TitrationQcReportAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
 
@@ -159,6 +159,54 @@ public class LuminexController extends SpringActionController
                     graph.addParameter("analyte", "${Analyte/Name}");
                     graph.addParameter("isotype", "${Titration/Run/Isotype}");
                     graph.addParameter("conjugate", "${Titration/Run/Conjugate}");
+                    SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
+                    ret.getDataRegion().addDisplayColumn(0, graphDetails);
+                }
+            };
+            view.setShadeAlternatingRows(true);
+            view.setShowBorders(true);
+            view.setShowUpdateColumn(false);
+            view.setFrame(WebPartView.FrameType.NONE);
+            result.setupViews(view, false, form.getProvider(), form.getProtocol());
+
+            return result;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            NavTree result = super.appendNavTrail(root);
+            return result.addChild(_protocol.getName() + " QC Report");
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class SinglePointControlQcReportAction extends BaseAssayAction<ProtocolIdForm>
+    {
+        private ExpProtocol _protocol;
+
+        @Override
+        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        {
+            _protocol = form.getProtocol();
+
+            AbstractAssayView result = new AbstractAssayView();
+            AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+            QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.SINGLE_POINT_CONTROL_ANALYTE_TABLE_NAME, LuminexProtocolSchema.SINGLE_POINT_CONTROL_ANALYTE_TABLE_NAME);
+            setHelpTopic(new HelpTopic("applyGuideSets"));
+            QueryView view = new QueryView(schema, settings, errors)
+            {
+                @Override
+                protected void setupDataView(DataView ret)
+                {
+                    super.setupDataView(ret);
+
+                    // TODO: add logic for SinglePointControl Graph (the below was stolen from Titration)
+                    ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
+//                    graph.addParameter("titration", "${Titration/Name}");
+//                    graph.addParameter("analyte", "${Analyte/Name}");
+//                    graph.addParameter("isotype", "${Titration/Run/Isotype}");
+//                    graph.addParameter("conjugate", "${Titration/Run/Conjugate}");
                     SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
                     ret.getDataRegion().addDisplayColumn(0, graphDetails);
                 }

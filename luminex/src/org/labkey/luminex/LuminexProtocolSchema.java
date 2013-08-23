@@ -55,6 +55,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String TITRATION_TABLE_NAME = "Titration";
     public static final String SINGLE_POINT_CONTROL_TABLE_NAME = "SinglePointControl";
     public static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
+    public static final String SINGLE_POINT_CONTROL_ANALYTE_TABLE_NAME = "SinglePointControlAnalyte";
     public static final String DATA_ROW_TABLE_NAME = "DataRow";
     public static final String DATA_FILE_TABLE_NAME = "DataFile";
     public static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";

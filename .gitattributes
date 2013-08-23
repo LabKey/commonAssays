@@ -578,6 +578,7 @@ flow/src/org/labkey/flow/webparts/FlowSummaryWebPart.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 luminex/module.properties -text
 luminex/resources/assay/Luminex/queries/SinglePointControlAnalyte.sql -text
+luminex/resources/assay/Luminex/queries/SinglePointControlAnalyte/.qview.xml -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-11.20.sql -text

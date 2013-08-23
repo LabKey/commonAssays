@@ -24,15 +24,13 @@ import java.util.Objects;
  * User: gktaylor
  * Date: Aug 6, 2013
  * Class to handle Luminex Single Point Controls, this class primarily takes a titration as an argument created
- * in the LuminexExcelParser. Unlike a Titration, it has no defined type (the type is implicit, and it has an
- * FI value as opposed to a maxFI value.
+ * in the LuminexExcelParser. Unlike a Titration, it has no defined type (the type is implicit).
  */
 public class SinglePointControl implements Serializable
 {
     private int _rowId;
     private int _runId;
     private String _name = "Standard";
-    private double _FI;
 
     public SinglePointControl()
     {
@@ -43,7 +41,6 @@ public class SinglePointControl implements Serializable
         setRowId(titration.getRowId());
         setRunId(titration.getRunId());
         setName(titration.getName());
-        setFI(titration.getMaxFI());
     }
 
     public int getRowId()
@@ -77,15 +74,4 @@ public class SinglePointControl implements Serializable
         
         _name = name;
     }
-
-    public double getFI()
-    {
-        return _FI;
-    }
-
-    public void setFI(double FI)
-    {
-        _FI = FI;
-    }
-
 }

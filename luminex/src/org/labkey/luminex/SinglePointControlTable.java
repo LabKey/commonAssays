@@ -26,6 +26,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryForeignKey;
 
 /**
  * User: gktaylor
@@ -43,6 +44,7 @@ public class SinglePointControlTable extends AbstractLuminexTable
         // Alias the RunId column to be consistent with other Schema columns
         ColumnInfo colInfo = getColumn("RunId");
         colInfo.setLabel("Run");
+        colInfo.setFk(new QueryForeignKey(schema, "Runs", "RowId", "Name"));
     }
 
     @Override

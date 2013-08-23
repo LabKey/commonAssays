@@ -216,6 +216,7 @@
     </table>
 
     <table tableName="SinglePointControl" tableDbType="TABLE">
+        <description>Contains one row per analyte/single point control combination within a run</description>
         <columns>
             <column columnName="RowId" />
             <column columnName="RunId" />

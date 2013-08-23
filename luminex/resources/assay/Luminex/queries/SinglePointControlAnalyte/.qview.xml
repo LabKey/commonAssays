@@ -1,0 +1,30 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="RunId"/>
+        <column name="Name">
+            <properties>
+                <property name="columnTitle" value="Single Point Control"/>
+            </properties>
+        </column>
+        <column name="RunId/Batch/Network"/>
+        <column name="RunId/Batch/CustomProtocol">
+            <properties>
+                <property name="columnTitle" value="Protocol"/>
+            </properties>
+        </column>
+        <column name="RunId/Folder"/>
+        <column name="RunId/NotebookNo"/>
+        <column name="RunId/AssayType"/>
+        <column name="RunId/ExpPerformer"/>
+        <column name="Analyte/Data/AcquisitionDate"/>
+        <column name="Analyte"/>
+        <column name="RunId/Isotype"/>
+        <column name="RunId/Conjugate"/>
+        <column name="Analyte/Properties/LotNumber"/>
+        <column name="AverageFiBkgd">
+            <properties>
+                <property name="columnTitle" value="Average FI-Bkgd"/>
+            </properties>
+        </column>
+    </columns>
+</customView>

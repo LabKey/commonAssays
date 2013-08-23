@@ -336,8 +336,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
 
-        // add header link for the QC Report
-        url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.QcReportAction.class);
+        /*
+         * add header menu for the QC Report
+         */
+        NavTree manageMenu = new NavTree("view qc report");
+
+        // add a URL for the titration report
+        url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.TitrationQcReportAction.class);
         if (containerFilter != null && containerFilter.getType() != null)
         {
             url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
@@ -348,7 +353,24 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         // just show titrations that are either standards or qc controls
         url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
-        result.add(new NavTree("view qc report", PageFlowUtil.addLastFilterParameter(url)));
+        manageMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url)));
+
+        // add a URL for the single point control report
+        url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.SinglePointControlQcReportAction.class);
+        if (containerFilter != null && containerFilter.getType() != null)
+        {
+            url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
+        }
+        if (null != currentRunId)
+        {
+            url.addParameter("AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
+        }
+        // just show titrations that are either standards or qc controls
+        url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
+        manageMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url)));
+
+        if (manageMenu.getChildCount() > 0)
+            result.add(manageMenu);
 
         return result;
     }
