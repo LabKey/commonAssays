@@ -31,7 +31,6 @@ import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayView;
 import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -41,6 +40,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
 import org.springframework.web.servlet.ModelAndView;
@@ -229,17 +229,19 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class LeveyJenningsReportAction extends SimpleViewAction<TitrationForm>
+    public class LeveyJenningsReportAction extends SimpleViewAction<LeveyJenningsForm>
     {
-        private String _titration;
-        private ExpProtocol _protocol;
+        private LeveyJenningsForm _form;
 
         @Override
-        public ModelAndView getView(TitrationForm form, BindException errors) throws Exception
+        public ModelAndView getView(LeveyJenningsForm form, BindException errors) throws Exception
         {
-            _titration = form.getTitration();
-            _protocol = form.getProtocol();
+            _form = form;
 
+            if (form.getControlName() == null)
+            {
+                throw new NotFoundException("No control name specified");
+            }
             VBox result = new VBox();
             AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
             result.addView(header);
@@ -253,7 +255,30 @@ public class LuminexController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            return result.addChild(_protocol.getName() + " Levey-Jennings Report: " + _titration);
+            result.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
+            result.addChild("Levey-Jennings Reports", new ActionURL(LeveyJenningsMenuAction.class, getContainer()).addParameter("rowId", _form.getProtocol().getRowId()));
+            return result.addChild(_form.getControlName());
         }
     }    
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class LeveyJenningsMenuAction extends SimpleViewAction<ProtocolIdForm>
+    {
+        private ProtocolIdForm _form;
+
+        @Override
+        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        {
+            _form = form;
+            return new LeveyJenningsMenuView(form.getProtocol());
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            result.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
+            return result.addChild("Levey-Jennings Reports");
+        }
+    }
 }

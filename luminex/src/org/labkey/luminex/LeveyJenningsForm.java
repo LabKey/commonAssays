@@ -22,17 +22,41 @@ import org.labkey.api.study.actions.ProtocolIdForm;
 * User: cnathe
 * Date: Sept 19, 2011
 */
-public class TitrationForm extends ProtocolIdForm
+public class LeveyJenningsForm extends ProtocolIdForm
 {
-    private String _titration;
+    public enum ControlType { Titration, SinglePoint }
+
+    private String _controlName;
+    private ControlType _controlType = ControlType.Titration;
 
     public String getTitration()
     {
-        return _titration;
+        return _controlName;
     }
 
-    public void setTitration(String titration)
+    public void setTitration(String controlName)
     {
-        _titration = titration;
+        _controlName = controlName;
+        _controlType = ControlType.Titration;
+    }
+
+    public String getControlName()
+    {
+        return _controlName;
+    }
+
+    public void setControlName(String controlName)
+    {
+        _controlName = controlName;
+    }
+
+    public ControlType getControlType()
+    {
+        return _controlType;
+    }
+
+    public void setControlType(ControlType controlType)
+    {
+        _controlType = controlType;
     }
 }

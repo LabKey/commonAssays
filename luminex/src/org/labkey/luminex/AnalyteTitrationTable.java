@@ -328,9 +328,13 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                     {
                         throw new ValidationException("GuideSet is for analyte " + guideSet.getAnalyteName(), " but this row is mapped to analyte " + analyte.getName());
                     }
-                    if (!Objects.equals(titration.getName(), guideSet.getTitrationName()))
+                    if (!guideSet.isTitration())
                     {
-                        throw new ValidationException("GuideSet is for titration " + guideSet.getTitrationName(), " but this row is mapped to titration " + titration.getName());
+                        throw new ValidationException("GuideSet is not for a titration");
+                    }
+                    if (!Objects.equals(titration.getName(), guideSet.getControlName()))
+                    {
+                        throw new ValidationException("GuideSet is for titration " + guideSet.getControlName(), " but this row is mapped to titration " + titration.getName());
                     }
                 }
 

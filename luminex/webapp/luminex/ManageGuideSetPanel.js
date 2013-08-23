@@ -331,7 +331,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             queryName: this.assayName + ' GuideSet',
             command: 'insert',
             rows: [{
-                TitrationName: this.titration,
+                ControlName: this.titration,
                 AnalyteName: this.analyte,
                 Isotype: this.isotype,
                 Conjugate: this.conjugate,

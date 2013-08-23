@@ -42,7 +42,7 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
             String curveTypeName = name.substring(0, name.length() - CURVE_FIT_SUFFIX.length());
             return createCurveTypeColumn(curveTypeName);
         }
-        return null;
+        return super.resolveColumn(name);
     }
 
     protected void addCurveTypeColumns()

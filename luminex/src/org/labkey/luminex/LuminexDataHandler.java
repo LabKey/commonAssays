@@ -673,7 +673,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private GuideSet determineGuideSet(Analyte analyte, Titration titration, String conjugate, String isotype, ExpProtocol protocol)
     {
-        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), titration.getName(), conjugate, isotype);
+        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentTitrationGuideSet(protocol, analyte.getName(), titration.getName(), conjugate, isotype);
         if (guideSet != null)
         {
             return guideSet;

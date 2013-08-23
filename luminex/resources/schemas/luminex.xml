@@ -82,7 +82,8 @@
             <column columnName="CurrentGuideSet" />
             <column columnName="Conjugate" />
             <column columnName="Isotype" />
-            <column columnName="TitrationName" />
+            <column columnName="ControlName" />
+            <column columnName="Titration" />
             <column columnName="Comment" />
             <column columnName="Created" />
             <column columnName="CreatedBy" />

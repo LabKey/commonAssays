@@ -158,7 +158,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             _protocol = guideSetTable._userSchema.getProtocol();
         }
 
-        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
+        public static GuideSet getMatchingCurrentTitrationGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
         {
             SQLFragment sql = new SQLFragment("SELECT * FROM ");
             sql.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
@@ -166,8 +166,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             sql.add(protocol.getRowId());
             sql.append(" AND AnalyteName");
             appendNullableString(sql, analyteName);
-            sql.append(" AND TitrationName");
+            sql.append(" AND ControlName");
             appendNullableString(sql, titrationName);
+            sql.append(" AND Titration = ?");
+            sql.add(true);
             sql.append(" AND Conjugate");
             appendNullableString(sql, conjugate);
             sql.append(" AND Isotype");
@@ -232,7 +234,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             validateProtocol(bean);
             validateGuideSetValues(bean);
             boolean current = bean.isCurrentGuideSet();
-            if (current && getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getTitrationName(), bean.getConjugate(), bean.getIsotype()) != null)
+            if (current && getMatchingCurrentTitrationGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype()) != null)
             {
                 throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
             }
@@ -249,10 +251,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             validateGuideSetValues(bean);
             if (bean.isCurrentGuideSet())
             {
-                GuideSet currentGuideSet = getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getTitrationName(), bean.getConjugate(), bean.getIsotype());
+                GuideSet currentGuideSet = getMatchingCurrentTitrationGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype());
                 if (currentGuideSet != null && currentGuideSet.getRowId() != oldKey.intValue())
                 {
-                    throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/TitrationName/Conjugate/Isotype combination");
+                    throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/ControlName/Conjugate/Isotype combination");
                 }
             }
             return Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
@@ -291,11 +293,22 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 throw new ValidationException("Isotype value '" + bean.getIsotype() + "' is too long, maximum length is " + maxLength + " characters");
             }
-            maxLength = LuminexProtocolSchema.getTableInfoGuideSet().getColumn("TitrationName").getScale();
-            if (bean.getTitrationName() != null && bean.getTitrationName().length() > maxLength)
+            maxLength = LuminexProtocolSchema.getTableInfoGuideSet().getColumn("ControlName").getScale();
+            if (bean.getControlName() != null && bean.getControlName().length() > maxLength)
             {
-                throw new ValidationException("TitrationName value '" + bean.getTitrationName() + "' is too long, maximum length is " + maxLength + " characters");
+                throw new ValidationException("ControlName value '" + bean.getControlName() + "' is too long, maximum length is " + maxLength + " characters");
             }
         }
     }
+
+    @Override
+    protected ColumnInfo resolveColumn(String name)
+    {
+        if (name.equalsIgnoreCase("TitrationName"))
+        {
+            return getColumn("ControlName");
+        }
+        return super.resolveColumn(name);
+    }
+
 }

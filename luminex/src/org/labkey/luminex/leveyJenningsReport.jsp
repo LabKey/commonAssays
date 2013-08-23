@@ -23,12 +23,12 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.luminex.TitrationForm" %>
+<%@ page import="org.labkey.luminex.LeveyJenningsForm" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 
 <%
-    JspView<TitrationForm> me = (JspView<TitrationForm>) HttpView.currentView();
-    TitrationForm bean = me.getModelBean();
+    JspView<LeveyJenningsForm> me = (JspView<LeveyJenningsForm>) HttpView.currentView();
+    LeveyJenningsForm bean = me.getModelBean();
 %>
 
 <table cellpadding="0" cellspacing="15">
@@ -59,17 +59,23 @@
     var defaultRowSize = 30;
 
     // local variables for storing the selected graph parameters
-    var _protocolName, _titration, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
+    var _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
 
     Ext.onReady(init);
     function init()
     {
-        _titration = <%=PageFlowUtil.jsString(bean.getTitration())%>;
+        _controlName = <%=PageFlowUtil.jsString(bean.getControlName())%>;
+        _controlType = <%=PageFlowUtil.jsString(bean.getControlType().toString())%>;
         _protocolName = <%=PageFlowUtil.jsString(bean.getProtocol().getName())%>;
 
-        if ("" == _titration)
+        if ("" == _controlType || "" == _controlName)
         {
-            Ext.get('graphParamsPanel').update("Error: no titration specified.");
+            Ext.get('graphParamsPanel').update("Error: no control name specified.");
+            return;
+        }
+        if ('SinglePoint' != _controlType && 'Titration' != _controlType)
+        {
+            Ext.get('graphParamsPanel').update("Error: unsupported control type: '" + _controlType + "'");
             return;
         }
         if ("" == _protocolName)
@@ -104,17 +110,31 @@
         });
 
         // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
-        var reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
+        var reqColumns;
+        var queryName;
+        var filterArray;
+        if ('Titration' == _controlType)
+        {
+            reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
+            queryName = 'AnalyteTitration';
+            filterArray = [LABKEY.Filter.create('Titration/Name', _controlName)];
+        }
+        else
+        {
+            reqColumns = ['Name', 'RunId/Isotype', 'RunId/Conjugate'];
+            queryName = 'SinglePointControl';
+            filterArray = [LABKEY.Filter.create('Name', _controlName)];
+        }
         LABKEY.Query.selectRows({
             containerFilter: LABKEY.Query.containerFilter.allFolders,
-            schemaName: 'assay',
-            queryName: _protocolName + ' AnalyteTitration',
-            filterArray: [LABKEY.Filter.create('Titration/Name', _titration)],
+            schemaName: 'assay.Luminex.' + _protocolName,
+            queryName: queryName,
+            filterArray: filterArray,
             columns: reqColumns.join(','),
             maxRows: 1,
             success: function(data) {
                 if (data.rows.length == 0)
-                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_titration) + "'.");
+                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_controlName) + "'.");
                 else
                 {
                     var missingColumns = '';
@@ -150,7 +170,8 @@
         var graphParamsPanel = new LABKEY.LeveyJenningsGraphParamsPanel({
             renderTo: 'graphParamsPanel',
             cls: 'extContainer',
-            titration: _titration,
+            titration: _controlName,
+            controlType: _controlType,
             assayName: _protocolName,
             listeners: {
                 'applyGraphBtnClicked': function(analyte, isotype, conjugate){
@@ -183,7 +204,8 @@
         var guideSetPanel = new LABKEY.LeveyJenningsGuideSetPanel({
             renderTo: 'guideSetOverviewPanel',
             cls: 'extContainer',
-            titration: _titration,
+            titration: _controlName,
+            controlType: _controlType,
             assayName: _protocolName,
             listeners: {
                 'currentGuideSetUpdated': function() {
@@ -204,7 +226,8 @@
         var trendPlotPanel = new LABKEY.LeveyJenningsTrendPlotPanel({
             renderTo: 'rPlotPanel',
             cls: 'extContainer',
-            titration: _titration,
+            titration: _controlName,
+            controlType: _controlType,
             assayName: _protocolName,
             defaultRowSize: defaultRowSize,
             networkExists: _networkExists,
@@ -223,7 +246,8 @@
         var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
             renderTo: 'trackingDataPanel',
             cls: 'extContainer',
-            titration: _titration,
+            titration: _controlName,
+            controlType: _controlType,
             assayName: _protocolName,
             defaultRowSize: defaultRowSize,
             listeners: {

@@ -339,7 +339,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         /*
          * add header menu for the QC Report
          */
-        NavTree manageMenu = new NavTree("view qc report");
+        NavTree qcReportMenu = new NavTree("view qc report");
 
         // add a URL for the titration report
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.TitrationQcReportAction.class);
@@ -353,7 +353,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         // just show titrations that are either standards or qc controls
         url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
-        manageMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url)));
+        qcReportMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url)));
 
         // add a URL for the single point control report
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.SinglePointControlQcReportAction.class);
@@ -367,10 +367,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         // just show titrations that are either standards or qc controls
         url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
-        manageMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url)));
+        qcReportMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url)));
+        qcReportMenu.addChild("view levey-jennings reports", new ActionURL(LuminexController.LeveyJenningsMenuAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()));
 
-        if (manageMenu.getChildCount() > 0)
-            result.add(manageMenu);
+        result.add(qcReportMenu);
 
         return result;
     }

@@ -31,7 +31,9 @@ public class GuideSet
     private boolean _currentGuideSet;
     private Double _maxFIAverage;
     private Double _maxFIStdDev;
-    private String _titrationName;
+    private String _controlName;
+    /** Default to being titration-based for backwards compatibility */
+    private boolean _titration = true;
     private String _comment;
     private Timestamp _created;
     private Timestamp _modified;
@@ -118,14 +120,14 @@ public class GuideSet
         _currentGuideSet = currentGuideSet;
     }
 
-    public String getTitrationName()
+    public String getControlName()
     {
-        return _titrationName;
+        return _controlName;
     }
 
-    public void setTitrationName(String titrationName)
+    public void setControlName(String controlName)
     {
-        _titrationName = titrationName;
+        _controlName = controlName;
     }
 
     public String getComment()
@@ -176,5 +178,15 @@ public class GuideSet
     public void setModifiedBy(Integer modifiedBy)
     {
         _modifiedBy = modifiedBy;
+    }
+
+    public boolean isTitration()
+    {
+        return _titration;
+    }
+
+    public void setTitration(boolean titration)
+    {
+        _titration = titration;
     }
 }
