@@ -20,9 +20,13 @@ Ext.namespace('LABKEY');
 LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     constructor : function(config){
         // check that the config properties needed are present
-        if (!config.titration || config.titration == "null")
+        if (!config.controlName || config.controlName == "null")
         {
-            throw "You must specify a titration!";
+            throw "You must specify a controlName!";
+        }
+        if (!config.controlType || config.controlType == "null")
+        {
+            throw "You must specify a controlType!";
         }
         if (!config.assayName || config.assayName == "null")
         {
@@ -208,6 +212,20 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
         }, this);
         items.push(this.conjugateCombobox);
 
+        var sql;
+        if (this.controlType == 'Titration')
+        {
+            sql =  'SELECT DISTINCT x.Analyte.Name AS Analyte, x.Titration.Run.Isotype AS Isotype, x.Titration.Run.Conjugate AS Conjugate, '
+                + 'FROM AnalyteTitration AS x '
+                + ' WHERE x.Titration.Name = \'' + this.controlName.replace(/'/g, "''") + '\'';
+        }
+        else
+        {
+            sql =  'SELECT DISTINCT x.Analyte.Name AS Analyte, x.SinglePointControl.Run.Isotype AS Isotype, x.SinglePointControl.Run.Conjugate AS Conjugate, '
+                + 'FROM AnalyteSinglePointControl AS x'
+                + ' WHERE x.SinglePointControl.Name = \'' + this.controlName.replace(/'/g, "''") + '\'';
+        }
+
         // store of all of the unique analyte/isotype/conjugate combinations for this assay design
         this.graphParamStore = new Ext.data.Store({
             autoLoad: true,
@@ -220,11 +238,8 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 method: 'GET',
                 url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
                     containerFilter: LABKEY.Query.containerFilter.allFolders,
-                    schemaName: 'assay',
-                    sql: 'SELECT DISTINCT x.Analyte.Name AS Analyte, x.Titration.Run.Isotype AS Isotype, x.Titration.Run.Conjugate AS Conjugate, '
-                        + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
-                        + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
-                        + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
+                    schemaName: 'assay.Luminex.' + this.assayName,
+                    sql: sql
                 })
             }),
             sortInfo: {

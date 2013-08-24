@@ -32,8 +32,6 @@ public class GuideSet
     private Double _maxFIAverage;
     private Double _maxFIStdDev;
     private String _controlName;
-    /** Default to being titration-based for backwards compatibility */
-    private boolean _titration = true;
     private String _comment;
     private Timestamp _created;
     private Timestamp _modified;
@@ -178,15 +176,5 @@ public class GuideSet
     public void setModifiedBy(Integer modifiedBy)
     {
         _modifiedBy = modifiedBy;
-    }
-
-    public boolean isTitration()
-    {
-        return _titration;
-    }
-
-    public void setTitration(boolean titration)
-    {
-        _titration = titration;
     }
 }

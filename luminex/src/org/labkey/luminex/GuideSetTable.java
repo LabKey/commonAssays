@@ -168,8 +168,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             appendNullableString(sql, analyteName);
             sql.append(" AND ControlName");
             appendNullableString(sql, titrationName);
-            sql.append(" AND Titration = ?");
-            sql.add(true);
             sql.append(" AND Conjugate");
             appendNullableString(sql, conjugate);
             sql.append(" AND Isotype");

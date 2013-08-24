@@ -19,23 +19,10 @@ package org.labkey.luminex;
  * User: jeckels
  * Date: Sep 6, 2011
  */
-public class AnalyteTitration
+public class AnalyteTitration extends AbstractLuminexControlAnalyte
 {
-    private int _analyteId;
     private int _titrationId;
     private Double _maxFI;
-    private Integer _guideSetId;
-    private boolean _includeInGuideSetCalculation;
-
-    public int getAnalyteId()
-    {
-        return _analyteId;
-    }
-
-    public void setAnalyteId(int analyteId)
-    {
-        _analyteId = analyteId;
-    }
 
     public int getTitrationId()
     {
@@ -57,26 +44,6 @@ public class AnalyteTitration
         _maxFI = maxFI;
     }
 
-    public void setGuideSetId(Integer guideSetId)
-    {
-        _guideSetId = guideSetId;
-    }
-
-    public Integer getGuideSetId()
-    {
-        return _guideSetId;
-    }
-
-    public boolean isIncludeInGuideSetCalculation()
-    {
-        return _includeInGuideSetCalculation;
-    }
-
-    public void setIncludeInGuideSetCalculation(boolean includeInGuideSetCalculation)
-    {
-        _includeInGuideSetCalculation = includeInGuideSetCalculation;
-    }
-
     @Override
     public boolean equals(Object o)
     {
@@ -85,13 +52,13 @@ public class AnalyteTitration
 
         AnalyteTitration that = (AnalyteTitration) o;
 
-        return (_analyteId == that._analyteId && _titrationId == that._titrationId);
+        return (getAnalyteId() == that.getAnalyteId() && _titrationId == that._titrationId);
     }
 
     @Override
     public int hashCode()
     {
-        int result = _analyteId;
+        int result = getAnalyteId();
         result = 31 * result + _titrationId;
         return result;
     }

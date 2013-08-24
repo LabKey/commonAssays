@@ -22,8 +22,10 @@ var $h = Ext.util.Format.htmlEncode;
 LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     constructor : function(config){
         // check that the config properties needed are present
-        if (!config.titration || config.titration == "null")
-            throw "You must specify a titration!";
+        if (!config.controlName || config.controlName == "null")
+            throw "You must specify a controlName!";
+        if (!config.controlType || config.controlType == "null")
+            throw "You must specify a controlType!";
         if (!config.assayName || config.assayName == "null")
             throw "You must specify a assayName!";
 
@@ -140,9 +142,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     queryCurrentGuideSetInfo: function() {
         // query the server for the current guide set for the selected graph params
         LABKEY.Query.selectRows({
-            schemaName: 'assay',
-            queryName: this.assayName + ' GuideSet',
-            filterArray: [LABKEY.Filter.create('ControlName', this.titration),
+            schemaName: 'assay.Luminex.' + this.assayName,
+            queryName:  'GuideSet',
+            filterArray: [LABKEY.Filter.create('ControlName', this.controlName),
                     LABKEY.Filter.create('AnalyteName', this.analyte),
                     LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
@@ -204,7 +206,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 disableId: createNewGuideSet ? this.currentGuideSetId : null,
                 guideSetId: createNewGuideSet ? null : this.currentGuideSetId,
                 assayName: this.assayName,
-                titration: this.titration,
+                controlName: this.controlName,
+                controlType: this.controlType,
                 analyte: this.analyte,
                 isotype: this.isotype,
                 conjugate: this.conjugate,
@@ -217,12 +220,12 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                             for (var i = 0; i < saveResults.length; i++)
                             {
                                 // if a change was made to the GuideSet table, it was the comment
-                                if (saveResults[i].queryName == this.assayName + " GuideSet")
+                                if (saveResults[i].queryName == "GuideSet")
                                 {
                                     this.queryCurrentGuideSetInfo(false);
                                 }
                                 // if a change was made to the list of runs in the current guide set, update accordingly 
-                                else if (saveResults[i].queryName == this.assayName + " AnalyteTitration")
+                                else if (saveResults[i].queryName == "AnalyteTitration" || saveResults[i].queryName == "AnalyteSinglePointControl")
                                 {
                                     this.fireEvent('currentGuideSetUpdated');
                                 }

@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,46 +23,22 @@ import java.util.Objects;
  * User: jeckels
  * Date: Jun 6, 2011
  */
-public class Titration implements Serializable
+public class Titration extends AbstractLuminexControl
 {
-    private int _rowId;
-    private int _runId;
-    private String _name = "Standard";
     private boolean _standard;
     private boolean _qcControl;
     private boolean _unknown;
     private double _maxFI;
 
-    public int getRowId()
+    public Titration()
     {
-        return _rowId;
-    }
-
-    public void setRowId(int rowId)
-    {
-        _rowId = rowId;
-    }
-
-    public int getRunId()
-    {
-        return _runId;
-    }
-
-    public void setRunId(int runId)
-    {
-        _runId = runId;
-    }
-
-    public String getName()
-    {
-        return _name;
+        setName("Standard");
     }
 
     public void setName(String name)
     {
         name = name == null || name.trim().isEmpty() ? "Standard" : name;
-        
-        _name = name;
+        super.setName(name);
     }
 
     public boolean isStandard()

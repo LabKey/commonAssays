@@ -83,7 +83,6 @@
             <column columnName="Conjugate" />
             <column columnName="Isotype" />
             <column columnName="ControlName" />
-            <column columnName="Titration" />
             <column columnName="Comment" />
             <column columnName="Created" />
             <column columnName="CreatedBy" />
@@ -222,6 +221,16 @@
             <column columnName="RowId" />
             <column columnName="RunId" />
             <column columnName="Name" />
+        </columns>
+    </table>
+
+    <table tableName="AnalyteSinglePointControl" tableDbType="TABLE">
+        <description>Contains one row per analyte/single point control combination within a run</description>
+        <columns>
+            <column columnName="AnalyteId" />
+            <column columnName="SinglePointControlId" />
+            <column columnName="GuideSetId" />
+            <column columnName="IncludeInGuideSetCalculation" />
         </columns>
     </table>
 

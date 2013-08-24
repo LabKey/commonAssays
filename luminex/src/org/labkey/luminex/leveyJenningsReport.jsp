@@ -121,9 +121,9 @@
         }
         else
         {
-            reqColumns = ['Name', 'RunId/Isotype', 'RunId/Conjugate'];
-            queryName = 'SinglePointControl';
-            filterArray = [LABKEY.Filter.create('Name', _controlName)];
+            reqColumns = ['SinglePointControl/Name', 'SinglePointControl/Run/Isotype', 'SinglePointControl/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
+            queryName = 'AnalyteSinglePointControl';
+            filterArray = [LABKEY.Filter.create('SinglePointControl/Name', _controlName)];
         }
         LABKEY.Query.selectRows({
             containerFilter: LABKEY.Query.containerFilter.allFolders,
@@ -170,7 +170,7 @@
         var graphParamsPanel = new LABKEY.LeveyJenningsGraphParamsPanel({
             renderTo: 'graphParamsPanel',
             cls: 'extContainer',
-            titration: _controlName,
+            controlName: _controlName,
             controlType: _controlType,
             assayName: _protocolName,
             listeners: {
@@ -204,7 +204,7 @@
         var guideSetPanel = new LABKEY.LeveyJenningsGuideSetPanel({
             renderTo: 'guideSetOverviewPanel',
             cls: 'extContainer',
-            titration: _controlName,
+            controlName: _controlName,
             controlType: _controlType,
             assayName: _protocolName,
             listeners: {

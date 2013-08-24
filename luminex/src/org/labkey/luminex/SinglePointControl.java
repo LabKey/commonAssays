@@ -15,63 +15,20 @@
  */
 package org.labkey.luminex;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 /**
  * User: gktaylor
  * Date: Aug 6, 2013
  * Class to handle Luminex Single Point Controls, this class primarily takes a titration as an argument created
  * in the LuminexExcelParser. Unlike a Titration, it has no defined type (the type is implicit).
  */
-public class SinglePointControl implements Serializable
+public class SinglePointControl extends AbstractLuminexControl
 {
-    private int _rowId;
-    private int _runId;
-    private String _name = "Standard";
-
     public SinglePointControl()
     {
     }
 
     public SinglePointControl(Titration titration)
     {
-        setRowId(titration.getRowId());
-        setRunId(titration.getRunId());
-        setName(titration.getName());
-    }
-
-    public int getRowId()
-    {
-        return _rowId;
-    }
-
-    public void setRowId(int rowId)
-    {
-        _rowId = rowId;
-    }
-
-    public int getRunId()
-    {
-        return _runId;
-    }
-
-    public void setRunId(int runId)
-    {
-        _runId = runId;
-    }
-
-    public String getName()
-    {
-        return _name;
-    }
-
-    public void setName(String name)
-    {
-        name = name == null || name.trim().isEmpty() ? "Standard" : name;
-        
-        _name = name;
+        super(titration);
     }
 }

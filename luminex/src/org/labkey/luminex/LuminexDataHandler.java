@@ -434,6 +434,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
 
                 insertTitrationAnalyteMappings(user, form, expRun, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);
+                insertSinglePointControlAnalyteMappings(user, form, expRun, singlePointControls, sheet.getValue(), analyte, conjugate, isotype, protocol);
 
                 // Now that we've made sure each data row to the appropriate data file, make sure that we
                 // have %CV and StdDev. It's important to wait so that we know the scope in which to do the aggregate
@@ -671,9 +672,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private GuideSet determineGuideSet(Analyte analyte, Titration titration, String conjugate, String isotype, ExpProtocol protocol)
+    private GuideSet determineGuideSet(Analyte analyte, AbstractLuminexControl control, String conjugate, String isotype, ExpProtocol protocol)
     {
-        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentTitrationGuideSet(protocol, analyte.getName(), titration.getName(), conjugate, isotype);
+        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentTitrationGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype);
         if (guideSet != null)
         {
             return guideSet;
@@ -705,6 +706,56 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Titration titration = titrations.get(titrationName);
             insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
         }
+    }
+
+    private void insertSinglePointControlAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, SinglePointControl> singlePointControls, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
+            throws ExperimentException, SQLException
+    {
+        // Insert mappings for all of the controls
+        for (SinglePointControl singlePointControl : singlePointControls.values())
+        {
+            insertAnalyteSinglePointControlMapping(user, expRun, dataRows, analyte, singlePointControl, conjugate, isotype, protocol);
+        }
+    }
+
+    private void insertAnalyteSinglePointControlMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, SinglePointControl singlePointControl, String conjugate, String isotype, ExpProtocol protocol) throws SQLException
+    {
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
+        filter.addCondition(FieldKey.fromParts("SinglePointControlId"), singlePointControl.getRowId());
+
+        AnalyteSinglePointControl analyteSinglePointControl = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getObject(AnalyteSinglePointControl.class);
+
+        boolean newRow = analyteSinglePointControl == null;
+        if (analyteSinglePointControl == null)
+        {
+            analyteSinglePointControl = new AnalyteSinglePointControl(analyte, singlePointControl);
+        }
+
+        if (newRow)
+        {
+            // Check if we have a guide set for this combo
+            GuideSet currentGuideSet = determineGuideSet(analyte, singlePointControl, conjugate, isotype, protocol);
+            if (currentGuideSet != null)
+            {
+                analyteSinglePointControl.setGuideSetId(currentGuideSet.getRowId());
+            }
+
+            Table.insert(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), analyteSinglePointControl);
+        }
+        else
+        {
+            Map<String, Object> keys = new CaseInsensitiveHashMap<>();
+            keys.put("AnalyteId", analyte.getRowId());
+            keys.put("SinglePointControlId", singlePointControl.getRowId());
+            Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteSinglePointControl, keys);
+        }
+
+        insertOrUpdateAnalyteSinglePointControlQCFlags(user, expRun, protocol, analyteSinglePointControl, analyte, singlePointControl, isotype, conjugate);
+    }
+
+    private void insertOrUpdateAnalyteSinglePointControlQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteSinglePointControl analyteSinglePointControl, Analyte analyte, SinglePointControl singlePointControl, String isotype, String conjugate)
+    {
+        // TODO
     }
 
     private void insertAnalyteTitrationMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
@@ -1483,12 +1534,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Name"), singlePointControl.getName());
                 filter.addCondition(FieldKey.fromParts("RunId"), expRun.getRowId());
-                SinglePointControl[] exitingSinglePointControls = new TableSelector(LuminexProtocolSchema.getTableInfoSinglePointControl(), filter, null).getArray(SinglePointControl.class);
-                assert exitingSinglePointControls.length <= 1;
+                SinglePointControl exitingSinglePointControl = new TableSelector(LuminexProtocolSchema.getTableInfoSinglePointControl(), filter, null).getObject(SinglePointControl.class);
 
-                if (exitingSinglePointControls.length > 0)
+               if (exitingSinglePointControl != null)
                 {
-                    singlePointControl = exitingSinglePointControls[0];
+                    singlePointControl = exitingSinglePointControl;
                 }
                 else
                 {
@@ -1895,7 +1945,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                 " pa, " + ExperimentService.get().getTinfoData() +
                 " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
-        // Delete entries in the SinglePointControl table
+
+        // Delete entries from SinglePointControl tables
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl() +
+                        " WHERE SinglePointControlId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
+                        " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                        " pa, " + ExperimentService.get().getTinfoData() +
+                        " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + ")))", params);
         executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
                         " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                         " pa, " + ExperimentService.get().getTinfoData() +

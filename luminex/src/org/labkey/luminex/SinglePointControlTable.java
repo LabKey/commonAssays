@@ -18,14 +18,8 @@ package org.labkey.luminex;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.ExprColumn;
-import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryForeignKey;
 
 /**
@@ -39,12 +33,12 @@ public class SinglePointControlTable extends AbstractLuminexTable
         // expose the actual columns in the table
         super(LuminexProtocolSchema.getTableInfoSinglePointControl(), schema, filterTable);
         setName(LuminexProtocolSchema.SINGLE_POINT_CONTROL_TABLE_NAME);
-        wrapAllColumns(true);
+        addWrapColumn(getRealTable().getColumn("RowId"));
+        addWrapColumn(getRealTable().getColumn("Name"));
 
         // Alias the RunId column to be consistent with other Schema columns
-        ColumnInfo colInfo = getColumn("RunId");
-        colInfo.setLabel("Run");
-        colInfo.setFk(new QueryForeignKey(schema, "Runs", "RowId", "Name"));
+        ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
+        runColumn.setFk(new QueryForeignKey(schema, "Runs", "RowId", "Name"));
     }
 
     @Override

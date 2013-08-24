@@ -55,7 +55,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String TITRATION_TABLE_NAME = "Titration";
     public static final String SINGLE_POINT_CONTROL_TABLE_NAME = "SinglePointControl";
     public static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
-    public static final String SINGLE_POINT_CONTROL_ANALYTE_TABLE_NAME = "SinglePointControlAnalyte";
+    public static final String ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME = "AnalyteSinglePointControl";
     public static final String DATA_ROW_TABLE_NAME = "DataRow";
     public static final String DATA_FILE_TABLE_NAME = "DataFile";
     public static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";
@@ -90,6 +90,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.add(ANALYTE_TITRATION_TABLE_NAME);
         result.add(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME);
         result.add(CV_QC_FLAG_TABLE_NAME);
+        result.add(ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
         result.add(SINGLE_POINT_CONTROL_TABLE_NAME);
         return result;
     }
@@ -206,8 +207,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             }
             if (SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                SinglePointControlTable result = createSinglePointControlTable(true);
-                return result;
+                return createSinglePointControlTable(true);
+            }
+            if (ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createAnalyteSinglePointControlTable(true);
             }
         }
         return super.createProviderTable(tableType);
@@ -256,6 +260,25 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
             sql.append(createDataFilterInClause());
             sql.append(")");
+            result.addCondition(sql);
+        }
+        return result;
+    }
+
+    private AnalyteSinglePointControlTable createAnalyteSinglePointControlTable(boolean filterTable)
+    {
+        AnalyteSinglePointControlTable result = new AnalyteSinglePointControlTable(this, filterTable);
+        if (filterTable)
+        {
+            SQLFragment sql = new SQLFragment("SinglePointControlId IN (SELECT RowId FROM ");
+            sql.append(getTableInfoSinglePointControl(), "spc");
+            sql.append(" WHERE RunId IN (SELECT pa.RunId FROM ");
+            sql.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
+            sql.append(", ");
+            sql.append(ExperimentService.get().getTinfoData(), "d");
+            sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
+            sql.append(createDataFilterInClause());
+            sql.append("))");
             result.addCondition(sql);
         }
         return result;
@@ -446,6 +469,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static TableInfo getTableInfoSinglePointControl()
     {
         return getSchema().getTable(SINGLE_POINT_CONTROL_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoAnalyteSinglePointControl()
+    {
+        return getSchema().getTable(ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
     }
 
     public static TableInfo getTableInfoAnalyteTitration()
