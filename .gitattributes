@@ -640,6 +640,7 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-11.31-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.21-13.22.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.22-13.23.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-13.23-13.24.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-10.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-11.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-2.20.sql -text
