@@ -64,6 +64,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
     public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
     public static final String ANALYTE_TITRATION_QC_FLAG_TABLE_NAME = "AnalyteTitrationQCFlags";
+    public static final String ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME = "AnalyteSinglePointControlQCFlags";
     public static final String CV_QC_FLAG_TABLE_NAME = "CVQCFlags";
 
     public static final String DB_SCHEMA_NAME = "luminex";
@@ -91,6 +92,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.add(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME);
         result.add(CV_QC_FLAG_TABLE_NAME);
         result.add(ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
+        result.add(ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME);
         result.add(SINGLE_POINT_CONTROL_TABLE_NAME);
         return result;
     }
@@ -200,6 +202,10 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             if (ANALYTE_TITRATION_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createAnalyteTitrationQCFlagTable();
+            }
+            if (ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createAnalyteSinglePointControlQCFlagTable();
             }
             if (CV_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
@@ -373,7 +379,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public ExpQCFlagTable createAnalyteTitrationQCFlagTable()
     {
-        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this);
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, this);
         result.populate();
         result.setAssayProtocol(getProtocol());
 
@@ -383,7 +389,32 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         titrationColumn.setFk(new TitrationForeignKey(this));
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/titration combination");
-        SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL ");
+        SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL AND FlagType != ?");
+        nonCVFlagFilter.add(LuminexDataHandler.QC_FLAG_FI_FLAG_TYPE);
+        result.addCondition(nonCVFlagFilter);
+
+        // disable insert/update for this table
+        result.setImportURL(AbstractTableInfo.LINK_DISABLER);
+        result.setInsertURL(AbstractTableInfo.LINK_DISABLER);
+        result.setUpdateURL(AbstractTableInfo.LINK_DISABLER);
+
+        return result;
+    }
+
+    public ExpQCFlagTable createAnalyteSinglePointControlQCFlagTable()
+    {
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME, this);
+        result.populate();
+        result.setAssayProtocol(getProtocol());
+
+        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        analyteColumn.setFk(new AnalyteForeignKey(this));
+        ColumnInfo titrationColumn = result.addColumn("SinglePointControl", ExpQCFlagTable.Column.IntKey2);
+        titrationColumn.setFk(new SinglePointControlForeignKey(this));
+
+        result.setDescription("Contains Run QC Flags that are associated with an analyte/single point control combination");
+        SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL AND FlagType = ?");
+        nonCVFlagFilter.add(LuminexDataHandler.QC_FLAG_FI_FLAG_TYPE);
         result.addCondition(nonCVFlagFilter);
 
         // disable insert/update for this table
@@ -651,6 +682,23 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         public TableInfo getLookupTableInfo()
         {
             return _schema.createTitrationTable(false);
+        }
+    }
+
+    public static class SinglePointControlForeignKey extends LookupForeignKey
+    {
+        private final LuminexProtocolSchema _schema;
+
+        public SinglePointControlForeignKey(LuminexProtocolSchema schema)
+        {
+            super("RowId");
+            _schema = schema;
+        }
+
+        @Override
+        public TableInfo getLookupTableInfo()
+        {
+            return _schema.createSinglePointControlTable(false);
         }
     }
 

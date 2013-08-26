@@ -108,6 +108,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String NAMESPACE = "LuminexDataFile";
     private static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     private static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+    public static final String QC_FLAG_FI_FLAG_TYPE = "MFI";
     public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
     public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50-4";
     public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
@@ -750,12 +751,86 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteSinglePointControl, keys);
         }
 
-        insertOrUpdateAnalyteSinglePointControlQCFlags(user, expRun, protocol, analyteSinglePointControl, analyte, singlePointControl, isotype, conjugate);
+        // Calculate the average FI value
+        double sum = 0;
+        int count = 0;
+        for (LuminexDataRow dataRow : dataRows)
+        {
+            if (dataRow.getAnalyte() == analyte.getRowId() && singlePointControl.getName().equals(dataRow.getDescription()))
+            {
+                sum += dataRow.getFiBackground();
+                count++;
+            }
+        }
+        assert count > 0 : "Should be at least one matchig single point control data row";
+        double average = sum / count;
+
+        insertOrUpdateAnalyteSinglePointControlQCFlags(user, expRun, protocol, analyteSinglePointControl, analyte, singlePointControl, isotype, conjugate, average);
     }
 
-    private void insertOrUpdateAnalyteSinglePointControlQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteSinglePointControl analyteSinglePointControl, Analyte analyte, SinglePointControl singlePointControl, String isotype, String conjugate)
+    /** Insert or Update QC Flags for MFI that are out of the guide set range if this AnalyteSinglePointControl record
+     * has a current GuideSet */
+    public static void insertOrUpdateAnalyteSinglePointControlQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteSinglePointControl analyteSinglePointControl, Analyte analyte, SinglePointControl singlePointControl, String isotype, String conjugate, double averageFI) throws SQLException
     {
-        // TODO
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), protocol, null);
+
+        // query the QC Flags table to get any existing analyte/titration QC Flags
+        ExpQCFlagTable qcFlagTable = schema.createAnalyteSinglePointControlQCFlagTable();
+        SimpleFilter analyteSinglePointControlFilter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
+        analyteSinglePointControlFilter.addCondition(FieldKey.fromParts("SinglePointControl"), singlePointControl.getRowId());
+        List<AnalyteSinglePointControlQCFlag> existingQCFlags = new TableSelector(qcFlagTable, Table.ALL_COLUMNS, analyteSinglePointControlFilter, null).getArrayList(AnalyteSinglePointControlQCFlag.class);
+
+        List<AnalyteSinglePointControlQCFlag> newQCFlags = new ArrayList<>();
+
+        if (null != analyteSinglePointControl.getGuideSetId())
+        {
+            // query the guide set table to get the average and stddev values for the comparisons
+            GuideSetTable guideSetTable = schema.createGuideSetTable(false);
+            FieldKey fiAverageFK = FieldKey.fromParts("SinglePointControlFIAverage");
+            FieldKey fiStdDevFK = FieldKey.fromParts("SinglePointControlFIStdDev");
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(
+                    fiAverageFK, fiStdDevFK));
+            SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("RowId"), analyteSinglePointControl.getGuideSetId());
+            Map<String, Object> guideSetRow = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMap();
+
+            if (guideSetRow == null)
+            {
+                throw new IllegalStateException("Unable to find referenced guide set: " + analyteSinglePointControl.getGuideSetId());
+            }
+            else
+            {
+                String descriptionPrefix = singlePointControl.getName() + " " + analyte.getName() + " - "
+                        + (isotype == null ? "[None]" : isotype) + " "
+                        + (conjugate == null ? "[None]" : conjugate) + " ";
+
+                // add QCFlag for MFI, if out of guide set range
+                Double guideSetAverage = (Double)guideSetRow.get(cols.get(fiAverageFK).getAlias());
+                Double guideSetStdDev = (Double)guideSetRow.get(cols.get(fiStdDevFK).getAlias());
+                String outOfRangeType = isOutOfGuideSetRange(averageFI, guideSetAverage, guideSetStdDev);
+                if (null != outOfRangeType)
+                {
+                    newQCFlags.add(new AnalyteSinglePointControlQCFlag(expRun.getRowId(), descriptionPrefix + outOfRangeType + " threshold for MFI", analyte.getRowId(), singlePointControl.getRowId()));
+                }
+            }
+        }
+
+        // insert new flags if a matching QC Flag does not exist (based on runId, flagType, desription, analyteId, and titrationId)
+       for (AnalyteSinglePointControlQCFlag newQCFlag : newQCFlags)
+        {
+            if (!existingQCFlags.contains(newQCFlag))
+            {
+                Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQCFlag);
+            }
+        }
+
+        // remove existing flags that are no longer relevant based on rerunning the transform script with well exclusions
+        for (AnalyteSinglePointControlQCFlag existingAnalyteTitrationQCFlag : existingQCFlags)
+        {
+            if (!newQCFlags.contains(existingAnalyteTitrationQCFlag))
+            {
+                Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), existingAnalyteTitrationQCFlag.getRowId());
+            }
+        }
     }
 
     private void insertAnalyteTitrationMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
@@ -1337,7 +1412,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return fit;
     }
 
-    /* Insert or Update QC Flags for High MFI, 4PL EC50, 5PL EC50, or AUC values that are
+    /** Insert or Update QC Flags for High MFI, 4PL EC50, 5PL EC50, or AUC values that are
       out of the guide set range if this AnalyteTitration record has a current GuideSet */
     public static void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, @NotNull AnalyteTitration analyteTitration, @NotNull Analyte analyte, @NotNull Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
             throws SQLException
@@ -1935,23 +2010,23 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
                 " WHERE DataId IN (" + idSQL + "))", params);
 
-        // Clean up analytes and titrations
+        // Clean up analytes
         executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteTitration() +
                 " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
                 " WHERE DataId IN (" + idSQL + "))", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                " WHERE DataId IN (" + idSQL + ")", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
-                " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
-                " pa, " + ExperimentService.get().getTinfoData() +
-                " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
-
-        // Delete entries from SinglePointControl tables
         executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl() +
                         " WHERE SinglePointControlId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
                         " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                         " pa, " + ExperimentService.get().getTinfoData() +
                         " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + ")))", params);
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
+                " WHERE DataId IN (" + idSQL + ")", params);
+
+        // Delete titrations and SinglePointControls
+        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
+                " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                " pa, " + ExperimentService.get().getTinfoData() +
+                " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
         executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
                         " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                         " pa, " + ExperimentService.get().getTinfoData() +

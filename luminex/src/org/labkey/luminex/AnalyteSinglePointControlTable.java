@@ -23,6 +23,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -42,6 +43,7 @@ import org.labkey.api.util.Pair;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -183,7 +185,17 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
             protected void updateQCFlags(User user, AnalyteSinglePointControl bean) throws SQLException
             {
-                // TODO
+                // get the run, isotype, conjugate, and analtye/single point control information in order to update QC Flags
+                Analyte analyte = getAnalyte(bean.getAnalyteId());
+                SinglePointControl control = getSinglePointControl(bean.getSinglePointControlId());
+                ExpRun run = getRun(control.getRunId());
+                Map<String, String> runIsotypeConjugate = getIsotypeAndConjugate(run);
+
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
+                filter.addCondition(FieldKey.fromParts("SinglePointControl"), control.getRowId());
+                Double average = new TableSelector(getUserSchema().getTable(LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME), Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
+
+                LuminexDataHandler.insertOrUpdateAnalyteSinglePointControlQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, control, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), average.doubleValue());
             }
         };
     }

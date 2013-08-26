@@ -15,36 +15,20 @@
  */
 package org.labkey.luminex;
 
-import org.labkey.api.exp.ExpQCFlag;
-
 /**
  * User: cnathe
  * Date: Jan 11, 2012
  */
-public class AnalyteTitrationQCFlag extends ExpQCFlag
+public class AnalyteTitrationQCFlag extends AbstractAnalyteQCFlag
 {
-    private int _analyte;
     private int _titration;
 
     public AnalyteTitrationQCFlag() {}
 
     public AnalyteTitrationQCFlag(int runId, String flagType, String description, int analyte, int titration)
     {
-        super(runId, flagType, description);
-        setAnalyte(analyte);
+        super(runId, flagType, description, analyte);
         setTitration(titration);
-        setEnabled(true);
-    }
-
-    public int getAnalyte()
-    {
-        return _analyte;
-    }
-
-    public void setAnalyte(int analyte)
-    {
-        _analyte = analyte;
-        setIntKey1(analyte);
     }
 
     public int getTitration()
@@ -58,11 +42,6 @@ public class AnalyteTitrationQCFlag extends ExpQCFlag
         setIntKey2(titration);
     }
 
-    public void setRun(int run)
-    {
-        setRunId(run);
-    }
-
     @Override
     public boolean equals(Object o)
     {
@@ -74,7 +53,7 @@ public class AnalyteTitrationQCFlag extends ExpQCFlag
         if (getRunId() != that.getRunId()) return false;
         if (getFlagType() != null ? !getFlagType().equals(that.getFlagType()) : that.getFlagType() != null) return false;
         if (getDescription() != null ? !getDescription().equals(that.getDescription()) : that.getDescription() != null) return false;
-        if (_analyte != that._analyte) return false;
+        if (getAnalyte() != that.getAnalyte()) return false;
         if (_titration != that._titration) return false;
 
         return true;
@@ -86,7 +65,7 @@ public class AnalyteTitrationQCFlag extends ExpQCFlag
         int result = getRunId();
         result = 31 * result + (getFlagType() != null ? getFlagType().hashCode() : 0);
         result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
-        result = 31 * result + _analyte;
+        result = 31 * result + getAnalyte();
         result = 31 * result + _titration;
         return result;
     }

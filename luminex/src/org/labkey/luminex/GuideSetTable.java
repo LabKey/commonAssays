@@ -30,6 +30,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.RowIdQueryUpdateService;
@@ -42,6 +43,8 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -70,35 +73,52 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
         });
 
-        SQLFragment maxFISQL = new SQLFragment(" FROM ");
-        maxFISQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
-        maxFISQL.append(" WHERE at.GuideSetId = ");
-        maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
-        maxFISQL.append(".RowId AND at.IncludeInGuideSetCalculation = ?");
-        maxFISQL.add(Boolean.TRUE);
-        maxFISQL.append(")");
-
-        SQLFragment maxFIAverageSQL = new SQLFragment("(SELECT AVG(at.MaxFI)");
-        maxFIAverageSQL.append(maxFISQL);
-        ExprColumn maxFIAverageCol = new ExprColumn(this, "MaxFIAverage", maxFIAverageSQL, JdbcType.DOUBLE);
-        maxFIAverageCol.setLabel("Max FI Average");
-        maxFIAverageCol.setFormat("0.00");
-        addColumn(maxFIAverageCol);
-
-        SQLFragment maxFIStdDevSQL = new SQLFragment("(SELECT ");
-        maxFIStdDevSQL.append(LuminexProtocolSchema.getSchema().getSqlDialect().getStdDevFunction());
-        maxFIStdDevSQL.append("(at.MaxFI)");
-        maxFIStdDevSQL.append(maxFISQL);
-        ExprColumn maxFIStdDevCol = new ExprColumn(this, "MaxFIStdDev", maxFIStdDevSQL, JdbcType.DOUBLE);
-        maxFIStdDevCol.setLabel("Max FI StdDev");
-        maxFIStdDevCol.setFormat("0.00");
-        addColumn(maxFIStdDevCol);
+        addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "Max", "Max", "GuideSetId");
+        addFIColumns(schema.getTable(LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME), "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 
         addCurveTypeColumns();
+    }
+
+    private void addFIColumns(TableInfo joinTable, String srcFIColumnName, String targetColumnNamePrefix, String targetColumnLabelPrefix, String guideSetColumnName)
+    {
+        List<ColumnInfo> columns = Arrays.asList(
+                joinTable.getColumn(guideSetColumnName),
+                joinTable.getColumn("IncludeInGuideSetCalculation"),
+                joinTable.getColumn(srcFIColumnName));
+        SQLFragment baseSQL = new SQLFragment(" FROM (");
+        baseSQL.append(QueryService.get().getSelectSQL(joinTable, columns, null, null, Table.ALL_ROWS, 0, false));
+//        baseSQL.append(joinTable, "x");
+        baseSQL.append(") x WHERE x.");
+        baseSQL.append(guideSetColumnName);
+        baseSQL.append(" = ");
+        baseSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        baseSQL.append(".RowId AND x.IncludeInGuideSetCalculation = ?");
+        baseSQL.add(Boolean.TRUE);
+        baseSQL.append(")");
+
+        SQLFragment averageSQL = new SQLFragment("(SELECT AVG(x.");
+        averageSQL.append(srcFIColumnName);
+        averageSQL.append(")");
+        averageSQL.append(baseSQL);
+        ExprColumn maxFIAverageCol = new ExprColumn(this, targetColumnNamePrefix + "FIAverage", averageSQL, JdbcType.DOUBLE);
+        maxFIAverageCol.setLabel(targetColumnLabelPrefix + "FI Average");
+        maxFIAverageCol.setFormat("0.00");
+        addColumn(maxFIAverageCol);
+
+        SQLFragment stdDevSQL = new SQLFragment("(SELECT ");
+        stdDevSQL.append(LuminexProtocolSchema.getSchema().getSqlDialect().getStdDevFunction());
+        stdDevSQL.append("(x.");
+        stdDevSQL.append(srcFIColumnName);
+        stdDevSQL.append(")");
+        stdDevSQL.append(baseSQL);
+        ExprColumn maxFIStdDevCol = new ExprColumn(this, targetColumnNamePrefix + "FIStdDev", stdDevSQL, JdbcType.DOUBLE);
+        maxFIStdDevCol.setLabel(targetColumnLabelPrefix + " FI StdDev");
+        maxFIStdDevCol.setFormat("0.00");
+        addColumn(maxFIStdDevCol);
     }
 
     protected LookupForeignKey createCurveFitFK(final String curveType)
