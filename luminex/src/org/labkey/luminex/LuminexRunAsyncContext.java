@@ -64,13 +64,29 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     public void logProperties(Logger logger)
     {
         super.logProperties(logger);
+        String valueText;
         logger.info("----- Start Luminex Analyte Properties -----");
         for(Map.Entry<String, Map<String, String>> entry : this._analyteColumnPropertiesByName.entrySet())
         {
             logger.info("\tProperties for " + entry.getKey() + ":");
             for(Map.Entry<String, String> props : entry.getValue().entrySet())
             {
-                logger.info("\t\t*"+props.getKey() + ":  " + props.getValue());
+                if(props.getValue() == null)
+                    valueText = "[Blank]";
+                else
+                    valueText = props.getValue();
+
+                logger.info("\t\t*"+props.getKey() + ":  " + valueText);
+            }
+
+            Object[] titrationByAnalyteArray = _titrationsByAnalyte.get(entry.getKey()).toArray();
+            if(titrationByAnalyteArray.length > 0)
+            {
+                logger.info("\t\tUses Titrations:");
+                for(int i = 0; i < titrationByAnalyteArray.length; i++)
+                {
+                    logger.info("\t\t\t*"+titrationByAnalyteArray[i]);
+                }
             }
         }
         logger.info("----- Stop Luminex Analyte Properties -----");
@@ -78,12 +94,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         for(Titration titration : this._titrations)
         {
             logger.info("\tProperties for " + titration.getName());
-            logger.info("\t\t*Row ID:  " + titration.getRowId());
-            logger.info("\t\t*Run ID:  " + titration.getRunId());
             logger.info("\t\t*Standard:  " + titration.isStandard());
             logger.info("\t\t*QC Control:  " + titration.isQcControl());
             logger.info("\t\t*Unknown:  " + titration.isUnknown());
-            logger.info("\t\t*Max FI:  " + titration.getMaxFI());
         }
         logger.info("----- Stop Luminex Titration Properties -----");
 
