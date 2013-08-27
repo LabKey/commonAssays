@@ -18,6 +18,8 @@ package org.labkey.luminex;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -89,7 +91,22 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         avgFiSQL.add(false);
 
         ExprColumn avgFiColumn = new ExprColumn(this, "AverageFiBkgd", avgFiSQL, JdbcType.DOUBLE);
+        avgFiColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    @Override
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                return new QCFlagHighlightDisplayColumn(colInfo, "AverageFiBkgdQCFlagsEnabled");
+            }
+            });
         addColumn(avgFiColumn);
+
+        // add a column for 'AverageFiBkgdQCFlagsEnabled'
+        SQLFragment averageFiBkgdFlagEnabledSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_AVERAGE_FI_BKGD_FLAG_TYPE, null, LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_ID);
+        ExprColumn averageFiBkgdFlagEnabledColumn = new ExprColumn(this, "AverageFiBkgdQCFlagsEnabled", averageFiBkgdFlagEnabledSQL, JdbcType.VARCHAR);
+        averageFiBkgdFlagEnabledColumn.setLabel("Average FI Background QC Flags Enabled State");
+        averageFiBkgdFlagEnabledColumn.setHidden(true);
+        addColumn(averageFiBkgdFlagEnabledColumn);
 
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();

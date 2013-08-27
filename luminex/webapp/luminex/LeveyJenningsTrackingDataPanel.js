@@ -123,30 +123,54 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/CustomProtocol', protocol));
         }
 
-        return new LABKEY.ext.Store({
-            autoLoad: false,
-            schemaName: 'assay',
-            queryName: this.assayName + ' AnalyteTitration',
-            columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/RowId, '
-                    + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
-                    + 'Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, Titration/Run/AssayType, '
-                    + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
-                    + 'GuideSet/Created, IncludeInGuideSetCalculation, '
-                    + 'Four ParameterCurveFit/EC50, Four ParameterCurveFit/EC50QCFlagsEnabled, '
-                    + 'Five ParameterCurveFit/EC50, Five ParameterCurveFit/EC50QCFlagsEnabled, '
-                    + 'TrapezoidalCurveFit/AUC, TrapezoidalCurveFit/AUCQCFlagsEnabled, '
-                    + 'MaxFI, MaxFIQCFlagsEnabled',
-            filterArray: filterArray,
-            sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
-            maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
-            containerFilter: LABKEY.Query.containerFilter.allFolders,
-            listeners: {
-                scope: this,
-                // add a listener to the store to load the QC Flags for the given runs/analyte/titration
-                'load': this.loadQCFlags
-            },
-            scope: this
-        });
+        if (this.controlType == "Titration") {
+            return new LABKEY.ext.Store({
+                autoLoad: false,
+                schemaName: 'assay',
+                queryName: this.assayName + ' AnalyteTitration',
+                columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/RowId, '
+                        + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
+                        + 'Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, Titration/Run/AssayType, '
+                        + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
+                        + 'GuideSet/Created, IncludeInGuideSetCalculation, '
+                        + 'Four ParameterCurveFit/EC50, Four ParameterCurveFit/EC50QCFlagsEnabled, '
+                        + 'Five ParameterCurveFit/EC50, Five ParameterCurveFit/EC50QCFlagsEnabled, '
+                        + 'TrapezoidalCurveFit/AUC, TrapezoidalCurveFit/AUCQCFlagsEnabled, '
+                        + 'MaxFI, MaxFIQCFlagsEnabled',
+                filterArray: filterArray,
+                sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
+                maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
+                containerFilter: LABKEY.Query.containerFilter.allFolders,
+                listeners: {
+                    scope: this,
+                    // add a listener to the store to load the QC Flags for the given runs/analyte/titration
+                    'load': this.loadQCFlags
+                },
+                scope: this
+            });
+        } else if (this.controlType == "SinglePoint") {
+            return new LABKEY.ext.Store({
+                autoLoad: false,
+                schemaName: 'assay',
+                queryName: this.assayName + ' AnalyteSinglePointControl',
+                columns: 'SinglePointControl, Analyte, SinglePointControl/Run/Isotype, SinglePointControl/Run/Conjugate, SinglePointControl/Run/RowId, '
+                        + 'SinglePointControl/Run/Name, SinglePointControl/Run/Folder/Name, SinglePointControl/Run/Folder/EntityId, '
+                        + 'SinglePointControl/Run/Batch/Network, SinglePointControl/Run/Batch/CustomProtocol, SinglePointControl/Run/NotebookNo, SinglePointControl/Run/AssayType, '
+                        + 'SinglePointControl/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
+                        + 'GuideSet/Created, IncludeInGuideSetCalculation, '
+                        + 'AverageFiBkgd, AverageFiBkgdQCFlagsEnabled',
+                filterArray: filterArray,
+                sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
+                maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
+                containerFilter: LABKEY.Query.containerFilter.allFolders,
+                listeners: {
+                    scope: this,
+                    // add a listener to the store to load the QC Flags for the given runs/analyte/titration
+                    'load': this.loadQCFlags
+                },
+                scope: this
+            });
+        }
     },
 
     getTrackingDataSelModel: function() {
@@ -172,13 +196,47 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     getTrackingDataColModel: function() {
         return new Ext.grid.ColumnModel({
             defaults: {sortable: true},
-            columns: [
+            columns: this.getTrackingDataColumns(),
+//            columns: [
+//                this.selModel,
+//                {header:'Analyte', dataIndex:'Analyte', hidden: true, renderer: this.encodingRenderer},
+//                {header:'Titration', dataIndex:'Titration', hidden: true, renderer: this.encodingRenderer},
+//                {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
+//                {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
+//                {header:'QC Flags', dataIndex:'QCFlags', width: 75},
+//                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
+//                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
+//                {header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
+//                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
+//                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
+//                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
+//                {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
+//                {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
+//                {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100, renderer: this.encodingRenderer},
+//                {header:'Guide Set Start Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
+//                {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
+//                {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Four ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
+//                {header:'EC50 4PL QC Flags Enabled', dataIndex:'Four ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
+//                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Five ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
+//                {header:'EC50 5PL QC Flags Enabled', dataIndex:'Five ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
+//                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("TrapezoidalCurveFit/AUCQCFlagsEnabled"), scope: this, align: 'right'},
+//                {header:'AUC  QC Flags Enabled', dataIndex:'TrapezoidalCurveFit/AUCQCFlagsEnabled', hidden: true},
+//                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'},
+//                {header:'High  QC Flags Enabled', dataIndex:'MaxFIQCFlagsEnabled', hidden: true}
+//            ],
+            scope: this
+        });
+    },
+
+    getTrackingDataColumns: function() {
+        if (this.controlType == "Titration") {
+            return [
                 this.selModel,
                 {header:'Analyte', dataIndex:'Analyte', hidden: true, renderer: this.encodingRenderer},
                 {header:'Titration', dataIndex:'Titration', hidden: true, renderer: this.encodingRenderer},
                 {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
                 {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
-                {header:'QC Flags', dataIndex:'QCFlags', width: 75}, 
+                {header:'QC Flags', dataIndex:'QCFlags', width: 75},
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
                 {header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
@@ -198,9 +256,32 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'AUC  QC Flags Enabled', dataIndex:'TrapezoidalCurveFit/AUCQCFlagsEnabled', hidden: true},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'},
                 {header:'High  QC Flags Enabled', dataIndex:'MaxFIQCFlagsEnabled', hidden: true}
-            ],
-            scope: this
-        });
+            ];
+        } else if (this.controlType == "SinglePoint") {
+            return [
+                this.selModel,
+                {header:'Analyte', dataIndex:'Analyte', hidden: true, renderer: this.encodingRenderer},
+                {header:'SinglePointControl', dataIndex:'SinglePointControl', hidden: true, renderer: this.encodingRenderer},
+                {header:'Isotype', dataIndex:'SinglePointControl/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
+                {header:'Conjugate', dataIndex:'SinglePointControl/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
+                {header:'QC Flags', dataIndex:'QCFlags', width: 75},
+                {header:'Assay Id', dataIndex:'SinglePointControl/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
+                {header:'Network', dataIndex:'SinglePointControl/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
+                {header:'Protocol', dataIndex:'SinglePointControl/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
+                {header:'Folder', dataIndex:'SinglePointControl/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
+                {header:'Notebook No.', dataIndex:'SinglePointControl/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
+                {header:'Assay Type', dataIndex:'SinglePointControl/Run/AssayType', width:100, renderer: this.encodingRenderer},
+                {header:'Experiment Performer', dataIndex:'SinglePointControl/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
+                {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
+                {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100, renderer: this.encodingRenderer},
+                {header:'Guide Set Start Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
+                {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
+                {header:'MFI', dataIndex:'AverageFiBkgd', width:75, renderer: this.outOfRangeRenderer("AverageFiBkgdQCFlagsEnabled"), scope: this, align: 'right'},
+                {header:'MFI QC Flags Enabled', dataIndex:'AverageFiBkgdQCFlagsEnabled', hidden: true}
+            ];
+        } else {
+            return [];
+        }
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked

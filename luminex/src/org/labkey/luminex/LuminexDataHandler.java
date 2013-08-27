@@ -110,10 +110,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     public static final String QC_FLAG_FI_FLAG_TYPE = "MFI";
     public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
+    public static final String QC_FLAG_AVERAGE_FI_BKGD_FLAG_TYPE = "AverageFiBkgd";
     public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50-4";
     public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
     public static final String QC_FLAG_AUC_FLAG_TYPE = "AUC";
     public static final String QC_FLAG_CV_FLAG_TYPE = "PCV";
+    public static final String QC_FLAG_TITRATION_ID = "TitrationId";  // Column name to use in createQCFlagEnabledSQLFragment
+    public static final String QC_FLAG_SINGLE_POINT_CONTROL_ID = "SinglePointControlId";   // Column name to use in createQCFlagEnabledSQLFragment
     public static final String POSITIVITY_THRESHOLD_COLUMN_NAME = "PositivityThreshold";
     public static final String POSITIVITY_THRESHOLD_DISPLAY_NAME = "Positivity Threshold";
     public static final String CALCULATE_POSITIVITY_COLUMN_NAME = "calculatePositivity";

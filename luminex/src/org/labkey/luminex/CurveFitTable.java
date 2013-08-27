@@ -69,7 +69,7 @@ public class CurveFitTable extends AbstractLuminexTable
                 return new QCFlagHighlightDisplayColumn(colInfo, "EC50QCFlagsEnabled");
             }
         });
-        SQLFragment ec50FlagSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), "EC50", null);
+        SQLFragment ec50FlagSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), "EC50", null, LuminexDataHandler.QC_FLAG_TITRATION_ID);
         ExprColumn ec50FlagEnabledColumn = new ExprColumn(this, "EC50QCFlagsEnabled", ec50FlagSQL, JdbcType.VARCHAR);
         ec50FlagEnabledColumn.setLabel("EC50 QC Flags Enabled State");
         ec50FlagEnabledColumn.setHidden(true);
@@ -84,7 +84,7 @@ public class CurveFitTable extends AbstractLuminexTable
                 return new QCFlagHighlightDisplayColumn(colInfo, "AUCQCFlagsEnabled");
             }
         });
-        SQLFragment aucFlagSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_AUC_FLAG_TYPE, "Trapezoidal");
+        SQLFragment aucFlagSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_AUC_FLAG_TYPE, "Trapezoidal", LuminexDataHandler.QC_FLAG_TITRATION_ID);
         ExprColumn aucFlagEnabledColumn = new ExprColumn(this, "AUCQCFlagsEnabled", aucFlagSQL, JdbcType.VARCHAR);
         aucFlagEnabledColumn.setLabel("AUC QC Flags Enabled State");
         aucFlagEnabledColumn.setHidden(true);

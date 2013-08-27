@@ -201,12 +201,12 @@ public class LuminexController extends SpringActionController
                 {
                     super.setupDataView(ret);
 
-                    // TODO: add logic for SinglePointControl Graph (the below was stolen from Titration)
                     ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
-//                    graph.addParameter("titration", "${Titration/Name}");
-//                    graph.addParameter("analyte", "${Analyte/Name}");
-//                    graph.addParameter("isotype", "${Titration/Run/Isotype}");
-//                    graph.addParameter("conjugate", "${Titration/Run/Conjugate}");
+                    graph.addParameter("controlName", "${SinglePointControl/Name}");
+                    graph.addParameter("controlType", "SinglePoint");
+                    graph.addParameter("analyte", "${Analyte/Name}");
+                    graph.addParameter("isotype", "${SinglePointControl/Run/Isotype}");
+                    graph.addParameter("conjugate", "${SinglePointControl/Run/Conjugate}");
                     SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
                     ret.getDataRegion().addDisplayColumn(0, graphDetails);
                 }

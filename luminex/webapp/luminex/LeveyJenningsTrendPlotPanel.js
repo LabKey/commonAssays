@@ -366,6 +366,17 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 'activate': this.activateTrendPlotPanel
             }
         });
+        this.singlePointControlPanel = new Ext.Panel({
+            itemId: "MFI",
+            title: "MFI",
+            html: "<div id='MFITrendPlotDiv' class='spcTrendPlot'></div>",
+            deferredRender: false,
+            listeners: {
+                scope: this,
+                'activate': this.activateTrendPlotPanel
+            }
+        });
+
         this.trendTabPanel = new Ext.TabPanel({
             autoScroll: true,
             activeTab: 0,
@@ -373,7 +384,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 height: 308,
                 padding: 5
             },
-            items: [this.ec504plPanel, this.ec505plPanel, this.aucPanel, this.mfiPanel]
+            // show different tabs if the report is qc titration report vs. qc single point control report
+            items: this.getTitrationSinglePointControlItems()
         });
         this.items.push(this.trendTabPanel);
 
@@ -583,5 +595,14 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         return storeData;
+    },
+
+    getTitrationSinglePointControlItems: function() {
+        if (this.controlType == "Titration") {
+            return([this.ec504plPanel, this.ec505plPanel, this.aucPanel, this.mfiPanel]);
+        } else if (this.controlType = "SinglePoint") {
+            return([this.singlePointControlPanel]);
+        }
+        return null;
     }
 });

@@ -95,7 +95,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             }
         });
         addColumn(maxFiCol);
-        SQLFragment maxFiFlagEnabledSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_HIGH_MFI_FLAG_TYPE, null);
+        SQLFragment maxFiFlagEnabledSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_HIGH_MFI_FLAG_TYPE, null, LuminexDataHandler.QC_FLAG_TITRATION_ID);
         ExprColumn maxFiFlagEnabledColumn = new ExprColumn(this, "MaxFIQCFlagsEnabled", maxFiFlagEnabledSQL, JdbcType.VARCHAR);
         maxFiFlagEnabledColumn.setLabel("High MFI QC Flags Enabled State");
         maxFiFlagEnabledColumn.setHidden(true);

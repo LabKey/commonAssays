@@ -62,13 +62,14 @@ public abstract class AbstractLuminexTable extends FilteredTable<LuminexProtocol
         return _userSchema.getSchemaName();
     }
 
-    public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType)
+    // param: titrationSinglePointControlSwitch - TitrationId for AnalyteTitration, SinglePointControlId for AnalyteSinglePointControl
+    public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType, String titrationSinglePointControlSwitch)
     {
         SQLFragment sql = new SQLFragment(" ");
         sql.append("SELECT qf.Enabled FROM ");
         sql.append(ExperimentService.get().getTinfoAssayQCFlag(), "qf");
         sql.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId = qf.IntKey1");
-        sql.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".TitrationId = qf.IntKey2");
+        sql.append("   AND " + ExprColumn.STR_TABLE_ALIAS + "." + titrationSinglePointControlSwitch + " = qf.IntKey2");
         if (null != curveType)
         {
             sql.append("    AND " + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + curveType + "'");
