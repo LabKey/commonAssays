@@ -411,7 +411,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             UWSequestSearchTask.TestCase.class,
             TPPTask.TestCase.class,
             Protein.TestCase.class,
-            SequestSearchTask.TestCase.class
+            SequestSearchTask.TestCase.class,
+            BibliospecSpectrumRenderer.TestCase.class
         ));
     }
 

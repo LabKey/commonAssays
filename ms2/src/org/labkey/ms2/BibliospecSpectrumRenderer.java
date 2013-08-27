@@ -1,5 +1,7 @@
 package org.labkey.ms2;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.util.PageFlowUtil;
@@ -22,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,7 +43,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
     private DecimalFormat MODIFICATION_MASS_FORMAT = new DecimalFormat("0.0");
 
-    public BibliospecSpectrumRenderer(ViewContext context) throws IOException
+    public BibliospecSpectrumRenderer(ViewContext context)
     {
         _context = context;
     }
@@ -48,7 +51,9 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
     @Override
     public void render(SpectrumIterator iter) throws IOException
     {
+        // Run ID->Modification list
         Map<Integer, List<MS2Modification>> modificationsCache = new HashMap<>();
+        // LabKey Fraction ID->Bibliospec SpectraSourceFile ID
         Map<Integer, Integer> fractionCache = new HashMap<>();
 
         String shortName = _context.getContainer().getName() + "SpectraLibrary";
@@ -64,29 +69,28 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                 statement.execute("CREATE TABLE Modifications (id  integer primary key autoincrement, RefSpectraId BIGINT, position INT not null, mass DOUBLE not null, constraint FK928405BDF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
                 statement.execute("CREATE TABLE RefSpectra (id  integer primary key autoincrement, peptideSeq TEXT not null, peptideModSeq TEXT not null, precursorCharge INT not null, precursorMZ DOUBLE not null, prevAA TEXT, nextAA TEXT, copies SMALLINT not null, numPeaks INTEGER not null);");
                 statement.execute("CREATE TABLE RefSpectraPeaks (RefSpectraId BIGINT not null, peakMZ BLOB, peakIntensity BLOB, primary key (RefSpectraId), constraint FKACE51F3F1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
-                statement.execute("CREATE TABLE RetentionTimes (id  integer primary key autoincrement, RefSpectraId BIGINT, RedundantRefSpectraId BIGINT, SpectrumSourceId BIGINT, retentionTime DOUBLE, bestSpectrum INT, constraint FKF3D3B64AF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
                 statement.execute("CREATE TABLE SpectrumSourceFiles (id  integer primary key autoincrement, fileName TEXT);");
 
+                // We're creating a redundant library, which isn't expected to contain retention times, so we can
+                // omit the table
+//                statement.execute("CREATE TABLE RetentionTimes (id  integer primary key autoincrement, RefSpectraId BIGINT, RedundantRefSpectraId BIGINT, SpectrumSourceId BIGINT, retentionTime DOUBLE, bestSpectrum INT, constraint FKF3D3B64AF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
+
+                // Keep track of the sequence value so that we can set foreign key values
                 int spectraCount = 0;
 
-                try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, copies, numPeaks) VALUES (?, ?, ?, ?, ?, ?)");
+                // Create the statements to insert all of the data
+                try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, nextAA, prevAA, copies, numPeaks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                      PreparedStatement spectraPS = connection.prepareStatement("INSERT INTO RefSpectraPeaks(RefSpectraId, PeakMZ, PeakIntensity) VALUES (?, ?, ?)");
                      PreparedStatement modificationPS = connection.prepareStatement("INSERT INTO Modifications (RefSpectraId, Position, Mass) VALUES (?, ?, ?)");
                      PreparedStatement sourceFilePS = connection.prepareStatement("INSERT INTO SpectrumSourceFiles (fileName) VALUES (?)"))
                 {
+                    // Iterate over all of the spectra
                     while (iter.hasNext())
                     {
                         Spectrum spectrum = iter.next();
 
                         float[] mzFloats = spectrum.getX();
                         float[] intensityFloats = spectrum.getY();
-
-                        String sequence = spectrum.getSequence();
-                        String[] split = sequence.split("\\.");
-                        if (split.length != 3)
-                        {
-                            throw new IllegalArgumentException("Expected peptide sequence to be of the form X.XXXX.X but was " + sequence);
-                        }
 
                         List<MS2Modification> modifications = modificationsCache.get(spectrum.getRun());
                         if (modifications == null)
@@ -122,16 +126,17 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             }
                         }
 
+                        // Hold on to the index->mass difference info so we can insert into the Modifications table as well
                         Map<Integer, Float> peptideModifications = new HashMap<>();
 
                         peptidePS.setString(1, spectrum.getTrimmedSequence());
-                        peptidePS.setString(2, getExportModifiedSequence(split[1], modifications, peptideModifications));
+                        peptidePS.setString(2, getExportModifiedSequence(spectrum.getSequence(), modifications, peptideModifications));
                         peptidePS.setInt(3, spectrum.getCharge());
                         peptidePS.setDouble(4, spectrum.getMZ());
-//                        peptidePS.setString(5, spectrum.getNextAA());
-//                        peptidePS.setString(6, spectrum.getPrevAA());
-                        peptidePS.setInt(5, 1);  // TODO - real value
-                        peptidePS.setInt(6, mzFloats.length);
+                        peptidePS.setString(5, "-");
+                        peptidePS.setString(6, "-");
+                        peptidePS.setInt(7, 1);
+                        peptidePS.setInt(8, mzFloats.length);
                         peptidePS.execute();
                         spectraCount++;
 
@@ -157,30 +162,31 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         }
 
                         spectraPS.setInt(1, spectraCount);
-                        // For now output as uncompressed data - must need to use a newer version to allow compression
-                        spectraPS.setBytes(2, mzBuffer.array());
-                        spectraPS.setBytes(3, intensityBuffer.array());
+                        spectraPS.setBytes(2, compress(mzBuffer.array()));
+                        spectraPS.setBytes(3, compress(intensityBuffer.array()));
                         spectraPS.execute();
                     }
                 }
 
-                // Insert the LibInfo row
+                // Insert the LibInfo row with summary info
                 try (PreparedStatement ps = connection.prepareStatement("INSERT INTO LibInfo(libLSID, createTime, numSpecs, majorVersion, minorVersion) VALUES (?, ?, ?, ?, ?)"))
                 {
-                    ps.setString(1, new Lsid("spectral_library", "bibliospec").setVersion("nr") + _context.getContainer().getName());
+                    ps.setString(1, new Lsid("spectral_library", "bibliospec").setVersion("redundant") + Lsid.encodePart(_context.getContainer().getName()));
                     ps.setString(2, new SimpleDateFormat("EEE MMM HH:mm:ss yyyy").format(new Date()));
                     ps.setInt(3, spectraCount);
                     ps.setInt(4, 1);
-                    ps.setInt(5, 0);
+                    ps.setInt(5, 1);
                     ps.execute();
                 }
 
+                // Create the indices on the end after all the inserts are done
                 statement.execute("CREATE INDEX idxPeptide on RefSpectra (peptideSeq);");
                 statement.execute("CREATE INDEX idxPeptideMod on RefSpectra (peptideModSeq, precursorCharge);");
             }
+
             try (InputStream fIn = new FileInputStream(tempFile))
             {
-                PageFlowUtil.streamFile(_context.getResponse(), Collections.<String, String>emptyMap(), shortName + ".blib", fIn, true);
+                PageFlowUtil.streamFile(_context.getResponse(), Collections.<String, String>emptyMap(), shortName + ".redundant.blib", fIn, true);
             }
         }
         catch (ClassNotFoundException e)
@@ -197,13 +203,24 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
         }
     }
 
-    private String getExportModifiedSequence(String trimmedModifiedSequence, List<MS2Modification> runModifications, Map<Integer, Float> peptideMods)
+    /** Bibliospec wants the modified strings in a different format ("XXX[+YY.Y]XXX") than how we store them ("X.XXX*XXX.X") */
+    private String getExportModifiedSequence(String sequence, List<MS2Modification> runModifications, Map<Integer, Float> peptideMods)
     {
+        // Grab just the middle part, between the dots
+        String[] split = sequence.split("\\.");
+        if (split.length != 3)
+        {
+            throw new IllegalArgumentException("Expected peptide sequence to be of the form X.XXXX.X but was " + sequence);
+        }
+
+        String trimmedModifiedSequence = split[1];
+
         StringBuilder result = new StringBuilder();
         int residueIndex = 0;
         for (int i = 0; i < trimmedModifiedSequence.length(); i++)
         {
             char c = trimmedModifiedSequence.charAt(i);
+            // If it's an amino acid, appent it directly
             if (Character.isLetter(c))
             {
                 result.append(c);
@@ -211,6 +228,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
             }
             else
             {
+                // Otherwise, find the modification's mass difference and append that instead
                 MS2Modification modification = findModification(c, runModifications);
                 result.append("[");
                 if (modification.getMassDiff() > 0)
@@ -237,12 +255,14 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
         throw new IllegalArgumentException("Could not find a matching modification for " + c);
     }
 
+    /** Do zlib compression of the bytes */
     private byte[] compress(byte[] bytes)
     {
         Deflater deflater = new Deflater();
         deflater.setInput(bytes);
         deflater.finish();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        // Operate on 4k chunks
         byte[] b = new byte[4096];
         int i;
         while ((i = deflater.deflate(b)) > 0)
@@ -256,6 +276,48 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
     @Override
     public void close() throws IOException
     {
+        // We handle the closing inside the render() method
+    }
 
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testParsing()
+        {
+            BibliospecSpectrumRenderer renderer = new BibliospecSpectrumRenderer(null);
+
+            MS2Modification mod1 = new MS2Modification();
+            mod1.setAminoAcid("C");
+            mod1.setMassDiff(57);
+            mod1.setSymbol("*");
+
+            MS2Modification mod2 = new MS2Modification();
+            mod2.setAminoAcid("A");
+            mod2.setMassDiff(-40.3f);
+            mod2.setSymbol("'");
+
+            HashMap<Integer, Float> peptideMods = new HashMap<>();
+            assertEquals("ABFDSC[+57.0]CC", renderer.getExportModifiedSequence("X.ABFDSC*CC.X", Arrays.asList(mod1), peptideMods));
+            assertEquals(Collections.singletonMap(6, 57.0f), peptideMods);
+
+            peptideMods.clear();
+            assertEquals("ABFDSC[+57.0]CC[+57.0]", renderer.getExportModifiedSequence("X.ABFDSC*CC*.X", Arrays.asList(mod1), peptideMods));
+            assertEquals(peptideMods.size(), 2);
+            assertEquals(57.0f, peptideMods.get(6), 0.0);
+            assertEquals(57.0f, peptideMods.get(8), 0.0);
+
+            peptideMods.clear();
+            assertEquals("ABFDSC[+57.0]CC[+57.0]", renderer.getExportModifiedSequence("X.ABFDSC*CC*.X", Arrays.asList(mod1, mod2), peptideMods));
+            assertEquals(peptideMods.size(), 2);
+            assertEquals(57.0f, peptideMods.get(6), 0.0);
+            assertEquals(57.0f, peptideMods.get(8), 0.0);
+
+            peptideMods.clear();
+            assertEquals("A[-40.3]BFDSC[+57.0]CC[+57.0]", renderer.getExportModifiedSequence("X.A'BFDSC*CC*.X", Arrays.asList(mod1, mod2), peptideMods));
+            assertEquals(peptideMods.size(), 3);
+            assertEquals(-40.3f, peptideMods.get(1), 0.0);
+            assertEquals(57.0f, peptideMods.get(6), 0.0);
+            assertEquals(57.0f, peptideMods.get(8), 0.0);
+        }
     }
 }
