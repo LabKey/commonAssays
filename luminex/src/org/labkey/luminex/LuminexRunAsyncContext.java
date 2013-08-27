@@ -36,6 +36,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     private String[] _analyteNames;
     private Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<>();
     private Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<>();
+    private Map<String, Map<String, String>> _analytePropertiesByName = new HashMap<>();
     private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
     private List<Titration> _titrations;
     private List<SinglePointControl> _singlePointControls;
@@ -54,6 +55,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         {
             _analytePropertiesById.put(analyteName, convertPropertiesToIds(originalContext.getAnalyteProperties(analyteName)));
             _analyteColumnPropertiesByName.put(analyteName, convertColumnPropertiesToNames(originalContext.getAnalyteColumnProperties(analyteName)));
+            _analytePropertiesByName.put(analyteName, convertDomainsToNames(originalContext.getAnalyteProperties(analyteName)));
             _titrationsByAnalyte.put(analyteName, originalContext.getTitrationsForAnalyte(analyteName));
         }
         _titrations = originalContext.getTitrations();
@@ -70,6 +72,17 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         {
             logger.info("\tProperties for " + entry.getKey() + ":");
             for(Map.Entry<String, String> props : entry.getValue().entrySet())
+            {
+                if(props.getValue() == null)
+                    valueText = "[Blank]";
+                else
+                    valueText = props.getValue();
+
+                logger.info("\t\t*"+props.getKey() + ":  " + valueText);
+            }
+
+            //Currenlty this should only have the positivity thresholds in it, but it might have more later.
+            for(Map.Entry<String, String> props: this._analytePropertiesByName.get(entry.getKey()).entrySet())
             {
                 if(props.getValue() == null)
                     valueText = "[Blank]";
@@ -178,6 +191,16 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     }
 
     /** Convert to a map that can be serialized - ColumnInfo can't be */
+    private Map<String, String> convertDomainsToNames(Map<DomainProperty, String> properties)
+    {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<DomainProperty, String> entry : properties.entrySet())
+        {
+            result.put(entry.getKey().getName(), entry.getValue());
+        }
+        return result;
+    }
+
     private Map<String, String> convertColumnPropertiesToNames(Map<ColumnInfo, String> properties)
     {
         Map<String, String> result = new HashMap<>();
