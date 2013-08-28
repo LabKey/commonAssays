@@ -15,6 +15,8 @@
  */
 package org.labkey.luminex;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
@@ -239,5 +241,63 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     public List<SinglePointControl> getSinglePointControls() throws ExperimentException
     {
         return _singlePointControls;
+    }
+
+
+    public static class TestCase extends Assert
+    {
+
+        LuminexUnitTestContext testContext = new LuminexUnitTestContext();
+        LuminexRunAsyncContext asyncContext;
+
+        private static class StringLogger extends Logger
+        {
+            StringBuilder sb = new StringBuilder();
+            private StringLogger()
+            {
+                super("");
+            }
+
+            @Override
+            public void info(Object append)
+            {
+                sb.append(append);
+                sb.append("\n");
+            }
+
+            public String toString()
+            {
+                return sb.toString();
+            }
+        }
+
+        @Test
+        public void checkLogging()
+        {
+            try{
+                asyncContext = new LuminexRunAsyncContext(testContext);
+            }
+            catch(Exception e)
+            {
+                fail();
+            }
+            StringLogger sl = new StringLogger();
+            asyncContext.logProperties(sl);
+            String output = sl.toString();
+
+            assert(output.contains("Analyte 1"));
+            assert(output.contains("Analyte 2"));
+            assert(output.contains("Batch Name: Name of the Batch"));
+            assert(output.contains("* New"));
+            assert(output.contains("Assay ID: Log Test"));
+            assert(output.contains("Run Comments: Test Comments"));
+            assert(output.contains("Run Name: Name of the Run"));
+            assert(output.contains("Name:  Name of the Project"));
+            assert(output.contains("*PositivityThreshold:  50.0"));
+            assert(output.contains("Standard:  true"));
+            assert(output.contains("QC Control:  false"));
+            assert(output.contains("Unknown:  false"));
+        }
+
     }
 }

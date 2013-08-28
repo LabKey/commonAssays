@@ -739,6 +739,7 @@ luminex/src/org/labkey/luminex/LuminexRunContext.java -text
 luminex/src/org/labkey/luminex/LuminexRunCreator.java -text
 luminex/src/org/labkey/luminex/LuminexRunDatabaseContext.java -text
 luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
+luminex/src/org/labkey/luminex/LuminexUnitTestContext.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
 luminex/src/org/labkey/luminex/LuminexWellGroup.java -text
