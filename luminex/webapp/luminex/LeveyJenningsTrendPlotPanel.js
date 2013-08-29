@@ -22,8 +22,8 @@ LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     constructor : function(config){
         // check that the config properties needed are present
-        if (!config.titration || config.titration == "null")
-            throw "You must specify a titration!";
+        if (!config.controlName || config.controlName == "null")
+            throw "You must specify a control name!";
         if (!config.assayName || config.assayName == "null")
             throw "You must specify a assayName!";
 
@@ -84,6 +84,13 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             }
         });
 
+        // setup variable switching between Titration and SinglePointControl column names
+        if (this.controlType == 'Titration') {
+            this.controlTypeColumnName = "Titration";
+        } else {
+            this.controlTypeColumnName = "SinglePointControl";
+        }
+
         // initialize the date range selection fields for the top toolbar
         this.startDateLabel = new Ext.form.Label({text: 'Start Date:'});
         this.startDateField = new Ext.form.DateField({
@@ -131,10 +138,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
                         containerFilter: LABKEY.Query.containerFilter.allFolders,
                         schemaName: 'assay',
-                        sql: "SELECT DISTINCT x.Titration.Run.Batch.Network" // x.Titration.Run.Batch.CustomProtocol AS Protocol
-                            + ' FROM "' + this.assayName + ' AnalyteTitration" AS x'
-                            + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
-                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
+                        sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.Network" // x.Titration.Run.Batch.CustomProtocol AS Protocol
+                            + ' FROM "' + this.assayName + ' Analyte' + this.controlTypeColumnName + '" AS x'
+                            + ' WHERE x.' + this.controlTypeColumnName + '.Name = \'' + this.controlName.replace(/'/g, "''") + '\''
+                            + ' AND x.' + (this.controlType == "Titration" ? "MaxFI" : "AverageFiBkgd") + ' IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
                     })
                 }),
                 listeners: {
@@ -206,10 +213,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
                         containerFilter: LABKEY.Query.containerFilter.allFolders,
                         schemaName: 'assay',
-                        sql: "SELECT DISTINCT x.Titration.Run.Batch.CustomProtocol AS CustomProtocol"
-                                + ' FROM "' + this.assayName + ' AnalyteTitration" AS x'
-                                + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
-                                + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
+                        sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.CustomProtocol AS CustomProtocol"
+                                + ' FROM "' + this.assayName + ' Analyte' + this.controlTypeColumnName + '" AS x'
+                                + ' WHERE x.' + this.controlTypeColumnName + '.Name = \'' + this.controlName.replace(/'/g, "''") + '\''
+                                + ' AND x.' + (this.controlType == "Titration" ? "MaxFI" : "AverageFiBkgd") + ' IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
                     })
                 }),
                 listeners: {
@@ -445,7 +452,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             // build the config object of the properties that will be needed by the R report
             var config = {reportId: 'module:luminex/LeveyJenningsTrendPlot.r', showSection: 'Levey-Jennings Trend Plot'};
             config['Protocol'] = this.assayName;
-            config['Titration'] = this.titration;
+            config['Titration'] = this.controlName;
             config['Analyte'] = this.analyte;
             config['Isotype'] = this.isotype;
             config['Conjugate'] = this.conjugate;
@@ -471,6 +478,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             // add config for plotting in log scale
             if (this.yAxisScale == 'log')
                 config['AsLog'] =  true;
+            if (this.controlType == "Titration") {
+                config['isTitration'] = true;
+            }
 
             // call and display the Report webpart
             new LABKEY.WebPart({

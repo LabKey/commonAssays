@@ -25,31 +25,59 @@ if (majorVersion <= 2.1) {
     }
 }
 
-plotTypes = c("EC50 4PL", "EC50 5PL", "AUC", "High MFI");
+# option for Titration vs. SinglePointControl
+isTitration = labkey.url.params$isTitration
+
+if (!is.null(isTitration)) {
+    plotTypes = c("EC50 4PL", "EC50 5PL", "AUC", "High MFI");
+} else {
+    plotTypes = c("MFI");
+}
 
 # create a list of filters to apply to the selectRows call
-colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
-colFilter=rbind(colFilter,makeFilter(c("Titration/Name","EQUAL",labkey.url.params$Titration)));
-if (labkey.url.params$Conjugate == "") {
-    colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","MISSING",labkey.url.params$Conjugate)));
+if (!is.null(isTitration)) {
+    colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
+    colFilter=rbind(colFilter,makeFilter(c("Titration/Name","EQUAL",labkey.url.params$Titration)));
+    if (labkey.url.params$Conjugate == "") {
+        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","MISSING",labkey.url.params$Conjugate)));
+    } else {
+        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","EQUAL",labkey.url.params$Conjugate)));
+    }
+    if (labkey.url.params$Isotype == "") {
+        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","MISSING",labkey.url.params$Isotype)));
+    } else {
+        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","EQUAL",labkey.url.params$Isotype)));
+    }
 } else {
-    colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","EQUAL",labkey.url.params$Conjugate)));
-}
-if (labkey.url.params$Isotype == "") {
-    colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","MISSING",labkey.url.params$Isotype)));
-} else {
-    colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","EQUAL",labkey.url.params$Isotype)));
+    colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
+    colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Name","EQUAL",labkey.url.params$Titration)));
+    if (labkey.url.params$Conjugate == "") {
+        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Conjugate","MISSING",labkey.url.params$Conjugate)));
+    } else {
+        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Conjugate","EQUAL",labkey.url.params$Conjugate)));
+    }
+    if (labkey.url.params$Isotype == "") {
+        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Isotype","MISSING",labkey.url.params$Isotype)));
+    } else {
+        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Isotype","EQUAL",labkey.url.params$Isotype)));
+    }
 }
 
 # create a list of the columns that are needed for the trending plot
-colSelect = paste("Analyte/Name", "Titration/Name", "Titration/Run/Isotype", "Titration/Run/Conjugate", "Analyte/Properties/LotNumber",
-                "Titration/Run/NotebookNo", "Analyte/Data/AcquisitionDate", "GuideSet/Created", sep=",");
+if (!is.null(isTitration)) {
+    colSelect = paste("Analyte/Name", "Titration/Name", "Titration/Run/Isotype", "Titration/Run/Conjugate", "Analyte/Properties/LotNumber",
+                    "Titration/Run/NotebookNo", "Analyte/Data/AcquisitionDate", "GuideSet/Created", sep=",");
+} else {
+    colSelect = paste("Analyte/Name", "SinglePointControl/Name", "SinglePointControl/Run/Isotype", "SinglePointControl/Run/Conjugate", "Analyte/Properties/LotNumber",
+                    "SinglePointControl/Run/NotebookNo", "Analyte/Data/AcquisitionDate", "GuideSet/Created", sep=",");
+}
 
-# get the columns needed for each of the 4 plot types : EC50 4PL, EC50 5PL, MaxFI, and AUC
+# get the columns needed for each of the 5 plot types : EC50 4PL, EC50 5PL, MaxFI, and AUC, MFI
 colSelect = paste(colSelect, "Four ParameterCurveFit/EC50", "GuideSet/Four ParameterCurveFit/EC50Average", "GuideSet/Four ParameterCurveFit/EC50StdDev", sep=",");
 colSelect = paste(colSelect, "Five ParameterCurveFit/EC50", "GuideSet/Five ParameterCurveFit/EC50Average", "GuideSet/Five ParameterCurveFit/EC50StdDev", sep=",");
 colSelect = paste(colSelect, "MaxFI", "GuideSet/MaxFIAverage", "GuideSet/MaxFIStdDev", sep=",");
 colSelect = paste(colSelect, "TrapezoidalCurveFit/AUC", "GuideSet/TrapezoidalCurveFit/AUCAverage", "GuideSet/TrapezoidalCurveFit/AUCStdDev", sep=",");
+colSelect = paste(colSelect, "AverageFiBkgd", "GuideSet/SinglePointControlFIAverage", "GuideSet/SinglePointControlFIStdDev", sep=",");
 
 # either filter on start and end date or on max number of rows
 maxRows = NA;
@@ -64,25 +92,46 @@ if (!is.null(labkey.url.params$MaxRows)) {
     }
     # Add the filter for Network
     if (!is.null(labkey.url.params$NetworkFilter)) {
-        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
+        if (!is.null(isTitration)) {
+            colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
+        } else {
+            colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
+        }
     }
     # Add the filter for Protocol
     if (!is.null(labkey.url.params$CustomProtocolFilter)) {
-        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
+        if (!is.null(isTitration)) {
+            colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
+        } else {
+            colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
+        }
     }
 }
 
 # call the selectRows function to get the data from the server
-labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
-                            folderPath=labkey.url.path,
-                            schemaName="assay",
-                            queryName=paste(labkey.url.params$Protocol, "AnalyteTitration", sep=" "),
-                            colSelect=colSelect,
-                            colFilter=colFilter,
-                            colSort="-Analyte/Data/AcquisitionDate,-Titration/Run/Created",
-                            containerFilter="AllFolders",
-                            colNameOpt="rname",
-                            maxRows=maxRows);
+if (!is.null(isTitration)) {
+    labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
+                                folderPath=labkey.url.path,
+                                schemaName="assay",
+                                queryName=paste(labkey.url.params$Protocol, "AnalyteTitration", sep=" "),
+                                colSelect=colSelect,
+                                colFilter=colFilter,
+                                colSort="-Analyte/Data/AcquisitionDate,-Titration/Run/Created",
+                                containerFilter="AllFolders",
+                                colNameOpt="rname",
+                                maxRows=maxRows);
+} else {
+    labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
+                                folderPath=labkey.url.path,
+                                schemaName="assay",
+                                queryName=paste(labkey.url.params$Protocol, "AnalyteSinglePointControl", sep=" "),
+                                colSelect=colSelect,
+                                colFilter=colFilter,
+                                colSort="-Analyte/Data/AcquisitionDate,-SinglePointControl/Run/Created",
+                                containerFilter="AllFolders",
+                                colNameOpt="rname",
+                                maxRows=maxRows);
+}
 
 # setup the png or pdf for the plot
 if (!is.null(labkey.url.params$PdfOut)) {
@@ -127,6 +176,10 @@ for (typeIndex in 1:length(plotTypes))
 	    dat$plottype_value = dat$trapezoidalcurvefit_auc;
 	    dat$guideset_average = dat$guideset_trapezoidalcurvefit_aucaverage;
 	    dat$guideset_stddev = dat$guideset_trapezoidalcurvefit_aucstddev;
+	} else if (plotType == "MFI") {
+	    dat$plottype_value = dat$averagefibkgd;
+        dat$guideset_average = dat$guideset_singlepointcontrolfiaverage;
+        dat$guideset_stddev = dat$guideset_singlepointcontrolfistddev;
 	}
 
 	# determine if the request is for log scale or not
@@ -181,10 +234,20 @@ for (typeIndex in 1:length(plotTypes))
 	  tckFactor = ceiling(xmax/30);
 	  # setup the tick marks and labels based on the scaling factor
 	  xtcks = seq(1, xmax, by = tckFactor);
-	  if ("titration_run_notebookno" %in% colnames(dat)) {
-	    xlabels = as.character(dat$titration_run_notebookno[xtcks])
+
+      # set the column labels to 'NotebookNo': Titration/Run/NotebookNo or SinglePointControl/Run/NotebookNo
+	  if (!is.null(isTitration)) {
+          if ("titration_run_notebookno" %in% colnames(dat)) {
+            xlabels = as.character(dat$titration_run_notebookno[xtcks])
+          } else {
+            xlabels = rep(NA, length(xtcks));
+          }
       } else {
-        xlabels = rep(NA, length(xtcks));
+          if ("singlepointcontrol_run_notebookno" %in% colnames(dat)) {
+            xlabels = as.character(dat$singlepointcontrol_run_notebookno[xtcks])
+          } else {
+            xlabels = rep(NA, length(xtcks));
+          }
       }
 
 	  # set the point colors, giving each unique lot numer (if more than one) a different color

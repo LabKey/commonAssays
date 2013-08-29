@@ -226,7 +226,7 @@
         var trendPlotPanel = new LABKEY.LeveyJenningsTrendPlotPanel({
             renderTo: 'rPlotPanel',
             cls: 'extContainer',
-            titration: _controlName,
+            controlName: _controlName,
             controlType: _controlType,
             assayName: _protocolName,
             defaultRowSize: defaultRowSize,

@@ -100,12 +100,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
     getTrackingDataStore: function(startDate, endDate, network, networkAny, protocol, protocolAny) {
         // build the array of filters to be applied to the store
-        var filterArray = [
-            LABKEY.Filter.create('Titration/Name', this.titration),
-            LABKEY.Filter.create('Analyte/Name', this.analyte),
-            LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
-            LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
-        ];
+        var filterArray = this.getFilterArray();
         if (startDate)
         {
             filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', startDate, LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
@@ -116,11 +111,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }
         if (!networkAny)
         {
-            filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/Network', network));
+            filterArray.push(LABKEY.Filter.create((this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '/Run/Batch/Network', network));
         }
         if (!protocolAny)
         {
-            filterArray.push(LABKEY.Filter.create('Titration/Run/Batch/CustomProtocol', protocol));
+            filterArray.push(LABKEY.Filter.create((this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '/Run/Batch/CustomProtocol', protocol));
         }
 
         if (this.controlType == "Titration") {
@@ -173,6 +168,26 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }
     },
 
+    getFilterArray: function() {
+        if (this.controlType == "Titration") {
+            return [
+                LABKEY.Filter.create('Titration/Name', this.titration),
+                LABKEY.Filter.create('Analyte/Name', this.analyte),
+                LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
+                LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
+            ];
+        } else if (this.controlType == "SinglePoint") {
+            return [
+                LABKEY.Filter.create('SinglePointControl/Name', this.titration),
+                LABKEY.Filter.create('Analyte/Name', this.analyte),
+                LABKEY.Filter.create('SinglePointControl/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
+                LABKEY.Filter.create('SinglePointControl/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
+            ];
+        } else {
+            return null;
+        }
+    },
+
     getTrackingDataSelModel: function() {
         return new Ext.grid.CheckboxSelectionModel({
             listeners: {
@@ -197,33 +212,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         return new Ext.grid.ColumnModel({
             defaults: {sortable: true},
             columns: this.getTrackingDataColumns(),
-//            columns: [
-//                this.selModel,
-//                {header:'Analyte', dataIndex:'Analyte', hidden: true, renderer: this.encodingRenderer},
-//                {header:'Titration', dataIndex:'Titration', hidden: true, renderer: this.encodingRenderer},
-//                {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
-//                {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
-//                {header:'QC Flags', dataIndex:'QCFlags', width: 75},
-//                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
-//                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
-//                {header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
-//                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
-//                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
-//                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
-//                {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
-//                {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-//                {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100, renderer: this.encodingRenderer},
-//                {header:'Guide Set Start Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
-//                {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
-//                {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Four ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
-//                {header:'EC50 4PL QC Flags Enabled', dataIndex:'Four ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
-//                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Five ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
-//                {header:'EC50 5PL QC Flags Enabled', dataIndex:'Five ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
-//                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("TrapezoidalCurveFit/AUCQCFlagsEnabled"), scope: this, align: 'right'},
-//                {header:'AUC  QC Flags Enabled', dataIndex:'TrapezoidalCurveFit/AUCQCFlagsEnabled', hidden: true},
-//                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'},
-//                {header:'High  QC Flags Enabled', dataIndex:'MaxFIQCFlagsEnabled', hidden: true}
-//            ],
             scope: this
         });
     },
@@ -237,7 +225,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
                 {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
                 {header:'QC Flags', dataIndex:'QCFlags', width: 75},
-                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
+                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRendererTitration, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
                 {header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
                 {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
@@ -265,7 +253,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Isotype', dataIndex:'SinglePointControl/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
                 {header:'Conjugate', dataIndex:'SinglePointControl/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
                 {header:'QC Flags', dataIndex:'QCFlags', width: 75},
-                {header:'Assay Id', dataIndex:'SinglePointControl/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
+                {header:'Assay Id', dataIndex:'SinglePointControl/Run/Name', renderer: this.assayIdHrefRendererSinglePointControl, width:200},
                 {header:'Network', dataIndex:'SinglePointControl/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
                 {header:'Protocol', dataIndex:'SinglePointControl/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer},
                 {header:'Folder', dataIndex:'SinglePointControl/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
@@ -694,9 +682,15 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }
     },
 
-    assayIdHrefRenderer: function(val, p, record) {
+    assayIdHrefRendererTitration: function(val, p, record) {
         var msg = Ext.util.Format.htmlEncode(val);
         var url = LABKEY.ActionURL.buildURL('assay', 'assayDetailRedirect', LABKEY.container.path,  {runId: record.get('Titration/Run/RowId')});
+        return "<a href='" + url + "'>" + msg + "</a>";
+    },
+
+    assayIdHrefRendererSinglePointControl: function(val, p, record) {
+        var msg = Ext.util.Format.htmlEncode(val);
+        var url = LABKEY.ActionURL.buildURL('assay', 'assayDetailRedirect', LABKEY.container.path,  {runId: record.get( 'SinglePointControl/Run/RowId')});
         return "<a href='" + url + "'>" + msg + "</a>";
     },
 
