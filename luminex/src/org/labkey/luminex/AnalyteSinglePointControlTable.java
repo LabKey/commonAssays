@@ -126,6 +126,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
         defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
         defaultCols.add(FieldKey.fromParts("AverageFiBkgd"));
+        defaultCols.add(FieldKey.fromParts("AverageFiBkgdQCFlagsEnabled"));
         setDefaultVisibleColumns(defaultCols);
     }
 
