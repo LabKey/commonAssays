@@ -113,7 +113,6 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Name"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Name"));
-        defaultCols.add(FieldKey.fromParts("AverageFiBkgd"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "Network"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "CustomProtocol"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Folder"));
@@ -126,6 +125,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Conjugate"));
         defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
         defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
+        defaultCols.add(FieldKey.fromParts("AverageFiBkgd"));
         setDefaultVisibleColumns(defaultCols);
     }
 
