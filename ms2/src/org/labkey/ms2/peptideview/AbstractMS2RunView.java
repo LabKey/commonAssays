@@ -75,13 +75,13 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         _runs = runs;
     }
 
-    public WebPartView createGridView(MS2Controller.RunForm form) throws ServletException, SQLException
+    public WebPartType createGridView(MS2Controller.RunForm form)
     {
         String peptideColumnNames = getPeptideColumnNames(form.getColumns());
         return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
     }
 
-    public abstract WebPartType createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
+    public abstract WebPartType createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting);
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 

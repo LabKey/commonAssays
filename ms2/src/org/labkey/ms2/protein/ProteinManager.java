@@ -24,7 +24,22 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.ResultSetCollapser;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
@@ -40,7 +55,11 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.webdav.SimpleDocumentResource;
-import org.labkey.ms2.*;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Peptide;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.Protein;
 import org.labkey.ms2.protein.fasta.PeptideGenerator;
 
 import java.io.ByteArrayOutputStream;
@@ -50,7 +69,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -866,19 +896,21 @@ public class ProteinManager
                     {
                         try
                         {
-                            if (clause.getParamVals() != null)
+                            // Coerce data types
+                            Object[] values = clause.getParamVals();
+                            if (values != null)
                             {
-                                for (Object o : clause.getParamVals())
+                                for (int i = 0; i < values.length; i++)
                                 {
-                                    if (o != null)
+                                    if (values[i] != null)
                                     {
-                                        ConvertUtils.convert(o.toString(), column.getJavaClass());
+                                        values[i] = ConvertUtils.convert(values[i].toString(), column.getJavaClass());
                                     }
                                 }
                             }
                             validClause = true;
                         }
-                        catch (ConversionException e) {}
+                        catch (ConversionException ignored) {}
                     }
                 }
             }
@@ -1395,6 +1427,21 @@ public class ProteinManager
         sql.append("\n");
 
         SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
+        // Translate filters from query-style nested ProteinProphet params to direct filters on the protein group table
+        for (SimpleFilter.FilterClause clause : new SimpleFilter(currentUrl, MS2Manager.getDataRegionNamePeptides()).getClauses())
+        {
+            if (clause instanceof CompareType.CompareClause && !clause.getFieldKeys().isEmpty())
+            {
+                CompareType.CompareClause compareClause = (CompareType.CompareClause) clause;
+                List<String> fieldKeyParts = clause.getFieldKeys().get(0).getParts();
+                // Strip off the ProteinProphetData/ProteinGroupId FieldKey prefix
+                if (fieldKeyParts.size() > 2 && "ProteinProphetData".equalsIgnoreCase(fieldKeyParts.get(0)) && "ProteinGroupId".equalsIgnoreCase(fieldKeyParts.get(1)))
+                {
+                    Object value = compareClause.getParamVals().length > 0 ? compareClause.getParamVals()[0] : null;
+                    proteinFilter.addClause(new CompareType.CompareClause(FieldKey.fromParts(fieldKeyParts.subList(2, fieldKeyParts.size())), compareClause.getComparison(), value));
+                }
+            }
+        }
         proteinFilter = reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         String proteinWhere = proteinFilter.getWhereSQL(getSqlDialect());
         if (proteinWhere != null && !"".equals(proteinWhere))

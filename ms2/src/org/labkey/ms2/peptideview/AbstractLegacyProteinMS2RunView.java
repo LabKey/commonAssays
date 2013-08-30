@@ -16,18 +16,26 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.view.ViewContext;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.data.*;
-import org.labkey.ms2.*;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2ExportType;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -68,7 +76,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
     public abstract ProteinTSVGridWriter getTSVProteinGridWriter(List<DisplayColumn> proteinDisplayColumns, List<DisplayColumn> peptideDisplayColumns);
 
-    protected DataRegion getNestedPeptideGrid(MS2Run run, String requestedPeptideColumnNames, boolean selectSeqId) throws SQLException
+    protected DataRegion getNestedPeptideGrid(MS2Run run, String requestedPeptideColumnNames, boolean selectSeqId)
     {
         String columnNames = getPeptideColumnNames(requestedPeptideColumnNames);
 

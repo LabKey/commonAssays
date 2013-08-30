@@ -71,7 +71,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         super(viewContext, "NestedPeptides", runs);
     }
 
-    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport)
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());
@@ -108,7 +108,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
 
-    private StandardProteinDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
+    private StandardProteinDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames)
     {
         StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(getAJAXNestedGridURL());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteins());
@@ -147,7 +147,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return proteinRgn;
     }
 
-    public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, int maxRows, String extraWhere) throws SQLException
+    public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, int maxRows, String extraWhere)
     {
         String sqlColumnNames = getPeptideSQLColumnNames(columnNames, run);
         return ProteinManager.getPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames, getUser());

@@ -45,7 +45,6 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -65,7 +64,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         super(viewContext, "Peptides", runs);
     }
 
-    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport)
     {
         DataRegion rgn = getPeptideGridForDisplay(requestedPeptideColumnNames);
         GridView peptideView = new GridView(rgn, (BindException)null);
@@ -203,7 +202,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         }
     }
 
-    private DataRegion getPeptideGridForDisplay(String columnNames) throws SQLException
+    private DataRegion getPeptideGridForDisplay(String columnNames)
     {
         DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows, _offset);
 

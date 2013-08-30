@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.NestableQueryView;
@@ -156,26 +157,41 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
     {
         List<MS2Run> runs = form.validateRuns();
         String where = null;
+        SimpleFilter baseFilter = new SimpleFilter();
         if (exportRows != null && !exportRows.isEmpty())
         {
-            StringBuilder sb = new StringBuilder();
-            sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-            sb.append(".RowId IN (");
-            String separator = "";
+            List<Long> rowIds = new ArrayList<>(exportRows.size());
             for (String protein : exportRows)
             {
-                sb.append(separator);
-                separator = ", ";
-                sb.append(new Long(protein));
+                rowIds.add(new Long(protein));
             }
-            sb.append(")");
-            where = sb.toString();
+            baseFilter.addInClause(FieldKey.fromParts("RowId"), rowIds);
+            where = MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RowId IN (" + StringUtils.join(rowIds, ", ") + ")";
         }
 
-        try (SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentURL, this, where, form.getViewContext().getUser()))
+        SpectrumIterator iter = null;
+        try
         {
+            // Choose a different iterator based on whether this is a nested view that may include protein group criteria
+            NestableQueryView gridView = createGridView(form);
+            gridView.createDataView();
+            if (gridView.getSelectedNestingOption() == null)
+            {
+                baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER, form.getViewContext().getUser()));
+                Sort sort = ProteinManager.getPeptideBaseSort();
+                sort.addURLSort(currentURL, MS2Manager.getDataRegionNamePeptides());
+                iter = new ResultSetSpectrumIterator(runs, baseFilter, sort);
+            }
+            else
+            {
+                iter = new ProteinResultSetSpectrumIterator(runs, currentURL, this, where, form.getViewContext().getUser());
+            }
             spectrumRenderer.render(iter);
             spectrumRenderer.close();
+        }
+        finally
+        {
+            if (iter != null) { iter.close(); }
         }
     }
 
@@ -247,7 +263,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             if (_selectedRows != null)
             {
                 String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
-                filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
+                filter.addClause(new SimpleFilter.InClause(FieldKey.fromParts(columnName), _selectedRows));
             }
             filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
             result.getRenderContext().setBaseFilter(filter);

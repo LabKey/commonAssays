@@ -65,6 +65,15 @@ public abstract class MS2ResultSet extends ResultSetWrapper
         }
     }
 
+    @Override
+    public void close() throws SQLException
+    {
+        // It's possible that we're between ResultSets and an exception has been thrown, and we're being closed
+        // in a finally block. If so, we don't want to blow up here with a NPE
+        if (null != resultset)
+            super.close();
+    }
+
     private boolean prepareNextResultSet() throws SQLException
     {
         if (!_iter.hasNext())

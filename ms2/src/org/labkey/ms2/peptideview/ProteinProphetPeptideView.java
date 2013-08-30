@@ -56,7 +56,6 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -224,7 +223,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return sb.toString();
     }
 
-    private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
+    private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames)
     {
         if (expanded)
         {
@@ -267,14 +266,13 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
     private DataRegion createPeptideDataRegion(String requestedPeptideColumnNames)
-            throws SQLException
     {
         DataRegion peptideGrid = getNestedPeptideGrid(getSingleRun(), requestedPeptideColumnNames, false);
         peptideGrid.removeColumns("Protein", "Description", "GeneName", "SeqId");
         return peptideGrid;
     }
 
-    public ResultSet createPeptideResultSet(String requestedPeptideColumnNames, int maxRows, String extraWhere) throws SQLException
+    public ResultSet createPeptideResultSet(String requestedPeptideColumnNames, int maxRows, String extraWhere)
     {
         MS2Run run = getSingleRun();
         String sqlColumnNames = getPeptideSQLColumnNames(requestedPeptideColumnNames, run);
@@ -348,7 +346,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         }
     }
 
-    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport)
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         GridView proteinView = new GridView(proteinRgn, (BindException)null);

@@ -87,9 +87,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
                 _rs.close();
                 _rs = null;
             }
-            catch (SQLException e)
-            {
-            }
+            catch (SQLException ignored) {}
         }
     }
 
