@@ -90,8 +90,14 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             scope: this
         });
 
-        // if the user has permissions to update in this container, show them the Apply Guide Set button
-        this.tbar = this.userCanUpdate ? [this.exportMenuButton, '-', this.applyGuideSetButton, '-', this.viewCurvesButton] : [this.exportMenuButton, '-', this.viewCurvesButton];
+        // if the controlType is Titration, show the viewCurves 'View 4PL Curves' button, for Single Point Controls do not
+        if (this.controlType == "Titration") {
+            // if the user has permissions to update in this container, show them the Apply Guide Set button
+            this.tbar = this.userCanUpdate ? [this.exportMenuButton, '-', this.applyGuideSetButton, '-', this.viewCurvesButton] : [this.exportMenuButton, '-', this.viewCurvesButton];
+        } else {
+            // if the user has permissions to update in this container, show them the Apply Guide Set button
+            this.tbar = this.userCanUpdate ? [this.exportMenuButton, '-', this.applyGuideSetButton ] : [this.exportMenuButton];
+        }
 
         this.fbar = [{xtype:'label', text:'Bold values in the "Guide Set Date" column indicate assays that are members of a guide set.'}];
 
