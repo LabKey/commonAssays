@@ -16,7 +16,6 @@
 
 package org.labkey.ms2;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -26,9 +25,9 @@ import java.io.IOException;
  */
 public class DtaSpectrumRenderer extends AbstractTextSpectrumRenderer
 {
-    public DtaSpectrumRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
+    public DtaSpectrumRenderer(MS2Controller.ExportForm form, String filenamePrefix, String extension) throws IOException
     {
-        super(response, filenamePrefix, extension);
+        super(form, filenamePrefix, extension);
     }
 
     public void renderFirstLine(Spectrum spectrum)

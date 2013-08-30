@@ -56,7 +56,7 @@ public enum MS2ExportType
         @Override
         public void export(AbstractMS2RunView peptideView, MS2Controller.ExportForm form, List<String> exportRows, ActionURL currentURL, SimpleFilter baseFilter) throws IOException, RunListException
         {
-            peptideView.exportSpectra(form, currentURL, new PklSpectrumRenderer(form.getViewContext().getResponse(), "spectra", "pkl"), exportRows);
+            peptideView.exportSpectra(form, currentURL, new PklSpectrumRenderer(form, "spectra", "pkl"), exportRows);
         }
     },
     DTA
@@ -64,7 +64,7 @@ public enum MS2ExportType
         @Override
         public void export(AbstractMS2RunView peptideView, MS2Controller.ExportForm form, List<String> exportRows, ActionURL currentURL, SimpleFilter baseFilter) throws IOException, RunListException
         {
-            peptideView.exportSpectra(form, currentURL, new DtaSpectrumRenderer(form.getViewContext().getResponse(), "spectra", "dta"), exportRows);
+            peptideView.exportSpectra(form, currentURL, new DtaSpectrumRenderer(form, "spectra", "dta"), exportRows);
         }
     },
     AMT

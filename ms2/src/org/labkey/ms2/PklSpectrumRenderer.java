@@ -16,7 +16,6 @@
 
 package org.labkey.ms2;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -26,9 +25,9 @@ import java.io.IOException;
  */
 public class PklSpectrumRenderer extends AbstractTextSpectrumRenderer
 {
-    public PklSpectrumRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
+    public PklSpectrumRenderer(MS2Controller.ExportForm form, String filenamePrefix, String extension) throws IOException
     {
-        super(response, filenamePrefix, extension);
+        super(form, filenamePrefix, extension);
     }
 
     public void renderFirstLine(Spectrum spectrum)

@@ -871,7 +871,7 @@ public class MS2Controller extends SpringActionController
 
             ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentURL, previousURL, nextURL, showGzURL, modificationHref(run), getContainer(), getUser());
             JspView<ShowPeptideContext> peptideView = new JspView<>("/org/labkey/ms2/showPeptide.jsp", ctx);
-            peptideView.setTitle("Peptide Details");
+            peptideView.setTitle("Peptide Details: " + peptide.getPeptide());
 
             NavTree pepNavTree = new NavTree();
             if (null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0)
@@ -5522,7 +5522,7 @@ public class MS2Controller extends SpringActionController
             MS2Run run = MS2Manager.getRun(this.run);
 
             if (null == run)
-                throw new NotFoundException("Run " + run + " not found");
+                throw new NotFoundException("Run " + this.run + " not found");
             if (run.isDeleted())
                 throw new NotFoundException("Run has been deleted.");
             if (run.getStatusId() == MS2Importer.STATUS_RUNNING)

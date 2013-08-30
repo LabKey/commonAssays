@@ -16,10 +16,13 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.util.DateUtil;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.Date;
 
 /**
  * A renderer of spectrum information that ends up as some type of text file
@@ -35,12 +38,23 @@ public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
     HttpServletResponse _response;
     PrintWriter _out;
 
-    protected AbstractTextSpectrumRenderer(HttpServletResponse response, String filenamePrefix, String extension) throws IOException
+    protected AbstractTextSpectrumRenderer(MS2Controller.ExportForm form, String filenamePrefix, String extension) throws IOException
     {
+        HttpServletResponse response = form.getViewContext().getResponse();
         // Flush any extraneous output (e.g., <CR><LF> from JSPs)
         response.reset();
-        response.setContentType("text/plain");
-        response.setHeader("Content-disposition", "attachment; filename=\"" + filenamePrefix + "_" + Math.round(Math.random() * 100000) + "." + extension + "\"");
+        String fileName = filenamePrefix + "_" + DateUtil.formatDateTime(new Date(), "yyyy-MM-dd-HH-mm-ss") + "." + extension;
+        if (form.isExportAsWebPage())
+        {
+            // Make it easier to test via Selenium by showing in the browser instead of forcing a file download
+            response.setContentType("text/plain; charset=UTF-8");
+            response.setHeader("Content-disposition", "inline; filename=\"" + fileName + "\"");
+        }
+        else
+        {
+            response.setContentType("text/plain");
+            response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+        }
 
         // Get the outputstream of the servlet (always get the outputstream AFTER you've set the content-disposition and content-type)
         _out = response.getWriter();
