@@ -246,7 +246,7 @@
         var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
             renderTo: 'trackingDataPanel',
             cls: 'extContainer',
-            titration: _controlName,
+            controlName: _controlName,
             controlType: _controlType,
             assayName: _protocolName,
             defaultRowSize: defaultRowSize,

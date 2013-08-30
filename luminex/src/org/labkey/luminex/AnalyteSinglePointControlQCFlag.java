@@ -29,7 +29,7 @@ public class AnalyteSinglePointControlQCFlag extends AbstractAnalyteQCFlag
 
     public AnalyteSinglePointControlQCFlag(int runId, String description, int analyte, int singlePointControl)
     {
-        super(runId, LuminexDataHandler.QC_FLAG_FI_FLAG_TYPE, description, analyte);
+        super(runId, LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE, description, analyte);
         setSinglePointControl(singlePointControl);
     }
 

@@ -271,7 +271,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    private AnalyteSinglePointControlTable createAnalyteSinglePointControlTable(boolean filterTable)
+    protected AnalyteSinglePointControlTable createAnalyteSinglePointControlTable(boolean filterTable)
     {
         AnalyteSinglePointControlTable result = new AnalyteSinglePointControlTable(this, filterTable);
         if (filterTable)
@@ -390,7 +390,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/titration combination");
         SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL AND FlagType != ?");
-        nonCVFlagFilter.add(LuminexDataHandler.QC_FLAG_FI_FLAG_TYPE);
+        nonCVFlagFilter.add(LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE);
         result.addCondition(nonCVFlagFilter);
 
         // disable insert/update for this table
@@ -414,7 +414,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/single point control combination");
         SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL AND FlagType = ?");
-        nonCVFlagFilter.add(LuminexDataHandler.QC_FLAG_FI_FLAG_TYPE);
+        nonCVFlagFilter.add(LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE);
         result.addCondition(nonCVFlagFilter);
 
         // disable insert/update for this table

@@ -108,9 +108,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String NAMESPACE = "LuminexDataFile";
     private static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     private static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
-    public static final String QC_FLAG_FI_FLAG_TYPE = "MFI";
+    public static final String QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE = "CTRL";
     public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
-    public static final String QC_FLAG_AVERAGE_FI_BKGD_FLAG_TYPE = "AverageFiBkgd";
     public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50-4";
     public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
     public static final String QC_FLAG_AUC_FLAG_TYPE = "AUC";
@@ -724,36 +723,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private void insertAnalyteSinglePointControlMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, SinglePointControl singlePointControl, String conjugate, String isotype, ExpProtocol protocol) throws SQLException
     {
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
-        filter.addCondition(FieldKey.fromParts("SinglePointControlId"), singlePointControl.getRowId());
-
-        AnalyteSinglePointControl analyteSinglePointControl = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getObject(AnalyteSinglePointControl.class);
-
-        boolean newRow = analyteSinglePointControl == null;
-        if (analyteSinglePointControl == null)
-        {
-            analyteSinglePointControl = new AnalyteSinglePointControl(analyte, singlePointControl);
-        }
-
-        if (newRow)
-        {
-            // Check if we have a guide set for this combo
-            GuideSet currentGuideSet = determineGuideSet(analyte, singlePointControl, conjugate, isotype, protocol);
-            if (currentGuideSet != null)
-            {
-                analyteSinglePointControl.setGuideSetId(currentGuideSet.getRowId());
-            }
-
-            Table.insert(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), analyteSinglePointControl);
-        }
-        else
-        {
-            Map<String, Object> keys = new CaseInsensitiveHashMap<>();
-            keys.put("AnalyteId", analyte.getRowId());
-            keys.put("SinglePointControlId", singlePointControl.getRowId());
-            Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteSinglePointControl, keys);
-        }
-
         // Calculate the average FI value
         double sum = 0;
         int count = 0;
@@ -765,10 +734,42 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 count++;
             }
         }
-        assert count > 0 : "Should be at least one matchig single point control data row";
-        double average = sum / count;
 
-        insertOrUpdateAnalyteSinglePointControlQCFlags(user, expRun, protocol, analyteSinglePointControl, analyte, singlePointControl, isotype, conjugate, average);
+        // It's possible that we don't have any data rows for this particular single point control/analyte combination
+        if (count > 0)
+        {
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
+            filter.addCondition(FieldKey.fromParts("SinglePointControlId"), singlePointControl.getRowId());
+
+            AnalyteSinglePointControl analyteSinglePointControl = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getObject(AnalyteSinglePointControl.class);
+
+            boolean newRow = analyteSinglePointControl == null;
+            if (analyteSinglePointControl == null)
+            {
+                analyteSinglePointControl = new AnalyteSinglePointControl(analyte, singlePointControl);
+            }
+
+            if (newRow)
+            {
+                // Check if we have a guide set for this combo
+                GuideSet currentGuideSet = determineGuideSet(analyte, singlePointControl, conjugate, isotype, protocol);
+                if (currentGuideSet != null)
+                {
+                    analyteSinglePointControl.setGuideSetId(currentGuideSet.getRowId());
+                }
+
+                Table.insert(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), analyteSinglePointControl);
+            }
+            else
+            {
+                Map<String, Object> keys = new CaseInsensitiveHashMap<>();
+                keys.put("AnalyteId", analyte.getRowId());
+                keys.put("SinglePointControlId", singlePointControl.getRowId());
+                Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteSinglePointControl, keys);
+            }
+
+            insertOrUpdateAnalyteSinglePointControlQCFlags(user, expRun, protocol, analyteSinglePointControl, analyte, singlePointControl, isotype, conjugate, sum / count);
+        }
     }
 
     /** Insert or Update QC Flags for MFI that are out of the guide set range if this AnalyteSinglePointControl record

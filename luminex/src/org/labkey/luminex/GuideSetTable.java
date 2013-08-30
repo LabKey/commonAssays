@@ -74,7 +74,9 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         });
 
         addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "Max", "Max", "GuideSetId");
-        addFIColumns(schema.getTable(LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME), "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
+        AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(false);
+        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
+        addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
         getColumn("ModifiedBy").setFk(userIdForeignKey);

@@ -17,14 +17,14 @@ Ext.QuickTips.init();
 /**
  * Class to create a labkey editorGridPanel to display the tracking data for the selected graph parameters
  *
- * @params titration
+ * @params controlName
  * @params assayName
  */
 LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     constructor : function(config){
         // check that the config properties needed are present
-        if (!config.titration || config.titration == "null")
-            throw "You must specify a titration!";
+        if (!config.controlName || config.controlName == "null")
+            throw "You must specify a controlName!";
         if (!config.assayName || config.assayName == "null")
             throw "You must specify a assayName!";
 
@@ -32,7 +32,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         Ext.apply(config, {
             width: 1375,
             autoHeight: true,
-            title: $h(config.titration) + ' Tracking Data',
+            title: $h(config.controlName) + ' Tracking Data',
             loadMask:{msg:"loading tracking data..."},
             columnLines: true,
             stripeRows: true,
@@ -127,8 +127,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         if (this.controlType == "Titration") {
             return new LABKEY.ext.Store({
                 autoLoad: false,
-                schemaName: 'assay',
-                queryName: this.assayName + ' AnalyteTitration',
+                schemaName: 'assay.Luminex.' + this.assayName,
+                queryName: 'AnalyteTitration',
                 columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/RowId, '
                         + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                         + 'Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, Titration/Run/AssayType, '
@@ -152,8 +152,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         } else if (this.controlType == "SinglePoint") {
             return new LABKEY.ext.Store({
                 autoLoad: false,
-                schemaName: 'assay',
-                queryName: this.assayName + ' AnalyteSinglePointControl',
+                schemaName: 'assay.Luminex.' + this.assayName,
+                queryName:  'AnalyteSinglePointControl',
                 columns: 'SinglePointControl, Analyte, SinglePointControl/Run/Isotype, SinglePointControl/Run/Conjugate, SinglePointControl/Run/RowId, '
                         + 'SinglePointControl/Run/Name, SinglePointControl/Run/Folder/Name, SinglePointControl/Run/Folder/EntityId, '
                         + 'SinglePointControl/Run/Batch/Network, SinglePointControl/Run/Batch/CustomProtocol, SinglePointControl/Run/NotebookNo, SinglePointControl/Run/AssayType, '
@@ -161,7 +161,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                         + 'GuideSet/Created, IncludeInGuideSetCalculation, '
                         + 'AverageFiBkgd, AverageFiBkgdQCFlagsEnabled',
                 filterArray: filterArray,
-                sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
+                sort: '-Analyte/Data/AcquisitionDate, -SinglePointControl/Run/Created',
                 maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
                 containerFilter: LABKEY.Query.containerFilter.allFolders,
                 listeners: {
@@ -177,14 +177,14 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     getFilterArray: function() {
         if (this.controlType == "Titration") {
             return [
-                LABKEY.Filter.create('Titration/Name', this.titration),
+                LABKEY.Filter.create('Titration/Name', this.controlName),
                 LABKEY.Filter.create('Analyte/Name', this.analyte),
                 LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                 LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
             ];
         } else if (this.controlType == "SinglePoint") {
             return [
-                LABKEY.Filter.create('SinglePointControl/Name', this.titration),
+                LABKEY.Filter.create('SinglePointControl/Name', this.controlName),
                 LABKEY.Filter.create('Analyte/Name', this.analyte),
                 LABKEY.Filter.create('SinglePointControl/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                 LABKEY.Filter.create('SinglePointControl/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
@@ -286,7 +286,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.conjugate = conjugate;
 
         // set the grid title based on the selected graph params
-        this.setTitle($h(this.titration) + ' Tracking Data for ' + $h(this.analyte)
+        this.setTitle($h(this.controlName) + ' Tracking Data for ' + $h(this.analyte)
                 + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate));
 
@@ -304,8 +304,19 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // get the selected record list from the grid
         var selection = this.selModel.getSelections();
         var selectedRecords = [];
+        // Copy so that it's available in the scope for the callback function
+        var controlType = this.controlType;
         Ext.each(selection, function(record){
-            selectedRecords.push({Analyte: record.get("Analyte"), Titration: record.get("Titration")});
+            var newItem = {Analyte: record.get("Analyte")};
+            if (controlType == 'Titration')
+            {
+                newItem.ControlId = record.get("Titration");
+            }
+            else
+            {
+                newItem.ControlId = record.get("SinglePointControl");
+            }
+            selectedRecords.push(newItem);
         });
 
         // create a pop-up window to display the apply guide set UI
@@ -321,7 +332,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             title: 'Apply Guide Run Set...',
             items: [new LABKEY.ApplyGuideSetPanel({
                 assayName: this.assayName,
-                titration: this.titration,
+                controlName: this.controlName,
+                controlType: this.controlType,
                 analyte: this.analyte,
                 isotype: this.isotype,
                 conjugate: this.conjugate,
@@ -412,10 +424,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var config = {reportId: 'module:luminex/CurveComparisonPlot.r', showSection: 'Curve Comparison Plot'};
         config['RunIds'] = runIds.join(";");
         config['Protocol'] = this.assayName;
-        config['Titration'] = this.titration;
+        config['Titration'] = this.controlName;
         config['Analyte'] = this.analyte;
         config['AsLog'] = logYaxis;
-        config['MainTitle'] = $h(this.titration) + ' 4PL for ' + $h(this.analyte)
+        config['MainTitle'] = $h(this.controlName) + ' 4PL for ' + $h(this.analyte)
                 + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate);
         config['PlotHeight'] = win.getHeight();
@@ -459,12 +471,14 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             sheets: [{
                 name: 'data',
                 // add a header section to the export with the graph parameter information
-                data: [['Titration:', this.titration],
+                data: [
+                    [this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl', this.controlName],
                     ['Analyte:', this.analyte],
                     ['Isotype:', this.isotype],
                     ['Conjugate:', this.conjugate],
                     ['Export Date:', this.dateRenderer(new Date())],
-                    []]
+                    []
+                ]
             }]
         };
 
@@ -572,12 +586,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     loadQCFlags: function(store, records, options) {
         // query the server for the QC Flags that match the selected Titration and Analyte and update the grid store accordingly
         this.getEl().mask("loading QC Flags...", "x-mask-loading");
+        var prefix = this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl';
         LABKEY.Query.executeSql({
-            schemaName: "assay",
-            sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM "' + this.assayName + ' AnalyteTitrationQCFlags" AS x '
-                 + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.Titration.Name=\'' + this.titration + '\' '
-                 + (this.isotype == '' ? '  AND x.Titration.Run.Isotype IS NULL ' : '  AND x.Titration.Run.Isotype=\'' + this.isotype + '\' ')
-                 + (this.conjugate == '' ? '  AND x.Titration.Run.Conjugate IS NULL ' : '  AND x.Titration.Run.Conjugate=\'' + this.conjugate + '\' ')
+            schemaName: "assay.Luminex." + this.assayName,
+            sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM Analyte' + prefix + 'QCFlags AS x '
+                 + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.' + prefix + '.Name=\'' + this.controlName + '\' '
+                 + (this.isotype == '' ? '  AND x.' + prefix + '.Run.Isotype IS NULL ' : '  AND x.' + prefix + '.Run.Isotype=\'' + this.isotype + '\' ')
+                 + (this.conjugate == '' ? '  AND x.' + prefix + '.Run.Conjugate IS NULL ' : '  AND x.' + prefix + '.Run.Conjugate=\'' + this.conjugate + '\' ')
                  + 'ORDER BY x.Run, x.FlagType, x.Enabled LIMIT 1000 ',
             sort: "Run,FlagType,Enabled",
             containerFilter: LABKEY.Query.containerFilter.allFolders,
@@ -613,7 +628,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
                 // update the store records with the QC Flag values
                 this.store.each(function(record) {
-                    var runFlag = runFlagList[record.get("Titration/Run/RowId")];
+                    var runFlag = runFlagList[record.get(prefix + "/Run/RowId")];
                     if (runFlag)
                     {
                         record.set("QCFlags", "<a>" + runFlag.value + "</a>");
@@ -644,15 +659,17 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var record = grid.getStore().getAt(rowIndex);
         var fieldName = grid.getColumnModel().getDataIndex(colIndex);
         var value = record.get(fieldName);
+        var prefix = this.controlName == 'Titration' ? 'Titration' : 'SinglePointControl';
 
         if (fieldName == "QCFlags" && value != null)
         {
             var win = new LABKEY.QCFlagToggleWindow({
-                schemaName: "assay",
-                queryName: this.assayName + " AnalyteTitrationQCFlags",
-                runId: record.get("Titration/Run/RowId"),
+                schemaName: "assay.Luminex." + this.assayName,
+                queryName: "Analyte" + prefix + "QCFlags",
+                runId: record.get(prefix + "/Run/RowId"),
                 analyte: this.analyte,
-                titration: this.titration,
+                controlName: this.controlName,
+                controlType: this.controlType,
                 listeners: {
                     scope: this,
                     'saveSuccess': function(){

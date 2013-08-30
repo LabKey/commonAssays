@@ -103,7 +103,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         addColumn(avgFiColumn);
 
         // add a column for 'AverageFiBkgdQCFlagsEnabled'
-        SQLFragment averageFiBkgdFlagEnabledSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_AVERAGE_FI_BKGD_FLAG_TYPE, null, LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_ID);
+        SQLFragment averageFiBkgdFlagEnabledSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE, null, LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_ID);
         ExprColumn averageFiBkgdFlagEnabledColumn = new ExprColumn(this, "AverageFiBkgdQCFlagsEnabled", averageFiBkgdFlagEnabledSQL, JdbcType.VARCHAR);
         averageFiBkgdFlagEnabledColumn.setLabel("Average FI Background QC Flags Enabled State");
         averageFiBkgdFlagEnabledColumn.setHidden(true);

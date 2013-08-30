@@ -17,7 +17,7 @@ Ext.QuickTips.init();
 
 /**
  * Class to display panel for selecting which runs are part of the current guide set for the given
- * titration, analyte, isotype, and conjugate combination
+ * controlName, analyte, isotype, and conjugate combination
  *
  * @params assayName
  * @params titration
@@ -28,11 +28,13 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
     constructor : function(config){
         // check that the config properties needed are present
         if (!config.assayName)
-            throw "You must specify a assayName!";
-        if (!config.titration)
-            throw "You must specify a titration!";
+            throw "You must specify an assayName!";
+        if (!config.controlType)
+            throw "You must specify a controlType!";
+        if (!config.controlName)
+            throw "You must specify a controlName!";
         if (!config.analyte)
-            throw "You must specify a analyte!";
+            throw "You must specify an analyte!";
         if (!config.selectedRecords)
             throw "You must specify selectedRecords!";
         
@@ -53,26 +55,31 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
         // build up two lists of analytes and titrations for use in the query filter
         var analyteIds = [];
-        var titrationIds = [];
+        var controlIds = [];
         Ext.each(this.selectedRecords, function(record){
             analyteIds.push(record["Analyte"]);
-            titrationIds.push(record["Titration"]);
+            controlIds.push(record["ControlId"]);
         });
+
+        var prefix = this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl';
+
+        var columns = 'Analyte, ' + prefix + ', ' + prefix + '/Run/Name, ' + prefix + '/Run/Folder/Name, ' + prefix + '/Run/Folder/EntityId, '
+                + prefix + '/Run/Isotype, ' + prefix + '/Run/Conjugate, ' + prefix + '/Run/Batch/Network, ' + prefix + '/Run/Batch/CustomProtocol, ' + prefix + '/Run/NotebookNo, '
+                + prefix + '/Run/AssayType, ' + prefix + '/Run/ExpPerformer, Analyte/Data/AcquisitionDate, GuideSet, IncludeInGuideSetCalculation, ';
+
+        columns += this.controlType == 'Titration' ? 'Four ParameterCurveFit/EC50, Five ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC' : 'AverageFiBkgd';
 
         // add a grid of all of the "selected" runs for the given criteria
         var selectedRunsStore = new LABKEY.ext.Store({
             storeId: 'selectedRunsStore',
-            schemaName: 'assay',
-            queryName: this.assayName + ' AnalyteTitration',
-            columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, ' 
-                    + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, '
-                    + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, GuideSet, IncludeInGuideSetCalculation, '
-                    + 'Four ParameterCurveFit/EC50, Five ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
+            schemaName: 'assay.Luminex.' + this.assayName,
+            queryName: 'Analyte' + prefix,
+            columns: columns,
             filterArray: [
-                LABKEY.Filter.create('Titration', titrationIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF),
+                LABKEY.Filter.create(prefix, controlIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF),
                 LABKEY.Filter.create('Analyte', analyteIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF)
             ],
-            sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
+            sort: '-Analyte/Data/AcquisitionDate, -' + prefix + '/Run/Created',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             updatable: false,
             autoLoad: true,
@@ -95,23 +102,30 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
         var selectedHeaderCols = [
-                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200}
+                {header:'Assay Id', dataIndex: prefix + '/Run/Name', renderer: this.encodingRenderer, width:200}
                 ];
         if (_networkExists) {
-            selectedHeaderCols.push({header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer});
+            selectedHeaderCols.push({header:'Network', dataIndex:prefix + '/Run/Batch/Network', width:75, renderer: this.encodingRenderer});
         }
         if (_protocolExists) {
-            selectedHeaderCols.push({header:'Protocol', dataIndex:'Titration/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
+            selectedHeaderCols.push({header:'Protocol', dataIndex:prefix + '/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
         }
-        selectedHeaderCols.push({header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.encodingRenderer, width:75});
-        selectedHeaderCols.push({header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer});
-        selectedHeaderCols.push({header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer});
-        selectedHeaderCols.push({header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer});
+        selectedHeaderCols.push({header:'Folder', dataIndex:prefix + '/Run/Folder/Name', renderer: this.encodingRenderer, width:75});
+        selectedHeaderCols.push({header:'Notebook No.', dataIndex:prefix + '/Run/NotebookNo', width:100, renderer: this.encodingRenderer});
+        selectedHeaderCols.push({header:'Assay Type', dataIndex:prefix + '/Run/AssayType', width:100, renderer: this.encodingRenderer});
+        selectedHeaderCols.push({header:'Experiment Performer', dataIndex:prefix + '/Run/ExpPerformer', width:100, renderer: this.encodingRenderer});
         selectedHeaderCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
-        selectedHeaderCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
-        selectedHeaderCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
-        selectedHeaderCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
-        selectedHeaderCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
+        if (this.controlType == 'Titration')
+        {
+            selectedHeaderCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+            selectedHeaderCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+            selectedHeaderCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
+            selectedHeaderCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
+        }
+        else
+        {
+            selectedHeaderCols.push({header:'Average FI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
+        }
 
         var selectedRunsColModel = new Ext.grid.ColumnModel({
             defaults: {sortable: true},
@@ -133,15 +147,23 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // add a grid with the list of possible guide sets for the given criteria
+        var guideSetColumns = 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet, ';
+        if (this.controlType == 'Titration')
+        {
+            guideSetColumns += 'Four ParameterCurveFit/EC50Average, Five ParameterCurveFit/EC50Average, '
+                            + 'MaxFIAverage, TrapezoidalCurveFit/AUCAverage';
+        }
+        else
+        {
+            guideSetColumns += 'SinglePointControlFIAverage';
+        }
         var guideSetsStore = new LABKEY.ext.Store({
             storeId: 'guideSetsStore',
-            schemaName: 'assay',
-            queryName: this.assayName + ' GuideSet',
-            columns: 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet, '
-                    + 'Four ParameterCurveFit/EC50Average, Five ParameterCurveFit/EC50Average, '
-                    + 'MaxFIAverage, TrapezoidalCurveFit/AUCAverage',
+            schemaName: 'assay.Luminex.' + this.assayName,
+            queryName: 'GuideSet',
+            columns: guideSetColumns,
             filterArray: [
-                LABKEY.Filter.create('ControlName', this.titration),
+                LABKEY.Filter.create('ControlName', this.controlName),
                 LABKEY.Filter.create('AnalyteName', this.analyte),
                 LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                 LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
@@ -167,19 +189,27 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // column model for the list of guide sets that can be "applied" to the runs
+        var guideSetColumnModelColumns = [
+            guideSetsSelModel,
+            {header: 'Created By', dataIndex: 'CreatedBy/DisplayName', width: 100},
+            {header: 'Created', dataIndex: 'Created', renderer: this.dateRenderer},
+            {header: 'Current', dataIndex: 'CurrentGuideSet'},
+            {header: 'Comment', dataIndex: 'Comment', renderer: this.encodingRenderer, width: 200}
+        ];
+        if (this.controlType == 'Titration')
+        {
+            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'Five ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'});
+            guideSetColumnModelColumns.push({header: 'Avg AUC', dataIndex: 'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'});
+            guideSetColumnModelColumns.push({header: 'Avg High MFI', dataIndex: 'MaxFIAverage', renderer: this.numberRenderer, align: 'right'});
+        }
+        else
+        {
+            guideSetColumnModelColumns.push({header: 'Avg FI', dataIndex: 'SinglePointControlFIAverage', renderer: this.numberRenderer, align: 'right'});
+        }
         var guideSetsColModel = new Ext.grid.ColumnModel({
             defaults: {width: 75, sortable: true},
-            columns: [
-                guideSetsSelModel,
-                {header:'Created By', dataIndex:'CreatedBy/DisplayName', width:100},
-                {header:'Created', dataIndex:'Created', renderer: this.dateRenderer},
-                {header:'Current', dataIndex:'CurrentGuideSet'},
-                {header:'Comment', dataIndex:'Comment', renderer: this.encodingRenderer, width:200},
-                {header:'Avg EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
-                {header:'Avg EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
-                {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'},
-                {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'}
-            ],
+            columns: guideSetColumnModelColumns,
             scope: this
         });
 
@@ -217,7 +247,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }),
             new Ext.Spacer({height: 20}),
             new Ext.Panel({
-                title: 'Guide Run Sets for ' + this.titration + ' : ' + this.analyte + ' '
+                title: 'Guide Run Sets for ' + this.controlName + ' : ' + this.analyte + ' '
                         + (this.isotype == '' ? '[None]' : this.isotype) + ' '
                         + (this.conjugate == '' ? '[None]' : this.conjugate),
                 width:1075,
@@ -252,11 +282,19 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         var record = allSelectedRecords[i];
                         if (!record.get("IncludeInGuideSetCalculation"))
                         {
-                            nonMemberUpdateRows.push({
+                            var nonMemberRow = {
                                 Analyte: record.get("Analyte"),
-                                Titration: record.get("Titration"),
                                 GuideSetId: selectedGuideSet.get("RowId")
-                            });
+                            };
+                            if (this.controlType == 'Titration')
+                            {
+                                nonMemberRow.Titration = record.get("Titration");
+                            }
+                            else
+                            {
+                                nonMemberRow.SinglePointControl = record.get("SinglePointControl");
+                            }
+                            nonMemberUpdateRows.push(nonMemberRow);
                         }
                     }
 
@@ -265,8 +303,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {
                         this.getEl().mask('Applying guide run set...', "x-mask-loading");
                         LABKEY.Query.updateRows({
-                            schemaName: 'assay',
-                            queryName: this.assayName + ' AnalyteTitration',
+                            schemaName: 'assay.Luminex.' + this.assayName,
+                            queryName: 'Analyte' + (this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl'),
                             rows: nonMemberUpdateRows,
                             success: function(data) {
                                 if (this.getEl().isMasked())
