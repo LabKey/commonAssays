@@ -173,7 +173,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }
             else
             {
-                allRunsCols.push({header:'FI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
+                allRunsCols.push({header:'MFI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
             }
             var allRunsColModel = new Ext.grid.ColumnModel({
                 defaults: {sortable: true},
@@ -252,8 +252,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            guideRunSetCols.push({header:'FI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
-
+            guideRunSetCols.push({header:'MFI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
         }
         var guideRunSetColModel = new Ext.grid.ColumnModel({
             defaults: {sortable: true},
