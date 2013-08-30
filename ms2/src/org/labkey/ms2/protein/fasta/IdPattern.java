@@ -58,7 +58,7 @@ public class IdPattern
         // According to Phil, SGD gene names may have a trailing letter or a trailing dash and letter
         addWholeHeaderIdPattern("SGD_GN", "^[YRQ][-A-Z,0-9]{4,9}[ ]([A-Z]{3}[0-9]+-?[A-Z]?)[ ]SGDID:[S][0-9]{9}.*","$1");
         addWholeHeaderIdPattern("SGDID", "^[YRQ][-A-Z,0-9]{4,9}[ ][A-Z]{3}[0-9]+-?[A-Z]?[ ]SGDID:([S][0-9]{9}).*","$1");
-        addWholeHeaderIdPattern("GN", ".*Gene_Symbol=([^ ]*).*","$1");
+        addWholeHeaderIdPattern("GN", ".*(?:Gene_Symbol|GN)=([^ ]*).*","$1");
 
     }
 

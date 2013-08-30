@@ -968,6 +968,17 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             parseAndCompare("P15559|NQO1_HUMAN", idMapE);
 
             idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN", "Smim17"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "A0A504_MOUSE"));
+            parseAndCompare("tr|A0A504|A0A504_MOUSE", idMapE, "tr|A0A504|A0A504_MOUSE MCG116182, isoform CRA_b OS=Mus musculus GN=Smim17 PE=4 SV=1 or:");
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN", "Ccdc112"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "CC112_MOUSE"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(), "A0AUP1"));
+            parseAndCompare("sp|A0AUP1|CC112_MOUSE", idMapE, "sp|A0AUP1|CC112_MOUSE Coiled-coil domain-containing protein 112 OS=Mus musculus GN=Ccdc112 PE=2 SV=2");
+
+            idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSP00000307953"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN","SERPINC1"));
@@ -1040,7 +1051,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         protected void parseAndCompare(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)
         {
             Map<String, Set<String>> idMapReturned = Protein.identParse(strLookup, wholeHeader);
-            assert(compareIdMaps(idMapExpected, idMapReturned));
+            assertTrue(compareIdMaps(idMapExpected, idMapReturned));
         }
     }
 }
