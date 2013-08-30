@@ -277,10 +277,10 @@ for (typeIndex in 1:length(plotTypes))
 	  mtext(mainTitle, side=3, line=mainTitleLine, font=2, las=1, cex=1.2); 
 
 	  # if creating a pdf, increase the line width and layout position offset
-	  yLegendOffset = -0.5;
+	  yLegendOffset = -3.75;
 	  if (!is.null(labkey.url.params$PdfOut)) {
 	    par(lwd=1.5);
-	    yLegendOffset = -0.75;
+	    yLegendOffset = -6.75;
 	  }
 
 	  # draw the guide set ranges for each of the records
