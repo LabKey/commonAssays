@@ -93,13 +93,13 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
         ExprColumn avgFiColumn = new ExprColumn(this, "AverageFiBkgd", avgFiSQL, JdbcType.DOUBLE);
         avgFiColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-                {
-                    @Override
-                    public DisplayColumn createRenderer(ColumnInfo colInfo)
-                    {
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
                 return new QCFlagHighlightDisplayColumn(colInfo, "AverageFiBkgdQCFlagsEnabled");
             }
-            });
+        });
         addColumn(avgFiColumn);
 
         // add a column for 'AverageFiBkgdQCFlagsEnabled'
@@ -212,7 +212,9 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
                 filter.addCondition(FieldKey.fromParts("SinglePointControl"), control.getRowId());
-                Double average = new TableSelector(getUserSchema().getTable(LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME), Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
+                AnalyteSinglePointControlTable analyteSinglePointControlTable = getUserSchema().createAnalyteSinglePointControlTable(true);
+                analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
+                Double average = new TableSelector(analyteSinglePointControlTable, Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
 
                 LuminexDataHandler.insertOrUpdateAnalyteSinglePointControlQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, control, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), average.doubleValue());
             }
