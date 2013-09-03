@@ -98,15 +98,7 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
             }
 %>
             </td>
-            <td>
-                <input type="text" name="participantIds"
-                  onKeyDown="return ctrlKeyCheck(event);"
-                  onBlur="hideCompletionDiv();"
-                  autocomplete="off"
-                  value="<%= h(bean.format(sampleInfo.getParticipantID())) %>"
-                  onKeyUp="return handleChange(this, event, '<%= bean.getParticipantCompletionBase() %>');">
-
-                </td>
+            <td><labkey:autoCompleteText name="participantIds" url="<%= bean.getParticipantCompletionBase() %>" value="<%= h(bean.format(sampleInfo.getParticipantID())) %>"/></td>
         <%
             for (String property : bean.getSampleProperties())
             {
