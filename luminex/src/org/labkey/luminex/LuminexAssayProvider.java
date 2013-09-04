@@ -345,29 +345,29 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.TitrationQcReportAction.class);
         if (containerFilter != null && containerFilter.getType() != null)
         {
-            url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter("AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
         if (null != currentRunId)
         {
             url.addParameter("AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
         }
         // just show titrations that are either standards or qc controls
-        url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
+        url.addParameter("AnalyteTitration.Titration/Unknown~eq", "false");
         qcReportMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url)));
 
         // add a URL for the single point control report
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.SinglePointControlQcReportAction.class);
         if (containerFilter != null && containerFilter.getType() != null)
         {
-            url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter("AnalyteSinglePointControl." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
         if (null != currentRunId)
         {
-            url.addParameter("AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
+            url.addParameter("AnalyteSinglePointControl.SinglePointControl/Run/RowId~eq", currentRunId);
         }
-        // just show titrations that are either standards or qc controls
-        url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
         qcReportMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url)));
+
+        // add link to view Levey-Jenning reports
         qcReportMenu.addChild("view levey-jennings reports", new ActionURL(LuminexController.LeveyJenningsMenuAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()));
 
         result.add(qcReportMenu);
