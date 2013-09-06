@@ -432,7 +432,7 @@ public class ReportsController extends BaseFlowController
     {
         Report report = ReportService.get().createReportInstance(reportType);
         if (report == null)
-            throw new IllegalArgumentException("report type not registered");
+            throw new NotFoundException("report type not registered");
 
         if (!(report instanceof FlowReport))
             throw new IllegalArgumentException("expected flow report type");
