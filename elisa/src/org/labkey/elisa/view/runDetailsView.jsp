@@ -29,10 +29,10 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.elisa.ElisaController" %>
-<%@ page import="com.google.gson.Gson" %>
 <%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="java.util.LinkedHashSet" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     public LinkedHashSet<ClientDependency> getClientDependencies()
@@ -62,7 +62,7 @@
     ActionURL filterUrl = ctx.cloneActionURL().deleteParameters();
     filterUrl.addFilter(QueryView.DATAREGIONNAME_DEFAULT, FieldKey.fromParts("Run", "RowId"), CompareType.EQUAL, form.getRunId());
     ActionURL baseUrl = ctx.cloneActionURL().addParameter("filterUrl", filterUrl.getLocalURIString());
-    Gson gson = new Gson();
+    ObjectMapper jsonMapper = new ObjectMapper();
 %>
 <div id="<%=h(renderId)%>" style="width:100%;"></div>
 <script type="text/javascript">
@@ -98,14 +98,14 @@
             autoColumnXName  : <%=q(form.getAutoColumnXName() != null ? form.getAutoColumnXName() : null)%>,
             defaultNumberFormat: eval(<%=q(numberFormatFn)%>),
             allowEditMode   : <%=!ctx.getUser().isGuest() && c.hasPermission(ctx.getUser(), UpdatePermission.class)%>,
-            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(gson.toJson(form.getFitParams()))%>}
+            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>}
         }));
 
         items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {
 
             schemaName      : <%=q(form.getSchemaName())%>,
             queryName       : <%=q(form.getQueryName())%>,
-            sampleColumns   : <%=text(gson.toJson(form.getSampleColumns()))%>
+            sampleColumns   : <%=text(jsonMapper.writeValueAsString(form.getSampleColumns()))%>
         }));
 
         var panel = Ext4.create('Ext.panel.Panel', {
