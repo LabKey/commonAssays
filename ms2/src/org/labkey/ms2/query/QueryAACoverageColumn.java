@@ -59,10 +59,10 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
     }
 
     protected Object calculateValue(RenderContext ctx, List<String> peptides)
-        throws SQLException
+            throws SQLException
     {
         Protein protein = new Protein();
-        protein.setSequence(ctx.getResultSet().getString(_sequenceColumn.getAlias()));
+        protein.setSequence(ctx.getResults().getString(_sequenceColumn.getAlias()));
         protein.setPeptides(peptides.toArray(new String[peptides.size()]));
         return protein.getAAPercent();
     }

@@ -62,7 +62,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
             return sb.toString();
         }
 
-        ResultSet originalRS = ctx.getResultSet();
+        ResultSet originalRS = ctx.getResults();
         ResultSet rs = originalRS;
 
         boolean closeRS = false;
@@ -70,11 +70,11 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         {
             if (originalRS instanceof GroupedResultSet)
             {
-                rs = ((GroupedResultSet)originalRS).getNextResultSet();
+                rs = ((GroupedResultSet) originalRS).getNextResultSet();
                 closeRS = true;
             }
             Object groupingValue = originalRS.getObject(_groupingColumn.getAlias());
-            List<String> peptides = (List<String>)ctx.get("PeptideList");
+            List<String> peptides = (List<String>) ctx.get("PeptideList");
             Object cachedGroupingValue = ctx.get("PeptideListGroupingValue");
             if (peptides == null || cachedGroupingValue == null || !cachedGroupingValue.equals(groupingValue))
             {
@@ -108,12 +108,21 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         }
         finally
         {
-            if (closeRS) { try { rs.close(); } catch (SQLException e) {} }
+            if (closeRS)
+            {
+                try
+                {
+                    rs.close();
+                }
+                catch (SQLException e)
+                {
+                }
+            }
         }
     }
 
     protected abstract Object calculateValue(RenderContext ctx, List<String> peptides)
-        throws SQLException;
+            throws SQLException;
 
 
     public boolean isFilterable()
