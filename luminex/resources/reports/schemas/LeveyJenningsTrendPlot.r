@@ -214,6 +214,12 @@ for (typeIndex in 1:length(plotTypes))
 	      ymax= 1;
 	  }
 
+	  # having a ymin and ymax that are the same messes up the legend position (issue 18507)
+	  if (ymin == ymax) {
+	      ymin = ymin - 1;
+	      ymax = ymax + 1;
+	  }
+
 	  # if the plot is in log scale, make sure we don't have values <= 0
 	  if (asLog == "y") {
 	      if (ymin <= 0) { ymin = 1; }
