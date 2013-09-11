@@ -235,7 +235,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
         for (int i = 0; i < trimmedModifiedSequence.length(); i++)
         {
             char c = trimmedModifiedSequence.charAt(i);
-            // If it's an amino acid, appent it directly
+            // If it's an amino acid, append it directly
             if (Character.isLetter(c))
             {
                 result.append(c);
