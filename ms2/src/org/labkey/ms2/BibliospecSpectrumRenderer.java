@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.util.Compress;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewContext;
@@ -28,8 +27,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.Connection;
@@ -65,11 +62,6 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
     @Override
     public void render(SpectrumIterator iter) throws IOException
     {
-        // Run ID->Modification list
-        Map<Integer, List<MS2Modification>> modificationsCache = new HashMap<>();
-        // LabKey Fraction ID->Bibliospec SpectraSourceFile ID
-        Map<Integer, Integer> fractionCache = new HashMap<>();
-
         String shortName = _context.getContainer().getName() + "SpectraLibrary";
         File tempFile = File.createTempFile(shortName, ".blib");
         try
@@ -83,11 +75,11 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                 statement.execute("CREATE TABLE Modifications (id  integer primary key autoincrement, RefSpectraId BIGINT, position INT not null, mass DOUBLE not null, constraint FK928405BDF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
                 statement.execute("CREATE TABLE RefSpectra (id  integer primary key autoincrement, peptideSeq TEXT not null, peptideModSeq TEXT not null, precursorCharge INT not null, precursorMZ DOUBLE not null, prevAA TEXT, nextAA TEXT, copies SMALLINT not null, numPeaks INTEGER not null);");
                 statement.execute("CREATE TABLE RefSpectraPeaks (RefSpectraId BIGINT not null, peakMZ BLOB, peakIntensity BLOB, primary key (RefSpectraId), constraint FKACE51F3F1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
-                statement.execute("CREATE TABLE SpectrumSourceFiles (id  integer primary key autoincrement, fileName TEXT);");
 
                 // We're creating a redundant library, which isn't expected to contain retention times, so we can
-                // omit the table
+                // omit the table. Also, Skyline refuses to show spectra within a document if we include the source files
 //                statement.execute("CREATE TABLE RetentionTimes (id  integer primary key autoincrement, RefSpectraId BIGINT, RedundantRefSpectraId BIGINT, SpectrumSourceId BIGINT, retentionTime DOUBLE, bestSpectrum INT, constraint FKF3D3B64AF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
+//                statement.execute("CREATE TABLE SpectrumSourceFiles (id  integer primary key autoincrement, fileName TEXT);");
 
                 // Keep track of the sequence value so that we can set foreign key values
                 int spectraCount = 0;
@@ -95,9 +87,14 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                 // Create the statements to insert all of the data
                 try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, nextAA, prevAA, copies, numPeaks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                      PreparedStatement spectraPS = connection.prepareStatement("INSERT INTO RefSpectraPeaks(RefSpectraId, PeakMZ, PeakIntensity) VALUES (?, ?, ?)");
-                     PreparedStatement modificationPS = connection.prepareStatement("INSERT INTO Modifications (RefSpectraId, Position, Mass) VALUES (?, ?, ?)");
-                     PreparedStatement sourceFilePS = connection.prepareStatement("INSERT INTO SpectrumSourceFiles (fileName) VALUES (?)"))
+//                     PreparedStatement sourceFilePS = connection.prepareStatement("INSERT INTO SpectrumSourceFiles (fileName) VALUES (?)");
+                     PreparedStatement modificationPS = connection.prepareStatement("INSERT INTO Modifications (RefSpectraId, Position, Mass) VALUES (?, ?, ?)"))
                 {
+                    // Run ID->Modification list
+                    Map<Integer, List<MS2Modification>> modificationsCache = new HashMap<>();
+
+//                    Set<Integer> fractionIdsIncluded = new HashSet<>();
+
                     // Iterate over all of the spectra
                     while (iter.hasNext())
                     {
@@ -118,27 +115,25 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             modificationsCache.put(run.getRun(), modifications);
                         }
 
-                        // Make sure we have a record for the .mzXML file in the SpectrumSourceFiles table
-                        Integer spectraFileId = fractionCache.get(spectrum.getFraction());
-                        if (spectraFileId == null)
-                        {
-                            MS2Fraction fraction = MS2Manager.getFraction(spectrum.getFraction());
-                            if (fraction == null)
-                            {
-                                throw new IllegalStateException("Could not find fraction " + spectrum.getFraction());
-                            }
-                            try
-                            {
-                                sourceFilePS.setString(1, new File(new URI(fraction.getMzXmlURL())).getAbsolutePath());
-                                sourceFilePS.execute();
-                                spectraFileId = fractionCache.size() + 1;
-                                fractionCache.put(fraction.getFraction(), spectraFileId);
-                            }
-                            catch (URISyntaxException e)
-                            {
-                                throw new UnexpectedException(e);
-                            }
-                        }
+//                        // Make sure we have a record for the .mzXML file in the SpectrumSourceFiles table
+//                        if (!fractionIdsIncluded.contains(spectrum.getFraction()))
+//                        {
+//                            MS2Fraction fraction = MS2Manager.getFraction(spectrum.getFraction());
+//                            if (fraction == null)
+//                            {
+//                                throw new IllegalStateException("Could not find fraction " + spectrum.getFraction());
+//                            }
+//                            try
+//                            {
+//                                sourceFilePS.setString(1, new File(new URI(fraction.getMzXmlURL())).getAbsolutePath());
+////                                sourceFilePS.execute();
+//                                fractionIdsIncluded.add(fraction.getFraction());
+//                            }
+//                            catch (URISyntaxException e)
+//                            {
+//                                throw new UnexpectedException(e);
+//                            }
+//                        }
 
                         // Hold on to the index->mass difference info so we can insert into the Modifications table as well
                         Map<Integer, Float> peptideModifications = new HashMap<>();
@@ -147,8 +142,8 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         peptidePS.setString(2, getExportModifiedSequence(spectrum.getSequence(), modifications, peptideModifications));
                         peptidePS.setInt(3, spectrum.getCharge());
                         peptidePS.setDouble(4, spectrum.getMZ());
-                        peptidePS.setString(5, "-");
-                        peptidePS.setString(6, "-");
+                        peptidePS.setString(5, spectrum.getNextAA());
+                        peptidePS.setString(6, spectrum.getPrevAA());
                         peptidePS.setInt(7, 1); // We're creating redundant libraries, which will always have one entry per sequence
                         peptidePS.setInt(8, mzFloats.length);
                         peptidePS.execute();
@@ -176,8 +171,8 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         }
 
                         spectraPS.setInt(1, spectraCount);
-                        spectraPS.setBytes(2, Compress.deflate(mzBuffer.array()));
-                        spectraPS.setBytes(3, Compress.deflate(intensityBuffer.array()));
+                        spectraPS.setBytes(2, mzBuffer.array());
+                        spectraPS.setBytes(3, intensityBuffer.array());
                         spectraPS.execute();
                     }
                 }
@@ -188,8 +183,9 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                     ps.setString(1, new Lsid("spectral_library", "bibliospec").setVersion("redundant") + ":" + Lsid.encodePart(_context.getContainer().getName()));
                     ps.setString(2, new SimpleDateFormat("EEE MMM HH:mm:ss yyyy").format(new Date()));
                     ps.setInt(3, spectraCount);
+                    // Writing out older version of library file
                     ps.setInt(4, 1);
-                    ps.setInt(5, 1);
+                    ps.setInt(5, 0);
                     ps.execute();
                 }
 
