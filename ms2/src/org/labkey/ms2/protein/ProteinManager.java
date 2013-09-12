@@ -253,10 +253,10 @@ public class ProteinManager
         return protein != null ? protein.getSequence() : null;
     }
 
-    public static Protein[] getProteinsContainingPeptide(int fastaId, MS2Peptide peptide) throws SQLException
+    public static List<Protein> getProteinsContainingPeptide(int fastaId, MS2Peptide peptide) throws SQLException
     {
         if ((null == peptide) || ("".equals(peptide.getTrimmedPeptide())) || (peptide.getProteinHits() < 1))
-            return new Protein[0];
+            return Collections.emptyList();
 
         int hits = peptide.getProteinHits();
         SQLFragment sql = new SQLFragment();
@@ -285,9 +285,9 @@ public class ProteinManager
             sql = getSchema().getSqlDialect().limitRows(sql, Math.max(20, hits));
         }
 
-        Protein[] proteins = Table.executeQuery(getSchema(), sql, Protein.class);
+        List<Protein> proteins = new SqlSelector(getSchema(), sql).getArrayList(Protein.class);
 
-        if (proteins.length == 0)
+        if (proteins.isEmpty())
             _log.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
 
         return proteins;
@@ -351,51 +351,44 @@ public class ProteinManager
             }
         }
         sql.append(" ORDER BY Name");
-        try
+        Collection<CustomAnnotationSet> allSets = new SqlSelector(getSchema(), sql).getCollection(CustomAnnotationSet.class);
+
+        Set<String> setNames = new CaseInsensitiveHashSet();
+        List<CustomAnnotationSet> dedupedSets = new ArrayList<>(allSets.size());
+        // If there are any name collisions, we want sets in this container to mask the ones in the project
+
+        // Take a first pass through to add all the ones from this container
+        for (CustomAnnotationSet set : allSets)
         {
-            CustomAnnotationSet[] allSets = Table.executeQuery(getSchema(), sql, CustomAnnotationSet.class);
-
-            Set<String> setNames = new CaseInsensitiveHashSet();
-            List<CustomAnnotationSet> dedupedSets = new ArrayList<>(allSets.length);
-            // If there are any name collisions, we want sets in this container to mask the ones in the project
-
-            // Take a first pass through to add all the ones from this container
-            for (CustomAnnotationSet set : allSets)
+            if (set.getContainer().equals(container.getId()))
             {
-                if (set.getContainer().equals(container.getId()))
-                {
-                    setNames.add(set.getName());
-                    dedupedSets.add(set);
-                }
+                setNames.add(set.getName());
+                dedupedSets.add(set);
             }
-
-            // Take a second pass through to add all the ones from the project that don't collide
-            for (CustomAnnotationSet set : allSets)
-            {
-                if (!set.getContainer().equals(container.getId()) && setNames.add(set.getName()))
-                {
-                    dedupedSets.add(set);
-                }
-            }
-
-            Collections.sort(dedupedSets, new Comparator<CustomAnnotationSet>()
-            {
-                public int compare(CustomAnnotationSet o1, CustomAnnotationSet o2)
-                {
-                    return o1.getName().compareTo(o2.getName());
-                }
-            });
-            Map<String, CustomAnnotationSet> result = new LinkedHashMap<>();
-            for (CustomAnnotationSet set : dedupedSets)
-            {
-                result.put(set.getName(), set);
-            }
-            return result;
         }
-        catch (SQLException e)
+
+        // Take a second pass through to add all the ones from the project that don't collide
+        for (CustomAnnotationSet set : allSets)
         {
-            throw new RuntimeSQLException(e);
+            if (!set.getContainer().equals(container.getId()) && setNames.add(set.getName()))
+            {
+                dedupedSets.add(set);
+            }
         }
+
+        Collections.sort(dedupedSets, new Comparator<CustomAnnotationSet>()
+        {
+            public int compare(CustomAnnotationSet o1, CustomAnnotationSet o2)
+            {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        Map<String, CustomAnnotationSet> result = new LinkedHashMap<>();
+        for (CustomAnnotationSet set : dedupedSets)
+        {
+            result.put(set.getName(), set);
+        }
+        return result;
     }
 
     public static void deleteCustomAnnotationSet(CustomAnnotationSet set)
@@ -446,31 +439,24 @@ public class ProteinManager
         }
         sql.append(") AND CustomAnnotationSetId = ?");
         sql.add(id);
-        try
+        List<CustomAnnotationSet> matches = new SqlSelector(getSchema(), sql).getArrayList(CustomAnnotationSet.class);
+        if (matches.size() > 1)
         {
-            CustomAnnotationSet[] matches = Table.executeQuery(getSchema(), sql, CustomAnnotationSet.class);
-            if (matches.length > 1)
+            for (CustomAnnotationSet set : matches)
             {
-                for (CustomAnnotationSet set : matches)
+                if (set.getContainer().equals(c.getId()))
                 {
-                    if (set.getContainer().equals(c.getId()))
-                    {
-                        return set;
-                    }
+                    return set;
                 }
-                assert false : "More than one matching set was found but none were in the current container";
-                return matches[0];
             }
-            if (matches.length == 1)
-            {
-                return matches[0];
-            }
-            return null;
+            assert false : "More than one matching set was found but none were in the current container";
+            return matches.get(0);
         }
-        catch (SQLException e)
+        if (matches.size() == 1)
         {
-            throw new RuntimeSQLException(e);
+            return matches.get(0);
         }
+        return null;
 
     }
 
@@ -1501,30 +1487,20 @@ public class ProteinManager
 
     public static Set<String> getOrganismsFromId(int id)
     {
-        try
-        {
-            HashSet<String> retVal = new HashSet<>();
-            Integer paramArr[] = {id};
-            List<String> rvString = new SqlSelector(getSchema(),
-                    "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
-                    paramArr).getArrayList(String.class);
+        HashSet<String> retVal = new HashSet<>();
+        List<String> rvString = new SqlSelector(getSchema(),
+                "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
+                id).getArrayList(String.class);
 
-            retVal.addAll(rvString);
+        retVal.addAll(rvString);
 
-            String org = Table.executeSingleton(getSchema(),
-                    "SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
-                            " FROM " + getTableInfoOrganisms() +
-                            " WHERE orgid=(SELECT orgid FROM " + getTableInfoSequences() +
-                            " WHERE seqid=?)",
-                    paramArr, String.class);
+        SQLFragment sql = new SQLFragment("SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
+                " FROM " + getTableInfoOrganisms() + " WHERE OrgId = " +
+                "(SELECT OrgId FROM " + getTableInfoSequences() + " WHERE SeqId = ?)", id);
+        String org = new SqlSelector(getSchema(), sql).getObject(String.class);
+        retVal.add(org);
 
-            retVal.add(org);
-            return retVal;
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return retVal;
     }
 
 

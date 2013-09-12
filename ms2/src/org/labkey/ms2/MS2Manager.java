@@ -98,6 +98,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -909,32 +910,26 @@ public class MS2Manager
         return null;
     }
 
-    public static Protein[] getProteinsForGroup(int rowId, int groupNumber, int indistinguishableCollectionId)
+    public static List<Protein> getProteinsForGroup(int rowId, int groupNumber, int indistinguishableCollectionId)
     {
-        try
-        {
-            String sql = "SELECT seq.SeqId, seq.ProtSequence AS Sequence, seq.Mass, seq.Description, seq.BestName, seq.BestGeneName, fs.LookupString FROM " +
-                getTableInfoProteinGroupMemberships() + " pgm," +
-                getTableInfoProteinGroups() + " pg, " +
-                getTableInfoProteinProphetFiles() + " ppf, " +
-                getTableInfoRuns() + " r, " +
-                ProteinManager.getTableInfoFastaSequences() + " fs, " +
-                ProteinManager.getTableInfoSequences() + " seq " +
-                "WHERE pg.RowId = pgm.ProteinGroupId " +
-                "AND seq.SeqId = pgm.SeqId " +
-                "AND pg.ProteinProphetFileId = ppf.RowId " +
-                "AND ppf.Run = r.Run " +
-                "AND fs.FastaId = r.FastaId " +
-                "AND fs.SeqId = seq.SeqId " +
-                "AND pg.GroupNumber = ? " +
-                "AND pg.IndistinguishableCollectionId = ? " +
-                "AND pg.ProteinProphetFileId = ?";
-            return Table.executeQuery(getSchema(), sql, new Object[] {groupNumber, indistinguishableCollectionId, rowId}, Protein.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        String sql = "SELECT seq.SeqId, seq.ProtSequence AS Sequence, seq.Mass, seq.Description, seq.BestName, seq.BestGeneName, fs.LookupString FROM " +
+            getTableInfoProteinGroupMemberships() + " pgm," +
+            getTableInfoProteinGroups() + " pg, " +
+            getTableInfoProteinProphetFiles() + " ppf, " +
+            getTableInfoRuns() + " r, " +
+            ProteinManager.getTableInfoFastaSequences() + " fs, " +
+            ProteinManager.getTableInfoSequences() + " seq " +
+            "WHERE pg.RowId = pgm.ProteinGroupId " +
+            "AND seq.SeqId = pgm.SeqId " +
+            "AND pg.ProteinProphetFileId = ppf.RowId " +
+            "AND ppf.Run = r.Run " +
+            "AND fs.FastaId = r.FastaId " +
+            "AND fs.SeqId = seq.SeqId " +
+            "AND pg.GroupNumber = ? " +
+            "AND pg.IndistinguishableCollectionId = ? " +
+            "AND pg.ProteinProphetFileId = ?";
+
+        return new SqlSelector(getSchema(), sql, groupNumber, indistinguishableCollectionId, rowId).getArrayList(Protein.class);
     }
 
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinGroupId) throws SQLException
@@ -953,23 +948,16 @@ public class MS2Manager
         throw new IllegalStateException("Expected zero or one protein groups for rowId=" + proteinGroupId);
     }
 
-    public static ProteinGroupWithQuantitation[] getProteinGroupsWithPeptide(MS2Peptide peptide)
+    public static Collection<ProteinGroupWithQuantitation> getProteinGroupsWithPeptide(MS2Peptide peptide)
     {
-        try
-        {
-            SQLFragment sql = new SQLFragment("SELECT pg.* FROM ");
-            sql.append(getTableInfoProteinGroupsWithQuantitation(), "pg");
-            sql.append(" WHERE pg.RowId IN (SELECT ProteinGroupId FROM ");
-            sql.append(getTableInfoPeptideMemberships(), "pm");
-            sql.append(" WHERE PeptideId = ?)");
-            sql.add(peptide.getRowId());
+        SQLFragment sql = new SQLFragment("SELECT pg.* FROM ");
+        sql.append(getTableInfoProteinGroupsWithQuantitation(), "pg");
+        sql.append(" WHERE pg.RowId IN (SELECT ProteinGroupId FROM ");
+        sql.append(getTableInfoPeptideMemberships(), "pm");
+        sql.append(" WHERE PeptideId = ?)");
+        sql.add(peptide.getRowId());
 
-            return Table.executeQuery(getSchema(), sql, ProteinGroupWithQuantitation.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return new SqlSelector(getSchema(), sql).getCollection(ProteinGroupWithQuantitation.class);
     }
 
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinProphetFileId, int groupNumber, int indistinguishableCollectionId) throws SQLException

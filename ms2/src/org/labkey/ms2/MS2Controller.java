@@ -4141,7 +4141,7 @@ public class MS2Controller extends SpringActionController
 
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            return new ProteinsView(currentURL, _run, form, new Protein[] {_protein}, null, peptideQueryView);
+            return new ProteinsView(currentURL, _run, form, Collections.singletonList(_protein), null, peptideQueryView);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -4171,7 +4171,7 @@ public class MS2Controller extends SpringActionController
             setTitle("Proteins Containing " + peptide);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            Protein[] proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
+            List<Protein> proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
             ActionURL currentURL = getViewContext().cloneActionURL();
 
             ProteinsView view = new ProteinsView(currentURL, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, null);
@@ -4229,7 +4229,7 @@ public class MS2Controller extends SpringActionController
             {
                 throw new NotFoundException();
             }
-            Protein[] proteins = group.lookupProteins();
+            List<Protein> proteins = group.lookupProteins();
 
             setTitle(run1.getDescription());
 
@@ -4266,10 +4266,10 @@ public class MS2Controller extends SpringActionController
 
     private static class ProteinsView extends VBox
     {
-        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, QueryPeptideMS2RunView peptideView) throws Exception
+        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, List<Protein> proteins, String[] peptides, QueryPeptideMS2RunView peptideView) throws Exception
         {
             // Limit to 100 proteins
-            int proteinCount = Math.min(100, proteins.length);
+            int proteinCount = Math.min(100, proteins.size());
             // string search:  searching for a peptide string in the proteins of a given run
             boolean stringSearch = (null != peptides);
             // don't show the peptides grid or the coveage map for the Proteins matching a peptide or the no run case (e.g click on a protein Name in Matching Proteins grid of search results)
@@ -4295,18 +4295,19 @@ public class MS2Controller extends SpringActionController
 
             for (int i = 0; i < proteinCount; i++)
             {
+                Protein protein = proteins.get(i);
                 ProteinViewBean bean = new ProteinViewBean();
                 // the all peptides matching applies to peptides matching a single protein.  Don't
                 // offer it as a choice in the case of protein groups
                 bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
 
                 addView(new HtmlView("<a name=\"Protein" + i + "\"></a>"));
-                proteins[i].setPeptides(peptides);
-                proteins[i].setShowEntireFragmentInCoverage(stringSearch);
-                bean.protein = proteins[i];
+                protein.setPeptides(peptides);
+                protein.setShowEntireFragmentInCoverage(stringSearch);
+                bean.protein = protein;
                 bean.showPeptides = showPeptides;
                 JspView proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
-                proteinSummary.setTitle(getProteinTitle(proteins[i], true));
+                proteinSummary.setTitle(getProteinTitle(protein, true));
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
                 //TODO:  do something sensible for a single seqid and no run.
@@ -4330,7 +4331,7 @@ public class MS2Controller extends SpringActionController
                 addView(sequenceView);
 
                 // Add annotations
-                AnnotationView annotations = new AnnotationView(proteins[i]);
+                AnnotationView annotations = new AnnotationView(protein);
                 annotations.enableExpandCollapse("ProteinAnnotationsView", true);
                 addView(annotations);
             }

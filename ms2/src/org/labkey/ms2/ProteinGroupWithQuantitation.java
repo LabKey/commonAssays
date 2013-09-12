@@ -18,11 +18,13 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.ms2.reader.ProteinGroup;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -32,8 +34,8 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
 {
     private IcatProteinQuantitation _quantitation;
 
-    private Protein[] _proteins;
-    private MS2Peptide[] _peptides;
+    private List<Protein> _proteins;
+    private List<MS2Peptide> _peptides;
 
     public Float getHeavy2LightRatioMean()
     {
@@ -110,7 +112,7 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
         }
     }
 
-    public Protein[] lookupProteins()
+    public List<Protein> lookupProteins()
     {
         if (_proteins == null)
         {
@@ -119,7 +121,7 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
         return _proteins;
     }
 
-    public MS2Peptide[] lookupPeptides()
+    public List<MS2Peptide> lookupPeptides()
     {
         if (_peptides == null)
         {
@@ -129,15 +131,9 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
             sql.append(MS2Manager.getTableInfoPeptideMemberships());
             sql.append(" WHERE ProteinGroupId = ?)");
             sql.add(getRowId());
-            try
-            {
-                _peptides = Table.executeQuery(MS2Manager.getSchema(), sql, MS2Peptide.class);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            _peptides = new SqlSelector(MS2Manager.getSchema(), sql).getArrayList(MS2Peptide.class);
         }
+
         return _peptides;
     }
 

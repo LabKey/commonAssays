@@ -17,10 +17,8 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpRun;
@@ -32,8 +30,6 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayRunDatabaseContext;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -64,17 +60,9 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         sql.add(run.getRowId());
         sql.append(" ORDER BY a.RowId");
 
-        try
+        for (Analyte analyte : new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getCollection(Analyte.class))
         {
-            Analyte[] analytes = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, Analyte.class);
-            for (Analyte analyte : analytes)
-            {
-                _analytes.put(analyte.getName(), analyte);
-            }
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
+            _analytes.put(analyte.getName(), analyte);
         }
     }
 

@@ -23,6 +23,7 @@ import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -197,24 +198,17 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             sql.append(" AND CurrentGuideSet = ?");
             sql.add(true);
 
-            try
+            GuideSet[] matches = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArray(GuideSet.class);
+            if (matches.length == 1)
             {
-                GuideSet[] matches = Table.executeQuery(LuminexProtocolSchema.getSchema(), sql, GuideSet.class);
-                if (matches.length == 1)
-                {
-                    return matches[0];
-                }
-                if (matches.length == 0)
-                {
-                    return null;
-                }
+                return matches[0];
+            }
+            if (matches.length == 0)
+            {
+                return null;
+            }
 
-                throw new IllegalStateException("More than one guide set is current for assay design '" + protocol.getName() + "', analyte '" + analyteName + "', conjugate '" + conjugate + "', isotype '" + isotype + "'");
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            throw new IllegalStateException("More than one guide set is current for assay design '" + protocol.getName() + "', analyte '" + analyteName + "', conjugate '" + conjugate + "', isotype '" + isotype + "'");
         }
 
         private static void appendNullableString(SQLFragment sql, String value)

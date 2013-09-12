@@ -20,8 +20,10 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.Protein" %>
 <%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
-<%@ page import="java.text.Format" %>
 <%@ page import="org.labkey.ms2.reader.ITraqProteinQuantitation" %>
+<%@ page import="java.text.Format" %>
+<%@ page import="java.util.List" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ProteinGroupWithQuantitation group = ((JspView<ProteinGroupWithQuantitation>)HttpView.currentView()).getModelBean();
     ITraqProteinQuantitation libra = group.getITraqProteinQuantitation();
@@ -33,10 +35,10 @@
         <td><%= group.getGroupNumber() %><% if (group.getIndistinguishableCollectionId() != 0) { %>-<%= group.getIndistinguishableCollectionId() %><% } %></td>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td class="labkey-form-label">Group probability</td>
-        <td><%= floatFormat.format(group.getGroupProbability()) %></td>
+        <td><%= h(floatFormat.format(group.getGroupProbability())) %></td>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td class="labkey-form-label">Protein probability</td>
-        <td><%= floatFormat.format(group.getProteinProbability()) %></td>
+        <td><%= h(floatFormat.format(group.getProteinProbability())) %></td>
     </tr>
     <tr>
         <td class="labkey-form-label">Total number of peptides</td>
@@ -47,33 +49,33 @@
         <td />
         <% if (group.getPctSpectrumIds() != null) { %>
             <td class="labkey-form-label">Percent spectrum ids</td>
-            <td><%= Formats.percent2.format(group.getPctSpectrumIds()) %></td>
+            <td><%= h(Formats.percent2.format(group.getPctSpectrumIds())) %></td>
         <% } %>
     </tr>
     <% if (group.getPercentCoverage() != null) { %>
         <tr>
             <td class="labkey-form-label">Percent coverage</td>
-            <td><%= Formats.percent2.format(group.getPercentCoverage()) %></td>
+            <td><%= h(Formats.percent2.format(group.getPercentCoverage())) %></td>
         </tr>
     <% } %>
 
     <% if (group.getRatioMean() != null) { %>
         <tr>
             <td class="labkey-form-label">Ratio mean</td>
-            <td><%= floatFormat.format(group.getRatioMean()) %></td>
+            <td><%= h(floatFormat.format(group.getRatioMean())) %></td>
             <td />
             <td class="labkey-form-label">Ratio standard dev</td>
-            <td><%= floatFormat.format(group.getRatioStandardDev()) %></td>
+            <td><%= h(floatFormat.format(group.getRatioStandardDev())) %></td>
             <td />
             <td class="labkey-form-label">Number of quantitation peptides</td>
             <td><%= group.getRatioNumberPeptides() %></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Heavy to light ratio mean</td>
-            <td><%= floatFormat.format(group.getHeavy2LightRatioMean()) %></td>
+            <td><%= h(floatFormat.format(group.getHeavy2LightRatioMean())) %></td>
             <td />
             <td class="labkey-form-label">Heavy to light standard dev</td>
-            <td><%= floatFormat.format(group.getHeavy2LightRatioStandardDev()) %></td>
+            <td><%= h(floatFormat.format(group.getHeavy2LightRatioStandardDev())) %></td>
         </tr>
     <% } %>
     <tr>
@@ -82,11 +84,11 @@
     <tr>
         <td class="labkey-form-label">Jump to</td>
         <td colspan="7"><%
-            Protein[] proteins = group.lookupProteins();
-            for (int i = 0; i < proteins.length; i++)
+            List<Protein> proteins = group.lookupProteins();
+            for (int i = 0; i < proteins.size(); i++)
             {
-                Protein protein = proteins[i]; %>
-                <a href="#Protein<%= i %>"><%= protein.getLookupString() %></a>,
+                Protein protein = proteins.get(i); %>
+                <a href="#Protein<%= i %>"><%=h(protein.getLookupString())%></a>,
             <% } %>
             <a href="#Peptides">Peptides</a>
         </td>
@@ -101,50 +103,50 @@ if (libra != null)
     <tr><td colspan="8" style="font-size:110%;font-weight:bold;">iTRAQ Quantitation</td></tr>
     <% if (libra.getRatio1() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 1</td><td><%= floatFormat.format(libra.getRatio1()) %></td><td />
-        <td class="labkey-form-label">Error 1</td><td><%= floatFormat.format(libra.getError1()) %></td>
+        <td class="labkey-form-label">Ratio 1</td><td><%= h(floatFormat.format(libra.getRatio1())) %></td><td />
+        <td class="labkey-form-label">Error 1</td><td><%= h(floatFormat.format(libra.getError1())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio2() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 2</td><td><%= floatFormat.format(libra.getRatio2()) %></td><td />
-        <td class="labkey-form-label">Error 2</td><td><%= floatFormat.format(libra.getError2()) %></td>
+        <td class="labkey-form-label">Ratio 2</td><td><%= h(floatFormat.format(libra.getRatio2())) %></td><td />
+        <td class="labkey-form-label">Error 2</td><td><%= h(floatFormat.format(libra.getError2())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio3() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 3</td><td><%= floatFormat.format(libra.getRatio3()) %></td><td />
-        <td class="labkey-form-label">Error 3</td><td><%= floatFormat.format(libra.getError3()) %></td>
+        <td class="labkey-form-label">Ratio 3</td><td><%= h(floatFormat.format(libra.getRatio3())) %></td><td />
+        <td class="labkey-form-label">Error 3</td><td><%= h(floatFormat.format(libra.getError3())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio4() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 4</td><td><%= floatFormat.format(libra.getRatio4()) %></td><td />
-        <td class="labkey-form-label">Error 4</td><td><%= floatFormat.format(libra.getError4()) %></td>
+        <td class="labkey-form-label">Ratio 4</td><td><%= h(floatFormat.format(libra.getRatio4())) %></td><td />
+        <td class="labkey-form-label">Error 4</td><td><%= h(floatFormat.format(libra.getError4())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio5() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 5</td><td><%= floatFormat.format(libra.getRatio5()) %></td><td />
-        <td class="labkey-form-label">Error 5</td><td><%= floatFormat.format(libra.getError5()) %></td>
+        <td class="labkey-form-label">Ratio 5</td><td><%= h(floatFormat.format(libra.getRatio5())) %></td><td />
+        <td class="labkey-form-label">Error 5</td><td><%= h(floatFormat.format(libra.getError5())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio6() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 6</td><td><%= floatFormat.format(libra.getRatio6()) %></td><td />
-        <td class="labkey-form-label">Error 6</td><td><%= floatFormat.format(libra.getError6()) %></td>
+        <td class="labkey-form-label">Ratio 6</td><td><%= h(floatFormat.format(libra.getRatio6())) %></td><td />
+        <td class="labkey-form-label">Error 6</td><td><%= h(floatFormat.format(libra.getError6())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio7() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 7</td><td><%= floatFormat.format(libra.getRatio7()) %></td><td />
-        <td class="labkey-form-label">Error 7</td><td><%= floatFormat.format(libra.getError7()) %></td>
+        <td class="labkey-form-label">Ratio 7</td><td><%= h(floatFormat.format(libra.getRatio7())) %></td><td />
+        <td class="labkey-form-label">Error 7</td><td><%= h(floatFormat.format(libra.getError7())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio8() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 8</td><td><%= floatFormat.format(libra.getRatio8()) %></td><td />
-        <td class="labkey-form-label">Error 8</td><td><%= floatFormat.format(libra.getError8()) %></td>
+        <td class="labkey-form-label">Ratio 8</td><td><%= h(floatFormat.format(libra.getRatio8())) %></td><td />
+        <td class="labkey-form-label">Error 8</td><td><%= h(floatFormat.format(libra.getError8())) %></td>
         </tr>
     <% } %>
 <%
