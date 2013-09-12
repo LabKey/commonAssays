@@ -54,7 +54,7 @@ public class LuminexController extends SpringActionController
 {
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class,
             LuminexUploadWizardAction.class
-        );
+    );
 
     public LuminexController()
     {
@@ -259,7 +259,7 @@ public class LuminexController extends SpringActionController
             result.addChild("Levey-Jennings Reports", new ActionURL(LeveyJenningsMenuAction.class, getContainer()).addParameter("rowId", _form.getProtocol().getRowId()));
             return result.addChild(_form.getControlName());
         }
-    }    
+    }
 
     @RequiresPermissionClass(ReadPermission.class)
     public class LeveyJenningsMenuAction extends SimpleViewAction<ProtocolIdForm>
@@ -270,7 +270,11 @@ public class LuminexController extends SpringActionController
         public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
         {
             _form = form;
-            return new LeveyJenningsMenuView(form.getProtocol());
+            VBox result = new VBox();
+            AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
+            result.addView(header);
+            result.addView(new LeveyJenningsMenuView(form.getProtocol()));
+            return result;
         }
 
         @Override
