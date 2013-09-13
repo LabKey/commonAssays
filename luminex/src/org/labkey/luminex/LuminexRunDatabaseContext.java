@@ -145,11 +145,11 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     @Override
     public List<SinglePointControl> getSinglePointControls() throws ExperimentException
     {
-        SQLFragment sql = new SQLFragment("SELECT t.* FROM ");
-        sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "t");
-        sql.append(" WHERE t.RunId = ?");
+        SQLFragment sql = new SQLFragment("SELECT spc.* FROM ");
+        sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");
+        sql.append(" WHERE spc.RunId = ?");
         sql.add(_run.getRowId());
-        sql.append(" ORDER BY t.Name");
+        sql.append(" ORDER BY spc.Name");
 
         SqlSelector sqlSelector = new SqlSelector(LuminexProtocolSchema.getSchema(), sql);
         return sqlSelector.getArrayList(SinglePointControl.class);

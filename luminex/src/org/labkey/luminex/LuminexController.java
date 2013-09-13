@@ -29,7 +29,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
-import org.labkey.api.study.assay.AbstractAssayView;
+import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.StringExpressionFactory;
@@ -87,7 +87,7 @@ public class LuminexController extends SpringActionController
         {
             _protocol = form.getProtocol();
 
-            AbstractAssayView result = new AbstractAssayView();
+            AssayView result = new AssayView();
             LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), _protocol, null);
             QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME);
             QueryView runsView = createQueryView(runsSetting, schema, errors);
@@ -143,7 +143,7 @@ public class LuminexController extends SpringActionController
         {
             _protocol = form.getProtocol();
 
-            AbstractAssayView result = new AbstractAssayView();
+            AssayView result = new AssayView();
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             setHelpTopic(new HelpTopic("applyGuideSets"));
@@ -190,7 +190,7 @@ public class LuminexController extends SpringActionController
         {
             _protocol = form.getProtocol();
 
-            AbstractAssayView result = new AbstractAssayView();
+            AssayView result = new AssayView();
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME, LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
             setHelpTopic(new HelpTopic("applyGuideSets"));

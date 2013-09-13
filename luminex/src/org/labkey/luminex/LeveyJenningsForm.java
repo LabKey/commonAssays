@@ -29,6 +29,9 @@ public class LeveyJenningsForm extends ProtocolIdForm
     private String _controlName;
     private ControlType _controlType = ControlType.Titration;
 
+    /**
+     * These Titration getters and setters are needed for URL backward compatibility.
+     */
     public String getTitration()
     {
         return _controlName;

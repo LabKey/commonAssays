@@ -1602,7 +1602,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return result;
     }
 
-    /** @return Name->Titration */
+    /** @return Name->SinglePointControl */
         private Map<String, SinglePointControl> insertSinglePointControls(ExpRun expRun, User user, List<SinglePointControl> singlePointControls)
                 throws ExperimentException, SQLException
         {
