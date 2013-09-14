@@ -19,14 +19,12 @@ package org.labkey.flow.controllers;
 import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.security.User;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -172,16 +170,6 @@ public abstract class BaseFlowController extends SpringActionController
         public C getPageFlow()
         {
             return _controller;
-        }
-
-        public User getUser()
-        {
-            return _controller.getUser();
-        }
-
-        public Container getContainer()
-        {
-            return _controller.getContainer();
         }
 
         public String getContainerPath()
