@@ -19,9 +19,9 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryForeignKey;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 
@@ -49,15 +49,7 @@ public class TitrationTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("QCControl")));
         addColumn(wrapColumn(getRealTable().getColumn("Unknown")));
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
-        LookupForeignKey runFk = new LookupForeignKey("RowId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _userSchema.createRunsTable();
-            }
-        };
-        runFk.setPrefixColumnCaption(false);
+        QueryForeignKey runFk = new QueryForeignKey(schema, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name");
         runColumn.setFk(runFk);
         setTitleColumn("Name");
     }

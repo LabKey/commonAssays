@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 /**
+ * Simple bean for mapping analytes to single point controls in the database
  * User: jeckels
  * Date: 8/23/13
  */

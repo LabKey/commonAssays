@@ -789,12 +789,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     // save default values for SinglePointControls
                     for (String singlePointControl : form.getParser().getSinglePointControls())
                     {
-                        String propertyName;
-                        Boolean value;
-
                         // add the name/value pairs for the singlePointControl well role definition section
-                        propertyName = getSinglePointControlCheckboxName(singlePointControl);
-                        value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                        String propertyName = getSinglePointControlCheckboxName(singlePointControl);
+                        Boolean value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                     }
 
