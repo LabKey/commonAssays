@@ -4437,6 +4437,9 @@ public class MS2Controller extends SpringActionController
             ProteinCoverageMapBuilder pcm = new ProteinCoverageMapBuilder(getViewContext(), protein, ms2Run, peptideFilter, showAllPeptides);
             pcm.setProteinPeptides(pcm.getPeptidesForFilter(peptideFilter));
             pcm.setAllPeptideCounts();
+            SimpleFilter targetPeptideCountsFilter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
+            targetPeptideCountsFilter.addClause(new ProteinManager.SequenceFilter(protein.getSeqId()));
+            pcm.setTargetPeptideCounts(peptideFilter);
             pw.write(pcm.getProteinExportHtml());
 
             pw.write("</body></html>");
