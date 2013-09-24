@@ -21,7 +21,6 @@ import org.labkey.api.util.Pair;
 import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.ms2.reader.LibraQuantResult;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +75,7 @@ public class MS2Peptide
 
 
     // TODO: Move into constructor?  Or rename?  Or just do on demand (when requesting _massMatches, etc.)?
-    public void init(double tolerance, double xStart, double xEnd) throws IOException
+    public void init(double tolerance, double xStart, double xEnd)
     {
         MS2Run run = MS2Manager.getRun(_runId);
 

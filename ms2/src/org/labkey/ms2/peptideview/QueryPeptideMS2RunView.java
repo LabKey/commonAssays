@@ -37,7 +37,6 @@ import org.labkey.api.view.GridView;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewContext;
-import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
@@ -68,7 +67,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         super(viewContext, "Peptides", runs);
     }
 
-    protected QuerySettings createQuerySettings(MS2Schema schema) throws RedirectException
+    protected QuerySettings createQuerySettings(MS2Schema schema)
     {
         QuerySettings settings = schema.getSettings(_url.getPropertyValues(), MS2Manager.getDataRegionNamePeptides());
         settings.setAllowChooseView(true);
@@ -94,7 +93,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             ActionURL url = _url.clone();
             url.deleteParameter("columns");
             url.addParameter(MS2Manager.getDataRegionNamePeptides() + ".viewName", "columns");
-            throw new RedirectException(url.toString());
+            throw new RedirectException(url);
         }
 
         return settings;
@@ -113,7 +112,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return peptideView;
     }
 
-    public AbstractMS2QueryView createGridView(SimpleFilter baseFilter) throws RedirectException, SQLException
+    public AbstractMS2QueryView createGridView(SimpleFilter baseFilter)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);

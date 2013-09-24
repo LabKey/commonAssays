@@ -30,7 +30,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -69,15 +68,8 @@ public class ProteinCoverageMapBuilder
     public String[] getPeptidesForFilter(SimpleFilter filter)
     {
         QueryPeptideMS2RunView qpmv = new QueryPeptideMS2RunView(_context, _ms2Run);
-        try
-        {
-            NestableQueryView qv = qpmv.createGridView(filter);
-            return new TableSelector(qv.getTable(), Collections.singleton("Peptide"), filter, new Sort("Peptide")).getArray(String.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException(e.getMessage());
-        }
+        NestableQueryView qv = qpmv.createGridView(filter);
+        return new TableSelector(qv.getTable(), Collections.singleton("Peptide"), filter, new Sort("Peptide")).getArray(String.class);
     }
 
     public void setShowAllPeptides(boolean showAllPeptides)
