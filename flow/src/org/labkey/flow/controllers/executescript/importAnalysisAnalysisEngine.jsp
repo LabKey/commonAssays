@@ -53,7 +53,7 @@
 <p>Select analysis engine for workspace <em>'<%=h(workspaceName)%>'</em>.
 </p>
 <hr/>
-<input type="radio" name="selectAnalysisEngine" id="<%=AnalysisEngine.FlowJoWorkspace%>" value="<%=AnalysisEngine.FlowJoWorkspace%>" <%=text(AnalysisEngine.FlowJoWorkspace == form.getSelectAnalysisEngine() ? "checked" : "")%> />
+<input type="radio" name="selectAnalysisEngine" id="<%=AnalysisEngine.FlowJoWorkspace%>" value="<%=AnalysisEngine.FlowJoWorkspace%>"<%=checked(AnalysisEngine.FlowJoWorkspace == form.getSelectAnalysisEngine())%> />
 <label for="<%=AnalysisEngine.FlowJoWorkspace%>">FlowJo statistics with <%=h(FlowModule.getLongProductName())%> graphs.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     Statistics from the FlowJo workspace are imported and
@@ -61,7 +61,7 @@
 </div>
 
 <%--
-<input type="radio" name="selectAnalysisEngine" id="labkeyEngine" value="labkeyEngine" <%="labkeyEngine".equals(form.getSelectAnalysisEngine()) ? "checked" : ""%> />
+<input type="radio" name="selectAnalysisEngine" id="labkeyEngine" value="labkeyEngine"<%=checked("labkeyEngine".equals(form.getSelectAnalysisEngine()))%> />
 <label for="labkeyEngine"><%=FlowModule.getLongProductName()%> statistics and graphs.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     The analysis defined in the FlowJo workspace will be used
@@ -69,7 +69,7 @@
 </div>
 --%>
 
-<input type="radio" name="selectAnalysisEngine" id="<%=AnalysisEngine.R%>" value="<%=AnalysisEngine.R%>" <%=text(AnalysisEngine.R == form.getSelectAnalysisEngine() ? "checked" : "")%> />
+<input type="radio" name="selectAnalysisEngine" id="<%=AnalysisEngine.R%>" value="<%=AnalysisEngine.R%>"<%=checked(AnalysisEngine.R == form.getSelectAnalysisEngine())%> />
 <label for="<%=AnalysisEngine.R%>">R statistics and graphs.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     The analysis defined in the FlowJo workspace will be used

@@ -127,7 +127,7 @@
         <tr><td>Analysis Step:</td><td><select name="<%=FlowParam.actionSequence%>" onchange="this.form.submit()">
             <% for (FlowProtocolStep s : steps)
             { %>
-            <option value="<%=s.getDefaultActionSequence()%>"<%= s == step ? " selected" : ""%>><%=s.getLabel()%></option>
+            <option value="<%=s.getDefaultActionSequence()%>"<%=selected(s == step)%>><%=h(s.getLabel())%></option>
             <% } %>
         </select></td></tr>
         <% } %>
@@ -142,7 +142,7 @@
 </form>
 
 <%
-    Collection<SubsetSpec> subsets = Collections.EMPTY_LIST;
+    Collection<SubsetSpec> subsets = Collections.emptyList();
     if (script != null)
     {
         subsets = ScriptAnalyzer.getSubsets(script.getAnalysisScript(), step == FlowProtocolStep.analysis, step == FlowProtocolStep.calculateCompensation, false);
@@ -161,7 +161,7 @@
                 <option value="">Ungated</option>
                 <% for (SubsetSpec subset : subsets)
                 { %>
-                <option value="<%=h(subset)%>" <%=subset.toString().equals(form.getSubset()) ? " selected" : ""%>><%=h(subset)%></option>
+                <option value="<%=h(subset)%>"<%=selected(subset.toString().equals(form.getSubset()))%>><%=h(subset)%></option>
                 <% } %>
             </select>
             </td>
@@ -169,7 +169,7 @@
                 <select name="xaxis">
                     <% for (Map.Entry<String, String> param : parameters.entrySet())
                     {%>
-                    <option value="<%=h(param.getKey())%>" <%=param.getKey().equals(form.getXaxis()) ? " selected" : ""%>><%=h(param.getValue())%></option>
+                    <option value="<%=h(param.getKey())%>"<%=selected(param.getKey().equals(form.getXaxis()))%>><%=h(param.getValue())%></option>
                     <% } %>
                 </select>
 
@@ -179,7 +179,7 @@
                     <option value="">[[histogram]]</option>
                     <% for (Map.Entry<String, String> param : parameters.entrySet())
                     {%>
-                    <option value="<%=h(param.getKey())%>" <%=param.getKey().equals(form.getYaxis()) ? " selected" : ""%>><%=h(param.getValue())%></option>
+                    <option value="<%=h(param.getKey())%>"<%=selected(param.getKey().equals(form.getYaxis()))%>><%=h(param.getValue())%></option>
                     <% } %>
                 </select>
             </td>

@@ -168,19 +168,19 @@
                                id="initialDilutionTextCheck"
                                name="runSettings.sameInitialValue"
                                onClick="changeVisibility('initialDilutionText', !this.checked);"
-                               <%= form.getRunSettings().isSameInitialValue() ? "CHECKED" : ""%>>
+                               <%=checked(form.getRunSettings().isSameInitialValue())%>>
                         Use same initial concentration/dilution for all samples<br>
                         <input type="checkbox"
                                id="methodNameCheck"
                                name="runSettings.sameMethod"
                                onClick="changeVisibility('methodName', !this.checked);"
-                               <%= form.getRunSettings().isSameMethod() ? "CHECKED" : ""%>>
+                               <%=checked(form.getRunSettings().isSameMethod())%>>
                                Use same method (concentration or dilution) for all samples<br>
                         <input type="checkbox"
                                id="factorCheck"
                                name="runSettings.sameFactor"
                                onClick="changeVisibility('factor', !this.checked);"
-                               <%= form.getRunSettings().isSameFactor() ? "CHECKED" : ""%>>
+                               <%=checked(form.getRunSettings().isSameFactor())%>>
                                Use same concentration/dilution factor for all samples<br>
                     </td>
                     <td>Desired cutoff percentages:<br>
@@ -244,7 +244,7 @@
                     </td>
                     <td colspan="2" align="center"><input type="checkbox" name="runSettings.inferFromFile"
                                onClick="toggleFileProperties(this.checked)"
-                               <%= form.getRunSettings().isInferFromFile() ? "CHECKED" : "" %>>
+                               <%=checked(form.getRunSettings().isInferFromFile())%>>
                         Infer properties from file name</td>
                 </tr>
                 <tr>

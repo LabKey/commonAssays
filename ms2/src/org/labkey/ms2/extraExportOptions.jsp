@@ -19,7 +19,7 @@
 %>
 <p>
     Choose an export format:<br/>
-    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.Excel) %>" checked="checked">Excel (limited to 65,535 rows)<br/>
+    <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.Excel) %>" checked>Excel (limited to 65,535 rows)<br/>
     <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.TSV) %>">TSV<br/>
     <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.DTA) %>">Spectra as DTA<br/>
     <input type="radio" name="exportFormat" value="<%= PageFlowUtil.filter(MS2ExportType.PKL) %>">Spectra as PKL<br/>

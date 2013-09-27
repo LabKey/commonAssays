@@ -63,7 +63,7 @@
 
                                 for(MS2RunViewType viewType : bean.viewTypes)
                                 { %>
-                                    <option value="<%=h(viewType.getURLName())%>" <%=viewType.equals(bean.currentViewType) ? "selected" : ""%>><%=viewType.getName()%></option><%
+                                    <option value="<%=h(viewType.getURLName())%>"<%=selected(viewType.equals(bean.currentViewType))%>><%=h(viewType.getName())%></option><%
                                 } %>
                                 </select><%=PageFlowUtil.helpPopup("Grouping", "<table><tr><td style=\"vertical-align: top;\" nowrap><b>Standard</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use Views->Customize View to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use Views->Customize View to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Peptides (Legacy)</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein (Legacy)</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>ProteinProphet (Legacy)</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr></table>", true, 500)%>
                             </td>
@@ -98,9 +98,9 @@
                         <table>
                             <tr>
                                 <td nowrap style="vertical-align: middle;">
-                                    <input type="radio" name="tryptic"<%=(0 == bean.tryptic ? " checked" : "")%> value="0">0<%=PageFlowUtil.helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")%>
-                                    <input type="radio" name="tryptic"<%=(1 == bean.tryptic ? " checked" : "")%> value="1">1<%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
-                                    <input type="radio" name="tryptic"<%=(2 == bean.tryptic ? " checked" : "")%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
+                                    <input type="radio" name="tryptic"<%=checked(0 == bean.tryptic)%> value="0">0<%=PageFlowUtil.helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")%>
+                                    <input type="radio" name="tryptic"<%=checked(1 == bean.tryptic)%> value="1">1<%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
+                                    <input type="radio" name="tryptic"<%=checked(2 == bean.tryptic)%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
                                 </td>
                                 <td nowrap style="vertical-align: middle;"><%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"AddTrypticEndsFilterButton\"")%></td>
                             </tr>

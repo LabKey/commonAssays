@@ -156,7 +156,7 @@
                 if (sampleInfo != null)
                 {
                     boolean selected = sampleInfo.getSampleId().equals(rEngineNormalizationReference);
-        %><option value=<%=PageFlowUtil.filter(sampleInfo.getSampleId())%> <%=text(selected ? "selected" : "")%>><%=PageFlowUtil.filter(sampleInfo.getLabel())%></option><%
+        %><option value=<%=PageFlowUtil.filter(sampleInfo.getSampleId())%><%=selected(selected)%>><%=PageFlowUtil.filter(sampleInfo.getLabel())%></option><%
                 }
             }
         %>

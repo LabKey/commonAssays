@@ -21,11 +21,11 @@
         <td colspan="2">Please select the columns to include in the comparison:</td>
     </tr>
     <tr>
-        <td><input type="checkbox" name="peptideCount" value="1" checked="checked" disabled>Count</td>
+        <td><input type="checkbox" name="peptideCount" value="1" checked disabled>Count</td>
     </tr>
     <tr>
-        <td><input type="checkbox" name="maxPeptideProphet" value="1" checked="checked">Maximum Peptide Prophet Probability</td>
-        <td><input type="checkbox" name="avgPeptideProphet" value="1" checked="checked">Average Peptide Prophet Probability</td>
+        <td><input type="checkbox" name="maxPeptideProphet" value="1" checked>Maximum Peptide Prophet Probability</td>
+        <td><input type="checkbox" name="avgPeptideProphet" value="1" checked>Average Peptide Prophet Probability</td>
     </tr>
     <tr>
         <td><input type="checkbox" name="minPeptideProphetErrorRate" value="1">Minimum Peptide Prophet Error Rate</td>

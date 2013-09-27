@@ -65,10 +65,10 @@
                                          value="<%=h(model.getMzOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzUnits.name()%>">
                                 <option value="<%=MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm.name()%>"
-                                        <%=model.getMzUnits() == MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm ? "selected=\"1\"" : ""%>
+                                        <%=selected(model.getMzUnits() == MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm)%>
                                         >ppm</option>
                                 <option value="<%=MS1Controller.SimilarSearchForm.MzOffsetUnits.mz.name()%>"
-                                        <%=model.getMzUnits() == MS1Controller.SimilarSearchForm.MzOffsetUnits.mz ? "selected=\"1\"" : ""%>
+                                        <%=selected(model.getMzUnits() == MS1Controller.SimilarSearchForm.MzOffsetUnits.mz)%>
                                         >m/z</option>
                             </select>
                         </td>
@@ -91,10 +91,10 @@
                                          value="<%=h(model.getTimeOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name()%>" onchange="onTimeUnitsChange(this.value);">
                                 <option value="<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt.name()%>"
-                                        <%=model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt ? "selected=\"1\"" : ""%>
+                                        <%=selected(model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt)%>
                                         >Seconds</option>
                                 <option value="<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans.name()%>"
-                                        <%=model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans ? "selected=\"1\"" : ""%>
+                                        <%=selected(model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans)%>
                                         >Scans</option>
                             </select>
                         </td>

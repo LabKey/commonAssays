@@ -52,12 +52,12 @@
     </tr>
     <tr id="fastaGuess" style="display: <%= "fasta".equals(bean.getFileType()) ? "table-row" : "none" %>;">
        <td></td>
-       <td><input type='checkbox' name='shouldGuess' <%= "1".equals(bean.getShouldGuess()) ? "checked" : ""%> value='1'> Try to guess organism</td>
+       <td><input type='checkbox' name='shouldGuess' <%=checked("1".equals(bean.getShouldGuess()))%> value='1'> Try to guess organism</td>
     </tr>
     <tr id="uniprotOnly" style="display: <%= "uniprot".equals(bean.getFileType()) ? "table-row" : "none" %>;">
         <td></td>
         <td>
-           <input type='checkbox' name='clearExisting' <%= bean.isClearExisting() ? "checked" : ""%>>Clear existing identifiers and annotations<%= helpPopup("Clear Existing", "By default, LabKey Server will merge protein identifiers and annotations with the ones it has already loaded. By checking this box, you can make the server clear out any existing identifiers and annotations it might have, so that the ones in the new file replace them.")%>
+           <input type='checkbox' name='clearExisting'<%=checked(bean.isClearExisting())%>>Clear existing identifiers and annotations<%= helpPopup("Clear Existing", "By default, LabKey Server will merge protein identifiers and annotations with the ones it has already loaded. By checking this box, you can make the server clear out any existing identifiers and annotations it might have, so that the ones in the new file replace them.")%>
         </td>
     </tr>
     <tr>

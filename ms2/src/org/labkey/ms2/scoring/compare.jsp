@@ -71,7 +71,7 @@
                 if (discriminate.startsWith("-"))
                     discriminate = discriminate.substring(1);
 
-                %><input type="checkbox" <%=form.getDiscriminates()[i][discIndex] ? "checked=\"true\"" : ""%> name="discriminates_<%=i%>_<%=discIndex%>"> <%=h(discriminate)%><br><%
+                %><input type="checkbox"<%=checked(form.getDiscriminates()[i][discIndex])%> name="discriminates_<%=i%>_<%=discIndex%>"> <%=h(discriminate)%><br><%
                 discIndex++;
             }
             %></td><%
@@ -99,9 +99,9 @@
                 <tr><td class="labkey-form-label">Marks</td>
                     <td><input type="text" size="15" name="marks" value="<%=form.getMarks()%>"></td></tr>
                 <tr><td class="labkey-form-label">Mark FDR</td>
-                    <td><input type="checkbox" name="markFdr" <%=form.isMarkFdr() ? "checked=\"true\"" : ""%>"></td></tr>
+                    <td><input type="checkbox" name="markFdr"<%=checked(form.isMarkFdr())%>"></td></tr>
                 <tr><td class="labkey-form-label">Save TSVs</td>
-                    <td><input type="checkbox" name="saveTsvs" <%=form.isSaveTsvs() ? "checked=\"true\"" : ""%>"></td></tr>
+                    <td><input type="checkbox" name="saveTsvs"<%=checked(form.isSaveTsvs())%>"></td></tr>
             </table>
         </td></tr>
         <tr>

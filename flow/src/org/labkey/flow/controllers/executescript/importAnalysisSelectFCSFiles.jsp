@@ -99,7 +99,7 @@
 
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.None%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
-       <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.None ? "checked" : "")%>
+       <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.None)%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with workspace.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
@@ -114,7 +114,7 @@
 %>
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>"
-       <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Included ? "checked" : "")%>
+       <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Included)%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>">Import FCS files included in the analysis archive.</label>
 <%
@@ -154,7 +154,7 @@
 
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"
-        <%=text(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse ? "checked" : "")%>
+        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse)%>
        onclick="clearSelections(this.value); renderFileBrowser();" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>">Browse the pipeline for a directory of FCS files.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">

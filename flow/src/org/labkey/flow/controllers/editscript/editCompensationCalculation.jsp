@@ -123,7 +123,7 @@ var keywordValueSubsetListMap = KV;
         for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
         {
             %>
-            <option value="<%=h(autoComp.getName())%>"<%=h(autoComp.getName().equals(form.selectAutoCompScript) ? " selected" : "")%>><%=h(autoComp.getName())%></option><%
+            <option value="<%=h(autoComp.getName())%>"<%=selected(autoComp.getName().equals(form.selectAutoCompScript))%>><%=h(autoComp.getName())%></option><%
         }
     %>
     </select>
@@ -236,7 +236,7 @@ if (analysisNames.length > 0)
         <option value="" title="Use gating from the sample identified by the Keyword/Value pair">Sample</option>
         <% for (String group : analysisNames)
         { %>
-        <option value="<%=h(group)%>"<%=group.equals(form.selectGroupName) ? " selected" : ""%>>Group <%=h(group)%></option>
+        <option value="<%=h(group)%>"<%=selected(group.equals(form.selectGroupName))%>>Group <%=h(group)%></option>
         <% } %>
     </select>
     </p>

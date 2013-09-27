@@ -22,8 +22,8 @@
         <td colspan="2">Please select the columns to include in the comparison:</td>
     </tr>
     <tr>
-        <td><input type="checkbox" name="proteinGroup" value="1" checked="checked" disabled>Protein Group</td>
-        <td><input type="checkbox" name="groupProbability" value="1" checked="checked">Group Probability</td>
+        <td><input type="checkbox" name="proteinGroup" value="1" checked disabled>Protein Group</td>
+        <td><input type="checkbox" name="groupProbability" value="1" checked>Group Probability</td>
     </tr>
     <tr>
         <td><input type="checkbox" name="light2HeavyRatioMean" value="1">Light to Heavy Quantitation</td>

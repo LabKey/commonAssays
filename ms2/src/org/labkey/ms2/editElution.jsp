@@ -104,7 +104,7 @@
             <tr>
                 <td>Click to set:</td>
                 <td>
-                    <input type="radio" name="lightBoundary" value="first" checked="true"/>First scan
+                    <input type="radio" name="lightBoundary" value="first" checked/>First scan
                 </td>
             </tr>
             <tr>
@@ -167,7 +167,7 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
             <tr>
                 <td>Click to set:</td>
                 <td>
-                    <input type="radio" name="heavyBoundary" value="first" checked="true"/>First scan
+                    <input type="radio" name="heavyBoundary" value="first" checked/>First scan
                 </td>
             </tr>
             <tr>

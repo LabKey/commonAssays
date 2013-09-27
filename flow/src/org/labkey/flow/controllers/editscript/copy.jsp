@@ -30,10 +30,10 @@
     <p>
         Which sections of the '<%=form.getFlowScript().getName()%>' script do you want to copy?<br>
 <% if (form.getFlowScript().hasStep(FlowProtocolStep.calculateCompensation)) { %>
-        <input type="checkbox" name="copyCompensationCalculation" value="true"<%=form.copyCompensationCalculation ? " checked" : ""%>>Compensation Calculation<br>
+        <input type="checkbox" name="copyCompensationCalculation" value="true"<%=checked(form.copyCompensationCalculation)%>>Compensation Calculation<br>
 <% } %>
 <% if (form.getFlowScript().hasStep(FlowProtocolStep.analysis)) { %>
-        <input type="checkbox" name="copyAnalysis" value="true"<%=form.copyAnalysis ? " checked" : ""%>>Analysis<br>
+        <input type="checkbox" name="copyAnalysis" value="true"<%=checked(form.copyAnalysis)%>>Analysis<br>
 <% } %>
     </p>
     <input type="submit" value="Make Copy">

@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.ProteinDictionaryHelpers.GoTypes" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -41,9 +40,9 @@
                     <td valign="middle">Chart type:</td>
                     <td valign="middle">
                         <select name="chartType" id="chartType">
-                            <option value="<%=GoTypes.CELL_LOCATION%>"<%=GoTypes.CELL_LOCATION == bean.goChartType ? " selected" : ""%>><%=GoTypes.CELL_LOCATION%></option>
-                            <option value="<%=GoTypes.FUNCTION%>"<%=GoTypes.FUNCTION == bean.goChartType ? " selected" : ""%>><%=GoTypes.FUNCTION%></option>
-                            <option value="<%=GoTypes.PROCESS%>"<%=GoTypes.PROCESS == bean.goChartType ? " selected" : ""%>><%=GoTypes.PROCESS%></option>
+                            <option value="<%=GoTypes.CELL_LOCATION%>"<%=selected(GoTypes.CELL_LOCATION == bean.goChartType)%>><%=h(GoTypes.CELL_LOCATION.toString())%></option>
+                            <option value="<%=GoTypes.FUNCTION%>"<%=selected(GoTypes.FUNCTION == bean.goChartType)%>><%=h(GoTypes.FUNCTION.toString())%></option>
+                            <option value="<%=GoTypes.PROCESS%>"<%=selected(GoTypes.PROCESS == bean.goChartType)%>><%=h(GoTypes.PROCESS.toString())%></option>
                         </select>
                     </td>
                     <td valign="middle"><%=generateSubmitButton("Submit")%></td>

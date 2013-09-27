@@ -51,11 +51,11 @@
         </tr>
         <tr>
             <td class="labkey-form-label">Search in subfolders<%= helpPopup("Search in subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
-            <td nowrap><input type="checkbox" name="includeSubfolders" <% if (bean.getForm().isIncludeSubfolders()) { %>checked="true" <% } %> /></td>
+            <td nowrap><input type="checkbox" name="includeSubfolders"<%=checked(bean.getForm().isIncludeSubfolders())%>/></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Exact matches only<%= helpPopup("Exact matches only", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
-            <td nowrap><input type="checkbox" name="exactMatch" <% if (bean.getForm().isExactMatch()) { %>checked="true" <% } %> /></td>
+            <td nowrap><input type="checkbox" name="exactMatch"<%=checked(bean.getForm().isExactMatch())%>/></td>
         </tr>
         <tr>
             <td></td>

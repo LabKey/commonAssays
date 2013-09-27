@@ -42,7 +42,7 @@
     {
         ReportDescriptor d = r.getDescriptor();
         boolean selected = id != null && id.equals(d.getReportId());
-        %><option <%=selected?"selected":""%> value="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></option><%
+        %><option<%=selected(selected)%> value="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></option><%
     }
     %></select>
 

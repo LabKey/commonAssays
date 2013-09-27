@@ -39,9 +39,9 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
         All proteins in all ProteinProphet protein groups will be shown in the comparison, subject to the filter criteria.</p>
     <p style="width:100%" class="labkey-title-area-line"></p>
     <p>Protein groups to use in the comparison:</p>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType %>" value="<%= MS2Controller.ProphetFilterType.none %>" <%= form.isNoProteinGroupFilter() ? "checked=\"true\"" : "" %> /> All protein groups</div>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType %>" id="proteinProphetRadioButton" value="<%= MS2Controller.ProphetFilterType.probability %>" <%= form.isProteinProphetFilter() ? "checked=\"true\"" : "" %>/> Protein groups with ProteinProphet probability &ge; <input onfocus="document.getElementById('proteinProphetRadioButton').checked=true;" type="text" size="2" name="<%= MS2Controller.PeptideFilteringFormElements.proteinProphetProbability %>" value="<%= form.getProteinProphetProbability() == null ? "" : form.getProteinProphetProbability() %>" /></div>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType %>" id="<%= FilterView.PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON %>" value="<%= MS2Controller.ProphetFilterType.customView %>" <%= form.isCustomViewProteinGroupFilter() ? "checked=\"true\"" : "" %>/>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType %>" value="<%= MS2Controller.ProphetFilterType.none %>"<%=checked(form.isNoProteinGroupFilter())%>/> All protein groups</div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType %>" id="proteinProphetRadioButton" value="<%= MS2Controller.ProphetFilterType.probability %>"<%=checked(form.isProteinProphetFilter())%>/> Protein groups with ProteinProphet probability &ge; <input onfocus="document.getElementById('proteinProphetRadioButton').checked=true;" type="text" size="2" name="<%= MS2Controller.PeptideFilteringFormElements.proteinProphetProbability %>" value="<%= form.getProteinProphetProbability() == null ? "" : form.getProteinProphetProbability() %>" /></div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType %>" id="<%= FilterView.PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON %>" value="<%= MS2Controller.ProphetFilterType.customView %>"<%=checked(form.isCustomViewProteinGroupFilter())%>/>
         Protein groups that meet the filter criteria in a custom view:
         <% String proteinGroupViewSelectId = bean.getProteinGroupView().renderViewList(request, out, proteinGroupViewName); %>
         <%= PageFlowUtil.textLink("Create or Edit View", (org.labkey.api.view.ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.ProteinGroupsFilter + "', 'proteinGroupsCustomizeView', " + PageFlowUtil.jsString(proteinGroupViewSelectId) + "); return false;", "editProteinGroupsViewLink") %>
@@ -52,9 +52,9 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     </div>
     <p style="width:100%" class="labkey-title-area-line"></p>
     <p>Peptide requirements for the protein groups:</p>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="<%= MS2Controller.ProphetFilterType.none %>" <%= form.isNoPeptideFilter() ? "checked=\"true\"" : "" %> /> All peptides</div>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="<%= MS2Controller.ProphetFilterType.probability %>" <%= form.isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/> Peptides with PeptideProphet probability &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="2" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></div>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="<%= FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON %>" value="<%= MS2Controller.ProphetFilterType.customView %>" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="<%= MS2Controller.ProphetFilterType.none %>"<%=checked(form.isNoPeptideFilter())%>/> All peptides</div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="<%= MS2Controller.ProphetFilterType.probability %>"<%=checked(form.isPeptideProphetFilter())%>/> Peptides with PeptideProphet probability &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="2" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="<%= FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON %>" value="<%= MS2Controller.ProphetFilterType.customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
         Peptides that meet the filter criteria in a custom view:
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
         <%= PageFlowUtil.textLink("Create or Edit View", (org.labkey.api.view.ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
@@ -67,16 +67,16 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     <p style="width:100%" class="labkey-title-area-line"></p>
 
     <p>Compare protein groups by:</p>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.pivotType %>" value="<%= MS2Controller.PivotType.run %>" <%= MS2Controller.PivotType.run == form.getPivotTypeEnum() ? "checked=\"true\"" : "" %> /> Run</div>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.pivotType %>" value="<%= MS2Controller.PivotType.fraction %>" <%= MS2Controller.PivotType.fraction == form.getPivotTypeEnum() ? "checked=\"true\"" : "" %> /> Fraction</div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.pivotType %>" value="<%= MS2Controller.PivotType.run %>"<%=checked(MS2Controller.PivotType.run == form.getPivotTypeEnum())%> /> Run</div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.pivotType %>" value="<%= MS2Controller.PivotType.fraction %>"<%=checked(MS2Controller.PivotType.fraction == form.getPivotTypeEnum())%> /> Fraction</div>
 
     <p style="width:100%" class="labkey-title-area-line"></p>
 
     <p>For each run or fraction:</p>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="false" <%= !form.isOrCriteriaForEachRun() ? " checked=\"true\"" : "" %> /> only show the protein if it meets the filter criteria in that run/fraction.</div>
-    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="true" <%= form.isOrCriteriaForEachRun() ? " checked=\"true\"" : "" %> /> show the protein if the run/fraction contains that protein and the protein meets the filter criteria in any of the compared runs/fractions.</div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="false"<%=checked(!form.isOrCriteriaForEachRun())%> /> only show the protein if it meets the filter criteria in that run/fraction.</div>
+    <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="true" <%=checked(form.isOrCriteriaForEachRun())%> /> show the protein if the run/fraction contains that protein and the protein meets the filter criteria in any of the compared runs/fractions.</div>
 
     <p style="width:100%" class="labkey-title-area-line"></p>
-    <div class="labkey-indented"><input type="checkbox" name="normalizeProteinGroups" <%= form.isNormalizeProteinGroups() ? " checked=\"true\"" : "" %> value="true" /> Normalize protein groups across runs</div>
+    <div class="labkey-indented"><input type="checkbox" name="normalizeProteinGroups"<%=checked(form.isNormalizeProteinGroups())%> value="true" /> Normalize protein groups across runs</div>
     <p><labkey:button text="Compare"/></p>
 </form>

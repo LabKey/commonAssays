@@ -48,7 +48,7 @@
     %>
     <p>
         <input type="checkbox" name="copyProtocol"
-               value="true"<%= form.isCopyProtocol() ? " checked" : ""%>> <%=h(description)%>
+               value="true"<%=checked(form.isCopyProtocol())%>> <%=h(description)%>
     </p>
 
     <% }
@@ -61,7 +61,7 @@
             if (scripts.length != 0) for (FlowScript script : scripts)
             { %>
         <input type="checkbox" name="copyAnalysisScript"
-               value="<%=h(script.getName())%>"<%=form.getCopyAnalysisScript().contains(script.getName()) ? " checked" : ""%>> <%=h(script.getName())%>
+               value="<%=h(script.getName())%>"<%=checked(form.getCopyAnalysisScript().contains(script.getName()))%>> <%=h(script.getName())%>
         <br>
         <%
             }

@@ -16,14 +16,14 @@
  */
 %>
 <%@ page import="org.labkey.api.util.Formats" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="java.text.Format" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.ms2.protein.ProteinManager" %>
+<%@ page import="java.text.Format" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
         MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -54,7 +54,7 @@
                     <% } %>
                     <select name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" onchange="this.form.submit();">
                         <option value="false">Show only peptides assigned by search engine</option>
-                        <option value="true" <%= text(org.labkey.ms2.protein.ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()) ? "selected" : "") %>>Show all peptides with sequence matches</option>
+                        <option value="true"<%=checked(ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()))%>>Show all peptides with sequence matches</option>
                     </select>
                 </form>
             </td>

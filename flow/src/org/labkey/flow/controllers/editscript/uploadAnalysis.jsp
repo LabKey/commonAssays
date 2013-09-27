@@ -29,11 +29,7 @@
         ret.append("<input type=\"checkbox\" name=\"ff_statisticSet\" value=\"");
         ret.append(option);
         ret.append("\"");
-
-        if (form.ff_statisticSet.contains(option))
-        {
-            ret.append(" checked");
-        }
+        ret.append(checked(form.ff_statisticSet.contains(option)));
         ret.append(">");
         return ret.toString();
     }

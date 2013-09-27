@@ -50,24 +50,24 @@
         </tr>
         <tr>
             <td class="labkey-form-label">Search in subfolders<%= helpPopup("Search in subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
-            <td nowrap><input type="checkbox" name="includeSubfolders" <% if (bean.getForm().isIncludeSubfolders()) { %>checked="true" <% } %> /></td>
+            <td nowrap><input type="checkbox" name="includeSubfolders"<%=checked(bean.getForm().isIncludeSubfolders())%>/></td>
 
             <td nowrap class="labkey-form-label">Maximum error rate<%= helpPopup("Maximum error rate", "If entered, only ProteinProphet protein groups that have an associated error rate less than or equal to the value will be included.") %></td>
             <td nowrap><input type="text" size="1" name="maximumErrorRate"  <% if (bean.getForm().getMaximumErrorRate() != null ) { %>value="<%= bean.getForm().getMaximumErrorRate() %>"<% } %>/></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Exact matches only<%= helpPopup("Exact matches only", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
-            <td nowrap><input type="checkbox" name="exactMatch" <% if (bean.getForm().isExactMatch()) { %>checked="true" <% } %> /></td>
+            <td nowrap><input type="checkbox" name="exactMatch"<%=checked(bean.getForm().isExactMatch())%>/></td>
 
             <td class="labkey-form-label">Restrict proteins<%= helpPopup("Restrict proteins", "If checked, the search will only look for proteins that are in FASTA files that have been searched by the included runs. If not checked, the list of Matching Proteins will include all proteins that match the criteria.") %></td>
-            <td nowrap><input type="checkbox" name="restrictProteins" <% if (bean.getForm().isRestrictProteins()) { %>checked="true" <% } %> /></td>
+            <td nowrap><input type="checkbox" name="restrictProteins"<%=checked(bean.getForm().isRestrictProteins())%> /></td>
         </tr>
         <tr>
             <td valign="center" height="100%" class="labkey-form-label">Peptide criteria<%= helpPopup("Peptide criteria", "If specified, at least one peptide assigned to the protein group must meet the criteria.") %></td>
             <td colspan="100">
-                <div><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="none" <%= bean.getForm().isNoPeptideFilter() ? "checked=\"true\"" : "" %> />None</div>
-                <div style="padding-top: 5px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet" <%= bean.getForm().isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/>Minimum PeptideProphet prob <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="1" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability() %>" /></div>
-                <div style="padding-top: 5px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= bean.getForm().isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>Custom filter:
+                <div><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="none"<%=checked(bean.getForm().isNoPeptideFilter())%> />None</div>
+                <div style="padding-top: 5px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet"<%=checked(bean.getForm().isPeptideProphetFilter())%>/>Minimum PeptideProphet prob <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="1" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability() %>" /></div>
+                <div style="padding-top: 5px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView"<%=checked(bean.getForm().isCustomViewPeptideFilter())%>/>Custom filter:
                     <% String peptideViewSelectId = bean.getPeptideView(ctx).renderViewList(request, out, viewName); %>
                     <%= PageFlowUtil.textLink("Create or Edit View", (ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
                 </div>
