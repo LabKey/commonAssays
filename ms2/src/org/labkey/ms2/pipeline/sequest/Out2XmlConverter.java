@@ -27,7 +27,7 @@ import org.apache.commons.beanutils.ConvertUtils;
  */
 public class Out2XmlConverter implements IInputXMLConverter
 {
-    public String convert(Param out2XmlParam)
+    public String convert(Param out2XmlParam, String commentPrefix)
     {
         String value = out2XmlParam.getValue();
         if (value.equals("")) return "";

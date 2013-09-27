@@ -143,17 +143,11 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             File fileMzXML = _factory.findInputFile(getJobSupport());
             File fileInputSpectra;
-            WorkDirectory.CopyingResource lock = null;
-            try
+            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
-                lock = _wd.ensureCopyingLock();
                 fileInputSpectra = _wd.inputFile(fileMzXML, false);
                 if (searchComplete)
                     fileWorkOutputXML = _wd.inputFile(fileOutputXML, false);
-            }
-            finally
-            {
-                if (lock != null) { lock.release(); }
             }
 
             if (!searchComplete)
@@ -198,17 +192,11 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             // Move final outputs to analysis directory.
             File filePepXMLRaw;
-            lock = null;
-            try
+            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
-                lock = _wd.ensureCopyingLock();
                 if (!searchComplete)
                     fileOutputXML = _wd.outputFile(fileWorkOutputXML);
                 filePepXMLRaw = _wd.outputFile(fileWorkPepXMLRaw);
-            }
-            finally
-            {
-                if (lock != null) { lock.release(); }
             }
 
             List<RecordedAction> actions = new ArrayList<>();

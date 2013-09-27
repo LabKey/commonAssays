@@ -53,23 +53,28 @@ public abstract class SequestParamsBuilder
 {
     public static final String DUMMY_FASTA_NAME = "~~~~~~~DUMMY_FASTA_NAME_FOR_TESTING~~~~~~~~~~`````.fasta";
 
-    Map<String, String> sequestInputParams;
+    protected Map<String, String> sequestInputParams;
     File sequenceRoot;
     char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O','[',']'};
     protected HashMap<String, String> supportedEnzymes = new HashMap<>();
-    protected final SequestParams _params;
-    protected final SequestParams.Variant _variant;
+    protected final AbstractSequestParams _params;
+    protected final AbstractSequestParams.Variant _variant;
     private List<File> _databaseFiles;
 
     public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
-        this(sequestInputParams, sequenceRoot, SequestParams.Variant.thermosequest, null);
+        this(sequestInputParams, sequenceRoot, SequestParams.Variant.thermosequest);
+    }
+
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant)
+    {
+        this(sequestInputParams, sequenceRoot, variant, null);
     }
 
     public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant, List<File> databaseFiles)
     {
         _variant = variant;
-        _params = new SequestParams(variant);
+        _params = createSequestParams(variant);
 
         this.sequestInputParams = sequestInputParams;
         this.sequenceRoot = sequenceRoot;
@@ -100,6 +105,11 @@ public abstract class SequestParamsBuilder
         supportedEnzymes.put("[DEKR]|{P}", "trypsin_gluc 1 1 DEKR P");
 
         initSubclass();
+    }
+
+    protected AbstractSequestParams createSequestParams(AbstractSequestParams.Variant variant)
+    {
+        return new SequestParams(variant);
     }
 
     protected abstract void initSubclass();
@@ -134,7 +144,7 @@ public abstract class SequestParamsBuilder
         return _validResidues;
     }
 
-    List<String> initDatabases()
+    protected List<String> initDatabases()
     {
         List<File> databaseFiles = _databaseFiles;
         if (databaseFiles == null)
@@ -154,7 +164,7 @@ public abstract class SequestParamsBuilder
 
         if (databaseFiles.size() != 1 && databaseFiles.size() != 2)
         {
-            return Collections.singletonList("Sequest search support one or two FASTA files, not " + databaseFiles.size());
+            return Collections.singletonList("One or two FASTA files is supported, not " + databaseFiles.size());
         }
 
         Param database1 = _params.getFASTAParam();
@@ -183,7 +193,7 @@ public abstract class SequestParamsBuilder
     }
 
 
-    List<String> initPeptideMassTolerance()
+    protected List<String> initPeptideMassTolerance()
     {
         String plusValueString =
             sequestInputParams.get("spectrum, parent monoisotopic mass error plus");
@@ -237,7 +247,7 @@ public abstract class SequestParamsBuilder
     paramters should range from 0.0 (don't use the ion series) to 1.0. The value entered represents the weighting that
     each ion series has (relative to the others). So an ion series with 0.5 contains half the weighting or relevance of
     an ion series with a 1.0 parameter. */
-    List<String> initIonScoring()
+    protected List<String> initIonScoring()
     {
         Param ions = _params.getParam("ion_series");
 
@@ -511,7 +521,7 @@ public abstract class SequestParamsBuilder
     }
     
 
-    List<String> initDynamicMods()
+    public List<String> initDynamicMods()
     {
         ArrayList<Character> defaultMods = new ArrayList<>();
         ArrayList<ResidueMod> workList = new ArrayList<>();
@@ -571,7 +581,7 @@ public abstract class SequestParamsBuilder
     }
 
 
-    List<String> initStaticMods()
+    protected List<String> initStaticMods()
     {
         String mods = sequestInputParams.get(ParameterNames.STATIC_MOD);
 
@@ -600,7 +610,7 @@ public abstract class SequestParamsBuilder
         return parserError;
     }
 
-    private List<String> parseMods(String mods, ArrayList<Character> residues, ArrayList<String> masses)
+    protected List<String> parseMods(String mods, ArrayList<Character> residues, ArrayList<String> masses)
     {
         if (mods == null || mods.equals("")) return Collections.emptyList();
 
@@ -613,7 +623,7 @@ public abstract class SequestParamsBuilder
             {
                 return Collections.singletonList("modification mass contained an invalid value(" + mods + ").");
             }
-            Character residue = token.charAt(token.length() - 1);
+            Character residue = Character.toUpperCase(token.charAt(token.length() - 1));
             if (!isValidResidue(residue))
             {
                 return Collections.singletonList("modification mass contained an invalid residue(" + residue + ").");
@@ -771,7 +781,7 @@ public abstract class SequestParamsBuilder
         StringBuilder sb = new StringBuilder();
         for (Param prop : _params.getParams())
         {
-            sb.append(prop.convert());
+            sb.append(prop.convert(_variant.getCommentPrefix()));
             sb.append("\n");
             if (prop.getName().equals("sequence_header_filter") ||
                 prop.getName().equals("add_W_Tryptophan"))
@@ -935,7 +945,7 @@ public abstract class SequestParamsBuilder
     }
 
     //Used with JUnit
-    protected SequestParams getProperties()
+    public AbstractSequestParams getProperties()
     {
         return _params;
     }
@@ -954,13 +964,13 @@ public abstract class SequestParamsBuilder
         return clean.toString();
     }
 
-    private class ResidueMod
+    protected static class ResidueMod
     {
 
         private Character res;
         private String weight;
 
-        private ResidueMod(Character res, String weight)
+        public ResidueMod(Character res, String weight)
         {
             this.res = res;
             this.weight = weight;
@@ -995,10 +1005,10 @@ public abstract class SequestParamsBuilder
 
     public abstract static class AbstractSequestTestCase extends Assert
     {
-        SequestParamsBuilder spb;
-        ParamParser ip;
-        String dbPath;
-        File root;
+        protected SequestParamsBuilder spb;
+        protected ParamParser ip;
+        protected String dbPath;
+        protected File root;
 
         @Before
         public void setUp() throws Exception
@@ -1051,7 +1061,7 @@ public abstract class SequestParamsBuilder
                 {
                     writer.close();
                 }
-                catch (IOException eio) {}
+                catch (IOException ignored) {}
             }
         }
     }

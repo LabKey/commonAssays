@@ -128,6 +128,7 @@ public class PepXmlLoader extends MS2Loader
 
         private String _massSpecType = null;
         private String _searchEngine = null;
+        private String _searchEngineVersion = null;
         private String _searchEnzyme = null;
 
         //dhmay adding 2008/01/30
@@ -207,6 +208,7 @@ public class PepXmlLoader extends MS2Loader
                     else if (element.equals("search_summary"))
                     {
                         _searchEngine = _parser.getAttributeValue(null, "search_engine");
+                        _searchEngineVersion = _parser.getAttributeValue(null, "search_engine_version");
                         _dataBasename = _parser.getAttributeValue(null, "base_name");
                         _dataSuffix = _parser.getAttributeValue(null, "out_data");
                         if (_dataSuffix == null)
@@ -301,6 +303,11 @@ public class PepXmlLoader extends MS2Loader
         public String getSearchEngine()
         {
             return _searchEngine;
+        }
+
+        public String getSearchEngineVersion()
+        {
+            return _searchEngineVersion;
         }
 
 

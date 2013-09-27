@@ -23,10 +23,10 @@ package org.labkey.ms2.pipeline.sequest;
  */
 public class SequestBasicConverter implements IInputXMLConverter
 {
-    public String convert(Param param)
+    public String convert(Param param, String commentPrefix)
     {
         SequestParam sequestParam = (SequestParam) param;
-        StringBuffer sb = new StringBuffer(sequestParam.getName());
+        StringBuilder sb = new StringBuilder(sequestParam.getName());
         sb.append(" = ");
         sb.append(sequestParam.getValue());
         if (sequestParam.getComment() != null && !sequestParam.getComment().equals(""))
@@ -41,8 +41,8 @@ public class SequestBasicConverter implements IInputXMLConverter
             {
                 sb.append(" ");
             }
-
-            sb.append("; ");
+            sb.append(commentPrefix);
+            sb.append(" ");
             sb.append(sequestParam.getComment());
         }
         return sb.toString();

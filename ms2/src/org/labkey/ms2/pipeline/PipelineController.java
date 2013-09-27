@@ -33,6 +33,8 @@ import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.pipeline.client.Search;
+import org.labkey.ms2.pipeline.comet.CometPipelineJob;
+import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
@@ -221,6 +223,22 @@ public class PipelineController extends SpringActionController
         protected TaskId getTaskId()
         {
             return new TaskId(SequestPipelineJob.class);
+        }
+    }
+
+    @RequiresPermissionClass(InsertPermission.class)
+    public class SearchCometAction extends SearchAction
+    {
+        public String getProviderName()
+        {
+            return CometPipelineProvider.NAME;
+        }
+
+
+        @Override
+        protected TaskId getTaskId()
+        {
+            return new TaskId(CometPipelineJob.class);
         }
     }
 
@@ -665,6 +683,30 @@ public class PipelineController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Set Sequest Defaults");
+        }
+    }
+
+    @RequiresPermissionClass(AdminPermission.class)
+    public class SetCometDefaultsAction extends SetDefaultsActionBase
+    {
+        public String getProviderName()
+        {
+            return CometPipelineProvider.NAME;
+        }
+
+        public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
+        {
+            return new JspView<>(CometPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
+        }
+
+        public HelpTopic getHelpTopic()
+        {
+            return PipelineController.getHelpTopic("MS2-Pipeline/setCometDefaults");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Set Comet Defaults");
         }
     }
 

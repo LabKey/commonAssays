@@ -22,20 +22,18 @@ import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
 import java.util.List;
 
-import com.google.gwt.user.client.ui.ChangeListener;
-
 /**
  * User: billnelson@uky.edu
  * Date: Apr 22, 2008
  */
 
 /**
- * <code>SequestSequenceDbComposite</code>
+ * <code>SimpleSequenceDbComposite</code>
  */
-public class SequestSequenceDbComposite extends SequenceDbComposite
+public class SimpleSequenceDbComposite extends SequenceDbComposite
 {
 
-    public SequestSequenceDbComposite(Search search)
+    public SimpleSequenceDbComposite(Search search)
     {
         super(search);
     }

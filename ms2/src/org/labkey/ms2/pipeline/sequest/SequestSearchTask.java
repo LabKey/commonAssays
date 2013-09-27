@@ -62,14 +62,14 @@ import java.util.zip.CRC32;
  */
 public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.Factory>
 {
-    private static final String SEQUEST_PARAMS = "sequest.params";
+    public static final String SEQUEST_PARAMS = "sequest.params";
     private static final String MAKE_DB_PARAMS = "makedb.params";
 
     private static final String SEQUEST_ACTION_NAME = "Sequest Search";
     private static final String MZXML2SEARCH_ACTION_NAME = "MzXML2Search";
     private static final String MAKEDB_ACTION_NAME = "MakeDB";
 
-    public static final String MASS_TYPE_PARENT = "sequest, mass_type_parent";
+    public static final String MASS_TYPE_PARENT_SUFFIX = ", mass_type_parent";
     public static final String MASS_TYPE_INDEX = "sequest, mass_type_index";
 
     public static final String USE_INDEX_PARAMETER_NAME = "pipeline, use index";
@@ -392,10 +392,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 copySequestLogFile = false;
 
                 // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
-                WorkDirectory.CopyingResource lock = null;
-                try
+                try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
                 {
-                    lock = _wd.ensureCopyingLock();
                     RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
                     sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
                     sequestAction.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
@@ -408,10 +406,6 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                     sequestAction.addInput(dirOutputDta, SPECTRA_INPUT_ROLE);
 
                     actions.add(sequestAction);
-                }
-                finally
-                {
-                    if (lock != null) { lock.release(); }
                 }
             }
             finally
@@ -550,8 +544,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             String parserError = conv.validate();
             if (!"".equals(parserError))
                 throw new SequestParamsException(parserError);
-            if(!conv.convert().equals(""))
-                paramsCmd.add(conv.convert());
+            if(!conv.convert(";").equals(""))
+                paramsCmd.add(conv.convert(";"));
         }
 
         return paramsCmd;

@@ -295,10 +295,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             boolean proteinProphetOutput = getJobSupport().isProphetEnabled();
             if (inputFiles.size() > 0)
             {
-                WorkDirectory.CopyingResource lock = null;
-                try
+                try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
                 {
-                    lock = _wd.ensureCopyingLock();
                     for (int i = 0; i < inputFiles.size(); i++)
                         inputWorkFiles[i] = _wd.inputFile(inputFiles.get(i), false);
 
@@ -312,10 +310,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                                 dirMzXml = spectraFiles.get(i).getParentFile();
                         }
                     }
-                }
-                finally
-                {
-                    if (lock != null) { lock.release(); }
                 }
             }
 
@@ -485,10 +479,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 }
             }
 
-            WorkDirectory.CopyingResource lock = null;
-            try
+            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
-                lock = _wd.ensureCopyingLock();
                 File filePepXML = _wd.outputFile(fileWorkPepXML);
 
                 // Set up the first step with the right outputs
@@ -557,10 +549,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     File libraOutput = _wd.outputFile(libraOutputWork, FT_LIBRA_QUANTITATION.getName(_wd.getDir(), getJobSupport().getBaseName()));
                     proteinQuantAction.addOutput(libraOutput, LIBRA_OUTPUT_ROLE, false);
                 }
-            }
-            finally
-            {
-                if (lock != null) { lock.release(); }
             }
 
             // Deal with possible TPP outputs, if TPP was not XML_ONLY

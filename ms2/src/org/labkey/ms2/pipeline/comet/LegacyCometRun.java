@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.pipeline.comet;
 
-import org.apache.axis.utils.StringUtils;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 
@@ -25,35 +24,37 @@ import org.labkey.ms2.MS2RunType;
  * Date: Sep 16, 2004
  * Time: 10:36:11 PM
  */
-public class CometRun extends MS2Run
+public class LegacyCometRun extends MS2Run
 {
     public MS2RunType getRunType()
     {
-        return MS2RunType.Comet;
+        return MS2RunType.LegacyComet;
     }
 
     public String getParamsFileName()
     {
-        return CometSearchTask.COMET_PARAMS;
+        return "comet.def";
     }
+
 
     public String getChargeFilterColumnName()
     {
-        return "XCorr";
+        return "RawScore";
     }
+
 
     public String getChargeFilterParamName()
     {
-        return "xCorr";
+        return "rawScore";
     }
 
     public String getDiscriminateExpressions()
     {
-        return "-SpRank, -DeltaCn, -XCorr";
+        return "-PeptideProphet, -ZScore, -DiffScore, -DiffScore * RawScore, -RawScore";
     }
 
     public String[] getGZFileExtensions()
     {
-        return StringUtils.EMPTY_STRING_ARRAY;
+        return new String[]{"cmt", "dta"};
     }
 }

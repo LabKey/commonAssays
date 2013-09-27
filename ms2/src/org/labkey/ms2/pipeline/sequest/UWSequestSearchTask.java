@@ -282,10 +282,8 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 FileUtil.deleteDir(decoyDir);
             }
 
-            WorkDirectory.CopyingResource lock = null;
-            try
+            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
-                lock = _wd.ensureCopyingLock();
                 RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
                 sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
                 sequestAction.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
@@ -307,10 +305,6 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 _wd.acceptFilesAsOutputs(Collections.<String, TaskPath>emptyMap(), sequestAction);
 
                 actions.add(sequestAction);
-            }
-            finally
-            {
-                if (lock != null) { lock.release(); }
             }
 
             return new RecordedActionSet(actions);

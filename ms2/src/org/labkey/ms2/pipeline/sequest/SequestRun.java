@@ -33,9 +33,8 @@ public class SequestRun extends MS2Run
 
     public String getParamsFileName()
     {
-        return "sequest.params";
+        return SequestSearchTask.SEQUEST_PARAMS;
     }
-
 
     public String getChargeFilterColumnName()
     {

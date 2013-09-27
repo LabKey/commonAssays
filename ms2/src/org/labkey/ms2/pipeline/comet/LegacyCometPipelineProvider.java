@@ -30,19 +30,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * CometCPipelineProvider class
+ * LegacyCometPipelineProvider class
  * <p/>
  * Created: Nov 1, 2005
  *
  * @author bmaclean
  */
-public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class LegacyCometPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
-    public static String name = "Comet";
+    public static final String NAME = "LegacyComet";
 
-    public CometCPipelineProvider(Module owningModule)
+    public LegacyCometPipelineProvider(Module owningModule)
     {
-        super(name, owningModule);
+        super(NAME, owningModule);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -98,7 +98,7 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public List<String> getTaxonomyList() throws IOException {
         // No user interface for this search type.
-        throw new UnsupportedOperationException("Comet does not support Mascot style taxonomy.");
+        throw new UnsupportedOperationException("LegacyComet does not support Mascot style taxonomy.");
     }
 
     public Map<String, String> getEnzymes() throws IOException {

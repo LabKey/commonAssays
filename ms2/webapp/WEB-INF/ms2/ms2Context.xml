@@ -30,6 +30,13 @@
                         </list>
                     </property>
                 </bean>
+                <bean class="org.labkey.ms2.pipeline.comet.CometSearchTask$Factory">
+                    <property name="inputTypes">
+                        <list>
+                            <ref bean="mzXMLFileType" />
+                        </list>
+                    </property>
+                </bean>
                 <bean class="org.labkey.ms2.pipeline.sequest.UWSequestSearchTask$Factory">
                     <property name="inputTypes">
                         <list>
@@ -117,6 +124,26 @@
                             <ref bean="msPrefixCommand"/>
                             <ref bean="msPictureCommand"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
+                            <ref bean="tppTask"/>
+                            <ref bean="expGeneratorSearch"/>
+                            <ref bean="tppTaskJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!-- Comet search pipeline -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.comet.CometPipelineJob"/>
+                    <property name="protocolObjectId" value="MS2.CometSearch" />
+                    <property name="protocolName" value="Comet analysis" />
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
+                            <ref bean="mzxmlConverter"/>
+                            <ref bean="msPrefixCommand"/>
+                            <ref bean="msPictureCommand"/>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.comet.CometSearchTask</value>
                             <ref bean="tppTask"/>
                             <ref bean="expGeneratorSearch"/>
                             <ref bean="tppTaskJoin"/>

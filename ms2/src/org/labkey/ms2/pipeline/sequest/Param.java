@@ -136,9 +136,9 @@ public abstract class Param implements Comparable<Param>
         return converter;
     }
 
-    public String convert()
+    public String convert(String commentPrefix)
     {
-        return converter.convert(this);
+        return converter.convert(this, commentPrefix);
     }
 
     public int compareTo(Param o)

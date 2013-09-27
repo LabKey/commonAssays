@@ -44,7 +44,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
 
     public boolean isJobComplete(PipelineJob job)
     {
-        SequestPipelineJob support = (SequestPipelineJob) job;
+        AbstractMS2SearchPipelineJob support = (AbstractMS2SearchPipelineJob) job;
         String baseName = support.getBaseName();
         String baseNameJoined = support.getJoinedBaseName();
         File dirAnalysis = support.getAnalysisDirectory();

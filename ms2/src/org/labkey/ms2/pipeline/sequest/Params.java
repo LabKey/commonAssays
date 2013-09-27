@@ -29,7 +29,7 @@ public abstract class Params
 {
     TreeSet<Param> _params = new TreeSet<>();
 
-    abstract void initProperties();
+    protected abstract void initProperties();
 
     public Collection<Param> getParams()
     {
@@ -76,10 +76,15 @@ public abstract class Params
         StringBuilder sb = new StringBuilder();
         for (Param prop : getParams())
         {
-            sb.append(prop.convert());
+            sb.append(prop.convert(getCommentPrefix()));
             sb.append(" ");
         }
         return sb.toString();
+    }
+
+    protected String getCommentPrefix()
+    {
+        return ";";
     }
 
 }

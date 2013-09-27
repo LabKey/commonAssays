@@ -30,7 +30,7 @@ public class Out2XmlParams extends Params
         initProperties();
     }
 
-    void initProperties()
+    public void initProperties()
     {
         _params.clear();
         _params.add(new Out2XmlParam(

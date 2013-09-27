@@ -200,6 +200,18 @@
           <ns:isUserEditable>true</ns:isUserEditable>
           <ns:sortDescending>true</ns:sortDescending>
         </ns:column>
+        <ns:column columnName="Score6">
+          <ns:columnTitle>Score6</ns:columnTitle>
+          <ns:inputType>text</ns:inputType>
+          <ns:formatString>0.0000</ns:formatString>
+          <ns:displayWidth>55</ns:displayWidth>
+          <ns:scale>10</ns:scale>
+          <ns:inputLength>10</ns:inputLength>
+          <ns:nullable>false</ns:nullable>
+          <ns:isReadOnly>false</ns:isReadOnly>
+          <ns:isUserEditable>true</ns:isUserEditable>
+          <ns:sortDescending>true</ns:sortDescending>
+        </ns:column>
         <ns:column columnName="IonPercent">
           <ns:columnTitle>Ion%</ns:columnTitle>
           <ns:inputType>text</ns:inputType>

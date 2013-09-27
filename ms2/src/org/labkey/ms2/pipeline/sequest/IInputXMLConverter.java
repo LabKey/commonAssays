@@ -23,5 +23,5 @@ package org.labkey.ms2.pipeline.sequest;
  */
 public interface IInputXMLConverter
 {
-    public String convert(Param p);
+    public String convert(Param p, String commentPrefix);
 }

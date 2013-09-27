@@ -370,11 +370,8 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
             }
 
-            WorkDirectory.CopyingResource lock = null;
-            try
+            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
-                lock = _wd.ensureCopyingLock();
-
                 mzxml2SearchAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(argsM2S, " "));
                 mzxml2SearchAction.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
                 mzxml2SearchAction.addOutput(fileMGF, "MGF", false);
@@ -389,10 +386,6 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 mascot2XMLAction.addInput(_wd.outputFile(fileWorkDAT), "DAT");
                 mascot2XMLAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
                 mascot2XMLAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args));
-            }
-            finally
-            {
-                if (lock != null) { lock.release(); }
             }
 
             _wd.discardFile(fileWorkMGF);

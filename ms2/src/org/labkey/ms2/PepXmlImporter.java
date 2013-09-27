@@ -210,7 +210,7 @@ public class PepXmlImporter extends MS2Importer
     {
         String databaseLocalPath = fraction.getDatabaseLocalPath();
 
-        _run = MS2Run.getRunFromTypeString(fraction.getSearchEngine());
+        _run = MS2Run.getRunFromTypeString(fraction.getSearchEngine(), fraction.getSearchEngineVersion());
         _scoreColumnNames = _run.getPepXmlScoreColumnNames();
 
         Map<String, Object> m = new HashMap<>();

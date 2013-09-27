@@ -59,7 +59,9 @@ import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.comet.CometCPipelineProvider;
+import org.labkey.ms2.pipeline.comet.CometParamsBuilder;
+import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
+import org.labkey.ms2.pipeline.comet.LegacyCometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
@@ -137,7 +139,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 13.20;
+        return 13.21;
     }
 
     @NotNull
@@ -245,7 +247,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         service.registerPipelineProvider(new XTandemPipelineProvider(this), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
         service.registerPipelineProvider(new SequestPipelineProvider(this));
-        service.registerPipelineProvider(new CometCPipelineProvider(this), "Comet (Cluster)");
+        service.registerPipelineProvider(new LegacyCometPipelineProvider(this), "Comet (Cluster)");
+        service.registerPipelineProvider(new CometPipelineProvider(this), "Comet");
 
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
@@ -382,7 +385,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public Set<Class> getIntegrationTests()
     {
         return new HashSet<Class>(Arrays.asList(
-            ThermoSequestParamsBuilder.TestCase.class
+            ThermoSequestParamsBuilder.TestCase.class,
+            CometParamsBuilder.FullParseTestCase.class
         ));
     }
 
@@ -409,10 +413,12 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             UWSequestSearchTask.TestCase.class,
             ProteinCoverageMapBuilder.TestCase.class,
             UWSequestSearchTask.TestCase.class,
+            CometParamsBuilder.LimitedParseTestCase.class,
             TPPTask.TestCase.class,
             Protein.TestCase.class,
             SequestSearchTask.TestCase.class,
-            BibliospecSpectrumRenderer.TestCase.class
+            BibliospecSpectrumRenderer.TestCase.class,
+            MS2RunType.TestCase.class
         ));
     }
 

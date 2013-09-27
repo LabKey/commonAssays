@@ -560,7 +560,7 @@ public class MS2Manager
             {
                 String type = rs.getString("Type");
 
-                MS2RunType runType = MS2RunType.lookupType(type);
+                MS2RunType runType = MS2RunType.lookupType(type, null);
                 if (runType != null)
                 {
                     BeanObjectFactory<MS2Run> bof = new BeanObjectFactory<>((Class<MS2Run>)runType.getRunClass());

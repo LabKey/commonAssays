@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="tandem-input-style.xsl"?>
+<bioml>
+<note>list path parameters</note>
+  <note type="input" label="list path, default parameters">sequest_default_input.xml</note>
+    <note>This value is ignored when it is present in the default parameter
+          list path.</note>
+  <note type="input" label="list path, taxonomy information">taxonomy.xml</note>
+	<note>This value is ignored by sequest.</note>
+
+<note>spectrum parameters</note>
+  <note type="input" label="spectrum, fragment mass type">monoisotopic</note>
+    <note> New feature added by Brendan MacLean; valid values = average | monoisotopic.
+		Sets the sequest mass_type_fragment parameter. No X!Tandem label for parent mass type,
+		see: sequest, mass_type_parent</note>
+  <note type="input" label="spectrum, fragment mass error">1.0</note>
+	<note>bioworks browser's default setting is 1.0; 
+         This tag depricates "spectrum, fragment monoisotopic mass error "</note>
+  <note type="input" label="spectrum, parent monoisotopic mass error plus">2.0</note>
+  <note type="input" label="spectrum, parent monoisotopic mass error minus">2.0</note>
+	<note>The max and min labels set the sequest peptide_mass_tolerance parameter.
+		They must be set to the same value</note>
+  <note type="input" label="spectrum, parent monoisotopic mass isotope error">no</note>
+    <note>Only for high resolution mass spectrometers.</note>
+  <note type="input" label="spectrum, fragment mass error units">Daltons</note>
+    <note>The value for this parameter may be 'Daltons' or 'ppm': all other values are ignored.
+          </note>
+  <note type="input" label="spectrum, parent monoisotopic mass error units">Daltons</note>
+    <note>The value for this parameter may be 'Daltons' or 'ppm': all other values are ignored</note>
+
+<note>spectrum conditioning parameters</note>
+  <note type="input" label="spectrum, dynamic range">100.0</note>
+    <note>The peaks read in are normalized so that the most intense peak
+          is set to the dynamic range value. All peaks with values of less that
+	  1, using this normalization, are not used. This normalization has the
+	  overall effect of setting a threshold value for peak intensities.</note>
+  <note type="input" label="spectrum, total peaks">50</note>
+    <note>If this value is 0, it is ignored. If it is greater than zero (lets say 50),
+          then the number of peaks in the spectrum with be limited to the 50 most intense
+          peaks in the spectrum. X! tandem does not do any peak finding: it only
+          limits the peaks used by this parameter, and the dynamic range parameter.</note>
+  <note type="input" label="spectrum, use noise suppression">no</note>
+    <note>Only for high resolution mass spectrometers.</note>
+  <note type="input" label="spectrum, minimum parent m+h"></note>
+    <note>Default = 600</note>
+    <note type="input" label="spectrum, maximum parent m+h"></note>
+    <note>Default = 4200</note>
+  <note type="input" label="spectrum, minimum fragment mz">140.0</note>
+  <note type="input" label="spectrum, minimum peaks"></note>
+    <note>Default = 5</note>
+  <note type="input" label="spectrum, threads">1</note>
+  <note type="input" label="pipeline, load spectra">no</note>
+
+
+<note>residue modification parameters</note>
+  <note type="input" label="residue, modification mass"></note>
+    <note>The format of this parameter is m@X, where m is the modfication
+          mass in Daltons and X is the appropriate residue to modify. Lists of
+          modifications are separated by commas. For example, to modify M and C
+          with the addition of 16.0 Daltons, the parameter line would be
+          +16.0@M,+16.0@C
+          Positive and negative values are allowed.</note>
+  <note type="input" label="residue, potential modification mass"></note>
+    <note>The format of this parameter is the same as the format
+          for residue, modification mass (see above).</note>
+  <note type="input" label="residue, potential modification motif"></note>
+    <note>The format of this parameter is similar to residue, modification mass,
+          with the addition of a modified PROSITE notation sequence motif specification.
+          For example, a value of 80@[ST!]PX[KR] indicates a modification
+          of either S or T when followed by P, and residue and the a K or an R.
+          A value of 204@N!{P}[ST]{P} indicates a modification of N by 204, if it
+          is NOT followed by a P, then either an S or a T, NOT followed by a P.
+          Positive and negative values are allowed.</note>
+
+<note>protein parameters</note>
+  <note type="input" label="protein, taxon">no default</note>
+    <note>This value is interpreted using the information in taxonomy.xml.</note>
+  <note type="input" label="protein, cleavage site">[RK]|{P}</note>
+    <note>this setting corresponds to the enzyme trypsin. The first characters
+          in brackets represent residues N-terminal to the bond - the '|' pipe -
+          and the second set of characters represent residues C-terminal to the
+          bond. The characters must be in square brackets (denoting that only
+          these residues are allowed for a cleavage) or french brackets (denoting
+          that these residues cannot be in that position). Use UPPERCASE characters.
+          To denote cleavage at any residue, use [X]|[X] and reset the
+          scoring, maximum missed cleavage site parameter (see below) to something
+          like 50. A coma delimited list of cut sites is not allowed with Sequest.</note>
+	<note type="input" label="protein, N-terminal residue modification mass">0.0</note>
+	<note type="input" label="protein, C-terminal residue modification mass">0.0</note>
+
+<note>model refinement paramters</note>
+  <note type="input" label="refine">no</note>
+  <note type="input" label="refine, spectrum synthesis">yes</note>
+  <note type="input" label="refine, maximum valid expectation value">0.1</note>
+  <note type="input" label="refine, potential N-terminus modifications"></note>
+  <note type="input" label="refine, potential C-terminus modifications"></note>
+	<note>The Terminus modifications are used by Sequest in the term_diff_search_options parameter.</note>
+  <note type="input" label="refine, unanticipated cleavage">yes</note>
+  <note type="input" label="refine, potential modification mass"></note>
+  <note type="input" label="refine, point mutations">no</note>
+  <note type="input" label="refine, use potential modifications for full refinement">no</note>
+  <note type="input" label="refine, point mutations">no</note>
+  <note type="input" label="refine, potential modification motif"></note>
+    <note>The format of this parameter is similar to residue, modification mass,
+          with the addition of a modified PROSITE notation sequence motif specification.
+          For example, a value of 80@[ST!]PX[KR] indicates a modification
+          of either S or T when followed by P, and residue and the a K or an R.
+          A value of 204@N!{P}[ST]{P} indicates a modification of N by 204, if it
+          is NOT followed by a P, then either an S or a T, NOT followed by a P.
+          Positive and negative values are allowed.</note>
+
+<note>scoring parameters</note>
+  <note type="input" label="scoring, minimum ion count">4</note>
+  <note type="input" label="scoring, maximum missed cleavage sites">2</note>
+  <note type="input" label="scoring, a ions">no</note>
+  <note type="input" label="scoring, b ions">yes</note>
+  <note type="input" label="scoring, c ions">no</note>
+  <note type="input" label="scoring, x ions">no</note>
+  <note type="input" label="scoring, y ions">yes</note>
+  <note type="input" label="scoring, z ions">no</note>
+  <note type="input" label="sequest, d ions">no</note>
+  <note type="input" label="sequest, v ions">no</note>
+  <note type="input" label="sequest, w ions">no</note>
+  <note type="input" label="sequest, a neutral loss">no</note>
+  <note type="input" label="sequest, b neutral loss">yes</note>
+  <note type="input" label="sequest, y neutral loss">yes</note>
+       <note>For sequest's ion_series property. (neutral-a)(neutral-b)(neutral-c)abcdvwxyz. 
+             On is 1 and off is 0. No fractional values.</note>
+
+
+<note>output parameters</note>
+  <note type="input" label="output, path">output.xml</note>
+  <note type="input" label="output, sort results by">spectrum</note>
+    <note>values = protein|spectrum (spectrum is the default)</note>
+  <note type="input" label="output, path hashing">yes</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, xsl path">tandem-style.xsl</note>
+  <note type="input" label="output, parameters">yes</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, performance">yes</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, spectra">no</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, histograms">no</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, proteins">yes</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, sequences">no</note>
+    <note>values = yes|no</note>
+  <note type="input" label="output, one sequence copy">yes</note>
+    <note>values = yes|no, set to yes to produce only one copy of each protein
+          sequence in the output xml</note>
+  <note type="input" label="output, results">all</note>
+    <note>values = all|valid|stochastic</note>
+  <note type="input" label="output, maximum valid expectation value">0.1</note>
+    <note>value is used in the valid|stochastic setting of output, results</note>
+  <note type="input" label="output, histogram column width">30</note>
+    <note>values any integer greater than 0. Setting this to '1' makes
+          cutting and pasting histograms into spread sheet programs
+          easier.</note>
+  <note>By default, don't import spectra into the database. We'll still resolve them by looking at the file system --></note>
+  <note type="input" label="pipeline, import spectra">no</note>
+
+<note>pipeline paramaters</note>
+	<note type="input" label="pipeline, data type">Samples</note>
+		<note>Samples, Fractions, or Both; determines wheather input data files are treated as 
+			separate samples, or grouped as fractions into a single run, or both.</note>
+
+<note>pipeline quantitation paramaters</note>
+<!--
+	<note label="pipeline quantitation, algorithm" type="input">xpress</note>
+		<note>Must be set to "xpress"; other options are not yet implemented</note>
+	<note label="pipeline quantitation, residue label mass" type="input"></note>
+		<note>mass@residue, For example 9.0@C  would be -lC -r9.0.         
+			Xpress usage statment:
+				-l<str>    change labeled residues (default='C')
+          			-r<num>    change XPRESS residue mass difference (default=9.0)
+          			-n<str>,<num>   when specifying multiple isotopic labels, use
+                          	this option e.g. -nK,3.0 -nL,3.0
+		</note>
+	<note type="input" label="pipeline quantitation, mass tolerance"></note>
+		<note>The mass tolerance value. Xpress usage statement:
+	 		-m<num>    change XPRESS mass tolerance (default=1.0)
+		</note>
+	<note type="input" label="pipeline quantitation, fix"></note>
+		<note>heavy,light; equivlent to the -L and -H arguments for Xpress.
+			Xpress usage:
+			 -L         for ratio, set/fix light to 1, vary heavy
+          		 -H         for ratio, set/fix heavy to 1, vary light
+		</note> 
+	<note type="input" label="pipeline quantitation, fix elution reference"></note>
+		<note>peak; Xpress -F, -f is the default value.  
+			the 'fix elution difference' label. Xpress usage:
+          		-f<num>    fix elution peak as +-<num> scans from start scan, default=5
+          		-F<num>    fix elution peak as +-<num> scans from identified peak apex, default=5
+		</note>
+	<note type="input" label="pipeline quantitation, fix elution difference"></note>
+		<note>The value added after the Xpress -F or -f arg. See fix elution reference.</note>
+	<note type="input" label="pipeline quantitation, metabolic search type"></note>
+		<note>normal, heavy; equal to Xpress -M and -N Xpress usage:
+	          	-M	for metabolic labeling; ignore all other parameters, assume IDs are normal and quantify w/corresponding 15N heavy pair
+          		-N    for metabolic labeling; ignore all other parameters, assume IDs are 15N heavy and quantify w/corresponding 14N light pair
+		</note>
+	<note type="input" label="pipeline quantitation, heavy elutes before light">no</note>
+		<note>yes; equal to Xpress -b  Xpress usage:
+	          	-b             heavy labeled peptide elutes before light labeled patner
+		</note>
+-->
+
+    <note>comet-specific parameters</note>
+
+    <note type="input" label="comet, num_output_lines">10</note>
+		<note> peptide results to show </note>
+	<note type="input" label="comet, num_results">500</note>
+		<note> results to store </note>
+	<note type="input" label="comet, show_fragment_ions">0</note>
+		<note> 0=no, 1=yes </note>
+    <note type="input" label="sequest, max_variable_mods_in_peptide">3</note>
+		<note> max # of diff. mod in a peptide. </note>
+	<note type="input" label="comet, mass_type_parent">1</note>
+		<note>0=average masses, 1=monoisotopic masses</note>
+	<note type="input" label="comet, mass_type_index">1</note>
+		<note>0=average masses, 1=monoisotopic masses</note>
+	<note type="input" label="comet, remove_precursor_peak">0</note>
+		<note>0=no, 1=yes</note>
+	<note type="input" label="comet, digest_mass_range">600.0 5000.0</note>
+		<note> Used to create digest_mass_range</note>
+</bioml>

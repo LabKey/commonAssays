@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2008 LabKey Corporation
+ * Copyright (c) 2013 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,6 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.pipeline.sequest;
+UPDATE ms2.Runs SET Type = 'LegacyComet' WHERE Type = 'Comet';
 
-/**
- * User: billnelson@uky.edu
- * Date: Sep 20, 2006
- * Time: 5:36:15 PM
- */
-public class SequestEnzymeConverter implements IInputXMLConverter
-{
-
-    public String convert(Param param, String commentPrefix)
-    {
-        SequestParam sequestParam = (SequestParam) param;
-        StringBuilder sb = new StringBuilder();
-        sb.append(sequestParam.getComment());
-        sb.append(sequestParam.getValue());
-        return sb.toString();
-    }
-
-}
+ALTER TABLE ms2.PeptidesData ADD COLUMN score6 REAL;

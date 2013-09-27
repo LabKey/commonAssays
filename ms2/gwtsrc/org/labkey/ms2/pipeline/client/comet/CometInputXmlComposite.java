@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.pipeline.client.sequest;
+package org.labkey.ms2.pipeline.client.comet;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -28,10 +28,7 @@ import org.labkey.ms2.pipeline.client.ParamParser;
  * Date: Apr 18, 2008
  */
 
-/**
- * <code>SequestInputXmlComposite</code>
- */
-public class SequestInputXmlComposite extends InputXmlComposite
+public class CometInputXmlComposite extends InputXmlComposite
 {
     public String update(String text)
     {
@@ -42,11 +39,11 @@ public class SequestInputXmlComposite extends InputXmlComposite
 
     public Widget getLabel()
     {
-        Label label = new Label("Sequest XML");
+        Label label = new Label("Comet XML");
         label.setStyleName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);
-        panel.add(new HelpPopup("Sequest XML", "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineSequest\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
+        panel.add(new HelpPopup("Comet XML", "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineComet\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
         return panel;
     }
 }

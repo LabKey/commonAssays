@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
 public class Mzxml2SearchConverter implements IInputXMLConverter
 {
 
-    public String convert(Param mzxml2SearchParam)
+    public String convert(Param mzxml2SearchParam, String commentPrefix)
     {
         String value = mzxml2SearchParam.getValue();
         StringBuilder sb = new StringBuilder("");

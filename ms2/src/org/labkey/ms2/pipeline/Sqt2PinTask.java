@@ -58,10 +58,8 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
         
         try
         {
-            WorkDirectory.CopyingResource lock = null;
-            try
+            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
-                lock = _wd.ensureCopyingLock();
                 TaskPath targetListTP = new TaskPath(".target.list");
                 TaskPath decoyListTP = new TaskPath(".decoy.list");
                 File targetListFile = _wd.newWorkFile(WorkDirectory.Function.output, targetListTP, job.getBaseName());
@@ -124,10 +122,6 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                 action.addOutput(_wd.outputFile(output), "PinXML", false);
                 action.addOutput(_wd.outputFile(targetListFile), "SQTFileList", false);
                 action.addOutput(_wd.outputFile(decoyListFile), "DecoySQTFileList", false);
-            }
-            finally
-            {
-                if (lock != null) { lock.release(); }
             }
         }
         catch (IOException e)

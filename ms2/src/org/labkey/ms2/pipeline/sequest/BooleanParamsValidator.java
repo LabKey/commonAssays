@@ -38,7 +38,17 @@ public class BooleanParamsValidator implements IParamsValidator
             parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a 1 or a 0(" + value + ").\n";
             return parserError;
         }
-        if (!value.equals("1") && !value.equals("0"))
+        if (spp.getValue().equalsIgnoreCase("no"))
+        {
+            value = "0";
+            spp.setValue(value);
+        }
+        if (spp.getValue().equalsIgnoreCase("yes"))
+        {
+            value = "1";
+            spp.setValue(value);
+        }
+        if (!value.equals("1") && !value.equals("0") && !value.equalsIgnoreCase("no") && !value.equalsIgnoreCase("yes"))
         {
             parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a 1 or a 0(" + value + ").\n";
         }
@@ -79,6 +89,20 @@ public class BooleanParamsValidator implements IParamsValidator
             assertEquals("1", _property.getValue());
 
             _property.setValue("0");
+            parserError = _property.validate();
+            assertEquals("", parserError);
+            assertEquals("0", _property.getValue());
+        }
+
+        @Test
+        public void testValidateYesNo()
+        {
+            _property.setValue("yes");
+            String parserError = _property.validate();
+            assertEquals("", parserError);
+            assertEquals("1", _property.getValue());
+
+            _property.setValue("no");
             parserError = _property.validate();
             assertEquals("", parserError);
             assertEquals("0", _property.getValue());

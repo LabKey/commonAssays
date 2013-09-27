@@ -214,7 +214,7 @@ public abstract class MS2Run implements Serializable
 
     public abstract String getDiscriminateExpressions();
 
-    public abstract String[] getGZFileExtensions();
+        public abstract String[] getGZFileExtensions();
 
     // PepXml score names in the order they get written to the database
     public Collection<String> getPepXmlScoreColumnNames()
@@ -229,9 +229,9 @@ public abstract class MS2Run implements Serializable
     }
 
 
-    public static MS2Run getRunFromTypeString(String type)
+    public static MS2Run getRunFromTypeString(String type, String version)
     {
-        MS2RunType runType = MS2RunType.lookupType(type);
+        MS2RunType runType = MS2RunType.lookupType(type, version);
         if (runType == null)
         {
             _log.error("Unrecognized run type: " + type);
@@ -244,11 +244,7 @@ public abstract class MS2Run implements Serializable
             run.setType(runType.name());
             return run;
         }
-        catch (IllegalAccessException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (InstantiationException e)
+        catch (IllegalAccessException | InstantiationException e)
         {
             throw new RuntimeException(e);
         }

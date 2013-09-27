@@ -17,10 +17,6 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.sequest.ConverterFactory;
-import org.labkey.ms2.pipeline.sequest.Mzxml2SearchParam;
-import org.labkey.ms2.pipeline.sequest.Params;
-import org.labkey.ms2.pipeline.sequest.ParamsValidatorFactory;
 
 /**
  * User: billnelson@uky.edu
@@ -35,7 +31,7 @@ public class Mzxml2SearchParams extends Params
         initProperties();
     }
 
-    void initProperties()
+    public void initProperties()
     {
         _params.clear();
         _params.add(new Mzxml2SearchParam(
