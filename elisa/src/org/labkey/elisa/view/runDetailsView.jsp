@@ -38,6 +38,7 @@
     public LinkedHashSet<ClientDependency> getClientDependencies()
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("clientapi/ext4"));
         resources.add(ClientDependency.fromFilePath("vischart"));
         resources.add(ClientDependency.fromFilePath("/elisa/runDetailsPanel.js"));
         resources.add(ClientDependency.fromFilePath("/elisa/runDataPanel.js"));
@@ -118,7 +119,7 @@
         });
 
         var _resize = function(w,h) {
-            LABKEY.Utils.resizeToViewport(panel, w, -1); // don't fit to height
+            LABKEY.ext4.Util.resizeToViewport(panel, w, -1); // don't fit to height
         };
 
         Ext4.EventManager.onWindowResize(_resize);

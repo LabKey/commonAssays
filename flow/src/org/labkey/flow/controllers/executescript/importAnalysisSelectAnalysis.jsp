@@ -19,14 +19,25 @@
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
-<%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("applet.js"));
+        resources.add(ClientDependency.fromFilePath("FileUploadField.js"));
+        resources.add(ClientDependency.fromFilePath("fileBrowser.js"));
+        return resources;
+    }
+%>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
     ViewContext context = getViewContext();
@@ -34,7 +45,6 @@
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
-    ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
     boolean hasPipelineRoot = pipeRoot != null;
     boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
@@ -66,12 +76,6 @@
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
     <div id="treeDiv" class="extContainer"></div>
-    <script type="text/javascript">
-        LABKEY.requiresScript("applet.js");
-        LABKEY.requiresScript("fileBrowser.js");
-        LABKEY.requiresScript("applet.js",true);
-        LABKEY.requiresScript("FileUploadField.js");
-    </script>
     <script type="text/javascript">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
