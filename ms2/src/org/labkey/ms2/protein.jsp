@@ -54,7 +54,7 @@
                     <% } %>
                     <select name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" onchange="this.form.submit();">
                         <option value="false">Show only peptides assigned by search engine</option>
-                        <option value="true"<%=checked(ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()))%>>Show all peptides with sequence matches</option>
+                        <option value="true" <%=selected(ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()))%>>Show all peptides with sequence matches</option>
                     </select>
                 </form>
             </td>
