@@ -677,7 +677,7 @@ public class PipelineController extends SpringActionController
 
         public HelpTopic getHelpTopic()
         {
-            return PipelineController.getHelpTopic("MS2-Pipeline/setSequestDefaults");
+            return PipelineController.getHelpTopic("pipelineSequest");
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -696,12 +696,12 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<>(CometPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
+            return new JspView<>(CometPipelineProvider.class, "setCometDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
         {
-            return PipelineController.getHelpTopic("MS2-Pipeline/setCometDefaults");
+            return PipelineController.getHelpTopic("pipelineComet");
         }
 
         public NavTree appendNavTrail(NavTree root)
