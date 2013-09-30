@@ -15,44 +15,33 @@
     * limitations under the License.
     */
 %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.pipeline.PipeRoot" %>
-<%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.portal.ProjectUrls" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.FlowModule" %>
-<%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.controllers.WorkspaceData" %>
-<%@ page import="org.labkey.flow.analysis.model.PCWorkspace" %>
-<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
-<%@ page import="org.labkey.flow.controllers.executescript.SamplesConfirmGridView" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.TreeMap" %>
-<%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
+<%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
 <%@ page import="org.labkey.flow.analysis.model.Workspace" %>
-<%@ page import="java.util.TreeSet" %>
+<%@ page import="org.labkey.flow.controllers.WorkspaceData" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
+<%@ page import="org.labkey.flow.controllers.executescript.SamplesConfirmGridView" %>
+<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.api.util.Pair" %>
-<%@ page import="java.util.Collection" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.List" %>
+<%@ page import="java.util.Collection" %>
 <%@ page import="java.util.HashMap" %>
-<%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
-<%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
-<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
     ViewContext context = getViewContext();
     Container container = context.getContainer();
-    PipelineService pipeService = PipelineService.get();
-    PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
     FlowProtocol protocol = FlowProtocol.getForContainer(container);
 
     WorkspaceData workspaceData = form.getWorkspace();

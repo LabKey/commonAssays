@@ -16,39 +16,35 @@
     */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page import="org.labkey.api.query.QueryParam" %>
+<%@ page import="org.labkey.api.query.QueryView" %>
+<%@ page import="org.labkey.api.study.Study" %>
+<%@ page import="org.labkey.api.study.StudyService" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
+<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
+<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
+<%@ page import="org.labkey.flow.query.FlowSchema" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.io.File" %>
-<%@ page import="org.labkey.flow.analysis.model.Workspace" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
-<%@ page import="org.labkey.flow.query.FlowSchema" %>
-<%@ page import="org.labkey.api.query.QueryAction" %>
-<%@ page import="java.util.HashSet" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
-<%@ page import="org.labkey.api.data.DataRegion" %>
-<%@ page import="org.labkey.api.query.QueryView" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
-<%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
-<%@ page import="org.labkey.api.study.StudyService" %>
-<%@ page import="org.labkey.api.study.Study" %>
+<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -58,8 +54,6 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
-    boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 
     List<String> selectedSamples = new ArrayList<>(form.getSelectedSamples().getRows().size());
     for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : form.getSelectedSamples().getRows().entrySet())

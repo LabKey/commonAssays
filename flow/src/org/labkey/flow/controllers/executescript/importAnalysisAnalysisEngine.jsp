@@ -15,32 +15,18 @@
     * limitations under the License.
     */
 %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.pipeline.PipeRoot" %>
-<%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.portal.ProjectUrls" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
-<%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.controllers.WorkspaceData" %>
 <%@ page import="org.labkey.flow.analysis.model.PCWorkspace" %>
+<%@ page import="org.labkey.flow.controllers.WorkspaceData" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
-    ViewContext context = getViewContext();
-    Container container = context.getContainer();
-    PipelineService pipeService = PipelineService.get();
-    PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
     WorkspaceData workspaceData = form.getWorkspace();
     String workspaceName = workspaceData.getPath() != null ? workspaceData.getPath() : workspaceData.getName();
     assert !(workspaceData.getWorkspaceObject() instanceof PCWorkspace) : "R Engine can only be used on Mac FlowJo workspaces";
-
-    ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
-    boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">

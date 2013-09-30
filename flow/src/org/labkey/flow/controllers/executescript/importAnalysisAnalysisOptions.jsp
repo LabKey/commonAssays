@@ -16,49 +16,29 @@
     */
 %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.api.action.SpringActionController" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.pipeline.PipeRoot" %>
-<%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.flow.util.KeywordUtil" %>
-<%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="java.util.TreeMap" %>
-<%@ page import="java.util.TreeSet" %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.flow.FlowSettings" %>
+<%@ page import="org.labkey.api.action.SpringActionController" %>
 <%@ page import="org.labkey.api.admin.AdminUrls" %>
-<%@ page import="org.labkey.flow.analysis.model.Workspace" %>
-<%@ page import="org.labkey.flow.analysis.model.Population" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.FlowSettings" %>
 <%@ page import="org.labkey.flow.analysis.model.Analysis" %>
-<%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
-<%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
-<%@ page import="org.labkey.flow.analysis.model.SubsetExpressionGate" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
-<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
 <%@ page import="org.labkey.flow.analysis.model.ISampleInfo" %>
+<%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
+<%@ page import="org.labkey.flow.analysis.model.Population" %>
+<%@ page import="org.labkey.flow.analysis.model.SubsetExpressionGate" %>
+<%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisEngine" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
+<%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
+<%@ page import="org.labkey.flow.util.KeywordUtil" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
-    ViewContext context = getViewContext();
-    Container container = context.getContainer();
-    PipelineService pipeService = PipelineService.get();
-    PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
-    FlowProtocol protocol = FlowProtocol.getForContainer(container);
-
     boolean normalizationEnabled = FlowSettings.isNormalizationEnabled();
 
     IWorkspace workspace = form.getWorkspace().getWorkspaceObject();

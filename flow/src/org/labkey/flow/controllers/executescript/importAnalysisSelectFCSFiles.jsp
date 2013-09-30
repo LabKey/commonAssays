@@ -22,7 +22,6 @@
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
@@ -31,21 +30,9 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-<%!
-
-    public LinkedHashSet<ClientDependency> getClientDependencies()
-    {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("applet.js"));
-        resources.add(ClientDependency.fromFilePath("FileUploadField.js"));
-        resources.add(ClientDependency.fromFilePath("fileBrowser.js"));
-        return resources;
-    }
-%>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
     ViewContext context = getViewContext();
@@ -186,6 +173,11 @@
 
 
     <div id="treeDiv" class="extContainer"></div>
+    <script type="text/javascript">
+        LABKEY.requiresScript("applet.js",true);
+        LABKEY.requiresScript("fileBrowser.js");
+        LABKEY.requiresScript("FileUploadField.js");
+    </script>
     <script type="text/javascript">
         var inputId=<%=q(inputId)%>;
         var fileSystem;

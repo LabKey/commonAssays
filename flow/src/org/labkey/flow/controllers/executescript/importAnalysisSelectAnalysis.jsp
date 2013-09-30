@@ -24,20 +24,7 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-<%!
-
-    public LinkedHashSet<ClientDependency> getClientDependencies()
-    {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("applet.js"));
-        resources.add(ClientDependency.fromFilePath("FileUploadField.js"));
-        resources.add(ClientDependency.fromFilePath("fileBrowser.js"));
-        return resources;
-    }
-%>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
     ViewContext context = getViewContext();
@@ -76,6 +63,11 @@
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
     <div id="treeDiv" class="extContainer"></div>
+    <script type="text/javascript">
+        LABKEY.requiresScript("applet.js",true);
+        LABKEY.requiresScript("fileBrowser.js");
+        LABKEY.requiresScript("FileUploadField.js");
+    </script>
     <script type="text/javascript">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
