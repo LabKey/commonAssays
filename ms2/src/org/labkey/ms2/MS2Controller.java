@@ -5571,57 +5571,40 @@ public class MS2Controller extends SpringActionController
                 errors.addError(new LabkeyError("Please enter a file path."));
                 return false;
             }
-            File file;
+            File file = FileUtil.getAbsoluteCaseSensitiveFile(new File(fname));
+
             try
             {
-                file = new File(fname).getCanonicalFile();
-            }
-            catch (IOException e)
-            {
-                String error = "Invalid file path";
-                if (e.getMessage() != null)
+                DefaultAnnotationLoader loader;
+
+                //TODO: this style of dealing with different file types must be repaired.
+                if ("uniprot".equalsIgnoreCase(form.getFileType()))
                 {
-                    error = error + " (" + e.getMessage() + ")";
+                    loader = new XMLProteinLoader(file, getViewBackgroundInfo(), null, form.isClearExisting());
                 }
-                errors.addError(new LabkeyError(error));
-                return false;
-            }
-            String comment = form.getComment();
+                else if ("fasta".equalsIgnoreCase(form.getFileType()))
+                {
+                    FastaDbLoader fdbl = new FastaDbLoader(file, getViewBackgroundInfo(), null);
+                    fdbl.setDefaultOrganism(form.getDefaultOrganism());
+                    fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
+                    loader = fdbl;
+                }
+                else
+                {
+                    throw new IllegalArgumentException("Unknown annotation file type: " + form.getFileType());
+                }
 
-            DefaultAnnotationLoader loader;
-
-            //TODO: this style of dealing with different file types must be repaired.
-            if ("uniprot".equalsIgnoreCase(form.getFileType()))
-            {
-                loader = new XMLProteinLoader(file, getViewBackgroundInfo(), null, form.isClearExisting());
-            }
-            else if ("fasta".equalsIgnoreCase(form.getFileType()))
-            {
-                FastaDbLoader fdbl = new FastaDbLoader(file, getViewBackgroundInfo(), null);
-                fdbl.setDefaultOrganism(form.getDefaultOrganism());
-                fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
-                loader = fdbl;
-            }
-            else
-            {
-                throw new IllegalArgumentException("Unknown annotation file type: " + form.getFileType());
-            }
-
-            loader.setComment(comment);
-
-            try
-            {
+                loader.setComment(form.getComment());
                 loader.validate();
+                PipelineService.get().getPipelineQueue().addJob(loader);
+
+                return true;
             }
             catch (IOException e)
             {
                 errors.addError(new LabkeyError(e.getMessage()));
                 return false;
             }
-
-            PipelineService.get().getPipelineQueue().addJob(loader);
-
-            return true;
         }
 
         public ActionURL getSuccessURL(LoadAnnotForm loadAnnotForm)
