@@ -29,14 +29,18 @@
 %>
 <labkey:errors />
 <form method="post" action="<%=urlFor(PipelineController.SetSequestDefaultsAction.class)%>">
-<table>
-    <tr><td class='labkey-form-label'>Sequest<br>Default XML:</td>
-        <td><textarea name="configureXml" cols="90" rows="20"><%=form.getConfigureXml()%></textarea><br>
-                    For detailed explanations of all available input parameters, see the
-                    <a href="http://fields.scripps.edu/sequest/index.html">Sequest Documentation</a> on-line.</td></tr>
-    <tr><td colspan="2"><labkey:button text="Set Defaults"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/></td></tr>
-</table>
+    <div>
+        <textarea style="width: 100%" id="configureXml" name="configureXml" cols="90" rows="20"><%=text(form.getConfigureXml())%></textarea>
+    </div>
+    <div>
+        For detailed explanations of all available input parameters, see the
+        <a href="http://fields.scripps.edu/sequest/index.html">Sequest Documentation</a> and <%= helpLink("pipelineSequest", "LabKey Server Sequest documentation")%> on-line.
+    </div>
+    <div>
+        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
+    </div>
 </form>
 <script for=window event=onload>
 try {document.getElementById("analysisName").focus();} catch(x){}
+Ext.EventManager.on('configureXml', 'keydown', handleTabsInTextArea);
 </script>

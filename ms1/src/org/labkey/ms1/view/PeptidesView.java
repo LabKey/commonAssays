@@ -15,14 +15,19 @@
  */
 package org.labkey.ms1.view;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
-import org.labkey.api.security.User;
 import org.labkey.api.view.DataView;
 import org.labkey.ms1.query.PeptideFilter;
 
@@ -102,7 +107,7 @@ public class PeptidesView extends QueryView
         defCols.add(FieldKey.fromParts("ProteinHits"));
         defCols.add(FieldKey.fromParts("Protein"));
 
-        ContainerFilter containerFilter = _searchSubfolders ? ContainerFilter.CURRENT : ContainerFilter.Type.CurrentAndSubfolders.create(getUser());
+        ContainerFilter containerFilter = _searchSubfolders ? ContainerFilter.Type.CurrentAndSubfolders.create(getUser()) : ContainerFilter.CURRENT;
         return MS2Service.get().createPeptidesTableInfo(getViewContext().getUser(),
                 getViewContext().getContainer(), false, containerFilter, filter, defCols);
     }

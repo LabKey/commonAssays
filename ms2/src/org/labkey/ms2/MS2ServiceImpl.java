@@ -66,6 +66,7 @@ public class MS2ServiceImpl implements MS2Service.Service
     {
         // Go through the schema so we get metadata applied correctly
         PeptidesTableInfo table = (PeptidesTableInfo)createSchema(user, container).getTable(MS2Schema.TableType.Peptides.name());
+        table.setContainerFilter(containerFilter);
         if(null != filter)
             table.addCondition(filter);
         if(null != defaultColumns)

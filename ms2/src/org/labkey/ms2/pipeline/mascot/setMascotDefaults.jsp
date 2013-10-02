@@ -29,18 +29,18 @@
 %>
 <form method="post" action="<%=urlFor(PipelineController.SetMascotDefaultsAction.class)%>">
 <labkey:errors />
-<table>
-    <tr><td class='labkey-form-label'>Mascot<br>Default XML:</td>
-<!--
-need to change this to to use a generic default
-it need not be a X! Tandem default
--->
-        <td><textarea name="configureXml" cols="90" rows="20"><%=form.getConfigureXml()%></textarea><br>
-                    For detailed explanations of all available input parameters, see the
-                    <a href="http://www.matrixscience.com/help_index.html" target="_api">Mascot API Documentation</a> on-line.</td></tr>
-    <tr><td colspan="2"><labkey:button text="Set Defaults"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/></td></tr>
-</table>
+    <div>
+        <textarea style="width: 100%" id="configureXml" name="configureXml" cols="90" rows="20"><%=text(form.getConfigureXml())%></textarea>
+    </div>
+    <div>
+        For detailed explanations of all available input parameters, see the
+        <a href="http://www.matrixscience.com/help_index.html" target="_api">Mascot API Documentation</a> and <%= helpLink("pipelineMascot", "LabKey Server Mascot documentation")%> on-line.
+    </div>
+    <div>
+        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
+    </div>
 </form>
 <script for=window event=onload>
 try {document.getElementById("analysisName").focus();} catch(x){}
+Ext.EventManager.on('configureXml', 'keydown', handleTabsInTextArea);
 </script>
