@@ -165,6 +165,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // the Excel files, so we get a cached parser, which has the data for all of the files.
         if (!parser.isImported())
         {
+            if (form == null)
+            {
+                throw new ExperimentException("Importing a Luminex run from a XAR file is not supported");
+            }
             importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form, true);
             parser.setImported(true);
         }
