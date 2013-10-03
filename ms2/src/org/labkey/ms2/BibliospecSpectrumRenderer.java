@@ -157,23 +157,28 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             modificationPS.execute();
                         }
 
-                        assert mzFloats.length == intensityFloats.length : "Mismatched spectra arrays";
-                        // Write out mz as doubles
-                        ByteBuffer mzBuffer = ByteBuffer.allocate(mzFloats.length * Double.SIZE / 8);
-                        mzBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                        // Write out mz as floats
-                        ByteBuffer intensityBuffer = ByteBuffer.allocate(intensityFloats.length * Float.SIZE / 8);
-                        intensityBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                        for (int i = 0; i < mzFloats.length; i++)
-                        {
-                            mzBuffer.putDouble(mzFloats[i]);
-                            intensityBuffer.putFloat(intensityFloats[i]);
-                        }
 
-                        spectraPS.setInt(1, spectraCount);
-                        spectraPS.setBytes(2, mzBuffer.array());
-                        spectraPS.setBytes(3, intensityBuffer.array());
-                        spectraPS.execute();
+                        // Don't bother inserting a spectra row if we don't have the spectra
+                        if (mzFloats.length > 0)
+                        {
+                            assert mzFloats.length == intensityFloats.length : "Mismatched spectra arrays";
+                            // Write out mz as doubles
+                            ByteBuffer mzBuffer = ByteBuffer.allocate(mzFloats.length * Double.SIZE / 8);
+                            mzBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                            // Write out mz as floats
+                            ByteBuffer intensityBuffer = ByteBuffer.allocate(intensityFloats.length * Float.SIZE / 8);
+                            intensityBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                            for (int i = 0; i < mzFloats.length; i++)
+                            {
+                                mzBuffer.putDouble(mzFloats[i]);
+                                intensityBuffer.putFloat(intensityFloats[i]);
+                            }
+
+                            spectraPS.setInt(1, spectraCount);
+                            spectraPS.setBytes(2, mzBuffer.array());
+                            spectraPS.setBytes(3, intensityBuffer.array());
+                            spectraPS.execute();
+                        }
                     }
                 }
 
