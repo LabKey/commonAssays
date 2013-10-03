@@ -18,18 +18,16 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.query.MS2Schema;
-import org.springframework.web.servlet.mvc.Controller;
 
 /**
  * User: jeckels
@@ -50,16 +48,6 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
     public String[] getProtocolPrefixes()
     {
         return _protocolPrefixes;
-    }
-
-    private ActionButton createButton(ViewContext context, Class<? extends Controller> action, String description, ActionButton.Action method)
-    {
-        ActionURL url = new ActionURL(action, context.getContainer());
-        url.addParameter("ExperimentRunIds", true);
-        ActionButton button = new ActionButton(url, description);
-        button.setActionType(method);
-        button.setDisplayModes(DataRegion.MODE_GRID);
-        return button;
     }
 
     @Override
