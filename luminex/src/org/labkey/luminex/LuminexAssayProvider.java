@@ -407,9 +407,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public boolean supportsReRun()
+    public ReRunSupport getReRunSupport()
     {
-        return true;
+        return ReRunSupport.ReRunAndDelete;
     }
 
     @Override
