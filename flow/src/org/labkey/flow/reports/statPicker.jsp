@@ -28,6 +28,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = HttpView.currentContext();
     FlowPropertySet fps = new FlowPropertySet(context.getContainer());
@@ -48,7 +49,7 @@
             if (null != spec.getSubset().getParent())
                 jsonStats.append("parent:").append(PageFlowUtil.jsString(spec.getSubset().getParent().toString())).append(",");
         }
-        jsonStats.append("stat:").append(PageFlowUtil.jsString(spec.getStatistic().getShortName())).append(",");
+        jsonStats.append("stat:").append(PageFlowUtil.jsString(spec.getStatistic().name())).append(",");
         jsonStats.append("param:").append(PageFlowUtil.jsString(spec.getParameter())).append(",");
         jsonStats.append("}");
         comma = ",\n";
@@ -70,18 +71,22 @@
     }
 
     StringBuilder stats = new StringBuilder();
-    stats.append("[");
+    stats.append("{");
     comma = "";
     for (StatisticSpec.STAT stat : StatisticSpec.STAT.values())
     {
         if (stat == StatisticSpec.STAT.Spill)
             continue;
         stats.append(comma);
-        stats.append("[\"").append(stat.getShortName()).append("\", \"").append(stat.getLongName()).append("\"]");
+        stats.append("\"").append(stat.name()).append("\": {");
+        stats.append("  name: \"").append(stat.name()).append("\"");
+        stats.append(", shortName: \"").append(stat.getShortName()).append("\"");
+        stats.append(", longName: \"").append(stat.getLongName()).append("\"");
+        stats.append("}");
 
         comma = ",\n";
     }
-    stats.append("]");
+    stats.append("}");
 
     StringBuilder ops = new StringBuilder();
     ops.append("[");
@@ -160,74 +165,21 @@ var StatCombo = Ext.extend(Ext.form.ComboBox,
     constructor : function (config)
     {
         config.mode = 'local';
-        config.store = <%=stats%>
+        config.store = new Ext.data.JsonStore({
+            root: 'stats',
+            idProperty: 'name',
+            fields: ['name', 'shortName', 'longName']
+        });
+        config.valueField='name';
+        config.displayField='longName';
+        config.forceSelection=true;
+        config.triggerAction='all';
+        config.listWidth='230px';
 
         StatCombo.superclass.constructor.call(this, config);
-    },
-
-    filterStats : function (stats)
-    {
-        if (stats && stats.length > 0)
-        {
-            if (stats.length == 1)
-            {
-                this.getStore().filter("field1", stats[0]);
-                this.setValue(stats[0]);
-            }
-            else
-            {
-                var options = [];
-                for (var i=0 ; i<stats.length ; i++)
-                    options.push({ property: "field1", value: stats[i] });
-                var filterFn = this.createOrFilter(options);
-                this.getStore().filterBy(filterFn);
-            }
-        }
-        else
-        {
-            this.clearValue();
-            this.getStore().clearFilter();
-        }
-    },
-
-    createFilterFns : function (options)
-    {
-        var filters = [];
-        for (var i = 0; i < options.length; i++)
-        {
-            var option = options[i],
-                    func   = options.fn,
-                    scope  = options.scope || this;
-
-            if (!Ext.isFunction(func)) {
-                func = this.getStore().createFilterFn(option.property, option.value, option.anyMatch, option.caseSensitive, option.exactMatch);
-            }
-
-            filters.push({fn: func, scope: scope});
-        }
-
-        return filters;
-    },
-
-    createOrFilter : function (options)
-    {
-        var filters = this.createFilterFns(options);
-        return function (record) {
-            for (var j = 0; j < filters.length; j++)
-            {
-                var filter = filters[j],
-                    fn     = filter.fn,
-                    scope  = filter.scope;
-
-                var isMatch = fn.call(scope, record);
-                if (isMatch)
-                    return true;
-            }
-
-            return false;
-        };
     }
 });
+Ext.reg('statcombo', StatCombo);
 
 var SubsetField = Ext.extend(Ext.form.TriggerField,
 {
@@ -306,19 +258,29 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
 {
     constructor : function (config)
     {
-        this.hiddenField = new Ext.form.Hidden({name: config.name});
-
-        this.subsetField = new SubsetField({name: config.name + "_subset"});
-        this.subsetField.on("selectionchange", this.subsetChanged, this);
-        this.subsetField.on("change", this.subsetChanged, this);
-        this.subsetField.on("blur", this.subsetChanged, this);
-
-        this.statCombo = new Ext.form.ComboBox({name: config.name + "_stat", store: []});
-        this.statCombo.on("selectionchange", this.statChanged, this);
-        this.statCombo.on("change", this.statChanged, this);
-        this.statCombo.on("blur", this.statChanged, this);
-
-        this.items = [ this.subsetField, this.statCombo, this.hiddenField ];
+        config.items = [{
+            xtype: 'subsetField',
+            name: config.name + "_subset",
+            ref: 'subsetField',
+            listeners: {
+                selectionchange: { fn: this.subsetChanged, scope: this },
+                change: { fn: this.subsetChanged, scope: this },
+                blur: { fn: this.subsetChanged, scope: this }
+            }
+        },{
+            xtype: 'statcombo',
+            name: config.name + "_stat",
+            ref: 'statCombo',
+            listeners: {
+                selectionchange: { fn: this.statChanged, scope: this },
+                change: { fn: this.statChanged, scope: this },
+                blur: { fn: this.statChanged, scope: this }
+            }
+        },{
+            xtype: 'hidden',
+            name: config.name,
+            ref: 'hiddenField'
+        }];
 
         StatisticField.superclass.constructor.call(this, config);
     },
@@ -330,8 +292,8 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
         if (stats && stats.length > 0)
         {
             this.statCombo.getStore().removeAll();
-            this.statCombo.getStore().loadData(stats);
-            //this.statCombo.enable();
+            var storeData = createStatStore(stats);
+            this.statCombo.getStore().loadData(storeData);
             this.statCombo.focus();
         }
         else
@@ -364,8 +326,19 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
                 if (s.subset == population)
                     stats.push(s.stat);
             }
-            this.statCombo.getStore().loadData(stats);
-            this.statCombo.setValue(stat);
+
+            var storeData = createStatStore(stats);
+            this.statCombo.getStore().loadData(storeData);
+
+            // Find the statistic by the StatisticSpec enum name, but fallback to the shortName for reports that were created incorrectly.
+            var index = this.statCombo.getStore().find('name', stat);
+            if (index == -1)
+                index = this.statCombo.getStore().find('shortName', stat);
+            if (index > -1) {
+                var record = this.statCombo.getStore().getAt(index);
+                this.statCombo.setValue(record.id);
+            }
+
             //this.statCombo.setDisabled(!(stat && stat.length > 0));
         }
         this.updateHiddenValue();
@@ -401,12 +374,29 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
 });
 Ext.reg('opCombo', OpCombo);
 
+var FlowStatistics = <%=stats%>;
+
+function createStatStore(stats)
+{
+    var items = [];
+
+    for (var i = 0, l=stats.length; i < l; i++)
+    {
+        var stat = stats[i];
+        var item = FlowStatistics[stat];
+        if (item)
+            items.push(item);
+    }
+
+    return {stats: items};
+}
+
 var FlowPropertySet = {};
 FlowPropertySet.keywords = [<%
     comma = "";
     for (String s : fps.getVisibleKeywords())
     {
-        %><%=comma%><%=PageFlowUtil.jsString(s)%><%
+        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
@@ -418,7 +408,7 @@ SampleSet.properties = [<%
     comma = "";
     for (String s : sampleSetProperties)
     {
-        %><%=comma%><%=PageFlowUtil.jsString(s)%><%
+        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];

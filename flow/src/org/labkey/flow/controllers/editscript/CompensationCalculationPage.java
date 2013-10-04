@@ -22,6 +22,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.SubsetPart;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -370,7 +371,9 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         {
             if (analysis.getPopulations().size() > 0)
             {
-                ret.add(analysis.getName().getRawName());
+                PopulationName name = analysis.getName();
+                if (name != null)
+                    ret.add(name.getRawName());
             }
         }
         return ret.toArray(new String[0]);

@@ -36,6 +36,8 @@
     ActionURL returnURL = bean.second;
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
+
+    String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
 %>
 <style>
     .x-form-item { margin:2px;} 
@@ -56,11 +58,11 @@ var report =
     for (int i=0 ; i<10 ; i++)
     {
         FilterFlowReport.Filter f = new FilterFlowReport.Filter(d,i);
-        %><%=comma%>{
+        %><%=text(comma)%>{
             property:<%=q(f.property)%>,
             value:<%=q(f.value)%>,
             type:<%=q(f.type)%>,
-            op:<%=null==f.op?q("eq"):q(f.op)%>}<%
+            op:<%=text(null==f.op?q("eq"):q(f.op))%>}<%
         comma =",";
     }
     %>]
@@ -74,7 +76,7 @@ function Form_onSave()
         success:function(form, action)
         {
             report.reportId = action.result.reportId;
-            window.location = <%=returnURL == null ? q(buildURL(ReportsController.BeginAction.class)) : q(returnURL.getLocalURIString())%>;
+            window.location = <%=q(retURL)%>;
         },
         failure:function(form,action)
         {
@@ -86,7 +88,7 @@ function Form_onSave()
 
 function Form_onCancel()
 {
-    window.location = <%=returnURL == null ? q(buildURL(ReportsController.BeginAction.class)) : q(returnURL.getLocalURIString())%>;
+    window.location = <%=q(retURL)%>;
 }
 
 
@@ -165,7 +167,7 @@ Ext.onReady(function() {
             {xtype:'compositefield', fieldLabel: 'Keyword', items: [
                 {xtype:'hidden', name:'filter[0].type', value:'keyword'},
                 {xtype:'combo', name:'filter[0].property', store:FlowPropertySet.keywords, value:keyword[0].property},
-                {xtype:'textfield', name:'filter[0].value', value:keyword[0].value},
+                {xtype:'textfield', name:'filter[0].value', value:keyword[0].value}
             ]},
 
             spacer,
@@ -173,7 +175,7 @@ Ext.onReady(function() {
             {xtype:'compositefield', fieldLabel: 'Keyword', items: [
                 {xtype:'hidden', name:'filter[1].type', value:'keyword'},
                 {xtype:'combo', name:'filter[1].property', store:FlowPropertySet.keywords, value:keyword[1].property},
-                {xtype:'textfield', name:'filter[1].value', value:keyword[1].value},
+                {xtype:'textfield', name:'filter[1].value', value:keyword[1].value}
             ]},
 
             spacer,
@@ -181,7 +183,7 @@ Ext.onReady(function() {
             {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
                 {xtype:'hidden', name:'filter[2].type', value:'sample'},
                 {xtype:'combo', name:'filter[2].property', store:SampleSet.properties, value:sample[0].property},
-                {xtype:'textfield', name:'filter[2].value', value:sample[0].value},
+                {xtype:'textfield', name:'filter[2].value', value:sample[0].value}
             ]},
 
             spacer,
@@ -189,14 +191,14 @@ Ext.onReady(function() {
             {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
                 {xtype:'hidden', name:'filter[3].type', value:'sample'},
                 {xtype:'combo', name:'filter[3].property', store:SampleSet.properties, value:sample[1].property},
-                {xtype:'textfield', name:'filter[3].value', value:sample[1].value},
+                {xtype:'textfield', name:'filter[3].value', value:sample[1].value}
             ]},
 
             {xtype:'hidden', name:'filter[4].type', value:'statistic'},
             {xtype:'statisticField', fieldLabel: 'Statistic', name:'filter[4].property', value:statistic[0].property},
             {xtype:'compositefield', items: [
                 {xtype:'opCombo', name:'filter[4].op', value:statistic[0].op},
-                {xtype:'textfield', name:'filter[4].value', value:statistic[0].value},
+                {xtype:'textfield', name:'filter[4].value', value:statistic[0].value}
             ]},
 
             spacer,
@@ -205,7 +207,7 @@ Ext.onReady(function() {
             {xtype:'statisticField', fieldLabel: 'Statistic', name:'filter[5].property', value:statistic[1].property},
             {xtype:'compositefield', items: [
                 {xtype:'opCombo', name:'filter[5].op', value:statistic[1].op},
-                {xtype:'textfield', name:'filter[5].value', value:statistic[1].value},
+                {xtype:'textfield', name:'filter[5].value', value:statistic[1].value}
             ]},
 
             spacer,
