@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
+<%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
 <%@ page extends="org.labkey.ms2.pipeline.ConfigureSequenceDB" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
