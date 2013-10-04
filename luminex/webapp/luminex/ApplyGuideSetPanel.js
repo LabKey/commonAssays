@@ -124,7 +124,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            selectedHeaderCols.push({header:'Average FI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
+            selectedHeaderCols.push({header:'MFI', dataIndex:'AverageFiBkgd', width:75, renderer: this.numberRenderer, align: 'right'});
         }
 
         var selectedRunsColModel = new Ext.grid.ColumnModel({
@@ -205,7 +205,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            guideSetColumnModelColumns.push({header: 'Avg FI', dataIndex: 'SinglePointControlFIAverage', renderer: this.numberRenderer, align: 'right'});
+            guideSetColumnModelColumns.push({header: 'MFI', dataIndex: 'SinglePointControlFIAverage', renderer: this.numberRenderer, align: 'right'});
         }
         var guideSetsColModel = new Ext.grid.ColumnModel({
             defaults: {width: 75, sortable: true},
