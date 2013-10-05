@@ -119,7 +119,7 @@
             List<? extends ISampleInfo> allSamples = workspace.getSamples();
             boolean allSelected = allSamples.size() == selectedSamples.size();
         %>
-        <b>Workspace:</b> <%=h(name)%><br/>
+        <b><%=h(workspace.getKindName())%>:</b> <%=h(name)%><br/>
         <table border="0" style="margin-left:1em;">
             <tr>
                 <td><b>Samples:</b></td>

@@ -79,6 +79,12 @@ public class ExternalAnalysis implements IWorkspace, Serializable
         }
     }
 
+    @Override
+    public String getKindName()
+    {
+        return "Analysis Archive";
+    }
+
     public static ExternalAnalysis readAnalysis(File file) throws IOException
     {
         VirtualFile vf = new FileSystemFile(file);

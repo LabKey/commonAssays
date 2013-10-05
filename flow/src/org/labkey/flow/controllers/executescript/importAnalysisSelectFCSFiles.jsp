@@ -86,7 +86,7 @@
     }
 </script>
 
-<p><em>Optionally</em>, you can browse the pipeline for the FCS files used in the workspace.
+<p><em>Optionally</em>, you can browse the pipeline for the FCS files used in the <%=h(workspace.getKindName())%>.
     Once the workspace and FCS files are associated, you will be able to use <%=h(FlowModule.getLongProductName())%>
     to see additional graphs, or calculate additional statistics.
     The FCS files themselves will not be modified, and will remain in the file system.
@@ -97,9 +97,9 @@
        id="<%=ImportAnalysisForm.SelectFCSFileOption.None%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.None)%>
        onclick="clearSelections(this.value);" />
-<label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with workspace.</label>
+<label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with the <%=h(workspace.getKindName())%>.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    Statistics from the FlowJo workspace will be imported but no graphs will be generated.<br>
+    Statistics from the <%=h(workspace.getKindName())%> will be imported but no graphs will be generated.<br>
     <em>NOTE:</em> Choosing this option will advance past the analysis engine step.
 </div>
 
@@ -145,7 +145,7 @@
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" style="<%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</label>
 <div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">
-    <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the FlowJo workspace with previously imported FCS files.
+    <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
 </div>
 
 <input type="radio" name="selectFCSFilesOption"
@@ -165,9 +165,9 @@
         String keywordDir = form.getKeywordDir() != null ? form.getKeywordDir()[0] : "";
     %>
     Select a <b>directory</b> containing the FCS files below if you want
-    to associate the workspace <em>'<%=h(name)%>'</em> with a set of FCS files.
+    to associate the <%=h(workspace.getKindName())%> <em>'<%=h(name)%>'</em> with a set of FCS files.
     <br>
-    The sample's keywords stored in the workspace will be used instead of those from the FCS files.
+    The sample's keywords stored in the <%=h(workspace.getKindName())%> will be used instead of those from the FCS files.
     <br/><br/>
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value="<%=h(keywordDir)%>"/>
 
@@ -255,7 +255,7 @@
     {
     %><p><em>The pipeline root has not been set for this folder.</em><br>
     You can safely skip this step, however no graphs can be generated
-    when importing the FlowJo workspace without the FCS files.</p><%
+    when importing the <%=h(workspace.getKindName())%> without the FCS files.</p><%
     if (canSetPipelineRoot) {
 %><%=generateButton("Set pipeline root", urlProvider(PipelineUrls.class).urlSetup(container))%><%
 } else {

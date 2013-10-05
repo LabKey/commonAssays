@@ -37,6 +37,12 @@ public class PCWorkspace extends FlowJoWorkspace
         super(name, path, elDoc);
     }
 
+    @Override
+    public String getKindName()
+    {
+        return "FlowJo Workspace";
+    }
+
     protected void readSample(Element elSample)
     {
         SampleInfo sampleInfo = new SampleInfo();

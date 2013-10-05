@@ -68,4 +68,11 @@ public class FlowRunWorkspace extends Workspace
             }
         }
     }
+
+    @Override
+    public String getKindName()
+    {
+        return "FlowRun Workspace";
+    }
+
 }

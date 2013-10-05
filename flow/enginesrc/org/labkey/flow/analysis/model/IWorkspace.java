@@ -32,6 +32,9 @@ public interface IWorkspace
 
     public String getName();
 
+    /** Get a display string that indicates the workspace type, e.g. "FlowJo Mac workspace" or "Analysis Archive".) */
+    public String getKindName();
+
     /**
      * Warnings generated during loading of the workspace.
      * @return

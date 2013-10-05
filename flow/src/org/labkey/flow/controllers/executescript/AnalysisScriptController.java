@@ -883,7 +883,7 @@ public class AnalysisScriptController extends BaseFlowController
             List<? extends ISampleInfo> samples = workspace.getSamples();
             if (samples.size() == 0)
             {
-                errors.reject(ERROR_MSG, "The workspace doesn't contain samples");
+                errors.reject(ERROR_MSG, String.format("%s doesn't contain samples", workspace.getKindName()));
                 return;
             }
 
@@ -1074,7 +1074,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                     if (!found)
                     {
-                        String msg = "None of the samples used by the workspace were found in the selected directory '" + form.getKeywordDir()[0] + "'.";
+                        String msg = String.format("None of the samples used by the %s were found in the selected directory '%s'.", workspace.getKindName(), form.getKeywordDir()[0]);
                         errors.reject(ERROR_MSG, msg);
                         return;
                     }
@@ -1322,7 +1322,7 @@ public class AnalysisScriptController extends BaseFlowController
                     int index = parameters.indexOf(param);
                     if (index == -1)
                     {
-                        errors.reject(ERROR_MSG, "Parameter '" + param + "' does not exist in the workspace");
+                        errors.reject(ERROR_MSG, String.format("Parameter '%s' does not exist in the %s", param, workspace.getKindName()));
                         return;
                     }
                 }

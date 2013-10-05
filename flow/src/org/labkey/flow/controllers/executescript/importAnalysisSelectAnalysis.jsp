@@ -36,9 +36,9 @@
     boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 
-<p>You may either upload a FlowJo workspace from your local computer or browse the pipeline
-    for a FlowJo workspace available to the server.  Be sure to save your FlowJo workspace
-    as XML so <%=h(FlowModule.getShortProductName())%> can read it.
+<p>You may either upload an analysis archive or FlowJo workspace from your local computer or browse the pipeline
+    for an analysis archive or FlowJo workspace available to the server.
+    Mac FlowJo workspaces must be saved as XML for <%=h(FlowModule.getLongProductName())%> to be able to read it.
 </p>
 <hr/>
 <input type="radio" name="selectWorkspace" id="uploadWorkspace" value="uploadWorkspace" />
@@ -58,7 +58,7 @@
     <% if (hasPipelineRoot) {
         String inputId = "workspace.path";
     %>
-    You can browse the pipeline directories and find the analysis archive or <b>workspace XML</b> to import.<br/><br/>
+    You can browse the pipeline directories and find the analysis archive or <b>FlowJo workspace XML</b> to import.<br/><br/>
     <%  if (!form.getWorkspace().getHiddenFields().containsKey("path")) { %>
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>

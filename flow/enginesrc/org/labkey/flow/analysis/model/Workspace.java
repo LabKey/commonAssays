@@ -634,4 +634,14 @@ public abstract class Workspace implements IWorkspace, Serializable
         }
     }
 
+    @Override
+    public String toString()
+    {
+        return "[" + getKindName() + ": " +
+                "name: " + getName() + ", " +
+                "path: " + getPath() + ", " +
+                "samples: " + getSampleCount() +
+                "]"
+                ;
+    }
 }

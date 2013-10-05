@@ -38,6 +38,12 @@ public class MacWorkspace extends FlowJoWorkspace
         super(name, path, elDoc);
     }
 
+    @Override
+    public String getKindName()
+    {
+        return "FlowJo Mac Workspace";
+    }
+
     protected void readAll(Element elDoc)
     {
         readAutoCompensationScripts(elDoc);

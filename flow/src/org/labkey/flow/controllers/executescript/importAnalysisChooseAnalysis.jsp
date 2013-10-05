@@ -158,7 +158,7 @@ those results must be put into different analysis folders.
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <br>
     <% if (analyses.length == 0 || analyses.length == disabledAnalyses.size()) { %>
-    What do you want to call the new analysis folder?  You will be able to use this name for multiple uploaded workspaces.<br>
+    What do you want to call the new analysis folder?  You will be able to use this name for multiple uploaded analyses.<br>
     <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>">
     <input type="hidden" name="createAnalysis" value="true">
     <br>

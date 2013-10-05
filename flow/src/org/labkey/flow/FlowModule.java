@@ -204,7 +204,7 @@ public class FlowModule extends DefaultModule
 
     public static String getLongProductName()
     {
-        return "LabKey Flow";
+        return "LabKey Server";
     }
 
     @Override

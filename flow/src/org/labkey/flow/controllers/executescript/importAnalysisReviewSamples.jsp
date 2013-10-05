@@ -162,7 +162,7 @@ if (groups.size() > 1)
             }
         }
     </script>
-    <label for="importGroupNames">Select a FlowJo group to import from the workspace.</label>
+    <label for="importGroupNames">Select a group to import from the <%=h(workspace.getKindName())%>.</label>
     <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
         <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
     </select>
