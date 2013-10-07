@@ -204,7 +204,7 @@
                 <td>
                     <% if (form.getrEngineNormalizationReference() != null) {
                         ISampleInfo sample = workspace.getSample(form.getrEngineNormalizationReference());
-                        %><%=h(sample.getLabel())%>
+                        %><%=h(sample == null ? "None selected" : sample.getLabel())%>
                     <% } %>
                 </td>
             </tr>
