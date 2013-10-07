@@ -16,6 +16,7 @@
 
 package org.labkey.microarray;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
@@ -24,16 +25,16 @@ import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.RedirectException;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
@@ -52,6 +53,7 @@ import java.util.Map;
 @RequiresPermissionClass(InsertPermission.class)
 public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardAction<MicroarrayRunUploadForm, MicroarrayAssayProvider>
 {
+    private static final Logger LOG = Logger.getLogger(MicroarrayUploadWizardAction.class);
     private Integer _channelCount;
     private String _barcode;
 
@@ -165,7 +167,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
         catch (ExperimentException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            LOG.warn(e);
         }
 
         InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
