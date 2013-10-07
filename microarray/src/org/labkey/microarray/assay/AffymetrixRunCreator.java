@@ -207,8 +207,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
             String sampleSetName = name.substring(0, dotIndex);
             String sampleName = name.substring(dotIndex + 1);
             // Could easily do some caching here, but probably not a significant perf issue
-            ExpSampleSet[] sampleSets = ExperimentService.get().getSampleSets(context.getContainer(), context.getUser(), true);
-            for (ExpSampleSet sampleSet : sampleSets)
+            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(context.getContainer(), context.getUser(), true))
             {
                 // Look for a sample set with the right name
                 if (sampleSetName.equals(sampleSet.getName()))

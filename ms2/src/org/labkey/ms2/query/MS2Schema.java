@@ -20,13 +20,23 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteomicsModule;
-import org.labkey.api.query.*;
+import org.labkey.api.query.CustomView;
+import org.labkey.api.query.CustomViewInfo;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.DetailsURL;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.StringExpression;
@@ -37,7 +47,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.ProteinGroupProteins;
@@ -50,7 +59,16 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -321,7 +339,6 @@ public class MS2Schema extends UserSchema
                 form = new MS2Controller.SpectraCountForm();
                 context = HttpView.currentContext();
                 BaseViewAction.defaultBindParameters(form, null, HttpView.getBindPropertyValues());
-                form.validateTargetProtein(context);
 
                 _runs = Collections.emptyList();
 

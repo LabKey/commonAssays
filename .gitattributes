@@ -1505,6 +1505,7 @@ ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_sequence.java -text
 ms2/src/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp -text
 ms2/src/org/labkey/ms2/proteinCoverageMap.jsp -text
 ms2/src/org/labkey/ms2/proteinCoverageMapHeader.jsp -text
+ms2/src/org/labkey/ms2/proteinDisambiguation.jsp -text
 ms2/src/org/labkey/ms2/proteinSequence.jsp -text
 ms2/src/org/labkey/ms2/query/AbstractQueryCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/AbstractRunCompareView.java -text

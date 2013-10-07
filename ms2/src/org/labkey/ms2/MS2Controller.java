@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
-import org.labkey.api.protein.ProteinService;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.ExportException;
 import org.labkey.api.action.FormHandlerAction;
@@ -55,6 +54,7 @@ import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -111,7 +111,6 @@ import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.compare.SpectraCountQueryView;
-import org.labkey.api.data.NestableQueryView;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.AbstractQueryMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
@@ -167,11 +166,13 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -348,7 +349,7 @@ public class MS2Controller extends SpringActionController
         }
         compareMenu.addMenuItem("ProteinProphet (Legacy)", null, view.createVerifySelectedScript(proteinProphetURL, "runs"));
 
-        ActionURL spectraURL = new ActionURL(MS2Controller.SpectraCountSetupAction.class, container);
+        ActionURL spectraURL = new ActionURL(SpectraCountSetupAction.class, container);
         if (experimentRunIds)
         {
             spectraURL.addParameter("experimentRunIds", "true");
@@ -890,9 +891,9 @@ public class MS2Controller extends SpringActionController
                 getContainer().hasPermission(getUser(), UpdatePermission.class);
                 {
                     ActionURL editUrl = getViewContext().getActionURL().clone();
-                    editUrl.setAction(MS2Controller.EditElutionGraphAction.class);
+                    editUrl.setAction(EditElutionGraphAction.class);
                     ActionURL toggleUrl = getViewContext().getActionURL().clone();
-                    toggleUrl.setAction(MS2Controller.ToggleValidQuantitationAction.class);
+                    toggleUrl.setAction(ToggleValidQuantitationAction.class);
 
                     NavTree navTree = new NavTree();
                     if (quant.findScanFile() != null && !"q3".equals(run.getQuantAnalysisType()))
@@ -1532,13 +1533,95 @@ public class MS2Controller extends SpringActionController
         targetProtein,
         targetSeqId,
         targetProteinMsg,
-        matchingProtNames,
-        matchingSeqIds
+        targetURL
       }
 
     public enum PivotType
     {
         run, fraction
+    }
+
+    public static class ProteinDisambiguationForm
+    {
+        private String _targetProtein;
+        private String _targetURL;
+
+        public String getTargetProtein()
+        {
+            return _targetProtein;
+        }
+
+        public void setTargetProtein(String targetProtein)
+        {
+            _targetProtein = targetProtein;
+        }
+
+        public String getTargetURL()
+        {
+            return _targetURL;
+        }
+
+        public void setTargetURL(String targetURL)
+        {
+            _targetURL = targetURL;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ProteinDisambiguationRedirectAction extends SimpleViewAction<ProteinDisambiguationForm>
+    {
+        @Override
+        public ModelAndView getView(ProteinDisambiguationForm form, BindException errors) throws Exception
+        {
+            if (form.getTargetURL() == null)
+            {
+                throw new NotFoundException("No targetURL specified");
+            }
+
+            Map<String, String[]> params = new HashMap<String, String[]>(getViewContext().getRequest().getParameterMap());
+            params.remove(PeptideFilteringFormElements.targetURL.toString());
+
+            if (form.getTargetProtein() == null)
+            {
+                ActionURL targetURL = new ActionURL(form.getTargetURL());
+                targetURL.addParameters(params);
+                throw new RedirectException(targetURL);
+            }
+
+            SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(getViewContext().getUser(), getViewContext().getContainer()));
+            tableInfo.addProteinNameFilter(form.getTargetProtein(), false);
+
+            Map<Protein, ActionURL> proteinsWithURLs = new LinkedHashMap<>();
+
+            // Track all of the unique sequences
+            Set<String> sequences = new HashSet<>();
+
+            for (Protein protein : new TableSelector(tableInfo, null, new Sort("BestName")).getArrayList(Protein.class))
+            {
+                sequences.add(protein.getSequence());
+
+                ActionURL targetURL = new ActionURL(form.getTargetURL());
+                targetURL.addParameters(params);
+                targetURL.addParameter(PeptideFilteringFormElements.targetSeqId, protein.getSeqId());
+                proteinsWithURLs.put(protein, targetURL);
+            }
+
+            // If we only have one sequence, we don't need to prompt the user to choose a specific protein, we can just
+            // grab the first one
+            if (sequences.size() == 1)
+            {
+                throw new RedirectException(proteinsWithURLs.values().iterator().next());
+            }
+
+            return new JspView<>("/org/labkey/ms2/proteinDisambiguation.jsp", proteinsWithURLs);
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Disambiguate Protein");
+            return root;
+        }
     }
 
     public enum ProphetFilterType
@@ -1559,19 +1642,17 @@ public class MS2Controller extends SpringActionController
         private String _pivotType = PivotType.run.toString();
         private String _targetProtein;
         private Integer _targetSeqId;
-        private String _targetProteinMsg;
-        private String _matchingSeqIds;
-        private String _matchingProtNames;
         private boolean _exportAsWebPage = false;
 
-        public String getTargetProteinMsg()
-        {
-            return _targetProteinMsg;
-        }
+        private Protein _protein;
 
-        public void setTargetProteinMsg(String targetProteinMsg)
+        public Protein lookupProtein()
         {
-            _targetProteinMsg = targetProteinMsg;
+            if (_protein == null && _targetSeqId != null)
+            {
+                _protein = ProteinManager.getProtein(_targetSeqId.intValue());
+            }
+            return _protein;
         }
 
         public Integer getTargetSeqId()
@@ -1592,26 +1673,6 @@ public class MS2Controller extends SpringActionController
         public void setTargetProtein(String targetProtein)
         {
             _targetProtein = targetProtein;
-        }
-
-        public String getMatchingSeqIds()
-        {
-            return _matchingSeqIds;
-        }
-
-        public void setMatchingSeqIds(String matchingSeqIds)
-        {
-            _matchingSeqIds = matchingSeqIds;
-        }
-
-        public String getMatchingProtNames()
-        {
-            return _matchingProtNames;
-        }
-
-        public void setMatchingProtNames(String matchingProtNames)
-        {
-            _matchingProtNames = matchingProtNames;
         }
 
         public boolean isExportAsWebPage()
@@ -1750,7 +1811,7 @@ public class MS2Controller extends SpringActionController
 
         public void appendPeptideFilterDescription(StringBuilder title, ViewContext context)
         {
-            if (null != getTargetSeqId() && null != getTargetProtein())
+            if (null != lookupProtein() && null != getTargetProtein())
             {
                 title.append("Protein ");
                 title.append(getTargetProtein());
@@ -1801,79 +1862,6 @@ public class MS2Controller extends SpringActionController
         public void setPivotType(String pivotType)
         {
             _pivotType = pivotType;
-        }
-
-        public void validateTargetProtein(ViewContext context)
-        {
-            setMatchingProtNames(null);
-            setMatchingSeqIds(null);
-            setTargetProteinMsg(null);
-
-            if (getTargetProtein() != null)
-            {
-                ArrayList<Integer> matchingIds = new ArrayList<>();
-                StringBuilder sbIds = new StringBuilder();
-                StringBuilder sbNames = new StringBuilder();
-                if (getTargetSeqId() == null) // new search)
-                {
-                    SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(context.getUser(), context.getContainer()));
-                    tableInfo.addProteinNameFilter(getTargetProtein(), false);
-                    List<ColumnInfo> cols = new ArrayList<>();
-                    cols.add(tableInfo.getColumn("SeqId"));
-                    cols.add(tableInfo.getColumn("BestName"));
-
-                    try (Results rsMatches = new TableSelector(tableInfo, cols, null, null).getResults())
-                    {
-                        String sep = "";
-
-                        for (int i = 0; i < rsMatches.getSize(); i++)
-                        {
-                            rsMatches.next();
-                            matchingIds.add(rsMatches.getInt(1));
-                            sbNames.append(sep);
-                            sbIds.append(sep);
-                            sbNames.append(rsMatches.getString(2));
-                            sbIds.append(rsMatches.getInt(1));
-                            sep = ", ";
-                            if (i == MAX_MATCHING_PROTEINS)
-                                break;
-                        }
-                    }
-                    catch (SQLException e)
-                    {
-                        throw new RuntimeSQLException(e);
-                    }
-
-                    if (matchingIds.size() == 1)
-                    {
-                        setTargetProtein(sbNames.toString());
-                        setTargetSeqId(matchingIds.get(0));
-                    }
-                    else
-                    {
-                        if (matchingIds.size() == 0)
-                            setTargetProteinMsg("No matching protein found. ");
-                        else if (matchingIds.size() >= MAX_MATCHING_PROTEINS)
-                            setTargetProteinMsg(" More than " + MAX_MATCHING_PROTEINS + " returned.  Try a more specific search string");
-                        else
-                        {
-                            setTargetProteinMsg("Matching proteins found: ");
-                            setMatchingProtNames(sbNames.toString());
-                            setMatchingSeqIds(sbIds.toString());
-                        }
-                    }
-                }
-                else
-                {
-                    // use the seqId it came in with
-                    sbNames.append(getTargetProtein());
-                    sbIds.append(getTargetSeqId());
-                }
-            }
-            else    // no protein name entered  or name cleared
-            {
-                setTargetSeqId(null);
-            }
         }
     }
 
@@ -1976,13 +1964,6 @@ public class MS2Controller extends SpringActionController
     {
         private PeptideFilteringComparisonForm _form;
 
-        @Override
-        public void validate(PeptideFilteringComparisonForm form, BindException errors)
-        {
-            super.validate(form, errors);
-            form.validateTargetProtein(getViewContext());
-        }
-
         public ComparePeptideQueryAction()
         {
             super(PeptideFilteringComparisonForm.class);
@@ -1996,16 +1977,6 @@ public class MS2Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
-            if (null != form.getTargetProteinMsg())
-            {
-                ActionURL setupURL= getViewContext().getActionURL().clone();
-                setupURL.setAction(MS2Controller.ComparePeptideQuerySetupAction.class);
-
-                setupURL.replaceParameter(PeptideFilteringFormElements.targetProteinMsg.name(), form.getTargetProteinMsg());
-                setupURL.replaceParameter(PeptideFilteringFormElements.matchingProtNames.name(), form.getMatchingProtNames());
-                setupURL.replaceParameter(PeptideFilteringFormElements.matchingSeqIds.name(), form.getMatchingSeqIds());
-                return HttpView.redirect(setupURL);
-            }
             ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
 
             Map<String, String> prefs = getPreferences(ComparePeptideQuerySetupAction.class);
@@ -2370,26 +2341,8 @@ public class MS2Controller extends SpringActionController
             super(SpectraCountForm.class);
         }
 
-        @Override
-        public void validate(SpectraCountForm form, BindException errors)
-        {
-            super.validate(form, errors);
-            form.validateTargetProtein(getViewContext());
-        }
-
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
-            if (null != form.getTargetProteinMsg())
-            {
-                ActionURL setupURL= getViewContext().getActionURL().clone();
-                setupURL.setAction(SpectraCountSetupAction.class);
-
-                setupURL.replaceParameter(PeptideFilteringFormElements.targetProteinMsg.name(), form.getTargetProteinMsg());
-                setupURL.replaceParameter(PeptideFilteringFormElements.matchingProtNames.name(), form.getMatchingProtNames());
-                setupURL.replaceParameter(PeptideFilteringFormElements.matchingSeqIds.name(), form.getMatchingSeqIds());
-                throw new RedirectException(setupURL);
-            }
-
             _form = form;
             _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
             if (_config == null)
@@ -4042,9 +3995,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
-            MS2Run run = form.validateRun();
             getPageConfig().setTemplate(PageConfig.Template.None);
-
             Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
 
             if (protein == null)
@@ -4052,16 +4003,31 @@ public class MS2Controller extends SpringActionController
                 throw new NotFoundException("No such protein: " + form.getSeqIdInt());
             }
 
-            QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
-            SimpleFilter filter = new SimpleFilter();
-            AbstractQueryMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
-            protein.setPeptides(new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), filter, new Sort("Peptide")).getArray(String.class));
+            MS2Run run = null;
+            if (form.getRun() != 0)
+            {
+                run = form.validateRun();
+                QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
+                SimpleFilter filter = new SimpleFilter();
+                AbstractQueryMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
+                protein.setPeptides(new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), filter, new Sort("Peptide")).getArray(String.class));
+            }
 
             PrintWriter writer = getViewContext().getResponse().getWriter();
             ActionURL searchURL = new ActionURL(DoProteinSearchAction.class, getContainer());
             searchURL.addParameter("seqId", protein.getSeqId());
             searchURL.addParameter("identifier", protein.getBestName());
-            writer.write("<a href=\"" + searchURL + "\">Search for other references to this protein</a><br/>");
+            writer.write("<div><a href=\"" + searchURL + "\">Search for other references to this protein</a></div>");
+            writer.write("<div>Best Name: ");
+            writer.write(PageFlowUtil.filter(protein.getBestName()));
+            writer.write("</div>");
+            writer.write("<div>Mass: ");
+            writer.write(PageFlowUtil.filter(DecimalFormat.getNumberInstance().format(protein.getMass())));
+            writer.write("</div>");
+            writer.write("<div>Length: ");
+            writer.write(PageFlowUtil.filter(DecimalFormat.getIntegerInstance().format(protein.getSequence().length())));
+            writer.write("</div>");
+
             writer.write(protein.getCoverageMap(run, null, 40).toString());
             return null;
         }
@@ -4470,8 +4436,6 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
             SimpleFilter.FilterClause targetProteinClause = null;
 
-            form.validateTargetProtein(context);
-
             // get the selected list of MS2Runs from the RunListCache
             List<MS2Run> runs;
             try
@@ -4563,10 +4527,8 @@ public class MS2Controller extends SpringActionController
             {
                 for (SeqRunIdPair ids : idPairs)
                 {
-                    RunForm runForm = new RunForm();
-                    runForm.setViewContext(getViewContext());
-                    runForm.setRun(ids.getRun());
-                    MS2Run ms2Run = runForm.validateRun();
+                    // No need to separately validate - we've already cleared the run permission checks
+                    MS2Run ms2Run = MS2Manager.getRun(ids.getRun());
                     Protein protein = ProteinManager.getProtein(ids.getSeqId());
                     if (protein == null)
                         throw new NotFoundException("Could not find protein with SeqId " + ids.getSeqId());

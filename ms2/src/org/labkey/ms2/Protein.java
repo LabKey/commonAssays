@@ -90,6 +90,18 @@ public class Protein
         _computeCoverage = true;
     }
 
+    /** Field alias for reflection-based object-relational-mapping */
+    public String getProtSequence()
+    {
+        return getSequence();
+    }
+
+    /** Field alias for reflection-based object-relational-mapping */
+    public void setProtSequence(String sequence)
+    {
+        setSequence(sequence);
+    }
+
 
     public double getMass()
     {
