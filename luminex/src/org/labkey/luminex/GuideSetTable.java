@@ -21,7 +21,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
@@ -86,6 +85,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addCurveTypeColumns();
     }
 
+    /** Add a flavor of FI columns (as of this writing, used by SinglePointControls and Titrations) to the current table
+     * @param joinTable the table to join to for the actual FI data
+     * @param srcFIColumnName name of the FI column in the join table
+     * @param targetColumnNamePrefix prefix to be used for the column name to be added to the current table
+     * @param targetColumnLabelPrefix prefix to be used for the column label to be added to the current table
+     */
     private void addFIColumns(TableInfo joinTable, String srcFIColumnName, String targetColumnNamePrefix, String targetColumnLabelPrefix, String guideSetColumnName)
     {
         List<ColumnInfo> columns = Arrays.asList(
@@ -94,7 +99,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 joinTable.getColumn(srcFIColumnName));
         SQLFragment baseSQL = new SQLFragment(" FROM (");
         baseSQL.append(QueryService.get().getSelectSQL(joinTable, columns, null, null, Table.ALL_ROWS, 0, false));
-//        baseSQL.append(joinTable, "x");
         baseSQL.append(") x WHERE x.");
         baseSQL.append(guideSetColumnName);
         baseSQL.append(" = ");
@@ -139,7 +143,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     @Override
     protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
-        // Guide sets are scoped to the protocol, not to folders
+        // Guide sets are scoped to the protocol, not to folders, so filter on ProtocolId instead of Container
         SQLFragment sql = new SQLFragment("ProtocolId = ?");
         sql.add(_userSchema.getProtocol().getRowId());
         return sql;
