@@ -45,8 +45,6 @@ public class CompareDataRegion extends DataRegion
         _rs = rs;
         _columnHeader = columnHeader;
         setName(MS2Manager.getDataRegionNameCompare());
-        setShadeAlternatingRows(true);
-        setShowBorders(true);
         setShowPagination(false);
     }
     

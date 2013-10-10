@@ -3603,8 +3603,6 @@ public class MS2Controller extends SpringActionController
 
             gridView.setFilter(runFilter);
             gridView.setTitle("Show All Runs");
-            rgn.setShadeAlternatingRows(true);
-            rgn.setShowBorders(true);
             rgn.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
 
             setTitle("Show All Runs");

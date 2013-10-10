@@ -112,13 +112,6 @@ public class PeptidesView extends QueryView
                 getViewContext().getContainer(), false, containerFilter, filter, defCols);
     }
 
-    protected DataRegion createDataRegion()
-    {
-        DataRegion region = super.createDataRegion();
-        region.setShadeAlternatingRows(true);
-        return region;
-    }
-
     public DataView createDataView()
     {
         DataView view = super.createDataView();

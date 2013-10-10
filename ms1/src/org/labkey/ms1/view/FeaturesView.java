@@ -160,7 +160,6 @@ public class FeaturesView extends QueryView
     protected DataRegion createDataRegion()
     {
         DataRegion region = super.createDataRegion();
-        region.setShadeAlternatingRows(true);
 
         //if this is for export, remove the details and peaks links
         if(_forExport)

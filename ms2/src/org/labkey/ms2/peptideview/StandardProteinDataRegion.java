@@ -39,7 +39,6 @@ public class StandardProteinDataRegion extends AbstractNestableDataRegion
     public StandardProteinDataRegion(String url)
     {
         super("Protein", url);
-        setShadeAlternatingRows(true);
     }
 
     @Override

@@ -39,7 +39,6 @@ public class ProteinProphetDataRegion extends AbstractNestableDataRegion
     public ProteinProphetDataRegion(String url)
     {
         super("ProteinGroupId", url);
-        setShadeAlternatingRows(true);
     }
 
     @Override

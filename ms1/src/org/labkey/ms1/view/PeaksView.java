@@ -86,17 +86,6 @@ public class PeaksView extends QueryView
     }
 
     /**
-     * Overridden to customize the data region.
-     * @return A customized DataRegion
-     */
-    protected DataRegion createDataRegion()
-    {
-        DataRegion region = super.createDataRegion();
-        region.setShadeAlternatingRows(true);
-        return region;
-    }
-
-    /**
      * Overridden to create a customized data view.
      * @return A customized DataView
      */

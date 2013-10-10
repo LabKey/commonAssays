@@ -254,7 +254,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
         view.getDataRegion().setHorizontalGroups(false);
         view.getDataRegion().setGroupHeadings(poolIDs);
-        view.getDataRegion().setShadeAlternatingRows(true);
+        //view.getDataRegion().setShadeAlternatingRows(true);
 
         addHiddenBatchProperties(form, view);
         addHiddenRunProperties(form, view);
