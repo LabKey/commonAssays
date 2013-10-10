@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
@@ -49,6 +50,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -759,8 +761,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         String hash = HashHelpers.hashFileContents(f);
         String[] hashArray = new String[] {hash};
 
-        FastaFile[] files = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum=? ORDER BY FastaId", hashArray, FastaFile.class);
+        Collection<FastaFile> files = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum = ? ORDER BY FastaId", hashArray).getCollection(FastaFile.class);
         FastaFile loadedFile = null;
+
         for (FastaFile file : files)
         {
             if (file.getLoaded() == null)

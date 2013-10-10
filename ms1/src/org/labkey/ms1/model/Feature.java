@@ -17,11 +17,10 @@
 package org.labkey.ms1.model;
 
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.model.Peptide;
 
 import java.sql.SQLException;
 
@@ -266,7 +265,7 @@ public class Feature
         if(null == _run)
         {
             Integer runId = getRunId();
-            _run = null == runId ? null : ExperimentService.get().getExpRun(getRunId().intValue());
+            _run = null == runId ? null : ExperimentService.get().getExpRun(getRunId());
         }
 
         return _run;
@@ -282,9 +281,7 @@ public class Feature
                 "INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan AND pd.charge=fe.MS2Charge)\n" +
                 "WHERE fe.FeatureId=? AND r.Deleted=? ORDER BY pd.RowId";
 
-        return Table.executeQuery(DbSchema.get("ms2"), sql,
-                new Object[]{Integer.valueOf(_featureId), Boolean.valueOf(false)}, 
-                Peptide.class);
+        return new SqlSelector(DbSchema.get("ms2"), sql, _featureId, false).getArray(Peptide.class);
     }
 
     private int _featureId;

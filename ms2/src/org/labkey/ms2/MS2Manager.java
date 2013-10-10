@@ -454,11 +454,7 @@ public class MS2Manager
             ExperimentService.get().getSchema().getScope().commitTransaction();
             return expRun;
         }
-        catch (SQLException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch (URISyntaxException e)
+        catch (SQLException | URISyntaxException e)
         {
             throw new ExperimentException(e);
         }
@@ -499,16 +495,7 @@ public class MS2Manager
             path = f.getAbsolutePath();
         }
 
-        ProteinProphetFile[] files = Table.executeQuery(getSchema(), sql, new Object[] { path, c.getId(), Boolean.FALSE }, ProteinProphetFile.class);
-        if (files.length == 0)
-        {
-            return null;
-        }
-        if (files.length == 1)
-        {
-            return files[0];
-        }
-        throw new IllegalStateException("Expected a zero or one matching ProteinProphetFiles");
+        return new SqlSelector(getSchema(), sql, path, c, Boolean.FALSE).getObject(ProteinProphetFile.class);
     }
 
     public static ProteinProphetFile getProteinProphetFileByRun(int runId) throws SQLException
@@ -532,16 +519,7 @@ public class MS2Manager
                 getTableInfoProteinProphetFiles() + ".Run = " + getTableInfoRuns() + ".Run AND " +
                 getTableInfoRuns() + ".Deleted = ?";
 
-        ProteinProphetFile[] files = Table.executeQuery(getSchema(), sql, new Object[] { id, Boolean.FALSE }, ProteinProphetFile.class);
-        if (files.length == 0)
-        {
-            return null;
-        }
-        if (files.length == 1)
-        {
-            return files[0];
-        }
-        throw new IllegalStateException("Expected a zero or one matching ProteinProphetFiles");
+        return new SqlSelector(getSchema(), sql, id, Boolean.FALSE).getObject(ProteinProphetFile.class);
     }
 
     private static MS2Run[] getRuns(String whereClause, Object... params)

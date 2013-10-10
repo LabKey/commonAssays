@@ -5690,13 +5690,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(AnnotationInsertionForm form, BindException errors) throws Exception
         {
-            AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?", new Object[] { form.getInsertId() }, AnnotationInsertion.class);
-            if (insertions.length == 0)
-            {
-                throw new NotFoundException();
-            }
-            assert insertions.length == 1;
-            _insertion = insertions[0];
+            _insertion = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
 
             return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
         }

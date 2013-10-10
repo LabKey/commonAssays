@@ -105,9 +105,9 @@ public class MS1Manager
     public PeakAvailability isPeakDataAvailable(int runId) throws SQLException
     {
         String sql = "Select FileId, Imported FROM ms1.Files AS f INNER JOIN exp.Data AS d on (f.ExpDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=? AND f.Deleted=?";
-        Map[] values = Table.executeQuery(getSchema(), sql, new Object[]{runId, FILETYPE_PEAKS, false}, java.util.Map.class);
+        Map<String, Object>[] values = new SqlSelector(getSchema(), sql, runId, FILETYPE_PEAKS, false).getMapArray();
 
-        if(null == values || 0 == values.length || null == values[0].get("FileId"))
+        if (0 == values.length || null == values[0].get("FileId"))
             return PeakAvailability.NotAvailable;
         else if(Boolean.FALSE.equals(values[0].get("Imported")))
             return PeakAvailability.PartiallyAvailable;
@@ -227,8 +227,8 @@ public class MS1Manager
         sql.append(FILETYPE_PEAKS);
         sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=? AND s.Scan IS NOT NULL and s.RetentionTime IS NOT NULL");
 
-        MinMaxScanInfo[] result = Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scanFirst, scanLast, true, false}, MinMaxScanInfo.class);
-        return null == result || 0 == result.length ? null : result[0];
+        MinMaxScanInfo[] result = new SqlSelector(getSchema(), sql, runId, scanFirst, scanLast, true, false).getArray(MinMaxScanInfo.class);
+        return 0 == result.length ? null : result[0];
     }
 
     public Collection<String> getContainerSummary(Container container) throws SQLException
@@ -239,8 +239,8 @@ public class MS1Manager
                 "from ms1.Files as f inner join exp.data as d on (f.ExpDataFileId=d.RowId)\n" +
                 "where type=? and deleted=? and d.Container=?";
         Integer count = Table.executeSingleton(getSchema(), sql, new Object[]{FILETYPE_FEATURES, false, container.getId()}, Integer.class);
-        if(null != count && count.intValue() > 0)
-            items.add(count.intValue() + (count.intValue() > 1 ? " MS1 Runs" : " MS1 Run"));
+        if(null != count && count > 0)
+            items.add(count + (count > 1 ? " MS1 Runs" : " MS1 Run"));
         return items;
     }
 
