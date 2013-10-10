@@ -777,6 +777,7 @@ microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayAssayDesigner.
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayDesignerMainPanel.java -text
 microarray/lib/jai_imageio.jar -text
 microarray/module.properties -text
+microarray/resources/credits/jars.txt -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-9.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-11.30-12.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.20-13.201.sql -text
@@ -795,7 +796,6 @@ microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-8.30-8.31.s
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-8.30-9.10.sql -text
 microarray/resources/schemas/microarray.xml -text
 microarray/resources/views/geo_export.html -text
-microarray/src/META-INF/microarray/jars.txt -text
 microarray/src/org/labkey/microarray/FeatureExtractionRun.java -text
 microarray/src/org/labkey/microarray/MageMLDocumentParser.java -text
 microarray/src/org/labkey/microarray/MicroarrayBulkPropertiesTemplateAction.java -text
@@ -969,6 +969,7 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemInputXmlComposite.java -
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemSequenceDbComposite.java -text
 ms2/module.properties -text
+ms2/resources/credits/scripts.txt -text
 ms2/resources/queries/ms2/CometPeptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/CometPeptides/SearchEngineProtein.qview.xml -text
 ms2/resources/queries/ms2/MascotPeptides/ProteinProphet.qview.xml -text
@@ -1196,7 +1197,6 @@ ms2/resources/views/MS2[!!-~]Runs[!!-~]Browser.webpart.xml -text
 ms2/resources/views/runsOverview.html -text
 ms2/schemas/pepXML.xsd -text
 ms2/schemas/pepXML_v117.xsd -text
-ms2/src/META-INF/ms2/scripts.txt -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/AbstractPeptideDisplayColumn.java -text
 ms2/src/org/labkey/ms2/AbstractProteinQuantitation.java -text
