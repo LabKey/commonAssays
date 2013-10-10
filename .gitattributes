@@ -293,6 +293,9 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/util/LogAxisFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/RangeFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/SimpleLogAxisFunction.java -text
 flow/module.properties -text
+flow/resources/flowReports/positivity.R -text
+flow/resources/flowReports/qc.R -text
+flow/resources/flowReports/ranalysis.r -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-11.20-11.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-12.30-13.10.sql -text
@@ -372,9 +375,6 @@ flow/schemas/Gating-ML.v2.0.20121207/Transformations.v2.0.xsd -text
 flow/schemas/ICSMetadata.xsd -text
 flow/schemas/flowData.xsd -text
 flow/schemas/flowPipelineScript.xsd -text
-flow/src/META-INF/positivity.R -text
-flow/src/META-INF/qc.R -text
-flow/src/META-INF/ranalysis.r -text
 flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text
 flow/src/org/labkey/flow/FlowServiceImpl.java -text

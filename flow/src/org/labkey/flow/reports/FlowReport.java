@@ -136,16 +136,11 @@ abstract public class FlowReport extends AbstractReport
 
     String getScriptResource(String file) throws IOException
     {
-        InputStream is = null;
-        try
+        Module m =  ModuleLoader.getInstance().getModule(FlowModule.NAME);
+
+        try (InputStream is = m.getResourceStream("flowReports/" + file))
         {
-            Module m =  ModuleLoader.getInstance().getModule(FlowModule.NAME);
-            is = m.getResourceStream("/META-INF/" + file);
             return IOUtils.toString(is);
-        }
-        finally
-        {
-            IOUtils.closeQuietly(is);
         }
     }
 
