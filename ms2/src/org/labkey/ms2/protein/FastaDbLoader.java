@@ -759,9 +759,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         }
         String convertedName = getCanonicalPath(f);
         String hash = HashHelpers.hashFileContents(f);
-        String[] hashArray = new String[] {hash};
 
-        Collection<FastaFile> files = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum = ? ORDER BY FastaId", hashArray).getCollection(FastaFile.class);
+        Collection<FastaFile> files = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum = ? ORDER BY FastaId", hash).getCollection(FastaFile.class);
         FastaFile loadedFile = null;
 
         for (FastaFile file : files)
@@ -776,11 +775,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             }
         }
 
-        Long existingProtFastasCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, Long.class);
+        Long existingProtFastasCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", new String[]{hash}, Long.class);
         if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount > 0)
         {
             String previousFileWithSameChecksum =
-                    Table.executeSingleton(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, String.class);
+                    Table.executeSingleton(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", new String[]{hash}, String.class);
 
             if (convertedName.equals(previousFileWithSameChecksum))
                 log.info("FASTA file \"" + convertedName + "\" has already been imported");
