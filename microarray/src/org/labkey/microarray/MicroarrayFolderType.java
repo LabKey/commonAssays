@@ -40,7 +40,7 @@ public class MicroarrayFolderType extends MultiPortalFolderType
             ),
             Arrays.asList(
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
-                Portal.getPortalPart("Assay Details").createWebPart(),
+                Portal.getPortalPart("Assay Runs").createWebPart(),
                 Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart(),
                 Portal.getPortalPart("Assay List").createWebPart()
             ),
