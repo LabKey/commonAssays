@@ -113,7 +113,7 @@ import java.util.Set;
  */
 public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider, ProteomicsModule
 {
-    public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+    public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     private static final ExperimentRunType SAMPLE_PREP_RUN_TYPE = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
     {
         public Priority getPriority(ExpProtocol protocol)
@@ -258,6 +258,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         runTypes.add(SEARCH_RUN_TYPE);
         runTypes.add(new MS2SearchExperimentRunType("Imported Searches", MS2Schema.TableType.ImportedSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("X!Tandem Searches", MS2Schema.TableType.XTandemSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX));
+        runTypes.add(new MS2SearchExperimentRunType("Comet Searches", MS2Schema.TableType.CometSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("Mascot Searches", MS2Schema.TableType.MascotSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("Sequest Searches", MS2Schema.TableType.SequestSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX));
 

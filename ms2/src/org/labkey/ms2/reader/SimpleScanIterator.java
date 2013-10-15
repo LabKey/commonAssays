@@ -22,7 +22,7 @@ import java.util.Iterator;
  * Date: Oct 6, 2005
  * Time: 9:03:09 AM
  */
-public interface SimpleScanIterator extends Iterator<SimpleScan>
+public interface SimpleScanIterator extends Iterator<SimpleScan>, AutoCloseable
 {
     void close();
 }

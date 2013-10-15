@@ -82,6 +82,7 @@ public class MS2Schema extends UserSchema
     private static final String PROTOCOL_PATTERN_PREFIX = "urn:lsid:%:Protocol.%:";
 
     public static final String MASCOT_PROTOCOL_OBJECT_PREFIX = "MS2.Mascot";
+    public static final String COMET_PROTOCOL_OBJECT_PREFIX = "MS2.Comet";
     public static final String SEQUEST_PROTOCOL_OBJECT_PREFIX = "MS2.Sequest";
     public static final String XTANDEM_PROTOCOL_OBJECT_PREFIX = "MS2.XTandem";
     public static final String IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX = "MS2.ImportedSearch";
@@ -168,6 +169,15 @@ public class MS2Schema extends UserSchema
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(MascotSearchRuns.toString(), ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
                 searchTable.setDescription("Contains one row per Mascot search results loaded in this folder.");
+                return searchTable;
+            }
+        },
+        CometSearchRuns
+        {
+            public ExpRunTable createTable(MS2Schema ms2Schema)
+            {
+                ExpRunTable searchTable = ms2Schema.createSearchTable(CometSearchRuns.toString(), ContainerFilter.CURRENT, COMET_PROTOCOL_OBJECT_PREFIX);
+                searchTable.setDescription("Contains one row per Comet search results loaded in this folder.");
                 return searchTable;
             }
         },
@@ -369,7 +379,7 @@ public class MS2Schema extends UserSchema
 
     public ExpRunTable createRunsTable(String name, ContainerFilter filter)
     {
-        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, COMET_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)

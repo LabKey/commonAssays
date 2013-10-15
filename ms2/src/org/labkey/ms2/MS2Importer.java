@@ -327,8 +327,8 @@ public abstract class MS2Importer
         if (null != mzXmlFile)
         {
             _log.info("Starting to parse " + mzXmlFile + " to get scan counts");
-            loadScanCounts(mzXmlFile, fraction);
-            _log.info("Finished parsing " + mzXmlFile + " to get scan counts");
+            int totalScans = loadScanCounts(mzXmlFile, fraction);
+            _log.info("Finished parsing to get scan counts. Total: " + totalScans + ", MS1: " + fraction.getMS1ScanCount() + ", MS2: " + fraction.getMS2ScanCount() + ", MS3: " + fraction.getMS3ScanCount() + ", MS4:" + fraction.getMS4ScanCount());
 
             fraction.setMzXmlURL(FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
             massSpecDataFileType msdft = new massSpecDataFileType();
@@ -349,19 +349,18 @@ public abstract class MS2Importer
         return fraction.getFraction();
     }
 
-    public static void loadScanCounts(File mzXmlFile, MS2Fraction fraction) throws IOException
+    /** @return the total number of scans in the file */
+    public static int loadScanCounts(File mzXmlFile, MS2Fraction fraction) throws IOException
     {
+        int scanCount = 0;
         if (NetworkDrive.exists(mzXmlFile))
         {
-            AbstractMzxmlIterator iter = null;
-            try
+            int ms1ScanCount = 0;
+            int ms2ScanCount = 0;
+            int ms3ScanCount = 0;
+            int ms4ScanCount = 0;
+            try (AbstractMzxmlIterator iter = AbstractMzxmlIterator.createParser(mzXmlFile, AbstractMzxmlIterator.NO_SCAN_FILTER))
             {
-                int scanCount = 0;
-                int ms1ScanCount = 0;
-                int ms2ScanCount = 0;
-                int ms3ScanCount = 0;
-                int ms4ScanCount = 0;
-                iter = AbstractMzxmlIterator.createParser(mzXmlFile, AbstractMzxmlIterator.NO_SCAN_FILTER);
                 while (iter.hasNext())
                 {
                     scanCount++;
@@ -384,14 +383,8 @@ public abstract class MS2Importer
             {
                 throw new IOException(e);
             }
-            finally
-            {
-                if (iter != null)
-                {
-                    iter.close();
-                }
-            }
         }
+        return scanCount;
     }
 
 
