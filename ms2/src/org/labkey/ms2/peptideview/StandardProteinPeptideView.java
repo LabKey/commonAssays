@@ -49,7 +49,6 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -271,7 +270,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         GridView view = new GridView(peptideRegion, (BindException)null)
         {
             @Override
-            public void renderView(RenderContext model, PrintWriter out) throws IOException, ServletException
+            public void renderView(RenderContext model, PrintWriter out) throws IOException
             {
                 super.renderView(model, out);
                 try
