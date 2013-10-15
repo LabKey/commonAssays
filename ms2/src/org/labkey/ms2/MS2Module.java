@@ -234,6 +234,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
+        final ModuleContext finalModuleContext = moduleContext;
         SearchService ss = ServiceRegistry.get().getService(SearchService.class);
         if (null != ss)
         {
@@ -264,7 +265,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         {
             public Set<ExperimentRunType> getExperimentRunTypes(Container container)
             {
-                if (container.getActiveModules().contains(MS2Module.this))
+                if (container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
                 {
                     return runTypes;
                 }

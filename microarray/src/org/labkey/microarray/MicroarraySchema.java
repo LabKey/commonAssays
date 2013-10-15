@@ -73,7 +73,7 @@ public class MicroarraySchema extends SimpleUserSchema
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider() {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MicroarrayModule.NAME)))
+                if (schema.getContainer().getActiveModules(schema.getUser()).contains(ModuleLoader.getInstance().getModule(MicroarrayModule.NAME)))
                     return new MicroarraySchema(schema.getUser(), schema.getContainer());
                 return null;
             }

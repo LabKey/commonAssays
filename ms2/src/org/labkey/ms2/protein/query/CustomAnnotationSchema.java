@@ -46,7 +46,7 @@ public class CustomAnnotationSchema extends UserSchema
         DefaultSchema.registerProvider(SCHEMA_WITHOUT_SEQUENCES_NAME, new DefaultSchema.SchemaProvider() {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
+                if (schema.getContainer().getActiveModules(schema.getUser()).contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
                     return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), false);
                 return null;
             }
@@ -55,7 +55,7 @@ public class CustomAnnotationSchema extends UserSchema
         DefaultSchema.registerProvider(SCHEMA_WITH_SEQUENCES_NAME, new DefaultSchema.SchemaProvider() {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                if (schema.getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
+                if (schema.getContainer().getActiveModules(schema.getUser()).contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
                     return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), true);
                 return null;
             }

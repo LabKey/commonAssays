@@ -115,7 +115,7 @@ public class MS2Schema extends UserSchema
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                for (Module module : schema.getContainer().getActiveModules())
+                for (Module module : schema.getContainer().getActiveModules(schema.getUser()))
                 {
                     if (module instanceof ProteomicsModule)
                         return new MS2Schema(schema.getUser(), schema.getContainer());

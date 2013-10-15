@@ -135,6 +135,7 @@ public class MicroarrayModule extends SpringModule
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
+        final ModuleContext finalModuleContext = moduleContext;
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         AssayService.get().registerAssayProvider(new AffymetrixAssayProvider());
@@ -149,7 +150,7 @@ public class MicroarrayModule extends SpringModule
         {
             public Set<ExperimentRunType> getExperimentRunTypes(Container container)
             {
-                if (container.getActiveModules().contains(MicroarrayModule.this))
+                if (container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
                 {
                     return Collections.<ExperimentRunType>singleton(MicroarrayRunType.INSTANCE);
                 }
