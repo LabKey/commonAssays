@@ -39,7 +39,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,10 +115,6 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         catch (ValidationException ve)
         {
             throw new ExperimentException(ve.getMessage(), ve);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException(e);
         }
     }
 

@@ -20,7 +20,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
@@ -42,10 +41,8 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.query.FlowTableType;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -277,14 +274,7 @@ public class FlowReportManager
         if (uri == null)
             return null;
 
-        try
-        {
-            return OntologyManager.ensureObject(container, uri, (Integer) null);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return OntologyManager.ensureObject(container, uri, (Integer) null);
     }
 
     public static String FLOW_REPORT_RESULT_OBJECT_LSID_PART = "FlowReportResult";
