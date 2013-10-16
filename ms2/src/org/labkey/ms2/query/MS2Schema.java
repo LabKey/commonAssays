@@ -110,18 +110,25 @@ public class MS2Schema extends UserSchema
         TABLE_NAMES = Collections.unmodifiableSet(names);
     }
 
-    public static void register()
+    public static void register(Module module)
     {
-        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider()
+        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider(module)
         {
-            public QuerySchema getSchema(DefaultSchema schema)
+            @Override
+            public boolean isAvailable(DefaultSchema schema, Module module)
             {
-                for (Module module : schema.getContainer().getActiveModules(schema.getUser()))
+                // Publish schema if any ProteomicsModule is active in the container
+                for (Module m : schema.getContainer().getActiveModules(schema.getUser()))
                 {
-                    if (module instanceof ProteomicsModule)
-                        return new MS2Schema(schema.getUser(), schema.getContainer());
+                    if (m instanceof ProteomicsModule)
+                        return true;
                 }
-                return  null;
+                return false;
+            }
+
+            public QuerySchema createSchema(DefaultSchema schema, Module module)
+            {
+                return new MS2Schema(schema.getUser(), schema.getContainer());
             }
         });
     }

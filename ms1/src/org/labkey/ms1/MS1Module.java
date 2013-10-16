@@ -90,7 +90,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
     {
         addController(CONTROLLER_NAME, MS1Controller.class);
 
-        MS1Schema.register();
+        MS1Schema.register(this);
 
         ServiceRegistry svcReg = ServiceRegistry.get();
         svcReg.registerService(MS1Service.class, new MS1ServiceImpl());

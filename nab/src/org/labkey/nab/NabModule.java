@@ -63,7 +63,7 @@ public class NabModule extends DefaultModule
         addController("nab", NabController.class);
         addController("nabassay", NabAssayController.class);
 
-        NabProviderSchema.register();
+        NabProviderSchema.register(this);
     }
 
     @NotNull

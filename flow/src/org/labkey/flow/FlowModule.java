@@ -95,9 +95,16 @@ public class FlowModule extends DefaultModule
 
     protected void init()
     {
-        DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
+        DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider(this)
         {
-            public QuerySchema getSchema(DefaultSchema schema)
+            @Override
+            public boolean isAvailable(DefaultSchema schema, Module module)
+            {
+                // UNDONE: schema must be available for backwards campatibility, but consider hiding it instead
+                return true;
+            }
+
+            public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 // don't create twice for same request
                 FlowSchema fs;

@@ -16,14 +16,13 @@
 
 package org.labkey.ms2.protein.query;
 
-import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.Module;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
-import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 
@@ -41,23 +40,19 @@ public class CustomAnnotationSchema extends UserSchema
     public static final String SCHEMA_DESCR = "Contains data about custom protein annotations.";
     private final boolean _includeSequences;
 
-    public static void register()
+    public static void register(Module module)
     {
-        DefaultSchema.registerProvider(SCHEMA_WITHOUT_SEQUENCES_NAME, new DefaultSchema.SchemaProvider() {
-            public QuerySchema getSchema(DefaultSchema schema)
+        DefaultSchema.registerProvider(SCHEMA_WITHOUT_SEQUENCES_NAME, new DefaultSchema.SchemaProvider(module) {
+            public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
-                if (schema.getContainer().getActiveModules(schema.getUser()).contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
-                    return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), false);
-                return null;
+                return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), false);
             }
         });
 
-        DefaultSchema.registerProvider(SCHEMA_WITH_SEQUENCES_NAME, new DefaultSchema.SchemaProvider() {
-            public QuerySchema getSchema(DefaultSchema schema)
+        DefaultSchema.registerProvider(SCHEMA_WITH_SEQUENCES_NAME, new DefaultSchema.SchemaProvider(module) {
+            public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
-                if (schema.getContainer().getActiveModules(schema.getUser()).contains(ModuleLoader.getInstance().getModule(MS2Module.MS2_MODULE_NAME)))
-                    return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), true);
-                return null;
+                return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), true);
             }
         });
     }

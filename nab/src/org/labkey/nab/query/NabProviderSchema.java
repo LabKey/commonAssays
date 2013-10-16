@@ -20,15 +20,14 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.module.Module;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.api.assay.dilution.SampleInfo;
 
@@ -43,11 +42,11 @@ public class NabProviderSchema extends DilutionProviderSchema
 {
     public static final String SCHEMA_NAME = "Nab";
 
-    static public void register()
+    static public void register(Module module)
     {
-        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider()
+        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider(module)
         {
-            public QuerySchema getSchema(DefaultSchema schema)
+            public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 // Nab top-level schema for backwards compatibility <12.3.  Moved to assay schema.
                 return new NabProviderSchema(schema.getUser(), schema.getContainer(), AssayService.get().getProvider(NabAssayProvider.NAME), null, true);

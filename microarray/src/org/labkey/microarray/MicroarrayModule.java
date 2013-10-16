@@ -80,7 +80,7 @@ public class MicroarrayModule extends SpringModule
     protected void init()
     {
         addController(CONTROLLER_NAME, MicroarrayController.class);
-        MicroarraySchema.register();
+        MicroarraySchema.register(this);
     }
 
     @NotNull

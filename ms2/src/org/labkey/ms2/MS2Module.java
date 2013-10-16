@@ -223,8 +223,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         addController("ms2-pipeline", PipelineController.class);
         addController("ms2-scoring", ScoringController.class);
 
-        MS2Schema.register();
-        CustomAnnotationSchema.register();
+        MS2Schema.register(this);
+        CustomAnnotationSchema.register(this);
 
         MS2Service.register(new MS2ServiceImpl());
 
