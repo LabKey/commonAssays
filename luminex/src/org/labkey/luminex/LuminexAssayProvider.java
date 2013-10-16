@@ -261,12 +261,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         if (dataRowIdInt == null)
             throw new IllegalArgumentException("Luminex data rows must have integer primary keys.  PK provided: " + dataRowId);
-        LuminexDataRow dataRow = new TableSelector(LuminexProtocolSchema.getTableInfoDataRow()).getObject(dataRowIdInt, LuminexDataRow.class);
-        if (dataRow == null)
+
+        Integer dataId = new TableSelector(LuminexProtocolSchema.getTableInfoDataRow(), Collections.singleton("DataId")).getObject(dataRowIdInt, Integer.class);
+        if (dataId == null)
         {
             return null;
         }
-        return ExperimentService.get().getExpData(dataRow.getData());
+        return ExperimentService.get().getExpData(dataId);
     }
 
     protected String getSourceLSID(String runLSID, int dataId)

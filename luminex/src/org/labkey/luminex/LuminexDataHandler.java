@@ -1890,8 +1890,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     dataRow.setParticipantID(match.getParticipantID());
                     dataRow.setVisitID(match.getVisitID());
                     dataRow.setDate(match.getDate());
-                    dataRow.setSpecimenID(specimenID);
+                    dataRow.setSpecimenID(match.getSpecimenID());
                     dataRow.setExtraSpecimenInfo(extraSpecimenInfo == null ? null : extraSpecimenInfo.trim());
+                }
+                else if (match.getSpecimenID() != null && !value.equals(match.getSpecimenID()))
+                {
+                    // Issue 18601: a sample indices map may have been uploaded that just has a SpecimenID
+                    dataRow.setSpecimenID(match.getSpecimenID());
                 }
             }
         }
