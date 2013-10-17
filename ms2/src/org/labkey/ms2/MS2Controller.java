@@ -2934,7 +2934,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            throw new NotFoundException("Unsupported dataRegion name" + dataRegion);
+            throw new NotFoundException("Unsupported dataRegion name: " + dataRegion);
         }
 
         private QueryView createProteinSearchView(ProbabilityProteinSearchForm form, BindException errors)
