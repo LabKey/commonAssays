@@ -64,7 +64,6 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
     initComponent : function() {
         // query the RunExclusion table to see if there are any existing exclusions for this run
-        console.log(this.runId);
         LABKEY.Query.selectRows({
             schemaName: 'assay',
             queryName: this.queryName + ' RunExclusion',
@@ -175,7 +174,6 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
                     this.present[rowId] = selMod.getSelections().length;
                     record.set('Present', this.present[rowId]);
                     this.excludedDataIds[rowId] = record.data.DataId;
-                    console.log(record);
                 },
                 rowselect : function(tsl, rowId, record)
                 {
@@ -252,7 +250,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
                         }
                         gridData[i].push(this.present[i]);
                     }
-                    console.log(gridData);
+
                     combinedStore.loadData(gridData);
                     titrationExclusionStore.fireEvent('titrationgridloaded');
 
@@ -262,13 +260,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         });
 
         var combinedStore = new Ext.data.ArrayStore({
-            fields : ['Name', 'DataId', 'RunId', 'Present'],
-            listeners : {
-                load : function(store)
-                {
-                    console.log(store);
-                }
-            }
+            fields : ['Name', 'DataId', 'RunId', 'Present']
         });
 
         var me = this;
@@ -432,7 +424,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
     getExcludedString : function()
     {
         var retString = '';
-        console.log(this.present);
+
         for(var thing in this.present)
         {
             if(thing != 'remove' && !(this.preExcludedIds[thing] == undefined && this.present[thing] == 0))
@@ -514,8 +506,6 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
             if (typeof this.preExcludedIds[key] === 'number')
             {
-                console.log(this.preExcludedIds);
-
                 config.rows[0].rowId = this.preExcludedIds[key];
                 if (analytesForExclusionStr != "")
                 {

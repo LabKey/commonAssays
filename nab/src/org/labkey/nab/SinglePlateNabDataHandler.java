@@ -144,7 +144,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
         if ((nabTemplate.getRows() + startRow > (plateSheet.getLastRowNum() + 1)) || (nabTemplate.getColumns() + startColumn > (plateSheet.getRow(startRow).getLastCellNum())))
         {
-            Row firstRow = plateSheet.getRow(startRow);
+            Row firstRow = plateSheet.getLastRowNum() >= startRow ? plateSheet.getRow(startRow) : null;
             int colCount = firstRow != null ? firstRow.getLastCellNum() : -1;
             throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: expected " +
                     (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " columns, but found "+
