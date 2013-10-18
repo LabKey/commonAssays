@@ -524,14 +524,10 @@ public class MS2Manager
 
     private static MS2Run[] getRuns(String whereClause, Object... params)
     {
-        ResultSet rs = null;
-
-        try
-        {
-            rs = Table.executeQuery(getSchema(),
+        try (ResultSet rs = new SqlSelector(getSchema(),
                     "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, runs.FastaId, ff.FileName AS FastaFileName, Loaded, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount FROM " + getTableInfoRuns() + " runs LEFT OUTER JOIN " + ProteinManager.getTableInfoFastaFiles() + " ff ON runs.FastaId = ff.FastaId WHERE " + whereClause,
-                    params);
-
+                    params).getResultSet())
+        {
             List<MS2Run> runs = new ArrayList<>();
 
             while (rs.next())
@@ -557,13 +553,6 @@ public class MS2Manager
         {
             _log.error("getRuns", e);
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            if (rs != null)
-            {
-                try { rs.close(); } catch(SQLException ignored) {}
-            }
         }
     }
 
