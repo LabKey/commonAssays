@@ -82,6 +82,9 @@ dataintegration/src/org/labkey/di/pipeline/TransformQuartzJobRunner.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformRun.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformTask.java -text
 dataintegration/src/org/labkey/di/pipeline/TransformTaskFactory.java -text
+dataintegration/src/org/labkey/di/steps/RemoteQueryTransformStep.java -text
+dataintegration/src/org/labkey/di/steps/RemoteQueryTransformStepMeta.java -text
+dataintegration/src/org/labkey/di/steps/RemoteQueryTransformStepProvider.java -text
 dataintegration/src/org/labkey/di/steps/SimpleQueryTransformStep.java -text
 dataintegration/src/org/labkey/di/steps/SimpleQueryTransformStepMeta.java -text
 dataintegration/src/org/labkey/di/steps/SimpleQueryTransformStepProvider.java -text
