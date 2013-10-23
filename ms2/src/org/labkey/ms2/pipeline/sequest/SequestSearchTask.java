@@ -349,7 +349,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 if (!pepXmlFile.exists())
                     throw new IOException("Failed running out2xml or Sequest - could not find expected file: " + pepXmlFile);
 
-                if (!FileUtil.deleteDir(dirOutputDta))
+                FileUtil.deleteDir(dirOutputDta);
+                if (dirOutputDta.exists())
                     throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
 
                 File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
