@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -337,7 +338,7 @@ public class LuminexExcelParser
         return result;
     }
 
-    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, File dataFile)
+    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, File dataFile) throws ExperimentException
     {
         if (row > analyteSheet.getLastRowNum())
         {
@@ -418,13 +419,19 @@ public class LuminexExcelParser
                 if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex)
                 {
                     String fitProbValue = cellContents.substring(startIndex + 1, endIndex).trim();
-                    analyte.setFitProb(Double.parseDouble(fitProbValue));
+                    if (fitProbValue != null && !NumberUtils.isNumber(fitProbValue))
+                        throw new ExperimentException("FitProb. value is not numeric: " + fitProbValue);
+
+                    analyte.setFitProb(parseDouble(fitProbValue));
                 }
                 startIndex = cellContents.lastIndexOf("=");
                 if (startIndex >= 0)
                 {
                     String resVarValue = cellContents.substring(startIndex + 1).trim();
-                    analyte.setResVar(Double.parseDouble(resVarValue));
+                    if (resVarValue != null && !NumberUtils.isNumber(resVarValue))
+                        throw new ExperimentException("ResVar. value is not numeric: " + resVarValue);
+
+                    analyte.setResVar(parseDouble(resVarValue));
                 }
             }
         }
@@ -591,7 +598,7 @@ public class LuminexExcelParser
 
     private Double parseDouble(String value)
     {
-        if (value == null || "".equals(value))
+        if (value == null || "".equals(value) || !NumberUtils.isNumber(value))
         {
             return null;
         }
