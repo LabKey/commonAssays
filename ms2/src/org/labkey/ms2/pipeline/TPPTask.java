@@ -292,6 +292,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 pepXMLAction.addInput(fileInput, "RawPepXML");
             }
 
+            List<File> spectraFiles = new ArrayList<>();
+
             boolean proteinProphetOutput = getJobSupport().isProphetEnabled();
             if (inputFiles.size() > 0)
             {
@@ -300,15 +302,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     for (int i = 0; i < inputFiles.size(); i++)
                         inputWorkFiles[i] = _wd.inputFile(inputFiles.get(i), false);
 
-                    if (isSpectraProcessor(params))
+                    // Always copy spectra files to be local, since PeptideProphet wants them as of TPP 4.6.3
+                    for (File spectraFile : getJobSupport().getInteractSpectraFiles())
                     {
-                        List<File> spectraFiles = getJobSupport().getInteractSpectraFiles();
-                        for (int i = 0; i < spectraFiles.size(); i++)
-                        {
-                            spectraFiles.set(i, _wd.inputFile(spectraFiles.get(i), false));
-                            if (dirMzXml == null)
-                                dirMzXml = spectraFiles.get(i).getParentFile();
-                        }
+                        spectraFiles.add(_wd.inputFile(spectraFile, true));
+                        if (dirMzXml == null)
+                            dirMzXml = spectraFile.getParentFile();
                     }
                 }
             }
@@ -450,8 +449,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 if (e.getExitCode() == 1)
                 {
                     File logFile = getJob().getLogFile();
-                    RandomAccessFile file = new RandomAccessFile(logFile, "r");
-                    try
+                    try (RandomAccessFile file = new RandomAccessFile(logFile, "r"))
                     {
                         // Look at the last 1K of the log file
                         file.seek(Math.max(0, file.length() - 1024));
@@ -467,10 +465,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                                 ignoreError = true;
                             }
                         }
-                    }
-                    finally
-                    {
-                        try { file.close(); } catch (IOException ioe) {}
                     }
                 }
                 if (!ignoreError)
@@ -556,6 +550,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             _wd.discardFile(_wd.newFile(FT_PEP_SHTML));
             _wd.discardFile(_wd.newFile(FT_INTERMEDIATE_PROT_XSL));
             _wd.discardFile(_wd.newFile(FT_INTERMEDIATE_PROT_SHTML));
+
+            // We don't need the extra copy of the spectra files
+            for (File spectraFile : spectraFiles)
+            {
+                _wd.discardFile(spectraFile);
+            }
 
             // If no combined analysis is coming or this is the combined analysis, remove
             // the raw pepXML file(s).
