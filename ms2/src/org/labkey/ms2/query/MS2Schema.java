@@ -1156,8 +1156,9 @@ public class MS2Schema extends UserSchema
 
                 executor.execute(insertSQL);
 
-                // Use the protein group's RowId as the normalized group id
-                executor.execute("UPDATE " + tempTableName + " SET NormalizedId = ProteinGroupId");
+                // Create indices on the two columns
+                executor.execute("CREATE INDEX IDX_" + shortName + "_NormalizedId ON " + tempTableName + "(NormalizedId);");
+                executor.execute("CREATE INDEX IDX_" + shortName + "_ProteinGroupId ON " + tempTableName + "(ProteinGroupId);");
 
                 // Figure out the minimum group id that contains a protein (SeqId) that's also in this group
                 String updateSubQuery = "SELECT MIN(MinNormalizedId) AS NewNormalizedId, GroupId FROM \n" +
@@ -1183,7 +1184,7 @@ public class MS2Schema extends UserSchema
             }
             finally
             {
-                if (connection != null) { try { connection.close(); } catch (SQLException e) {} }
+                if (connection != null) { try { connection.close(); } catch (SQLException ignored) {} }
             }
             return tempTableName;
         }
