@@ -32,7 +32,6 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.IAssayDomainType;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
@@ -446,11 +445,12 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void setValidationAndAnalysisScripts(ExpProtocol protocol, List<File> scripts) throws ExperimentException
+    public void setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts) throws ExperimentException
     {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public List<File> getValidationAndAnalysisScripts(ExpProtocol protocol, Scope scope)
     {
