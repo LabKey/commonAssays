@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -229,7 +230,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         return expProtocol;
     }
 
-    @Override
+    @Override @NotNull
     public Map<String, File> getUploadedData()
     {
         Map<String, File> map = new HashMap<>();
