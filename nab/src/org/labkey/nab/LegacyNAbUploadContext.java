@@ -321,6 +321,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
         return _info.getUser();
     }
 
+    @NotNull
     @Override
     public Container getContainer()
     {

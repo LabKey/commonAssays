@@ -27,6 +27,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -225,7 +226,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
                 allowing(expProtocol).getRowId();
                 will(returnValue(100));
                 allowing(expProtocol).getName();
-                will(returnValue("LABKEYTESTINGPROTOCOL"));
+                will(returnValue(AssayRunAsyncContext.UNIT_TESTING_PROTOCOL_NAME));
          }});
         return expProtocol;
     }
