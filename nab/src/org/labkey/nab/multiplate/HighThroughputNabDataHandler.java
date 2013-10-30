@@ -192,7 +192,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    protected void prepareWellGroups(List<WellGroup> groups, ExpMaterial sampleInput, Map<String, DomainProperty> properties)
+    protected void prepareWellGroups(List<WellGroup> groups, ExpMaterial sampleInput, Map<String, DomainProperty> properties) throws ExperimentException
     {
         List<WellData> wells = new ArrayList<>();
         // All well groups use the same plate template, so it's okay to just check the dilution direction of the first group:

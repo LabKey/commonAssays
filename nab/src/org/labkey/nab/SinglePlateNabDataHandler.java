@@ -178,7 +178,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected void prepareWellGroups(List<WellGroup> groups, ExpMaterial sampleInput, Map<String, DomainProperty> properties)
+    protected void prepareWellGroups(List<WellGroup> groups, ExpMaterial sampleInput, Map<String, DomainProperty> properties) throws ExperimentException
     {
         if (groups.size() != 1)
             throw new IllegalStateException("Expected exactly 1 well group per material for single-plate NAb runs.  Found " + groups.size());
