@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class CometPipelineJob extends AbstractMS2SearchPipelineJob
 {
-    private static TaskId _tid = new TaskId(CometPipelineJob.class);
+    private static final TaskId TASK_ID = new TaskId(CometPipelineJob.class);
 
     public CometPipelineJob(CometSearchProtocol protocol,
                               ViewBackgroundInfo info,
@@ -62,7 +62,7 @@ public class CometPipelineJob extends AbstractMS2SearchPipelineJob
 
     public TaskId getTaskPipelineId()
     {
-        return _tid;
+        return TASK_ID;
     }
 
     public boolean isRefreshRequired()

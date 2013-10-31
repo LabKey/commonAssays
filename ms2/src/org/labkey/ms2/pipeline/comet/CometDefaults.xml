@@ -2,23 +2,23 @@
 <?xml-stylesheet type="text/xsl" href="tandem-input-style.xsl"?>
 <bioml>
 <note>list path parameters</note>
-  <note type="input" label="list path, default parameters">sequest_default_input.xml</note>
+  <note type="input" label="list path, default parameters">comet_default_input.xml</note>
     <note>This value is ignored when it is present in the default parameter
           list path.</note>
   <note type="input" label="list path, taxonomy information">taxonomy.xml</note>
-	<note>This value is ignored by sequest.</note>
+	<note>This value is ignored by Comet.</note>
 
 <note>spectrum parameters</note>
   <note type="input" label="spectrum, fragment mass type">monoisotopic</note>
     <note> New feature added by Brendan MacLean; valid values = average | monoisotopic.
-		Sets the sequest mass_type_fragment parameter. No X!Tandem label for parent mass type,
-		see: sequest, mass_type_parent</note>
+		Sets the Comet mass_type_fragment parameter. No X!Tandem label for parent mass type,
+		see: comet, mass_type_parent</note>
   <note type="input" label="spectrum, fragment mass error">1.0</note>
 	<note>bioworks browser's default setting is 1.0; 
-         This tag depricates "spectrum, fragment monoisotopic mass error "</note>
+         This tag deprecates "spectrum, fragment monoisotopic mass error "</note>
   <note type="input" label="spectrum, parent monoisotopic mass error plus">2.0</note>
   <note type="input" label="spectrum, parent monoisotopic mass error minus">2.0</note>
-	<note>The max and min labels set the sequest peptide_mass_tolerance parameter.
+	<note>The max and min labels set the Comet peptide_mass_tolerance parameter.
 		They must be set to the same value</note>
   <note type="input" label="spectrum, parent monoisotopic mass isotope error">no</note>
     <note>Only for high resolution mass spectrometers.</note>
@@ -84,7 +84,7 @@
           that these residues cannot be in that position). Use UPPERCASE characters.
           To denote cleavage at any residue, use [X]|[X] and reset the
           scoring, maximum missed cleavage site parameter (see below) to something
-          like 50. A coma delimited list of cut sites is not allowed with Sequest.</note>
+          like 50. A coma delimited list of cut sites is not allowed with Comet.</note>
 	<note type="input" label="protein, N-terminal residue modification mass">0.0</note>
 	<note type="input" label="protein, C-terminal residue modification mass">0.0</note>
 
@@ -94,7 +94,7 @@
   <note type="input" label="refine, maximum valid expectation value">0.1</note>
   <note type="input" label="refine, potential N-terminus modifications"></note>
   <note type="input" label="refine, potential C-terminus modifications"></note>
-	<note>The Terminus modifications are used by Sequest in the term_diff_search_options parameter.</note>
+	<note>The Terminus modifications are used by Comet in the variable_C_terminus and variable_N_terminus parameters.</note>
   <note type="input" label="refine, unanticipated cleavage">yes</note>
   <note type="input" label="refine, potential modification mass"></note>
   <note type="input" label="refine, point mutations">no</note>
@@ -118,15 +118,6 @@
   <note type="input" label="scoring, x ions">no</note>
   <note type="input" label="scoring, y ions">yes</note>
   <note type="input" label="scoring, z ions">no</note>
-  <note type="input" label="sequest, d ions">no</note>
-  <note type="input" label="sequest, v ions">no</note>
-  <note type="input" label="sequest, w ions">no</note>
-  <note type="input" label="sequest, a neutral loss">no</note>
-  <note type="input" label="sequest, b neutral loss">yes</note>
-  <note type="input" label="sequest, y neutral loss">yes</note>
-       <note>For sequest's ion_series property. (neutral-a)(neutral-b)(neutral-c)abcdvwxyz. 
-             On is 1 and off is 0. No fractional values.</note>
-
 
 <note>output parameters</note>
   <note type="input" label="output, path">output.xml</note>
@@ -215,7 +206,7 @@
 		<note> results to store </note>
 	<note type="input" label="comet, show_fragment_ions">0</note>
 		<note> 0=no, 1=yes </note>
-    <note type="input" label="sequest, max_variable_mods_in_peptide">3</note>
+    <note type="input" label="comet, max_variable_mods_in_peptide">5</note>
 		<note> max # of diff. mod in a peptide. </note>
 	<note type="input" label="comet, mass_type_parent">1</note>
 		<note>0=average masses, 1=monoisotopic masses</note>

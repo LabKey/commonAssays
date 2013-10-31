@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.metadata;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -50,7 +52,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
     }
 
     @Override
-    public ExpExperiment saveExperimentRun(AssayRunUploadContext<MassSpecMetadataAssayProvider> context, ExpExperiment batch, ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
+    public ExpExperiment saveExperimentRun(AssayRunUploadContext<MassSpecMetadataAssayProvider> context, @Nullable ExpExperiment batch, @NotNull ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
     {
         MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())

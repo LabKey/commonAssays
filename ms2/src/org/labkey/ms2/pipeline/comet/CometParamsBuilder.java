@@ -92,48 +92,48 @@ public class CometParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
                 21,                                                       //sortOrder
-                "0",                                            //The value of the property
-                "decoy_search",                                // the sequest.params property name
-                "0=no (default), 1=concatenated search, 2=separate search",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0",                                            // default value of the property
+                "decoy_search",                                // parameters file property name
+                "0=no (default), 1=concatenated search, 2=separate search",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ));
         _params.addProperty(new SequestParam(
                 21,                                                       //sortOrder
-                "DECOY_",                                            //The value of the property
-                "decoy_prefix",                                // the sequest.params property name
-                "decoy entries are denoted by this string which is pre-pended to each protein accession",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "DECOY_",                                            // default value of the property
+                "decoy_prefix",                                // parameters file property name
+                "decoy entries are denoted by this string which is pre-pended to each protein accession",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ));
 
         _params.addProperty(new SequestParam(
                 22,                                                       //sortOrder
-                "0",                                            //The value of the property
-                "search_enzyme_number",                                // the sequest.params property name
-                "choose from list at end of this params file",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0",                                            // default value of the property
+                "search_enzyme_number",                                // parameters file property name
+                "choose from list at end of this params file",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ));
         _params.addProperty(new SequestParam(
                 23,                                                       //sortOrder
-                "0",                                            //The value of the property
-                "sample_enzyme_number",                                // the sequest.params property name
-                "choose from list at end of this params file",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0",                                            // default value of the property
+                "sample_enzyme_number",                                // parameters file property name
+                "choose from list at end of this params file",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ));
 
         _params.addProperty(new SequestParam(
             150,                                                       //sortOrder
-            "5",                                            //The value of the property
-            "max_variable_mods_in_peptide",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "5",                                            // default value of the property
+            "max_variable_mods_in_peptide",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
             true
         )).setInputXmlLabels(_variant.getParamPrefix() + ", max_variable_mods_in_peptide");
@@ -142,10 +142,10 @@ public class CometParamsBuilder extends SequestParamsBuilder
         {
             _params.addProperty(new SequestParam(
                 150 + i,                                                       //sortOrder
-                "0.0 X 0 3",                                            //The value of the property
-                "variable_mod" + i,                                // the sequest.params property name
-                "",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0.0 X 0 3",                                            // default value of the property
+                "variable_mod" + i,                                // parameters file property name
+                "",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
                 false
             )).setInputXmlLabels(ParameterNames.DYNAMIC_MOD);
@@ -153,184 +153,184 @@ public class CometParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
             250,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "use_A_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "use_A_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("scoring, a ions");
         _params.addProperty(new SequestParam(
             251,                                                       //sortOrder
-            "1",                                            //The value of the property
-            "use_B_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "1",                                            // default value of the property
+            "use_B_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("scoring, b ions");
         _params.addProperty(new SequestParam(
             252,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "use_C_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "use_C_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("scoring, c ions");
         _params.addProperty(new SequestParam(
             253,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "use_X_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "use_X_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("scoring, x ions");
         _params.addProperty(new SequestParam(
             254,                                                       //sortOrder
-            "1",                                            //The value of the property
-            "use_Y_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "1",                                            // default value of the property
+            "use_Y_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("scoring, y ions");
         _params.addProperty(new SequestParam(
             255,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "use_Z_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "use_Z_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("scoring, z ions");
         _params.addProperty(new SequestParam(
             256,                                                       //sortOrder
-            "1",                                            //The value of the property
-            "use_NL_ions",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "1",                                            // default value of the property
+            "use_NL_ions",                                // parameters file property name
+            "",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("comet, use_NL_ions");
 
         _params.addProperty(new SequestParam(
                 260,                                                       //sortOrder
-                "0",                                            //The value of the property
-                "use_sparse_matrix",                                // the sequest.params property name
-                "",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0",                                            // default value of the property
+                "use_sparse_matrix",                                // parameters file property name
+                "",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 ParamsValidatorFactory.getBooleanParamsValidator(),
                 false
         ));
 
         _params.addProperty(new SequestParam(
                 440,                                                       //sortOrder
-                "0.0",                                            //The value of the property
-                "add_X_user_amino_acid",                                // the sequest.params property name
-                "added to X - avg. 0.0000, mono. 0.0000",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0.0",                                            // default value of the property
+                "add_X_user_amino_acid",                                // parameters file property name
+                "added to X - avg. 0.0000, mono. 0.0000",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ).setInputXmlLabels().setInputXmlLabels(ParameterNames.STATIC_MOD));
 
         _params.addProperty(new SequestParam(
                 470,                                                       //sortOrder
-                "0.0",                                            //The value of the property
-                "add_B_user_amino_acid",                                // the sequest.params property name
-                "added to B - avg. 0.0000, mono. 0.0000",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0.0",                                            // default value of the property
+                "add_B_user_amino_acid",                                // parameters file property name
+                "added to B - avg. 0.0000, mono. 0.0000",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ).setInputXmlLabels().setInputXmlLabels(ParameterNames.STATIC_MOD));
 
         _params.addProperty(new SequestParam(
             475,                                                       //sortOrder
-            "0.0",                                            //The value of the property
-            "add_U_user_amino_acid",                                // the sequest.params property name
-            "added to U - avg. 0.0000, mono. 0.0000",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0.0",                                            // default value of the property
+            "add_U_user_amino_acid",                                // parameters file property name
+            "added to U - avg. 0.0000, mono. 0.0000",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             null,
             false
         ).setInputXmlLabels().setInputXmlLabels(ParameterNames.STATIC_MOD));
 
         _params.addProperty(new SequestParam(
                 476,                                                       //sortOrder
-                "0.0",                                            //The value of the property
-                "add_J_user_amino_acid",                                // the sequest.params property name
-                "added to J - avg. 0.0000, mono. 0.0000",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0.0",                                            // default value of the property
+                "add_J_user_amino_acid",                                // parameters file property name
+                "added to J - avg. 0.0000, mono. 0.0000",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ).setInputXmlLabels().setInputXmlLabels(ParameterNames.STATIC_MOD));
 
         _params.addProperty(new SequestParam(
                 500,                                                       //sortOrder
-                "0.0",                                            //The value of the property
-                "add_Z_user_amino_acid",                                // the sequest.params property name
-                "added to Z - avg. 0.0000, mono. 0.0000",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0.0",                                            // default value of the property
+                "add_Z_user_amino_acid",                                // parameters file property name
+                "added to Z - avg. 0.0000, mono. 0.0000",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 null,
                 false
         ).setInputXmlLabels().setInputXmlLabels(ParameterNames.STATIC_MOD));
 
         _params.addProperty(new SequestParam(
             71,                                                       //sortOrder
-            "0.4",                                                    //The value of the property
-            "fragment_bin_offset",                                 // the sequest.params property name
-            "offset position to start the binning (0.0 to 1.0)",// the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
+            "0.4",                                                    // default value of the property
+            "fragment_bin_offset",                                 // parameters file property name
+            "offset position to start the binning (0.0 to 1.0)",// comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                             
             ParamsValidatorFactory.getRealNumberParamsValidator(),
             true
         )).setInputXmlLabels("comet, fragment_bin_offset");
 
         _params.addProperty(new SequestParam(
             70,                                                       //sortOrder
-            "1.005",                                                    //The value of the property
-            "fragment_bin_tol",                                 // the sequest.params property name
-            "binning to use on fragment ions",// the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
+            "1.005",                                                    // default value of the property
+            "fragment_bin_tol",                                 // parameters file property name
+            "binning to use on fragment ions",// comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                             
             ParamsValidatorFactory.getRealNumberParamsValidator(),
             true
         )).setInputXmlLabels("spectrum, fragment mass error");
 
         _params.addProperty(new SequestParam(
             172,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "spectrum_batch_size",                                // the sequest.params property name
-            "max. # of spectra to search at a time; 0 to search the entire scan range in one loop", // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "spectrum_batch_size",                                // parameters file property name
+            "max. # of spectra to search at a time; 0 to search the entire scan range in one loop", // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                              
             ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
             true
         )).setInputXmlLabels("comet, spectrum_batch_size");
 
         _params.addProperty(new SequestParam(
               208,                                                       //sortOrder
-              "10",                                                      //The value of the property
-              "minimum_peaks",                                           // the sequest.params property name
+              "10",                                                      // default value of the property
+              "minimum_peaks",                                           // parameters file property name
               "minimum num. of peaks in spectrum to search (default 10)",                                                       // the input.xml label
-               ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+               ConverterFactory.getSequestBasicConverter(),                              
                new NaturalNumberParamsValidator(),
                true
         )).setInputXmlLabels("comet, minimum_peaks");
 
         _params.addProperty(new SequestParam(
                 211,                                                       //sortOrder
-                "0.0 0.0",                                            //The value of the property
-                "clear_mz_range",                                // the sequest.params property name
-                "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "0.0 0.0",                                            // default value of the property
+                "clear_mz_range",                                // parameters file property name
+                "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 new MultipleDoubleParamsValidator(0, Double.MAX_VALUE, 2),
                 true
         )).setInputXmlLabels("comet, clear_mz_range");
 
         _params.addProperty(new SequestParam(
                 230,                                                       //sortOrder
-                "2",                                            //The value of the property
-                "allowed_missed_cleavage",                                // the sequest.params property name
-                "maximum value is 5; for enzyme search",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                "2",                                            // default value of the property
+                "allowed_missed_cleavage",                                // parameters file property name
+                "maximum value is 5; for enzyme search",       // comment in the parameters file
+                ConverterFactory.getSequestBasicConverter(),                      
                 ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
                 true
         ).setInputXmlLabels(AbstractMS2SearchTask.MAXIMUM_MISSED_CLEAVAGE_SITES));
@@ -338,112 +338,112 @@ public class CometParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
             259,                                                       //sortOrder
-            "3",                                            //The value of the property
-            "max_fragment_charge",                                // the sequest.params property name
-            "set maximum fragment charge state to analyze (allowed max 5)",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "3",                                            // default value of the property
+            "max_fragment_charge",                                // parameters file property name
+            "set maximum fragment charge state to analyze (allowed max 5)",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new NonNegativeIntegerParamsValidator(),
             true
         )).setInputXmlLabels("comet, max_fragment_charge" );
 
         _params.addProperty(new SequestParam(
             261,                                                       //sortOrder
-            "6",                                            //The value of the property
-            "max_precursor_charge",                                // the sequest.params property name
-            "set maximum precursor charge state to analyze (allowed max 9)",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "6",                                            // default value of the property
+            "max_precursor_charge",                                // parameters file property name
+            "set maximum precursor charge state to analyze (allowed max 9)",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new NaturalNumberParamsValidator(),
             true
         )).setInputXmlLabels("comet, max_precursor_charge" );
 
         _params.addProperty(new SequestParam(
             300,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "output_outfiles",                                // the sequest.params property name
-            "0=no, 1=yes  write .out files",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "output_outfiles",                                // parameters file property name
+            "0=no, 1=yes  write .out files",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new BooleanParamsValidator(),
             false
         ));
         _params.addProperty(new SequestParam(
             301,                                                       //sortOrder
-            "1",                                            //The value of the property
-            "output_pepxmlfile",                                // the sequest.params property name
-            "0=no, 1=yes  write .pep.xml file",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "1",                                            // default value of the property
+            "output_pepxmlfile",                                // parameters file property name
+            "0=no, 1=yes  write .pep.xml file",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new BooleanParamsValidator(),
             false
         ));
         _params.addProperty(new SequestParam(
             302,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "output_sqtfile",                                // the sequest.params property name
-            "0=no, 1=yes  write sqt file",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "output_sqtfile",                                // parameters file property name
+            "0=no, 1=yes  write sqt file",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new BooleanParamsValidator(),
             false
         ));
         _params.addProperty(new SequestParam(
             303,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "output_sqtstream",                                // the sequest.params property name
-            "0=no, 1=yes  write sqt to standard output",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "output_sqtstream",                                // parameters file property name
+            "0=no, 1=yes  write sqt to standard output",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new BooleanParamsValidator(),
             false
         ));
         _params.addProperty(new SequestParam(
             304,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "output_txtfile",                                // the sequest.params property name
-            "0=no, 1=yes  write .tab-delimited txt file",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "output_txtfile",                                // parameters file property name
+            "0=no, 1=yes  write .tab-delimited txt file",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new BooleanParamsValidator(),
             false
         ));
         _params.addProperty(new SequestParam(
             305,                                                       //sortOrder
-            "0",                                            //The value of the property
-            "output_pinxmlfile",                                // the sequest.params property name
-            "0=no, 1=yes  write pin.xml file",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0",                                            // default value of the property
+            "output_pinxmlfile",                                // parameters file property name
+            "0=no, 1=yes  write pin.xml file",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new BooleanParamsValidator(),
             false
         ));
 
         _params.addProperty(new SequestParam(
             400,                                                       //sortOrder
-            "0 0",                                            //The value of the property
-            "scan_range",                                // the sequest.params property name
-            "start and scan scan range to search; 0 as 1st entry ignores parameter",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0 0",                                            // default value of the property
+            "scan_range",                                // parameters file property name
+            "start and scan scan range to search; 0 as 1st entry ignores parameter",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new MultipleIntegerParamsValidator(0, Integer.MAX_VALUE, 2),
             false
         ).setInputXmlLabels("comet, scan_range"));
         _params.addProperty(new SequestParam(
             401,                                                       //sortOrder
-            "0 0",                                            //The value of the property
-            "precursor_charge",                                // the sequest.params property name
-            "precursor charge range to analyze; does not override mzXML charge; 0 as 1st entry ignores parameter",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "0 0",                                            // default value of the property
+            "precursor_charge",                                // parameters file property name
+            "precursor charge range to analyze; does not override mzXML charge; 0 as 1st entry ignores parameter",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new MultipleIntegerParamsValidator(0, Integer.MAX_VALUE, 2),
             true
         ).setInputXmlLabels("comet, precursor_charge"));
         _params.addProperty(new SequestParam(
             402,                                                       //sortOrder
-            "2",                                            //The value of the property
-            "ms_level",                                // the sequest.params property name
-            "MS level to analyze, valid are levels 2 (default) or 3",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "2",                                            // default value of the property
+            "ms_level",                                // parameters file property name
+            "MS level to analyze, valid are levels 2 (default) or 3",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new NonNegativeIntegerParamsValidator(),
             true
         ).setInputXmlLabels("comet, ms_level"));
         _params.addProperty(new SequestParam(
             403,                                                       //sortOrder
-            "ALL",                                            //The value of the property
-            "activation_method",                                // the sequest.params property name
-            "activation method; used if activation method set; allowed ALL, CID, ECD, ETD, PQD, HCD, IRMPD",       // the sequest.params comment
-            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            "ALL",                                            // default value of the property
+            "activation_method",                                // parameters file property name
+            "activation method; used if activation method set; allowed ALL, CID, ECD, ETD, PQD, HCD, IRMPD",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),                      
             new ListParamsValidator("ALL", "CID", "ECD", "ETD", "PQD", "HCD", "IRMPD"),
             true
         ).setInputXmlLabels("comet, activation_method"));

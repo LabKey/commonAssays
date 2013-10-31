@@ -34,12 +34,12 @@ import java.util.List;
  */
 public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements XTandemSearchTask.JobSupport
 {
-    private static Logger _log = getJobLogger(XTandemPipelineJob.class);
-    protected static TaskId _tid = new TaskId(XTandemPipelineJob.class);
+    private static final Logger LOG = getJobLogger(XTandemPipelineJob.class);
+    protected static final TaskId TASK_ID = new TaskId(XTandemPipelineJob.class);
 
     public Logger getClassLogger()
     {
-        return _log;
+        return LOG;
     }
 
     public XTandemPipelineJob(XTandemSearchProtocol protocol,
@@ -63,7 +63,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public TaskId getTaskPipelineId()
     {
-        return _tid;
+        return TASK_ID;
     }
 
     public AbstractFileAnalysisJob createSingleFileJob(File file)

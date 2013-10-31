@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements MascotSearchTask.JobSupport
 {
-    private static TaskId _tid = new TaskId(MascotPipelineJob.class);
+    private static final TaskId TASK_ID = new TaskId(MascotPipelineJob.class);
 
     private String _mascotServer;
     private String _mascotHTTPProxy;
@@ -93,7 +93,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
 
     public TaskId getTaskPipelineId()
     {
-        return _tid;
+        return TASK_ID;
     }
 
     public AbstractFileAnalysisJob createSingleFileJob(File file)

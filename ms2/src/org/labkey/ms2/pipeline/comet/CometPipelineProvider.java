@@ -42,9 +42,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * User: billnelson@uky.edu
- * Date: Aug 24, 2006
- * Time: 12:45:45 PM
+ * User: jeckels
+ * Date: September 17, 2013
  */
 public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
