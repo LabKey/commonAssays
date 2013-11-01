@@ -273,7 +273,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
             resolverType.addHiddenFormFields(form, view);
 
-            PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
+            PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
             collector.addHiddenFormFields(view, form);
 
             Map<String, String> defaultWellRoleValues = PropertyManager.getProperties(getViewContext().getUser(),

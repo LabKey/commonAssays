@@ -214,7 +214,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         return "Test Comments";
     }
 
-    @Override
+    @Override @NotNull
     public ExpProtocol getProtocol()
     {
         Mockery mock = new Mockery();

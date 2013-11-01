@@ -34,8 +34,6 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.actions.PlateBasedUploadWizardAction;
-import org.labkey.api.study.actions.PlateUploadFormImpl;
-import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
@@ -138,7 +136,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
             addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
 
-        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
+        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
         collector.addHiddenFormFields(view, form);
 
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);

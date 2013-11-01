@@ -37,7 +37,6 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -183,7 +182,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
                 addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
 
-            PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
+            PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
             collector.addHiddenFormFields(view, form);
 
             ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);

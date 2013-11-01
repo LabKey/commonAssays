@@ -268,7 +268,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         if (resolverType != null)
             resolverType.addHiddenFormFields(form, view);
 
-        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
+        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
         collector.addHiddenFormFields(view, form);
 
         ButtonBar bbar = new ButtonBar();
