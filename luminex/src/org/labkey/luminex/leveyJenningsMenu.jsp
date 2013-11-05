@@ -35,10 +35,17 @@
     LeveyJenningsMenuView.Bean bean = me.getModelBean();
 %>
 
-<table>
+<table class="labkey-data-region labkey-show-borders">
     <tr>
-        <td valign="top">
-            <strong>Titrations</strong><br/>
+        <td valign="top" style="padding: 5px" class="labkey-column-header">
+            <strong>Titrations</strong>
+        </td>
+        <td valign="top" style="padding: 5px" class="labkey-column-header">
+            <strong>Single Point Controls</strong>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top" style="padding: 5px" >
             <% if (bean.getTitrations().isEmpty()) { %>
                 <em>No titrations</em> <%
             }
@@ -51,8 +58,7 @@
                 %><%= textLink(titrationName, url) %><br/><%
             }%>
         </td>
-        <td valign="top">
-            <strong>Single Point Controls</strong><br/>
+        <td valign="top" style="padding: 5px" >
             <% if (bean.getSinglePointControls().isEmpty()) { %>
                 <em>No single point controls</em> <%
             }
