@@ -40,6 +40,7 @@ import java.util.Set;
 public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvider> implements LuminexRunContext
 {
     private List<Titration> _titrations = new ArrayList<>();
+    private List<SinglePointControl> _singlePointControls = new ArrayList<>();
 
     public LuminexUnitTestContext()
     {
@@ -51,7 +52,11 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         _titrations.add(toAdd);
 
         toAdd.setName("Titration 2");
-        _titrations.add(toAdd);         
+        _titrations.add(toAdd);
+
+        SinglePointControl toAddSPC = new SinglePointControl();
+        toAddSPC.setName("Single Point Control 1");
+        _singlePointControls.add(toAddSPC);
     }
 
     @Override
@@ -243,7 +248,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     @Override
     public List<SinglePointControl> getSinglePointControls() throws ExperimentException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return _singlePointControls;
     }
 
     @Override

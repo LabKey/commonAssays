@@ -69,8 +69,8 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     {
         super.logProperties(logger);
         String valueText;
-        logger.info("----- Start Luminex Analyte Properties -----");
-        for(Map.Entry<String, Map<String, String>> entry : this._analyteColumnPropertiesByName.entrySet())
+        logger.info("----- Start Analyte Properties -----");
+        for(Map.Entry<String, Map<String, String>> entry : _analyteColumnPropertiesByName.entrySet())
         {
             logger.info("\tProperties for " + entry.getKey() + ":");
             for(Map.Entry<String, String> props : entry.getValue().entrySet())
@@ -84,7 +84,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             }
 
             //Currenlty this should only have the positivity thresholds in it, but it might have more later.
-            for(Map.Entry<String, String> props: this._analytePropertiesByName.get(entry.getKey()).entrySet())
+            for(Map.Entry<String, String> props: _analytePropertiesByName.get(entry.getKey()).entrySet())
             {
                 if(props.getValue() == null)
                     valueText = "[Blank]";
@@ -104,16 +104,21 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
                 }
             }
         }
-        logger.info("----- Stop Luminex Analyte Properties -----");
-        logger.info("----- Start Luminex Titration Properties -----");
-        for(Titration titration : this._titrations)
+        logger.info("----- Stop Analyte Properties -----");
+        logger.info("----- Start Well Role Properties -----");
+        for(Titration titration : _titrations)
         {
             logger.info("\tProperties for " + titration.getName());
             logger.info("\t\t*Standard:  " + titration.isStandard());
             logger.info("\t\t*QC Control:  " + titration.isQcControl());
             logger.info("\t\t*Unknown:  " + titration.isUnknown());
         }
-        logger.info("----- Stop Luminex Titration Properties -----");
+        for (SinglePointControl singlePointControl : _singlePointControls)
+        {
+            logger.info("\tProperties for " + singlePointControl.getName());
+            logger.info("\t\t*Single Point Control: true");
+        }
+        logger.info("----- Stop Well Role Properties -----");
 
     }
 
@@ -297,6 +302,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             assert(output.contains("Standard:  true"));
             assert(output.contains("QC Control:  false"));
             assert(output.contains("Unknown:  false"));
+            assert(output.contains("Single Point Control: true"));
         }
 
     }

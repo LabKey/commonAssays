@@ -82,6 +82,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 
+        getColumn("Created").setLabel("Guide Set Start Date");
+
         addCurveTypeColumns();
     }
 

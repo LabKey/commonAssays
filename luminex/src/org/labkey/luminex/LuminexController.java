@@ -175,8 +175,9 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            NavTree result = super.appendNavTrail(root);
-            return result.addChild(_protocol.getName() + " QC Report");
+            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            result.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
+            return result.addChild("Titration QC Report");
         }
     }
 
@@ -223,8 +224,9 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            NavTree result = super.appendNavTrail(root);
-            return result.addChild(_protocol.getName() + " QC Report");
+            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            result.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
+            return result.addChild("Single Point Control QC Report");
         }
     }
 

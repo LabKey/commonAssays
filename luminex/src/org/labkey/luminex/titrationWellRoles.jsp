@@ -79,7 +79,6 @@
         </table>
         <br/>
         <table> <!-- Show a table containing both Titrated Unknowns and Tracked single point controls -->
-        <td>
 <%
     }
 
@@ -87,8 +86,7 @@
     if (unknownTitrations.size() > 0)
     {
 %>
-        <br/>
-        <td>
+        <td valign="top">
         <table>
             <tr>
                 <td>&nbsp;</td>
@@ -115,7 +113,7 @@
     if (trackedSinglePointControls.size() >0)
     {
 %>
-        <td>
+        <td valign="top">
             <table>
                 <tr>
                 <td>&nbsp;</td>
