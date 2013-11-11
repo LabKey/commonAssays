@@ -77,6 +77,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     public static final FileType INDEX_FILE_TYPE = new FileType(".hdr");
     public static final FileType SEQUEST_LOG_FILE_TYPE = new FileType(".sequest.log");
+    public static final FileType SEQUEST_PARAMS_FILE_TYPE = new FileType(".sequest.params");
 
     private static final Object INDEX_LOCK = new Object();
 
@@ -397,6 +398,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 {
                     RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
                     sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
+                    // Copy to a name that's unique to this file and won't conflict between searches in the same directory
+                    File jobSpecificSequestParamsFile = SEQUEST_PARAMS_FILE_TYPE.getFile(fileWorkParams.getParentFile(), getJob().getBaseName());
+                    FileUtils.moveFile(fileWorkParams, jobSpecificSequestParamsFile);
                     sequestAction.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
                     sequestAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
                     sequestAction.addOutput(_wd.outputFile(sequestLogFileWork), "SequestLog", false);

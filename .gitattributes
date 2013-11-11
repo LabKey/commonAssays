@@ -1333,6 +1333,7 @@ ms2/src/org/labkey/ms2/peptideview/ProteinStringExpression.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinTSVGridWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryPeptideMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryProteinGroupMS2RunView.java -text
+ms2/src/org/labkey/ms2/peptideview/QueryResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/ResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/SingleMS2RunRReport.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinDataRegion.java -text

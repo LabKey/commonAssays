@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.NestableQueryView;
@@ -33,9 +33,11 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.DisplayElement;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
@@ -94,12 +96,6 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException
     {
         NestableQueryView queryView = createGridView(false, null, null, true);
-        RenderContext context = queryView.createDataView().getRenderContext();
-        TableInfo tinfo = queryView.createTable();
-
-        Sort sort = new Sort();
-        SimpleFilter filter = context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort);
-
         FieldKey desiredFK;
         if (queryView.getSelectedNestingOption() != null)
         {
@@ -110,15 +106,9 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             desiredFK = FieldKey.fromString("SeqId");
         }
 
-        ColumnInfo desiredCol = QueryService.get().getColumns(tinfo, Collections.singletonList(desiredFK)).get(desiredFK);
-        assert desiredCol != null : "Couldn't find column " + desiredFK;
-
-        List<ColumnInfo> columns = new ArrayList<>();
-        columns.add(desiredCol);
-
-        QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<FieldKey>());
-
-        SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
+        Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);
+        ColumnInfo desiredCol = pair.first;
+        SQLFragment sql = pair.second;
 
         if (queryView.getSelectedNestingOption() != null)
         {
@@ -156,43 +146,83 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
     public void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException
     {
         List<MS2Run> runs = form.validateRuns();
-        String where = null;
-        SimpleFilter baseFilter = new SimpleFilter();
-        if (exportRows != null && !exportRows.isEmpty())
-        {
-            List<Long> rowIds = new ArrayList<>(exportRows.size());
-            for (String protein : exportRows)
-            {
-                rowIds.add(new Long(protein));
-            }
-            baseFilter.addInClause(FieldKey.fromParts("RowId"), rowIds);
-            where = MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RowId IN (" + StringUtils.join(rowIds, ", ") + ")";
-        }
 
-        SpectrumIterator iter = null;
-        try
+        // Choose a different iterator based on whether this is a nested view that may include protein group criteria
+        NestableQueryView queryView = createGridView(form);
+        SQLFragment sql = generateSubSelect(queryView, currentURL, exportRows, FieldKey.fromParts("RowId")).second;
+        try (SpectrumIterator iter = new QueryResultSetSpectrumIterator(runs, sql))
         {
-            // Choose a different iterator based on whether this is a nested view that may include protein group criteria
-            NestableQueryView gridView = createGridView(form);
-            gridView.createDataView();
-            if (gridView.getSelectedNestingOption() == null)
-            {
-                baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER, form.getViewContext().getUser()));
-                Sort sort = ProteinManager.getPeptideBaseSort();
-                sort.addURLSort(currentURL, MS2Manager.getDataRegionNamePeptides());
-                iter = new ResultSetSpectrumIterator(runs, baseFilter, sort);
-            }
-            else
-            {
-                iter = new ProteinResultSetSpectrumIterator(runs, currentURL, this, where, form.getViewContext().getUser());
-            }
             spectrumRenderer.render(iter);
             spectrumRenderer.close();
         }
-        finally
+    }
+
+    /** Generate the SELECT SQL to get a particular FieldKey, respecting the filters and other config on the URL */
+    private Pair<ColumnInfo, SQLFragment> generateSubSelect(NestableQueryView queryView, ActionURL currentURL, @Nullable List<String> selectedIds, FieldKey desiredFK)
+    {
+        RenderContext context = queryView.createDataView().getRenderContext();
+        TableInfo tinfo = queryView.createTable();
+
+        Sort sort = new Sort();
+        SimpleFilter filter = context.buildFilter(tinfo, currentURL, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort);
+        addSelectionFilter(selectedIds, queryView, filter);
+
+        ColumnInfo desiredCol = QueryService.get().getColumns(tinfo, Collections.singletonList(desiredFK)).get(desiredFK);
+        if (desiredCol == null)
         {
-            if (iter != null) { iter.close(); }
+            throw new IllegalArgumentException("Couldn't find column " + desiredFK + " in table " + tinfo);
         }
+
+        List<ColumnInfo> columns = new ArrayList<>();
+        columns.add(desiredCol);
+
+        QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<FieldKey>());
+
+        SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
+        return new Pair<>(desiredCol, sql);
+    }
+
+    /** Add a filter for any selection the user might have made. The type of selection depends on the type of view (peptides/protein groups/search engine protein) */
+    private void addSelectionFilter(@Nullable List<String> exportRows, NestableQueryView queryView, SimpleFilter filter)
+    {
+        if (exportRows != null)
+        {
+            List<Integer> rowIds = parseIds(exportRows);
+            FieldKey selectionFK;
+            QueryNestingOption nestingOption = queryView.getSelectedNestingOption();
+            if (nestingOption != null)
+            {
+                // We're nested, so the selection key is going to be at the protein or protein group level
+                selectionFK = FieldKey.fromString(nestingOption.getAggregateRowIdColumnName());
+            }
+            else
+            {
+                // No nesting, so the selection key will just be the peptide's RowId
+                selectionFK = FieldKey.fromParts("RowId");
+            }
+            filter.addClause(new SimpleFilter.InClause(selectionFK, rowIds));
+        }
+    }
+
+    /**
+     * Convert from Strings to Integers
+     * @throws NotFoundException if there's an unparseable value
+     */
+    private List<Integer> parseIds(List<String> exportRows)
+    {
+        List<Integer> rowIds = new ArrayList<>(exportRows.size());
+        for (String exportRow : exportRows)
+        {
+            try
+            {
+               rowIds.add(Integer.parseInt(exportRow));
+            }
+            catch (NumberFormatException e)
+            {
+                throw new NotFoundException("Invalid selection: " + exportRow);
+            }
+        }
+        return rowIds;
     }
 
     public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting);

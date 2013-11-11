@@ -121,6 +121,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
 import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.protein.AnnotationInsertion;
@@ -5878,6 +5879,15 @@ public class MS2Controller extends SpringActionController
             {
                 // If not, fall back on the default name
                 paramsFile = new File(run.getPath() + "/" + run.getParamsFileName());
+                if (!paramsFile.exists() && TPPTask.FT_PEP_XML.isType(run.getFileName()))
+                {
+                    String basename = TPPTask.FT_PEP_XML.getBaseName(new File(run.getPath() + "/" + run.getFileName()));
+                    paramsFile = new File(paramsFile.getParentFile(), basename + "." + run.getParamsFileName());
+                }
+            }
+            if (!NetworkDrive.exists(paramsFile))
+            {
+                throw new NotFoundException("Could not find parameters file for run '" + run.getFileName() + "'.");
             }
             PageFlowUtil.streamFile(response, paramsFile, false);
         }

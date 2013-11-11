@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.comet;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
@@ -41,6 +42,7 @@ import java.util.List;
 public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Factory>
 {
     public static final String COMET_PARAMS = "comet.params";
+    public static final FileType COMET_PARAMS_FILE_TYPE = new FileType(".comet.params");
 
     private static final String COMET_ACTION_NAME = "Comet Search";
 
@@ -111,7 +113,10 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
             {
                 RecordedAction cometAction = new RecordedAction(COMET_ACTION_NAME);
                 cometAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
-                cometAction.addOutput(_wd.outputFile(fileWorkParams), "CometParams", true);
+                // Copy to a name that's unique to this file and won't conflict between searches in the same directory
+                File jobSpecificCometParamsFile = COMET_PARAMS_FILE_TYPE.getFile(fileWorkParams.getParentFile(), getJob().getBaseName());
+                FileUtils.moveFile(fileWorkParams, jobSpecificCometParamsFile);
+                cometAction.addOutput(_wd.outputFile(jobSpecificCometParamsFile), "CometParams", true);
                 cometAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
                 for (File file : getJob().getSequenceFiles())
                 {
