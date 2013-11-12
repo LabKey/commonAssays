@@ -56,7 +56,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     private boolean hasSequest()
     {
-        for (TaskFactory taskFactory : PipelineJobService.get().getTaskFactories())
+        for (TaskFactory taskFactory : PipelineJobService.get().getTaskFactories(null))
         {
             if (taskFactory instanceof AbstractSequestSearchTaskFactory)
             {
