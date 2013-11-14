@@ -593,6 +593,12 @@ flow/src/org/labkey/flow/webparts/FlowOverview.java -text
 flow/src/org/labkey/flow/webparts/FlowSummary.jsp -text
 flow/src/org/labkey/flow/webparts/FlowSummaryWebPart.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
+freezerpro/FreezerPro.iml -text
+freezerpro/module.properties -text
+freezerpro/src/org/labkey/freezerpro/FreezerProController.java -text
+freezerpro/src/org/labkey/freezerpro/FreezerProModule.java -text
+freezerpro/src/org/labkey/freezerpro/FreezerProTransform.java -text
+freezerpro/src/org/labkey/freezerpro/FreezerProTransformTask.java -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
