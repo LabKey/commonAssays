@@ -19,7 +19,7 @@ package org.labkey.ms2.protein.tools;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.plot.PiePlot;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
@@ -132,15 +132,12 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
         HashMap<String, Integer> thirdLevTallies = new HashMap<>();
         HashMap<String, HashSet<Integer>> extra = new HashMap<>();
 
-        ResultSet rs = null;
-
-        try
+        try (ResultSet rs = new SqlSelector(ProteinManager.getSchema(), sql).getResultSet())
         {
-            rs = Table.executeQuery(ProteinManager.getSchema(), sql);
             int prevSeqId = -1;
             int prevLocId = -1;
 
-            while(rs.next())
+            while (rs.next())
             {
                 int seqId = rs.getInt(1);
                 int locId = rs.getInt(2);
@@ -177,11 +174,6 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
                 sqids.add(seqId);
             }
         }
-        finally
-        {
-            if (null != rs)
-                rs.close();
-        }
 
         retVal.getDataset().setExtraInfo(extra);
 
@@ -203,7 +195,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
             int tallyGtOtherMin = 0;
             for (String k : list)
             {
-                int n = thirdLevTallies.get(k).intValue();
+                int n = thirdLevTallies.get(k);
                 if (n >= i) tallyGtOtherMin++;
             }
             if (tallyGtOtherMin <= PIESLICE_MAX) break;
@@ -213,7 +205,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
         // Now we create the pie chart dataset.
         for (String k : list)
         {
-            int n = thirdLevTallies.get(k).intValue();
+            int n = thirdLevTallies.get(k);
             if (n >= retVal.getOtherMin())
             {
                 retVal.getDataset().setValue(k, n);
@@ -235,7 +227,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
             {
                 if (!k.equalsIgnoreCase("Other"))
                 {
-                    int ocount = thirdLevTallies.get(k).intValue();
+                    int ocount = thirdLevTallies.get(k);
                     if (ocount < retVal.getOtherMin())
                     {
                         otherSet.addAll(retVal.getDataset().getExtraInfo().get(k));

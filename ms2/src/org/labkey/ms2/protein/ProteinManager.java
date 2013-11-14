@@ -33,6 +33,7 @@ import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.ResultSetCollapser;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlExecutor;
@@ -1455,16 +1456,16 @@ public class ProteinManager
 
     public static MultiMap<String, String> getIdentifiersFromId(int seqid)
     {
-        ResultSet rs = null;
-        try
+        final MultiMap<String, String> map = new MultiHashMap<>();
+
+        new SqlSelector(getSchema(),
+                "SELECT T.name AS name, I.identifier\n" +
+                "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
+                "WHERE seqId = ?",
+                seqid).forEach(new Selector.ForEachBlock<ResultSet>()
         {
-            MultiMap<String, String> map = new MultiHashMap<>();
-            rs = Table.executeQuery(getSchema(),
-                    "SELECT T.name AS name, I.identifier\n" +
-                    "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
-                    "WHERE seqId = ?",
-                    new Object[]{seqid});
-            while (rs.next())
+            @Override
+            public void exec(ResultSet rs) throws SQLException
             {
                 String name = rs.getString(1).toLowerCase();
                 String id = rs.getString(2);
@@ -1472,16 +1473,9 @@ public class ProteinManager
                     name = "go";
                 map.put(name, id);
             }
-            return map;
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            ResultSetUtil.close(rs);
-        }
+        });
+
+        return map;
     }
 
 

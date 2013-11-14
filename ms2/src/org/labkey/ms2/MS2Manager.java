@@ -36,6 +36,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
@@ -63,7 +64,6 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
@@ -696,10 +696,8 @@ public class MS2Manager
 
     // We've already verified INSERT permission on newContainer
     // Now, verify DELETE permission on old container(s) and move runs to the new container
-    public static void moveRuns(User user, List<MS2Run> runList, Container newContainer) throws UnauthorizedException, SQLException
+    public static void moveRuns(final User user, List<MS2Run> runList, Container newContainer) throws UnauthorizedException
     {
-        ResultSet rs = null;
-
         List<Integer> runIds = new ArrayList<>(runList.size());
 
         for (MS2Run run : runList)
@@ -711,27 +709,22 @@ public class MS2Manager
         SQLFragment runSQL = inClause.getSQLFragment(getSqlDialect());
         selectSQL.append(runSQL);
 
-        try
+        // Check for DELETE permission on all containers holding the requested runs
+        // UI only allows moving from containers with DELETE permissions, but one could hack the request
+        new SqlSelector(getSchema(), selectSQL).forEach(new Selector.ForEachBlock<String>()
         {
-            rs = Table.executeQuery(getSchema(), selectSQL);
-
-            // Check for DELETE permission on all containers holding the requested runs
-            // UI only allows moving from containers with DELETE permissions, but one could hack the request
-            while (rs.next())
+            @Override
+            public void exec(String containerId) throws SQLException
             {
-                Container c = ContainerManager.getForId(rs.getString(1));
+                Container c = ContainerManager.getForId(containerId);  // TODO: Switch to ForEachBlock<Container>
                 if (!c.hasPermission(user, DeletePermission.class))
                     throw new UnauthorizedException();
             }
+        }, String.class);
 
-            SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());
-            updateSQL.append(runSQL);
-            new SqlExecutor(getSchema()).execute(updateSQL);
-        }
-        finally
-        {
-            ResultSetUtil.close(rs);
-        }
+        SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());
+        updateSQL.append(runSQL);
+        new SqlExecutor(getSchema()).execute(updateSQL);
 
         _removeRunsFromCache(runIds);
     }
@@ -1238,10 +1231,8 @@ public class MS2Manager
 
     private static void addStats(Map<String, String> stats, String prefix, String whereSql, Object[] params)
     {
-        ResultSet rs = null;
-        try
+        try (ResultSet rs = new SqlSelector(getSchema(), "SELECT COUNT(*) AS Runs, COALESCE(SUM(PeptideCount),0) AS Peptides, COALESCE(SUM(SpectrumCount),0) AS Spectra FROM " + getTableInfoRuns() + " WHERE " + whereSql, params).getResultSet())
         {
-            rs = Table.executeQuery(getSchema(), "SELECT COUNT(*) AS Runs, COALESCE(SUM(PeptideCount),0) AS Peptides, COALESCE(SUM(SpectrumCount),0) AS Spectra FROM " + getTableInfoRuns() + " WHERE " + whereSql, params);
             rs.next();
 
             stats.put(prefix + "Runs", df.format(rs.getObject(1)));
@@ -1251,10 +1242,6 @@ public class MS2Manager
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
         }
     }
 
@@ -1518,16 +1505,14 @@ public class MS2Manager
                     series.setKey(series.getKey() + " (Loading)");
                 else
                 {
-                    ResultSet rs = null;
-                    try
-                    {
-                        rs = Table.executeQuery(getSchema(),
+                    try (ResultSet rs = new SqlSelector(getSchema(),
                                                     "SELECT Protein, " + discriminate + " as Expression, " +
                                                             " CASE substring(Protein, 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
                                                     "FROM " + getTableInfoPeptides().getSelectName() + " " +
                                                     "WHERE Run = ? " +
                                                     "ORDER BY Expression, FP",
-                                                    new Object[] { run.getRun() });
+                                                    run.getRun()).getResultSet())
+                    {
 
                         int rows = 0;
                         int falsePositives = 0;
@@ -1574,13 +1559,6 @@ public class MS2Manager
                         series.setKey(series.getKey() + " (Error)");
                         series.clear();
                         _log.error("Error getting ROC data.", e);
-                    }
-                    finally
-                    {
-                        if (rs != null)
-                        {
-                            try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
-                        }
                     }
                 }
 
@@ -1636,10 +1614,7 @@ public class MS2Manager
                 series.setKey(series.getKey() + " (Loading)");
             else
             {
-                ResultSet rs = null;
-                try
-                {
-                    rs = Table.executeQuery(getSchema(),
+                try (ResultSet rs = new SqlSelector(getSchema(),
                                 "SELECT GroupNumber, -max(GroupProbability) as Expression, min(BestName) as Protein, " +
                                         " CASE substring(min(BestName), 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
                                 "FROM " + getTableInfoRuns().getSelectName() + " r " +
@@ -1650,8 +1625,8 @@ public class MS2Manager
                                 "WHERE r.Run = ? " +
                                 "GROUP BY GroupNumber " +
                                 "ORDER BY Expression, FP",
-                                new Object[] { run.getRun() });
-
+                                run.getRun()).getResultSet())
+                {
                     int rows = 0;
                     int falsePositives = 0;
                     int iMark = 0;
@@ -1693,13 +1668,6 @@ public class MS2Manager
                     series.clear();
                     _log.error("Error getting ROC data.", e);
                 }
-                finally
-                {
-                    if (rs != null)
-                    {
-                        try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
-                    }
-                }
             }
 
             collection.addSeries(series);
@@ -1726,10 +1694,7 @@ public class MS2Manager
             String key = run.getDescription();
             XYSeriesROC series = new XYSeriesROC(key);
 
-            ResultSet rs = null;
-            try
-            {
-                rs = Table.executeQuery(getSchema(),
+            try (ResultSet rs = new SqlSelector(getSchema(),
                                             "SELECT Protein, " +
                                                 " case" +
                                                     " when Charge = 1 then " + expressions[0] +
@@ -1739,7 +1704,8 @@ public class MS2Manager
                                             "FROM " + getTableInfoPeptides().getSelectName() + " " +
                                             "WHERE Run = ? " +
                                             "ORDER BY Expression DESC",
-                                            new Object[] {runId});
+                                            runId).getResultSet())
+            {
                 if (!rs.next())
                     return collection;
 
@@ -1780,13 +1746,6 @@ public class MS2Manager
                 series.clear();
                 _log.error("Error getting ROC data.", e);
             }
-            finally
-            {
-                if (rs != null)
-                {
-                    try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
-                }
-            }
 
             collection.addSeries(series);
         }
@@ -1815,15 +1774,13 @@ public class MS2Manager
             XYSeries seriesFP = new XYSeries("False-Positives");
             //Set<SpectrumId> seen = new HashSet<SpectrumId>();
 
-            ResultSet rs = null;
-            try
-            {
-                rs = Table.executeQuery(getSchema(),
+            try (ResultSet rs = new SqlSelector(getSchema(),
                         "SELECT Fraction, Scan, Charge, Protein, " + expression + " as Expression " +
                         "FROM " + getTableInfoPeptides().getSelectName() + " " +
                         "WHERE Run = ? " +
                         "ORDER BY Expression",
-                        new Object[] {runId});
+                        runId).getResultSet())
+            {
                 if (!rs.next())
                     return collection;
 
@@ -1885,13 +1842,6 @@ public class MS2Manager
                 seriesCorrect.setKey(seriesCorrect.getKey() + " (Error)");
                 seriesCorrect.clear();
                 _log.error("Error getting descriminate data.", e);
-            }
-            finally
-            {
-                if (rs != null)
-                {
-                    try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
-                }
             }
 
             collection.addSeries(seriesFP);

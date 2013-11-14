@@ -42,7 +42,6 @@ import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -197,10 +196,8 @@ public class FlowManager
             if (a != null)
                 return a;
 
-            ResultSet rs = null;
-            try
+            try (ResultSet rs = new SqlSelector(getSchema(), "SELECT RowId, Id FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", container, attr).getResultSet())
             {
-                rs = Table.executeQuery(getSchema(), "SELECT RowId, Id FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", new Object[] {container, attr});
                 // we're not caching misses because this is an unlimited cachemap
                 if (!rs.next())
                     return null;
@@ -215,10 +212,6 @@ public class FlowManager
             catch (SQLException e)
             {
                 throw UnexpectedException.wrap(e);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
             }
         }
     }

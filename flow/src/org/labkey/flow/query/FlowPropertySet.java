@@ -16,20 +16,24 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.api.exp.query.ExpDataTable;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.util.KeywordUtil;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class FlowPropertySet
 {
@@ -55,7 +59,7 @@ public class FlowPropertySet
 
     static protected Map<String, SubsetSpec> getSubsetNameAncestorMap(Collection<SubsetSpec> subsets)
     {
-        Map<String, SubsetSpec> ret = new HashMap();
+        Map<String, SubsetSpec> ret = new HashMap<>();
         for (SubsetSpec spec : subsets)
         {
             if (spec != null)
@@ -83,7 +87,7 @@ public class FlowPropertySet
         //    return subsetExpression;
         
         String expr = subsetExpression.toString();
-        if (expr.indexOf("|") >= 0)
+        if (expr.contains("|"))
             return subsetExpression;
         if (!expr.startsWith("(") || !expr.endsWith(")"))
             return subsetExpression;
@@ -151,7 +155,7 @@ public class FlowPropertySet
             return;
         _statistics = AttributeCache.STATS.getAttrValues(_container, _colDataId, true);
         _graphs = AttributeCache.GRAPHS.getAttrValues(_container, _colDataId, true);
-        Set<SubsetSpec> subsets = new HashSet();
+        Set<SubsetSpec> subsets = new HashSet<>();
         for (StatisticSpec stat : _statistics.keySet())
         {
             subsets.add(stat.getSubset());

@@ -17,24 +17,29 @@ package org.labkey.ms2.protein.tools;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.ResultSetUtil;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.iterator.CloseableIterator;
+import org.labkey.api.reader.TabLoader;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
-import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.InputStream;
-import java.sql.*;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 /**
  * User: tholzman
@@ -60,6 +65,7 @@ public class ProteinDictionaryHelpers
             Connection conn = null;
             CloseableIterator<Map<String, Object>> it = null;
             DbScope scope = ProteinManager.getSchema().getScope();
+
             try
             {
                 new SqlExecutor(ProteinManager.getSchema()).execute("DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
@@ -254,13 +260,10 @@ public class ProteinDictionaryHelpers
         {
             if (gTypeC == 0 || gTypeF == 0 || gTypeP == 0)
             {
-                ResultSet rs = null;
-
-                try
+                new SqlSelector(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')").forEach(new Selector.ForEachBlock<ResultSet>()
                 {
-                    rs = Table.executeQuery(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')", null);
-
-                    while (rs.next())
+                    @Override
+                    public void exec(ResultSet rs) throws SQLException
                     {
                         int antypeid = rs.getInt(1);
                         String gt = rs.getString(2);
@@ -277,11 +280,7 @@ public class ProteinDictionaryHelpers
                             gTypeP = antypeid;
                         }
                     }
-                }
-                finally
-                {
-                    ResultSetUtil.close(rs);
-                }
+                });
             }
         }
     }

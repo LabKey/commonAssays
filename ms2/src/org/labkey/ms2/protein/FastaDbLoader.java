@@ -500,10 +500,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     protected int guessAssociatedFastaId() throws SQLException
     {
         String bfn = baseFileName(_file.getPath());
-        ResultSet rs = null;
-        try
+
+        try (ResultSet rs = new SqlSelector(ProteinManager.getSchema(), "SELECT FastaId,FileName FROM " + ProteinManager.getTableInfoFastaFiles()).getResultSet())
         {
-            rs = Table.executeQuery(ProteinManager.getSchema(), "SELECT FastaId,FileName FROM " + ProteinManager.getTableInfoFastaFiles(), null);
             while (rs.next())
             {
                 String curFastaFname = rs.getString(2);
@@ -514,10 +513,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                 }
             }
         }
-        finally
-        {
-            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
-        }
+
         return 0;
     }
 

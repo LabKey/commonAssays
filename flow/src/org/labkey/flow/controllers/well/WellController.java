@@ -24,10 +24,11 @@ import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector.ForEachBlock;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
@@ -42,7 +43,6 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
@@ -79,7 +79,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -529,7 +528,7 @@ public class WellController extends BaseFlowController
             SQLFragment sql = new SQLFragment("SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?", getContainer(), form.keyword);
             try
             {
-                keywordid = Table.executeSingleton(DbSchema.get("flow"), sql.getSQL(), sql.getParams().toArray(), Integer.class);
+                keywordid = Table.executeSingleton(FlowManager.get().getSchema(), sql.getSQL(), sql.getParams().toArray(), Integer.class);
                 if (null == keywordid)
                     errors.rejectValue("keyword", ERROR_MSG, "keyword not found: " + form.keyword);
             }
@@ -580,7 +579,7 @@ public class WellController extends BaseFlowController
             }
             update.append(")");
 
-            updated = new SqlExecutor(DbSchema.get("flow")).execute(update);
+            updated = new SqlExecutor(FlowManager.get().getSchema()).execute(update);
 
             form.message = "" + updated + " values updated";
             // CONSIDER handle nulls (requires INSERT and DELETE)
@@ -652,24 +651,19 @@ public class WellController extends BaseFlowController
 
         public TreeSet<String> getValues(ViewContext context, String keyword)
         {
-            ResultSet rs = null;
-            try
+            final TreeSet<String> set = new TreeSet<>();
+
+            new SqlSelector(FlowManager.get().getSchema(),
+                    "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(new ForEachBlock<String>()
             {
-                rs = Table.executeQuery(DbSchema.get("flow"),
-                        "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", new Object[]{context.getContainer(), keyword});
-                TreeSet<String> set = new TreeSet<>();
-                while (rs.next())
-                    set.add(rs.getString(1));
-                return set;
-            }
-            catch (SQLException x)
-            {
-                throw new RuntimeSQLException(x);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
-            }
+                @Override
+                public void exec(String value) throws SQLException
+                {
+                    set.add(value);
+                }
+            }, String.class);
+
+            return set;
         }
     }
 

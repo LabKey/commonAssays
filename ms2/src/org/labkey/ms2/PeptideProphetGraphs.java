@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.api.data.Table;
@@ -158,19 +159,19 @@ public class PeptideProphetGraphs
         float ratioRandom = (float) zeroScoresPositive / (float) zeroScoresNegative;
 
         XYSeries series = new XYSeries("xy");
-        ResultSet rs = Table.executeQuery(MS2Manager.getSchema(),
-                "SELECT Protein, PeptideProphet " +
-                "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
-                "WHERE Run = ? AND Charge = ? " +
-                "ORDER BY PeptideProphet",
-                new Object[] { runId, charge });
-
         int increment = total / 250;
         if (increment < 50)
             increment = 50;
         int negative = 0;
         int count = 0;
         float score = 0.0f;
+
+        ResultSet rs = new SqlSelector(MS2Manager.getSchema(),
+                "SELECT Protein, PeptideProphet " +
+                "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
+                "WHERE Run = ? AND Charge = ? " +
+                "ORDER BY PeptideProphet",
+                runId, charge).getResultSet();
 
         while (rs.next())
         {

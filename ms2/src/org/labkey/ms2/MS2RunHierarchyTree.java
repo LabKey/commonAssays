@@ -19,7 +19,7 @@ package org.labkey.ms2;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ContainerTree;
@@ -69,12 +69,8 @@ public class MS2RunHierarchyTree extends ContainerTree
 
         if (isAuthorized)
         {
-            ResultSet rs = null;
-
-            try
+            try (ResultSet rs = new SqlSelector(MS2Manager.getSchema(), "SELECT Run, Description, FileName FROM " + MS2Manager.getTableInfoRuns() + " WHERE Container=? AND Deleted=?", parent, Boolean.FALSE).getResultSet())
             {
-                rs = Table.executeQuery(MS2Manager.getSchema(), "SELECT Run, Description, FileName FROM " + MS2Manager.getTableInfoRuns() + " WHERE Container=? AND Deleted=?", new Object[]{parent.getId(), Boolean.FALSE});
-
                 boolean moreRuns = rs.next();
 
                 if (moreRuns)
@@ -112,20 +108,6 @@ public class MS2RunHierarchyTree extends ContainerTree
             catch (SQLException e)
             {
                 throw new RuntimeSQLException(e);
-            }
-            finally
-            {
-                if (null != rs)
-                {
-                    try
-                    {
-                        rs.close();
-                    }
-                    catch (SQLException e)
-                    {
-                        //
-                    }
-                }
             }
         }
     }

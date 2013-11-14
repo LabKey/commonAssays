@@ -16,6 +16,8 @@
 package org.labkey.flow.persist;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Selector;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.gwt.client.util.StringUtils;
@@ -177,24 +179,29 @@ public class AttributeSetHelper
 
     }
 
-    private static void loadFromDb(AttributeSet attrs, AttrObject obj, boolean includeGraphBytes) throws SQLException
+    private static void loadFromDb(final AttributeSet attrs, AttrObject obj, final boolean includeGraphBytes) throws SQLException
     {
         FlowManager mgr = FlowManager.get();
-        Object[] params = new Object[] { obj.getRowId() };
+        int rowId = obj.getRowId();
 
         String sqlKeywords = "SELECT flow.KeywordAttr.RowId, flow.KeywordAttr.name, flow.keyword.value " +
                 "FROM flow.keyword " +
                 "INNER JOIN flow.KeywordAttr ON flow.keyword.keywordid = flow.KeywordAttr.rowid " +
                 "WHERE flow.keyword.objectId = ?";
-        ResultSet rsKeywords = Table.executeQuery(mgr.getSchema(), sqlKeywords, params);
-        List<Integer> keywordIDs = new ArrayList<>();
-        Map<String, String> keywords = new TreeMap();
-        while (rsKeywords.next())
+
+        final List<Integer> keywordIDs = new ArrayList<>();
+        final Map<String, String> keywords = new TreeMap<>();
+
+        new SqlSelector(mgr.getSchema(), sqlKeywords, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
         {
-            keywordIDs.add(rsKeywords.getInt(1));
-            keywords.put(rsKeywords.getString(2), rsKeywords.getString(3));
-        }
-        rsKeywords.close();
+            @Override
+            public void exec(ResultSet rs) throws SQLException
+            {
+                keywordIDs.add(rs.getInt(1));
+                keywords.put(rs.getString(2), rs.getString(3));
+            }
+        });
+
         attrs.setKeywords(keywords);
 
         if (keywordIDs.size() > 0)
@@ -205,27 +212,33 @@ public class AttributeSetHelper
                     "ON A.RowId = B.Id\n" +
                     "AND B.RowId != B.Id\n" +
                     "AND A.RowId IN (" + StringUtils.join(keywordIDs, ", ") + ")";
-            ResultSet rsKeywordAliases = Table.executeQuery(mgr.getSchema(), sqlKeywordAliaes, null);
-            while (rsKeywordAliases.next())
-            {
-                attrs.addKeywordAlias(rsKeywordAliases.getString(1), rsKeywordAliases.getString(2));
-            }
-            rsKeywordAliases.close();
-        }
 
+            new SqlSelector(mgr.getSchema(), sqlKeywordAliaes).forEach(new Selector.ForEachBlock<ResultSet>()
+            {
+                @Override
+                public void exec(ResultSet rs) throws SQLException
+                {
+                    attrs.addKeywordAlias(rs.getString(1), rs.getString(2));
+                }
+            });
+        }
 
         String sqlStatistics = "SELECT flow.StatisticAttr.RowId, flow.StatisticAttr.name, flow.statistic.value " +
                 "FROM flow.statistic " +
                 "INNER JOIN flow.StatisticAttr ON flow.statistic.statisticid = flow.StatisticAttr.rowid " +
                 "WHERE flow.statistic.objectId = ?";
-        ResultSet rsStatistics = Table.executeQuery(mgr.getSchema(), sqlStatistics, params);
-        List<Integer> statisticIDs = new ArrayList<>();
-        while (rsStatistics.next())
+
+        final List<Integer> statisticIDs = new ArrayList<>();
+
+        new SqlSelector(mgr.getSchema(), sqlStatistics, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
         {
-            statisticIDs.add(rsStatistics.getInt(1));
-            attrs.setStatistic(new StatisticSpec(rsStatistics.getString(2)), rsStatistics.getDouble(3));
-        }
-        rsStatistics.close();
+            @Override
+            public void exec(ResultSet rsStatistics) throws SQLException
+            {
+                statisticIDs.add(rsStatistics.getInt(1));
+                attrs.setStatistic(new StatisticSpec(rsStatistics.getString(2)), rsStatistics.getDouble(3));
+            }
+        });
 
         if (statisticIDs.size() > 0)
         {
@@ -235,38 +248,43 @@ public class AttributeSetHelper
                     "ON A.RowId = B.Id\n" +
                     "AND B.RowId != B.Id\n" +
                     "AND A.RowId IN (" + StringUtils.join(statisticIDs, ", ") + ")";
-            ResultSet rsStatisticAliases = Table.executeQuery(mgr.getSchema(), sqlStatisticAliaes, null);
-            while (rsStatisticAliases.next())
+
+            new SqlSelector(mgr.getSchema(), sqlStatisticAliaes).forEach(new Selector.ForEachBlock<ResultSet>()
             {
-                attrs.addStatisticAlias(new StatisticSpec(rsStatisticAliases.getString(1)), new StatisticSpec(rsStatisticAliases.getString(2)));
-            }
-            rsStatisticAliases.close();
+                @Override
+                public void exec(ResultSet rs) throws SQLException
+                {
+                    attrs.addStatisticAlias(new StatisticSpec(rs.getString(1)), new StatisticSpec(rs.getString(2)));
+                }
+            });
         }
 
+        String sqlGraphs;
 
-        ResultSet rsGraphs = null;
-        try
+        if (!includeGraphBytes)
         {
-            if (!includeGraphBytes)
-            {
-                String sqlGraphs = "SELECT flow.GraphAttr.RowId, flow.GraphAttr.name " +
-                        "FROM flow.graph " +
-                        "INNER JOIN flow.GraphAttr ON flow.graph.graphid = flow.GraphAttr.rowid " +
-                        "WHERE flow.graph.objectid = ?";
-                rsGraphs = Table.executeQuery(mgr.getSchema(), sqlGraphs, params);
-            }
-            else
-            {
-                String sqlGraphs = "SELECT flow.GraphAttr.RowId, flow.GraphAttr.name, flow.graph.data " +
-                        "FROM flow.graph " +
-                        "INNER JOIN flow.GraphAttr ON flow.graph.graphid = flow.GraphAttr.rowid " +
-                        "WHERE flow.graph.objectid = ?";
-                rsGraphs = Table.executeQuery(mgr.getSchema(), sqlGraphs, params);
-            }
-            List<Integer> graphIDs = new ArrayList<>();
-            while (rsGraphs.next())
+            sqlGraphs = "SELECT flow.GraphAttr.RowId, flow.GraphAttr.name " +
+                    "FROM flow.graph " +
+                    "INNER JOIN flow.GraphAttr ON flow.graph.graphid = flow.GraphAttr.rowid " +
+                    "WHERE flow.graph.objectid = ?";
+        }
+        else
+        {
+            sqlGraphs = "SELECT flow.GraphAttr.RowId, flow.GraphAttr.name, flow.graph.data " +
+                    "FROM flow.graph " +
+                    "INNER JOIN flow.GraphAttr ON flow.graph.graphid = flow.GraphAttr.rowid " +
+                    "WHERE flow.graph.objectid = ?";
+        }
+
+        final List<Integer> graphIDs = new ArrayList<>();
+
+        new SqlSelector(mgr.getSchema(), sqlGraphs, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
+        {
+            @Override
+            public void exec(ResultSet rsGraphs) throws SQLException
             {
                 graphIDs.add(rsGraphs.getInt(1));
+
                 if (!includeGraphBytes)
                 {
                     attrs.setGraph(new GraphSpec(rsGraphs.getString(2)), null);
@@ -275,29 +293,27 @@ public class AttributeSetHelper
                 {
                     attrs.setGraph(new GraphSpec(rsGraphs.getString(2)), rsGraphs.getBytes(3));
                 }
-            }
 
-            if (graphIDs.size() > 0)
-            {
-                String sqlGraphAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
-                        "FROM flow.GraphAttr A\n" +
-                        "INNER JOIN flow.GraphAttr B\n" +
-                        "ON A.RowId = B.Id\n" +
-                        "AND B.RowId != B.Id\n" +
-                        "AND A.RowId IN (" + StringUtils.join(graphIDs, ", ") + ")";
-                ResultSet rsGraphAliases = Table.executeQuery(mgr.getSchema(), sqlGraphAliaes, null);
-                while (rsGraphAliases.next())
-                {
-                    attrs.addGraphAlias(new GraphSpec(rsGraphAliases.getString(1)), new GraphSpec(rsGraphAliases.getString(2)));
-                }
-                rsGraphAliases.close();
             }
+        });
 
-        }
-        finally
+        if (graphIDs.size() > 0)
         {
-            if (rsGraphs != null) try { rsGraphs.close(); } catch (SQLException e) {}
+            String sqlGraphAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
+                    "FROM flow.GraphAttr A\n" +
+                    "INNER JOIN flow.GraphAttr B\n" +
+                    "ON A.RowId = B.Id\n" +
+                    "AND B.RowId != B.Id\n" +
+                    "AND A.RowId IN (" + StringUtils.join(graphIDs, ", ") + ")";
+
+            new SqlSelector(mgr.getSchema(), sqlGraphAliaes).forEach(new Selector.ForEachBlock<ResultSet>()
+            {
+                @Override
+                public void exec(ResultSet rs) throws SQLException
+                {
+                    attrs.addGraphAlias(new GraphSpec(rs.getString(1)), new GraphSpec(rs.getString(2)));
+                }
+            });
         }
     }
-
 }

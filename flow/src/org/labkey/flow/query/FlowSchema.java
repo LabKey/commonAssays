@@ -96,7 +96,6 @@ import org.springframework.validation.BindException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -499,7 +498,7 @@ public class FlowSchema extends UserSchema
             setName(name);
             _expDataAlias = "_expdata_";
             _expData = ExperimentService.get().createDataTable(name, FlowSchema.this);
-            _flowObject = DbSchema.get("flow").getTable("object");
+            _flowObject = FlowManager.get().getTinfoObject();
             _type = type;
             _fps = new FlowPropertySet(_expData);
         }
@@ -788,7 +787,7 @@ public class FlowSchema extends UserSchema
             setName(name);
             _expData = ExperimentService.get().createDataTable(name, FlowSchema.this);
             _expData.setDataType(type);
-            _flowObject = DbSchema.get("flow").getTable("object");
+            _flowObject = FlowManager.get().getTinfoObject();
             _type = type;
 
             _fps = new FlowPropertySet(FlowSchema.this.getContainer());
@@ -1896,49 +1895,44 @@ public class FlowSchema extends UserSchema
     /** CONSIDER JOIN ObjectId from exp.Objects */
     String createFastFlowObjectTableName(Container c, int typeid)
     {
-        try
-        {
-            long begin = System.currentTimeMillis();
-            DbSchema flow = FlowManager.get().getSchema();
-            String shortName = "flowObject" + GUID.makeHash(); 
-            String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
-            Table.execute(flow,
+        DbSchema flow = FlowManager.get().getSchema();
+        SqlExecutor executor = new SqlExecutor(flow);
+        String shortName = "flowObject" + GUID.makeHash();
+        String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
+
+        executor.execute(
                 "SELECT \n" +
-                "    exp.data.RowId,\n" +
-                "    exp.data.LSID,\n" +
-                "    exp.data.Name,\n" +
-                "    exp.data.CpasType,\n" +
-                "    exp.data.SourceApplicationId,\n" +
-                "    exp.data.DataFileUrl,\n" +
-                "    exp.data.RunId,\n" +
-                "    exp.data.Created,\n" +
-                "    exp.data.CreatedBy,\n" +
-                "    exp.data.Container,\n" +
-                "    flow.object.RowId AS objectid,\n" +
-                "    flow.object.TypeId,\n" +
-                "    flow.object.compid,\n" +
-                "    flow.object.fcsid,\n" +
-                "    flow.object.scriptid,\n" +
-                "    flow.object.uri,\n" +
-                "    exp.RunList.ExperimentId\n" +
-                "INTO " +  name + "\n" +
-                "FROM exp.data\n" +
-                "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
-                "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
-                "WHERE flow.Object.container = ? and TypeId = ?",
-                    c.getId(), typeid);
-            String create =
+                        "    exp.data.RowId,\n" +
+                        "    exp.data.LSID,\n" +
+                        "    exp.data.Name,\n" +
+                        "    exp.data.CpasType,\n" +
+                        "    exp.data.SourceApplicationId,\n" +
+                        "    exp.data.DataFileUrl,\n" +
+                        "    exp.data.RunId,\n" +
+                        "    exp.data.Created,\n" +
+                        "    exp.data.CreatedBy,\n" +
+                        "    exp.data.Container,\n" +
+                        "    flow.object.RowId AS objectid,\n" +
+                        "    flow.object.TypeId,\n" +
+                        "    flow.object.compid,\n" +
+                        "    flow.object.fcsid,\n" +
+                        "    flow.object.scriptid,\n" +
+                        "    flow.object.uri,\n" +
+                        "    exp.RunList.ExperimentId\n" +
+                        "INTO " + name + "\n" +
+                        "FROM exp.data\n" +
+                        "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
+                        "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
+                        "WHERE flow.Object.container = ? and TypeId = ?",
+                c.getId(), typeid);
+
+        String create =
 //                    "CREATE INDEX ix_" + shortName + " ON " + name + " (TypeId,ExperimentId);\n" +
-                    "CREATE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
-                    "CREATE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
-            new SqlExecutor(flow).execute(create);
-            long end = System.currentTimeMillis();
-            return name;
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+                "CREATE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
+                "CREATE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
+        executor.execute(create);
+
+        return name;
     }
 
 

@@ -164,7 +164,7 @@ public class MS1Manager
         sql.append(FILETYPE_PEAKS);
         sql.append(" AND s.Scan=? AND (p.MZ BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=?");
 
-        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scan, mzLow, mzHigh, true, false});
+        return new SqlSelector(getSchema(), sql, runId, scan, mzLow, mzHigh, true, false).getResultSet();
     }
 
     public Table.TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast) throws SQLException
@@ -187,7 +187,7 @@ public class MS1Manager
         if(null != orderBy)
             sql.append(" ORDER BY ").append(orderBy);
 
-        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, true, false});
+        return new SqlSelector(getSchema(), sql, runId, mzLow, mzHigh, scanFirst, scanLast, true, false).getResultSet();
     }
 
     public Integer[] getPrevNextScan(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast, int scanCur) throws SQLException
