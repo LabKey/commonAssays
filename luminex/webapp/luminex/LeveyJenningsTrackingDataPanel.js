@@ -589,6 +589,12 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     value = this.flagsExcelRenderer(value);
                 }
 
+                // Issue 19019: specify that this value should be displayed as a string and not converted to a date
+                if (col.dataIndex == "Titration/Run/Name")
+                {
+                    value = {value: value, forceString: true};
+                }
+
                 exportJson.sheets[0].data[rowIndex][colIndex] = value;
                 colIndex++;
             }, this);
