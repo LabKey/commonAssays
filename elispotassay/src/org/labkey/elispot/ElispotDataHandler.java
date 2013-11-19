@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
@@ -200,8 +201,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
      */
     public static void populateAntigenDataProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws SQLException, ValidationException, ExperimentException
     {
-        try {
-            ExperimentService.get().getSchema().getScope().ensureTransaction();
+        try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
+        {
             Container container = run.getContainer();
 
             // get the URI for the spot count
@@ -296,11 +297,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     }
                 }
             }
-            ExperimentService.get().getSchema().getScope().commitTransaction();
-        }
-        finally
-        {
-            ExperimentService.get().getSchema().getScope().closeConnection();
+            transaction.commit();
         }
     }
 
@@ -309,8 +306,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
      */
     public static void populateAntigenRunProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws SQLException, ValidationException, ExperimentException
     {
-        try {
-            ExperimentService.get().getSchema().getScope().ensureTransaction();
+        try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
+        {
             Container container = run.getContainer();
 
             // get the URI for the spot count
@@ -492,11 +489,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     }
                 }
             }
-            ExperimentService.get().getSchema().getScope().commitTransaction();
-        }
-        finally
-        {
-            ExperimentService.get().getSchema().getScope().closeConnection();
+            transaction.commit();
         }
     }
 

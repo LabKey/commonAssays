@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.collections.CsvSet;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
@@ -139,10 +140,9 @@ public abstract class MS2Importer
 
     protected RunInfo prepareRun(boolean restart) throws SQLException
     {
-        try
+        try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().ensureTransaction())
         {
             boolean alreadyImported = false;
-            MS2Manager.getSchema().getScope().ensureTransaction();
 
             synchronized (_schemaLock)
             {
@@ -166,12 +166,8 @@ public abstract class MS2Importer
                 }
             }
 
-            MS2Manager.getSchema().getScope().commitTransaction();
+            transaction.commit();
             return new RunInfo(_runId, alreadyImported);
-        }
-        finally
-        {
-            MS2Manager.getSchema().getScope().closeConnection();
         }
     }
 

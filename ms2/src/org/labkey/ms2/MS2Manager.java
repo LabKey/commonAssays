@@ -33,6 +33,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DatabaseCache;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
@@ -336,10 +337,8 @@ public class MS2Manager
 
     private static ExpRun wrapRun(MS2Run run, User user) throws ExperimentException
     {
-        try
+        try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
-            ExperimentService.get().getSchema().getScope().ensureTransaction();
-
             Container container = run.getContainer();
             final File pepXMLFile = new File(run.getPath(), run.getFileName());
 
@@ -451,16 +450,12 @@ public class MS2Manager
             run.setExperimentRunLSID(expRun.getLSID());
             MS2Manager.updateRun(run, user);
 
-            ExperimentService.get().getSchema().getScope().commitTransaction();
+            transaction.commit();
             return expRun;
         }
         catch (SQLException | URISyntaxException e)
         {
             throw new ExperimentException(e);
-        }
-        finally
-        {
-            ExperimentService.get().getSchema().getScope().closeConnection();
         }
     }
 

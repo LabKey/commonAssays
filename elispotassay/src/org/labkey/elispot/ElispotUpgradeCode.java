@@ -16,6 +16,7 @@
 package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DeferredUpgrade;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.ExperimentException;
@@ -78,10 +79,8 @@ public class ElispotUpgradeCode implements UpgradeCode
                 {
                     for (ExpRun run : protocol.getExpRuns())
                     {
-                        try
+                        try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
                         {
-                            ExperimentService.get().getSchema().getScope().ensureTransaction();
-
                             ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
                             if (data.length != 1)
                                 throw new ExperimentException("Elispot should only upload a single file per run.");
@@ -121,16 +120,12 @@ public class ElispotUpgradeCode implements UpgradeCode
                             ElispotDataHandler.populateAntigenDataProperties(run, plate, propMap, true, false);
                             ElispotDataHandler.populateAntigenRunProperties(run, plate, propMap, true, false);
 
-                            ExperimentService.get().getSchema().getScope().commitTransaction();
+                            transaction.commit();
                         }
                         catch (Exception e)
                         {
                             // fail upgrading the run but continue on to subsequent runs
                             _log.error("An error occurred upgrading elispot run: " + run.getName() + " in folder: " + run.getContainer().getPath(), e);
-                        }
-                        finally
-                        {
-                            ExperimentService.get().getSchema().getScope().closeConnection();
                         }
                     }
                 }
@@ -160,10 +155,8 @@ public class ElispotUpgradeCode implements UpgradeCode
                 AssayProvider provider = AssayService.get().getProvider(protocol);
                 if (provider instanceof ElispotAssayProvider)
                 {
-                    try
+                    try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
                     {
-                        ExperimentService.get().getSchema().getScope().ensureTransaction();
-
                         // add a run property for background well subtraction
                         Domain domain = provider.getRunDomain(protocol);
 
@@ -184,16 +177,12 @@ public class ElispotUpgradeCode implements UpgradeCode
                                 run.setProperty(context.getUpgradeUser(), prop.getPropertyDescriptor(), false);
                             }
                         }
-                        ExperimentService.get().getSchema().getScope().commitTransaction();
+                        transaction.commit();
                     }
                     catch (Exception e)
                     {
                         // fail upgrading the run but continue on to subsequent runs
                         _log.error("An error occurred upgrading elispot assay : " + protocol.getName() + " in folder: " + protocol.getContainer().getPath(), e);
-                    }
-                    finally
-                    {
-                        ExperimentService.get().getSchema().getScope().closeConnection();
                     }
                 }
             }
