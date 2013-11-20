@@ -16,6 +16,5 @@
 
 -- Remove the target container for the lookup so that we resolve the file correctly when the assay design is in another
 -- container
--- ROLLUP NOTICE - safe to rerun. 13.3 rollup script should start at 13.201 and include this SQL
 UPDATE exp.PropertyDescriptor SET LookupContainer = NULL
   WHERE Name = 'CelFileId' AND LookupSchema = 'exp' AND LookupQuery = 'Data';

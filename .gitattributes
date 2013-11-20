@@ -37,11 +37,11 @@ dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-0.00-13.1
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.10-13.20.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.13-13.14.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.15-13.16.sql -text
-dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.20-13.21.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.20-13.30.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.01-0.02.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.02-0.03.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.03-0.04.sql -text
+dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-13.20-13.21.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-0.00-13.10.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.10-13.20.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.11-13.12.sql -text
@@ -49,11 +49,11 @@ dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.12-13.1
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.13-13.14.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.14-13.15.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.15-13.16.sql -text
-dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.20-13.21.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.20-13.30.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.01-0.02.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.02-0.03.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.03-0.04.sql -text
+dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-13.20-13.21.sql -text
 dataintegration/schemas/etl.xsd -text
 dataintegration/src/org/labkey/di/DataIntegrationModule.java -text
 dataintegration/src/org/labkey/di/DataIntegrationQuerySchema.java -text
@@ -608,7 +608,6 @@ luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-11.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.30-12.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.31-12.10.sql -text
-luminex/resources/schemas/dbscripts/postgresql/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-13.20-13.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-13.21-13.22.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-13.22-13.23.sql -text
@@ -647,6 +646,7 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.30-11.33.sql 
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.31-11.32.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.31-11.33.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.32-11.33.sql -text
+luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-2.20-2.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-2.20-2.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-2.21-2.22.sql -text
@@ -664,7 +664,6 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.30-9.31.sql -t
 luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-11.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.30-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.31-12.10.sql -text
-luminex/resources/schemas/dbscripts/sqlserver/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.20-13.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.21-13.22.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.22-13.23.sql -text
@@ -705,6 +704,7 @@ luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.30-11.33.sql -
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.31-11.32.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.31-11.33.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.32-11.33.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-13.20-13.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-2.20-2.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-2.20-2.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-2.21-2.22.sql -text
@@ -805,20 +805,20 @@ microarray/module.properties -text
 microarray/resources/credits/jars.txt -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-9.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-11.30-12.10.sql -text
-microarray/resources/schemas/dbscripts/postgresql/microarray-13.20-13.201.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.20-13.30.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-11.30-11.31.sql -text
+microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-13.20-13.201.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-8.30-8.31.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-8.30-9.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-0.00-9.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-11.30-12.10.sql -text
-microarray/resources/schemas/dbscripts/sqlserver/microarray-13.20-13.201.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.20-13.30.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-11.30-11.31.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-13.20-13.201.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-8.30-8.31.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-8.30-9.10.sql -text
 microarray/resources/schemas/microarray.xml -text
@@ -1018,7 +1018,6 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-11.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.30-12.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-12.10-12.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.10-13.20.sql -text
-ms2/resources/schemas/dbscripts/postgresql/ms2-13.20-13.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.20-13.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.21-13.22.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
@@ -1086,6 +1085,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-11.20-11.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-11.21-11.22.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-11.30-11.31.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-12.10-12.11.sql -text
+ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-13.20-13.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-2.00-2.01.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-2.00-2.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-2.01-2.02.sql -text
@@ -1116,7 +1116,6 @@ ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-11.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.30-12.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-12.10-12.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-13.10-13.20.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-13.20-13.21.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-13.20-13.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-13.21-13.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
@@ -1196,6 +1195,7 @@ ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-11.20-11.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-11.21-11.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-11.30-11.31.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-12.10-12.11.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-13.20-13.21.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-2.00-2.01.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-2.00-2.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-2.01-2.02.sql -text
