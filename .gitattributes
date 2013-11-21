@@ -121,14 +121,6 @@ elisa/src/org/labkey/elisa/view/runDetailsView.jsp -text
 elisa/webapp/elisa/runDataPanel.js -text
 elisa/webapp/elisa/runDetailsPanel.js -text
 elispotassay/module.properties -text
-elispotassay/resources/schemas/dbscripts/postgresql/elispot-11.30-12.10.sql -text
-elispotassay/resources/schemas/dbscripts/postgresql/elispot-12.10-12.20.sql -text
-elispotassay/resources/schemas/dbscripts/postgresql/obsolete/elispot-11.30-11.31.sql -text
-elispotassay/resources/schemas/dbscripts/postgresql/obsolete/elispot-12.10-12.11.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/elispot-11.30-12.10.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/elispot-12.10-12.20.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/obsolete/elispot-11.30-11.31.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/obsolete/elispot-12.10-12.11.sql -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text
@@ -138,7 +130,6 @@ elispotassay/src/org/labkey/elispot/ElispotModule.java -text
 elispotassay/src/org/labkey/elispot/ElispotPlateTypeHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotProtocolSchema.java -text
 elispotassay/src/org/labkey/elispot/ElispotRunUploadForm.java -text
-elispotassay/src/org/labkey/elispot/ElispotUpgradeCode.java -text
 elispotassay/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
 elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/pipeline/BackgroundSubtractionJob.java -text

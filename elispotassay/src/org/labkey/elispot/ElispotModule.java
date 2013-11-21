@@ -19,7 +19,6 @@ package org.labkey.elispot;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -27,11 +26,11 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.study.assay.plate.ExcelPlateReader;
 import org.labkey.api.study.assay.plate.PlateReaderService;
+import org.labkey.api.study.assay.plate.TextPlateReader;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.elispot.pipeline.ElispotPipelineProvider;
-import org.labkey.api.study.assay.plate.ExcelPlateReader;
-import org.labkey.api.study.assay.plate.TextPlateReader;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -84,11 +83,5 @@ public class ElispotModule extends DefaultModule
         PlateReaderService.registerPlateReader(provider, new TextPlateReader());
 
         PipelineService.get().registerPipelineProvider(new ElispotPipelineProvider(this));
-    }
-
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new ElispotUpgradeCode();
     }
 }
