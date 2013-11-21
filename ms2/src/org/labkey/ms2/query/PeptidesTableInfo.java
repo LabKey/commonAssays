@@ -257,8 +257,6 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         ExprColumn trypricEndsColumn = new ExprColumn(this, "TrypticEnds", trypticSQL, JdbcType.INTEGER);
         addColumn(trypricEndsColumn);
 
-        // Add this column if we're not on SQLServer 2000, which doesn't support BLOBs in a subselect like this
-        // This is an ugly way to conditionalize the column - remove the check as soon as we drop support for SQL Server 2000
         SQLFragment spectrumSQL = new SQLFragment();
         spectrumSQL.append("(SELECT Spectrum FROM ");
         spectrumSQL.append(MS2Manager.getTableInfoSpectraData(), "sd");
