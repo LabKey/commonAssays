@@ -17,13 +17,13 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.collections.CsvSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -280,15 +279,11 @@ public abstract class MS2Importer
         filter.addCondition("Path", _path);
         filter.addCondition("FileName", _fileName);
         filter.addCondition("Deleted", Boolean.FALSE);
-        ResultSet rs = Table.select(MS2Manager.getTableInfoRuns(), new CsvSet("Run,Path,FileName,Container,Deleted"), filter, null);
 
-        int runId = -1;
+        TableInfo ti = MS2Manager.getTableInfoRuns();
+        Integer runId = new TableSelector(ti.getColumn("Run"), filter, null).getObject(Integer.class);
 
-        if (rs.next())
-            runId = rs.getInt("Run");
-
-        rs.close();
-        return runId;
+        return null != runId ? runId : -1;
     }
 
 

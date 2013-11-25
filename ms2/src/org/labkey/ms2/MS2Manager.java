@@ -1035,7 +1035,7 @@ public class MS2Manager
     {
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("run"), run.getRun());
 
-        return new TableSelector(getTableInfoModifications(), Table.ALL_COLUMNS, filter, null).getArrayList(MS2Modification.class);
+        return new TableSelector(getTableInfoModifications(), filter, null).getArrayList(MS2Modification.class);
     }
 
     public static MS2Peptide getPeptide(long peptideId)

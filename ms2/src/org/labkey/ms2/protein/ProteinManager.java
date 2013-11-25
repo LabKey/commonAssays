@@ -658,7 +658,7 @@ public class ProteinManager
         filter.addCondition(FieldKey.fromParts("identifier"), identifier);
         filter.addCondition(FieldKey.fromParts("identTypeId"), identifierTypeId);
         filter.addCondition(FieldKey.fromParts("seqId"), seqId);
-        return new TableSelector(getTableInfoIdentifiers(), Table.ALL_COLUMNS, filter, null).exists();
+        return new TableSelector(getTableInfoIdentifiers(), filter, null).exists();
     }
 
     private static Integer getIdentifierTypeId(String identifierType)

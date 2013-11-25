@@ -23,6 +23,7 @@ import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.CachedResultSet;
+import org.labkey.api.data.CachedResultSets;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
@@ -159,7 +160,7 @@ public class SamplesConfirmGridView extends GridView
         maps.addAll(matchedList);
 
         // Initialize the ResultSet and DataRegion
-        ResultSet rs = CachedResultSet.create(maps);
+        ResultSet rs = CachedResultSets.create(maps);
         Results results = new ResultsImpl(rs);
         setResults(results);
 

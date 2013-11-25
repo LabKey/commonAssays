@@ -103,7 +103,7 @@ public enum MS2ExportType
             HttpServletResponse response = form.getViewContext().getResponse();
             MS2Run run = form.validateRun();
             Filter filter = new SimpleFilter("Run", run.getRun());
-            MS2Peptide[] peptides = new TableSelector(MS2Manager.getTableInfoPeptides(), Table.ALL_COLUMNS, filter, new Sort("Scan")).getArray(MS2Peptide.class);
+            MS2Peptide[] peptides = new TableSelector(MS2Manager.getTableInfoPeptides(), filter, new Sort("Scan")).getArray(MS2Peptide.class);
             response.setContentType("text/tab-separated-values");
             response.setHeader("Content-disposition", "attachment; filename=\"" + run.getDescription() + ".MS2Ions.tsv");
             response.getWriter().write("Scan\tPeptide\tPeptideProphet\tProtein\tIonType\tFragmentLength\tAverageTheoreticalMass\tAverageObservedMass\tAverageDeltaMass\tAverageIntensity\tMonoisotopicTheoreticalMass\tMonoisotopicObservedMass\tMonoisotopicDeltaMass\tMonoisotopicIntesity\n");
