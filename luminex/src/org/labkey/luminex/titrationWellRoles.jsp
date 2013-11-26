@@ -77,10 +77,12 @@
         }
 %>
         </table>
-        <br/>
-        <table> <!-- Show a table containing both Titrated Unknowns and Tracked single point controls -->
 <%
     }
+
+%>
+    <table><tr> <!-- Show a table containing both Titrated Unknowns and Tracked single point controls -->
+<%
 
     // show a table for the user to select which titrations are Titrated Unknowns
     if (unknownTitrations.size() > 0)
@@ -139,7 +141,7 @@
 <%
     }
 %>
-        </table>
+    </tr></table>
 
 
 <script type="text/javascript">
