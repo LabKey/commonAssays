@@ -312,7 +312,8 @@ public class MacWorkspace extends FlowJoWorkspace
         */
 
         Population ret = new Population();
-        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
+        String nameAttr = readNameAttribute(elPopulation);
+        PopulationName name = PopulationName.fromString(nameAttr);
         ret.setName(name);
         SubsetSpec subset = new SubsetSpec(parentSubset, name);
         Set<String> gatedParams = new LinkedHashSet<>();
@@ -391,7 +392,8 @@ public class MacWorkspace extends FlowJoWorkspace
     protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         Analysis ret = new Analysis();
-        PopulationName name = PopulationName.fromString(elAnalysis.getAttribute("name"));
+        String nameAttr = readNameAttribute(elAnalysis);
+        PopulationName name = PopulationName.fromString(nameAttr);
         ret.setName(name);
         ret.setSettings(_settings);
         ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
@@ -510,4 +512,10 @@ public class MacWorkspace extends FlowJoWorkspace
         _groupInfos.put(ret._groupId, ret);
         return ret;
     }
+
+    protected String readNameAttribute(Element elNamed)
+    {
+        return elNamed.getAttribute("name");
+    }
+
 }

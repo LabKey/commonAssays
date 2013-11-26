@@ -84,11 +84,13 @@ public class FCSHeader
         return keywords.get(key);
     }
 
+    /** Get the i-th parameter name where i is 0-based. */
     public String getParameterName(int i)
     {
         return getParameterName(keywords, i);
     }
 
+    /** Get the i-th parameter description where i is 0-based. */
     public String getParameterDescription(int i)
     {
         return getParameterStain(keywords, i);
@@ -135,11 +137,13 @@ public class FCSHeader
         return name;
     }
 
+    /** Get the i-th parameter name where i is 0-based. */
     public static String getParameterName(Map<String, String> keywords, int index)
     {
         return cleanParameterName(StringUtils.trimToNull(keywords.get("$P" + (index+1) + "N")));
     }
 
+    /** Get the i-th parameter stain where i is 0-based. */
     public static String getParameterStain(Map<String, String> keywords, int index)
     {
         return StringUtils.trimToNull(keywords.get("$P" + (index+1) + "S"));

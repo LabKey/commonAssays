@@ -264,6 +264,7 @@ public class WorkspaceParser
                     "GatePaths",
                     "GateText",
                     "Graph",
+                    "GraphInformation", // Replaces "Graph" in FlowJo v9.7.2
                     "Group",
                     "GroupNode",
                     "Groups",

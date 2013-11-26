@@ -65,8 +65,8 @@ public class ParameterInfo implements Serializable
 
         ParameterInfo paramInfo = new ParameterInfo(paramName);
         paramInfo._multiplier = 1d;
-        String paramDisplay = keywords.get("P" + index + "DISPLAY");
-        String paramRange = keywords.get("$P" + index + "R");
+        String paramDisplay = keywords.get("P" + (index+1) + "DISPLAY");
+        String paramRange = keywords.get("$P" + (index+1) + "R");
         if ("LIN".equals(paramDisplay))
         {
             double range = Double.valueOf(paramRange).doubleValue();

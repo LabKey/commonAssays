@@ -47,7 +47,10 @@ public class Protein
     private boolean _forCoverageMapExport = false;
 
     private static final String PEPTIDE_START_TD="<td class=\"%s\" colspan=%d > %s </td>";
+
+    // In the export cases, we need to in-line the styles since we don't have the external CSS to reference
     private static final String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#99ccff\" align=\"center\" > %s </td>";
+    private static final String PEPTIDE_START_TD_EXPORT_MULTIPLE ="<td class=\"%s\" colspan=%d  bgcolor=\"#CC99FF\" align=\"center\" > %s </td>";
     private static final String PEPTIDE_START_CLASS =" peptide-marker ";
     private static final String PEPTIDE_MULTIPLE_CLASS =" peptide-marker-multiple ";
     private static final String COLUMN_DIVIDER_CLASS=" tenth-col ";
@@ -430,8 +433,26 @@ public class Protein
             if (counts.getCountInstances() > 1)
                 cssClass = PEPTIDE_MULTIPLE_CLASS;
 
+            String baseOutput;
+            if (_forCoverageMapExport)
+            {
+                // Choose the appropriate <TD> with in-lined styling
+                if (counts.getCountInstances() > 1)
+                {
+                    baseOutput = PEPTIDE_START_TD_EXPORT_MULTIPLE;
+                }
+                else
+                {
+                    baseOutput = PEPTIDE_START_TD_EXPORT;
+                }
+            }
+            else
+            {
+                baseOutput = PEPTIDE_START_TD;
+            }
+
             if ((range.start==curIdx) || (curRowStart==curIdx))
-                td=String.format((_forCoverageMapExport ? PEPTIDE_START_TD_EXPORT: PEPTIDE_START_TD), cssClass, colsCurrentRow, label );
+                td=String.format(baseOutput, cssClass, colsCurrentRow, label);
             else
                 td= PEPTIDE_MIDDLE_TD;
 

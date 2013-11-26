@@ -18,9 +18,12 @@ package org.labkey.flow.analysis.model;
 
 import org.w3c.dom.Element;
 
-public class FJ8Workspace extends MacWorkspace
+/**
+ * Mac FlowJo <= v9.6.x series uses 'version 2.0' file format.
+ */
+public class Mac2Workspace extends MacWorkspace
 {
-    public FJ8Workspace(String name, String path, Element elDoc)
+    public Mac2Workspace(String name, String path, Element elDoc)
     {
        super(name, path, elDoc);
     }
@@ -44,7 +47,7 @@ public class FJ8Workspace extends MacWorkspace
     protected SampleInfo readSample(Element elSample)
     {
         SampleInfo ret = new SampleInfo();
-        ret._sampleName = elSample.getAttribute("name");
+        ret._sampleName = readNameAttribute(elSample);
         ret._sampleId = elSample.getAttribute("sampleID");
         if (elSample.hasAttribute("compensationID"))
         {
@@ -66,7 +69,8 @@ public class FJ8Workspace extends MacWorkspace
         {
             for (Element elGroupNode : getElementsByTagName(elGroups, "GroupNode"))
             {
-                PopulationName groupName = PopulationName.fromString(elGroupNode.getAttribute("name"));
+                String nameAttr = readNameAttribute(elGroupNode);
+                PopulationName groupName = PopulationName.fromString(nameAttr);
 
                 for (Element elGroup : getElementsByTagName(elGroupNode, "Group"))
                 {

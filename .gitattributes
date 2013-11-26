@@ -171,7 +171,6 @@ flow/enginesrc/org/labkey/flow/analysis/model/FCS.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FCSCache.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FCSHeader.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FCSKeywordData.java -text
-flow/enginesrc/org/labkey/flow/analysis/model/FJ8Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FixedCalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FlowException.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FlowJo10_0_6Workspace.java -text
@@ -183,6 +182,8 @@ flow/enginesrc/org/labkey/flow/analysis/model/ISampleInfo.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IdentityCalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IntervalGate.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/Mac2Workspace.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/Mac3Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/MacWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/MinMaxConstraint.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/NotGate.java -text

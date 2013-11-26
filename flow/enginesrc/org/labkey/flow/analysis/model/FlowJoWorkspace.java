@@ -39,7 +39,7 @@ abstract public class FlowJoWorkspace extends Workspace
     static
     {
         STATS.put("Count", StatisticSpec.STAT.Count);
-        
+
         STATS.put("%ile", StatisticSpec.STAT.Percentile);
         STATS.put("Percentile", StatisticSpec.STAT.Percentile);
 
@@ -306,6 +306,19 @@ abstract public class FlowJoWorkspace extends Workspace
         return ret.toString();
     }
 
+    /** Returns attribute value using the given name or alternate names. */
+    static String getAttribute(Element el, String name, String... alternateNames)
+    {
+        if (el.hasAttribute(name))
+            return el.getAttribute(name);
+
+        for (String attrName : alternateNames)
+            if (el.hasAttribute(attrName))
+                return el.getAttribute(attrName);
+
+        return null;
+    }
+
     // For some parameters, the actual range is 262144, but FlowJo coerces
     // the value to something between 0 and 4096.  This code is a bit of a
     // hack to try to detect that case.
@@ -366,7 +379,13 @@ abstract public class FlowJoWorkspace extends Workspace
     protected void readStat(Element elStat, SubsetSpec subset, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats,
                             String statisticAttr, String parameterAttr, String percentileAttr)
     {
-        String statistic = elStat.getAttribute(statisticAttr);
+        // FlowJo v9.7 prefixes the statistic attribute name, e.g. 'statNode_statistic'
+        String statistic = getAttribute(elStat, statisticAttr, "statNode_" + statisticAttr);
+
+        // FlowJo v9.7 prefixes the statistic values, e.g. 'statNode_FrequencyOfParent'
+        if (statistic.startsWith("statNode_"))
+            statistic = statistic.substring("statNode_".length());
+
         StatisticSpec.STAT stat = STATS.get(statistic);
         if (stat == null)
         {
@@ -410,7 +429,8 @@ abstract public class FlowJoWorkspace extends Workspace
 
         if (results != null)
         {
-            String strValue = StringUtils.trimToNull(elStat.getAttribute("value"));
+            // FlowJo v9.7 changed attribute 'value' to 'statValue'
+            String strValue = StringUtils.trimToNull(getAttribute(elStat, "value", "statValue"));
             if (strValue != null && !strValue.equals("\ufffd"))
             {
                 double value;
@@ -687,7 +707,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals("panel 1", workspace.getGroups().get(1).getGroupName().toString());
             assertEquals(72, workspace.getGroups().get(1).getSampleIds().size());
             assertEquals(2, workspace.getGroupAnalyses().size());
-            assertEquals(10, workspace.getParameterNames().size());
+            assertEquals(11, workspace.getParameterNames().size());
             assertEquals(0, workspace.getWarnings().size());
 
             SampleInfo sampleInfo = workspace.getSample("2");
@@ -722,48 +742,69 @@ abstract public class FlowJoWorkspace extends Workspace
         }
 
         @Test
-        public void loadAdvanced_7_2_5() throws Exception
+        public void loadMacAdvanced_8_5_3() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v8.5.3.xml");
+            assertAdvanced(workspace, "8.5.3", true);
+        }
+
+        @Test
+        public void loadMacAdvanced_9_6_4() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v9.6.4.xml");
+            assertAdvanced(workspace, "9.6.4", true);
+        }
+
+        @Test
+        public void loadMacAdvanced_9_7_2() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v9.7.2.xml");
+            assertAdvanced(workspace, "9.7.2", true);
+        }
+
+        @Test
+        public void loadPCAdvanced_7_2_5() throws Exception
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.2.5.wsp");
-            assertAdvanced(workspace, "7.2.5");
+            assertAdvanced(workspace, "7.2.5", false);
         }
 
         @Test
-        public void loadAdvanced_7_5_5() throws Exception
+        public void loadPCAdvanced_7_5_5() throws Exception
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.5.5.wsp");
-            assertAdvanced(workspace, "7.5.5");
+            assertAdvanced(workspace, "7.5.5", false);
         }
 
         @Test
-        public void loadAdvanced_7_6_3() throws Exception
+        public void loadPCAdvanced_7_6_3() throws Exception
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.6.3.wsp");
-            assertAdvanced(workspace, "7.6.3");
+            assertAdvanced(workspace, "7.6.3", false);
         }
 
         @Test
-        public void loadAdvanced_7_6_5() throws Exception
+        public void loadPCAdvanced_7_6_5() throws Exception
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.6.5.wsp");
-            assertAdvanced(workspace, "7.6.5");
+            assertAdvanced(workspace, "7.6.5", false);
         }
 
         @Test
-        public void loadAdvanced_10_0_5() throws Exception
+        public void loadPCAdvanced_10_0_5() throws Exception
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.5.wsp");
-            assertAdvanced(workspace, "10.0.5");
+            assertAdvanced(workspace, "10.0.5", false);
         }
 
         //@Test
-        public void loadAdvanced_10_0_6b() throws Exception
+        public void loadPCAdvanced_10_0_6() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.6b.wsp");
-            assertAdvanced(workspace, "10.0.6b");
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.6.wsp");
+            assertAdvanced(workspace, "10.0.6", false);
         }
 
-        private void assertAdvanced(Workspace workspace, String version)
+        private void assertAdvanced(Workspace workspace, String version, boolean mac)
         {
             assertEquals(16, workspace.getSampleCount());
             assertEquals(16, workspace._sampleAnalyses.size());
@@ -771,7 +812,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals(7, workspace._groupInfos.size());
             assertEquals(7, workspace._groupAnalyses.size());
             //assertEquals(1, workspace.getCompensationMatrices().size());
-            assertEquals(4, workspace.getParameterNames().size());
+            assertEquals(5, workspace.getParameterNames().size());
 
             // warnings
             if ("10.0.5".equals(version))
@@ -786,7 +827,8 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
             }
 
-            SampleInfo sample = workspace.getSample("2");
+            String sampleId = mac ? "268435458" : "2";
+            SampleInfo sample = workspace.getSample(sampleId);
             assertEquals("931115-B02- Sample 01.fcs", sample.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sample);
@@ -795,26 +837,54 @@ abstract public class FlowJoWorkspace extends Workspace
             PolygonGate Agate = (PolygonGate)A.getGates().get(0);
             assertEquals("Fluor", Agate.getXAxis());
             assertEquals("PhyEry", Agate.getYAxis());
-            assertEquals(new Polygon(
-                    new double[] { 1.107275784176232, 1.107275784176232, 17.239071329506057, 17.239071329506057 },
-                    new double[] { 0.30096014487175127, 4.532357028330131, 4.532357028330131, 0.30096014487175127 }),
-                    Agate.getPolygon());
+            if (mac)
+            {
+                assertEquals(new Polygon(
+                        new double[] { 1.0496, 19.7711, 19.7711, 1.0496 },
+                        new double[] { 4.7977, 4.7977, 0.3244, 0.3244 }),
+                        Agate.getPolygon());
+            }
+            else
+            {
+                assertEquals(new Polygon(
+                        new double[] { 1.1073, 1.1073, 17.2391, 17.2391 },
+                        new double[] { 0.3010, 4.5324, 4.5324, 0.3010 }),
+                        Agate.getPolygon());
+            }
 
             Population AandnotB = workspace.findPopulation(analysis, SubsetSpec.fromParts("A and not B"));
             AndGate AandnotBgate = (AndGate)AandnotB.getGates().get(0);
             assertEquals("A", ((SubsetRef)AandnotBgate.getGates().get(0)).getRef().toString());
-            assertEquals("not B", ((SubsetRef) AandnotBgate.getGates().get(1)).getRef().toString());
+            if (mac)
+            {
+                // Foolishly, I created the gate as "A & ! B" when setting up the mac workspace instead of "A & 'not B'"
+                NotGate notB = (NotGate)AandnotBgate.getGates().get(1);
+                assertEquals("B", ((SubsetRef)notB.getGate()).getRef().toString());
+            }
+            else
+            {
+                assertEquals("not B", ((SubsetRef) AandnotBgate.getGates().get(1)).getRef().toString());
+            }
 
             Population bifurcateCD8plus = workspace.findPopulation(analysis, SubsetSpec.fromParts("bifurcate CD8+"));
             IntervalGate bifurcateCD8plusGate = (IntervalGate)bifurcateCD8plus.getGates().get(0);
             assertEquals("PhyEry", bifurcateCD8plusGate.getXAxis());
-            assertEquals(16.635, bifurcateCD8plusGate.getMin(), 0.001);
-            if ("7.2.5".equals(version))
-                assertEquals(1384.662, bifurcateCD8plusGate.getMax(), 0.001d);
+            if (mac)
+            {
+                assertEquals(18.451, bifurcateCD8plusGate.getMin(), 0.001);
+                assertEquals(127652.657, bifurcateCD8plusGate.getMax(), 0.001);
+            }
             else
-                assertEquals(Double.MAX_VALUE, bifurcateCD8plusGate.getMax(), DELTA);
+            {
+                assertEquals(16.635, bifurcateCD8plusGate.getMin(), 0.001);
+                if ("7.2.5".equals(version))
+                    assertEquals(1384.662, bifurcateCD8plusGate.getMax(), 0.001d);
+                else
+                    assertEquals(Double.MAX_VALUE, bifurcateCD8plusGate.getMax(), DELTA);
+            }
 
             Population CD4CD8ellipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("CD4, CD8 ellipse"));
+            assertNotNull(CD4CD8ellipse);
             //EllipseGate CD4CD8ellipseGate = (EllipseGate)CD4CD8ellipse.getGates().get(0);
             //assertEquals(...);
             //assertEquals("ForSc", CD4CD8ellipse.getXAxis());
@@ -828,65 +898,89 @@ abstract public class FlowJoWorkspace extends Workspace
 
             // ellipse gate with eventsInside="0"
             Population invertedEllipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("inverted ellipse"));
+            assertNotNull(invertedEllipse);
             //EllipseGate invertedEllipseGate = (EllipseGate)invertedEllipse.getGates().get(0);
             //assertEquals("ForSc", invertedEllipseGate.getXAxis());
             //assertEquals("OrthSc", invertedEllipseGate.getYAxis());
 
-            Population Q1 = workspace.findPopulation(analysis, SubsetSpec.fromParts("Q1: CD4- , CD8+"));
+            // I labeled the mac quadrant gates backwards
+            String Q1name = mac ? "Q1: CD8-, CD4+" : "Q1: CD4- , CD8+";
+            Population Q1 = workspace.findPopulation(analysis, SubsetSpec.fromParts(Q1name));
             PolygonGate Q1gate = (PolygonGate)Q1.getGates().get(0);
             //assertEquals(...);
 
             AttributeSet results = workspace.getSampleAnalysisResults(sample);
             Map<StatisticSpec, Double> stats = results.getStatistics();
             assertEquals(10000, stats.get(new StatisticSpec("Count")).intValue());
-            if ("7.2.5".equals(version))
+            if (mac)
             {
-                assertEquals(7554,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
-                assertEquals(75.540d, stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
-                assertEquals(61.702d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
-                assertEquals(1381d,   stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
-                assertEquals(72.191d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
-                assertEquals(38.258d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
-                assertEquals(43.602d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
-                assertEquals(47.223d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
-                assertEquals(45.803d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
-                //assertEquals(39.947d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
-                assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
-                assertEquals(29.628d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
-                assertEquals(13.810d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
-            }
-            else if ("10.0.5".equals(version))
-            {
-                assertEquals(27,      stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
-                assertEquals(0.27d,   stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
-                assertEquals(48.148d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
-                assertEquals(5d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
-                assertEquals(61.806d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
-                assertEquals(44.101d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
-                assertEquals(40.694d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
-                assertEquals(46.791d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
-                assertEquals(50.673d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
-                //assertEquals(0d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
-                // XXX: FreqOfParent wasn't migrated properly by FlowJo from v7.6.5 to v10.0.5
-                //assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
-                assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
-                assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                // CONSIDER: Casing of 'T Cells' different from PC workspaces.  Make StatisticSpec case-insensitive
+                assertEquals(7542,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                assertEquals(75.420d, stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                assertEquals(62.198d, stats.get(new StatisticSpec("Lymphocytes/T Cells:Freq_Of_Parent")), 0.001d);
+                assertEquals(1391,    stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Count")).intValue());
+                assertEquals(72.000d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                assertEquals(39.000d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:CV(Fluor)")), 0.001d);
+                assertEquals(42.900d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                assertEquals(46.700d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Mean(Fluor)")), 0.001d);
+                assertEquals(45.600d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Median(Fluor)")), 0.001d);
+                //assertEquals(40.500d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:RobustCV(Fluor)")), 0.001d);
+                assertEquals(18.400d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                assertEquals(29.700d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                assertEquals(13.900d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Frequency")), 0.001d);
             }
             else
             {
-                assertEquals(7548,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
-                assertEquals(75.480d, stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
-                assertEquals(61.711d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
-                assertEquals(1379,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")).intValue());
-                assertEquals(72.207d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
-                assertEquals(38.137d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
-                assertEquals(43.686d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
-                assertEquals(47.283d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
-                assertEquals(45.861d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
-                //assertEquals(39.386d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
-                assertEquals(18.270d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
-                assertEquals(29.605d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
-                assertEquals(13.790d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                // PC statistics seem to change quite often
+                if ("7.2.5".equals(version))
+                {
+                    assertEquals(7554,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                    assertEquals(75.540d, stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                    assertEquals(61.702d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+                    assertEquals(1381d,   stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
+                    assertEquals(72.191d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                    assertEquals(38.258d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
+                    assertEquals(43.602d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                    assertEquals(47.223d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
+                    assertEquals(45.803d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+                    //assertEquals(39.947d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
+                    assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertEquals(29.628d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                    assertEquals(13.810d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                }
+                else if ("10.0.5".equals(version))
+                {
+                    assertEquals(27,      stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                    assertEquals(0.27d,   stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                    assertEquals(48.148d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+                    assertEquals(5d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
+                    assertEquals(61.806d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                    assertEquals(44.101d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
+                    assertEquals(40.694d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                    assertEquals(46.791d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
+                    assertEquals(50.673d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+                    //assertEquals(0d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
+                    // XXX: FreqOfParent wasn't migrated properly by FlowJo from v7.6.5 to v10.0.5
+                    //assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                    assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                }
+                else
+                {
+                    assertEquals(7548,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                    assertEquals(75.480d, stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                    assertEquals(61.711d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+                    assertEquals(1379,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")).intValue());
+                    assertEquals(72.207d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                    assertEquals(38.137d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
+                    assertEquals(43.686d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                    assertEquals(47.283d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
+                    assertEquals(45.861d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+                    //assertEquals(39.386d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
+                    assertEquals(18.270d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertEquals(29.605d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                    assertEquals(13.790d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                }
             }
 
             // ... when we support Mode
@@ -1038,6 +1132,20 @@ abstract public class FlowJoWorkspace extends Workspace
             Iterable<StatisticSpec> alises = attrs.getStatisticAliases(spec);
             StatisticSpec actualAlias = alises.iterator().next();
             assertEquals(expectedAlias.toString(), actualAlias.toString());
+        }
+
+        private void assertEquals(Polygon expected, Polygon actual)
+        {
+            assertEquals("Polygon length", expected.len, actual.len);
+            assertEquals("Polygon X", expected.X, actual.X);
+            assertEquals("Polygon Y", expected.Y, actual.Y);
+        }
+
+        private void assertEquals(String msg, double[] expected, double[] actual)
+        {
+            assertEquals(msg + ": lengths not equal", expected.length, actual.length);
+            for (int i = 0; i < expected.length; i++)
+                assertEquals(": values[" + i + "] not equal", expected[i], actual[i], 0.001);
         }
 
     }

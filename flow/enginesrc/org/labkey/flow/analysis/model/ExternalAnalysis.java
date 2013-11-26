@@ -111,7 +111,7 @@ public class ExternalAnalysis implements IWorkspace, Serializable
         sample._keywords.putAll(keywords.getKeywords());
         _keywords.addAll(keywords.getKeywords().keySet());
 
-        for (int i = 1; i < 100; i++)
+        for (int i = 0; i < 100; i++)
         {
             String paramName = FCSHeader.getParameterName(sample._keywords, i);
             if (paramName == null)

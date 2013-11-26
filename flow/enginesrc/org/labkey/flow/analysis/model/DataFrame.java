@@ -322,6 +322,7 @@ public class DataFrame
         private String _suffix;
         private Set<String> _aliases;
         private String _description;
+        /** The parameter index is 0-based. */
         private int _index;
         private int _origIndex;
 

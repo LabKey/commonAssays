@@ -111,7 +111,8 @@ public class CompensationMatrix implements Serializable
 
     private void init(Element elMatrix)
     {
-        _name = elMatrix.getAttribute("name");
+        // FlowJo v9.7 uses 'matrixName' attribute on <CompensationMatrix> element
+        _name = FlowJoWorkspace.getAttribute(elMatrix, "name", "matrixName");
         _prefix = elMatrix.getAttribute("prefix");
         _prefix = _prefix == null ? "<" : _prefix;
         _suffix = elMatrix.getAttribute("suffix");
@@ -129,7 +130,14 @@ public class CompensationMatrix implements Serializable
                 if (!(nlChannelValues.item(iValue) instanceof Element))
                     continue;
                 Element elChannelValue = (Element) nlChannelValues.item(iValue);
-                mapValues.put(elChannelValue.getAttribute("name"), new Double(elChannelValue.getAttribute("value")));
+
+                // FlowJo v9.7 uses 'fluorName' attribute name
+                String fluorName = FlowJoWorkspace.getAttribute(elChannelValue, "name", "fluorName");
+
+                // FlowJo v9.7 uses 'spillValue' attribute name
+                String spillValue = FlowJoWorkspace.getAttribute(elChannelValue, "value", "spillValue");
+
+                mapValues.put(fluorName, new Double(spillValue));
             }
             setChannel(elChannel.getAttribute("name"), mapValues);
         }

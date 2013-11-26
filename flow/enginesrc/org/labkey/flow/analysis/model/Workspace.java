@@ -130,7 +130,12 @@ public abstract class Workspace implements IWorkspace, Serializable
 
             if (version == 2.0)
             {
-                return new FJ8Workspace(name, path, elDoc);
+                return new Mac2Workspace(name, path, elDoc);
+            }
+            else if (version == 3.0)
+            {
+                // Version 3.0 introduced in FlowJo v9.7
+                return new Mac3Workspace(name, path, elDoc);
             }
         }
 

@@ -68,7 +68,7 @@ public class PCWorkspace extends FlowJoWorkspace
     protected void readParameterInfo(ISampleInfo sampleInfo)
     {
         Map<String, String> keywords = sampleInfo.getKeywords();
-        for (int i = 1; i < 100; i ++)
+        for (int i = 0; i < 100; i ++)
         {
             String paramName = FCSHeader.getParameterName(keywords, i);
             if (paramName == null)
