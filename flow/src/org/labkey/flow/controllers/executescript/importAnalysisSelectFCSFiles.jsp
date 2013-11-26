@@ -72,7 +72,7 @@
     {
         if (fileBrowser && fileBrowser.rendered)
         {
-            fileBrowser.grid.getSelectionModel().clearSelections();
+            fileBrowser.getGrid().getSelectionModel().clearSelections();
             selectRecord(null);
             fileBrowser.setDisabled(selectedValue != "<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>");
         }
@@ -174,11 +174,6 @@
 
     <div id="treeDiv" class="extContainer"></div>
     <script type="text/javascript">
-        LABKEY.requiresScript("applet.js",true);
-        LABKEY.requiresScript("fileBrowser.js");
-        LABKEY.requiresScript("FileUploadField.js");
-    </script>
-    <script type="text/javascript">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
         var fileBrowser;
@@ -199,37 +194,46 @@
             {
                 Ext.QuickTips.init();
 
-                fileSystem = new LABKEY.FileSystem.WebdavFileSystem({
-                    baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
-                    rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
+                fileSystem = Ext4.create('File.system.Webdav', {
+                    rootPath : <%=q(pipeRoot.getWebdavURL())%>,
+                    rootName : <%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>
+                });
 
-                fileBrowser = new LABKEY.ext.FileBrowser({
+                fileBrowser = Ext4.create('File.panel.Browser', {
                     fileSystem:fileSystem
+                    ,height:600
+                    ,width:800
                     ,helpEl:null
                     ,showAddressBar:false
                     ,showFolderTree:true
                     ,showDetails:false
                     ,showFileUpload:false
                     ,allowChangeDirectory:true
-                    ,tbarItems:[]
+                    ,showToolbar:false
                     ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs") || endsWith(data.name,".facs")|| endsWith(data.name, ".lmd"); }}
+                    ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
                 });
 
-                fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.doubleclick, function(record){
-                    if (!record || !record.data.file)
+                fileBrowser.on("doubleclick", function(){
+                    var path = null;
+                    var record = fileBrowser.getGrid().getSelectionModel().getSelection();
+                    if (!record || record.length != 1 || record[0].data.collection)
                         return;
-                    var path = fileSystem.parentPath(record.data.path);
+                    else
+                        path = record.data.id.replace(fileBrowser.getBaseURL(), '/');
+
                     selectRecord(path);
                     document.forms["importAnalysis"].submit();
                     return true;
                 });
-                fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.selectionchange, function(record){
+                fileBrowser.on("selectionchange", function(){
                     var path = null;
-                    if (record)
+                    var record = fileBrowser.getGrid().getSelectionModel().getSelection();
+                    if (record && record.length == 1)
                     {
-                        path = record.data.path;
-                        if (record.data.file)
-                            path = fileSystem.parentPath(path); // parent directory of selected .fcs file
+                        path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
+                        if (!record[0].data.collection)
+                            path = fileSystem.getParentPath(path); // parent directory of selected .fcs file
                     }
                     selectRecord(path);
                     return true;
@@ -237,7 +241,6 @@
 
                 fileBrowser.render('treeDiv');
                 var path = <%=q(keywordDir)%>;
-                fileBrowser.start(path);
             }
             return true;
         }

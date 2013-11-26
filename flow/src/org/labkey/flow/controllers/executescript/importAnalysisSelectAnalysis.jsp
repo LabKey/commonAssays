@@ -64,11 +64,6 @@
     <%  }  %>
     <div id="treeDiv" class="extContainer"></div>
     <script type="text/javascript">
-        LABKEY.requiresScript("applet.js",true);
-        LABKEY.requiresScript("fileBrowser.js");
-        LABKEY.requiresScript("FileUploadField.js");
-    </script>
-    <script type="text/javascript">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
         var fileBrowser;
@@ -87,41 +82,48 @@
         {
             Ext.QuickTips.init();
 
-            fileSystem = new LABKEY.FileSystem.WebdavFileSystem({
-                baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
-                rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
+            fileSystem = Ext4.create('File.system.Webdav', {
+                rootPath : <%=q(pipeRoot.getWebdavURL())%>,
+                rootName : <%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>
+            });
 
-            fileBrowser = new LABKEY.ext.FileBrowser({
+            fileBrowser = Ext4.create('File.panel.Browser', {
                 fileSystem:fileSystem
+                ,height:600
+                ,width:800
                 ,helpEl:null
                 ,showAddressBar:false
                 ,showFolderTree:true
                 ,showDetails:false
                 ,showFileUpload:false
                 ,allowChangeDirectory:true
-                ,tbarItems:[]
+                ,showToolbar:false
                 ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp") || endsWith(data.name, ".zip"); }}
+                ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
             });
 
-            fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.doubleclick, function(record){
+            fileBrowser.on("doubleclick", function(){
                 if (record && record.data.file)
                 {
-                    var path = record.data.path;
+                    var path = null;
+                    var record = fileBrowser.getGrid().getSelectionModel().getSelection();
+                    if (record && record.length == 1 && !record[0].data.collection)
+                        path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
                     selectRecord(path);
                     document.forms["importAnalysis"].submit();
                 }
                 return true;
             });
-            fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.selectionchange, function(record){
+            fileBrowser.on("selectionchange", function(){
                 var path = null;
-                if (record && record.data.file)
-                    path = record.data.path;
+                var record = fileBrowser.getGrid().getSelectionModel().getSelection();
+                if (record && record.length == 1 && !record[0].data.collection)
+                    path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
                 selectRecord(path);
                 return true;
             });
 
             fileBrowser.render('treeDiv');
-            fileBrowser.start('/');
         });
     </script>
     <%
