@@ -22,7 +22,6 @@ import org.labkey.api.collections.RowMapFactory;
 import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.CachedResultSet;
 import org.labkey.api.data.CachedResultSets;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataRegion;
