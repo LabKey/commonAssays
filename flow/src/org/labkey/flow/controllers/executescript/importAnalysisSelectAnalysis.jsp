@@ -62,7 +62,7 @@
     <%  if (!form.getWorkspace().getHiddenFields().containsKey("path")) { %>
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
-    <div id="treeDiv" class="extContainer"></div>
+    <div id="treeDiv"></div>
     <script type="text/javascript">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
