@@ -17,6 +17,7 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
@@ -68,10 +69,8 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         ExperimentService.Interface svc = ExperimentService.get();
 
         FlowCompensationMatrix flowComp;
-        try
+        try (DbScope.Transaction transaction = svc.ensureTransaction())
         {
-            svc.ensureTransaction();
-
             ExpData data;
             if (name == null)
             {
@@ -85,14 +84,9 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
             data.save(user);
             AttributeSetHelper.doSave(attrs, user, data);
             flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
-            svc.commitTransaction();
+            transaction.commit();
             return flowComp;
         }
-        finally
-        {
-            svc.closeTransaction();
-        }
-
     }
 
     public CompensationMatrix getCompensationMatrix()

@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -503,10 +504,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         columns.put(new FieldKey(null, "RowId"), colRowId);
         columns.putAll(QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys())));
 
-        try (ResultSet rs = new TableSelector(table, new ArrayList<>(columns.values()), null, null).getResultSet())
+        try (DbScope.Transaction transaction = expService.ensureTransaction();
+             ResultSet rs = new TableSelector(table, new ArrayList<>(columns.values()), null, null).getResultSet())
         {
-            expService.ensureTransaction();
-
             while (rs.next())
             {
                 int rowid = ((Number) colRowId.getValue(rs)).intValue();
@@ -522,12 +522,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     }
                 }
             }
-            expService.commitTransaction();
+            transaction.commit();
         }
         finally
         {
             FlowManager.get().flowObjectModified();
-            expService.closeTransaction();
         }
     }
 

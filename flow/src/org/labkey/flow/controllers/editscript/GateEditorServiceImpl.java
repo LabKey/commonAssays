@@ -18,8 +18,20 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.flow.script.xml.*;
+import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
+import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
+import org.fhcrc.cpas.flow.script.xml.EllipseDef;
+import org.fhcrc.cpas.flow.script.xml.GateDef;
+import org.fhcrc.cpas.flow.script.xml.IntervalDef;
+import org.fhcrc.cpas.flow.script.xml.ParameterDef;
+import org.fhcrc.cpas.flow.script.xml.PointDef;
+import org.fhcrc.cpas.flow.script.xml.PolygonDef;
+import org.fhcrc.cpas.flow.script.xml.PopulationDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.jfree.chart.axis.ValueAxis;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -30,26 +42,39 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
-import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.CompensationCalculation;
+import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.analysis.model.FlowException;
+import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.PlotInfo;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowCompensationMatrix;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.gateeditor.client.GWTGraphException;
 import org.labkey.flow.gateeditor.client.GateEditorService;
 import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.script.FlowAnalyzer;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class GateEditorServiceImpl extends BaseRemoteService implements GateEditorService
@@ -655,9 +680,8 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         {
             return well;
         }
-        try
+        try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
         {
-            ExperimentService.get().ensureTransaction();
             FlowScript scriptOld = flowWell.getScript();
             if (scriptOld != null)
             {
@@ -686,17 +710,13 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 flowWell = FlowScript.createScriptForWell(getUser(), flowWell, script.getName() + "_modified", doc, flowWell.getRun().getScript().getData(), InputRole.AnalysisScript);
             }
             FlowManager.get().deleteAttributes(flowWell.getExpObject());
-            ExperimentService.get().commitTransaction();
+            transaction.commit();
             return makeRunModeWell(flowWell, flowWell.getRun().getScript());
         }
         catch (Exception e)
         {
             _log.error("Error", e);
             throw UnexpectedException.wrap(e);
-        }
-        finally
-        {
-            ExperimentService.get().closeTransaction();
         }
     }
 

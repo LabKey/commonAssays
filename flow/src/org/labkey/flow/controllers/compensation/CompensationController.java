@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
@@ -115,17 +116,12 @@ public class CompensationController extends BaseFlowController
                 addError(errors, "Error parsing file:" + e);
                 return false;
             }
-            try
+            AttributeSet attrs = new AttributeSet(comp);
+            AttributeSetHelper.prepareForSave(attrs, getContainer());
+            try (DbScope.Transaction transaction = svc.ensureTransaction())
             {
-                AttributeSet attrs = new AttributeSet(comp);
-                AttributeSetHelper.prepareForSave(attrs, getContainer());
-                svc.ensureTransaction();
                 _flowComp = FlowCompensationMatrix.create(getUser(), getContainer(), form.ff_compensationMatrixName, attrs);
-                svc.commitTransaction();
-            }
-            finally
-            {
-                svc.closeTransaction();
+                transaction.commit();
             }
             return true;
         }
