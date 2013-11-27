@@ -640,21 +640,8 @@ public class MS2Manager
     public static RelativeQuantAnalysisSummary getQuantSummaryForRun(int runId)
     {
         SimpleFilter filter = new SimpleFilter("run", runId);
-        RelativeQuantAnalysisSummary[] summaries;
-        try
-        {
-            summaries = Table.select(getTableInfoQuantSummaries(), Table.ALL_COLUMNS, filter, null, RelativeQuantAnalysisSummary.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-            
-        if (summaries.length <= 0)
-            return null;
-        if (summaries.length > 1)
-            _log.warn("Found more than one quantitation summary for run " + runId + "; using first");
-        return summaries[0];
+
+        return new TableSelector(getTableInfoQuantSummaries(), filter, null).getObject(RelativeQuantAnalysisSummary.class);
     }
 
     /**
@@ -891,16 +878,8 @@ public class MS2Manager
     {
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition("RowId", proteinGroupId);
-        ProteinGroupWithQuantitation[] groups = Table.select(getTableInfoProteinGroupsWithQuantitation(), Table.ALL_COLUMNS, filter, null, ProteinGroupWithQuantitation.class);
-        if (groups.length == 0)
-        {
-            return null;
-        }
-        if (groups.length == 1)
-        {
-            return groups[0];
-        }
-        throw new IllegalStateException("Expected zero or one protein groups for rowId=" + proteinGroupId);
+
+        return new TableSelector(getTableInfoProteinGroupsWithQuantitation(), filter, null).getObject(ProteinGroupWithQuantitation.class);
     }
 
     public static Collection<ProteinGroupWithQuantitation> getProteinGroupsWithPeptide(MS2Peptide peptide)
@@ -921,16 +900,8 @@ public class MS2Manager
         filter.addCondition("ProteinProphetFileId", proteinProphetFileId);
         filter.addCondition("GroupNumber", groupNumber);
         filter.addCondition("IndistinguishableCollectionId", indistinguishableCollectionId);
-        ProteinGroupWithQuantitation[] groups = Table.select(getTableInfoProteinGroupsWithQuantitation(), Table.ALL_COLUMNS, filter, null, ProteinGroupWithQuantitation.class);
-        if (groups.length == 0)
-        {
-            return null;
-        }
-        if (groups.length == 1)
-        {
-            return groups[0];
-        }
-        throw new IllegalStateException("Expected zero or one protein groups for proteinProphetFileId=" + proteinProphetFileId + ", groupNumber=" + groupNumber + ", indistinguishableCollectionId=" + indistinguishableCollectionId);
+
+        return new TableSelector(getTableInfoProteinGroupsWithQuantitation(), filter, null).getObject(ProteinGroupWithQuantitation.class);
     }
 
 
@@ -1021,14 +992,7 @@ public class MS2Manager
     {
         SimpleFilter filter = new SimpleFilter("run", runId);
 
-        try
-        {
-            return Table.select(getTableInfoFractions(), Table.ALL_COLUMNS, filter, null, MS2Fraction.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return new TableSelector(getTableInfoFractions(), filter, null).getArray(MS2Fraction.class);
     }
 
     public static List<MS2Modification> getModifications(MS2Run run)

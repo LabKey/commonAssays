@@ -143,13 +143,13 @@ public class MS1Manager
     public Software[] getSoftware(int fileId) throws SQLException
     {
         SimpleFilter fltr = new SimpleFilter("FileId", fileId);
-        return Table.select(getTable(TABLE_SOFTWARE), Table.ALL_COLUMNS, fltr, null, Software.class);
+        return new TableSelector(getTable(TABLE_SOFTWARE), fltr, null).getArray(Software.class);
     }
 
     public SoftwareParam[] getSoftwareParams(int softwareId) throws SQLException
     {
         SimpleFilter fltr = new SimpleFilter("SoftwareId", softwareId);
-        return Table.select(getTable(TABLE_SOFTWARE_PARAMS), Table.ALL_COLUMNS, fltr, null, SoftwareParam.class);
+        return new TableSelector(getTable(TABLE_SOFTWARE_PARAMS), fltr, null).getArray(SoftwareParam.class);
     }
 
     public Table.TableResultSet getPeakData(int runId, int scan, double mzLow, double mzHigh) throws SQLException

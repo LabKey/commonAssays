@@ -33,7 +33,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -124,8 +123,8 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
         for (Integer guideSetId : guideSetIds)
         {
             SimpleFilter guideSetFilter = new SimpleFilter("GuideSetId", guideSetId);
-            Type[] guideSetBeans = Table.select(_rawTable, Table.ALL_COLUMNS, guideSetFilter, null, _typeClass);
-            forUpdate.addAll(Arrays.asList(guideSetBeans));
+            List<Type> guideSetBeans = new TableSelector(_rawTable, guideSetFilter, null).getArrayList(_typeClass);
+            forUpdate.addAll(guideSetBeans);
         }
 
         for (Type t : forUpdate)
@@ -143,7 +142,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
 
         if (newGuideSetId != null)
         {
-            GuideSet guideSet = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(newGuideSetId.intValue(), GuideSet.class);
+            GuideSet guideSet = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(newGuideSetId, GuideSet.class);
             if (guideSet == null)
             {
                 throw new ValidationException("No such guideSetId: " + newGuideSetId);

@@ -24,7 +24,6 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpRun;
@@ -46,7 +45,6 @@ import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -231,9 +229,9 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                 SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", bean.getAnalyteId());
                 curveFitFilter.addCondition("TitrationId", bean.getTitrationId());
-                CurveFit[] curveFits = Table.select(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, curveFitFilter, null, CurveFit.class);
+                List<CurveFit> curveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), curveFitFilter, null).getArrayList(CurveFit.class);
 
-                LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), Arrays.asList(curveFits));
+                LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), curveFits);
             }
         };
     }

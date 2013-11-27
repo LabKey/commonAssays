@@ -496,7 +496,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<>();
         // Pull back as a map so that we get custom properties as well
-        for (Map<String, Object> databaseMap : new TableSelector(tableInfo, Table.ALL_COLUMNS, filter, null).getMapCollection())
+        for (Map<String, Object> databaseMap : new TableSelector(tableInfo, filter, null).getMapCollection())
         {
             LuminexDataRow existingRow = BeanObjectFactory.Registry.getFactory(LuminexDataRow.class).fromMap(databaseMap);
             // Make sure an extra properties are made available
@@ -786,7 +786,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         ExpQCFlagTable qcFlagTable = schema.createAnalyteSinglePointControlQCFlagTable();
         SimpleFilter analyteSinglePointControlFilter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
         analyteSinglePointControlFilter.addCondition(FieldKey.fromParts("SinglePointControl"), singlePointControl.getRowId());
-        List<AnalyteSinglePointControlQCFlag> existingQCFlags = new TableSelector(qcFlagTable, Table.ALL_COLUMNS, analyteSinglePointControlFilter, null).getArrayList(AnalyteSinglePointControlQCFlag.class);
+        List<AnalyteSinglePointControlQCFlag> existingQCFlags = new TableSelector(qcFlagTable, analyteSinglePointControlFilter, null).getArrayList(AnalyteSinglePointControlQCFlag.class);
 
         List<AnalyteSinglePointControlQCFlag> newQCFlags = new ArrayList<>();
 
@@ -887,7 +887,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // Look up any existing curve fits that might already be in the database
             SimpleFilter curveFitFilter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
             curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), titration.getRowId());
-            CurveFit[] existingCurveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null).getArray(CurveFit.class);
+            CurveFit[] existingCurveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), filter, null).getArray(CurveFit.class);
 
             // Keep track of the curve fits that should be part of this run
             List<CurveFit> newCurveFits = new ArrayList<>();
@@ -1431,7 +1431,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
         SimpleFilter analyteTitrationFilter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
         analyteTitrationFilter.addCondition(FieldKey.fromParts("Titration"), titration.getRowId());
-        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = new TableSelector(qcFlagTable, Table.ALL_COLUMNS, analyteTitrationFilter, null).getArrayList(AnalyteTitrationQCFlag.class);
+        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = new TableSelector(qcFlagTable, analyteTitrationFilter, null).getArrayList(AnalyteTitrationQCFlag.class);
 
         List<AnalyteTitrationQCFlag> newAnalyteTitrationQCFlags = new ArrayList<>();
 

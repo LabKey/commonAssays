@@ -74,22 +74,12 @@ public class ViabilityManager
 
     public static ViabilityResult[] getResults(ExpData data, Container container) throws SQLException
     {
-        ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
-                Table.ALL_COLUMNS,
-                SimpleFilter.createContainerFilter(container).addCondition("DataID", data.getRowId()),
-                null,
-                ViabilityResult.class);
-        return result;
+        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition("DataID", data.getRowId()), null).getArray(ViabilityResult.class);
     }
 
     public static ViabilityResult[] getResults(ExpRun run, Container container) throws SQLException
     {
-        ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
-                Table.ALL_COLUMNS,
-                SimpleFilter.createContainerFilter(container).addCondition("DataID/RunID", run.getRowId()),
-                null,
-                ViabilityResult.class);
-        return result;
+        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition("DataID/RunID", run.getRowId()), null).getArray(ViabilityResult.class);
     }
 
     /**
@@ -111,13 +101,11 @@ public class ViabilityManager
 
     static String[] getSpecimens(int resultRowId) throws SQLException
     {
-        String[] specimens = new TableSelector(
+        return new TableSelector(
                 ViabilitySchema.getTableInfoResultSpecimens(),
                 PageFlowUtil.set("SpecimenID"),
                 new SimpleFilter("ResultID", resultRowId),
                 new Sort("SpecimenIndex")).getArray(String.class);
-
-        return specimens;
     }
 
     static Map<PropertyDescriptor, Object> getProperties(int objectID) throws SQLException
