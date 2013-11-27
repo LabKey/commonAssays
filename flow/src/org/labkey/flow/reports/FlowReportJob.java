@@ -16,6 +16,7 @@
 package org.labkey.flow.reports;
 
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -98,10 +99,8 @@ public class FlowReportJob extends RReportJob
 
         // Create the domains in a separate transaction from saving the data.
         DbSchema schema = ExperimentService.get().getSchema();
-        try
+        try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
         {
-            schema.getScope().ensureTransaction();
-
             for (ParamReplacement output : outputSubst)
             {
                 if (TsvOutput.ID.equals(output.getId()))
@@ -120,20 +119,14 @@ public class FlowReportJob extends RReportJob
                 }
             }
 
-            schema.getScope().commitTransaction();
-        }
-        finally
-        {
-            schema.getScope().closeConnection();
+            transaction.commit();
         }
 
         if (getErrors() > 0)
             return;
 
-        try
+        try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
         {
-            schema.getScope().ensureTransaction();
-
             deleteSavedResults();
 
             for (Tuple3<TsvOutput, Domain, FlowTableType> tuple : tuples)
@@ -143,15 +136,11 @@ public class FlowReportJob extends RReportJob
                     return;
             }
 
-            schema.getScope().commitTransaction();
+            transaction.commit();
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            schema.getScope().closeConnection();
         }
     }
 

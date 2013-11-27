@@ -29,6 +29,7 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.ResultSetCollapser;
 import org.labkey.api.data.RuntimeSQLException;
@@ -408,21 +409,15 @@ public class ProteinManager
             throw new RuntimeException(e);
         }
 
-        try
+        try (DbScope.Transaction transaction = getSchema().getScope().ensureTransaction())
         {
-            getSchema().getScope().ensureTransaction();
-
-            Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", set.getCustomAnnotationSetId());
+            new SqlExecutor(getSchema()).execute("DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", set.getCustomAnnotationSetId());
             Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
-            getSchema().getScope().commitTransaction();
+            transaction.commit();
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            getSchema().getScope().closeConnection();
         }
     }
 
@@ -485,10 +480,8 @@ public class ProteinManager
             throw new SQLException("There are " + missingCount + " protein sequences in the original FASTA file that are not in the new file");
         }
 
-        try
+        try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().ensureTransaction())
         {
-            MS2Manager.getSchema().getScope().ensureTransaction();
-
             SQLFragment updatePeptidesSQL = new SQLFragment();
             updatePeptidesSQL.append("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SeqId = map.NewSeqId");
             updatePeptidesSQL.append("\tFROM " + MS2Manager.getTableInfoFractions() + " f \n");
@@ -519,12 +512,8 @@ public class ProteinManager
 
             new SqlExecutor(MS2Manager.getSchema()).execute(updateProteinsSQL);
 
-            Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
-            MS2Manager.getSchema().getScope().commitTransaction();
-        }
-        finally
-        {
-            MS2Manager.getSchema().getScope().closeConnection();
+            new SqlExecutor(MS2Manager.getSchema()).execute("UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
+            transaction.commit();
         }
     }
 

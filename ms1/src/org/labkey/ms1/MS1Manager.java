@@ -295,80 +295,79 @@ public class MS1Manager
         DbSchema schema = getSchema();
         DbScope scope = schema.getScope();
 
-        try
+        StringBuilder sql = new StringBuilder("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS_TO_FAMILIES));
+        sql.append(" WHERE PeakFamilyId IN (");
+        sql.append(genPeakFamilyListSQL(fileId));
+        sql.append("); ");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_PEAK_FAMILIES));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(fileId));
+        sql.append(")");
+
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            StringBuilder sql = new StringBuilder("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_PEAKS_TO_FAMILIES));
-            sql.append(" WHERE PeakFamilyId IN (");
-            sql.append(genPeakFamilyListSQL(fileId));
-            sql.append("); ");
-
-            sql.append("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_PEAK_FAMILIES));
-            sql.append(" WHERE ScanId IN (");
-            sql.append(genScanListSQL(fileId));
-            sql.append(")");
-
             //execute this much
             _log.info("Purging peak families for file " + String.valueOf(fileId) + "...");
-            scope.ensureTransaction();
-            Table.execute(getSchema(), sql.toString());
-            scope.commitTransaction();
+            new SqlExecutor(getSchema()).execute(sql.toString());
+            transaction.commit();
             _log.info("Finished purging peak families for file " + String.valueOf(fileId) + ".");
-
-            //now delete the peaks themselves
-            sql = new StringBuilder("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_PEAKS));
-            sql.append(" WHERE ScanId IN (");
-            sql.append(genScanListSQL(fileId));
-            sql.append(")");
-
-            _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
-            scope.ensureTransaction();
-            Table.execute(getSchema(), sql.toString());
-            scope.commitTransaction();
-            _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
-
-            //now the rest of it
-            sql = new StringBuilder("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
-            sql.append(" WHERE ScanId IN (");
-            sql.append(genScanListSQL(fileId));
-            sql.append(");");
-
-            sql.append("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_SCANS));
-            sql.append(" WHERE FileId=");
-            sql.append(fileId);
-            sql.append(";");
-
-            sql.append("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
-            sql.append(" WHERE SoftwareId IN (");
-            sql.append(genSoftwareListSQL(fileId));
-            sql.append(");");
-
-            sql.append("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_SOFTWARE));
-            sql.append(" WHERE FileId=");
-            sql.append(fileId);
-            sql.append(";");
-
-            sql.append("DELETE FROM ");
-            sql.append(getSQLTableName(TABLE_FILES));
-            sql.append(" WHERE FileId=");
-            sql.append(String.valueOf(fileId));
-            sql.append(";");
-
-            _log.info("Purging scans and related file data for file " + String.valueOf(fileId) + "...");
-            scope.ensureTransaction();
-            Table.execute(getSchema(), sql.toString());
-            scope.commitTransaction();
-            _log.info("Finished purging scans and related file data for file " + String.valueOf(fileId) + ".");
         }
-        finally
+
+        //now delete the peaks themselves
+        sql = new StringBuilder("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(fileId));
+        sql.append(")");
+
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            scope.closeConnection();
+            _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
+            new SqlExecutor(getSchema()).execute(sql.toString());
+            transaction.commit();
+            _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
+        }
+
+        //now the rest of it
+        sql = new StringBuilder("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(fileId));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
+        sql.append(" WHERE SoftwareId IN (");
+        sql.append(genSoftwareListSQL(fileId));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE));
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" WHERE FileId=");
+        sql.append(String.valueOf(fileId));
+        sql.append(";");
+
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
+        {
+            _log.info("Purging scans and related file data for file " + String.valueOf(fileId) + "...");
+            new SqlExecutor(getSchema()).execute(sql.toString());
+            transaction.commit();
+            _log.info("Finished purging scans and related file data for file " + String.valueOf(fileId) + ".");
         }
     } //deletePeakData
 

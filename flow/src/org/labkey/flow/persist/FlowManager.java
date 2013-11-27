@@ -600,17 +600,11 @@ public class FlowManager
     private void deleteAttributes(SQLFragment sqlObjectIds)
     {
         DbScope scope = getSchema().getScope();
-        try
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            scope.ensureTransaction();
-
             Integer[] objids = new SqlSelector(getSchema(), sqlObjectIds).getArray(Integer.class);
             deleteAttributes(objids);
-            scope.commitTransaction();
-        }
-        finally
-        {
-            scope.closeConnection();
+            transaction.commit();
         }
     }
 
@@ -626,21 +620,17 @@ public class FlowManager
     private void deleteObjectIds(Integer[] oids, Set<Container> containers)
     {
         DbScope scope = getSchema().getScope();
-        try
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            scope.ensureTransaction();
-
             deleteAttributes(oids);
             SQLFragment sqlf = new SQLFragment("DELETE FROM flow.Object WHERE RowId IN (" );
             sqlf.append(StringUtils.join(oids,','));
             sqlf.append(")");
             new SqlExecutor(getSchema()).execute(sqlf);
-            scope.commitTransaction();
+            transaction.commit();
         }
         finally
         {
-            getSchema().getScope().closeConnection();
-
             for (Container container : containers)
             {
                 AttributeCache.invalidateCache(container);
@@ -653,18 +643,14 @@ public class FlowManager
     private void deleteObjectIds(SQLFragment sqlOIDs, Set<Container> containers)
     {
         DbScope scope = getSchema().getScope();
-        try
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            scope.ensureTransaction();
-
             deleteAttributes(sqlOIDs);
             new SqlExecutor(getSchema()).execute("DELETE FROM flow.Object WHERE RowId IN (" + sqlOIDs.getSQL() + ")", sqlOIDs.getParamsArray());
-            scope.commitTransaction();
+            transaction.commit();
         }
         finally
         {
-            getSchema().getScope().closeConnection();
-
             for (Container container : containers)
             {
                 AttributeCache.invalidateCache(container);
@@ -737,20 +723,17 @@ public class FlowManager
         }
         int keywordId = ensureKeywordName(c, keyword);
         DbSchema schema = getSchema();
-        try
+        try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
         {
-            schema.getScope().ensureTransaction();
-
             new SqlExecutor(schema).execute(sqlDeleteKeyword, obj.getRowId(), keywordId);
             if (value != null)
             {
                 new SqlExecutor(schema).execute(sqlInsertKeyword, obj.getRowId(), keywordId, value);
             }
-            schema.getScope().commitTransaction();
+            transaction.commit();
         }
         finally
         {
-            schema.getScope().closeConnection();
             AttributeCache.invalidateCache(data.getContainer());
         }
 
@@ -925,10 +908,8 @@ public class FlowManager
     {
         DbSchema s = getSchema();
         TableInfo o = getTinfoObject();
-        try
+        try (DbScope.Transaction transaction = s.getScope().ensureTransaction())
         {
-            s.getScope().ensureTransaction();
-
             if (o.getColumn("container") != null)
             {
                 new SqlExecutor(s).execute(
@@ -957,12 +938,11 @@ public class FlowManager
                         "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7))) " +
                         "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid IN (1,3) AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", c.getId());
             }
-            s.getScope().commitTransaction();
+            transaction.commit();
         }
         finally
         {
             flowObjectModified();
-            s.getScope().closeConnection();
         }
     }
 

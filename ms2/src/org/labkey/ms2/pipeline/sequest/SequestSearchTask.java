@@ -401,7 +401,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                     // Copy to a name that's unique to this file and won't conflict between searches in the same directory
                     File jobSpecificSequestParamsFile = SEQUEST_PARAMS_FILE_TYPE.getFile(fileWorkParams.getParentFile(), getJob().getBaseName());
                     FileUtils.moveFile(fileWorkParams, jobSpecificSequestParamsFile);
-                    sequestAction.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
+                    sequestAction.addOutput(_wd.outputFile(jobSpecificSequestParamsFile), "SequestParams", true);
                     sequestAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
                     sequestAction.addOutput(_wd.outputFile(sequestLogFileWork), "SequestLog", false);
                     for (File file : sequenceFiles)

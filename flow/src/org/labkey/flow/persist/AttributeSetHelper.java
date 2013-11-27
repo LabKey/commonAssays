@@ -16,6 +16,7 @@
 package org.labkey.flow.persist;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
@@ -128,9 +129,8 @@ public class AttributeSetHelper
     public static void doSave(AttributeSet attrs, User user, ExpData data) throws SQLException
     {
         FlowManager mgr = FlowManager.get();
-        try
+        try (DbScope.Transaction transaction = mgr.getSchema().getScope().ensureTransaction())
         {
-            mgr.getSchema().getScope().ensureTransaction();
             Container c = data.getContainer();
             
             AttrObject obj = mgr.createAttrObject(data, attrs.getType(), attrs.getURI());
@@ -169,11 +169,10 @@ public class AttributeSetHelper
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
-            mgr.getSchema().getScope().commitTransaction();
+            transaction.commit();
         }
         finally
         {
-            mgr.getSchema().getScope().closeConnection();
             AttributeCache.invalidateCache(data.getContainer());
         }
 

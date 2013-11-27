@@ -53,9 +53,8 @@ public class NabUpgradeCode implements UpgradeCode
 
         DbSchema nabSchema = NabManager.getSchema();
         DbScope scope = nabSchema.getScope();
-        try
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            scope.beginTransaction();
             SQLFragment sqlProtocolIds = new SQLFragment("SELECT DISTINCT nab.NabSpecimen.ProtocolId FROM study.DataSet, nab.NabSpecimen WHERE study.DataSet.ProtocolId = nab.NabSpecimen.ProtocolId");
             ArrayList<Integer> protocolIds = new SqlSelector(nabSchema.getScope(), sqlProtocolIds).getArrayList(Integer.class);
 
@@ -84,15 +83,11 @@ public class NabUpgradeCode implements UpgradeCode
                     // Key property name is updated to RowId back in the SQL script
                 }
             }
-            scope.commitTransaction();
+            transaction.commit();
         }
         catch (Exception e)
         {
             throw new RuntimeException(e);
-        }
-        finally
-        {
-            scope.closeConnection();
         }
     }
 }

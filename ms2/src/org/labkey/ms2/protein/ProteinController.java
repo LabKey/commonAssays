@@ -280,9 +280,9 @@ public class ProteinController extends SpringActionController
 
             DbScope scope = ProteinManager.getSchema().getScope();
 
-            try
+            try (DbScope.Transaction transaction = scope.ensureTransaction())
             {
-                Connection connection = scope.ensureTransaction().getConnection();
+                Connection connection = transaction.getConnection();
                 CustomAnnotationSet annotationSet = new CustomAnnotationSet();
                 Date modified = new Date();
                 annotationSet.setModified(modified);
@@ -339,17 +339,13 @@ public class ProteinController extends SpringActionController
                 stmt.executeBatch();
                 connection.commit();
 
-                scope.commitTransaction();
+                transaction.commit();
             }
             catch (ValidationException ve)
             {
                 for (ValidationError error : ve.getErrors())
                     errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
                 return false;
-            }
-            finally
-            {
-                scope.closeConnection();
             }
             return true;
         }
