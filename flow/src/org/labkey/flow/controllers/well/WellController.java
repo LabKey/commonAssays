@@ -24,12 +24,10 @@ import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Selector.ForEachBlock;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -525,17 +523,10 @@ public class WellController extends BaseFlowController
                 }
             }
 
-            SQLFragment sql = new SQLFragment("SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?", getContainer(), form.keyword);
-            try
-            {
-                keywordid = Table.executeSingleton(FlowManager.get().getSchema(), sql.getSQL(), sql.getParams().toArray(), Integer.class);
-                if (null == keywordid)
-                    errors.rejectValue("keyword", ERROR_MSG, "keyword not found: " + form.keyword);
-            }
-            catch (SQLException x)
-            {
-                throw new RuntimeSQLException(x);
-            }
+            SQLFragment sql = new SQLFragment("SELECT RowId FROM flow.KeywordAttr WHERE Container = ? AND Name = ?", getContainer(), form.keyword);
+            keywordid = new SqlSelector(FlowManager.get().getSchema(), sql).getObject(Integer.class);
+            if (null == keywordid)
+                errors.rejectValue("keyword", ERROR_MSG, "keyword not found: " + form.keyword);
         }
 
         public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors) throws Exception

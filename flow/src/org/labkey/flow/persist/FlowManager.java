@@ -258,25 +258,18 @@ public class FlowManager
 
             if (entry == null)
             {
-                try
+                Map<String, Object> row = new SqlSelector(getSchema(), "SELECT Container, Name, Id FROM " + attributeTable(type) + " WHERE RowId = ?", rowId).getMap();
+                if (row == null)
                 {
-                    Map<String, Object> row = Table.executeSingleton(getSchema(), "SELECT Container, Name, Id FROM " + attributeTable(type) + " WHERE RowId = ?", new Object[] { rowId }, Map.class);
-                    if (row == null)
-                    {
-                        return null;
-                    }
-                    String name = (String)row.get("Name");
-                    String containerId = (String)row.get("Container");
-                    Integer aliasId = (Integer)row.get("Id");
-                    entry = new FlowEntry(type, rowId, containerId, name, aliasId);
+                    return null;
+                }
+                String name = (String)row.get("Name");
+                String containerId = (String)row.get("Container");
+                Integer aliasId = (Integer)row.get("Id");
+                entry = new FlowEntry(type, rowId, containerId, name, aliasId);
 
-                    _attrRowIdToEntryCache.put(key, entry);
-                    _attrNameToEntryCache.put(new NameCacheKey(containerId, type, name), entry);
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
+                _attrRowIdToEntryCache.put(key, entry);
+                _attrNameToEntryCache.put(new NameCacheKey(containerId, type, name), entry);
             }
 
             return entry;
