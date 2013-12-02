@@ -16,9 +16,7 @@
 
 package org.labkey.elispot;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -37,8 +35,6 @@ import java.util.Collections;
 
 public class ElispotModule extends DefaultModule
 {
-    private static final Logger _log = Logger.getLogger(ElispotModule.class);
-
     public String getName()
     {
         return "ELISpotAssay";
@@ -62,13 +58,7 @@ public class ElispotModule extends DefaultModule
 
     public boolean hasScripts()
     {
-        return true;
-    }
-
-    @NotNull
-    public Collection<String> getSummary(Container c)
-    {
-        return Collections.emptyList();
+        return false;
     }
 
     public void doStartup(ModuleContext moduleContext)
