@@ -208,7 +208,8 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                     + " FROM Data AS x "
-                    + " WHERE x.Data.Run.RowId = " + this.runId, // todo: check if this works for 2 files in one run that have different sets of analytes
+                    + " WHERE x.Data.Run.RowId = " + this.runId + " AND x.Type = '" + this.type + "' "
+                    + " AND x.Description " + (this.description ? " = '" + this.description + "'" : " IS NULL"),
                 schemaName: "assay.Luminex." + this.queryName,
                 autoLoad: true,
                 listeners: {
