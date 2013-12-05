@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
@@ -94,10 +95,12 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     @Override
     public Map<DomainProperty, Object> getDefaultValues(Domain domain, String disambiguationId) throws ExperimentException
     {
-        //  Issue 14851: added check for isMultiRunUpload to if statement for case when "Save and Import Another Run" gets default values for the Run properties 
+        //  Issue 14851: added check for isMultiRunUpload to if statement for case when "Save and Import Another Run" gets default values for the Run properties
         if (!isMultiRunUpload() && !isResetDefaultValues() && domain.getDomainKind() instanceof LuminexAnalyteDomainKind)
         {
             DomainProperty[] analyteColumns = domain.getProperties();
+            Map<DomainProperty, Object> analyteDefaultValues = DefaultValueService.get().getDefaultValues(getContainer(), domain);
+            Map<DomainProperty, Object> userDefaultValues = new HashMap<>();
 
             String objectURI = null;
             if (getReRunId() != null)
@@ -127,19 +130,17 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             {
                 // Look up the values for that ObjectURI
                 Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
-                Map<DomainProperty, Object> ret = new HashMap<>();
                 for (DomainProperty analyteDP : analyteColumns)
                 {
                     ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
                     if (objectProp != null)
                     {
-                        ret.put(analyteDP, objectProp.value());
+                        userDefaultValues.put(analyteDP, objectProp.value());
                     }
                 }
-                return ret;
             }
-            else
-                return Collections.emptyMap();
+
+            return DefaultValueService.get().getMergedValues(domain, userDefaultValues, analyteDefaultValues);
         }
         else
         {
