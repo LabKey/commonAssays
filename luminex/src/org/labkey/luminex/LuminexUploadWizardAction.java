@@ -180,30 +180,40 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         domains.put(defaultValueKey,  defaultValues);
                     }
                     final String inputName = getAnalytePropertyName(analyte, analyteDP);
-                    if (defaultValues != null)
-                        view.setInitialValue(inputName, defaultValues.get(analyteDP));
+                    Object analyteDefaultValue = defaultValues != null ? defaultValues.get(analyteDP) : null;
 
-                    ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser(), getViewContext().getContainer());
-                    info.setName(inputName);
-                    info.setDisplayColumnFactory(new DisplayColumnFactory()
+                    if (analyteDP.isShownInInsertView())
                     {
-                        @Override
-                        public DisplayColumn createRenderer(ColumnInfo colInfo)
-                        {
-                            return new DataColumn(colInfo)
-                            {
-                                @Override
-                                public String getFormFieldName(RenderContext ctx)
-                                {
-                                    return inputName;
-                                }
-                            };
-                        }
-                    });
-                    cols.add(info.getRenderer());
+                        view.setInitialValue(inputName, analyteDefaultValue);
 
+                        ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser(), getViewContext().getContainer());
+                        info.setName(inputName);
+                        info.setDisplayColumnFactory(new DisplayColumnFactory()
+                        {
+                            @Override
+                            public DisplayColumn createRenderer(ColumnInfo colInfo)
+                            {
+                                return new DataColumn(colInfo)
+                                {
+                                    @Override
+                                    public String getFormFieldName(RenderContext ctx)
+                                    {
+                                        return inputName;
+                                    }
+                                };
+                            }
+                        });
+                        cols.add(info.getRenderer());
+                    }
+                    // issue 19149: Analyte fields do not respect Shown in Insert View or default values
+                    else if (analyteDefaultValue != null)
+                    {
+                        view.getDataRegion().addHiddenFormField(inputName, analyteDefaultValue.toString());
+                    }
                 }
-                view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
+
+                if (cols.size() > 0)
+                    view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
             }
 
             // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
