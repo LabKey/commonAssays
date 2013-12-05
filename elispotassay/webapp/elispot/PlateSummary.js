@@ -32,6 +32,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
             frame   : false,
             bodyPadding : 20,
             region   : 'center',
+            flex     : 1.2,
             items    : [this.platePanel]
         });
         this.items.push(this.centerPanel);
