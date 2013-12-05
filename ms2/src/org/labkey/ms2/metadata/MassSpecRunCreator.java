@@ -137,7 +137,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
         }
     }
 
-    protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addInputMaterials(AssayRunUploadContext<MassSpecMetadataAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())

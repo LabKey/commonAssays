@@ -36,6 +36,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
@@ -273,5 +274,12 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         // Override to make default value true
         Boolean b = getBooleanProperty(protocol, EDITABLE_RUNS_PROPERTY_SUFFIX);
         return b == null || b.booleanValue();
+    }
+
+    @NotNull
+    @Override
+    public List<AssayDataType> getRelatedDataTypes()
+    {
+        return MicroarrayModule.RELATED_INPUT_TYPES;
     }
 }

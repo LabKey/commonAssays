@@ -65,7 +65,7 @@ public class MicroarrayModule extends SpringModule
 
     /** Collection of all of the non-MageML input types that are handled specially in the code */
     public static final List<AssayDataType> RELATED_INPUT_TYPES =
-            Arrays.asList(QC_REPORT_INPUT_TYPE, THUMBNAIL_INPUT_TYPE, FEATURES_INPUT_TYPE, GRID_INPUT_TYPE); 
+            Arrays.asList(QC_REPORT_INPUT_TYPE, THUMBNAIL_INPUT_TYPE, FEATURES_INPUT_TYPE, GRID_INPUT_TYPE);
 
     public String getName()
     {

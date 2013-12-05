@@ -48,7 +48,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
     }
 
     @Override
-    protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addOutputDatas(AssayRunUploadContext<AffymetrixAssayProvider> context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         try
         {
@@ -138,7 +138,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
     }
 
     @Override
-    protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addInputMaterials(AssayRunUploadContext<AffymetrixAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         try
         {

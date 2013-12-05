@@ -43,7 +43,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
         super(provider);
     }
 
-    protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addInputMaterials(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         MicroarrayRunUploadForm form = (MicroarrayRunUploadForm)context;
         int count = form.getSampleCount(form.getCurrentMageML());
@@ -63,7 +63,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
     }
 
     @Override
-    protected void addInputDatas(AssayRunUploadContext context, Map<ExpData, String> inputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addInputDatas(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpData, String> inputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         super.addInputDatas(context, inputDatas, resolverType);
 
@@ -105,7 +105,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
         return files.get(AssayDataCollector.PRIMARY_FILE);
     }
 
-    protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addOutputDatas(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         try
         {
@@ -113,7 +113,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
             ExpData mageData = DefaultAssayRunCreator.createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE, true);
 
             outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
-            addRelatedOutputDatas(context.getContainer(), outputDatas, mageMLFile, MicroarrayModule.RELATED_INPUT_TYPES);
+            addRelatedOutputDatas(context, outputDatas, mageMLFile);
         }
         catch (IOException e)
         {
