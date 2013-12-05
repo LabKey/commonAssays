@@ -86,25 +86,6 @@ public class FlowQueryView extends QueryView
     }
 
     @Override
-    protected boolean canDelete()
-    {
-        TableInfo mainTable = null;
-        try
-        {
-            mainTable = getQueryDef().getMainTable();
-        }
-        catch (java.lang.IllegalArgumentException x)
-        {
-            // see bug 9119
-        }
-        if (mainTable instanceof ExpRunTable)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     protected boolean canInsert()
     {
         return false;
@@ -203,6 +184,18 @@ public class FlowQueryView extends QueryView
         return getSettings().getShowGraphs();
     }
 
+    protected boolean showAnalysisFolderButton()
+    {
+        // Don't show the "Analysis Folder" menu for some grids (flow.Analyses, flow.Statistics, flow.Keywords, etc.)
+        String queryName = getSettings().getQueryName();
+        return queryName != null &&
+               (queryName.equals(FlowTableType.CompensationControls.toString()) ||
+                queryName.equals(FlowTableType.CompensationMatrices.toString()) ||
+                queryName.equals(FlowTableType.FCSAnalyses.toString()) ||
+                queryName.equals(FlowTableType.FCSFiles.toString()) ||
+                queryName.equals(FlowTableType.Runs.toString()));
+    }
+
     protected boolean subtractBackground()
     {
         return getSettings().getSubtractBackground();
@@ -222,7 +215,7 @@ public class FlowQueryView extends QueryView
 
     protected void populateButtonBar(DataView view, ButtonBar bar,  boolean exportAsWebPage)
     {
-        if (getSchema().getRun() == null /*&& getSchema().getScript() == null*/)
+        if (showAnalysisFolderButton() && getSchema().getRun() == null /*&& getSchema().getScript() == null*/)
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
             URLHelper target = urlChangeView();

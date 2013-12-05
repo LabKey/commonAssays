@@ -19,7 +19,9 @@ package org.labkey.flow.webparts;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
@@ -44,28 +46,49 @@ public class AnalysesWebPart extends FlowQueryView
         
         setTitle("Flow Analyses");
         setShowExportButtons(false);
-        setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+        setShowPagination(false);
+        setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
     }
 
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
-        if (!getViewContext().hasPermission(InsertPermission.class))
-            return;
-        FlowScript[] scripts = FlowScript.getScripts(getContainer());
-        FlowScript analysisScript = null;
-        for (FlowScript script : scripts)
+        super.populateButtonBar(view, bar);
+
+        if (getViewContext().hasPermission(InsertPermission.class))
         {
-            if (script.hasStep(FlowProtocolStep.analysis))
+            FlowScript[] scripts = FlowScript.getScripts(getContainer());
+            FlowScript analysisScript = null;
+            for (FlowScript script : scripts)
             {
-                analysisScript = script;
-                break;
+                if (script.hasStep(FlowProtocolStep.analysis))
+                {
+                    analysisScript = script;
+                    break;
+                }
             }
+            if (analysisScript != null)
+            {
+                ActionButton btnAnalyze = new ActionButton("Choose runs to analyze", analysisScript.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class));
+                bar.add(btnAnalyze);
+            }
+
+            ActionURL createRunGroupURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateRunGroupURL(getContainer(), getReturnURL(), false);
+            ActionButton createExperiment = new ActionButton(createRunGroupURL, "Create Analysis Folder");
+            createExperiment.setActionType(ActionButton.Action.LINK);
+            createExperiment.setDisplayPermission(InsertPermission.class);
+            bar.add(createExperiment);
         }
-        if (analysisScript == null)
+    }
+
+    @Override
+    public ActionButton createDeleteButton()
+    {
+        // Use default delete button, but without showing the confirmation text -- DeleteSelectedExperimentsAction will show a confirmation page.
+        ActionButton button = super.createDeleteButton();
+        if (button != null)
         {
-            return;
+            button.setRequiresSelection(true);
         }
-        ActionButton btnAnalyze = new ActionButton("Choose runs to analyze", analysisScript.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class));
-        bar.add(btnAnalyze);
+        return button;
     }
 }
