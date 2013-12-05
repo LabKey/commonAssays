@@ -2671,7 +2671,7 @@ public class MS2Controller extends SpringActionController
             annots.setTitle("Protein Annotations Loaded");
 
             QueryView jobsView = PipelineService.get().getPipelineQueryView(getViewContext(), PipelineService.PipelineButtonOption.Standard);
-            jobsView.getSettings().setBaseFilter(new SimpleFilter("Provider", ProteinAnnotationPipelineProvider.NAME));
+            jobsView.getSettings().setBaseFilter(new SimpleFilter(FieldKey.fromParts("Provider"), ProteinAnnotationPipelineProvider.NAME));
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
             jobsView.setTitle("Protein Annotation Load Jobs");
 
@@ -3011,12 +3011,12 @@ public class MS2Controller extends SpringActionController
             boolean addedFilter = false;
             if (form.getMaximumErrorRate() != null)
             {
-                filter.addCondition("ErrorRate", form.getMaximumErrorRate(), CompareType.LTE);
+                filter.addCondition(FieldKey.fromParts("ErrorRate"), form.getMaximumErrorRate(), CompareType.LTE);
                 addedFilter = true;
             }
             if (form.getMinimumProbability() != null)
             {
-                filter.addCondition("GroupProbability", form.getMinimumProbability(), CompareType.GTE);
+                filter.addCondition(FieldKey.fromParts("GroupProbability"), form.getMinimumProbability(), CompareType.GTE);
                 addedFilter = true;
             }
 
@@ -3226,7 +3226,7 @@ public class MS2Controller extends SpringActionController
                 catch (NumberFormatException ignored) {} // Skip any ids that got posted with invalid formats
             }
 
-            baseFilter.addInClause("RowId", peptideIds);
+            baseFilter.addInClause(FieldKey.fromParts("RowId"), peptideIds);
         }
 
         MS2ExportType exportType = MS2ExportType.valueOfOrNotFound(form.getExportFormat());
@@ -3599,7 +3599,7 @@ public class MS2Controller extends SpringActionController
 
             if (!getUser().isSiteAdmin())
             {
-                runFilter.addInClause("Container", ContainerManager.getIds(getUser(), ReadPermission.class));
+                runFilter.addInClause(FieldKey.fromParts("Container"), ContainerManager.getIds(getUser(), ReadPermission.class));
             }
 
             gridView.setFilter(runFilter);

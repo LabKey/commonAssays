@@ -340,11 +340,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public FlowExperiment getExperiment()
     {
-        ExpExperiment[] experiments = getExperimentRun().getExperiments();
-        if (experiments.length>0)
-            return new FlowExperiment(experiments[0]);
-        else
+        List<? extends ExpExperiment> experiments = getExperimentRun().getExperiments();
+        if (experiments.isEmpty())
             return null;
+
+        return new FlowExperiment(experiments.get(0));
     }
 
     static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step)
@@ -546,33 +546,29 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public void moveToWorkspace(User user)
     {
-        try
+        try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
         {
-            ExperimentService.get().ensureTransaction();
-
             ExpRun run = getExperimentRun();
-            ExpExperiment[] experiments = run.getExperiments();
-            for (ExpExperiment experiment : experiments)
+            for (ExpExperiment experiment : run.getExperiments())
             {
                 experiment.removeRun(user, getExperimentRun());
             }
             FlowExperiment workspace = FlowExperiment.ensureWorkspace(user, getContainer());
             workspace.getExperiment().addRuns(user, run);
-            ExperimentService.get().commitTransaction();
+            transaction.commit();
         }
         finally
         {
-            ExperimentService.get().closeTransaction();
             FlowManager.get().flowObjectModified();
         }
     }
 
     public boolean isInWorkspace()
     {
-        ExpExperiment[] experiments = getExperimentRun().getExperiments();
-        if (experiments.length != 1)
+        List<? extends ExpExperiment> experiments = getExperimentRun().getExperiments();
+        if (experiments.size() != 1)
             return false;
-        FlowExperiment flowExperiment = new FlowExperiment(experiments[0]);
+        FlowExperiment flowExperiment = new FlowExperiment(experiments.get(0));
         return flowExperiment.isWorkspace();
     }
 

@@ -1441,7 +1441,7 @@ public class MS2Schema extends UserSchema
 
         if (form != null && form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
         {
-            baseTable.addCondition(new SimpleFilter("PeptideProphet", form.getPeptideProphetProbability(), CompareType.GTE));
+            baseTable.addCondition(new SimpleFilter(FieldKey.fromParts("PeptideProphet"), form.getPeptideProphetProbability(), CompareType.GTE));
         }
         else if (form != null && form.isCustomViewPeptideFilter())
         {

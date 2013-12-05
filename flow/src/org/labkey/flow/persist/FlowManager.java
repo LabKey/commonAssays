@@ -507,7 +507,7 @@ public class FlowManager
     public AttrObject getAttrObject(ExpData data)
     {
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("DataId", data.getRowId());
+        filter.addCondition(FieldKey.fromParts("DataId"), data.getRowId());
 
         return new TableSelector(getTinfoObject(), filter, null).getObject(AttrObject.class);
     }
@@ -515,7 +515,7 @@ public class FlowManager
     public AttrObject getAttrObjectFromRowId(int rowid)
     {
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("RowId", rowid);
+        filter.addCondition(FieldKey.fromParts("RowId"), rowid);
 
         return new TableSelector(getTinfoObject(), filter, null).getObject(AttrObject.class);
     }
@@ -523,7 +523,7 @@ public class FlowManager
     public Collection<AttrObject> getAttrObjectsFromURI(Container c, URI uri)
     {
         SimpleFilter filter = SimpleFilter.createContainerFilter(c);
-        filter.addCondition("URI", uri.toString());
+        filter.addCondition(FieldKey.fromParts("URI"), uri.toString());
 
         return new TableSelector(getTinfoObject(), filter, null).getCollection(AttrObject.class);
     }
@@ -766,7 +766,7 @@ public class FlowManager
             obj = createAttrObject(data, ObjectType.script, null);
         }
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("ObjectId", obj.getRowId());
+        filter.addCondition(FieldKey.fromParts("ObjectId"), obj.getRowId());
         Script script = new TableSelector(getTinfoScript(), filter, null).getObject(Script.class);
         if (script == null)
         {
@@ -832,7 +832,7 @@ public class FlowManager
         TableInfo table = schema.getTable(FlowTableType.FCSFiles);
         List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-        SimpleFilter filter = new SimpleFilter("Sample/Name", null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Sample", "Name"), null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
 
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         //TODO: multiple aggregates
@@ -848,8 +848,8 @@ public class FlowManager
     {
         FlowSchema schema = new FlowSchema(user, container);
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("FCSFileCount", 0, CompareType.NEQ);
-        filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
+        filter.addCondition(FieldKey.fromParts("FCSFileCount"), 0, CompareType.NEQ);
+        filter.addCondition(FieldKey.fromParts("ProtocolStep"), "Keywords", CompareType.EQUAL);
         TableInfo table = schema.getTable(FlowTableType.Runs);
         List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));

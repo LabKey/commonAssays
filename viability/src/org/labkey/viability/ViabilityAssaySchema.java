@@ -512,7 +512,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             specimenID.setKeyField(true);
             AssayTableMetadata metadata = new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata(_provider, getProtocol());
             SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, getProtocol(), metadata);
-            SimpleFilter filter = new SimpleFilter("volumeunits", "CEL");
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("volumeunits"), "CEL");
             fk.addSpecimenFilter(filter);
             specimenID.setFk(fk);
 

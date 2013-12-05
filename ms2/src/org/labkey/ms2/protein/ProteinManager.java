@@ -529,8 +529,8 @@ public class ProteinManager
         {
             String genus = FastaDbLoader.extractGenus(organismName);
             String species = FastaDbLoader.extractSpecies(organismName);
-            SimpleFilter filter = new SimpleFilter("species", species);
-            filter.addCondition("genus", genus);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("species"), species);
+            filter.addCondition(FieldKey.fromParts("genus"), genus);
             Organism organism = new TableSelector(getTableInfoOrganisms(), filter, null).getObject(Organism.class);
             if (organism == null)
             {
@@ -987,7 +987,7 @@ public class ProteinManager
             {
                 try
                 {
-                    filter.addCondition("ProteinProphetData/ProteinGroupId/RowId", Integer.parseInt(groupRowId));
+                    filter.addCondition(FieldKey.fromParts("ProteinProphetData", "ProteinGroupId", "RowId"), Integer.parseInt(groupRowId));
                 }
                 catch (NumberFormatException e)
                 {
@@ -1008,7 +1008,7 @@ public class ProteinManager
                         filter.addClause(new SequenceFilter(Integer.parseInt(seqId)));
                     }
                     else
-                        filter.addCondition("SeqId", Integer.parseInt(seqId));
+                        filter.addCondition(FieldKey.fromParts("SeqId"), Integer.parseInt(seqId));
                 }
                 catch (NumberFormatException e)
                 {

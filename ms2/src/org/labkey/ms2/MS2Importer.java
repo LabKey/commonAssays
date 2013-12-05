@@ -28,6 +28,7 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -276,9 +277,9 @@ public abstract class MS2Importer
     protected int getRun() throws SQLException
     {
         SimpleFilter filter = SimpleFilter.createContainerFilter(_container);
-        filter.addCondition("Path", _path);
-        filter.addCondition("FileName", _fileName);
-        filter.addCondition("Deleted", Boolean.FALSE);
+        filter.addCondition(FieldKey.fromParts("Path"), _path);
+        filter.addCondition(FieldKey.fromParts("FileName"), _fileName);
+        filter.addCondition(FieldKey.fromParts("Deleted"), Boolean.FALSE);
 
         TableInfo ti = MS2Manager.getTableInfoRuns();
         Integer runId = new TableSelector(ti.getColumn("Run"), filter, null).getObject(Integer.class);

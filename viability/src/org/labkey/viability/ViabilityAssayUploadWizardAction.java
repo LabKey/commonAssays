@@ -365,8 +365,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         {
             ExpProtocol protocol = run.getProtocol();
             String prefix = protocol.getName() + "-";
-            ExpExperiment[] experiments = run.getExperiments();
-            for (ExpExperiment exp : experiments)
+            for (ExpExperiment exp : run.getExperiments())
             {
                 if (exp.getName().startsWith(prefix) && exp.getBatchProtocol() == null)
                     return exp;

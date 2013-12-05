@@ -94,8 +94,7 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
             gwtMembers[i] = gwtMember;
             if (expRun != null)
             {
-                ExpExperiment[] experiments = expRun.getExperiments();
-                for (ExpExperiment experiment : experiments)
+                for (ExpExperiment experiment : expRun.getExperiments())
                 {
                     GWTComparisonGroup group = groups.get(experiment.getRowId());
                     if (group == null)

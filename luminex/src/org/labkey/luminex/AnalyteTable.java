@@ -29,6 +29,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
@@ -89,7 +90,7 @@ public class AnalyteTable extends AbstractLuminexTable
                     public TableInfo getLookupTableInfo()
                     {
                         TitrationTable titrationTable = _userSchema.createTitrationTable(false);
-                        titrationTable.addCondition(new SimpleFilter("Standard", Boolean.TRUE));
+                        titrationTable.addCondition(new SimpleFilter(FieldKey.fromParts("Standard"), Boolean.TRUE));
                         return titrationTable;
                     }
                 });

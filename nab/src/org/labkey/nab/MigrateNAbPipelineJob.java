@@ -336,7 +336,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(resultsTableInfo, Arrays.asList(rowIdFK, specimenNameFK));
             ColumnInfo rowIdCol = cols.get(rowIdFK);
             ColumnInfo specimenNameCol = cols.get(specimenNameFK);
-            Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK.toString(), run.getRowId()), null).getMapArray();
+            Map<String, Object>[] newDataRows = new TableSelector(resultsTableInfo, cols.values(), new SimpleFilter(runFK, run.getRowId()), null).getMapArray();
 
             // Figure out the RowId for the new assay run
             Map<String, Integer> result = new HashMap<>();

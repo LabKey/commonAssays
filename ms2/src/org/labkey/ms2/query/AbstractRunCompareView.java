@@ -179,8 +179,7 @@ public abstract class AbstractRunCompareView extends QueryView
                 gwtRun.setUrl(runURL.toString());
                 if (expRun != null)
                 {
-                    ExpExperiment[] experiments = expRun.getExperiments();
-                    for (ExpExperiment experiment : experiments)
+                    for (ExpExperiment experiment : expRun.getExperiments())
                     {
                         GWTComparisonGroup comparisonGroup = runGroups.get(experiment.getRowId());
                         if (comparisonGroup == null)

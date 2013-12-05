@@ -17,6 +17,8 @@
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.data.Table" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.api.query.QueryForm" %>
 <%@ page import="org.labkey.api.query.QueryView" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
@@ -28,7 +30,6 @@
 <%@ page import="org.labkey.flow.query.FlowSchema" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
-<%@ page import="org.labkey.api.data.Table" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -70,7 +71,7 @@ The analysis section describes which gates in the analysis, as well as the stati
         view.getSettings().setMaxRows(Table.ALL_ROWS);
         view.getSettings().setAllowChooseView(false);
         view.getSettings().setAllowCustomizeView(false);
-        view.getSettings().getBaseFilter().addCondition("AnalysisScript/RowId", script.getScriptId(), CompareType.EQUAL);
+        view.getSettings().getBaseFilter().addCondition(FieldKey.fromParts("AnalysisScript", "RowId"), script.getScriptId(), CompareType.EQUAL);
         include(view, out);
     } else {
         %><labkey:link href='<%=url.clone().replaceParameter("showRuns", "1")%>' text="Show Runs"/><%

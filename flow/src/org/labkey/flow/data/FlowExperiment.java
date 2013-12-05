@@ -74,11 +74,11 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public FlowExperiment[] getExperiments(Container container)
     {
         ExperimentService.Interface svc = ExperimentService.get();
-        ExpExperiment[] experiments = svc.getExperiments(container, null, false, true);
-        FlowExperiment[] ret = new FlowExperiment[experiments.length];
-        for (int i = 0; i < experiments.length; i ++)
+        List<? extends ExpExperiment> experiments = svc.getExperiments(container, null, false, true);
+        FlowExperiment[] ret = new FlowExperiment[experiments.size()];
+        for (int i = 0; i < experiments.size(); i ++)
         {
-            ret[i] = new FlowExperiment(experiments[i]);
+            ret[i] = new FlowExperiment(experiments.get(i));
         }
         return ret;
     }

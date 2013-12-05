@@ -19,6 +19,7 @@ package org.labkey.ms2.compare;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.*;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.action.LabkeyError;
@@ -191,7 +192,7 @@ public abstract class CompareQuery extends SQLFragment
         append(getFromClause());
         appendNewLine();
         SimpleFilter filter = new SimpleFilter();
-        filter.addInClause("Run", MS2Manager.getRunIds(_runs));
+        filter.addInClause(FieldKey.fromParts("Run"), MS2Manager.getRunIds(_runs));
 
         addWhereClauses(filter);
 

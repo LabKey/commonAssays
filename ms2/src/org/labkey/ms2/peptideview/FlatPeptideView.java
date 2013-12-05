@@ -29,6 +29,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
@@ -174,7 +175,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
                 peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
             }
 
-            filter.addInClause("RowId", peptideIds);
+            filter.addInClause(FieldKey.fromParts("RowId"), peptideIds);
         }
         return filter;
     }

@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AbstractBeanQueryUpdateService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.ValidationException;
@@ -122,7 +123,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
         // Add all rows to the update set for the guide sets that have changed
         for (Integer guideSetId : guideSetIds)
         {
-            SimpleFilter guideSetFilter = new SimpleFilter("GuideSetId", guideSetId);
+            SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), guideSetId);
             List<Type> guideSetBeans = new TableSelector(_rawTable, guideSetFilter, null).getArrayList(_typeClass);
             forUpdate.addAll(guideSetBeans);
         }

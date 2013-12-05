@@ -18,8 +18,8 @@ package org.labkey.ms2;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
@@ -102,7 +102,7 @@ public enum MS2ExportType
         {
             HttpServletResponse response = form.getViewContext().getResponse();
             MS2Run run = form.validateRun();
-            Filter filter = new SimpleFilter("Run", run.getRun());
+            Filter filter = new SimpleFilter(FieldKey.fromParts("Run"), run.getRun());
             MS2Peptide[] peptides = new TableSelector(MS2Manager.getTableInfoPeptides(), filter, new Sort("Scan")).getArray(MS2Peptide.class);
             response.setContentType("text/tab-separated-values");
             response.setHeader("Content-disposition", "attachment; filename=\"" + run.getDescription() + ".MS2Ions.tsv");

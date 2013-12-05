@@ -16,19 +16,33 @@
 
 package org.labkey.ms1;
 
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.util.ResultSetUtil;
-import org.labkey.ms1.model.*;
-import org.labkey.ms1.maintenance.PurgeTask;
 import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SchemaTableInfo;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.ms1.maintenance.PurgeTask;
+import org.labkey.ms1.model.DataFile;
+import org.labkey.ms1.model.Feature;
+import org.labkey.ms1.model.MinMaxScanInfo;
+import org.labkey.ms1.model.Scan;
+import org.labkey.ms1.model.Software;
+import org.labkey.ms1.model.SoftwareParam;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.util.Map;
-import java.util.Collection;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 public class MS1Manager
 {
@@ -142,13 +156,13 @@ public class MS1Manager
 
     public Software[] getSoftware(int fileId) throws SQLException
     {
-        SimpleFilter fltr = new SimpleFilter("FileId", fileId);
+        SimpleFilter fltr = new SimpleFilter(FieldKey.fromParts("FileId"), fileId);
         return new TableSelector(getTable(TABLE_SOFTWARE), fltr, null).getArray(Software.class);
     }
 
     public SoftwareParam[] getSoftwareParams(int softwareId) throws SQLException
     {
-        SimpleFilter fltr = new SimpleFilter("SoftwareId", softwareId);
+        SimpleFilter fltr = new SimpleFilter(FieldKey.fromParts("SoftwareId"), softwareId);
         return new TableSelector(getTable(TABLE_SOFTWARE_PARAMS), fltr, null).getArray(SoftwareParam.class);
     }
 

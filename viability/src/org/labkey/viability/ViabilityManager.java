@@ -37,6 +37,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayService;
@@ -74,12 +75,12 @@ public class ViabilityManager
 
     public static ViabilityResult[] getResults(ExpData data, Container container) throws SQLException
     {
-        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition("DataID", data.getRowId()), null).getArray(ViabilityResult.class);
+        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("DataID"), data.getRowId()), null).getArray(ViabilityResult.class);
     }
 
     public static ViabilityResult[] getResults(ExpRun run, Container container) throws SQLException
     {
-        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition("DataID/RunID", run.getRowId()), null).getArray(ViabilityResult.class);
+        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("DataID", "RunID"), run.getRowId()), null).getArray(ViabilityResult.class);
     }
 
     /**
@@ -104,7 +105,7 @@ public class ViabilityManager
         return new TableSelector(
                 ViabilitySchema.getTableInfoResultSpecimens(),
                 PageFlowUtil.set("SpecimenID"),
-                new SimpleFilter("ResultID", resultRowId),
+                new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowId),
                 new Sort("SpecimenIndex")).getArray(String.class);
     }
 
@@ -235,7 +236,7 @@ public class ViabilityManager
 
     private static void deleteSpecimens(int resultRowId) throws SQLException
     {
-        Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter("ResultID", resultRowId));
+        Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowId));
     }
 
     /** Delete the properties for objectID, but not the object itself. */
@@ -251,7 +252,7 @@ public class ViabilityManager
      */
     /*package*/ static ExpData getResultExpData(int resultRowId)
     {
-        Integer dataId = new TableSelector(ViabilitySchema.getTableInfoResults(), Collections.singleton("DataID"), new SimpleFilter("RowID", resultRowId), null).getObject(Integer.class);
+        Integer dataId = new TableSelector(ViabilitySchema.getTableInfoResults(), Collections.singleton("DataID"), new SimpleFilter(FieldKey.fromParts("RowID"), resultRowId), null).getObject(Integer.class);
 // WAS:        Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), Integer.class);
         if (dataId != null)
             return ExperimentService.get().getExpData(dataId.intValue());
@@ -276,8 +277,8 @@ public class ViabilityManager
 
             Map<String, Object>[] rows =
                     new TableSelector(ViabilitySchema.getTableInfoResults(),
-                    new HashSet<>(Arrays.asList("RowID", "ObjectID")),
-                    new SimpleFilter("DataID", dataIDs, CompareType.IN), null).getMapArray();
+                            new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                            new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null).getMapArray();
 
             int[] objectIDs = new int[rows.length];
 
@@ -344,7 +345,7 @@ public class ViabilityManager
             Map<String, Object>[] rows = new TableSelector(
                     ViabilitySchema.getTableInfoResults(),
                     new HashSet<>(Arrays.asList("RowID", "ObjectID")),
-                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null).getMapArray();
+                    new SimpleFilter(FieldKey.fromParts("PoolID"), "xxx-", CompareType.STARTS_WITH), null).getMapArray();
 
             for (Map<String, Object> row : rows)
             {

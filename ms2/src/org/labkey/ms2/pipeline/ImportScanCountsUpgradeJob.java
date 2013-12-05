@@ -22,6 +22,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -74,8 +75,8 @@ public class ImportScanCountsUpgradeJob extends PipelineJob implements Serializa
 
         try
         {
-            SimpleFilter filter = new SimpleFilter("ScanCount", null, CompareType.ISBLANK);
-            filter.addCondition("MzXmlURL", null, CompareType.NONBLANK);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("ScanCount"), null, CompareType.ISBLANK);
+            filter.addCondition(FieldKey.fromParts("MzXmlURL"), null, CompareType.NONBLANK);
             MS2Fraction[] fractions = new TableSelector(MS2Manager.getTableInfoFractions(), filter, new Sort("Fraction")).getArray(MS2Fraction.class);
             info("Found " + fractions.length + " fractions to process");
 

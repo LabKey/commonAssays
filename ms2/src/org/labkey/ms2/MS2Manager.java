@@ -639,7 +639,7 @@ public class MS2Manager
 
     public static RelativeQuantAnalysisSummary getQuantSummaryForRun(int runId)
     {
-        SimpleFilter filter = new SimpleFilter("run", runId);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("run"), runId);
 
         return new TableSelector(getTableInfoQuantSummaries(), filter, null).getObject(RelativeQuantAnalysisSummary.class);
     }
@@ -687,7 +687,7 @@ public class MS2Manager
 
         SQLFragment selectSQL = new SQLFragment("SELECT DISTINCT Container FROM " + getTableInfoRuns() + " ");
         SimpleFilter inClause = new SimpleFilter();
-        inClause.addInClause("Run", runIds);
+        inClause.addInClause(FieldKey.fromParts("Run"), runIds);
         SQLFragment runSQL = inClause.getSQLFragment(getSqlDialect());
         selectSQL.append(runSQL);
 
@@ -775,7 +775,7 @@ public class MS2Manager
     {
         SQLFragment markDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = NULL, Deleted=?, Modified=? ", Boolean.TRUE, new Date());
         SimpleFilter where = SimpleFilter.createContainerFilter(c);
-        where.addInClause("Run", runIds);
+        where.addInClause(FieldKey.fromParts("Run"), runIds);
         markDeleted.append(where.getSQLFragment(getSqlDialect()));
 
         new SqlExecutor(getSchema()).execute(markDeleted);
@@ -877,7 +877,7 @@ public class MS2Manager
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinGroupId) throws SQLException
     {
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("RowId", proteinGroupId);
+        filter.addCondition(FieldKey.fromParts("RowId"), proteinGroupId);
 
         return new TableSelector(getTableInfoProteinGroupsWithQuantitation(), filter, null).getObject(ProteinGroupWithQuantitation.class);
     }
@@ -897,9 +897,9 @@ public class MS2Manager
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinProphetFileId, int groupNumber, int indistinguishableCollectionId) throws SQLException
     {
         SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("ProteinProphetFileId", proteinProphetFileId);
-        filter.addCondition("GroupNumber", groupNumber);
-        filter.addCondition("IndistinguishableCollectionId", indistinguishableCollectionId);
+        filter.addCondition(FieldKey.fromParts("ProteinProphetFileId"), proteinProphetFileId);
+        filter.addCondition(FieldKey.fromParts("GroupNumber"), groupNumber);
+        filter.addCondition(FieldKey.fromParts("IndistinguishableCollectionId"), indistinguishableCollectionId);
 
         return new TableSelector(getTableInfoProteinGroupsWithQuantitation(), filter, null).getObject(ProteinGroupWithQuantitation.class);
     }
@@ -990,7 +990,7 @@ public class MS2Manager
 
     public static MS2Fraction[] getFractions(int runId)
     {
-        SimpleFilter filter = new SimpleFilter("run", runId);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("run"), runId);
 
         return new TableSelector(getTableInfoFractions(), filter, null).getArray(MS2Fraction.class);
     }
@@ -1004,7 +1004,7 @@ public class MS2Manager
 
     public static MS2Peptide getPeptide(long peptideId)
     {
-        Filter filter = new SimpleFilter("RowId", peptideId);
+        Filter filter = new SimpleFilter(FieldKey.fromParts("RowId"), peptideId);
 
         return new TableSelector(getTableInfoPeptides(), filter, null).getObject(MS2Peptide.class);
     }

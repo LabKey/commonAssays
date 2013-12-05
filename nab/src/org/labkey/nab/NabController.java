@@ -40,10 +40,10 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
-import org.labkey.api.assay.dilution.SampleProperty;
-import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.assay.dilution.SafeTextConverter;
 import org.labkey.api.assay.dilution.SampleInfo;
+import org.labkey.api.assay.dilution.SampleProperty;
+import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
@@ -67,6 +67,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
@@ -730,8 +731,8 @@ public class NabController extends SpringActionController
 
         public PlateQueryView getDuplicateDataFileView(ViewContext context, OldNabAssayRun assay)
         {
-            SimpleFilter filter = new SimpleFilter("Property/DataFile", assay.getPlate().getProperty("DataFile"));
-            filter.addCondition("RowId", assay.getRunRowId(), CompareType.NEQ);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Property", "DataFile"), assay.getPlate().getProperty("DataFile"));
+            filter.addCondition(FieldKey.fromParts("RowId"), assay.getRunRowId(), CompareType.NEQ);
             PlateQueryView duplicateDataFileView = PlateService.get().getPlateGridView(context, filter);
             duplicateDataFileView.setShowExportButtons(false);
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();

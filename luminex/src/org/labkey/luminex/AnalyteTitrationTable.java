@@ -190,8 +190,8 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             @Override
             protected AnalyteTitration get(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException
             {
-                SimpleFilter filter = new SimpleFilter("AnalyteId", key.getKey());
-                filter.addCondition("TitrationId", key.getValue());
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), key.getKey());
+                filter.addCondition(FieldKey.fromParts("TitrationId"), key.getValue());
                 return new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getObject(AnalyteTitration.class);
             }
 
@@ -227,8 +227,8 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 ExpRun run = getRun(titration.getRunId());
                 Map<String, String> runIsotypeConjugate = getIsotypeAndConjugate(run);
 
-                SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", bean.getAnalyteId());
-                curveFitFilter.addCondition("TitrationId", bean.getTitrationId());
+                SimpleFilter curveFitFilter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), bean.getAnalyteId());
+                curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), bean.getTitrationId());
                 List<CurveFit> curveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), curveFitFilter, null).getArrayList(CurveFit.class);
 
                 LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), curveFits);
