@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.ms1.model.Feature" %>
 <%@ page import="org.labkey.ms1.model.FeatureDetailsModel" %>
 <%@ page import="org.labkey.ms1.model.Peptide" %>
+<%@ page import="org.labkey.ms1.MS1Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<FeatureDetailsModel> me = (JspView<FeatureDetailsModel>) HttpView.currentView();
@@ -393,7 +394,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" style="text-align:center">
-                        <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
+                        <form id="frmMzWindowFilter" action="<%=h(buildURL(MS1Controller.ShowFeatureDetailsAction.class))%>" method="GET">
                             <input type="hidden" name="srcUrl" value="<%=h(model.getSrcUrl())%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
@@ -467,7 +468,7 @@
                 </tr>
                 <tr>
                     <td style="text-align:center">
-                        <form id="frmScanWindowFilter" action="showFeatureDetails.view" method="GET">
+                        <form id="frmScanWindowFilter" action="<%=h(buildURL(MS1Controller.ShowFeatureDetailsAction.class))%>" method="GET">
                             <input type="hidden" name="srcUrl" value="<%=h(model.getSrcUrl())%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>

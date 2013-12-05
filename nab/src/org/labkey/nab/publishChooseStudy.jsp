@@ -15,18 +15,16 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.nab.NabController" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.study.Study" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.PublishBean> me = (JspView<NabController.PublishBean>) HttpView.currentView();
     NabController.PublishBean bean = me.getModelBean();
 %>
-<form action="publish.view" method="GET">
+<form action="<%=h(buildURL(NabController.PublishAction.class))%>" method="GET">
     <input type="hidden" name="plateIds" value="<%= bean.isPlateIds() %>">
     <%
         for (Integer plateId : bean.getIds())

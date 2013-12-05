@@ -99,7 +99,7 @@
             </table>
         </td>
     </tr>
-<form method="post" action="upload.view" enctype="multipart/form-data">
+<form method="post" action="<%=h(buildURL(NabController.UploadAction.class))%>" enctype="multipart/form-data">
     <tr>
         <td>
             <table>

@@ -30,7 +30,7 @@
 <% } %>
 
 <% if (bean.foundData) { %>
-    <form name="chartForm" action="peptideCharts.view">
+    <form name="chartForm" action="<%=h(buildURL(MS2Controller.PeptideChartsAction.class))%>">
     <%=bean.imageMap%>
     <table align="left">
     <tr>
