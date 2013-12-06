@@ -60,7 +60,7 @@ public class FeaturesView extends QueryView
         _baseFilters.add(new ContainerFeaturesFilter(container));
     }
 
-    public FeaturesView(MS1Schema schema, int runId) throws SQLException
+    public FeaturesView(MS1Schema schema, int runId)
     {
         this(schema, new ArrayList<FeaturesFilter>(), false);
         _baseFilters.add(new RunFilter(runId));

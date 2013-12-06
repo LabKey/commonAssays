@@ -18,12 +18,10 @@ package org.labkey.ms2.protein.organism;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -51,16 +49,9 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
 
     public static Integer getNcbiId()
     {
-        try
-        {
-            if (null == _ncbiId)
-                _ncbiId = Table.executeSingleton(_schema,
-                    "SELECT identtypeid FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE name='NCBI Taxonomy'", null, Integer.class);
-        }
-        catch(SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        if (null == _ncbiId)
+            _ncbiId = new SqlSelector(_schema,
+                "SELECT identtypeid FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE Name='NCBI Taxonomy'").getObject(Integer.class);
 
         return _ncbiId;
     }
@@ -89,18 +80,11 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
 
                 if (!cachedMiss)
                 {
-                    try
-                    {
-                        retVal = Table.executeSingleton(_schema, _organismFromTaxIdSql, new String[]{taxid}, String.class);
+                    retVal = new SqlSelector(_schema, _organismFromTaxIdSql, taxid).getObject(String.class);
 
-                        _cache.put(taxid, retVal != null ? retVal : CACHED_MISS_VALUE);
-                        if (retVal != null)
-                            return retVal;
-                    }
-                    catch (SQLException e)
-                    {
-                        throw new RuntimeSQLException(e);
-                    }
+                    _cache.put(taxid, retVal != null ? retVal : CACHED_MISS_VALUE);
+                    if (retVal != null)
+                        return retVal;
                 }
             }
         }

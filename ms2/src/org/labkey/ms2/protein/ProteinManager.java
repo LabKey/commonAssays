@@ -453,7 +453,6 @@ public class ProteinManager
             return matches.get(0);
         }
         return null;
-
     }
 
     public static void migrateRuns(int oldFastaId, int newFastaId)
@@ -471,14 +470,16 @@ public class ProteinManager
         missingCountSQL.append(") Mapping WHERE OldSeqId IN (\n");
         missingCountSQL.append("(SELECT p.SeqId FROM " + MS2Manager.getTableInfoPeptides() + " p, " + MS2Manager.getTableInfoRuns() + " r WHERE p.run = r.Run AND r.FastaId = " + oldFastaId + ")\n");
         missingCountSQL.append("UNION\n");
-        missingCountSQL.append("(SELECT pgm.SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " + MS2Manager.getTableInfoProteinGroups() + " pg, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf, " + MS2Manager.getTableInfoRuns() + " r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = " + oldFastaId + "))\n");
+        missingCountSQL.append("(SELECT pgm.SeqId FROM ").append(MS2Manager.getTableInfoProteinGroupMemberships()).append(" pgm, ").append(MS2Manager.getTableInfoProteinGroups()).append(" pg, ").append(MS2Manager.getTableInfoProteinProphetFiles()).append(" ppf, ").append(MS2Manager.getTableInfoRuns()).append(" r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = ").append(oldFastaId).append("))\n");
         missingCountSQL.append("AND NewSeqId IS NULL");
 
-        int missingCount = Table.executeSingleton(getSchema(), missingCountSQL.getSQL(), missingCountSQL.getParamsArray(), Integer.class);
+        int missingCount = new SqlSelector(getSchema(), missingCountSQL).getObject(Integer.class);
         if (missingCount > 0)
         {
             throw new SQLException("There are " + missingCount + " protein sequences in the original FASTA file that are not in the new file");
         }
+
+        SqlExecutor executor = new SqlExecutor(MS2Manager.getSchema());
 
         try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().ensureTransaction())
         {
@@ -494,7 +495,7 @@ public class ProteinManager
             updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
             updatePeptidesSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-            new SqlExecutor(MS2Manager.getSchema()).execute(updatePeptidesSQL);
+            executor.execute(updatePeptidesSQL);
 
             SQLFragment updateProteinsSQL = new SQLFragment();
             updateProteinsSQL.append("UPDATE " + MS2Manager.getTableInfoProteinGroupMemberships() + " SET SeqId= map.NewSeqId\n");
@@ -510,9 +511,9 @@ public class ProteinManager
             updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
             updateProteinsSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-            new SqlExecutor(MS2Manager.getSchema()).execute(updateProteinsSQL);
+            executor.execute(updateProteinsSQL);
 
-            new SqlExecutor(MS2Manager.getSchema()).execute("UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
+            executor.execute("UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
             transaction.commit();
         }
     }
@@ -1516,20 +1517,12 @@ public class ProteinManager
         String url = cacheURLs.get(identType);
         if (url == null)
         {
-            try
-            {
-                url = Table.executeSingleton(getSchema(),
-                        "SELECT S.url\n" +
-                        "FROM " + ProteinManager.getTableInfoInfoSources() + " S INNER JOIN " + ProteinManager.getTableInfoIdentTypes() +" T " +
-                            "ON S.sourceId = T.cannonicalSourceId\n" +
-                        "WHERE T.name=?",
-                        new Object[]{identType},
-                        String.class);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            url = new SqlSelector(getSchema(),
+                    "SELECT S.url\n" +
+                    "FROM " + ProteinManager.getTableInfoInfoSources() + " S INNER JOIN " + ProteinManager.getTableInfoIdentTypes() +" T " +
+                        "ON S.sourceId = T.cannonicalSourceId\n" +
+                    "WHERE T.name=?",
+                    identType).getObject(String.class);
             cacheURLs.put(identType, null==url ? NOTFOUND : url);
         }
         if (null == url || NOTFOUND.equals(url))
@@ -1605,16 +1598,9 @@ public class ProteinManager
             return;
         if (null != modifiedSince)
         {
-            try
-            {
-                Date d = Table.executeSingleton(getSchema(),"SELECT max(insertdate) from prot.annotinsertions",null, Timestamp.class);
-                if (null != d && d.compareTo(modifiedSince) <= 0)
-                    return;
-            }
-            catch (SQLException x)
-            {
-                _log.error("Unexpected sql exception", x);
-            }
+            Date d = new SqlSelector(getSchema(),"SELECT MAX(InsertDate) FROM prot.annotinsertions").getObject(Timestamp.class);
+            if (null != d && d.compareTo(modifiedSince) <= 0)
+                return;
         }
 
         if (null == task)

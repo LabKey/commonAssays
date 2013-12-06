@@ -16,18 +16,17 @@
 
 package org.labkey.ms1.model;
 
-import org.labkey.api.protein.ProteinService;
 import org.labkey.api.data.Container;
-import org.labkey.api.ms2.MS2Urls;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.ms2.MS2Urls;
+import org.labkey.api.protein.ProteinService;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.view.FeaturesView;
 
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 
 /**
@@ -60,7 +59,7 @@ public class FeatureDetailsModel
 
     public FeatureDetailsModel(Feature feature, int prevFeatureId, int nextFeatureId, String srcUrl,
                                double mzWindowLow, double mzWindowHigh, int scanWindowLow, int scanWindowHigh,
-                               int scan, Container container, ActionURL url) throws SQLException
+                               int scan, Container container, ActionURL url)
     {
         assert null != feature : "Null feature passed to FeatureDetailsModel!";
         assert null != feature.getScan() : "Feature has no apex scan!";
@@ -68,7 +67,7 @@ public class FeatureDetailsModel
         assert null != feature.getRunId() : "Feature has no experiment run!";
 
         _feature = feature;
-        _runId = _feature.getRunId().intValue();
+        _runId = _feature.getRunId();
         _container = container;
         _prevFeatureId = prevFeatureId;
         _nextFeatureId = nextFeatureId;
@@ -122,7 +121,7 @@ public class FeatureDetailsModel
         return _nextFeatureId;
     }
 
-    public Integer[] getPrevNextScans() throws SQLException
+    public Integer[] getPrevNextScans()
     {
         if(null == _feature || null == _feature.getRunId() || null == _feature.getMz()
                 || null == _feature.getScanFirst() || null == _feature.getScanLast())

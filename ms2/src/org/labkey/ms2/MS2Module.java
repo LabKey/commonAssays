@@ -17,11 +17,9 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.protein.ProteinService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.Handler;
@@ -36,6 +34,7 @@ import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
@@ -330,20 +329,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public Collection<String> getSummary(Container c)
     {
         Collection<String> list = new LinkedList<>();
-        try
+        long count = MS2Manager.getRunCount(c);
+        if (count > 0)
+            list.add("" + count + " MS2 Run" + (count > 1 ? "s" : ""));
+        int customAnnotationCount = ProteinManager.getCustomAnnotationSets(c, false).size();
+        if (customAnnotationCount > 0)
         {
-            long count = MS2Manager.getRunCount(c);
-            if (count > 0)
-                list.add("" + count + " MS2 Run" + (count > 1 ? "s" : ""));
-            int customAnnotationCount = ProteinManager.getCustomAnnotationSets(c, false).size();
-            if (customAnnotationCount > 0)
-            {
-                list.add(customAnnotationCount + " custom protein annotation set" + (customAnnotationCount > 1 ? "s" : ""));
-            }
-        }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
+            list.add(customAnnotationCount + " custom protein annotation set" + (customAnnotationCount > 1 ? "s" : ""));
         }
         return list;
     }

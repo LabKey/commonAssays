@@ -200,7 +200,7 @@ public class MS1Controller extends SpringActionController
             super(ShowFeaturesForm.class);
         }
 
-        protected FeaturesView getFeaturesView(ShowFeaturesForm form, BindException bindErrors, boolean forExport) throws Exception
+        protected FeaturesView getFeaturesView(ShowFeaturesForm form, BindException bindErrors, boolean forExport)
         {
             _form = form;
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer()),
@@ -239,14 +239,14 @@ public class MS1Controller extends SpringActionController
             Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
             if(null != fileId)
             {
-                Software[] swares = mgr.getSoftware(fileId.intValue());
+                Software[] swares = mgr.getSoftware(fileId);
                 if(null != swares && swares.length > 0)
                 {
                     softwareView = new JspView<>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Processing Software Information");
                 }
 
-                DataFile dataFile = mgr.getDataFile(fileId.intValue());
+                DataFile dataFile = mgr.getDataFile(fileId);
                 if(null != dataFile)
                 {
                     fileDetailsView = new JspView<>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
@@ -359,14 +359,14 @@ public class MS1Controller extends SpringActionController
             Integer fileId = mgr.getFileIdForRun(expRun.getRowId(), MS1Manager.FILETYPE_PEAKS);
             if(null != fileId)
             {
-                Software[] swares = mgr.getSoftware(fileId.intValue());
+                Software[] swares = mgr.getSoftware(fileId);
                 if(null != swares && swares.length > 0)
                 {
                     softwareView = new JspView<>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
                 }
 
-                DataFile dataFile = mgr.getDataFile(fileId.intValue());
+                DataFile dataFile = mgr.getDataFile(fileId);
                 if(null != dataFile)
                 {
                     fileDetailsView = new JspView<>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
@@ -740,14 +740,14 @@ public class MS1Controller extends SpringActionController
             _featureId = featureId;
         }
 
-        public Feature getFeature() throws SQLException
+        public Feature getFeature()
         {
             if(null == _feature && null != _featureId)
                 _feature = MS1Manager.get().getFeature(_featureId.intValue());
             return _feature;
         }
 
-        public Double getMzSource() throws SQLException
+        public Double getMzSource()
         {
             if(null == _mzSource)
             {
@@ -764,7 +764,7 @@ public class MS1Controller extends SpringActionController
             _mzSource = mzSource;
         }
 
-        public Double getTimeSource() throws SQLException
+        public Double getTimeSource()
         {
             if(null == _timeSource)
             {
@@ -852,10 +852,10 @@ public class MS1Controller extends SpringActionController
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
             baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
-            baseFilters.add(new MzFilter(form.getMzSource().doubleValue(), form.getMzOffset(), form.getMzUnits()));
+            baseFilters.add(new MzFilter(form.getMzSource(), form.getMzOffset(), form.getMzUnits()));
             if(SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
-                baseFilters.add(new RetentionTimeFilter(form.getTimeSource().doubleValue() - form.getTimeOffset(),
-                        form.getTimeSource().doubleValue() + form.getTimeOffset()));
+                baseFilters.add(new RetentionTimeFilter(form.getTimeSource() - form.getTimeOffset(),
+                        form.getTimeSource() + form.getTimeOffset()));
             else
                 baseFilters.add(new ScanFilter((int)form.getTimeSource().doubleValue() - (int)form.getTimeOffset(),
                         (int)form.getTimeSource().doubleValue() + (int)(form.getTimeOffset())));

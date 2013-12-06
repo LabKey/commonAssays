@@ -16,10 +16,7 @@
 
 package org.labkey.ms1.model;
 
-import org.labkey.ms1.model.SoftwareParam;
 import org.labkey.ms1.MS1Manager;
-
-import java.sql.SQLException;
 
 /**
  * Represents information about a software package used to produce an MS1 data file
@@ -30,7 +27,7 @@ import java.sql.SQLException;
  */
 public class Software
 {
-    public SoftwareParam[] getParameters() throws SQLException
+    public SoftwareParam[] getParameters()
     {
         if(_softwareId < 0)
             return new SoftwareParam[0];

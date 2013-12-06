@@ -18,6 +18,7 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
@@ -229,10 +230,10 @@ public class PepXmlImporter extends MS2Importer
             progress.getCumulativeTimer().setCurrentTask(Tasks.ImportFASTA, databaseLocalPath);
             int fastaId = FastaDbLoader.loadAnnotations(_path, databaseLocalPath, FastaDbLoader.UNKNOWN_ORGANISM, true, _log, _context);
 
-            _scoringAnalysis = Table.executeSingleton(ProteinManager.getSchema(),
+            _scoringAnalysis = new SqlSelector(ProteinManager.getSchema(),
                     "SELECT ScoringAnalysis " +
                     "FROM " + ProteinManager.getTableInfoFastaFiles() + " " +
-                    "WHERE FastaId = ?", new Object[]{fastaId}, Boolean.class);
+                    "WHERE FastaId = ?", fastaId).getObject(Boolean.class);
 
             m.put("FastaId", fastaId);
         }

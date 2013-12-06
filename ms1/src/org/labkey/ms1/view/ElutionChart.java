@@ -48,7 +48,7 @@ public class ElutionChart extends FeatureChart
         _scanLast = scanLast;
     }
 
-    protected Table.TableResultSet getChartData() throws SQLException
+    protected Table.TableResultSet getChartData()
     {
         return MS1Manager.get().getPeakData(_runId, _mzLow, _mzHigh, _scanFirst, _scanLast);
     }

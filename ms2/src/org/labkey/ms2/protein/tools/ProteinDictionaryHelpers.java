@@ -20,8 +20,6 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
-import org.labkey.api.iterator.CloseableIterator;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
@@ -63,7 +61,6 @@ public class ProteinDictionaryHelpers
             int orgLineCount = 0;
             PreparedStatement ps = null;
             Connection conn = null;
-            CloseableIterator<Map<String, Object>> it = null;
             DbScope scope = ProteinManager.getSchema().getScope();
 
             try
@@ -152,7 +149,6 @@ public class ProteinDictionaryHelpers
             {
                 if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
                 if (null != conn) scope.releaseConnection(conn);
-                if (it != null) { try { it.close(); } catch (IOException e) {} }
             }
 
             _log.info("Finished reloading ProtSprotOrgMap in " + (System.currentTimeMillis() - start)/1000.0 + " seconds");
@@ -173,19 +169,19 @@ public class ProteinDictionaryHelpers
     }
 
 
-    private static String getGODefinitionFromId(int id) throws SQLException
+    private static String getGODefinitionFromId(int id)
     {
-        return Table.executeSingleton(ProteinManager.getSchema(), "SELECT TermDefinition FROM " + ProteinManager.getTableInfoGoTermDefinition() + " WHERE TermId=?", new Object[]{id}, String.class);
+        return new SqlSelector(ProteinManager.getSchema(), "SELECT TermDefinition FROM " + ProteinManager.getTableInfoGoTermDefinition() + " WHERE TermId=?", id).getObject(String.class);
     }
 
-    public static String getGODefinitionFromAcc(String acc) throws SQLException
+    public static String getGODefinitionFromAcc(String acc)
     {
         return getGODefinitionFromId(getGOIdFromAcc(acc));
     }
 
-    public static int getGOIdFromAcc(String acc) throws SQLException
+    public static int getGOIdFromAcc(String acc)
     {
-        Integer goId = Table.executeSingleton(ProteinManager.getSchema(), "SELECT Id FROM " + ProteinManager.getTableInfoGoTerm() + " WHERE Acc = ?", new Object[]{acc}, Integer.class);
+        Integer goId = new SqlSelector(ProteinManager.getSchema(), "SELECT Id FROM " + ProteinManager.getTableInfoGoTerm() + " WHERE Acc = ?", acc).getObject(Integer.class);
 
         return (null == goId ? 0 : goId);
     }

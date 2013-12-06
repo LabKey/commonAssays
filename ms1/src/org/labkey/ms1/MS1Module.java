@@ -53,7 +53,6 @@ import org.labkey.ms1.report.FeaturesRReport;
 import org.labkey.ms1.report.MS1ReportUIProvider;
 import org.labkey.ms1.report.PeaksRReport;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -147,18 +146,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
     @Override
     public Collection<String> getSummary(Container c)
     {
-        Collection<String> ret;
-        try
-        {
-            ret = MS1Manager.get().getContainerSummary(c);
-        }
-        catch(SQLException e)
-        {
-            ret = new ArrayList<>();
-            ret.add(e.getMessage());
-        }
-        
-        return ret;
+        return MS1Manager.get().getContainerSummary(c);
     }
 
     @Override

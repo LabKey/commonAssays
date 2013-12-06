@@ -19,7 +19,6 @@ package org.labkey.ms1.view;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.ResultSetUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,12 +39,9 @@ public abstract class FeatureChart
 
     public void render(OutputStream out, int width, int height) throws SQLException, IOException
     {
-        Table.TableResultSet rs = null;
-        try
+        //get the scan/peak data for this feature
+        try (Table.TableResultSet rs = getChartData())
         {
-            //get the scan/peak data for this feature
-            rs = getChartData();
-
             //construct the chart
             JFreeChart chart = null;
             if(null != rs)
@@ -55,18 +51,13 @@ public abstract class FeatureChart
             if(null != chart)
                 ChartUtilities.writeChartAsPNG(out, chart, width, height);
         }
-        finally
-        {
-            ResultSetUtil.close(rs);
-        }
     }
 
     /**
      * Derived classes may override this to fetch a different dataset
      * @return The data to use for the chart
-     * @throws SQLException Thrown if database error
      */
-    protected abstract Table.TableResultSet getChartData() throws SQLException;
+    protected abstract Table.TableResultSet getChartData();
 
     /**
      * Derived classes should override this to actually construct the chart. The calling

@@ -16,17 +16,16 @@
 
 package org.labkey.ms1.view;
 
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.data.Table;
-import org.labkey.ms1.view.FeatureChart;
 import org.labkey.ms1.MS1Manager;
 
-import java.sql.SQLException;
 import java.awt.*;
+import java.sql.SQLException;
 
 /**
  * Can produce a spectrum chart for a given feature/scan
@@ -45,7 +44,7 @@ public class SpectrumChart extends FeatureChart
         _mzLow = mzLow;
     }
 
-    protected Table.TableResultSet getChartData() throws SQLException
+    protected Table.TableResultSet getChartData()
     {
         return MS1Manager.get().getPeakData(_runId, _scan, _mzLow, _mzHigh);
     }

@@ -27,7 +27,6 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.FastaDbHelper;
@@ -202,24 +201,15 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             fdbu._initialInsertionStmt.setInt(4, organismToBeGuessed ? 1 : 0);
             fdbu._initialInsertionStmt.setTimestamp(5, new java.sql.Timestamp(new java.util.Date().getTime()));
 
-            ResultSet rs = null;
-
-            try
+            try (ResultSet rs = ProteinManager.getSqlDialect().executeWithResults(fdbu._initialInsertionStmt))
             {
-                rs = ProteinManager.getSqlDialect().executeWithResults(fdbu._initialInsertionStmt);
                 if (null != rs && rs.next())
                     currentInsertId = rs.getInt(1);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
             }
         }
         else
         {
-            Integer skip = Table.executeSingleton(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + currentInsertId, null, Integer.class);
-            if (skip != null)
-                skipEntries = skip;
+            skipEntries = new SqlSelector(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
         }
         //c.commit();
         return currentInsertId;
@@ -638,10 +628,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         }
         else
         {
-            ResultSet rs = null;
-            try
+            try (ResultSet rs = conn.createStatement().executeQuery("SELECT DefaultOrganism,OrgShouldBeGuessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + currentInsertId))
             {
-                rs = conn.createStatement().executeQuery("SELECT DefaultOrganism,OrgShouldBeGuessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + currentInsertId);
                 if (rs.next())
                 {
                     setDefaultOrganism(rs.getString(1));
@@ -650,15 +638,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                 else
                     logger.error("Can't find insert id " + currentInsertId + " in parse recovery.");
             }
-            finally
-            {
-                if (rs != null) try { rs.close(); } catch (SQLException ignored) {}
-            }
-            Integer skipCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " +
-                    ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" +
-                    currentInsertId, null, Integer.class);
-            if (skipCount != null)
-                skipEntries = skipCount;
+
+            skipEntries = new SqlSelector(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " +
+                    ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
         }
 
         Thread.currentThread().setName("AnnotLoader" + currentInsertId);
@@ -771,16 +753,18 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             }
         }
 
-        Long existingProtFastasCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", new String[]{hash}, Long.class);
+        Long existingProtFastasCount = new SqlSelector(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(Long.class);
+
         if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount > 0)
         {
             String previousFileWithSameChecksum =
-                    Table.executeSingleton(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", new String[]{hash}, String.class);
+                    new SqlSelector(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(String.class);
 
             if (convertedName.equals(previousFileWithSameChecksum))
                 log.info("FASTA file \"" + convertedName + "\" has already been imported");
             else
                 log.info("FASTA file \"" + convertedName + "\" not imported, but another file, '" + previousFileWithSameChecksum + "', has the same checksum");
+
             return loadedFile.getFastaId();
         }
 

@@ -22,8 +22,6 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms1.MS1Manager;
 
-import java.sql.SQLException;
-
 /**
  * Represents an MS1 Feature.
  *
@@ -253,14 +251,14 @@ public class Feature
         _ms2ConnectivityProbability = ms2ConnectivityProbability;
     }
 
-    public Integer getRunId() throws SQLException
+    public Integer getRunId()
     {
         if(null == _runId)
             _runId = MS1Manager.get().getRunIdFromFeature(_featureId);
         return _runId;
     }
 
-    public ExpRun getExpRun() throws SQLException
+    public ExpRun getExpRun()
     {
         if(null == _run)
         {
@@ -271,7 +269,7 @@ public class Feature
         return _run;
     }
 
-    public Peptide[] getMatchingPeptides() throws SQLException
+    public Peptide[] getMatchingPeptides()
     {
         String sql = "SELECT fr.run, pd.* FROM ms2.PeptidesData AS pd\n" +
                 "INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)\n" +

@@ -71,7 +71,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 
         try
         {
-            if(MS1Manager.get().isAlreadyImported(dataFile,data))
+            if (MS1Manager.get().isAlreadyImported(dataFile,data))
             {
                 log.info("The file " + dataFile.toURI() + " has already been imported for this experiment into this container.");
                 return;
@@ -110,15 +110,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 
             parser.parse(dataFile, importer);
         }
-        catch(IOException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch(ParserConfigurationException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch(SAXException e)
+        catch(IOException | ParserConfigurationException | SAXException e)
         {
             throw new ExperimentException(e);
         }
@@ -126,7 +118,6 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         {
             throw new ExperimentException(MS1Manager.get().getAllErrors(e));
         }
-
     } //importFile()
 
     /**

@@ -519,12 +519,12 @@ public class MS2Manager
 
     private static MS2Run[] getRuns(String whereClause, Object... params)
     {
+        List<MS2Run> runs = new ArrayList<>();
+
         try (ResultSet rs = new SqlSelector(getSchema(),
                     "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, runs.FastaId, ff.FileName AS FastaFileName, Loaded, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount FROM " + getTableInfoRuns() + " runs LEFT OUTER JOIN " + ProteinManager.getTableInfoFastaFiles() + " ff ON runs.FastaId = ff.FastaId WHERE " + whereClause,
                     params).getResultSet())
         {
-            List<MS2Run> runs = new ArrayList<>();
-
             while (rs.next())
             {
                 String type = rs.getString("Type");
@@ -541,14 +541,14 @@ public class MS2Manager
                     return null;
                 }
             }
-
-            return runs.toArray(new MS2Run[runs.size()]);
         }
         catch (SQLException e)
         {
             _log.error("getRuns", e);
             throw new RuntimeSQLException(e);
         }
+
+        return runs.toArray(new MS2Run[runs.size()]);
     }
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
@@ -1054,19 +1054,12 @@ public class MS2Manager
 
     public static Pair<float[], float[]> getSpectrum(int fractionId, int scan) throws SpectrumException
     {
-        try
-        {
-            byte[] spectrumBytes = Table.executeSingleton(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction=? AND Scan=?", new Object[]{fractionId, scan}, byte[].class);
+        byte[] spectrumBytes = new SqlSelector(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction = ? AND Scan = ?", fractionId, scan).getObject(byte[].class);
 
-            if (null != spectrumBytes)
-                return SpectrumImporter.byteArrayToFloatArrays(spectrumBytes);
-            else
-                return getSpectrumFromMzXML(fractionId, scan);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);  // Unrecoverable -- always raise these excpetions to user and log to mothership
-        }
+        if (null != spectrumBytes)
+            return SpectrumImporter.byteArrayToFloatArrays(spectrumBytes);
+        else
+            return getSpectrumFromMzXML(fractionId, scan);
     }
 
 
@@ -1207,20 +1200,13 @@ public class MS2Manager
 
     private static void addStatsWithCounting(Map<String, String> stats, String prefix, String whereSql, Object[] params)
     {
-        try
-        {
-            Long inProcessRuns = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE " + whereSql, params, Long.class);
-            Long inProcessPeptides = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoPeptides() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params, Long.class);
-            Long inProcessSpectra = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoSpectra() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params, Long.class);
+        Long inProcessRuns = new SqlSelector(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE " + whereSql, params).getObject(Long.class);
+        Long inProcessPeptides = new SqlSelector(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoPeptides() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params).getObject(Long.class);
+        Long inProcessSpectra = new SqlSelector(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoSpectra() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params).getObject(Long.class);
 
-            stats.put(prefix + "Runs", df.format(inProcessRuns));
-            stats.put(prefix + "Peptides", df.format(inProcessPeptides));
-            stats.put(prefix + "Spectra", df.format(inProcessSpectra));
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        stats.put(prefix + "Runs", df.format(inProcessRuns));
+        stats.put(prefix + "Peptides", df.format(inProcessPeptides));
+        stats.put(prefix + "Spectra", df.format(inProcessSpectra));
     }
 
 
@@ -1373,9 +1359,8 @@ public class MS2Manager
 
 
     public static long getRunCount(Container c)
-            throws SQLException
     {
-        return Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted = ? AND Container = ?", new Object[]{Boolean.FALSE, c.getId()}, Long.class);
+        return new SqlSelector(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted = ? AND Container = ?", Boolean.FALSE, c).getObject(Long.class);
     }
 
     public static final String NEGATIVE_HIT_PREFIX = "rev_";
@@ -1549,22 +1534,13 @@ public class MS2Manager
             if (!showRun)
                 continue;
 
-            long runRows;
-            try
-            {
-                runRows = Table.executeSingleton(getSchema(),
-                    "SELECT count(*) " +
-                        "FROM " + getTableInfoRuns().getSelectName() + " r " +
-                            "inner join " + getTableInfoProteinProphetFiles().getSelectName() + " f on r.Run = f.Run " +
-                            "inner join " + getTableInfoProteinGroups().getSelectName() + " g on f.RowId = g.ProteinProphetFileId " +
-                        "WHERE r.Run = ? ",
-                        new Object[] { run.getRun() },
-                        Integer.class).longValue();
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            long runRows = new SqlSelector(getSchema(),
+                "SELECT COUNT(*) " +
+                    "FROM " + getTableInfoRuns().getSelectName() + " r " +
+                        "inner join " + getTableInfoProteinProphetFiles().getSelectName() + " f on r.Run = f.Run " +
+                        "inner join " + getTableInfoProteinGroups().getSelectName() + " g on f.RowId = g.ProteinProphetFileId " +
+                    "WHERE r.Run = ? ",
+                    run.getRun()).getObject(Integer.class).longValue();
 
             String key = run.getDescription();
             XYSeriesROC series = new XYSeriesROC(key);

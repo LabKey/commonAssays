@@ -16,26 +16,25 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.data.SqlSelector;
-import org.labkey.ms2.reader.PeptideProphetSummary;
-import org.labkey.ms2.reader.SensitivitySummary;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.Container;
+import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.ChartColor;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.ms2.reader.SensitivitySummary;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.ResultSet;
 import java.awt.*;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * User: arauch
@@ -145,15 +144,15 @@ public class PeptideProphetGraphs
                         "WHERE Run = ? AND Charge = ?";
         String negHitPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
 
-        int total = Table.executeSingleton(MS2Manager.getSchema(),
+        int total = new SqlSelector(MS2Manager.getSchema(),
                         chargeSQL,
-                        new Object[] { runId, charge }, Integer.class);
-        int zeroScores = Table.executeSingleton(MS2Manager.getSchema(),
-                        chargeSQL +  " AND PeptideProphet = 0",
-                        new Object[] { runId, charge }, Integer.class);
-        int zeroScoresNegative = Table.executeSingleton(MS2Manager.getSchema(),
+                        runId, charge).getObject(Integer.class);
+        int zeroScores = new SqlSelector(MS2Manager.getSchema(),
+                        chargeSQL + " AND PeptideProphet = 0",
+                        runId, charge).getObject(Integer.class);
+        int zeroScoresNegative = new SqlSelector(MS2Manager.getSchema(),
                         chargeSQL + " AND PeptideProphet = 0 AND Protein LIKE ?",
-                        new Object[] { runId, charge, negHitPrefix + '%' }, Integer.class);
+                        runId, charge, negHitPrefix + '%').getObject(Integer.class);
         int zeroScoresPositive = zeroScores - zeroScoresNegative;
 
         float ratioRandom = (float) zeroScoresPositive / (float) zeroScoresNegative;

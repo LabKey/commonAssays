@@ -53,7 +53,7 @@ public class RetentionMassChart extends FeatureChart
     }
 
 
-    protected Table.TableResultSet getChartData() throws SQLException
+    protected Table.TableResultSet getChartData()
     {
         return MS1Manager.get().getPeakData(_runId, _mzLow, _mzHigh, _scanFirst, _scanLast);
     }
@@ -157,7 +157,7 @@ public class RetentionMassChart extends FeatureChart
                 defColor = row == 0 ? Color.RED : Color.BLUE;
 
             //return a color interpolated between white and the series default color
-            double percent = z.doubleValue() / zMax;
+            double percent = z / zMax;
             double r = Color.WHITE.getRed() + ((defColor.getRed() - Color.WHITE.getRed()) * percent);
             double g = Color.WHITE.getGreen() + ((defColor.getGreen() - Color.WHITE.getGreen()) * percent);
             double b = Color.WHITE.getBlue() + ((defColor.getBlue() - Color.WHITE.getBlue()) * percent);

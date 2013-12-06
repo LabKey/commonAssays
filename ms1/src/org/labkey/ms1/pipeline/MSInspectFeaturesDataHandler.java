@@ -201,23 +201,15 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
-        if(null == data || null == dataFile || null == info || null == log || null == context)
+        if (null == data || null == dataFile || null == info || null == log || null == context)
             return;
 
         int numRows = 0;
-        try
+        //if this file has already been imported before, just return
+        if (MS1Manager.get().isAlreadyImported(dataFile, data))
         {
-            //if this file has already been imported before, just return
-            if(MS1Manager.get().isAlreadyImported(dataFile, data))
-            {
-                log.info("Already imported features file " + dataFile.toURI() + " for this experiment into this container.");
-                return;
-            }
-        }
-        catch(SQLException e)
-        {
-            log.warn("Problem checking if this file has already been imported!");
-            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
+            log.info("Already imported features file " + dataFile.toURI() + " for this experiment into this container.");
+            return;
         }
 
         //FIX: 8403
