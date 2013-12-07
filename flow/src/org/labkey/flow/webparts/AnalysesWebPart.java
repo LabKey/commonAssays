@@ -47,6 +47,8 @@ public class AnalysesWebPart extends FlowQueryView
         setTitle("Flow Analyses");
         setShowExportButtons(false);
         setShowPagination(false);
+        // Workaround for "Issue 18903: can't change query on showRuns.view" -- for now, just don't display the [details] link which includes the returnURL parameter.
+        setShowDetailsColumn(false);
         setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
     }
 

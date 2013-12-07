@@ -16,6 +16,7 @@
 
 package org.labkey.flow.webparts;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
@@ -39,6 +40,7 @@ public class AnalysisScriptTypeColumn extends DataColumn
         return false;
     }
 
+    @Override @NotNull
     public String getFormattedValue(RenderContext ctx)
     {
         Object value = getBoundColumn().getValue(ctx);

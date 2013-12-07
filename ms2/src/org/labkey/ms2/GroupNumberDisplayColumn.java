@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
@@ -65,6 +66,7 @@ public class GroupNumberDisplayColumn extends DataColumn
         return String.class;
     }
 
+    @Override @NotNull
     public String getFormattedValue(RenderContext ctx)
     {
         Map row = ctx.getRow();

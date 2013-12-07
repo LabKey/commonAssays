@@ -16,6 +16,7 @@
 
 package org.labkey.flow.webparts;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
@@ -66,7 +67,9 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         setSettings(settings);
         
         setTitle("Flow Scripts");
-        setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+        setShowExportButtons(false);
+        setShowPagination(false);
+        setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
     }
 
     public List<DisplayColumn> getDisplayColumns()
@@ -89,9 +92,8 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
-        if (!getViewContext().hasPermission(UpdatePermission.class))
-            return;
-        ActionButton btnNewScript = new ActionButton("Create New Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, getContainer()));
+        ActionButton btnNewScript = new ActionButton("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, getContainer()));
+        btnNewScript.setDisplayPermission(UpdatePermission.class);
         bar.add(btnNewScript);
     }
 
@@ -106,7 +108,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
     {
         String _actionName;
 
-        public ScriptActionColumn(String actionName, Class<? extends Controller> action, ColumnInfo col)
+        public ScriptActionColumn(@NotNull String actionName, @NotNull Class<? extends Controller> action, @NotNull ColumnInfo col)
         {
             super(col);
             _actionName = actionName;
@@ -116,7 +118,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
             setWidth("40");
         }
 
-        @Override
+        @Override @NotNull
         public String getFormattedValue(RenderContext ctx)
         {
             return _actionName;

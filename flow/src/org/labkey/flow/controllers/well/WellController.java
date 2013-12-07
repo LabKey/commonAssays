@@ -584,20 +584,20 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getSuccessView(UpdateKeywordsForm form)
         {
-            return new MessageView(form.message, "bulkUpdateKeywords.view");
+            return new MessageView(form.message, new ActionURL(WellController.BulkUpdateKeywordsAction.class, getContainer()));
         }
     }
 
     public static class MessageView extends HtmlView
     {
-        MessageView(String message, String href)
+        MessageView(String message, ActionURL url)
         {
             super(null);
             StringBuilder sb = new StringBuilder();
             sb.append("<span style='color:green;'>");
             sb.append(PageFlowUtil.filter(message));
             sb.append("</span><br>");
-            sb.append(PageFlowUtil.generateButton("OK", href));
+            sb.append(PageFlowUtil.generateButton("OK", url));
             setHtml(sb.toString());
         }
     }
@@ -650,7 +650,8 @@ public class WellController extends BaseFlowController
                 @Override
                 public void exec(String value) throws SQLException
                 {
-                    set.add(value);
+                    if (value != null)
+                        set.add(value);
                 }
             }, String.class);
 
