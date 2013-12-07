@@ -535,7 +535,7 @@ public class MS1Manager
      */
     public boolean isAlreadyImported(File dataFile, ExpData data)
     {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data as d INNER JOIN ");
+        StringBuilder sql = new StringBuilder("SELECT * FROM exp.Data AS d INNER JOIN ");
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f");
         sql.append(" ON (d.RowId = f.ExpDataFileId) WHERE DataFileUrl=? AND Container=? AND f.Imported=? AND f.Deleted=?");
