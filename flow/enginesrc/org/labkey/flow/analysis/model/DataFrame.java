@@ -72,6 +72,7 @@ public class DataFrame
     public static String canonicalFieldName(String name)
     {
         name = name.toLowerCase().replace(" ", "").replace("-","");
+        name = name.replace("/", "_");
         // UNDONE: these aliases should be configured in admin pages
         name = name.replace("petexasred","petr");
         name = name.replace("petxrd", "petr");
@@ -389,8 +390,10 @@ public class DataFrame
         public void initAliases(boolean precompensated)
         {
             Set<String> aliases = new CaseInsensitiveHashSet();
+            String canonName = canonicalFieldName(_name);
+
             aliases.add(_name);
-            aliases.add(canonicalFieldName(_name));
+            aliases.add(canonName);
 
             String linLogBaseName = _baseName + (isLogarithmic() ? " Log" : " Lin");
             aliases.add(composeName(linLogBaseName, _prefix, _suffix));
@@ -401,9 +404,10 @@ public class DataFrame
                 _precompensated = true;
                 String compName = composeName(_baseName, CompensationMatrix.PREFIX, CompensationMatrix.SUFFIX);
                 aliases.add(compName);
-                aliases.add(canonicalFieldName(compName));
+                aliases.add(canonName);
 
                 aliases.add(composeName(_baseName, "Comp-", null));
+                aliases.add(composeName(canonName, "Comp-", null));
 
                 aliases.add(composeName(linLogBaseName, CompensationMatrix.PREFIX, CompensationMatrix.SUFFIX));
             }

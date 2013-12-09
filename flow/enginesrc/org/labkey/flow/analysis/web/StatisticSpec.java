@@ -48,6 +48,7 @@ public class StatisticSpec implements Serializable, Comparable
         Frequency("Frequency", "%", false),
         Freq_Of_Parent("Frequency of Parent", "%P", false),
         Freq_Of_Grandparent("Frequency of Grandparent", "%G", false),
+        Freq_Of_Ancestor("Frequency of Ancestor", "%of", true),
         Min("Min", "Min", true),
         Max("Max", "Max", true),
         Median("Median", "Median", true),
@@ -254,6 +255,19 @@ public class StatisticSpec implements Serializable, Comparable
                     root = root.getParent();
                 }
                 return getFrequency(root, subset);
+            }
+            case Freq_Of_Ancestor:
+            {
+                // parameter is the name of the ancestor population
+                String name = stat.getParameter();
+                if (name == null)
+                    throw new IllegalArgumentException("ancestor name required");
+                Subset ancestor = subset;
+                while (ancestor.getParent() != null || !name.equals(ancestor.getName()))
+                {
+                    ancestor = ancestor.getParent();
+                }
+                return getFrequency(ancestor, subset);
             }
             case Freq_Of_Parent:
                 return getFrequency(subset.getParent(), subset);

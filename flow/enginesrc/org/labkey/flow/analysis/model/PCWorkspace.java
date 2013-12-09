@@ -102,7 +102,7 @@ public class PCWorkspace extends FlowJoWorkspace
             for (Element elStat : getElementsByTagName(elSubpopulations, "Statistic"))
             {
                 readStat(elStat, subset, results, analysis, sampleId, warnOnMissingStats,
-                        "name", "id", "percent");
+                        "name", "id", "percent", "ancestor");
             }
         }
     }

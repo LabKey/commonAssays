@@ -228,7 +228,7 @@ function statisticsColumns(statistics)
             if ('Count' != s.stat)
                 renderer = _toFixed;
             var dataIndex = '__' + name;
-            var col = {header:Ext.util.Format.htmlEncode(name), dataIndex:dataIndex, tpl: "{[values['" + dataIndex + "']]}", width:80, align:'right', renderer:renderer, stat:s.stat, param:s.param};
+            var col = {header:Ext.util.Format.htmlEncode(name), dataIndex:dataIndex, tpl: "{[values['" + dataIndex + "'] ? values['" + dataIndex + "'] : '']}", width:80, align:'right', renderer:renderer, stat:s.stat, param:s.param};
             map[name] = col;
             columns.push(col);
         }
@@ -338,7 +338,6 @@ function showKeywords()
 Ext.onReady(function()
 {
     if (statistics.length > 0)
-
     {
         showStatistics();
     }

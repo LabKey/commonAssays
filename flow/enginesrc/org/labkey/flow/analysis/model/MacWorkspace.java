@@ -271,7 +271,7 @@ public class MacWorkspace extends FlowJoWorkspace
         for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
         {
             readStat(elStat, subset, results, analysis, sampleId, warnOnMissingStats,
-                    "statistic", "parameter", "statisticVariable");
+                    "statistic", "parameter", "statisticVariable", "parameter");
         }
     }
 

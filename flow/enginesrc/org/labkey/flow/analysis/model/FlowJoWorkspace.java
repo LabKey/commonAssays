@@ -77,9 +77,14 @@ abstract public class FlowJoWorkspace extends Workspace
         STATS.put("fj.stat.freqofparent", StatisticSpec.STAT.Freq_Of_Parent);
 
         STATS.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
-        STATS.put("FreqOf", StatisticSpec.STAT.Frequency);
         STATS.put("Freq. of Total", StatisticSpec.STAT.Frequency);
         STATS.put("fj.stat.freqoftotal", StatisticSpec.STAT.Frequency);
+
+        STATS.put("FrequencyOfAncestor", StatisticSpec.STAT.Freq_Of_Ancestor);
+        STATS.put("FreqOf", StatisticSpec.STAT.Freq_Of_Ancestor);
+        // FlowJo > 7.5 through < 10.0.5 uses the "Freq. of " prefix plus the ancestor population name
+        //STATS.put("Freq. of <population name>", StatisticSpec.STAT.Freq_Of_Ancestor);
+        STATS.put("fj.stat.freqof", StatisticSpec.STAT.Freq_Of_Ancestor);
     }
 
     private VersionNumber _version;
@@ -185,10 +190,11 @@ abstract public class FlowJoWorkspace extends Workspace
         final Map<StatisticSpec, Double> statistics = results.getStatistics();
         if (statistics.size() > 0)
         {
+            // Issue 19117: FlowJo 10.0.6 saves total count as -1
             // If the statistic "count" is unavailable, try to get it from the '$TOT" keyword.
             StatisticSpec totalSpec = new StatisticSpec(null, StatisticSpec.STAT.Count, null);
             Double total = statistics.get(totalSpec);
-            if (total == null || total == 0.0d)
+            if (total == null || total == 0.0d || total == -1.0d)
             {
                 SampleInfo sampleInfo = _sampleInfos.get(sampleId);
                 if (sampleInfo != null)
@@ -377,7 +383,7 @@ abstract public class FlowJoWorkspace extends Workspace
     }
 
     protected void readStat(Element elStat, SubsetSpec subset, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats,
-                            String statisticAttr, String parameterAttr, String percentileAttr)
+                            String statisticAttr, String parameterAttr, String percentileAttr, String ancestorAttr)
     {
         // FlowJo v9.7 prefixes the statistic attribute name, e.g. 'statNode_statistic'
         String statistic = getAttribute(elStat, statisticAttr, "statNode_" + statisticAttr);
@@ -387,39 +393,57 @@ abstract public class FlowJoWorkspace extends Workspace
             statistic = statistic.substring("statNode_".length());
 
         StatisticSpec.STAT stat = STATS.get(statistic);
+
+        // FlowJo 7.2.5 used "FreqOf" name with ancestor of "Total": consider it a Frequency of total statistic
+        if (stat == StatisticSpec.STAT.Freq_Of_Ancestor && "Total".equals(elStat.getAttribute(ancestorAttr)))
+        {
+            stat = StatisticSpec.STAT.Frequency;
+        }
+
+        // FlowJo > 7.5 through < 10.0.5 uses the "Freq. of " prefix plus the ancestor population name
+        if (stat == null && statistic.startsWith("Freq. of ") && !statistic.equals("Freq. of Total") && elStat.hasAttribute(ancestorAttr))
+        {
+            stat = StatisticSpec.STAT.Freq_Of_Ancestor;
+        }
+
         if (stat == null)
         {
             warnOnce(sampleId, analysis.getName(), subset, statistic + " statistic not yet supported.");
             return;
         }
 
-        if (stat == StatisticSpec.STAT.Frequency)
-        {
-            if (elStat.hasAttribute("ancestor") && !("".equals(elStat.getAttribute("ancestor")) || "Total".equals(elStat.getAttribute("ancestor"))))
-            {
-                warnOnce(sampleId, analysis.getName(), subset, "Frequency of arbitrary ancestor populations not supported.");
-                return;
-            }
-        }
-
         String parameter = null;
         if (stat.isParameterRequired())
         {
-            parameter = StringUtils.trimToNull(elStat.getAttribute(parameterAttr));
-            if (parameter != null)
-                parameter = ___cleanName(parameter);
-
-            if (stat == StatisticSpec.STAT.Percentile)
+            if (stat == StatisticSpec.STAT.Freq_Of_Ancestor)
             {
-                String percentile = StringUtils.trimToNull(elStat.getAttribute(percentileAttr));
-                if (percentile == null)
+                // Parameter is ancestor population name
+                parameter = StringUtils.trimToNull(elStat.getAttribute(ancestorAttr));
+                if (parameter == null)
                 {
-                    warnOnce(sampleId, analysis.getName(), subset, "Percentile stat requires '" + percentileAttr + "' attribute.");
+                    warnOnce(sampleId, analysis.getName(), subset, "Frequency of ancestor stat requires '" + ancestorAttr + "' attribute.");
                     return;
                 }
-                else
+            }
+            else
+            {
+                // Parameter is channel name
+                parameter = StringUtils.trimToNull(elStat.getAttribute(parameterAttr));
+                if (parameter != null)
+                    parameter = ___cleanName(parameter);
+
+                if (stat == StatisticSpec.STAT.Percentile)
                 {
-                    parameter = parameter + ":" + percentile;
+                    String percentile = StringUtils.trimToNull(elStat.getAttribute(percentileAttr));
+                    if (percentile == null)
+                    {
+                        warnOnce(sampleId, analysis.getName(), subset, "Percentile stat requires '" + percentileAttr + "' attribute.");
+                        return;
+                    }
+                    else
+                    {
+                        parameter = parameter + ":" + percentile;
+                    }
                 }
             }
         }
@@ -444,14 +468,10 @@ abstract public class FlowJoWorkspace extends Workspace
                     return;
                 }
 
-                // PC workspace version <= 1.5 doesn't return a percentage in 0-100 range.
-                if ("FreqOf".equals(statistic))
-                    value = 100.0d * value;
-
-                // FlowJo v10.0.* doesn't return a percentage in 0-100 range.
-                if (getVersion() != null && getVersion().getVersionInt() >= 17 && getFlowJoVersion() != null && getFlowJoVersion().getVersionInt() >= 100)
+                // PC FlowJo version doesn't return frequencies in 0-100 range
+                if (this instanceof PCWorkspace && value > 0 && value < 1)
                 {
-                    if (stat == StatisticSpec.STAT.Frequency || stat == StatisticSpec.STAT.Freq_Of_Parent || stat == StatisticSpec.STAT.Freq_Of_Grandparent)
+                    if (stat == StatisticSpec.STAT.Frequency || stat == StatisticSpec.STAT.Freq_Of_Parent || stat == StatisticSpec.STAT.Freq_Of_Grandparent || stat == StatisticSpec.STAT.Freq_Of_Ancestor)
                         value = 100.0d * value;
                 }
 
@@ -823,7 +843,7 @@ abstract public class FlowJoWorkspace extends Workspace
             }
             else
             {
-                assertEquals(1, workspace.getWarnings().size());
+                assertEquals(StringUtils.join(workspace.getWarnings(), "\n"), 1, workspace.getWarnings().size());
                 assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
             }
 
@@ -928,6 +948,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertEquals(18.400d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
                 assertEquals(29.700d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Parent")), 0.001d);
                 assertEquals(13.900d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Frequency")), 0.001d);
+                assertEquals(18.400d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
             }
             else
             {
@@ -945,6 +966,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(45.803d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
                     //assertEquals(39.947d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
                     assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(29.628d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(13.810d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                 }
@@ -962,6 +984,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     //assertEquals(0d,      stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
                     // XXX: FreqOfParent wasn't migrated properly by FlowJo from v7.6.5 to v10.0.5
                     //assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                 }
@@ -978,6 +1001,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(45.861d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
                     //assertEquals(39.386d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
                     assertEquals(18.270d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertEquals(18.270d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(29.605d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(13.790d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                 }
