@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
@@ -169,7 +170,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             {
                 parse(logger, parsingStrategy, sharedIdentsStrategy);
 
-                Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Date(), associatedFastaId);
+                new SqlExecutor(ProteinManager.getSchema()).execute("UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded = ? WHERE FastaId = ?", new Date(), associatedFastaId);
             }
             finally
             {
@@ -682,7 +683,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
         if (protCount / 3 < negCount)
         {
-            Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() +
+            new SqlExecutor(ProteinManager.getSchema()).execute("UPDATE " + ProteinManager.getTableInfoFastaFiles() +
                     " SET ScoringAnalysis = ?" +
                     " WHERE FastaId = ?", true, associatedFastaId);
         }

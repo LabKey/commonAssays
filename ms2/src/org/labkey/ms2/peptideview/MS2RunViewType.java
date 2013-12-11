@@ -44,7 +44,7 @@ public enum MS2RunViewType
             return new QueryProteinGroupMS2RunView(viewContext, runs);
         }
 
-        public boolean supportsRun(MS2Run run) throws SQLException
+        public boolean supportsRun(MS2Run run)
         {
             return run.hasProteinProphet();
         }
@@ -95,7 +95,7 @@ public enum MS2RunViewType
             return new ProteinProphetPeptideView(viewContext, runs);
         }
 
-        public boolean supportsRun(MS2Run run) throws SQLException
+        public boolean supportsRun(MS2Run run)
         {
             return run.hasProteinProphet();
         }
@@ -131,7 +131,7 @@ public enum MS2RunViewType
         return _urlName;
     }
 
-    public boolean supportsRun(MS2Run run) throws SQLException
+    public boolean supportsRun(MS2Run run)
     {
         return true;
     }
@@ -174,7 +174,7 @@ public enum MS2RunViewType
         return NONE;
     }
 
-    public static List<MS2RunViewType> getTypesForRun(MS2Run run) throws SQLException
+    public static List<MS2RunViewType> getTypesForRun(MS2Run run)
     {
         List<MS2RunViewType> result = new ArrayList<>();
         for (MS2RunViewType type : values())

@@ -74,19 +74,12 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
     {
         File dataFile = data.getFile();
         MS2Run run = null;
-        try
+        ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(dataFile, container);
+        if (ppFile != null)
         {
-            ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(dataFile, container);
-            if (ppFile != null)
-            {
-                run = MS2Manager.getRun(ppFile.getRun());
-            }
+            run = MS2Manager.getRun(ppFile.getRun());
         }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-        
+
         if (run == null)
         {
             return null;

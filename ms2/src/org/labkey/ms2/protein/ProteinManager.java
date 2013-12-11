@@ -41,6 +41,7 @@ import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
@@ -1331,7 +1332,7 @@ public class ProteinManager
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
+    public static TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
 

@@ -469,7 +469,7 @@ public class MS2Manager
         return runIds;
     }
 
-    public static ProteinProphetFile getProteinProphetFile(File f, Container c) throws SQLException
+    public static ProteinProphetFile getProteinProphetFile(File f, Container c)
     {
         String sql = "SELECT " +
                 getTableInfoProteinProphetFiles() + ".* FROM " +
@@ -493,18 +493,17 @@ public class MS2Manager
         return new SqlSelector(getSchema(), sql, path, c, Boolean.FALSE).getObject(ProteinProphetFile.class);
     }
 
-    public static ProteinProphetFile getProteinProphetFileByRun(int runId) throws SQLException
+    public static ProteinProphetFile getProteinProphetFileByRun(int runId)
     {
         return lookupProteinProphetFile(runId, "Run");
     }
 
-    public static ProteinProphetFile getProteinProphetFile(int proteinProphetFileId) throws SQLException
+    public static ProteinProphetFile getProteinProphetFile(int proteinProphetFileId)
     {
         return lookupProteinProphetFile(proteinProphetFileId, "RowId");
     }
 
     private static ProteinProphetFile lookupProteinProphetFile(int id, String columnName)
-        throws SQLException
     {
         String sql = "SELECT " +
                 getTableInfoProteinProphetFiles() + ".* FROM " +
@@ -716,15 +715,7 @@ public class MS2Manager
         if (newDescription == null || newDescription.length() == 0)
             return;
 
-        try
-        {
-            Table.execute(getSchema(), "UPDATE " + getTableInfoRuns() + " SET Description=? WHERE Run = ?",
-                    newDescription, runId);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        new SqlExecutor(getSchema()).execute("UPDATE " + getTableInfoRuns() + " SET Description=? WHERE Run = ?", newDescription, runId);
 
         _removeRunsFromCache(Arrays.asList(runId));
     }
@@ -806,7 +797,7 @@ public class MS2Manager
     // Purge all data associated with runs marked as deleted that were modified the specified number
     //    of days ago.  For example, purgeDeleted(14) purges all runs modified 14 days ago or
     //    before; purgeDeleted(0) purges ALL deleted runs.
-    public static void purgeDeleted(int days) throws SQLException
+    public static void purgeDeleted(int days)
     {
         // Status will be non-null if a purge thread is running; in that case, ignore the purge request.
         if (null != _purgeStatus)
@@ -874,7 +865,7 @@ public class MS2Manager
         return new SqlSelector(getSchema(), sql, groupNumber, indistinguishableCollectionId, rowId).getArrayList(Protein.class);
     }
 
-    public static ProteinGroupWithQuantitation getProteinGroup(int proteinGroupId) throws SQLException
+    public static ProteinGroupWithQuantitation getProteinGroup(int proteinGroupId)
     {
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("RowId"), proteinGroupId);
@@ -894,7 +885,7 @@ public class MS2Manager
         return new SqlSelector(getSchema(), sql).getCollection(ProteinGroupWithQuantitation.class);
     }
 
-    public static ProteinGroupWithQuantitation getProteinGroup(int proteinProphetFileId, int groupNumber, int indistinguishableCollectionId) throws SQLException
+    public static ProteinGroupWithQuantitation getProteinGroup(int proteinProphetFileId, int groupNumber, int indistinguishableCollectionId)
     {
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("ProteinProphetFileId"), proteinProphetFileId);
@@ -928,10 +919,6 @@ public class MS2Manager
                     setPurgeStatus(complete, _runIds.length);
                 }
             }
-            catch(SQLException e)
-            {
-                _log.error("Error purging runs", e);
-            }
             finally
             {
                 clearPurgeStatus();
@@ -941,15 +928,15 @@ public class MS2Manager
 
 
     // Clear all the data in a run, then delete the run record itself
-    public static void purgeRun(int run) throws SQLException
+    public static void purgeRun(int run)
     {
         clearRun(run);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoRuns() + " WHERE Run = ?", run);
+        new SqlExecutor(getSchema()).execute("DELETE FROM " + getTableInfoRuns() + " WHERE Run = ?", run);
     }
 
 
     // Clear contents of a single run, but not the run itself.  Used to re-import after a failed attempt and to purge runs.
-    public static void clearRun(int run) throws SQLException
+    public static void clearRun(int run)
     {
         Object[] params = new Object[] {run};
         purgeProteinProphetFiles("IN (SELECT RowId FROM " + getTableInfoProteinProphetFiles() + " WHERE Run = ?" + ")", new Object[] {run});
@@ -958,34 +945,36 @@ public class MS2Manager
         String fractionWhere = " WHERE Fraction IN (SELECT Fraction FROM " + getTableInfoFractions() + runWhere + ")";
         String peptideFKWhere = " WHERE PeptideId IN (SELECT RowId FROM " + getTableInfoPeptidesData() + fractionWhere + ")";
 
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoSpectraData() + fractionWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoQuantSummaries() + runWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoQuantitation() + peptideFKWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoITraqPeptideQuantitation() + peptideFKWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptideProphetData() + peptideFKWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptidesData() + fractionWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptideProphetSummaries() + runWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoModifications() + runWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFractions() + runWhere, params);
+        SqlExecutor executor = new SqlExecutor(getSchema());
+        executor.execute("DELETE FROM " + getTableInfoSpectraData() + fractionWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoQuantSummaries() + runWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoQuantitation() + peptideFKWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoITraqPeptideQuantitation() + peptideFKWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoPeptideProphetData() + peptideFKWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoPeptidesData() + fractionWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoPeptideProphetSummaries() + runWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoModifications() + runWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoFractions() + runWhere, params);
     }
 
 
-    public static void purgeProteinProphetFile(int rowId) throws SQLException
+    public static void purgeProteinProphetFile(int rowId)
     {
         purgeProteinProphetFiles("= ?", new Object[]{rowId});
     }
 
-    private static void purgeProteinProphetFiles(String rowIdComparison, Object[] params) throws SQLException
+    private static void purgeProteinProphetFiles(String rowIdComparison, Object[] params)
     {
         String proteinProphetFilesWhere = " WHERE ProteinProphetFileId " + rowIdComparison;
         String proteinGroupsWhere = " WHERE ProteinGroupId IN (SELECT RowId FROM " + getTableInfoProteinGroups() + proteinProphetFilesWhere + ")";
 
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinQuantitation() + proteinGroupsWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoITraqProteinQuantitation() + proteinGroupsWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptideMemberships() + proteinGroupsWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinGroupMemberships() + proteinGroupsWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinGroups() + proteinProphetFilesWhere, params);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinProphetFiles() + " WHERE RowId " + rowIdComparison, params);
+        SqlExecutor executor = new SqlExecutor(getSchema());
+        executor.execute("DELETE FROM " + getTableInfoProteinQuantitation() + proteinGroupsWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoITraqProteinQuantitation() + proteinGroupsWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoPeptideMemberships() + proteinGroupsWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoProteinGroupMemberships() + proteinGroupsWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoProteinGroups() + proteinProphetFilesWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoProteinProphetFiles() + " WHERE RowId " + rowIdComparison, params);
     }
 
     public static MS2Fraction[] getFractions(int runId)
@@ -1183,6 +1172,7 @@ public class MS2Manager
 
     private static void addStats(Map<String, String> stats, String prefix, String whereSql, Object[] params)
     {
+        // TODO: Use getMap() instead of getResultSet()
         try (ResultSet rs = new SqlSelector(getSchema(), "SELECT COUNT(*) AS Runs, COALESCE(SUM(PeptideCount),0) AS Peptides, COALESCE(SUM(SpectrumCount),0) AS Spectra FROM " + getTableInfoRuns() + " WHERE " + whereSql, params).getResultSet())
         {
             rs.next();
@@ -1449,6 +1439,7 @@ public class MS2Manager
                     series.setKey(series.getKey() + " (Loading)");
                 else
                 {
+                    // TODO: Use getMap() instead of getResultSet()
                     try (ResultSet rs = new SqlSelector(getSchema(),
                                                     "SELECT Protein, " + discriminate + " as Expression, " +
                                                             " CASE substring(Protein, 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
@@ -1549,6 +1540,7 @@ public class MS2Manager
                 series.setKey(series.getKey() + " (Loading)");
             else
             {
+                // TODO: Use getMap() instead of getResultSet()
                 try (ResultSet rs = new SqlSelector(getSchema(),
                                 "SELECT GroupNumber, -max(GroupProbability) as Expression, min(BestName) as Protein, " +
                                         " CASE substring(min(BestName), 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
@@ -1709,6 +1701,7 @@ public class MS2Manager
             XYSeries seriesFP = new XYSeries("False-Positives");
             //Set<SpectrumId> seen = new HashSet<SpectrumId>();
 
+            // TODO: Use getMap() instead of getResultSet()
             try (ResultSet rs = new SqlSelector(getSchema(),
                         "SELECT Fraction, Scan, Charge, Protein, " + expression + " as Expression " +
                         "FROM " + getTableInfoPeptides().getSelectName() + " " +

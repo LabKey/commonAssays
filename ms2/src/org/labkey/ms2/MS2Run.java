@@ -509,7 +509,7 @@ public abstract class MS2Run implements Serializable
         this.deleted = deleted;
     }
 
-    public ProteinProphetFile getProteinProphetFile() throws SQLException
+    public ProteinProphetFile getProteinProphetFile()
     {
         if (_proteinProphetFile == null)
         {
@@ -518,7 +518,7 @@ public abstract class MS2Run implements Serializable
         return _proteinProphetFile;
     }
 
-    public boolean hasProteinProphet() throws SQLException
+    public boolean hasProteinProphet()
     {
         return getProteinProphetFile() != null;
     }

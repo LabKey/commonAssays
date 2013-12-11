@@ -289,7 +289,7 @@ public class ProteinProphetImporter
         return run;
     }
 
-    private MS2Run findExistingRun(Logger logger, Container c) throws SQLException, IOException
+    private MS2Run findExistingRun(Logger logger, Container c) throws IOException
     {
         ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(_file, c);
         if (ppFile != null)

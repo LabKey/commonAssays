@@ -21,7 +21,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.ms1.MS1Manager;
 
 import java.awt.*;
@@ -44,12 +44,12 @@ public class SpectrumChart extends FeatureChart
         _mzLow = mzLow;
     }
 
-    protected Table.TableResultSet getChartData()
+    protected TableResultSet getChartData()
     {
         return MS1Manager.get().getPeakData(_runId, _scan, _mzLow, _mzHigh);
     }
 
-    protected JFreeChart makeChart(Table.TableResultSet rs) throws SQLException
+    protected JFreeChart makeChart(TableResultSet rs) throws SQLException
     {
         XYSeries series = new XYSeries("Spectrum");
 

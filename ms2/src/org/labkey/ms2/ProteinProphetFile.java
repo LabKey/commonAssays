@@ -139,7 +139,7 @@ public class ProteinProphetFile extends SensitivitySummary
         _predictedNumberIncorrect = PeptideProphetSummary.toIntArray(b);
     }
 
-    public ProteinGroupWithQuantitation lookupGroup(int groupNumber, int indistinguishableCollectionId) throws SQLException
+    public ProteinGroupWithQuantitation lookupGroup(int groupNumber, int indistinguishableCollectionId)
     {
         return MS2Manager.getProteinGroup(_rowId, groupNumber, indistinguishableCollectionId);
     }

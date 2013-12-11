@@ -18,13 +18,10 @@ package org.labkey.microarray;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 
 import java.beans.PropertyChangeEvent;
-import java.sql.SQLException;
 
 /**
  * User: bbimber

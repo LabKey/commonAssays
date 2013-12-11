@@ -25,6 +25,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.FieldKey;
@@ -116,7 +117,7 @@ public class MS1Manager
 
     public PeakAvailability isPeakDataAvailable(int runId)
     {
-        String sql = "Select FileId, Imported FROM ms1.Files AS f INNER JOIN exp.Data AS d on (f.ExpDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=? AND f.Deleted=?";
+        String sql = "Select FileId, Imported FROM ms1.Files AS f INNER JOIN exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=? AND f.Deleted=?";
         Map<String, Object>[] values = new SqlSelector(getSchema(), sql, runId, FILETYPE_PEAKS, false).getMapArray();
 
         if (0 == values.length || null == values[0].get("FileId"))
@@ -164,7 +165,7 @@ public class MS1Manager
         return new TableSelector(getTable(TABLE_SOFTWARE_PARAMS), fltr, null).getArray(SoftwareParam.class);
     }
 
-    public Table.TableResultSet getPeakData(int runId, int scan, double mzLow, double mzHigh)
+    public TableResultSet getPeakData(int runId, int scan, double mzLow, double mzHigh)
     {
         StringBuilder sql = new StringBuilder("SELECT s.ScanId, s.Scan, s.RetentionTime, s.ObservationDuration, p.PeakId, p.MZ, p.Intensity, p.Area, p.Error, p.Frequency, p.Phase, p.Decay FROM ");
         sql.append(getSQLTableName(TABLE_PEAKS));
@@ -179,12 +180,12 @@ public class MS1Manager
         return new SqlSelector(getSchema(), sql, runId, scan, mzLow, mzHigh, true, false).getResultSet();
     }
 
-    public Table.TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast)
+    public TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast)
     {
         return getPeakData(runId, mzLow, mzHigh, scanFirst, scanLast, null);
     }
 
-    public Table.TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast, String orderBy)
+    public TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast, String orderBy)
     {
         StringBuilder sql = new StringBuilder("SELECT s.ScanId, s.Scan, s.RetentionTime, s.ObservationDuration, p.PeakId, p.MZ, p.Intensity, p.Area, p.Error, p.Frequency, p.Phase, p.Decay FROM ");
         sql.append(getSQLTableName(TABLE_PEAKS));
@@ -235,9 +236,9 @@ public class MS1Manager
         sql.append(getSQLTableName(TABLE_SCANS));
         sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
         sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId = d.RowId) WHERE d.RunId = ? AND f.Type = ");
         sql.append(FILETYPE_PEAKS);
-        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=? AND s.Scan IS NOT NULL and s.RetentionTime IS NOT NULL");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported = ? AND f.Deleted = ? AND s.Scan IS NOT NULL AND s.RetentionTime IS NOT NULL");
 
         MinMaxScanInfo[] result = new SqlSelector(getSchema(), sql, runId, scanFirst, scanLast, true, false).getArray(MinMaxScanInfo.class);
         return 0 == result.length ? null : result[0];
@@ -248,8 +249,8 @@ public class MS1Manager
         ArrayList<String> items = new ArrayList<>();
 
         String sql = "SELECT COUNT(*) AS NumRuns \n" +
-                "FROM ms1.Files as f inner join exp.data as d on (f.ExpDataFileId=d.RowId)\n" +
-                "where type=? and deleted=? and d.Container=?";
+                "FROM ms1.Files AS f INNER JOIN exp.data AS d ON (f.ExpDataFileId = d.RowId)\n" +
+                "WHERE Type = ? AND Deleted = ? AND d.Container = ?";
         Integer count = new SqlSelector(getSchema(), sql, FILETYPE_FEATURES, false, container).getObject(Integer.class);
         if (count > 0)
             items.add(count + (count > 1 ? " MS1 Runs" : " MS1 Run"));

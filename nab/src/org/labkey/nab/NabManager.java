@@ -23,8 +23,8 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
@@ -172,7 +172,7 @@ public class NabManager extends AbstractNabManager
 
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(nabRunDataTable, fieldKeys.values());
 
-        try (Table.TableResultSet resultSet = new TableSelector(nabRunDataTable, columns.values(), filter, null).getResultSet())
+        try (TableResultSet resultSet = new TableSelector(nabRunDataTable, columns.values(), filter, null).getResultSet())
         {
             // We're expecting only 1 row, but there could be 0 in some cases
             if (resultSet.getSize() > 0)

@@ -200,25 +200,7 @@ public abstract class MS2Importer
             updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw fnfe;
         }
-        catch (SQLException e)
-        {
-            logError("MS2 import failed", e);
-            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
-            throw e;
-        }
-        catch (IOException e)
-        {
-            logError("MS2 import failed", e);
-            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
-            throw e;
-        }
-        catch (XMLStreamException e)
-        {
-            logError("MS2 import failed", e);
-            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
-            throw e;
-        }
-        catch (RuntimeException e)
+        catch (SQLException | IOException | XMLStreamException | RuntimeException e)
         {
             logError("MS2 import failed", e);
             updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
@@ -237,7 +219,7 @@ public abstract class MS2Importer
     }
 
 
-    private void clearRun(MS2Progress progress) throws SQLException
+    private void clearRun(MS2Progress progress)
     {
         progress.getCumulativeTimer().setCurrentTask(Tasks.ClearRun, "for " + _fileName);
         MS2Manager.clearRun(_runId);

@@ -24,7 +24,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.data.xy.AbstractXYZDataset;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.model.MinMaxScanInfo;
 
@@ -53,12 +53,12 @@ public class RetentionMassChart extends FeatureChart
     }
 
 
-    protected Table.TableResultSet getChartData()
+    protected TableResultSet getChartData()
     {
         return MS1Manager.get().getPeakData(_runId, _mzLow, _mzHigh, _scanFirst, _scanLast);
     }
 
-    protected JFreeChart makeChart(Table.TableResultSet rs) throws SQLException
+    protected JFreeChart makeChart(TableResultSet rs) throws SQLException
     {
         IntensityXYZSeries seriesCurScan = new IntensityXYZSeries("Current Scan (" + _scanCur + ")");
         IntensityXYZSeries seriesRest = new IntensityXYZSeries("Other Scans");

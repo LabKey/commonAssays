@@ -23,7 +23,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.model.MinMaxScanInfo;
 
@@ -48,12 +48,12 @@ public class ElutionChart extends FeatureChart
         _scanLast = scanLast;
     }
 
-    protected Table.TableResultSet getChartData()
+    protected TableResultSet getChartData()
     {
         return MS1Manager.get().getPeakData(_runId, _mzLow, _mzHigh, _scanFirst, _scanLast);
     }
 
-    protected JFreeChart makeChart(Table.TableResultSet rs) throws SQLException
+    protected JFreeChart makeChart(TableResultSet rs) throws SQLException
     {
         //get the actual min/max scan info for the requested scan range
         //we need this to set the range of the Y axes properly

@@ -475,7 +475,7 @@ public class MS2Controller extends SpringActionController
 
     private class FilterHeaderView extends JspView<FilterHeaderBean>
     {
-        private FilterHeaderView(ActionURL currentURL, RunForm form, MS2Run run) throws ServletException, SQLException
+        private FilterHeaderView(ActionURL currentURL, RunForm form, MS2Run run) throws ServletException
         {
             super("/org/labkey/ms2/filterHeader.jsp", new FilterHeaderBean());
 
