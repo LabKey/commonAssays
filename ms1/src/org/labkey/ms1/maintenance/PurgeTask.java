@@ -20,8 +20,6 @@ import org.apache.log4j.Logger;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.ms1.MS1Manager;
 
-import java.sql.SQLException;
-
 /**
  * System maintenance tasks for purging deleted data files
  *
@@ -33,29 +31,22 @@ public class PurgeTask implements SystemMaintenance.MaintenanceTask
 {
     public void run()
     {
-        try
+        long msStart = System.currentTimeMillis();
+        _log.info("MS1 Purge Task starting cycle...");
+
+        MS1Manager mgr = MS1Manager.get();
+
+        Integer fileId = mgr.getNextPurgeFile();
+        while(null != fileId)
         {
-            long msStart = System.currentTimeMillis();
-            _log.info("MS1 Purge Task starting cycle...");
+            _log.info("Purging MS1 file id " + fileId + "...");
+            mgr.purgeFile(fileId);
+            _log.info("MS1 file id " + fileId + " successfully purged.");
 
-            MS1Manager mgr = MS1Manager.get();
-
-            Integer fileId = mgr.getNextPurgeFile();
-            while(null != fileId)
-            {
-                _log.info("Purging MS1 file id " + fileId + "...");
-                mgr.purgeFile(fileId);
-                _log.info("MS1 file id " + fileId + " successfully purged.");
-                
-                fileId = mgr.getNextPurgeFile();
-            }
-
-            _log.info("MS1 Purge Task finished cycle in " + String.valueOf((System.currentTimeMillis() - msStart) / 1000) + " seconds.");
+            fileId = mgr.getNextPurgeFile();
         }
-        catch(SQLException e)
-        {
-            _log.warn("Unable to purge MS1 data due to the following SQLException: " + MS1Manager.get().getAllErrors(e));
-        }
+
+        _log.info("MS1 Purge Task finished cycle in " + String.valueOf((System.currentTimeMillis() - msStart) / 1000) + " seconds.");
     }
 
     public String getDescription()

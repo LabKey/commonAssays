@@ -28,7 +28,6 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.DataFile;
 import org.labkey.ms1.model.Feature;
@@ -38,7 +37,6 @@ import org.labkey.ms1.model.Software;
 import org.labkey.ms1.model.SoftwareParam;
 
 import java.io.File;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -258,10 +256,10 @@ public class MS1Manager
         return items;
     }
 
-    public void deleteFeaturesData(ExpData expData) throws SQLException
+    public void deleteFeaturesData(ExpData expData)
     {
-        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
-                true,expData.getRowId(),FILETYPE_FEATURES);
+        new SqlExecutor(getSchema()).execute("UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
+                true, expData.getRowId(), FILETYPE_FEATURES);
     }
 
     public void purgeFeaturesData(int fileId)
@@ -293,18 +291,18 @@ public class MS1Manager
         new SqlExecutor(getSchema()).execute(sql.toString());
     }
 
-    public void moveFileData(int oldExpDataFileID, int newExpDataFileID) throws SQLException
+    public void moveFileData(int oldExpDataFileID, int newExpDataFileID)
     {
-        Table.execute(getSchema(), "UPDATE " + SCHEMA_NAME + "." + TABLE_FILES + " SET ExpDataFileID=? WHERE ExpDataFileID=?", newExpDataFileID, oldExpDataFileID);
+        new SqlExecutor(getSchema()).execute("UPDATE " + SCHEMA_NAME + "." + TABLE_FILES + " SET ExpDataFileID=? WHERE ExpDataFileID=?", newExpDataFileID, oldExpDataFileID);
     }
 
-    public void deletePeakData(int expDataFileId) throws SQLException
+    public void deletePeakData(int expDataFileId)
     {
-        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
+        new SqlExecutor(getSchema()).execute("UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
                 true, expDataFileId, FILETYPE_PEAKS);
     }
 
-    public void purgePeakData(int fileId) throws SQLException
+    public void purgePeakData(int fileId)
     {
         DbSchema schema = getSchema();
         DbScope scope = schema.getScope();
@@ -385,63 +383,6 @@ public class MS1Manager
         }
     } //deletePeakData
 
-    protected void purgePeaks(int fileId) throws SQLException
-    {
-        //NOTE: This is not ideal, but seems to be necessary for PostgreSQL.
-        //On SQL Server, a simple delete statement with a nested sub-select will delete
-        //several hundreds of thousands of rows quickly and without issue, but on PostgreSQL,
-        //the same query will literally take *hours* to run. Splitting it up into
-        //a query per scan reduced this from several hours to a couple of minutes on my dev machine.
-        //Clearly PostgreSQL is doing something truly awful here, but until they fix it on their
-        //side, we'll have to delete peaks on a per-scan basis.
-        _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
-        DbSchema schema = getSchema();
-        DbScope scope = schema.getScope();
-        ResultSet rs = null;
-        try
-        {
-            rs = new SqlSelector(getSchema(), "SELECT ScanId FROM ms1.Scans WHERE FileId=" + String.valueOf(fileId),
-                    null).getResultSet(false);
-
-            int scanId = 0;
-            long numScans = 0;
-            scope.ensureTransaction();
-
-            while(rs.next())
-            {
-                scanId = rs.getInt(1);
-                if(!rs.wasNull())
-                    purgePeaksForScan(scanId);
-                ++numScans;
-
-                //commit after every 10 scans
-                if(numScans % 10 == 0)
-                {
-                    scope.commitTransaction();
-                    scope.ensureTransaction();
-                }
-            }
-
-            //final commit if necessary
-            scope.commitTransaction();
-
-            _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
-        }
-        finally
-        {
-            ResultSetUtil.close(rs);
-            scope.closeConnection();
-        }
-    }
-
-    protected void purgePeaksForScan(int scanId) throws SQLException
-    {
-        _log.info("Purging peaks for scan " + String.valueOf(scanId) + "...");
-        String sql = "DELETE FROM ms1.Peaks WHERE ScanId=" + String.valueOf(scanId);
-        Table.execute(getSchema(), sql);
-        _log.info("Finished purging peaks for scan " + String.valueOf(scanId) + ".");
-    }
-
     protected String genPeakFamilyListSQL(int fileId)
     {
         StringBuilder sql = new StringBuilder("SELECT PeakFamilyId FROM ");
@@ -451,16 +392,6 @@ public class MS1Manager
         sql.append(")");
         return sql.toString();
 
-    }
-
-    protected String genPeakListSQL(int fileId)
-    {
-        StringBuilder sql = new StringBuilder("SELECT PeakId FROM ");
-        sql.append(getSQLTableName(TABLE_PEAKS));
-        sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(fileId));
-        sql.append(")");
-        return sql.toString();
     }
 
     protected String genScanListSQL(int fileId)
@@ -498,9 +429,8 @@ public class MS1Manager
     /**
      * Purges a the data for a given file id
      * @param fileId The id of the file to purge
-     * @throws SQLException thrown if something goes wrong
      */
-    public void purgeFile(int fileId) throws SQLException
+    public void purgeFile(int fileId)
     {
         Integer fileType = new SqlSelector(getSchema(), "SELECT Type FROM ms1.Files WHERE FileId = ?", fileId).getObject(Integer.class);
         if(null == fileType)
@@ -511,9 +441,9 @@ public class MS1Manager
             purgePeakData(fileId);
     }
 
-    public void deleteFailedImports(int expDataFileId, int fileType) throws SQLException
+    public void deleteFailedImports(int expDataFileId, int fileType)
     {
-        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=? AND Imported=?",
+        new SqlExecutor(getSchema()).execute("UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=? AND Imported=?",
                 true,expDataFileId,fileType,false);
     }
 
@@ -557,22 +487,6 @@ public class MS1Manager
             sb.append(e.toString());
         }
         return sb.toString();
-    }
-
-    /**
-     * Returns true if any of the peptide sequences passed contain any modifiers
-     *
-     * @param peptideSequences Array of peptide sequences
-     * @return True if any contain modifiers
-     */
-    public boolean containsModifiers(String[] peptideSequences)
-    {
-        for(String seq : peptideSequences)
-        {
-            if(containsModifiers(seq))
-                return true;
-        }
-        return false;
     }
 
     /**

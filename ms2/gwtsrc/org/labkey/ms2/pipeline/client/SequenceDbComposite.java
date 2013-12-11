@@ -88,13 +88,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         hasDirectories = !paths.isEmpty();
 
         sequenceDbPathListBox.addItem(DB_DIR_ROOT, "/");
-        Collections.sort(paths);
-        for(Iterator it = paths.iterator() ; it.hasNext(); )
+        Collections.sort(paths, String.CASE_INSENSITIVE_ORDER);
+        for (String dirName : paths)
         {
-            String dirName = (String)it.next();
-            if(dirName == null||dirName.equals(""))
+            if (dirName == null || dirName.equals(""))
                 continue;
-            sequenceDbPathListBox.addItem(dirName,dirName);
+            sequenceDbPathListBox.addItem(dirName, dirName);
         }
         int pathCount = sequenceDbPathListBox.getItemCount();
         for(int i = 0; i < pathCount; i++)
@@ -126,7 +125,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         }
         sequenceDbListBox.clear();
         if(files.isEmpty()) return;
-        Collections.sort(files);
+        Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
         String path;
         for (String fileName : files)
         {

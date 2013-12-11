@@ -18,7 +18,6 @@ package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
@@ -32,16 +31,16 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Controller;
+import org.labkey.ms1.MS1Manager;
 import org.xml.sax.SAXException;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * Imports the Peaks XML file format used by Ceadars-Sinai
@@ -114,10 +113,6 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         {
             throw new ExperimentException(e);
         }
-        catch(SQLException e)
-        {
-            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
-        }
     } //importFile()
 
     /**
@@ -148,15 +143,8 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         if(null == data || null == container || null == user)
             return;
 
-        try
-        {
-            MS1Manager.get().deletePeakData(data.getRowId());
-        }
-        catch(SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    } //deleteData()
+        MS1Manager.get().deletePeakData(data.getRowId());
+    }
 
 
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
@@ -164,14 +152,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         if(null == newData || null == user) //anything else?
             return;
 
-        try
-        {
-            MS1Manager.get().moveFileData(oldDataRowID, newData.getRowId());
-        }
-        catch(SQLException e)
-        {
-            throw new ExperimentException(e);
-        }
+        MS1Manager.get().moveFileData(oldDataRowID, newData.getRowId());
     } //runMoved()
 
     public ActionURL getContentURL(Container container, ExpData data)

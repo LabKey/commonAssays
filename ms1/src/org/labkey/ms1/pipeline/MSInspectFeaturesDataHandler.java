@@ -354,8 +354,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     {
         HashMap<String,Object> map = new HashMap<>();
         map.put("FileId",null);
-        map.put("ExpDataFileId", new Integer(data.getRowId()));
-        map.put("Type", new Integer(MS1Manager.FILETYPE_FEATURES));
+        map.put("ExpDataFileId", data.getRowId());
+        map.put("Type", MS1Manager.FILETYPE_FEATURES);
         map.put("MzXmlURL", PeaksFileDataHandler.getMzXmlFilePath(data));
         map.put("Imported", Boolean.TRUE);
 
@@ -632,7 +632,6 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param data          The experiment data file being deleted
      * @param container     The container in which it lives
      * @param user          The user deleting it
-     * @throws ExperimentException  Thrown if something goes wrong
      */
     public void deleteData(ExpData data, Container container, User user)
     {
@@ -643,14 +642,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //Although it's not terribly obvious, the caller will have already begun a transaction
         //and the DbScope code will generate an exception if you call beginTrans() more than once
         //so don't use a transaction here because it's already transacted in the caller.
-        try
-        {
-            MS1Manager.get().deleteFeaturesData(data);
-        }
-        catch(SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        MS1Manager.get().deleteFeaturesData(data);
     } //deleteData()
 
     /**
@@ -662,23 +654,15 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param newRunLSID        The new run LSID
      * @param user              The user moving the data
      * @param oldDataRowId      The old data file row id
-     * @throws ExperimentException  Thrown if something goes wrong
      */
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowId) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowId)
     {
         if(null == newData || null == user)
                 return;
 
         //update the database records to reflect the new data file row id
-        try
-        {
-            MS1Manager.get().moveFileData(oldDataRowId, newData.getRowId());
-        }
-        catch(SQLException e)
-        {
-            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
-        }
-    } //runMoved()
+        MS1Manager.get().moveFileData(oldDataRowId, newData.getRowId());
+    }
 
     /**
      * Returns the priority if the passed data file is one this class knows how to import, otherwise null.

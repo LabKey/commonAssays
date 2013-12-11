@@ -913,7 +913,6 @@ ms1/src/org/labkey/ms1/pipeline/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/query/ContainerFeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilter.java -text
-ms1/src/org/labkey/ms1/query/FeaturesFilterFactory.java -text
 ms1/src/org/labkey/ms1/query/FeaturesLinkDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/query/FilesTableInfo.java -text

@@ -19,12 +19,15 @@ package org.labkey.ms2.pipeline;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
 import org.labkey.ms2.pipeline.client.SearchService;
 
@@ -32,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -343,25 +345,25 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         List<String> sequenceDbs = null;
         String defaultDbPath;
-        ArrayList<String> returnList = new ArrayList<>();
+        List<String> returnList = new ArrayList<>();
         if(defaultDb != null && defaultDb.endsWith("/"))
         {
             String savedDb =
                     PipelineService.get().getLastSequenceDbSetting(provider.getProtocolFactory(),getContainer(),getUser());
             if(savedDb != null && savedDb.length() > 0)
             {
-                if(defaultDb.equals("/") && (savedDb.indexOf("/") == -1 || savedDb.indexOf("/") == 0 ) )
+                if(defaultDb.equals("/") && (!savedDb.contains("/") || savedDb.indexOf("/") == 0 ) )
                 {
                     defaultDb = savedDb;
                 }
-                else if(savedDb.indexOf("/") != -1 && defaultDb.indexOf("/") != 0)
+                else if(savedDb.contains("/") && defaultDb.indexOf("/") != 0)
                 {
                     String test = savedDb.replaceFirst(defaultDb, "");
-                    if(test.indexOf("/") == -1) defaultDb = savedDb;
+                    if(!test.contains("/")) defaultDb = savedDb;
                 }
             }
         }
-        getSequenceDbPaths(searchEngine,refresh);
+        getSequenceDbPaths(searchEngine, refresh);
 
         if(relativePath.equals("/"))
         {
