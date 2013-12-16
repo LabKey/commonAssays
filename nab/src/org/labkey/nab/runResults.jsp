@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.security.permissions.InsertPermission"%>
-<%@ page import="org.labkey.api.study.PlateQueryView"%>
-<%@ page import="org.labkey.api.study.WellData"%>
+<%@ page import="org.labkey.api.assay.dilution.DilutionSummary"%>
+<%@ page import="org.labkey.api.assay.dilution.SampleInfo"%>
+<%@ page import="org.labkey.api.assay.nab.Luc5Assay"%>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
+<%@ page import="org.labkey.api.study.PlateQueryView" %>
+<%@ page import="org.labkey.api.study.WellData" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.assay.dilution.DilutionSummary" %>
-<%@ page import="org.labkey.api.assay.nab.Luc5Assay" %>
 <%@ page import="org.labkey.nab.NabController" %>
-<%@ page import="org.labkey.api.assay.dilution.SampleInfo" %>
+<%@ page import="org.labkey.nab.OldNabAssayRun" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.nab.OldNabAssayRun" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -35,7 +36,8 @@
     NabController.RenderAssayBean bean = me.getModelBean();
     OldNabAssayRun assay = bean.getAssay();
     ViewContext context = me.getViewContext();
-    boolean writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
+    Container c = context.getContainer();
+    boolean writer = c.hasPermission(context.getUser(), InsertPermission.class);
     %>
 <labkey:errors/>
 <%
@@ -93,7 +95,7 @@
                 </tr>
                 <tr>
                     <td style="<%= labelStyle %>">Experiment Date</td>
-                    <td><%= h(formatDate(assay.getExperimentDate())) %></td>
+                    <td><%=formatDate(assay.getExperimentDate())%></td>
                     <td colspan="4">&nbsp;</td>
                 </tr>
             </table>
@@ -318,7 +320,7 @@
                             <tr>
                                 <td>&nbsp;</td>
                                 <%
-                                    for (int c = 1; c <= assay.getPlate().getColumns(); c++)
+                                    for (int col = 1; col <= assay.getPlate().getColumns(); col++)
                                     {
                                 %>
                                 <td style="font-weight:bold"><%=c %></td>

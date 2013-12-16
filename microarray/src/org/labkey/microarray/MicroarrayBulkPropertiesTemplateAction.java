@@ -60,7 +60,7 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
 
         // First, set the content-type, so that your browser knows which application to launch
         getViewContext().getResponse().setContentType("application/vnd.ms-excel");
-        String filename = protocol.getName() + "Template" + DateUtil.formatDate() + ".xls";
+        String filename = protocol.getName() + "Template" + DateUtil.formatDateISO8601() + ".xls";
         getViewContext().getResponse().setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         WritableWorkbook workbook = Workbook.createWorkbook(getViewContext().getResponse().getOutputStream());

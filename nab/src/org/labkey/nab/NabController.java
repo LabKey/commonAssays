@@ -420,7 +420,7 @@ public class NabController extends SpringActionController
             {
                 if (cutoff.getValue() == null && cutoff.getText() != null)
                     errors.reject("main", cutoff.getText() + " is not a valid cutoff value.");
-                if (cutoff.getValue() != null && (cutoff.getValue().intValue() < -100 || cutoff.getValue().intValue() > 200))
+                if (cutoff.getValue() != null && (cutoff.getValue() < -100 || cutoff.getValue() > 200))
                     errors.reject("main", "Cutoff percentages must be between -100 and 200 percent.  " + cutoff.getText() + " is not a valid cutoff value.");
             }
 
@@ -2019,7 +2019,7 @@ public class NabController extends SpringActionController
             if (obj instanceof Double|| obj instanceof Float)
                 return _decimalFormat.format(obj);
             if (obj instanceof Date)
-                return DateUtil.formatDate((Date) obj);
+                return DateUtil.formatDate(_targetContainer, (Date) obj);
             return obj.toString();
         }
     }

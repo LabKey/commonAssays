@@ -21,35 +21,22 @@ import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.assay.dilution.DilutionSummary;
-import org.labkey.api.assay.nab.Luc5Assay;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.CustomView;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.SchemaKey;
 import org.labkey.api.security.User;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
-import org.labkey.nab.query.NabProviderSchema;
-import org.labkey.nab.query.NabRunDataTable;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /*
  * User: brittp

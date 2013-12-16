@@ -86,7 +86,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
             config.setHeight(graphForm.getHeight());
         if (graphForm.getWidth() > 0)
             config.setWidth(graphForm.getWidth());
-        NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, config);
+        NabGraph.renderChartPNG(getViewContext().getContainer(), getViewContext().getResponse(), summaries, config);
         return null;
     }
 

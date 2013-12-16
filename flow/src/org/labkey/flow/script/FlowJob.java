@@ -69,7 +69,7 @@ public abstract class FlowJob extends PipelineJob
         {
             return;
         }
-        addStatus("Job started at " + DateUtil.formatDateTime(_start));
+        addStatus("Job started at " + DateUtil.formatDateTime(getContainer(), _start));
         try
         {
             doRun();
@@ -85,7 +85,7 @@ public abstract class FlowJob extends PipelineJob
         {
             FlowManager.get().flowObjectModified();
             _end = new Date();
-            addStatus("Job completed at " + DateUtil.formatDateTime(_end));
+            addStatus("Job completed at " + DateUtil.formatDateTime(getContainer(), _end));
             long duration = Math.max(0, _end.getTime() - _start.getTime());
             addStatus("Elapsed time " + DateUtil.formatDuration(duration));
         }

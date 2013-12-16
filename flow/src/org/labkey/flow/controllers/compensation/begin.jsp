@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -29,7 +30,7 @@
 <table>
     <tr><th>Name</th><th>Created</th></tr>
     <% for (FlowCompensationMatrix matrix : matrices) { %>
-        <tr><td><a href="<%=h(matrix.urlShow())%>"><%=matrix.getName()%></a></td><td><%=formatDateTime(matrix.getExpObject().getCreated())%></td></tr>
+        <tr><td><a href="<%=h(matrix.urlShow())%>"><%=h(matrix.getName())%></a></td><td><%=formatDateTime(matrix.getExpObject().getCreated())%></td></tr>
     <% } %>
 </table>
 <% } %>

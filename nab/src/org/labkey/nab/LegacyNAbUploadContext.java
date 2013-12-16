@@ -225,7 +225,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             }
             else if (NabAssayProvider.EXPERIMENT_DATE_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
             {
-                result.put(property, DateUtil.formatDate(_legacyRun.getExperimentDate()));
+                result.put(property, DateUtil.formatDate(property.getContainer(), _legacyRun.getExperimentDate()));
             }
             else if (NabAssayProvider.FILE_ID_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
             {

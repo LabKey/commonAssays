@@ -16,13 +16,16 @@
 package org.labkey.ms2.metadata;
 
 import jxl.Workbook;
-import jxl.write.*;
-import org.labkey.api.data.ExcelWriter;
+import jxl.write.Label;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.util.DateUtil;
@@ -56,7 +59,7 @@ public class MassSpecBulkPropertiesTemplateAction extends BaseAssayAction<MassSp
 
         // First, set the content-type, so that your browser knows which application to launch
         getViewContext().getResponse().setContentType("application/vnd.ms-excel");
-        String filename = protocol.getName() + "Template" + DateUtil.formatDate() + ".xls";
+        String filename = protocol.getName() + "Template" + DateUtil.formatDateISO8601() + ".xls";
         getViewContext().getResponse().setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         WritableWorkbook workbook = Workbook.createWorkbook(getViewContext().getResponse().getOutputStream());
