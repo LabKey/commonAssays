@@ -29,6 +29,7 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.w3c.dom.*;
 
+import javax.xml.namespace.QName;
 import java.io.*;
 import java.util.*;
 
@@ -321,6 +322,19 @@ abstract public class FlowJoWorkspace extends Workspace
         for (String attrName : alternateNames)
             if (el.hasAttribute(attrName))
                 return el.getAttribute(attrName);
+
+        return null;
+    }
+
+    /** Returns attribute value using the given name or alternate names. */
+    static String getAttribute(Element el, QName name, QName... alternateNames)
+    {
+        if (el.hasAttributeNS(name.getNamespaceURI(), name.getLocalPart()))
+            return el.getAttributeNS(name.getNamespaceURI(), name.getLocalPart());
+
+        for (QName attrName : alternateNames)
+            if (el.hasAttributeNS(attrName.getNamespaceURI(), attrName.getLocalPart()))
+                return el.getAttributeNS(attrName.getNamespaceURI(), attrName.getLocalPart());
 
         return null;
     }

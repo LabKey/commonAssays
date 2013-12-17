@@ -30,6 +30,7 @@ import org.isacNet.std.gatingML.v20.gating.RectangleGateDimensionType;
 import org.isacNet.std.gatingML.v20.gating.RectangleGateType;
 import org.labkey.api.util.UnexpectedException;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 
@@ -38,6 +39,7 @@ import java.util.List;
 
 import static org.labkey.flow.analysis.model.WorkspaceParser.GATINGML_2_0_PREFIX_MAP;
 import static org.labkey.flow.analysis.model.WorkspaceParser.GATING_2_0_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.TRANSFORMATIONS_2_0_NS;
 
 /**
  * User: kevink
@@ -50,6 +52,26 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
     public FlowJo10_0_6Workspace(String name, String path, Element elDoc)
     {
         super(name, path, elDoc);
+    }
+
+    @Override
+    protected void readSampleCompensation(SampleInfo sampleInfo, Element elSample)
+    {
+        // FlowJo 10.0.6 uses the GatingML 2.0 namespace with GatingML 1.5 elements
+        NodeList nodeList = elSample.getElementsByTagNameNS(TRANSFORMATIONS_2_0_NS, "spilloverMatrix");
+        if (nodeList != null && nodeList.getLength() > 0)
+        {
+            Element elSpilloverMatrix = (Element)nodeList.item(0);
+            CompensationMatrix matrix = new CompensationMatrix(elSpilloverMatrix);
+            int index = _compensationMatrices.indexOf(matrix);
+            if (index == -1)
+            {
+                _compensationMatrices.add(matrix);
+                index = _compensationMatrices.size()-1;
+            }
+            // CONSIDER: Add CompensationMatrix field to SampleInfo instead of using index
+            sampleInfo._compensationId = String.valueOf(index);
+        }
     }
 
     private PolygonGate readPolygonGate(PolygonGateType xPolygonGate)
@@ -164,4 +186,9 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
         return gate;
     }
 
+    @Override
+    protected void readCompensationMatrices(Element elDoc)
+    {
+        // Compensation matrices moved to Group and Sample
+    }
 }

@@ -22,6 +22,7 @@ import org.w3c.dom.NodeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilder;
@@ -36,6 +37,13 @@ import java.io.*;
 import Jama.Matrix;
 
 import org.labkey.flow.analysis.data.NumberArray;
+
+import static org.labkey.flow.analysis.model.WorkspaceParser.COMPENSATION_1_5_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.COMPENSATION_2_0_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.DATATYPES_1_5_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.DATATYPES_2_0_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.TRANSFORMATIONS_1_5_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.TRANSFORMATIONS_2_0_NS;
 
 /**
  * Compensation matrix as read from a FlowJo workspace file.
@@ -111,19 +119,45 @@ public class CompensationMatrix implements Serializable
 
     private void init(Element elMatrix)
     {
+        String tagName = elMatrix.getLocalName();
+        String nsURI = elMatrix.getNamespaceURI();
+
+        if ("CompensationMatrix".equals(tagName))
+        {
+            initCompensationMatrix(elMatrix);
+        }
+        else if (COMPENSATION_1_5_NS.equals(nsURI) && "spilloverMatrix".equals(tagName))
+        {
+            initGatingML_1_5(elMatrix);
+        }
+        else if (TRANSFORMATIONS_2_0_NS.equals(nsURI) && "spilloverMatrix".equals(tagName))
+        {
+            // FlowJo v10.0.6 serializes a GatingML 1.5 matrix using the 2.0 namespace. Why for the love of god?
+            initGatingML_1_5(elMatrix);
+        }
+        else if (TRANSFORMATIONS_2_0_NS.equals(nsURI) && "spectrumMatrix".equals(tagName))
+        {
+            initGatingML_2_0(elMatrix);
+        }
+    }
+
+    // Read the Mac FlowJo xml format
+    private void initCompensationMatrix(Element elMatrix)
+    {
         // FlowJo v9.7 uses 'matrixName' attribute on <CompensationMatrix> element
         _name = FlowJoWorkspace.getAttribute(elMatrix, "name", "matrixName");
         _prefix = elMatrix.getAttribute("prefix");
         _prefix = _prefix == null ? "<" : _prefix;
         _suffix = elMatrix.getAttribute("suffix");
         _suffix = _suffix == null ? ">" : _suffix;
+
         NodeList nlChannels = elMatrix.getChildNodes();
         for (int iChannel = 0; iChannel < nlChannels.getLength(); iChannel ++)
         {
             if (!(nlChannels.item(iChannel) instanceof Element))
                 continue;
             Element elChannel = (Element) nlChannels.item(iChannel);
-            HashMap mapValues = new HashMap();
+            HashMap<String, Double> mapValues = new HashMap<>();
             NodeList nlChannelValues = elChannel.getChildNodes();
             for (int iValue = 0; iValue < nlChannelValues.getLength(); iValue ++)
             {
@@ -141,6 +175,83 @@ public class CompensationMatrix implements Serializable
             }
             setChannel(elChannel.getAttribute("name"), mapValues);
         }
+    }
+
+    // Read the GatingML 1.5 xml format
+    // NOTE: FlowJo 10.0.6 incorrectly uses GatingML 2.0 namespaces on GatingML 1.5 elements.
+    private void initGatingML_1_5(Element elMatrix)
+    {
+        _name = elMatrix.getAttribute("name");
+        if (_name == null)
+            _name = FlowJoWorkspace.getAttribute(elMatrix, new QName(COMPENSATION_1_5_NS, "id"), new QName(COMPENSATION_2_0_NS, "id"));
+        _prefix = elMatrix.getAttribute("prefix");
+        _prefix = _prefix == null ? "<" : _prefix;
+        _suffix = elMatrix.getAttribute("suffix");
+        _suffix = _suffix == null ? ">" : _suffix;
+
+        NodeList nlSpillover = elMatrix.getElementsByTagNameNS(TRANSFORMATIONS_1_5_NS, "spillover");
+        if (nlSpillover.getLength() == 0)
+            nlSpillover = elMatrix.getElementsByTagNameNS(TRANSFORMATIONS_2_0_NS, "spillover");
+
+        for (int i = 0; i < nlSpillover.getLength(); i++)
+        {
+            if (!(nlSpillover.item(i) instanceof Element))
+                continue;
+            Element elSpillover = (Element)nlSpillover.item(i);
+
+            String channelName = elSpillover.getAttributeNS(DATATYPES_1_5_NS, "parameter");
+            if (channelName == null || channelName.length() == 0)
+                channelName = elSpillover.getAttributeNS(DATATYPES_2_0_NS, "parameter");
+            if (channelName == null || channelName.length() == 0)
+                throw new FlowException("Compensation matrix spillover name required");
+
+            Map<String, Double> mapValues = new HashMap<>();
+            NodeList nlCoefficient = elSpillover.getElementsByTagNameNS(TRANSFORMATIONS_1_5_NS, "coefficient");
+            if (nlCoefficient.getLength() == 0)
+                nlCoefficient = elSpillover.getElementsByTagNameNS(TRANSFORMATIONS_2_0_NS, "coefficient");
+            for (int j = 0; j < nlCoefficient.getLength(); j++)
+            {
+                if (!(nlCoefficient.item(j) instanceof Element))
+                    continue;
+                Element elCoefficient = (Element)nlCoefficient.item(j);
+
+                String parameterName = elCoefficient.getAttributeNS(DATATYPES_1_5_NS, "parameter");
+                if (parameterName == null || parameterName.length() == 0)
+                    parameterName = elCoefficient.getAttributeNS(DATATYPES_2_0_NS, "parameter");
+                if (parameterName == null || parameterName.length() == 0)
+                    throw new FlowException("Compensation matrix coefficient name required");
+
+                String value = elCoefficient.getAttributeNS(TRANSFORMATIONS_1_5_NS, "value");
+                if (value == null || value.length() == 0)
+                    value = elCoefficient.getAttributeNS(TRANSFORMATIONS_2_0_NS, "value");
+                if (value == null || value.length() == 0)
+                    throw new FlowException("Compensation matrix coefficient value required");
+
+                Double d = Double.valueOf(value);
+                mapValues.put(parameterName, d);
+            }
+
+            setChannel(channelName, mapValues);
+        }
+    }
+
+    // Read the GatingML 2.0 xml format
+    private void initGatingML_2_0(Element elMatrix)
+    {
+        throw new UnsupportedOperationException("NYI");
+        /*
+        try
+        {
+            XmlOptions options = new XmlOptions();
+
+            SpectrumMatrixType matrix = SpectrumMatrixType.Factory.parse(elMatrix, options);
+            matrix.getDetectors();
+        }
+        catch (XmlException e)
+        {
+            e.printStackTrace();
+        }
+        */
     }
 
     private void init(String strFile)

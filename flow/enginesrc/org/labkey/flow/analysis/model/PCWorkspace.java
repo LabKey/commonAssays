@@ -55,13 +55,26 @@ public class PCWorkspace extends FlowJoWorkspace
         Element elSampleNode = getElementByTagName(elSample, "SampleNode");
         sampleInfo._sampleName = elSampleNode.getAttribute("name");
         sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
+
+        readSampleCompensation(sampleInfo, elSample);
+        readSampleTransformations(sampleInfo, elSample);
+
+        _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
+        readSampleAnalysis(elSampleNode);
+    }
+
+    protected void readSampleCompensation(SampleInfo sampleInfo, Element elSample)
+    {
+        Element elSampleNode = getElementByTagName(elSample, "SampleNode");
         if (elSampleNode.hasAttribute("compensationID"))
         {
             sampleInfo._compensationId = elSampleNode.getAttribute("compensationID");
         }
+    }
 
-        _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
-        readSampleAnalysis(elSampleNode);
+    protected void readSampleTransformations(SampleInfo sampleInfo, Element elSample)
+    {
+        // UNDONE
     }
 
     // UNDONE: Assumes all parameters in the workspace are scaled the same
@@ -388,6 +401,16 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected void readCompensationMatrices(Element elDoc)
     {
-        // UNDONE
+        // FlowJo v7.2.5
+        for (Element elFlowJoEditor : getElementsByTagName(elDoc, "FlowJoEditor"))
+        {
+            for (Element elCompensation : getElementsByTagName(elFlowJoEditor, "Compensation"))
+            {
+                for (Element elCompensationMatrix : getElementsByTagName(elFlowJoEditor, "CompensationMatrix"))
+                {
+                    _compensationMatrices.add(new CompensationMatrix(elCompensationMatrix));
+                }
+            }
+        }
     }
 }

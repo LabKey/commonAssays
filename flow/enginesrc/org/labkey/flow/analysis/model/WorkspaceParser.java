@@ -214,6 +214,8 @@ public class WorkspaceParser
                     "StringArray",
                     "Subpopulations",
                     "Table",
+                    // FlowJo 10.0.6 adds <Transformations> under <Sample> node and contains parameter transforms (transforms:linear, transforms:biex)
+                    "Transformations",
                     "ValidateCompensation",
                     "Vertex",
                     "Workspace",
