@@ -1448,8 +1448,8 @@ public class FlowSchema extends UserSchema
             ExpProtocol protocol = getProtocol().getProtocol();
             AssayProvider provider = AssayService.get().getProvider(protocol);
             AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), protocol, null);
-            FlowAssayProvider.FlowAssayTableMetadata tableMetadata = new FlowAssayProvider.FlowAssayTableMetadata(provider, protocol, specimenRelativeFromFCSFileTable);
-            SpecimenForeignKey specimenFK = new SpecimenForeignKey(schema, provider, protocol, tableMetadata);
+            FlowAssayProvider.FlowAssayTableMetadata tableMetadata = new FlowAssayProvider.FlowAssayTableMetadata(provider, protocol, true);
+            SpecimenForeignKey specimenFK = new SpecimenForeignKey(schema, ret, tableMetadata);
             colSpecimen.setFk(specimenFK);
         }
         else

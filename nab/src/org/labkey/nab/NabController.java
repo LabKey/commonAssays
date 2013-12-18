@@ -1747,7 +1747,7 @@ public class NabController extends SpringActionController
                 String sampleId = (String) wellgroup.getProperty(SampleProperty.SampleId.name());
                 ParticipantVisit sampleInfo = form.getReshowData(sampleId);
                 if (sampleInfo == null)
-                    sampleInfo = SpecimenService.get().getSampleInfo(targetContainer, sampleId);
+                    sampleInfo = SpecimenService.get().getSampleInfo(targetContainer, getUser(), sampleId);
                 sampleInfoMap.put(wellgroup, sampleInfo);
             }
 
