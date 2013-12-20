@@ -1,0 +1,8 @@
+<view xmlns="http://labkey.org/data/xml/view"
+        title="GEO Export">
+    <dependencies>
+        <dependency path="Ext4"/>
+        <dependency path="Ext4ClientApi"/>
+        <dependency path="microarray/geo_export.js"/>
+    </dependencies>
+</view>
