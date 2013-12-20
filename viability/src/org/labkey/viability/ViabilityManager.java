@@ -312,6 +312,7 @@ public class ViabilityManager
         @Before
         public void setUp() throws Exception
         {
+            JunitUtil.deleteTestContainer();
             cleanup();
 
             Container c = JunitUtil.getTestContainer();
