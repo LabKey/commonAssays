@@ -78,9 +78,9 @@
             // setTitle...
         }
 
-        Ext.onReady(function()
+        Ext4.onReady(function()
         {
-            Ext.QuickTips.init();
+            Ext4.QuickTips.init();
 
             fileSystem = Ext4.create('File.system.Webdav', {
                 rootPath : <%=q(pipeRoot.getWebdavURL())%>,
@@ -90,7 +90,6 @@
             fileBrowser = Ext4.create('File.panel.Browser', {
                 fileSystem:fileSystem
                 ,height:600
-                ,width:800
                 ,helpEl:null
                 ,showAddressBar:false
                 ,showFolderTree:true
@@ -100,17 +99,24 @@
                 ,showToolbar:false
                 ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp") || endsWith(data.name, ".zip"); }}
                 ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
+                ,listeners: {
+                    afterrender: {
+                        fn: function(f) {
+                            var size = Ext4.getBody().getSize();
+                            LABKEY.ext4.Util.resizeToViewport(f, size.width, size.height, 20, null);
+                        },
+                        single: true
+                    }
+                }
             });
 
-            fileBrowser.on("doubleclick", function(){
-                if (record && record.data.file)
+            fileBrowser.on("doubleclick", function(record){
+                if (record && !record.data.collection)
                 {
-                    var path = null;
-                    var record = fileBrowser.getGrid().getSelectionModel().getSelection();
-                    if (record && record.length == 1 && !record[0].data.collection)
-                        path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
+                    var path = record.data.id.replace(fileBrowser.getBaseURL(), '/');
                     selectRecord(path);
                     document.forms["importAnalysis"].submit();
+                    return false;
                 }
                 return true;
             });

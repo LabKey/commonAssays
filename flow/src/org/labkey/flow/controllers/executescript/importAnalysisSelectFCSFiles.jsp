@@ -192,17 +192,17 @@
         {
             if (!fileBrowser)
             {
-                Ext.QuickTips.init();
+                Ext4.QuickTips.init();
 
                 fileSystem = Ext4.create('File.system.Webdav', {
                     rootPath : <%=q(pipeRoot.getWebdavURL())%>,
                     rootName : <%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>
+                    //rootOffset : <%=q(keywordDir)%>
                 });
 
                 fileBrowser = Ext4.create('File.panel.Browser', {
                     fileSystem:fileSystem
                     ,height:600
-                    ,width:800
                     ,helpEl:null
                     ,showAddressBar:false
                     ,showFolderTree:true
@@ -212,18 +212,25 @@
                     ,showToolbar:false
                     ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs") || endsWith(data.name,".facs")|| endsWith(data.name, ".lmd"); }}
                     ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
+                    ,listeners: {
+                        afterrender: {
+                            fn: function(f) {
+                                var size = Ext4.getBody().getSize();
+                                LABKEY.ext4.Util.resizeToViewport(f, size.width, size.height, 20, null);
+                            },
+                            single: true
+                        }
+                    }
                 });
 
-                fileBrowser.on("doubleclick", function(){
-                    var path = null;
-                    var record = fileBrowser.getGrid().getSelectionModel().getSelection();
-                    if (!record || record.length != 1 || record[0].data.collection)
-                        return;
-                    else
-                        path = record.data.id.replace(fileBrowser.getBaseURL(), '/');
-
-                    selectRecord(path);
-                    document.forms["importAnalysis"].submit();
+                fileBrowser.on("doubleclick", function(record){
+                    if (record && record.data.collection)
+                    {
+                        var path = record.data.id.replace(fileBrowser.getBaseURL(), '/');
+                        selectRecord(path);
+                        document.forms["importAnalysis"].submit();
+                        return false;
+                    }
                     return true;
                 });
                 fileBrowser.on("selectionchange", function(){
@@ -245,7 +252,7 @@
             return true;
         }
 
-        Ext.onReady(function()
+        Ext4.onReady(function()
         {
             <% if (form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse) { %>
             renderFileBrowser();
