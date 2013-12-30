@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
-<%@ page import="org.labkey.api.security.User" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
-    User user = HttpView.currentContext().getUser();
+    User user = getUser();
 %>
 <form method="post" action="<%=h(bean.applyViewURL)%>">
     <table>

@@ -25,7 +25,7 @@
 <%
     JspView<PipelineController.SetDefaultsForm> view = (JspView<PipelineController.SetDefaultsForm>) HttpView.currentView();
     PipelineController.SetDefaultsForm form = view.getModelBean();
-    Container c = view.getViewContext().getContainer();
+    Container c = getContainer();
 %>
 <labkey:errors />
 <form method="post" action="<%=urlFor(PipelineController.SetCometDefaultsAction.class)%>">

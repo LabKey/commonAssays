@@ -17,13 +17,13 @@
 %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowObject flowObj = (FlowObject)getModelBean();
-    ActionURL setFlagUrl = urlProvider(ExperimentUrls.class).getSetFlagURL(getViewContext().getContainer());
+    ActionURL setFlagUrl = urlProvider(ExperimentUrls.class).getSetFlagURL(getContainer());
     setFlagUrl.addParameter("lsid", flowObj.getLSID());
     setFlagUrl.addParameter("redirect", false);
 

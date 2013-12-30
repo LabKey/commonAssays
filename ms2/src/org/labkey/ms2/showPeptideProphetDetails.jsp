@@ -1,3 +1,4 @@
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%
 /*
  * Copyright (c) 2006-2010 LabKey Corporation
@@ -19,13 +20,14 @@
 
 <table>
 <%
-    ActionURL dist = me.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetDistributionPlotAction.class);
+    ViewContext context = getViewContext();
+    ActionURL dist = context.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetDistributionPlotAction.class);
     ActionURL distCumulative = dist.clone().addParameter("cumulative", "1");
 
-    ActionURL versus = me.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetObservedVsModelPlotAction.class);
+    ActionURL versus = context.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetObservedVsModelPlotAction.class);
     ActionURL versusCumulative = versus.clone().addParameter("cumulative", "1");
 
-    ActionURL versusPP = me.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetObservedVsPPScorePlotAction.class);
+    ActionURL versusPP = context.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetObservedVsPPScorePlotAction.class);
 
     for (int i=1; i<4; i++)
     {

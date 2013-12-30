@@ -21,19 +21,17 @@
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
-    ViewContext context = getViewContext();
-    Container container = context.getContainer();
+    Container container = getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
     boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = context.getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
+    boolean canSetPipelineRoot = getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 
 <p>You may either upload an analysis archive or FlowJo workspace from your local computer or browse the pipeline

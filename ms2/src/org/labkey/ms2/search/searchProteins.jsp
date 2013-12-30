@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -31,11 +30,11 @@
     ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = me.getViewContext();
 
-    ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, ctx.getContainer());
+    ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, getContainer());
     String viewName = bean.getPeptideCustomViewName(ctx);
 %>
 
-<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
+<script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
 <form action="<%= url %>" method="get">
     <table>

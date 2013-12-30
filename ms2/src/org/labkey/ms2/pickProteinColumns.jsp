@@ -23,7 +23,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.PickColumnsBean bean = ((JspView<MS2Controller.PickColumnsBean>) HttpView.currentView()).getModelBean();
-    Container c = getViewContext().getContainer();
+    Container c = getContainer();
 %>
 <table class="labkey-data-region"><tr>
   <td><form method="post" action=""><table class="labkey-data-region">

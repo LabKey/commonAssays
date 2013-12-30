@@ -24,10 +24,7 @@
 <%
     JspView<ScoringController.ChartDiscForm> me = (JspView<ScoringController.ChartDiscForm>) HttpView.currentView();
     ScoringController.ChartDiscForm form = me.getModelBean();
-
-    StringBuffer params = new StringBuffer();
-
-    Container c = getViewContext().getContainer();
+    Container c = getContainer();
 %>
 <labkey:errors/>
 <%

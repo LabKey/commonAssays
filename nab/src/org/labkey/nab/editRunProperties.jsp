@@ -15,25 +15,25 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.assay.dilution.SampleInfo"%>
 <%@ page import="org.labkey.api.study.PlateTemplate"%>
 <%@ page import="org.labkey.api.study.WellGroup"%>
 <%@ page import="org.labkey.api.study.WellGroupTemplate"%>
-<%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.study.assay.PlateUrls"%>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.nab.NabController" %>
 <%@ page import="org.labkey.nab.RunSettings" %>
-<%@ page import="org.labkey.api.assay.dilution.SampleInfo" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.study.assay.PlateUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
     NabController.UploadAssayForm form = me.getModelBean();
     String dataTDStyle = "padding-left:20px";
-    PlateTemplate activeTemplate = me.getModelBean().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
-    PlateTemplate[] templates = me.getModelBean().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
+    PlateTemplate activeTemplate = me.getModelBean().getActivePlateTemplate(getContainer(), getUser());
+    PlateTemplate[] templates = me.getModelBean().getPlateTemplates(getContainer(), getUser());
     int specimenCount = activeTemplate.getWellGroupCount(WellGroup.Type.SPECIMEN);
     List<? extends WellGroupTemplate> wellGroupTemplates = activeTemplate.getWellGroups();
     List<WellGroupTemplate> specimenWellGroups = new ArrayList<>();
@@ -43,7 +43,7 @@
             specimenWellGroups.add(groupTemplate);
     }
 
-    ActionURL choosePlateURL = urlProvider(PlateUrls.class).getPlateTemplateListURL(me.getViewContext().getContainer());
+    ActionURL choosePlateURL = urlProvider(PlateUrls.class).getPlateTemplateListURL(getContainer());
 
     String errorParameter = request.getParameter("error");
     if (errorParameter != null)

@@ -17,41 +17,42 @@
 %>
 <%@ page buffer="none" %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
-<%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
-<%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.attachments.Attachment"%>
+<%@ page import="org.labkey.api.attachments.AttachmentService"%>
+<%@ page import="org.labkey.api.data.Container"%>
+<%@ page import="org.labkey.api.data.ContainerManager"%>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
+<%@ page import="org.labkey.api.portal.ProjectUrls" %>
+<%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.study.Study" %>
+<%@ page import="org.labkey.api.study.StudyService" %>
+<%@ page import="org.labkey.api.util.MimeMap" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunForm" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
+<%@ page import="org.labkey.flow.data.FlowProperty" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
-<%@ page import="org.labkey.api.attachments.Attachment" %>
-<%@ page import="org.labkey.api.attachments.AttachmentService" %>
-<%@ page import="org.labkey.api.util.MimeMap" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.api.security.User" %>
-<%@ page import="org.labkey.flow.data.FlowProperty" %>
-<%@ page import="org.labkey.api.study.Study" %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.data.ContainerManager" %>
-<%@ page import="org.labkey.api.study.StudyService" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     RunForm form = (RunForm) HttpView.currentModel();
-    ViewContext context = HttpView.currentContext();
+    ViewContext context = getViewContext();
+
     final FlowRun run = form.getRun();
     FlowCompensationMatrix comp = run.getCompensationMatrix();
 
-    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
+    boolean canEdit = context.hasPermission(UpdatePermission.class);
 
     if (canEdit || run.getExpObject().getComment() != null)
     {
@@ -78,7 +79,7 @@
 
     // UNDONE: link to audit log for keyword changes
 
-    if (context.getContainer().hasPermission(context.getUser(), UpdatePermission.class) &&
+    if (getContainer().hasPermission(getUser(), UpdatePermission.class) &&
         (run.getStep() == FlowProtocolStep.analysis || run.isInWorkspace()))
     {
         if (run.isInWorkspace()) { %>
@@ -111,7 +112,7 @@
         %><labkey:link href="<%=showFileURL%>" text="Download Workspace XML File"/><br/><%
     }
 
-    User user = context.getUser();
+    User user = getUser();
     if (user != null && !user.isGuest())
     {
         if (run.getPath() != null)

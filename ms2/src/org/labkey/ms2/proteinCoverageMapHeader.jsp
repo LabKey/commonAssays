@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -34,17 +34,17 @@
         showPeptidesPopupUrl.addParameter("MS2Peptides.viewName", "Standard");
         bean.showRunUrl = showPeptidesPopupUrl.toString();
     }
-    ActionURL toggleURL = HttpView.currentContext().getActionURL().clone();
+    ActionURL toggleURL = getActionURL().clone();
     toggleURL.replaceParameter("simpleSequenceView", "true");
 %>
 <table class="labkey-tab-strip">
     <tr>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%=getContextPath()%>/_.gif"></td>
         <td class="labkey-tab-selected" style="margin-bottom: 0;"><a href="#">Detail View</a></td>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%=getContextPath()%>/_.gif"></td>
         <td class="labkey-tab" style="margin-bottom: 0;"><a href="<%= toggleURL %>">Summary View</a></td>
         <td class="labkey-tab-space" width="100%"></td>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%=getContextPath()%>/_.gif"></td>
     </tr>
 </table>
 

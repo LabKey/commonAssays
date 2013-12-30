@@ -22,7 +22,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView me = (JspView)HttpView.currentView();
-    ActionURL urlPipeline = urlProvider(PipelineUrls.class).urlBegin(me.getViewContext().getContainer());
+    ActionURL urlPipeline = urlProvider(PipelineUrls.class).urlBegin(getContainer());
 %>
 <table class="labkey-peak-warning" width="100%">
     <tr>

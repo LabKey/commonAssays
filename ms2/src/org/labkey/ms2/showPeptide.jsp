@@ -15,23 +15,20 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.settings.AppProps"%>
 <%@ page import="org.labkey.api.util.Formats"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.util.Pair"%>
-<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.MS2Fraction" %>
-<%@ page import="org.labkey.ms2.MS2GZFileRenderer" %>
+<%@ page import="org.labkey.ms2.MS2Fraction"%>
+<%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
 <%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
+<%@ page import="org.labkey.ms2.MassType" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.ms2.MassType" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -171,9 +168,9 @@ if (mzs != null && intensities != null && mzs.length == intensities.length && mz
 {
 %>
 
-<!--[if IE]><script type="text/javascript" src="<%= PageFlowUtil.filter(AppProps.getInstance().getContextPath()) %>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="<%= PageFlowUtil.filter(AppProps.getInstance().getContextPath())%>/MS2/lorikeet_0.3/js/jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="<%= PageFlowUtil.filter(AppProps.getInstance().getContextPath())%>/MS2/lorikeet_0.3/js/jquery-ui-1.8.4.min.js"></script>
+<!--[if IE]><script type="text/javascript" src="<%=getContextPath()%>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="<%=getContextPath()%>/MS2/lorikeet_0.3/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<%=getContextPath()%>/MS2/lorikeet_0.3/js/jquery-ui-1.8.4.min.js"></script>
 
 
 <!-- PLACE HOLDER DIV FOR THE SPECTRUM -->

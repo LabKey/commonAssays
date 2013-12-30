@@ -1,19 +1,19 @@
 <%
-    /*
-    * Copyright (c) 2011-2013 LabKey Corporation
-    *
-    * Licensed under the Apache License, Version 2.0 (the "License");
-    * you may not use this file except in compliance with the License.
-    * You may obtain a copy of the License at
-    *
-    *     http://www.apache.org/licenses/LICENSE-2.0
-    *
-    * Unless required by applicable law or agreed to in writing, software
-    * distributed under the License is distributed on an "AS IS" BASIS,
-    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    * See the License for the specific language governing permissions and
-    * limitations under the License.
-    */
+/*
+ * Copyright (c) 2011-2013 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
@@ -22,7 +22,6 @@
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
 <%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
@@ -41,11 +40,9 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
-    ViewContext context = getViewContext();
-    Container container = context.getContainer();
+    Container container = getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
-
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">
@@ -217,7 +214,7 @@ those results must be put into different analysis folders.
 if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
 {
     // Get set of valid copy to study targets
-    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
+    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
     Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");
     for (Study study : validStudies)

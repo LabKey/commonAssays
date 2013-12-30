@@ -18,15 +18,13 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController.CopyForm" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    ViewContext context = getViewContext();
-    Container c = context.getContainer();
+    Container c = getContainer();
 
     Pair<CopyForm, FlowReport> bean = (Pair<CopyForm, FlowReport>)getModelBean();
     CopyForm form = bean.first;

@@ -35,14 +35,12 @@
 <%
     JspView<ImportRunsForm> me = (JspView<ImportRunsForm>) HttpView.currentView();
     ImportRunsForm form = me.getModelBean();
-    ViewContext context = HttpView.getRootContext();
-
-    Container c = context.getContainer();
+    Container c = getContainer();
 
     Map<String, String> paths = form.getNewPaths();
 
     // Get set of valid copy to study targets
-    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(context.getUser(), ReadPermission.class);
+    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
     Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");
     for (Study study : validStudies)

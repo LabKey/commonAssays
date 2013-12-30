@@ -18,23 +18,21 @@
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.exp.OntologyManager" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.exp.property.Domain" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.security.SecurityManager" %>
 <%@ page import="org.labkey.api.security.SecurityPolicy" %>
+<%@ page import="org.labkey.api.security.SecurityPolicyManager" %>
+<%@ page import="org.labkey.api.security.User"%>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
-<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.webdav.WebdavService" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
@@ -43,6 +41,7 @@
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowFCSAnalysis" %>
+<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
@@ -56,29 +55,24 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
-<%@ page import="org.labkey.api.security.User" %>
-<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
-<%@ page import="org.labkey.api.security.SecurityPolicyManager" %>
-<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
-<%@ page import="java.util.LinkedHashMap" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
     .right {text-align:right;}
 </style>
-<script type="text/javascript" src="<%=h(AppProps.getInstance().getContextPath())%>/Flow/util.js"></script>
+<script type="text/javascript" src="<%=getContextPath()%>/Flow/util.js"></script>
 <script type="text/javascript">
 LABKEY.requiresClientAPI(true);
 LABKEY.requiresScript("TreeGrid.js");
 Ext.QuickTips.init();
 </script>
 <%
-    ViewContext context = HttpView.currentContext();
-    User user = context.getUser();
+    User user = getUser();
     FlowWell well = getWell();
     FlowWell fcsFile = well.getFCSFileInput();
     FlowFCSFile originalFile = well.getOriginalFCSFile();

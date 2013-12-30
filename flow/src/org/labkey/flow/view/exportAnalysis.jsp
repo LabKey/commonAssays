@@ -1,37 +1,35 @@
 <%
-    /*
-    * Copyright (c) 2011-2013 LabKey Corporation
-    *
-    * Licensed under the Apache License, Version 2.0 (the "License");
-    * you may not use this file except in compliance with the License.
-    * You may obtain a copy of the License at
-    *
-    *     http://www.apache.org/licenses/LICENSE-2.0
-    *
-    * Unless required by applicable law or agreed to in writing, software
-    * distributed under the License is distributed on an "AS IS" BASIS,
-    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    * See the License for the specific language governing permissions and
-    * limitations under the License.
-    */
+/*
+ * Copyright (c) 2011-2013 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 %>
-<%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.persist.AnalysisSerializer" %>
-<%@ page import="java.util.EnumMap" %>
-<%@ page import="org.labkey.flow.view.ExportAnalysisForm" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
+<%@ page import="org.labkey.flow.persist.AnalysisSerializer" %>
+<%@ page import="org.labkey.flow.view.ExportAnalysisForm" %>
+<%@ page import="java.util.EnumMap" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     JspView<ExportAnalysisForm> me = (JspView<ExportAnalysisForm>) HttpView.currentView();
     ExportAnalysisForm bean = me.getModelBean();
-    Container container = getViewContext().getContainer();
-    
+
     Map<AnalysisSerializer.Options, String> exportFormats = new EnumMap<>(AnalysisSerializer.Options.class);
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySample, "Grouped by sample");
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySamplePopulation, "Grouped by sample and population");

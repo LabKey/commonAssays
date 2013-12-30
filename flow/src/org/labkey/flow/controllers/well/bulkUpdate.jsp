@@ -24,7 +24,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     WellController.UpdateKeywordsForm form = (WellController.UpdateKeywordsForm)HttpView.currentModel();
-    ViewContext context = HttpView.currentContext();
+    ViewContext context = getViewContext();
 %>
 <span style="color:green;"><%=h(form.message)%></span><br>
 <labkey:errors />
@@ -47,7 +47,7 @@ var keywordStore = new Ext.data.SimpleStore({fields:['keyword'], data:keywords})
 var values = [
 <%
     comma = "";
-    for (String v : form.getValues(context,form.keyword))
+    for (String v : form.getValues(context, form.keyword))
     {
         out.print(comma);
         out.print("[");

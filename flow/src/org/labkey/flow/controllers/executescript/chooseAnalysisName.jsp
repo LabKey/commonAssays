@@ -16,24 +16,23 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils"%>
-<%@ page import="org.labkey.api.data.DataRegion"%>
+<%@ page import="org.labkey.api.data.Container"%>
+<%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.data.DataRegionSelection" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.Action" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ChooseRunsToAnalyzeForm> me = (JspView<ChooseRunsToAnalyzeForm>) HttpView.currentView();
-    ViewContext context = HttpView.getRootContext();
     ChooseRunsToAnalyzeForm form = me.getModelBean();
+    Container c = getContainer();
 %>
 <labkey:errors/>
 <form method="POST" action="<%=h(buildURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class))%>">
@@ -42,7 +41,7 @@
             if (StringUtils.isEmpty(name))
             {
                 Set<String> namesInUse = new HashSet<>();
-                for (FlowExperiment experiment : FlowExperiment.getExperiments(context.getContainer()))
+                for (FlowExperiment experiment : FlowExperiment.getExperiments(c))
                 {
                     namesInUse.add(experiment.getName().toLowerCase());
                 }
@@ -60,8 +59,8 @@
         <input type="text" name="ff_analysisName" value="<%=h(name)%>">
     </p>
 
-    <labkey:button text="Analyze runs" action="<%=new ActionURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class, context.getContainer())%>"/>
-    <labkey:button text="Go back" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, context.getContainer())%>"/>
+    <labkey:button text="Analyze runs" action="<%=new ActionURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class, c)%>"/>
+    <labkey:button text="Go back" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, c)%>"/>
     <% for (int runid : form.getSelectedRunIds()) { %>
     <input type="hidden" name="<%=DataRegion.SELECT_CHECKBOX_NAME%>" value="<%=runid%>">
     <% } %>

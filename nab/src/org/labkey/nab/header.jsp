@@ -15,14 +15,12 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.data.DataRegion"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.nab.NabController"%>
+<%@ page import="org.labkey.nab.NabController" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.data.DataRegion" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -54,7 +52,7 @@
 <%=textLink("Download Datafile", bean.getDatafileURL())%>
 <% } %>
 <% if (me.getViewContext().hasPermission(org.labkey.api.security.permissions.AdminPermission.class)) { %>
-    <%= textLink("Migrate Legacy NAb Runs", new org.labkey.api.view.ActionURL(NabController.MigrateToAssayAction.class, me.getViewContext().getContainer())) %>
+    <%= textLink("Migrate Legacy NAb Runs", new org.labkey.api.view.ActionURL(NabController.MigrateToAssayAction.class, getContainer())) %>
 <% } %>
 <br>
 <labkey:errors/>

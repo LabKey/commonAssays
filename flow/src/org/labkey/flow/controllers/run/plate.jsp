@@ -18,11 +18,7 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
 <%@ page import="org.labkey.flow.query.FlowPropertySet" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%
-    ViewContext context = HttpView.currentContext();
-%>
+<%@ page extends="org.labkey.api.jsp.JspBase"%>
 <script type="text/javascript">
 	LABKEY.requiresClientAPI();
 </script>
@@ -461,7 +457,7 @@ Ext.onReady(function()
 var statistics = null;  // for pure client API page this can be left null;
 var statistics = [<%
 String comma = "";
-FlowPropertySet ps = new FlowPropertySet(context.getContainer());
+FlowPropertySet ps = new FlowPropertySet(getContainer());
 for (StatisticSpec s : ps.getStatistics().keySet())
 {
     %><%=comma%><%=PageFlowUtil.jsString(s.toString())%><%

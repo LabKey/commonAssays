@@ -29,7 +29,6 @@
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
@@ -43,13 +42,11 @@
 <%@ page import="org.labkey.flow.persist.FlowManager" %>
 <%@ page import="org.labkey.flow.persist.ObjectType" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="org.labkey.flow.webparts.FlowSummaryWebPart" %>
 <%@ page import="java.util.Arrays" %>
 <%@page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    FlowSummaryWebPart me = (FlowSummaryWebPart) HttpView.currentModel();
-    Container c = me.c;
-    User user = getViewContext().getUser();
+    Container c = getContainer();
+    User user = getUser();
 
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
@@ -422,7 +419,7 @@
             }
             else
             {
-                %><div><%=textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
+                %><div><%=textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getActionURL().getLocalURIString()))%></div><%
             }
 
             if (_fcsRealRunCount > 0)

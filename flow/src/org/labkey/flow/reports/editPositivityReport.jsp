@@ -34,8 +34,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    ViewContext context = getViewContext();
-    Container c = context.getContainer();
+    Container c = getContainer();
 
     Pair<PositivityFlowReport, ActionURL> bean = (Pair<PositivityFlowReport, ActionURL>) HttpView.currentModel();
     PositivityFlowReport report = bean.first;
@@ -46,7 +45,7 @@
     FlowProtocol protocol = FlowProtocol.getForContainer(c);
     ICSMetadata metadata = protocol.getICSMetadata();
 
-    ActionURL currentURL = context.getActionURL();
+    ActionURL currentURL = getActionURL();
     ActionURL editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
     editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
 %>

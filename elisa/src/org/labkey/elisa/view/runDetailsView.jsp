@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 %>
+<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.data.PropertyManager" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.api.query.QueryView" %>
 <%@ page import="org.labkey.api.reports.permissions.ShareReportPermission" %>
+<%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.util.ExtUtil" %>
 <%@ page import="org.labkey.api.util.Formats" %>
 <%@ page import="org.labkey.api.util.UniqueID" %>
@@ -28,11 +31,9 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.elisa.ElisaController" %>
 <%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="org.labkey.elisa.ElisaController" %>
 <%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
-<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     public LinkedHashSet<ClientDependency> getClientDependencies()
@@ -48,9 +49,10 @@
 <%
     JspView<ElisaController.GenericReportForm> me = (JspView<ElisaController.GenericReportForm>) HttpView.currentView();
     ViewContext ctx = me.getViewContext();
-    Container c = ctx.getContainer();
+    Container c = getContainer();
+    User user = getUser();
     ElisaController.GenericReportForm form = me.getModelBean();
-    String numberFormat = PropertyManager.getProperties(ctx.getContainer(), "DefaultStudyFormatStrings").get("NumberFormatString");
+    String numberFormat = PropertyManager.getProperties(c, "DefaultStudyFormatStrings").get("NumberFormatString");
     String numberFormatFn;
     if(numberFormat == null)
     {
@@ -92,13 +94,13 @@
             renderType      : <%=q(form.getRenderType())%>,
             id              : <%=q(form.getComponentId())%>,
             baseUrl         : <%=q(baseUrl.getLocalURIString())%>,
-            allowShare      : <%=c.hasPermission(ctx.getUser(), ShareReportPermission.class)%>,
-            isDeveloper     : <%=ctx.getUser().isDeveloper()%>,
-            hideSave        : <%=ctx.getUser().isGuest()%>,
+            allowShare      : <%=c.hasPermission(user, ShareReportPermission.class)%>,
+            isDeveloper     : <%=user.isDeveloper()%>,
+            hideSave        : <%=user.isGuest()%>,
             autoColumnYName  : <%=q(form.getAutoColumnYName() != null ? form.getAutoColumnYName() : null)%>,
             autoColumnXName  : <%=q(form.getAutoColumnXName() != null ? form.getAutoColumnXName() : null)%>,
             defaultNumberFormat: eval(<%=q(numberFormatFn)%>),
-            allowEditMode   : <%=!ctx.getUser().isGuest() && c.hasPermission(ctx.getUser(), UpdatePermission.class)%>,
+            allowEditMode   : <%=!user.isGuest() && c.hasPermission(user, UpdatePermission.class)%>,
             curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>}
         }));
 

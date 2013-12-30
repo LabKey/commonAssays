@@ -51,7 +51,7 @@
             }
             for (String titrationName : bean.getTitrations())
             {
-                ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, getViewContext().getContainer());
+                ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, getContainer());
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", titrationName);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.Titration.toString());
@@ -64,7 +64,7 @@
             }
             for (String singlePointControl : bean.getSinglePointControls())
             {
-                ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, getViewContext().getContainer());
+                ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, getContainer());
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", singlePointControl);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.SinglePoint.toString());

@@ -19,13 +19,12 @@
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="java.util.Iterator" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="java.util.LinkedHashSet" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -40,8 +39,7 @@
 %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
-    ViewContext context = getViewContext();
-    Container container = context.getContainer();
+    Container container = getContainer();
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
 %>
 <script type="text/javascript">
@@ -59,7 +57,7 @@
             if (step.getNumber() > 1) {
                 %>
                 <td valign="middle">
-                    <img src="<%=h(context.getContextPath())%>/_.gif" style="background:<%=text(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
+                    <img src="<%=getContextPath()%>/_.gif" style="background:<%=text(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
                 </td>
                 <%
             }

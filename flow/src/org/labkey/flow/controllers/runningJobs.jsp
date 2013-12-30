@@ -31,7 +31,7 @@
 
     // The flow module used to just inspect jobs in the in-memory mini-
     // pipeline queue.
-    Container c = getViewContext().getContainer();
+    Container c = getContainer();
     List<FlowJob> jobs = new ArrayList<>();
     for (PipelineStatusFile sf : PipelineService.get().getQueuedStatusFiles())
     {

@@ -24,7 +24,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
-    Container c = me.getViewContext().getContainer();
+    Container c = getContainer();
     MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;
 %>
@@ -50,7 +50,7 @@ if (null != bean.quantAlgorithm)
 
         if (bean.writePermissions)
         { %>
-            <%=textLink("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
+            <%=textLink("Rename", MS2Controller.getRenameRunURL(c, run, getActionURL()))%><%
         } %>
             <%=bean.modHref%><%
 

@@ -27,7 +27,7 @@
     DataFile dataFile = me.getModelBean();
     ExpData expData = (null == dataFile ? null : dataFile.getExpData());
 
-    ActionURL urlDownload = urlProvider(ExperimentUrls.class).getShowFileURL(me.getViewContext().getContainer());
+    ActionURL urlDownload = urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
 %>
 <% if (null != dataFile && null != expData) { %>
 <table>

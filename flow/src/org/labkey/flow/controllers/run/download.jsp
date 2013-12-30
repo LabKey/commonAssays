@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
-<%@ page import="org.labkey.flow.controllers.run.DownloadRunBean" %>
-<%@ page import="java.io.File" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.flow.controllers.run.DownloadRunBean" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
+<%@ page import="java.io.File" %>
 <%@ page extends="org.labkey.api.jsp.FormPage"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib"%>
 <%
@@ -31,8 +30,7 @@
 <%
     if (model.missing.size() > 0)
     {
-        ViewContext context = getViewContext();
-        Container container = context.getContainer();
+        Container container = getContainer();
         PipelineService pipeService = PipelineService.get();
         PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
         %>

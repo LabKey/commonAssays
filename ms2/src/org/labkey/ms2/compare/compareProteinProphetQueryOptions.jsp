@@ -32,9 +32,9 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext());
 %>
 
-<script type="text/javascript" src="<%= h(AppProps.getInstance().getContextPath()) %>/MS2/inlineViewDesigner.js"></script>
+<script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
-<form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, view.getViewContext().getContainer()) %>" name="peptideFilterForm">
+<form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
     <p>This comparison view is based on ProteinProphet data so the runs must be associated with ProteinProphet data.

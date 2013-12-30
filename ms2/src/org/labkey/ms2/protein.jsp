@@ -26,9 +26,9 @@
 <%@ page import="java.text.Format" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-        MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
-        Format intFormat = Formats.commaf0;
-        Format percentFormat = Formats.percent;
+    MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
+    Format intFormat = Formats.commaf0;
+    Format percentFormat = Formats.percent;
 %>
 <table>
     <% if (bean.run != null) { %>
@@ -54,7 +54,7 @@
                     <% } %>
                     <select name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" onchange="this.form.submit();">
                         <option value="false">Show only peptides assigned by search engine</option>
-                        <option value="true" <%=selected(ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()))%>>Show all peptides with sequence matches</option>
+                        <option value="true" <%=selected(ProteinManager.showAllPeptides(getActionURL(), getUser()))%>>Show all peptides with sequence matches</option>
                     </select>
                 </form>
             </td>

@@ -15,23 +15,18 @@
  * limitations under the License.
  */
 %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.query.AttributeCache" %>
-<%@ page import="org.labkey.flow.query.FlowPropertySet" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
+<%@ page import="org.labkey.api.exp.property.DomainProperty" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.query.FlowPropertySet" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ViewContext context = HttpView.currentContext();
-    FlowPropertySet fps = new FlowPropertySet(context.getContainer());
+    FlowPropertySet fps = new FlowPropertySet(getContainer());
     
     StringBuilder jsonStats = new StringBuilder();
     jsonStats.append("[");
@@ -59,7 +54,7 @@
     StringBuilder jsonSamples = new StringBuilder();
     jsonSamples.append("[");
     List<String> sampleSetProperties = new ArrayList<>();
-    FlowProtocol protocol = FlowProtocol.ensureForContainer(context.getUser(), context.getContainer());
+    FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
     if (protocol != null)
     {
         ExpSampleSet sampleSet = protocol.getSampleSet();

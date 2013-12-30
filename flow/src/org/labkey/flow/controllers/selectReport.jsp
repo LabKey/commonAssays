@@ -29,8 +29,8 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
-    User user = context.getUser();
-    Container c = context.getContainer();
+    User user = getUser();
+    Container c = getContainer();
 
     boolean canEdit = c.hasPermission(user, UpdatePermission.class);
 

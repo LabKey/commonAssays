@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
 <%@ page import="org.labkey.flow.controllers.NewFolderForm" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
@@ -25,8 +24,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ViewContext context = getViewContext();
-    Container c = context.getContainer();
+    Container c = getContainer();
     NewFolderForm form = (NewFolderForm) getModelBean();
 %>
 <labkey:errors/>

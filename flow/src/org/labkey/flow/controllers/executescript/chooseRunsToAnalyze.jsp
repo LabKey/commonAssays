@@ -45,8 +45,6 @@
 %>
 <%
     JspView<ChooseRunsToAnalyzeForm> me = (JspView<ChooseRunsToAnalyzeForm>) HttpView.currentView();
-    ViewContext context = HttpView.getRootContext();
-
     ChooseRunsToAnalyzeForm form = me.getModelBean();
     ChooseRunsView view = new ChooseRunsView(form);
     Collection<FlowExperiment> targetExperiments = new ArrayList(form.getAvailableAnalyses());
@@ -54,7 +52,7 @@
     PopulationSet analysis = form.getProtocol().getCompensationCalcOrAnalysis(form.getProtocolStep());
 %>
 <labkey:errors/>
-<form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, context.getContainer())%>">
+<form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
     <table>
         <tr><td>Analysis script to use:</td>
             <td><select name="scriptId" onchange="this.form.submit()">

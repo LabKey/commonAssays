@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.luminex.LuminexRunUploadForm" %>
+<%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
 <%@ page import="org.labkey.luminex.Titration" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
-<%@ page import="java.util.TreeMap" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="java.util.Set" %>
-
+<%@ page import="java.util.TreeMap" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
@@ -63,13 +63,13 @@
         {
 %>
             <tr>
-                <td class="labkey-form-label"><%= PageFlowUtil.filter(titrationEntry.getValue().getName()) %></td>
+                <td class="labkey-form-label"><%= h(titrationEntry.getValue().getName()) %></td>
                 <td>
-                    <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
+                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn();' />
                 </td>
                 <td>
-                    <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
+                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);' />
                 </td>
             </tr>
@@ -99,9 +99,9 @@
         {
 %>
             <tr>
-                <td class="labkey-form-label"><%= PageFlowUtil.filter(titrationEntry.getValue().getName()) %></td>
+                <td class="labkey-form-label"><%= h(titrationEntry.getValue().getName()) %></td>
                 <td>
-                    <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
+                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);' />
                 </td>
             </tr>
@@ -126,9 +126,9 @@
                     {
 %>
                 <tr>
-                    <td class="labkey-form-label"><%= PageFlowUtil.filter(trackedSinglePointControl) %></td>
+                    <td class="labkey-form-label"><%= h(trackedSinglePointControl) %></td>
                     <td>
-                        <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl)) %>'
+                        <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl)) %>'
                                value='1' onClick='titrationRoleChecked(this);' />
                     </td>
                 </tr>
@@ -159,8 +159,8 @@
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
         {
 %>
-            var titrationRoleName = '<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>';
-            var titrationCellName = '<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>';
+            var titrationRoleName = '<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>';
+            var titrationCellName = '<%= h(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>';
             var isChecked = document.getElementsByName(titrationRoleName)[0].checked;
 
             // set the hidden helper showcol field value

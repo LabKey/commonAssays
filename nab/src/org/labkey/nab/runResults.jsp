@@ -24,7 +24,6 @@
 <%@ page import="org.labkey.api.study.WellData" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.NabController" %>
 <%@ page import="org.labkey.nab.OldNabAssayRun" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -35,9 +34,8 @@
     JspView<NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
     NabController.RenderAssayBean bean = me.getModelBean();
     OldNabAssayRun assay = bean.getAssay();
-    ViewContext context = me.getViewContext();
-    Container c = context.getContainer();
-    boolean writer = c.hasPermission(context.getUser(), InsertPermission.class);
+    Container c = getContainer();
+    boolean writer = c.hasPermission(getUser(), InsertPermission.class);
     %>
 <labkey:errors/>
 <%
@@ -364,7 +362,7 @@
     </tr>
     <tr>
         <td>
-            <% me.include(bean.getDiscussionView(HttpView.getRootContext()), out); %>
+            <% me.include(bean.getDiscussionView(getViewContext()), out); %>
         </td>
     </tr>
 <%

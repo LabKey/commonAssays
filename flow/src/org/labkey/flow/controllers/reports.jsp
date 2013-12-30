@@ -42,12 +42,12 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
-    User user = context.getUser();
-    Container c = context.getContainer();
+    User user = getUser();
+    Container c = getContainer();
 
     boolean canEdit = c.hasPermission(user, UpdatePermission.class);
 
-    ActionURL currentURL = context.getActionURL();
+    ActionURL currentURL = getActionURL();
     ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c).addReturnURL(currentURL);
     ActionURL deleteURL = new ActionURL(ReportsController.DeleteAction.class, c).addReturnURL(currentURL);
 

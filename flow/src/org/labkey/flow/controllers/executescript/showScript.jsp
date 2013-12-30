@@ -35,9 +35,9 @@
 <%
     final FlowScript script = (FlowScript)getModelBean();
     ViewContext context = getViewContext();
-    ActionURL url = context.getActionURL();
+    ActionURL url = getActionURL();
 
-    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
+    boolean canEdit = context.hasPermission(UpdatePermission.class);
 %>
 Analysis scripts may have up to two sections in them.
 The compensation calculation describes how to locate the compensation controls in each run, and which gates need to be applied to them.
@@ -48,7 +48,7 @@ The analysis section describes which gates in the analysis, as well as the stati
 <% } %>
 </p>
 <%
-    ScriptOverview overview = new ScriptOverview(context.getUser(), context.getContainer(), script);
+    ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
 %>
 <%=text(overview.toString())%>
 
