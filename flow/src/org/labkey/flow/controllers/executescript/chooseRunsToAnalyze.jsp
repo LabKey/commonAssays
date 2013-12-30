@@ -16,9 +16,9 @@
  */
 %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext"%>
+<%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController"%>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
@@ -27,8 +27,6 @@
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.flow.controllers.BaseFlowController" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <style type="text/css">
