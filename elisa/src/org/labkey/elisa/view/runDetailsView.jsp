@@ -48,7 +48,7 @@
 %>
 <%
     JspView<ElisaController.GenericReportForm> me = (JspView<ElisaController.GenericReportForm>) HttpView.currentView();
-    ViewContext ctx = me.getViewContext();
+    ViewContext ctx = getViewContext();
     Container c = getContainer();
     User user = getUser();
     ElisaController.GenericReportForm form = me.getModelBean();

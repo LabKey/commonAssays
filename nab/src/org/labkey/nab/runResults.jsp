@@ -41,7 +41,7 @@
 <%
     String labelStyle = "text-align:left;vertical-align:middle;font-weight:bold";
 
-    PlateQueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext(), assay);
+    PlateQueryView duplicateDataFileView = bean.getDuplicateDataFileView(getViewContext(), assay);
 
     if (bean.isNewRun())
     {

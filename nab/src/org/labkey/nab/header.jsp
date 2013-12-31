@@ -51,7 +51,7 @@
 %>
 <%=textLink("Download Datafile", bean.getDatafileURL())%>
 <% } %>
-<% if (me.getViewContext().hasPermission(org.labkey.api.security.permissions.AdminPermission.class)) { %>
+<% if (getViewContext().hasPermission(org.labkey.api.security.permissions.AdminPermission.class)) { %>
     <%= textLink("Migrate Legacy NAb Runs", new org.labkey.api.view.ActionURL(NabController.MigrateToAssayAction.class, getContainer())) %>
 <% } %>
 <br>

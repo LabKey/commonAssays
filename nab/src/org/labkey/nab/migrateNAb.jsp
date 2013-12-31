@@ -15,23 +15,21 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.data.DataRegion" %>
-<%@ page import="org.labkey.api.exp.api.ExpProtocol" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.data.DataRegion"%>
+<%@ page import="org.labkey.api.data.DisplayColumn"%>
 <%@ page import="org.labkey.api.data.RenderContext" %>
-<%@ page import="org.labkey.api.data.DisplayColumn" %>
+<%@ page import="org.labkey.api.exp.api.ExpProtocol" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-
 <%
-JspView<Map<ExpProtocol, List<DisplayColumn>>> me = (JspView<Map<ExpProtocol, List<DisplayColumn>>>) HttpView.currentView();
-Map<ExpProtocol, List<DisplayColumn>> protocols = me.getModelBean();
-ViewContext context = me.getViewContext();
+    JspView<Map<ExpProtocol, List<DisplayColumn>>> me = (JspView<Map<ExpProtocol, List<DisplayColumn>>>) HttpView.currentView();
+    Map<ExpProtocol, List<DisplayColumn>> protocols = me.getModelBean();
+    ViewContext context = getViewContext();
 %>
 <p style="width: 500px">
     This will migrate NAb runs created by the legacy implementation into the newer assay-based representation. It will

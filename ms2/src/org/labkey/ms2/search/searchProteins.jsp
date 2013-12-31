@@ -24,11 +24,10 @@
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-
 <%
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
-    ViewContext ctx = me.getViewContext();
+    ViewContext ctx = getViewContext();
 
     ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, getContainer());
     String viewName = bean.getPeptideCustomViewName(ctx);
