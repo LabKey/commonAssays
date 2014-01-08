@@ -103,7 +103,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return new AssayTableMetadata(
                 this,
                 protocol,
-                FieldKey.fromParts("Properties", ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+                FieldKey.fromParts(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
                 FieldKey.fromParts("ObjectId"));
     }
