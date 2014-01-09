@@ -39,8 +39,7 @@ public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
     @Override
     public ApiResponse execute(GraphSelectedForm form, BindException errors) throws Exception
     {
-        Map<Integer, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
-                getViewContext().getUser(), form.getId());
+        Map<Integer, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getId());
 
         StringBuilder objectIdParam = new StringBuilder();
         String sep = "";
@@ -51,7 +50,7 @@ public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
         }
 
 
-        ActionURL url = new ActionURL(StudyNabGraphAction.class, getViewContext().getContainer());
+        ActionURL url = new ActionURL(StudyNabGraphAction.class, getContainer());
         // simply pass the incoming parameters through, except for objectIds, which is subject to modification for
         // security reasons:
         url.addParameters(getPropertyValues());

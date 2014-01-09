@@ -391,7 +391,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
                         if (form.isDelete())
                         {
-                            reRun.delete(getViewContext().getUser());
+                            reRun.delete(getUser());
                         }
                         else if (experiment == null)
                         {

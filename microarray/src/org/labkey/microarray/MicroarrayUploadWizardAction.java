@@ -79,7 +79,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         {
             // Look through all the sample sets that are visible from this folder to check for samples where
             // the barcode matches
-            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(getContainer(), getViewContext().getUser(), true))
+            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(getContainer(), getUser(), true))
             {
                 ExpMaterial[] materials = sampleSet.getSamples();
                 Domain domain = sampleSet.getType();

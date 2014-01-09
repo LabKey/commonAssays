@@ -87,7 +87,7 @@ public class MS1Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return ExperimentService.get().createExperimentRunWebPart(getViewContext(),MS1Module.EXP_RUN_TYPE);
+            return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS1Module.EXP_RUN_TYPE);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -203,7 +203,7 @@ public class MS1Controller extends SpringActionController
         protected FeaturesView getFeaturesView(ShowFeaturesForm form, BindException bindErrors, boolean forExport)
         {
             _form = form;
-            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer()),
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()),
                                                         form.getRunId());
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 featuresView.getBaseFilters().add(new PeptideFilter(form.getPepSeq(), true));
@@ -215,12 +215,12 @@ public class MS1Controller extends SpringActionController
         {
             //this action requires that a specific experiment run has been specified
             if(!form.runSpecified())
-                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getViewContext().getContainer()));
+                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getContainer()));
 
             //ensure that the experiment run is valid and exists within the current container
             ExpRun run = ExperimentService.get().getExpRun(form.getRunId());
-            if(null == run || !(run.getContainer().equals(getViewContext().getContainer())))
-                throw new NotFoundException("Experiment run " + form.getRunId() + " does not exist in " + getViewContext().getContainer().getPath());
+            if(null == run || !(run.getContainer().equals(getContainer())))
+                throw new NotFoundException("Experiment run " + form.getRunId() + " does not exist in " + getContainer().getPath());
 
             MS1Manager mgr = MS1Manager.get();
 
@@ -312,7 +312,7 @@ public class MS1Controller extends SpringActionController
         protected PeaksView createQueryView(PeaksViewForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             Feature feature = form.getFeature();
-            return new PeaksView(getViewContext(), new MS1Schema(getUser(), getViewContext().getContainer()),
+            return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
                                                 feature.getExpRun(), feature,
                                                 null == form.getScanFirst() ? feature.getScanFirst().intValue() : form.getScanFirst().intValue(),
                                                 null == form.getScanLast() ? feature.getScanLast().intValue() : form.getScanLast().intValue());
@@ -321,13 +321,13 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getHtmlView(PeaksViewForm form, BindException errors) throws Exception
         {
             if(-1 == form.getFeatureId())
-                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getViewContext().getContainer()));
+                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getContainer()));
 
             //get the feature and ensure that it is valid and that it's ExpRun is valid
             //and that it exists within the current container
             Feature feature = form.getFeature();
             if(null == feature)
-                throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getViewContext().getContainer().getPath());
+                throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getContainer().getPath());
 
             ExpRun expRun = feature.getExpRun();
             if(null == expRun)
@@ -336,7 +336,7 @@ public class MS1Controller extends SpringActionController
             //because we are now showing features from sub-folders in search results, the specified
             //feature/run may exist in a different container than the current one. If so, redirect to
             //the appropriate container
-            if(!(expRun.getContainer().equals(getViewContext().getContainer())))
+            if(!(expRun.getContainer().equals(getContainer())))
             {
                 ActionURL redir = getViewContext().getActionURL().clone();
                 redir.setContainer(expRun.getContainer());
@@ -403,7 +403,7 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getView(MS2PeptideForm form, BindException errors) throws Exception
         {
             if(null == form || form.getFeatureId() < 0)
-                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getViewContext().getContainer()));
+                return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getContainer()));
 
             //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
@@ -415,7 +415,7 @@ public class MS1Controller extends SpringActionController
                 return new HtmlView("The corresponding MS2 peptide information was not found in the database. Ensure that it has been imported before attempting to view the MS2 peptide.");
 
             Peptide pepFirst = peptides[0];
-            ActionURL url = PageFlowUtil.urlProvider(MS2Urls.class).getShowPeptideUrl(getViewContext().getContainer());
+            ActionURL url = PageFlowUtil.urlProvider(MS2Urls.class).getShowPeptideUrl(getContainer());
             url.addParameter("run", String.valueOf(pepFirst.getRun()));
             url.addParameter("peptideId", String.valueOf(pepFirst.getRowId()));
             url.addParameter("rowIndex", 1);
@@ -447,7 +447,7 @@ public class MS1Controller extends SpringActionController
             //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
             if(null == feature)
-                throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getViewContext().getContainer().getPath());
+                throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getContainer().getPath());
 
             //ensure that the run for this feature exists within the current container
             //and that the runid parameter matches
@@ -458,7 +458,7 @@ public class MS1Controller extends SpringActionController
             //because we are now showing features from sub-folders in search results, the specified
             //feature/run may exist in a different container than the current one. If so, redirect to
             //the appropriate container
-            if(!(run.getContainer().equals(getViewContext().getContainer())))
+            if(!(run.getContainer().equals(getContainer())))
             {
                 ActionURL redir = getViewContext().getActionURL().clone();
                 redir.setContainer(run.getContainer());
@@ -481,7 +481,7 @@ public class MS1Controller extends SpringActionController
             FeatureDetailsModel model = new FeatureDetailsModel(feature, prevNextFeatureIds[0],
                     prevNextFeatureIds[1], form.getSrcUrl(), form.getMzWindowLow(), form.getMzWindowHigh(),
                     form.getScanWindowLow(), form.getScanWindowHigh(), form.getScan(), 
-                    getViewContext().getContainer(), getViewContext().getActionURL());
+                    getContainer(), getViewContext().getActionURL());
 
             //cache the form so we can build the nav trail
             _form = form;
@@ -621,13 +621,13 @@ public class MS1Controller extends SpringActionController
         protected FeaturesView getFeaturesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
-            baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
+            baseFilters.add(new ContainerFeaturesFilter(getContainer(), form.isSubfolders(), getUser()));
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 baseFilters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
             if(null != form.getRunIds() && form.getRunIds().length() > 0)
                 baseFilters.add(new RunFilter(form.getRunIds()));
 
-            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer(),
                                             !(form.isSubfolders())), baseFilters, true);
             featuresView.setTitle("Matching MS1 Features");
             featuresView.setForExport(forExport);
@@ -638,8 +638,8 @@ public class MS1Controller extends SpringActionController
         {
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
-            TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getViewContext().getUser(), getViewContext().getContainer());
-            PeptidesView pepView = new PeptidesView(MS2Service.get().createSchema(getViewContext().getUser(), getViewContext().getContainer()), peptidesTable.getPublicName()
+            TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getUser(), getContainer());
+            PeptidesView pepView = new PeptidesView(MS2Service.get().createSchema(getUser(), getContainer()), peptidesTable.getPublicName()
             );
             pepView.setSearchSubfolders(form.isSubfolders());
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
@@ -652,7 +652,7 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getHtmlView(PeptideFilterSearchForm form, BindException errors) throws Exception
         {
             //create the search view
-            PepSearchModel searchModel = new PepSearchModel(getViewContext().getContainer(), form.getPepSeq(),
+            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(),
                     form.isExact(), form.isSubfolders(), form.getRunIds());
             JspView<PepSearchModel> searchView = new JspView<>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
             searchView.setTitle("Search Criteria");
@@ -851,7 +851,7 @@ public class MS1Controller extends SpringActionController
         protected FeaturesView getFeaturesView(SimilarSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
-            baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
+            baseFilters.add(new ContainerFeaturesFilter(getContainer(), form.isSubfolders(), getUser()));
             baseFilters.add(new MzFilter(form.getMzSource(), form.getMzOffset(), form.getMzUnits()));
             if(SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
                 baseFilters.add(new RetentionTimeFilter(form.getTimeSource() - form.getTimeOffset(),
@@ -860,7 +860,7 @@ public class MS1Controller extends SpringActionController
                 baseFilters.add(new ScanFilter((int)form.getTimeSource().doubleValue() - (int)form.getTimeOffset(),
                         (int)form.getTimeSource().doubleValue() + (int)(form.getTimeOffset())));
 
-            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer(),
                                             !(form.isSubfolders())), baseFilters, true);
             featuresView.setTitle("Search Results");
             featuresView.setForExport(forExport);
@@ -869,7 +869,7 @@ public class MS1Controller extends SpringActionController
 
         public ModelAndView getHtmlView(SimilarSearchForm form, BindException errors) throws Exception
         {
-            SimilarSearchModel searchModel = new SimilarSearchModel(getViewContext().getContainer(), form.getFeature(),
+            SimilarSearchModel searchModel = new SimilarSearchModel(getContainer(), form.getFeature(),
                     form.getMzSource(), form.getTimeSource(),
                     form.getMzOffset(), form.getMzUnits(),
                     form.getTimeOffset(), form.getTimeUnits(),
@@ -906,7 +906,7 @@ public class MS1Controller extends SpringActionController
             if(null == selectedRuns || selectedRuns.size() < 1)
                 return HttpView.redirect(new BeginAction().getUrl().getLocalURIString());
 
-            ActionURL url = new ActionURL(CompareRunsAction.class, getViewContext().getContainer());
+            ActionURL url = new ActionURL(CompareRunsAction.class, getContainer());
             StringBuilder runIds = new StringBuilder();
             String sep = "";
             for(String run : selectedRuns)
@@ -961,7 +961,7 @@ public class MS1Controller extends SpringActionController
 
         protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
-            return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), form.getRunIdArray(), getViewContext().getActionURL());
+            return new CompareRunsView(new MS1Schema(getUser(), getContainer()), form.getRunIdArray(), getViewContext().getActionURL());
         }
 
         protected ModelAndView getHtmlView(CompareRunsForm form, BindException errors) throws Exception

@@ -62,15 +62,15 @@ if (errorMessage != null)
 <a name="quantitation"></a>
 <table class="labkey-tab-strip">
     <tr>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%= getContextPath() %>/_.gif"></td>
         <% for (int i = 1; i <= 6; i++)
         {
             URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", Integer.toString(i)); %>
-            <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
+            <td class="labkey-tab-space"><img width="5" src="<%= getContextPath() %>/_.gif"></td>
             <td class="labkey-tab<%= i == currentCharge ? "-selected" : "" %>" style="margin-bottom: 0;"><a href="<%= h(chargeUrl ) %>#quantitation"><%= i %>+</a></td><%
         } %>
         <td class="labkey-tab-space" width="100%"></td>
-        <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%= getContextPath() %>/_.gif"></td>
     </tr>
 </table>
 <table style="height: <%= ElutionGraph.HEIGHT * 3 + 50 %>px;">

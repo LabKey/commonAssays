@@ -40,7 +40,7 @@ public class ViabilityController extends SpringActionController
     {
         public ActionURL getRedirectURL(Object o) throws Exception
         {
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getViewContext().getContainer());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
         }
     }
 }

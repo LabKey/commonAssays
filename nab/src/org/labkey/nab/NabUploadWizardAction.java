@@ -124,7 +124,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException, ExperimentException
     {
         if (form.getReRun() != null)
-            form.getReRun().delete(getViewContext().getUser());
+            form.getReRun().delete(getUser());
         return super.afterRunCreation(form, run, errors);
     }
 

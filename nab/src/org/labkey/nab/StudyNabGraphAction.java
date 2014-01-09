@@ -54,7 +54,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
     @Override
     public ModelAndView getView(GraphSelectedForm graphForm, BindException errors) throws Exception
     {
-        Map<Integer, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(), getViewContext().getUser(), graphForm.getId());
+        Map<Integer, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), graphForm.getId());
         if (ids.values().isEmpty())
             throw new NotFoundException("No IDs available for charting.");
         // We don't care which protocol we get- we just need any valid protocol to get to the provider (which should be
@@ -71,7 +71,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
                     throw new IllegalStateException("Cannot graph data from different providers on the same chart");
             }
         }
-        Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
+        Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
         Set<Integer> cutoffSet = new HashSet<>();
         for (DilutionSummary summary : summaries.keySet())
         {
@@ -86,7 +86,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
             config.setHeight(graphForm.getHeight());
         if (graphForm.getWidth() > 0)
             config.setWidth(graphForm.getWidth());
-        NabGraph.renderChartPNG(getViewContext().getContainer(), getViewContext().getResponse(), summaries, config);
+        NabGraph.renderChartPNG(getContainer(), getViewContext().getResponse(), summaries, config);
         return null;
     }
 

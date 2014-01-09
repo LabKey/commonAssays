@@ -428,7 +428,7 @@ public class MS2Controller extends SpringActionController
             vBox.addView(runSummary);
 
             List<Pair<String, String>> sqlSummaries = new ArrayList<>();
-            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getViewContext().getUser(), run);
+            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run);
             peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
 
             VBox filterBox = new VBox(new FilterHeaderView(currentURL, form, run), new CurrentFilterView(null, sqlSummaries));
@@ -1589,7 +1589,7 @@ public class MS2Controller extends SpringActionController
                 throw new RedirectException(targetURL);
             }
 
-            SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(getViewContext().getUser(), getViewContext().getContainer()));
+            SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(getUser(), getContainer()));
             tableInfo.addProteinNameFilter(form.getTargetProtein(), false);
 
             Map<Protein, ActionURL> proteinsWithURLs = new LinkedHashMap<>();
@@ -2116,7 +2116,7 @@ public class MS2Controller extends SpringActionController
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[runs.size()]));
             ActionURL currentURL = getViewContext().cloneActionURL();
-            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getViewContext().getUser());
+            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser());
 
             MS2ExportType exportType = MS2ExportType.valueOfOrNotFound(form.getExportFormat());
             exportType.export(peptideView, form, null, currentURL, peptideFilter);
@@ -2428,7 +2428,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
-        CompareQuery query = CompareQuery.getCompareQuery(column, currentURL, runs, getViewContext().getUser());
+        CompareQuery query = CompareQuery.getCompareQuery(column, currentURL, runs, getUser());
         if (query == null)
         {
             errors.addError(new LabkeyError("You must specify a comparison type"));
@@ -2467,7 +2467,7 @@ public class MS2Controller extends SpringActionController
             List<String> headers = new ArrayList<>();
             headers.add(query.getHeader());
             headers.add("");
-            for (Pair<String, String> sqlSummary : query.getSQLSummaries(getViewContext().getUser()))
+            for (Pair<String, String> sqlSummary : query.getSQLSummaries(getUser()))
             {
                 headers.add(sqlSummary.getKey() + ": " + sqlSummary.getValue());
             }
@@ -2481,7 +2481,7 @@ public class MS2Controller extends SpringActionController
             rgn.setColSpan(query.getColumnsPerRun());
             rgn.setMultiColumnCaptions(runCaptions);
 
-            HttpView filterView = new CurrentFilterView(query, getViewContext().getUser());
+            HttpView filterView = new CurrentFilterView(query, getUser());
 
             GridView compareView = new GridView(rgn, errors);
             rgn.setShowPagination(false);
@@ -3202,7 +3202,7 @@ public class MS2Controller extends SpringActionController
 
         // Need to create a filter for 1) extra filter and 2) selected peptides
         // URL filter is applied automatically (except for DTA/PKL)
-        SimpleFilter baseFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.EXTRA_FILTER, getViewContext().getUser(), run);
+        SimpleFilter baseFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.EXTRA_FILTER, getUser(), run);
 
         List<String> exportRows = null;
         if (selected)
@@ -4401,7 +4401,7 @@ public class MS2Controller extends SpringActionController
 
             ActionURL targetURL = getViewContext().getActionURL().clone();
             SimpleFilter peptideFilter = getAllPeptidesFilter(getViewContext(), targetURL, ms2Run);
-            boolean showAllPeptides = ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser());
+            boolean showAllPeptides = ProteinManager.showAllPeptides(getViewContext().getActionURL(), getUser());
             ProteinCoverageMapBuilder pcm = new ProteinCoverageMapBuilder(getViewContext(), protein, ms2Run, peptideFilter, showAllPeptides);
             pcm.setProteinPeptides(pcm.getPeptidesForFilter(peptideFilter));
             pcm.setAllPeptideCounts();
@@ -4459,7 +4459,7 @@ public class MS2Controller extends SpringActionController
             if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
                 targetURL.addParameter(MS2Manager.getDataRegionNamePeptides() + ".PeptideProphet~gte", form.getPeptideProphetProbability().toString());
 
-            boolean showAllPeptides = ProteinManager.showAllPeptides(targetURL, getViewContext().getUser());
+            boolean showAllPeptides = ProteinManager.showAllPeptides(targetURL, getUser());
 
             // if we have a target protein, then use that seqId with the run list for the export
             SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size()];

@@ -91,7 +91,7 @@ public class ReportsController extends BaseFlowController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            root.addChild("Reports", new ActionURL(BeginAction.class,getViewContext().getContainer()));
+            root.addChild("Reports", new ActionURL(BeginAction.class, getContainer()));
             return root;
         }
     }
@@ -119,7 +119,7 @@ public class ReportsController extends BaseFlowController
         @Override
         public void validateForm(FORM form, Errors errors)
         {
-            FlowProtocol protocol = FlowProtocol.getForContainer(getViewContext().getContainer());
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
             if (protocol == null)
                 errors.reject(ERROR_MSG, "No flow protocol in this container.  Please upload FCS files to create a flow protocol.");
         }
@@ -221,7 +221,7 @@ public class ReportsController extends BaseFlowController
                 return;
             }
 
-            Collection<FlowReport> reports = FlowReportManager.getFlowReports(getViewContext().getContainer(), getViewContext().getUser());
+            Collection<FlowReport> reports = FlowReportManager.getFlowReports(getContainer(), getUser());
             for (FlowReport report : reports)
             {
                 if (form.getReportName().equalsIgnoreCase(report.getDescriptor().getReportName()))
@@ -254,7 +254,7 @@ public class ReportsController extends BaseFlowController
 
         public ActionURL getSuccessURL(CopyForm idForm)
         {
-            ActionURL url = new ActionURL(UpdateAction.class, getViewContext().getContainer()).addParameter("reportId", r.getReportId().toString());
+            ActionURL url = new ActionURL(UpdateAction.class, getContainer()).addParameter("reportId", r.getReportId().toString());
             if (idForm.getReturnActionURL() != null)
                 url.addReturnURL(idForm.getReturnActionURL());
             return url;
@@ -297,12 +297,12 @@ public class ReportsController extends BaseFlowController
         @Override
         public URLHelper getCancelUrl()
         {
-            return _form.getReturnURLHelper(new ActionURL(BeginAction.class,getViewContext().getContainer()));
+            return _form.getReturnURLHelper(new ActionURL(BeginAction.class, getContainer()));
         }
 
         public ActionURL getSuccessURL(IdForm form)
         {
-            return form.getReturnActionURL(new ActionURL(BeginAction.class, getViewContext().getContainer()));
+            return form.getReturnActionURL(new ActionURL(BeginAction.class, getContainer()));
         }
 
         public boolean handlePost(IdForm form, BindException errors) throws Exception

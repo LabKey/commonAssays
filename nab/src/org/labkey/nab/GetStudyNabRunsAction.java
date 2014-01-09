@@ -92,8 +92,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
 
     protected Collection<ExpRun> getRuns(GetStudyNabRunsForm form, BindException errors)
     {
-        Map<Integer, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
-                getViewContext().getUser(), form.getObjectIds());
+        Map<Integer, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getObjectIds());
 
         Collection<ExpRun> runs = new ArrayList<>();
 

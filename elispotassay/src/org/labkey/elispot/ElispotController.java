@@ -98,7 +98,7 @@ public class ElispotController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getViewContext().getContainer()));
+            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -143,7 +143,7 @@ public class ElispotController extends SpringActionController
             QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
             settings.setAllowChooseView(true);
 
-            QueryView queryView = new QueryView(new ElispotProtocolSchema(getViewContext().getUser(), getViewContext().getContainer(), _protocol, (ElispotAssayProvider)AssayService.get().getProvider(_protocol), null), settings, errors);
+            QueryView queryView = new QueryView(new ElispotProtocolSchema(getUser(), getContainer(), _protocol, (ElispotAssayProvider)AssayService.get().getProvider(_protocol), null), settings, errors);
             queryView.setShadeAlternatingRows(true);
             queryView.setShowBorders(true);
             queryView.setShowDetailsColumn(false);

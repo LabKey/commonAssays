@@ -258,7 +258,7 @@ public class WellController extends BaseFlowController
             //whether the pipeline root's parent really is the container, or if we should
             //be checking a different (more specific) permission.
             SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, false);
-            if (!policy.hasPermission(getViewContext().getUser(), ReadPermission.class))
+            if (!policy.hasPermission(getUser(), ReadPermission.class))
                 return new HtmlView("<span class='error'>You don't have permission to the FCS file.</span>");
 
             boolean canRead = false;
@@ -554,7 +554,7 @@ public class WellController extends BaseFlowController
             }
             update.append("  ELSE value END\n");
             update.append("WHERE objectid IN (SELECT O.rowid from flow.object O where O.container=? and O.typeid=?) AND keywordid=?");
-            update.add(getViewContext().getContainer());
+            update.add(getContainer());
             update.add(ObjectType.fcsKeywords.getTypeId());
             update.add(keywordid);
             update.append("  AND value IN (");

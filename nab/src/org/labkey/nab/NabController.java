@@ -1029,7 +1029,7 @@ public class NabController extends SpringActionController
                 params.put(paramName, getViewContext().getRequest().getParameter(paramName));
             }
             
-            ViewBackgroundInfo info = new ViewBackgroundInfo(getViewContext().getContainer(), getViewContext().getUser(), getViewContext().getActionURL());
+            ViewBackgroundInfo info = new ViewBackgroundInfo(getContainer(), getUser(), getViewContext().getActionURL());
             PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
             if (pipeRoot == null)
             {
