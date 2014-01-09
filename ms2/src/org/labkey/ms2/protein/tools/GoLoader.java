@@ -16,22 +16,30 @@
 
 package org.labkey.ms2.protein.tools;
 
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
-import org.labkey.api.iterator.CloseableIterator;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.reader.TabLoader;
+import org.labkey.api.util.CheckedInputStream;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FTPUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -59,7 +67,6 @@ public abstract class GoLoader
     private static Boolean _goLoaded = null;
     private static GoLoader _currentLoader = null;
 
-    private TarInputStream _tis = null;
     private final StringBuffer _status = new StringBuffer();  // Can't use StringBuilder -- needs to be synchronized
     private boolean _complete = false;
 
@@ -123,7 +130,7 @@ public abstract class GoLoader
                 }
                 finally
                 {
-                    complete();
+                    _complete = true;
                 }
             }
         });
@@ -132,10 +139,6 @@ public abstract class GoLoader
 
     private void loadGoFromGz() throws SQLException, IOException, ServletException
     {
-        InputStream is = getInputStream();
-        _tis = new TarInputStream(new GZIPInputStream(is));
-        TarEntry te = _tis.getNextEntry();
-
         DbSchema schema = ProteinManager.getSchema();
         Map<String, GoLoadBean> map = getGoLoadMap();
 
@@ -145,18 +148,23 @@ public abstract class GoLoader
         logStatus("Starting to load GO annotation files");
         logStatus("");
 
-        while (te != null)
+        try (TarArchiveInputStream tais = new TarArchiveInputStream(new GZIPInputStream(new CheckedInputStream(getInputStream()))))
         {
-            String filename = te.getName();
-            int index = filename.lastIndexOf('/');
-            String shortFilename = filename.substring(index + 1);
+            TarArchiveEntry te = tais.getNextTarEntry();
 
-            GoLoadBean bean = map.get(shortFilename);
+            while (te != null)
+            {
+                String filename = te.getName();
+                int index = filename.lastIndexOf('/');
+                String shortFilename = filename.substring(index + 1);
 
-            if (null != bean)
-                loadSingleGoFile(bean, shortFilename, _tis);
+                GoLoadBean bean = map.get(shortFilename);
 
-            te = _tis.getNextEntry();
+                if (null != bean)
+                    loadSingleGoFile(bean, shortFilename, tais);
+
+                te = tais.getNextTarEntry();
+            }
         }
 
         new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
@@ -170,46 +178,46 @@ public abstract class GoLoader
     private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException, ServletException
     {
         int orgLineCount = 0;
-        CloseableIterator<Map<String, Object>> it = null;
         String[] cols = bean.cols;
         TableInfo ti = bean.tinfo;
+
+        logStatus("Clearing table " + bean.tinfo);
+        new SqlExecutor(ProteinManager.getSchema()).execute("TRUNCATE TABLE " + bean.tinfo);
+
+        logStatus("Starting to load " + filename);
+        InputStreamReader isr = new InputStreamReader(is);
+        TabLoader t = new TabLoader(isr, false);
+        String SQLCommand = "INSERT INTO " + ti + "(";
+        String QMarkPart = "VALUES (";
+
+        for (int i = 0; i < cols.length; i++)
+        {
+            SQLCommand += cols[i];
+            QMarkPart += "?";
+            if (i < (cols.length - 1))
+            {
+                SQLCommand += ",";
+                QMarkPart += ",";
+            }
+            else
+            {
+                SQLCommand += ") ";
+                QMarkPart += ") ";
+            }
+        }
+
+        List<ColumnInfo> columns = ti.getColumns();
+
+        DbScope scope = ProteinManager.getSchema().getScope();
         Connection conn = null;
-        DbScope scope = null;
         PreparedStatement ps = null;
 
         try
         {
-            logStatus("Clearing table " + bean.tinfo);
-            new SqlExecutor(ProteinManager.getSchema()).execute("TRUNCATE TABLE " + bean.tinfo);
-
-            logStatus("Starting to load " + filename);
-            InputStreamReader isr = new InputStreamReader(is);
-            TabLoader t = new TabLoader(isr, false);
-            scope = ProteinManager.getSchema().getScope();
             conn = scope.getConnection();
-            String SQLCommand = "INSERT INTO " + ti + "(";
-            String QMarkPart = "VALUES (";
-
-            for (int i = 0; i < cols.length; i++)
-            {
-                SQLCommand += cols[i];
-                QMarkPart += "?";
-                if (i < (cols.length - 1))
-                {
-                    SQLCommand += ",";
-                    QMarkPart += ",";
-                }
-                else
-                {
-                    SQLCommand += ") ";
-                    QMarkPart += ") ";
-                }
-            }
-
-            List<ColumnInfo> columns = ti.getColumns();
-
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
+
             for (Map<String, Object> curRec : t)
             {
                 boolean addRow = true;
@@ -278,8 +286,6 @@ public abstract class GoLoader
                 conn.setAutoCommit(true);
                 scope.releaseConnection(conn);
             }
-            if (null != it)
-                it.close();
         }
 
         logStatus("Completed loading " + filename);
@@ -296,25 +302,6 @@ public abstract class GoLoader
         logStatus("Loading GO annotations failed with the following exception:");
         logStatus(ExceptionUtil.renderException(e));
         ExceptionUtil.logExceptionToMothership(null, e);
-    }
-
-
-    private void complete()
-    {
-        // Make sure stream is closed
-        if (null != _tis)
-        {
-            try
-            {
-                _tis.close();
-            }
-            catch (IOException e)
-            {
-                ExceptionUtil.logExceptionToMothership(HttpView.getRootContext().getRequest(), e);
-            }
-        }
-
-        _complete = true;
     }
 
 

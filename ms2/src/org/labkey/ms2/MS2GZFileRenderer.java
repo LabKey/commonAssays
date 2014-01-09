@@ -16,12 +16,11 @@
 
 package org.labkey.ms2;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import com.ice.tar.TarInputStream;
 
 /**
  * User: arauch
@@ -44,13 +43,15 @@ public class MS2GZFileRenderer extends GZFileRenderer
     }
 
 
+    @Override
     protected boolean isSearchFile(String filename)
     {
         return (_searchFilename.equalsIgnoreCase(filename) || _oldFormatSearchFilename.equalsIgnoreCase(filename));
     }
 
 
-    protected void renderFile(PrintWriter out, String fileName, TarInputStream tis) throws IOException
+    @Override
+    protected void renderFile(PrintWriter out, String fileName, TarArchiveInputStream tis) throws IOException
     {
         renderFileHeader(out, fileName);
         super.renderFile(out, fileName, tis);

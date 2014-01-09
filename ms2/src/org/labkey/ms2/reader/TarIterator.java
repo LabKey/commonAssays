@@ -15,14 +15,18 @@
  */
 package org.labkey.ms2.reader;
 
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.log4j.Logger;
-import org.labkey.ms2.MS2Importer;
-import org.labkey.ms2.FloatParser;
 import org.labkey.api.arrays.FloatArray;
+import org.labkey.ms2.FloatParser;
+import org.labkey.ms2.MS2Importer;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -35,17 +39,17 @@ import java.util.zip.GZIPInputStream;
  */
 public class TarIterator implements SimpleScanIterator
 {
-    private Logger _log = Logger.getLogger(TarIterator.class);
+    private static final Logger _log = Logger.getLogger(TarIterator.class);
+    private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
     private String _dtaFileNamePrefix = null;
-    InputStream _is;
-    GZIPInputStream _gzInputStream;
-    TarInputStream _tis;
-    TarEntry _te;
-    boolean _checkNext = true;   // set to true after next()
-    boolean _hasNext = false;    // set by hasNext()
-    byte[] _spectrumData = new byte[BUFFER_SIZE];
-    private static final int STREAM_BUFFER_SIZE = 128 * 1024;
+    private InputStream _is;
+    private GZIPInputStream _gzInputStream;
+    private TarArchiveInputStream _tis;
+    private TarArchiveEntry _te;
+    private boolean _checkNext = true;   // set to true after next()
+    private boolean _hasNext = false;    // set by hasNext()
+    private byte[] _spectrumData = new byte[BUFFER_SIZE];
 
 
     public TarIterator(File gzFile, String dtaFileNamePrefix) throws java.io.IOException
@@ -56,7 +60,7 @@ public class TarIterator implements SimpleScanIterator
             _dtaFileNamePrefix = dtaFileNamePrefix;
             _is = new BufferedInputStream(new FileInputStream(gzFile), STREAM_BUFFER_SIZE);
             _gzInputStream = new GZIPInputStream(_is);
-            _tis = new TarInputStream(_gzInputStream);
+            _tis = new TarArchiveInputStream(_gzInputStream);
             success = true;
         }
         finally
@@ -85,7 +89,7 @@ public class TarIterator implements SimpleScanIterator
             // advance to next tarEntry
             try
             {
-                while (null != (_te = _tis.getNextEntry()))
+                while (null != (_te = _tis.getNextTarEntry()))
                 {
                     String fileName = _te.getName();
                     if (fileName.endsWith(".dta") && fileName.startsWith(_dtaFileNamePrefix))
@@ -100,6 +104,7 @@ public class TarIterator implements SimpleScanIterator
             _checkNext = false;
             _hasNext = null != _te;
         }
+
         return _hasNext;
     }
 
@@ -164,7 +169,7 @@ public class TarIterator implements SimpleScanIterator
     }
 
 
-    protected static byte[] realloc(int size, byte[] buf)
+    private static byte[] realloc(int size, byte[] buf)
     {
         if (null == buf || buf.length < size)
             return new byte[size];
@@ -177,9 +182,9 @@ public class TarIterator implements SimpleScanIterator
      * TarInputStream tis, so you can't hold onto the object after calling
      * GzSimpleSpectrumInterator.next()
      * <p/>
-     * Since it is stateful anyway, we can just return the same GzSimpleSpectrum everytime
+     * Since it is stateful anyway, we can just return the same GzSimpleSpectrum every time
      */
-    protected class GzSimpleSpectrum implements SimpleScan
+    class GzSimpleSpectrum implements SimpleScan
     {
         GzSimpleSpectrum()
         {

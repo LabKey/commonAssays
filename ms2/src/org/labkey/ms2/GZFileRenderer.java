@@ -16,12 +16,16 @@
 
 package org.labkey.ms2;
 
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
-import org.apache.log4j.Logger;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.labkey.api.util.NetworkDrive;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -31,8 +35,6 @@ import java.util.zip.GZIPInputStream;
  */
 public abstract class GZFileRenderer
 {
-    private static Logger _log = Logger.getLogger(GZFileRenderer.class);
-
     private String _gzFileName;
     private String _lastErrorMessage = null;
 
@@ -66,11 +68,10 @@ public abstract class GZFileRenderer
             return false;
         }
 
-        TarInputStream tis = new TarInputStream(new GZIPInputStream(new FileInputStream(gzFile)));
-        TarEntry te = tis.getNextEntry();
-
-        try
+        try (TarArchiveInputStream tis = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(gzFile))))
         {
+            TarArchiveEntry te = tis.getNextTarEntry();
+
             while (null != te)
             {
                 // some archives prepend "./" (e.g "./foo.2170.2170.3.out")
@@ -84,12 +85,8 @@ public abstract class GZFileRenderer
                     return true;
                 }
 
-                te = tis.getNextEntry();
+                te = tis.getNextTarEntry();
             }
-        }
-        finally
-        {
-            tis.close();
         }
 
         _lastErrorMessage = "Not found.";
@@ -99,7 +96,7 @@ public abstract class GZFileRenderer
 
     protected abstract boolean isSearchFile(String filename);
 
-    protected void renderFile(PrintWriter out, String fileName, TarInputStream tis) throws IOException
+    protected void renderFile(PrintWriter out, String fileName, TarArchiveInputStream tis) throws IOException
     {
         BufferedReader br = new BufferedReader(new InputStreamReader(tis));
         String line;
