@@ -34,6 +34,7 @@ import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
@@ -317,7 +318,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     /** Creates a version of the Peptides table for use in non-query based views. Includes calculated columns like DeltaScan and Hydrophobicity */
     protected FilteredTable createLegacyWrappedPeptidesTable()
     {
-        FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptides());
+        FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoPeptides(), new MS2Schema(getUser(), getContainer()));
         table.wrapAllColumns(true);
         table.getColumn("RowId").setKeyField(true);
         // Different renderer to ensure that SeqId is always selected when Protein column is displayed

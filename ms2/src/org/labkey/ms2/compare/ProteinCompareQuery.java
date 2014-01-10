@@ -16,20 +16,21 @@
 
 package org.labkey.ms2.compare;
 
-import org.labkey.api.security.User;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.Pair;
-import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.security.User;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.validation.BindException;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: adam
@@ -122,12 +123,12 @@ public class ProteinCompareQuery extends CompareQuery
 
         SimpleFilter proteinFilter = new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins());
         // Add to GROUP BY
-        for (String columnName : proteinFilter.getAllColumnNames())
+        for (FieldKey fieldKey : proteinFilter.getAllFieldKeys())
         {
-            if (!columnName.equalsIgnoreCase("Peptides") && !columnName.equalsIgnoreCase("UniquePeptides"))
+            if (!fieldKey.equals(FieldKey.fromParts("Peptides")) && !fieldKey.equals(FieldKey.fromParts("UniquePeptides")))
             {
                 append(", ");
-                append(columnName);
+                append(fieldKey.toString());
             }
         }
 

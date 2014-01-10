@@ -95,7 +95,7 @@ public class PeaksTableInfo extends FilteredTable<MS1Schema>
         SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=? AND d.RunId=? AND s.Scan BETWEEN ? AND ?)",
                                             container.getId(), true, false, runId, scanFirst, scanLast);
 
-        getFilter().deleteConditions("ScanId");
+        getFilter().deleteConditions(FieldKey.fromParts("ScanId"));
         addCondition(sf, FieldKey.fromParts("ScanId"));
     }
 } //class PeaksTableInfo

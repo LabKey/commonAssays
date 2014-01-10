@@ -211,7 +211,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             public TableInfo getLookupTableInfo()
             {
                 TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
-                FilteredTable result = new FilteredTable(info);
+                FilteredTable result = new FilteredTable<>(info, getUserSchema());
                 for (ColumnInfo col : info.getColumns())
                 {
                     ColumnInfo newColumn = result.addWrapColumn(col);

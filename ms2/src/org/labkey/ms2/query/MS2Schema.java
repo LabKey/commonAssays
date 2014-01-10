@@ -424,7 +424,7 @@ public class MS2Schema extends UserSchema
 
     protected FilteredTable createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context, boolean filterByRuns)
     {
-        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoProteinGroupMemberships());
+        FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoProteinGroupMemberships(), this);
         result.wrapAllColumns(true);
 
         result.getColumn("ProteinGroupId").setFk(new LookupForeignKey("RowId")
@@ -606,7 +606,7 @@ public class MS2Schema extends UserSchema
 
     protected TableInfo createPeptideMembershipsTable()
     {
-        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoPeptideMemberships());
+        FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoPeptideMemberships(), this);
         result.wrapAllColumns(false);
 
         LookupForeignKey fk = new LookupForeignKey("RowId")
@@ -723,7 +723,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable(MS2Manager.getTableInfoRuns());
+                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoRuns(), MS2Schema.this);
                 result.addWrapColumn(result.getRealTable().getColumn("Run"));
                 result.addWrapColumn(result.getRealTable().getColumn("Description"));
                 result.addWrapColumn(result.getRealTable().getColumn("Created"));
@@ -960,7 +960,7 @@ public class MS2Schema extends UserSchema
         rawTable.addColumn(proteinGroupIdCol);
         proteinGroupIdCol.setParentTable(rawTable);
 
-        FilteredTable baseTable = new FilteredTable(rawTable);
+        FilteredTable baseTable = new FilteredTable<>(rawTable, this);
         baseTable.wrapAllColumns(true);
         ColumnInfo peptideMembershipsColumn = baseTable.wrapColumn("PeptideMemberships", rawTable.getColumn("ProteinGroupId"));
         peptideMembershipsColumn.setFk(new LookupForeignKey("ProteinGroupId")
@@ -1433,7 +1433,7 @@ public class MS2Schema extends UserSchema
 
     protected FilteredTable createPeptidesTableForQueryCrosstab(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
     {
-        FilteredTable baseTable = new FilteredTable(MS2Manager.getTableInfoPeptides());
+        FilteredTable baseTable = new FilteredTable<>(MS2Manager.getTableInfoPeptides(), this);
         baseTable.wrapAllColumns(true);
         //apply PeptideFilteringComparisonForm
         SQLFragment whereSQL;

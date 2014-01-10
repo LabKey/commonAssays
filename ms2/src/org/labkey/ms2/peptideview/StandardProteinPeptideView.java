@@ -46,6 +46,7 @@ import org.labkey.ms2.RunListException;
 import org.labkey.ms2.SpectrumIterator;
 import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.query.MS2Schema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -86,7 +87,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         List<DisplayColumn> result = new ArrayList<>();
 
-        FilteredTable table = new FilteredTable(MS2Manager.getTableInfoProteins());
+        FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoProteins(), new MS2Schema(getUser(), getContainer()));
         table.wrapAllColumns(true);
 
         ColumnInfo aaCoverageColumn = table.wrapColumn("AACoverage", table.getRealTable().getColumn("SeqId"));

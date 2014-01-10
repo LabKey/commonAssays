@@ -219,16 +219,16 @@ public abstract class AbstractRunCompareView extends QueryView
 
         for (SimpleFilter.FilterClause clause : new ArrayList<>(filter.getClauses()))
         {
-            for (String colName : clause.getColumnNames())
+            for (FieldKey fieldKey : clause.getFieldKeys())
             {
-                if (colName.startsWith("Run/"))
+                if (fieldKey.toString().startsWith("Run/"))
                 {
                     SimpleFilter filterToRemove = new SimpleFilter();
                     filterToRemove.addClause(clause);
                     String urlParam = filterToRemove.toQueryString(getSettings().getDataRegionName());
                     if (urlParam != null && urlParam.indexOf('=') != -1)
                     {
-                        filter.deleteConditions(colName);
+                        filter.deleteConditions(fieldKey);
 
                         SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
                         for (MS2Run run : _runs)

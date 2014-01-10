@@ -127,7 +127,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable(MS2Manager.getTableInfoQuantitation());
+                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoQuantitation(), getUserSchema());
                 result.wrapAllColumns(true);
                 result.getColumn("PeptideId").setHidden(true);
                 result.getColumn("QuantId").setHidden(true);
@@ -144,7 +144,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable(MS2Manager.getTableInfoITraqPeptideQuantitation());
+                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoITraqPeptideQuantitation(), getUserSchema());
                 result.wrapAllColumns(true);
                 result.getColumn("PeptideId").setHidden(true);
 
@@ -198,7 +198,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptideProphetData());
+                FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoPeptideProphetData(), getUserSchema());
                 table.wrapAllColumns(true);
                 table.getColumn("PeptideId").setHidden(true);
                 return table;

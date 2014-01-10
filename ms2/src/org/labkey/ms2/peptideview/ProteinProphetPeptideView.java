@@ -53,6 +53,7 @@ import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.TotalFilteredPeptidesColumn;
 import org.labkey.ms2.UniqueFilteredPeptidesColumn;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.query.MS2Schema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -86,7 +87,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ProteinGroupProteins proteins = new ProteinGroupProteins(Arrays.asList(_runs));
         Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.SEQUENCE_COLUMN_NAMES);
 
-        FilteredTable table = new FilteredTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+        FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoProteinGroupsWithQuantitation(), new MS2Schema(getUser(), getContainer()));
         table.wrapAllColumns(true);
 
         ColumnInfo totalPeptidesColumn = table.wrapColumn(TotalFilteredPeptidesColumn.NAME, table.getRealTable().getColumn("ProteinGroupId"));

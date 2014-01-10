@@ -1156,8 +1156,7 @@ public class ProteinManager
     // TODO: runTableName is null in all cases... remove parameter?
     public static void replaceRunCondition(SimpleFilter filter, @Nullable String runTableName, MS2Run... runs)
     {
-        String columnName = runTableName == null ? "Run" : runTableName + ".Run";
-        filter.deleteConditions(columnName);
+        filter.deleteConditions(runTableName == null ? FieldKey.fromParts("Run") : FieldKey.fromParts(runTableName, "Run"));
         addRunCondition(filter, runTableName, runs);
     }
 
