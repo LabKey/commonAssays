@@ -85,6 +85,17 @@ public class MS1Controller extends SpringActionController
     @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        // Invoked via reflection
+        @SuppressWarnings("UnusedDeclaration")
+        public BeginAction()
+        {
+        }
+
+        public BeginAction(ViewContext ctx)
+        {
+            setViewContext(ctx);
+        }
+
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS1Module.EXP_RUN_TYPE);
@@ -200,6 +211,12 @@ public class MS1Controller extends SpringActionController
             super(ShowFeaturesForm.class);
         }
 
+        public ShowFeaturesAction(ViewContext ctx)
+        {
+            this();
+            setViewContext(ctx);
+        }
+
         protected FeaturesView getFeaturesView(ShowFeaturesForm form, BindException bindErrors, boolean forExport)
         {
             _form = form;
@@ -284,7 +301,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root, int runId, Container container)
         {
-            return new BeginAction().appendNavTrail(root).addChild("Features from Run", getUrl(runId, container));
+            return new BeginAction(getViewContext()).appendNavTrail(root).addChild("Features from Run", getUrl(runId, container));
         }
 
         public ActionURL getUrl(int runId, Container container)
@@ -390,7 +407,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return new ShowFeaturesAction().appendNavTrail(root, _runId).addChild("Peaks for Feature");
+            return new ShowFeaturesAction(getViewContext()).appendNavTrail(root, _runId).addChild("Peaks for Feature");
         }
     } //class ShowFeaturesAction
 
@@ -511,7 +528,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            root = new BeginAction().appendNavTrail(root);
+            root = new BeginAction(getViewContext()).appendNavTrail(root);
             root.addChild("Features List", _form.getSrcUrl());
             root.addChild("Feature Details");
             return root;
@@ -904,7 +921,7 @@ public class MS1Controller extends SpringActionController
         {
             Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), true);
             if(null == selectedRuns || selectedRuns.size() < 1)
-                return HttpView.redirect(new BeginAction().getUrl().getLocalURIString());
+                return HttpView.redirect(new BeginAction(getViewContext()).getUrl().getLocalURIString());
 
             ActionURL url = new ActionURL(CompareRunsAction.class, getContainer());
             StringBuilder runIds = new StringBuilder();
