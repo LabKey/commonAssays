@@ -59,7 +59,6 @@ dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-1
 dataintegration/schemas/etl.xsd -text
 dataintegration/src/org/labkey/di/DataIntegrationModule.java -text
 dataintegration/src/org/labkey/di/DataIntegrationQuerySchema.java -text
-dataintegration/src/org/labkey/di/EtlResourceLoader.java -text
 dataintegration/src/org/labkey/di/TransformBaseTable.java -text
 dataintegration/src/org/labkey/di/TransformDataIteratorBuilder.java -text
 dataintegration/src/org/labkey/di/TransformHistoryTable.java -text
