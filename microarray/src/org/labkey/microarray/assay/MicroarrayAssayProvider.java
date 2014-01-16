@@ -51,7 +51,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;

@@ -25,7 +25,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewContext;
-import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
 
 import javax.servlet.ServletContext;

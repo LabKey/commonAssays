@@ -26,6 +26,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.query.MicroarrayUserSchema;
 
 /**
  * User: jeckels
@@ -37,7 +38,7 @@ public class MicroarrayRunType extends ExperimentRunType
 
     private MicroarrayRunType()
     {
-        super("Microarray", MicroarraySchema.SCHEMA_NAME, MicroarraySchema.TABLE_RUNS);
+        super("Microarray", MicroarrayUserSchema.SCHEMA_NAME, MicroarrayUserSchema.TABLE_RUNS);
     }
 
     public Priority getPriority(ExpProtocol protocol)

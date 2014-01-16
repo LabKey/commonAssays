@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.microarray.assay;
+package org.labkey.microarray.affy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ImportAliasable;
@@ -56,7 +56,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
             ExpData excelData = DefaultAssayRunCreator.createData(context.getContainer(), excelFile, excelFile.getName(), AffymetrixAssayProvider.GENE_TITAN_DATA_TYPE, true);
             outputDatas.put(excelData, AffymetrixAssayProvider.GENE_TITAN_DATA_TYPE.getRole());
 
-            if(outputDatas.size() == 0)
+            if (outputDatas.size() == 0)
                 throw new ExperimentException("NO EXCEL FILE ADDED");
 
             ExcelLoader loader = new ExcelLoader(excelFile);
@@ -107,7 +107,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                         celFile = Paths.get(excelFile.getParent()).resolve(filePath).resolve(fileName).normalize().toFile();
                     }
 
-                    if(!celFile.exists())
+                    if (!celFile.exists())
                     {
                         // If the file still doesn't exist then we can assume that it doesn't exist, or the data in
                         // the excel document is incorrect.
@@ -120,7 +120,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                     PipeRoot pipelineRoot = PipelineService.get().getPipelineRootSetting(context.getContainer());
                     Boolean inPipelineRoot = celFile.getAbsolutePath().startsWith(pipelineRoot.getRootPath().getAbsolutePath());
 
-                    if(!inFileRoot && !inPipelineRoot)
+                    if (!inFileRoot && !inPipelineRoot)
                     {
                         throw new ExperimentException("File must be within Pipeline Root or Folder Root path.");
                     }
@@ -149,9 +149,9 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
             // Check if there are aliases
             Map<String, DomainProperty> importMap = ImportAliasable.Helper.createImportMap(Arrays.asList(context.getProvider().getResultsDomain(context.getProtocol()).getProperties()), false);
 
-            for(Map<String, Object> rowData : loader)
+            for (Map<String, Object> rowData : loader)
             {
-                if(rowCounter == 0){
+                if (rowCounter == 0){
                     for (Map.Entry<String, Object> column : rowData.entrySet())
                     {
                         DomainProperty domainProperty = importMap.get(column.getValue());
@@ -169,7 +169,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                 else
                 {
                     String hybName = (String) rowData.get(hybColumn);
-                    if(hybName == null || hybName.equals(""))
+                    if (hybName == null || hybName.equals(""))
                         throw new ExperimentException("hyb_name column cannot be blank or null");
 
                     ExpMaterial sample = resolveSample(context, hybName);
@@ -193,6 +193,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
         return files.get(AssayDataCollector.PRIMARY_FILE);
     }
 
+    // NOTE:
     private ExpMaterial resolveSample(AssayRunUploadContext context, String name) throws ExperimentException
     {
         List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterialsByName(name, context.getContainer(), context.getUser());

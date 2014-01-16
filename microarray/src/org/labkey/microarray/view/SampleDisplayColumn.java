@@ -38,7 +38,7 @@ public class SampleDisplayColumn extends DataColumn
     public String renderURL(RenderContext ctx)
     {
         Integer sampleId = (Integer) ctx.get("sampleid");
-        if(sampleId == null)
+        if (sampleId == null)
             return null;
 
         ExpMaterial sample = ExperimentService.get().getExpMaterial(sampleId);

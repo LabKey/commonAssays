@@ -33,12 +33,19 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
-import org.labkey.microarray.assay.AffymetrixAssayProvider;
-import org.labkey.microarray.assay.AffymetrixDataHandler;
+import org.labkey.microarray.affy.AffymetrixAssayProvider;
+import org.labkey.microarray.affy.AffymetrixDataHandler;
 import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.controllers.FeatureAnnotationSetController;
+import org.labkey.microarray.controllers.MicroarrayController;
+import org.labkey.microarray.matrix.ExpressionMatrixAssayProvider;
+import org.labkey.microarray.matrix.ExpressionMatrixDataHandler;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
+import org.labkey.microarray.query.MicroarrayUserSchema;
+import org.labkey.microarray.view.FeatureAnnotationSetWebPart;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class MicroarrayModule extends SpringModule
@@ -47,7 +54,11 @@ public class MicroarrayModule extends SpringModule
     public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
     public static final String WEBPART_MICROARRAY_STATISTICS = "Microarray Summary";
     public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
+    private static final String WEBPART_FEATURE_ANNOTATION_SET = "Feature Annotation Sets";
+
     private static final String CONTROLLER_NAME = "microarray";
+    private static final String FEATURE_ANNOTATION_SET_CONTROLLER_NAME = "feature-annotationset";
+
     public static final String DB_SCHEMA_NAME = "microarray";
 
     public static final AssayDataType MAGE_ML_INPUT_TYPE =
@@ -74,13 +85,14 @@ public class MicroarrayModule extends SpringModule
 
     public double getVersion()
     {
-        return 13.30;
+        return 13.31;
     }
 
     protected void init()
     {
         addController(CONTROLLER_NAME, MicroarrayController.class);
-        MicroarraySchema.register(this);
+        addController(FEATURE_ANNOTATION_SET_CONTROLLER_NAME, FeatureAnnotationSetController.class);
+        MicroarrayUserSchema.register(this);
     }
 
     @NotNull
@@ -117,6 +129,13 @@ public class MicroarrayModule extends SpringModule
                     view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
                     return view;
                 }
+            },
+            new BaseWebPartFactory(WEBPART_FEATURE_ANNOTATION_SET)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
+                {
+                    return new FeatureAnnotationSetWebPart(portalCtx);
+                }
             }
         ));
     }
@@ -139,6 +158,7 @@ public class MicroarrayModule extends SpringModule
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         AssayService.get().registerAssayProvider(new AffymetrixAssayProvider());
+        AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
         // add a container listener so we'll know when our container is deleted:
@@ -146,6 +166,7 @@ public class MicroarrayModule extends SpringModule
 
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
             public Set<ExperimentRunType> getExperimentRunTypes(Container container)
@@ -159,6 +180,17 @@ public class MicroarrayModule extends SpringModule
         });
         if (null != ServiceRegistry.get(SearchService.class))
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MageMLDocumentParser());
+
+        // TODO: Are these module properties still needed?
+        /*
+        ModuleProperty reportProperty = new ModuleProperty(this, "ComparisonReportId");
+        reportProperty.setCanSetPerContainer(true);
+        addModuleProperty(reportProperty);
+
+        ModuleProperty assayDesignName = new ModuleProperty(this, "AssayDesignName");
+        assayDesignName.setCanSetPerContainer(true);
+        addModuleProperty(assayDesignName);
+        */
     }
 
     @Override

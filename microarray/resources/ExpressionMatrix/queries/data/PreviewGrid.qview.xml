@@ -1,0 +1,10 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Value"/>
+        <column name="FeatureId/GeneSymbol"/>
+        <column name="FeatureId/ProbeId"/>
+        <column name="SampleId"/>
+        <column name="Run"/>
+        <column name="Run/LogData"/>
+    </columns>
+</customView>

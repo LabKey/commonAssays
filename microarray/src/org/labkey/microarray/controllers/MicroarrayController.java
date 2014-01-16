@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.microarray;
+package org.labkey.microarray.controllers;
 
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -32,11 +32,15 @@ import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GWTView;
-import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.WebPartView;
+import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
+import org.labkey.microarray.MicroarrayRunType;
+import org.labkey.microarray.MicroarrayUploadWizardAction;
+import org.labkey.microarray.PendingMageMLFilesView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
@@ -167,6 +171,23 @@ public class MicroarrayController extends SpringActionController
 
             _successURL = new URLHelper(baseURL + analysisDir.getAbsolutePath());
             return true;
+        }
+    }
+
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class MatrixQueryAction extends SimpleViewAction
+    {
+        @Override
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return new JspView<>("/org/labkey/microarray/view/ExpressionMatrixQuery.jsp");
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Microarray Expression Data Comparison");
         }
     }
 }

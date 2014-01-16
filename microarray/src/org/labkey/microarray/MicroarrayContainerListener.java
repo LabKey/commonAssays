@@ -18,8 +18,9 @@ package org.labkey.microarray;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.security.User;
+import org.labkey.api.util.ContainerUtil;
+import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.beans.PropertyChangeEvent;
 
@@ -36,8 +37,10 @@ public class MicroarrayContainerListener implements ContainerManager.ContainerLi
 
     public void containerDeleted(Container c, User user)
     {
-        DbSchema ms = MicroarraySchema.getSchema();
-        new SqlExecutor(ms).execute("DELETE FROM " + ms.getTable(MicroarraySchema.TABLE_GEO_PROPS).getSelectName() + " WHERE container = ?", c);
+        DbSchema ms = MicroarrayUserSchema.getSchema();
+        ContainerUtil.purgeTable(ms.getTable(MicroarrayUserSchema.TABLE_GEO_PROPS), c, "Container");
+
+        MicroarrayManager.get().delete(c);
     }
 
     public void propertyChange(PropertyChangeEvent evt)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.microarray;
+package org.labkey.microarray.query;
 
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
@@ -32,7 +32,6 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -44,6 +43,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayDetailRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
 import java.util.ArrayList;
@@ -51,18 +51,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class MicroarraySchema extends SimpleUserSchema
+public class MicroarrayUserSchema extends SimpleUserSchema
 {
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
     public static final String TABLE_RUNS = "MicroarrayRuns";
     public static final String TABLE_GEO_PROPS = "Geo_Properties";
+    public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
+    public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
-    private ExpSchema _expSchema;
     public static final String QC_REPORT_COLUMN_NAME = "QCReport";
     public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
 
-    public MicroarraySchema(User user, Container container)
+    private ExpSchema _expSchema;
+
+    public MicroarrayUserSchema(User user, Container container)
     {
         super(SCHEMA_NAME, SCHMEA_DESCR, user, container, getSchema());
         _expSchema = new ExpSchema(user, container);
@@ -74,7 +77,7 @@ public class MicroarraySchema extends SimpleUserSchema
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider(module) {
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
-                return new MicroarraySchema(schema.getUser(), schema.getContainer());
+                return new MicroarrayUserSchema(schema.getUser(), schema.getContainer());
             }
         });
     }
@@ -84,6 +87,8 @@ public class MicroarraySchema extends SimpleUserSchema
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
         hs.add(TABLE_RUNS);
         hs.add(TABLE_GEO_PROPS);
+        hs.add(TABLE_FEATURE_ANNOTATION_SET);
+        hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
     }
 
@@ -94,13 +99,23 @@ public class MicroarraySchema extends SimpleUserSchema
             return createRunsTable();
         }
 
-        if(getTableNames().contains(name))
+        if (getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
             return new SimpleUserSchema.SimpleTable(this, tableInfo).init();
         }
 
         return null;
+    }
+
+    public TableInfo getAnnotationSetTable()
+    {
+        return getTable(TABLE_FEATURE_ANNOTATION_SET);
+    }
+
+    public TableInfo getAnnotationTable()
+    {
+        return getTable(TABLE_FEATURE_ANNOTATION);
     }
 
     public ExpRunTable createRunsTable()

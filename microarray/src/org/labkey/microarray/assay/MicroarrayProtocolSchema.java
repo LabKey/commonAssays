@@ -16,7 +16,6 @@
 package org.labkey.microarray.assay;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
@@ -35,7 +34,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.microarray.MicroarraySchema;
+import org.labkey.microarray.query.MicroarrayUserSchema;
 import org.springframework.validation.BindException;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
     {
         ExpRunTable result = super.createRunsTable();
 
-        new MicroarraySchema(getUser(), getContainer()).configureRunsTable(result);
+        new MicroarrayUserSchema(getUser(), getContainer()).configureRunsTable(result);
         if (getProvider().isEditableRuns(getProtocol()))
         {
             result.addAllowablePermission(UpdatePermission.class);

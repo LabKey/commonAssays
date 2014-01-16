@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.microarray.assay;
+package org.labkey.microarray.affy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -120,7 +120,7 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
 
             for (Map<String, Object> excelRow : loader)
             {
-                if(rowCounter > 0)
+                if (rowCounter > 0)
                 {
                     Map<String, Object> runDataRow = new HashMap<>();
                     String celFileName = (String) excelRow.get(sampleFileNameColumn);
@@ -160,7 +160,7 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
 
         for (Map.Entry entry : materialInputs.entrySet())
         {
-            if(entry.getValue().equals(sampleName))
+            if (entry.getValue().equals(sampleName))
                 return ((ExpMaterial)entry.getKey()).getRowId();
         }
 
@@ -171,16 +171,16 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
     {
         Path path = Paths.get(celFilePath).resolve(celFileName).normalize();
 
-        if(!path.toFile().exists())
+        if (!path.toFile().exists())
         {
             path = Paths.get(dataFile.getParent()).resolve(celFilePath).resolve(celFileName).normalize();
         }
 
         String absolutePath = path.toString();
 
-        for(ExpData data : dataOutputs)
+        for (ExpData data : dataOutputs)
         {
-            if(data.getFile().getAbsolutePath().contains(absolutePath))
+            if (data.getFile().getAbsolutePath().contains(absolutePath))
                 return data.getRowId();
         }
 
