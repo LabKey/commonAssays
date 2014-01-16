@@ -99,13 +99,13 @@
     </tr>
     <% for (int iChannel = 0; iChannel < channelCount; iChannel ++)
     {
-        String className = 0==(iChannel%2)?"labkey-alternate-row":"labkey-row";
+        _HtmlString className = getShadeRowClass(0==(iChannel%2));
     %>
     <tr>
-        <th class="labkey-row-header <%=text(className)%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
+        <th class="labkey-row-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         {
-        %><td class="<%=text(className)%>" style="text-align:right;"><%=text(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
+        %><td class="<%=className%>" style="text-align:right;"><%=text(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
         }%>
     </tr>
     <%}%>

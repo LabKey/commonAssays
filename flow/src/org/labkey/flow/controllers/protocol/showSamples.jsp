@@ -85,7 +85,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descripti
                     continue;
 
                 %>
-                <tr class="<%=i%2==0 ? "labkey-alternate-row":"labkey-row"%>">
+                <tr class="<%=getShadeRowClass(i%2==0)%>">
                 <td valign="top"><a href="<%=h(sample.detailsURL())%>"><%= sample.getName()%></a></td>
                 <td>
                     <% if (fcsFiles.size() > 0) { %>
