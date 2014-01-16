@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.labkey.api.data.statistics.MathStat;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.chart.DensityPlot;
 import org.labkey.flow.analysis.chart.PlotFactory;
@@ -240,7 +241,7 @@ public class FCSAnalyzer
     private List<StatResult> calculateStatistics(Map<SubsetSpec, Subset> subsetMap, ScriptComponent group, Collection<StatisticSpec> stats)
     {
         List<StatResult> ret = new ArrayList<>(stats.size());
-        Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap<>();
+        Map<SubsetSpec, Map<String, MathStat>> subsetStatsMap = new HashMap<>();
         for (StatisticSpec stat : stats)
         {
             StatResult result = new StatResult(stat);
@@ -252,7 +253,7 @@ public class FCSAnalyzer
             try
             {
                 Subset subset = getSubset(subsetMap, group, statisticSpecification.getSubset());
-                Map<String, Stats.DoubleStats> statsMap = subsetStatsMap.get(statisticSpecification.getSubset());
+                Map<String, MathStat> statsMap = subsetStatsMap.get(statisticSpecification.getSubset());
                 if (statsMap == null)
                 {
                     statsMap = new HashMap<>();

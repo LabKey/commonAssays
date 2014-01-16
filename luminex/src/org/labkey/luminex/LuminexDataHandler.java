@@ -40,6 +40,8 @@ import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.MathStat;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
@@ -61,6 +63,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
@@ -640,7 +643,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 if (fis.size() > 1)
                 {
-                    Stats.DoubleStats stats = new Stats.DoubleStats(ArrayUtils.toPrimitive(fis.toArray(new Double[fis.size()])));
+                    StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                    MathStat stats = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[fis.size()])));
                     double stdDev = stats.getStdDev();
                     double mean = Math.abs(stats.getMean());
                     dataRow.setStdDev(stdDev);

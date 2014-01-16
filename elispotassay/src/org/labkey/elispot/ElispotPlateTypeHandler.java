@@ -17,8 +17,11 @@
 package org.labkey.elispot;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.statistics.MathStat;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.AbstractPlateTypeHandler;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
@@ -185,7 +188,9 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
                 if (i > 0)
                 {
                     statsData = Arrays.copyOf(statsData, i);
-                    Stats.DoubleStats stats = new Stats.DoubleStats(statsData);
+                    StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                    MathStat stats = service.getStats(statsData);
+
                     Map<String, Double> values = new HashMap<>();
 
                     if (!Double.isNaN(stats.getMedian()))

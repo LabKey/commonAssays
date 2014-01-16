@@ -22,6 +22,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.statistics.MathStat;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
@@ -39,6 +41,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
@@ -392,7 +395,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             }
                         }
                         statsData = Arrays.copyOf(statsData, i);
-                        Stats.DoubleStats stats = new Stats.DoubleStats(statsData);
+                        StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                        MathStat stats = service.getStats(statsData);
 
                         String key = UploadWizardAction.getInputName(antigenNameProp, antigenGroup.getName());
                         if (propMap.containsKey(key))

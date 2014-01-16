@@ -19,7 +19,9 @@ package org.labkey.flow.analysis.web;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.view.Stats;
+import org.labkey.api.data.statistics.MathStat;
+import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.flow.analysis.model.DataFrame;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowException;
@@ -239,7 +241,7 @@ public class StatisticSpec implements Serializable, Comparable
         return count * 100 / total;
     }
 
-    static public double calculate(Subset subset, StatisticSpec stat, Map<String, Stats.DoubleStats> stats)
+    static public double calculate(Subset subset, StatisticSpec stat, Map<String, MathStat> stats)
     {
         String param;
         double percentile = 0;
@@ -283,18 +285,19 @@ public class StatisticSpec implements Serializable, Comparable
                 param = stat.getParameter();
                 break;
         }
-        Stats.DoubleStats doubleStats = stats.get(param);
+        MathStat doubleStats = stats.get(param);
         if (doubleStats == null)
         {
-            doubleStats = new Stats.DoubleStats(subset.getDataFrame().getDoubleArray(param));
+            StatsService service = ServiceRegistry.get().getService(StatsService.class);
+            doubleStats = service.getStats(subset.getDataFrame().getDoubleArray(param));
             stats.put(param, doubleStats);
         }
         switch (stat.getStatistic())
         {
             case Min:
-                return doubleStats.getMin();
+                return doubleStats.getMinimum();
             case Max:
-                return doubleStats.getMax();
+                return doubleStats.getMaximum();
             case Mean:
                 return doubleStats.getMean();
             case Median:
@@ -393,7 +396,7 @@ public class StatisticSpec implements Serializable, Comparable
             DataFrame.Field field = frame.getField(p);
             System.out.print(field.getName());
 
-            java.util.Map<String, Stats.DoubleStats> map = new java.util.HashMap<>();
+            java.util.Map<String, MathStat> map = new java.util.HashMap<>();
             Subset subset = new Subset(null, null, fcs, frame);
             StatisticSpec[] stats = new StatisticSpec[] {
                 new StatisticSpec(null, STAT.Min, field.getName()),

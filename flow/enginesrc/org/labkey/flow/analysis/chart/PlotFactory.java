@@ -23,6 +23,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.labkey.api.arrays.DoubleArray;
+import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.util.RangeFunction;
@@ -89,7 +90,7 @@ public class PlotFactory
                 root = root.getParent();
 
             // UNDONE: Share this rootStatsMap
-            Map<String, Stats.DoubleStats> rootStatsMap = new HashMap<>();
+            Map<String, MathStat> rootStatsMap = new HashMap<>();
             min = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Min, field.getName()), rootStatsMap);
             min = field.getScalingFunction().translate(min);
 
