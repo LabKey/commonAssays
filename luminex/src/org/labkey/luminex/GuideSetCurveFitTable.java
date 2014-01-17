@@ -38,7 +38,7 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
     /** @param curveType the type of curve to filter the results to. Null means don't filter */
     public GuideSetCurveFitTable(LuminexProtocolSchema schema, String curveType)
     {
-        super(schema.getDbSchema(), schema);
+        super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema);
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
@@ -90,8 +90,6 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
         ColumnInfo curveTypeColumn = new ColumnInfo("CurveType", this);
         curveTypeColumn.setJdbcType(JdbcType.VARCHAR);
         addColumn(curveTypeColumn);
-
-        setName(LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME);
     }
 
     @NotNull

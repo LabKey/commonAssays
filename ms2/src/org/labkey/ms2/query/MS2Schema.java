@@ -944,7 +944,7 @@ public class MS2Schema extends UserSchema
             name = "bogusTable";
         }
 
-        rawTable = new VirtualTable(getDbSchema())
+        rawTable = new VirtualTable(getDbSchema(), name)
         {
             @NotNull
             @Override
@@ -953,7 +953,6 @@ public class MS2Schema extends UserSchema
                 return new SQLFragment("SELECT * FROM " + name);
             }
         };
-        rawTable.setName(name);
 
         rawTable.addColumn(normalizedIdCol);
         normalizedIdCol.setParentTable(rawTable);
@@ -986,7 +985,7 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 // Create a junction query that connects normalized group ids with protein identifications
-                VirtualTable result = new VirtualTable(getDbSchema())
+                VirtualTable result = new VirtualTable(getDbSchema(), "InnerTable")
                 {
                     @NotNull
                     @Override
@@ -1010,7 +1009,6 @@ public class MS2Schema extends UserSchema
                 seqFK.setPrefixColumnCaption(false);
                 seqIdCol.setFk(seqFK);
                 result.addColumn(seqIdCol);
-                result.setName("InnerTable");
 
                 return result;
             }

@@ -20,7 +20,6 @@ import org.labkey.api.data.Entity;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.MemTracker;
-import org.labkey.api.view.ViewContext;
 
 import java.io.Serializable;
 
@@ -44,7 +43,7 @@ public class FeatureExtractionRun extends Entity implements Serializable, Clonea
 
     public FeatureExtractionRun()
     {
-        assert MemTracker.put(this);
+        MemTracker.getInstance().put(this);
     }
 
     public int getRowId()

@@ -46,7 +46,7 @@ public class ComparePeptideTableInfo extends VirtualTable
 
     public ComparePeptideTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
     {
-        super(MS2Manager.getSchema());
+        super(MS2Manager.getSchema(), "PeptideComparision");
 
         _schema = schema;
         _runs = runs;

@@ -59,7 +59,7 @@ public abstract class MS2Run implements Serializable
 
     public MS2Run()
     {
-        assert MemTracker.put(this);
+        MemTracker.getInstance().put(this);
     }
 
 

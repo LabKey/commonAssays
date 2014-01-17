@@ -494,8 +494,7 @@ public class FlowSchema extends UserSchema
 
         JoinFlowDataTable(String name, FlowDataType type)
         {
-            super(getDbSchema());
-            setName(name);
+            super(getDbSchema(), name);
             _expDataAlias = "_expdata_";
             _expData = ExperimentService.get().createDataTable(name, FlowSchema.this);
             _flowObject = FlowManager.get().getTinfoObject();
@@ -783,8 +782,7 @@ public class FlowSchema extends UserSchema
 
         FastFlowDataTable(String name, FlowDataType type)
         {
-            super(getDbSchema());
-            setName(name);
+            super(getDbSchema(), name);
             _expData = ExperimentService.get().createDataTable(name, FlowSchema.this);
             _expData.setDataType(type);
             _flowObject = FlowManager.get().getTinfoObject();

@@ -45,7 +45,7 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 
     public TableInfo getLookupTableInfo()
     {
-        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema())
+        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema(), null)
         {
             protected boolean isCaseSensitive()
             {
