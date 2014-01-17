@@ -149,15 +149,10 @@ public class RScriptJob extends FlowExperimentJob
         Module flowModule = ModuleLoader.getInstance().getModule(FlowModule.NAME);
         String reportPath = "META-INF";
         Resource r = flowModule.getModuleResource(new Path(reportPath, "ranalysis.r"));
-        InputStream is = null;
-        try
+
+        try (InputStream is = r.getInputStream())
         {
-            is = r.getInputStream();
             return IOUtils.toString(is);
-        }
-        finally
-        {
-            IOUtils.closeQuietly(is);
         }
     }
 
@@ -213,21 +208,16 @@ public class RScriptJob extends FlowExperimentJob
 
         String script = getScript();
         ScriptContext context = engine.getContext();
-        Writer writer = null;
-        try
+
+        try (Writer writer = new FileWriter(getLogFile()))
         {
-            writer = new FileWriter(getLogFile());
             context.setWriter(writer);
-            String output = (String)engine.eval(script, context);
+            String output = (String) engine.eval(script, context);
             info(output);
         }
         catch (ScriptException e)
         {
             error("Error running R script", e);
-        }
-        finally
-        {
-            IOUtils.closeQuietly(writer);
         }
     }
 
