@@ -12,6 +12,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.etl.DataIterator;
 import org.labkey.api.etl.DataIteratorBuilder;
 import org.labkey.api.etl.DataIteratorContext;
@@ -25,6 +26,7 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.ContainerUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.matrix.ExpressionMatrixProtocolSchema;
 import org.labkey.microarray.query.MicroarrayUserSchema;
@@ -159,6 +161,15 @@ public class MicroarrayManager
             return insertFeatureAnnotations(user, c, rowId, loader, errors);
 
         return -1;
+    }
+
+    public Map<String, Integer> getFeatureAnnotationSetProbeIds(Container c, int featureSetRowId)
+    {
+        SimpleFilter featureFilter = SimpleFilter.createContainerFilter(c);
+        featureFilter.addCondition(FieldKey.fromParts("FeatureAnnotationSetId"), featureSetRowId);
+
+        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("ProbeId", "RowId"), featureFilter, null);
+        return featureAnnotationSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
     }
 
     public void delete(Container container)

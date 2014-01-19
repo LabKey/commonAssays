@@ -240,8 +240,9 @@ public class FeatureAnnotationSetController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            root.addChild("Upload Feature Annotations");
-            return root;
+            setHelpTopic("featureAnnotationSets");
+            ActionURL url = new ActionURL(ManageAction.class, getContainer());
+            return root.addChild("Feature Annotation Sets", url).addChild("Upload Annotation Set");
         }
     }
 

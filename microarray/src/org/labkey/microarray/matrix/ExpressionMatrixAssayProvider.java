@@ -34,6 +34,7 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProviderSchema;
+import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.FileType;
@@ -58,6 +59,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     public static final AssayDataType DATA_TYPE = new AssayDataType(LSID_PREFIX, new FileType(".tsv"));
 
     public static final ColumnMappingProperty FEATURE_ANNOTATION_SET_ID_COLUMN = new ColumnMappingProperty("featureSet", "Feature Annotation Set", true);
+    public static final ColumnMappingProperty IMPORT_VALUES_COLUMN = new ColumnMappingProperty("importValues", "Import Values", false);
 
     public ExpressionMatrixAssayProvider()
     {
@@ -68,6 +70,12 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(this, protocol, null, FieldKey.fromParts("DataId", "Run"), FieldKey.fromParts("RowId"));
+    }
+
+    @Override
+    public AssayRunCreator getRunCreator()
+    {
+        return new ExpressionMatrixRunCreator(this);
     }
 
     @Override
@@ -143,6 +151,13 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
         featureSet.setShownInUpdateView(false);
         featureSet.setRequired(true);
 
+        DomainProperty importValues = addProperty(runDomain, IMPORT_VALUES_COLUMN.getName(), IMPORT_VALUES_COLUMN.getLabel(), PropertyType.BOOLEAN);
+        featureSet.setShownInInsertView(false);
+        featureSet.setShownInUpdateView(false);
+        featureSet.setShownInDetailsView(false);
+        featureSet.setHidden(true);
+        featureSet.setRequired(false);
+
         return result;
     }
 
@@ -159,6 +174,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
         }
 
         runProperties.add(FEATURE_ANNOTATION_SET_ID_COLUMN.getName());
+        runProperties.add(IMPORT_VALUES_COLUMN.getName());
 
         return domainMap;
     }

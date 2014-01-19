@@ -853,6 +853,7 @@ microarray/src/org/labkey/microarray/matrix/ExpressionMatrixAssayProvider.java -
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixDataHandler.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixProtocolSchema.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixProviderSchema.java -text
+microarray/src/org/labkey/microarray/matrix/ExpressionMatrixRunCreator.java -text
 microarray/src/org/labkey/microarray/matrix/FeatureDataTable.java -text
 microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractorTask.java -text

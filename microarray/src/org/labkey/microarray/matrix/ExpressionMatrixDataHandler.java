@@ -15,14 +15,13 @@
  */
 package org.labkey.microarray.matrix;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
@@ -31,18 +30,19 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.io.File;
@@ -50,9 +50,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 {
@@ -84,18 +89,39 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = expRun.getProtocol();
             AssayProvider provider = AssayService.get().getProvider(expRun);
-            Domain runDomain = provider.getRunDomain(protocol);
+            if (provider == null)
+            {
+                throw new ExperimentException("Could not find assay provider for protocol with LSID " + protocol.getLSID());
+            }
 
+            Domain runDomain = provider.getRunDomain(protocol);
             if (runDomain == null)
             {
                 throw new ExperimentException("Could not find run domain for protocol with LSID " + protocol.getLSID());
             }
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
+
             TabLoader loader = new TabLoader(dataFile, true);
-            List<Map<String, Object>> rowsMap = loader.load();
-            Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), rowsMap);
-            insertExpressionMatrixData(samplesMap, rowsMap, runProps, data.getRowId());
+            ColumnDescriptor[] cols = loader.getColumns();
+            List<String> columnNames = new ArrayList<>(cols.length);
+            for (ColumnDescriptor col : cols)
+                columnNames.add(col.getColumnName());
+
+            Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), columnNames);
+
+            boolean importValues = true;
+            if (runProps.containsKey(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
+            {
+                String importValuesStr = runProps.get(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName());
+                if (importValuesStr != null)
+                    importValues = Boolean.valueOf(importValuesStr);
+            }
+
+            if (importValues)
+            {
+                insertExpressionMatrixData(info.getContainer(), samplesMap, loader, runProps, data.getRowId());
+            }
         }
         catch (IOException e)
         {
@@ -111,34 +137,45 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    private Map<String, Integer> ensureSamples(Container container, List<Map<String, Object>> loaderData) throws ExperimentException
+    private Map<String, Integer> ensureSamples(Container container, Collection<String> columnNames) throws ExperimentException
     {
-        Map<String, Integer> samplesMap = new HashMap<>();
-
-        for (String name : loaderData.get(0).keySet())
+        Set<String> sampleNames = new HashSet<>(columnNames.size());
+        for (String name : columnNames)
         {
             if (!name.equals(PROBE_ID_COLUMN_NAME))
             {
-                TableInfo sampleSetTableInfo = DbSchema.get(ExpSchema.SCHEMA_NAME).getTable("Material");
-                SimpleFilter sampleSetFilter = new SimpleFilter();
-                sampleSetFilter.addCondition(FieldKey.fromParts("Name"), name);
-                sampleSetFilter.addCondition(FieldKey.fromParts("Container"), container);
-                TableSelector sampleTableSelector = new TableSelector(sampleSetTableInfo, sampleSetFilter, null);
-                Map<String, Object>[] sampleSetResults = sampleTableSelector.getMapArray();
-
-                if (sampleSetResults == null || sampleSetResults.length < 1)
-                {
-                    throw new ExperimentException("No sample found with sample name=" + name);
-                }
-
-                samplesMap.put(name, (Integer) sampleSetResults[0].get("RowId"));
+                sampleNames.add(name);
             }
         }
 
-        return samplesMap;
+        SimpleFilter sampleSetFilter = new SimpleFilter();
+        sampleSetFilter.addInClause(FieldKey.fromParts("Name"), sampleNames);
+        sampleSetFilter.addCondition(FieldKey.fromParts("Container"), container);
+
+        Set<String> selectNames = new LinkedHashSet<>();
+        selectNames.add("Name");
+        selectNames.add("RowId");
+        TableSelector sampleTableSelector = new TableSelector(ExperimentService.get().getTinfoMaterial(), selectNames, sampleSetFilter, null);
+        Map<String, Object>[] sampleSetResults = sampleTableSelector.getMapArray();
+        if (sampleSetResults.length < 1)
+            throw new ExperimentException("No samples found");
+
+        // CONSIDER: Create missing samples automatically ?
+        Map<String, Integer> sampleMap = sampleTableSelector.getValueMap();
+        if (sampleMap.size() < sampleNames.size())
+        {
+            Set<String> missingSamples = new HashSet<>(sampleNames);
+            missingSamples.removeAll(sampleMap.keySet());
+            StringBuilder msg = new StringBuilder("No samples found for: ");
+            msg.append(StringUtils.join(missingSamples, ", "));
+            throw new ExperimentException(msg.toString());
+        }
+
+        return sampleMap;
     }
 
-    private void insertExpressionMatrixData(Map<String, Integer> samplesMap, List<Map<String, Object>> loaderData,
+    private void insertExpressionMatrixData(Container c,
+                                            Map<String, Integer> samplesMap, DataLoader loader,
                                             Map<String, String> runProps, Integer dataRowId) throws ExperimentException
     {
         assert MicroarrayUserSchema.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
@@ -152,9 +189,10 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
             int rowCount = 0;
 
             // Grab the probe name to rowId mapping for this run's annotation set
-            Map<String, Integer> probeIds = getProbeIds(runProps);
+            int featureSet = Integer.parseInt(runProps.get("featureSet"));
+            Map<String, Integer> probeIds = MicroarrayManager.get().getFeatureAnnotationSetProbeIds(c, featureSet);
 
-            for (Map<String, Object> row : loaderData)
+            for (Map<String, Object> row : loader)
             {
                 Object probeObject = row.get(PROBE_ID_COLUMN_NAME);
                 String probeName = probeObject == null ? null : probeObject.toString();
@@ -185,10 +223,10 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
                 if (++rowCount % 5000 == 0)
                 {
-                    LOG.info("Imported " + rowCount + " of " + loaderData.size() + " rows");
+                    LOG.info("Imported " + rowCount + " rows...");
                 }
             }
-            LOG.info("Imported " + rowCount + " of " + loaderData.size() + " rows");
+            LOG.info("Imported " + rowCount + " rows.");
         }
         catch (SQLException e)
         {
@@ -198,20 +236,6 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         {
             if (statement != null) { try { statement.close(); } catch (SQLException ignored) {} }
         }
-    }
-
-    private Map<String, Integer> getProbeIds(Map<String, String> runProps)
-    {
-        SimpleFilter featureFilter = new SimpleFilter();
-        featureFilter.addCondition(FieldKey.fromParts("FeatureAnnotationSetId"), Integer.parseInt(runProps.get("featureSet")));
-        TableInfo tableInfo = MicroarrayUserSchema.getSchema().getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION);
-        TableSelector featureAnnotationSelector = new TableSelector(tableInfo, PageFlowUtil.set("RowId", "ProbeId"), featureFilter, null);
-        Map<String, Integer> result = new HashMap<>();
-        for (Map<String, Object> probeRow : featureAnnotationSelector.getMapArray())
-        {
-            result.put((String) probeRow.get("ProbeId"), (Integer) probeRow.get("RowId"));
-        }
-        return result;
     }
 
     private Map<String, String> getRunPropertyValues(ExpRun run, Domain domain)

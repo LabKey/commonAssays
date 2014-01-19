@@ -76,7 +76,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                                         File fileParameters,
                                         List<File> filesInput) throws IOException
     {
-        super(protocol, providerName, info, root, protocolName, fileParameters, filesInput);
+        super(protocol, providerName, info, root, protocolName, fileParameters, filesInput, true);
 
         _dirSequenceRoot = dirSequenceRoot;
 
