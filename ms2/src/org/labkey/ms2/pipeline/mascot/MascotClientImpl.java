@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
@@ -1055,8 +1056,8 @@ public class MascotClientImpl implements SearchClient
                 {"seg", "mascot, protein mass", "search, seg"},
                 {"taxonomy", "protein, taxon", "search, taxonomy"},
                 {"tolu", "spectrum, parent monoisotopic mass error units", "search, tolu"},
-                {"useremail", "pipeline, email address", "search, usermail"},
-                {"username", "pipeline, user name", "search, username"},
+                {"useremail", PipelineJob.PIPELINE_EMAIL_ADDRESS_PARAM, "search, usermail"},
+                {"username", PipelineJob.PIPELINE_USERNAME_PARAM, "search, username"},
                 {"iatol", "mascot, iatol", "default, iatol"},
                 {"iastol", "mascot, iastol", "default, iastol"},
                 {"ia2tol", "mascot, ia2tol", "default, ia2tol"},

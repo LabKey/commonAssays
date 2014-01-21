@@ -248,7 +248,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             List<RecordedAction> actions = new ArrayList<>();
             Map<String, String> params = getJob().getParameters();
             params.put("list path, sequest parameters", SEQUEST_PARAMS);
-            params.put("search, useremail", params.get("pipeline, email address"));
+            params.put("search, useremail", params.get(PipelineJob.PIPELINE_EMAIL_ADDRESS_PARAM));
             params.put("search, username", "CPAS User");
 
             List<File> sequenceFiles = getFASTAOrIndexFiles(actions);

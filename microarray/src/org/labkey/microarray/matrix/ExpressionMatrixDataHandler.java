@@ -137,7 +137,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    private Map<String, Integer> ensureSamples(Container container, Collection<String> columnNames) throws ExperimentException
+    protected static Map<String, Integer> ensureSamples(Container container, Collection<String> columnNames) throws ExperimentException
     {
         Set<String> sampleNames = new HashSet<>(columnNames.size());
         for (String name : columnNames)

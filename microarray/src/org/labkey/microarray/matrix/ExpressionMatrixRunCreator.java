@@ -17,10 +17,18 @@ package org.labkey.microarray.matrix;
 
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.TabLoader;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,6 +37,8 @@ import java.util.Map;
  */
 public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<ExpressionMatrixAssayProvider>
 {
+    public static final String SAMPLES_ROLE_NAME = "Samples";
+
     public ExpressionMatrixRunCreator(ExpressionMatrixAssayProvider provider)
     {
         super(provider);
@@ -37,6 +47,35 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
     @Override
     protected void addInputMaterials(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
-        // UNDONE: Add samples found in matrix column header as inputs
+        // Attach the materials found in the matrix file to the run
+        try
+        {
+            File dataFile = getPrimaryFile(context);
+            TabLoader loader = new TabLoader(dataFile, true);
+            ColumnDescriptor[] cols = loader.getColumns();
+
+            List<String> columnNames = new ArrayList<>(cols.length);
+            for (ColumnDescriptor col : cols)
+                columnNames.add(col.getColumnName());
+
+            Map<String, Integer> samplesMap = ExpressionMatrixDataHandler.ensureSamples(context.getContainer(), columnNames);
+            List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterials(samplesMap.values());
+            for (ExpMaterial material : materials)
+            {
+                inputMaterials.put(material, SAMPLES_ROLE_NAME);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException("Failed to read from data file", e);
+        }
     }
+
+    private File getPrimaryFile(AssayRunUploadContext context) throws IOException, ExperimentException
+    {
+        Map<String, File> files = context.getUploadedData();
+        assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
+        return files.get(AssayDataCollector.PRIMARY_FILE);
+    }
+
 }

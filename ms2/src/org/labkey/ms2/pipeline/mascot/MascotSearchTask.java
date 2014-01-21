@@ -186,7 +186,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 return new RecordedActionSet();
             }
 
-            params.put("pipeline, user name", "LabKey User");
+            params.put("pipeline, user name", "LabKey User"); // BUGBUG: should be "pipeline, username" ?
 
             File fileWorkInputXML = _wd.newFile("input.xml");
             getJobSupport().createParamParser().writeFromMap(params, fileWorkInputXML);
