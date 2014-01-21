@@ -25,8 +25,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.SampleProperty;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -53,7 +53,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +90,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
     }

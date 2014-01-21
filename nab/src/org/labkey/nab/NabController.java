@@ -61,6 +61,7 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.statistics.DoublePoint;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
@@ -910,8 +911,8 @@ public class NabController extends SpringActionController
                 currentColor = (Color) plot.getRenderer(0).getSeriesPaint(pointDatasetCount - 1);
 
             XYSeries curvedSeries = new XYSeries(sampleId);
-            DilutionCurve.DoublePoint[] curve = summary.getCurve();
-            for (DilutionCurve.DoublePoint point : curve)
+            DoublePoint[] curve = summary.getCurve();
+            for (DoublePoint point : curve)
                 curvedSeries.add(point.getX(), point.getY());
             curvesDataset.addSeries(curvedSeries);
             if (currentColor != null)

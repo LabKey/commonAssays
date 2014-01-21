@@ -17,7 +17,7 @@ package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.DataType;
@@ -172,7 +172,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new CrossPlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }

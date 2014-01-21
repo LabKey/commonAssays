@@ -15,13 +15,12 @@
  */
 package org.labkey.nab.multiplate;
 
-import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
-import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.nab.NabAssayRun;
 
@@ -41,7 +40,7 @@ public class CrossPlateDilutionNabAssayRun extends NabAssayRun
     private DilutionSummary[] _dilutionSummaries;
 
     public CrossPlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
-                                         User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
+                                         User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
         _plates = plates;

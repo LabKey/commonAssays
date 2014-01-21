@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex;
 
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -26,6 +25,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
@@ -124,8 +124,8 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Conjugate"));
         defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
         defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
-        defaultCols.add(FieldKey.fromParts(DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50"));
-        defaultCols.add(FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
+        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50"));
+        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
         defaultCols.add(FieldKey.fromParts("MaxFI"));
         defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUC"));
         setDefaultVisibleColumns(defaultCols);

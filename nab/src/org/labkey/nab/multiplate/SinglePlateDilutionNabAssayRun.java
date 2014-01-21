@@ -16,10 +16,10 @@
 package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.Luc5Assay;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
@@ -47,7 +47,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
     private DilutionSummary[] _dilutionSummaries;
 
     public SinglePlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
-                                  User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
+                                  User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
         _plates = plates;
@@ -122,7 +122,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 
     private static class MultiVirusDilutionSummary extends DilutionSummary
     {
-        public MultiVirusDilutionSummary(Luc5Assay assay, List<WellGroup> sampleGroups, String lsid, DilutionCurve.FitType curveFitType)
+        public MultiVirusDilutionSummary(Luc5Assay assay, List<WellGroup> sampleGroups, String lsid, StatsService.CurveFitType curveFitType)
         {
             super(assay, sampleGroups, lsid, curveFitType);
         }

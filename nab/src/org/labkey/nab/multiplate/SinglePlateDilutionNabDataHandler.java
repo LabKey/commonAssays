@@ -17,8 +17,8 @@ package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -206,7 +206,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, DilutionCurve.FitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new SinglePlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }
@@ -226,7 +226,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
+    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
         Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)

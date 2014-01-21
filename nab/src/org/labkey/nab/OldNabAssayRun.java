@@ -15,9 +15,9 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.Luc5Assay;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 
@@ -35,7 +35,7 @@ public class OldNabAssayRun extends Luc5Assay
     protected Plate _plate;
     private DilutionSummary[] _dilutionSummaries;
 
-    public OldNabAssayRun(Plate plate, int[] cutoffs, DilutionCurve.FitType renderCurveFitType)
+    public OldNabAssayRun(Plate plate, int[] cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(plate.getRowId(), cutoffs, renderCurveFitType);
         _plate = plate;

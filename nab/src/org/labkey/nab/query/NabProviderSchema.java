@@ -17,9 +17,9 @@
 package org.labkey.nab.query;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.data.*;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.DefaultSchema;
@@ -87,9 +87,9 @@ public class NabProviderSchema extends DilutionProviderSchema
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<DilutionCurve.FitType> result = new EnumTableInfo<>(DilutionCurve.FitType.class, getDbSchema(), new EnumTableInfo.EnumValueGetter<DilutionCurve.FitType>()
+            EnumTableInfo<StatsService.CurveFitType> result = new EnumTableInfo<>(StatsService.CurveFitType.class, getDbSchema(), new EnumTableInfo.EnumValueGetter<StatsService.CurveFitType>()
             {
-                public String getValue(DilutionCurve.FitType e)
+                public String getValue(StatsService.CurveFitType e)
                 {
                     return e.getLabel();
                 }

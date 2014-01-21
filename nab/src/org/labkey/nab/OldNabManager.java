@@ -30,6 +30,7 @@ import org.labkey.api.assay.dilution.SampleInfo;
 import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
@@ -407,7 +408,7 @@ public class OldNabManager extends AbstractNabManager
         // actually retrieved from the database (so all rowids are properly
         // populated), but we also need to save the cutoff dilutions with the
         // plate, which requires creating an assay instance before saving.
-        OldNabAssayRun temp = new OldNabAssayRun(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
+        OldNabAssayRun temp = new OldNabAssayRun(plate, cutoffs, StatsService.CurveFitType.FIVE_PARAMETER);
         for (DilutionSummary dilution : temp.getSummaries())
         {
             // Old NAb runs will only have one well group, so there's no need to iterate the list:
@@ -430,7 +431,7 @@ public class OldNabManager extends AbstractNabManager
 
         int rowid = PlateService.get().save(container, user, plate);
         plate = PlateService.get().getPlate(container, rowid);
-        return new OldNabAssayRun(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
+        return new OldNabAssayRun(plate, cutoffs, StatsService.CurveFitType.FIVE_PARAMETER);
     }
 
     protected OldNabAssayRun createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, ServletException, BiffException
@@ -487,7 +488,7 @@ public class OldNabManager extends AbstractNabManager
     public OldNabAssayRun loadFromDatabase(User user, Container container, int rowid) throws Exception
     {
         Plate plate = PlateService.get().getPlate(container, rowid);
-        return new OldNabAssayRun(plate, getCutoffs(plate), DilutionCurve.FitType.FIVE_PARAMETER);
+        return new OldNabAssayRun(plate, getCutoffs(plate), StatsService.CurveFitType.FIVE_PARAMETER);
     }
 
     public void deletePlate(Container container, int rowid) throws SQLException
@@ -504,7 +505,7 @@ public class OldNabManager extends AbstractNabManager
         WellGroup group = PlateService.get().getWellGroup(container, wellGroupRowId);
         if (group == null)
             return null;
-        OldNabAssayRun assay = new OldNabAssayRun(group.getPlate(), getCutoffs(group.getPlate()), DilutionCurve.FitType.FIVE_PARAMETER);
+        OldNabAssayRun assay = new OldNabAssayRun(group.getPlate(), getCutoffs(group.getPlate()), StatsService.CurveFitType.FIVE_PARAMETER);
         for (DilutionSummary summary : assay.getSummaries())
         {
             if (summary.getFirstWellGroup().getRowId().intValue() == wellGroupRowId)

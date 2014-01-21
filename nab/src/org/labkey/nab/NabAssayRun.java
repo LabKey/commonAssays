@@ -17,10 +17,10 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
@@ -47,7 +47,7 @@ import java.util.Set;
 public abstract class NabAssayRun extends DilutionAssayRun
 {
     public NabAssayRun(DilutionAssayProvider provider, ExpRun run,
-                       User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
+                       User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
     }

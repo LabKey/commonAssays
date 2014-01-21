@@ -21,10 +21,10 @@ import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.nab.query.NabProtocolSchema;
 
 import java.sql.SQLException;
@@ -48,7 +48,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
         super(NAB_DATA_ROW_LSID_PREFIX);
     }
 
-    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
+    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
         Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)

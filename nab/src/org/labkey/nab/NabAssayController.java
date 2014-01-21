@@ -25,10 +25,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
-import org.labkey.api.assay.dilution.DilutionSummary;
-import org.labkey.api.assay.nab.NabGraph;
 import org.labkey.api.assay.nab.RenderAssayBean;
 import org.labkey.api.assay.nab.RenderAssayForm;
 import org.labkey.api.assay.nab.view.DilutionGraphAction;
@@ -40,6 +37,7 @@ import org.labkey.api.assay.nab.view.RunDetailsAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -280,7 +278,7 @@ public class NabAssayController extends SpringActionController
         return null;
     }
 
-    private DilutionAssayRun _getNabAssayRun(ExpRun run, DilutionCurve.FitType fit, User elevatedUser) throws ExperimentException
+    private DilutionAssayRun _getNabAssayRun(ExpRun run, StatsService.CurveFitType fit, User elevatedUser) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
         // then immediately hit the 'print' button.
@@ -310,7 +308,7 @@ public class NabAssayController extends SpringActionController
     public class DetailsAction extends RunDetailsAction<RenderAssayBean>
     {
         @Override
-        protected DilutionAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit, User user) throws ExperimentException
+        protected DilutionAssayRun getNabAssayRun(ExpRun run, StatsService.CurveFitType fit, User user) throws ExperimentException
         {
             return _getNabAssayRun(run, fit, user);
         }
@@ -474,7 +472,7 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        protected DilutionAssayRun getAssayRun(ExpRun run, DilutionCurve.FitType fit, User user) throws ExperimentException
+        protected DilutionAssayRun getAssayRun(ExpRun run, StatsService.CurveFitType fit, User user) throws ExperimentException
         {
             return _getNabAssayRun(run, fit, user);
         }

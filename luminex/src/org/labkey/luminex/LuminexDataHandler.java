@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
-import org.labkey.api.assay.dilution.ParameterCurveImpl;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
@@ -78,7 +77,6 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.Stats;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -899,10 +897,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             String stdCurve = analyte.getStdCurve();
             if (stdCurve != null)
             {
-                ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
+                FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
                 if (fitParams != null)
                 {
-                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, null, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
+                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, null, StatsService.CurveFitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
                     if (fit != null)
                     {
                         newCurveFits.add(fit);
@@ -917,12 +915,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             if (!wellGroup.getWellData(false).isEmpty())
             {
                 LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
-                CurveFit rumi5PLFit = importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+                CurveFit rumi5PLFit = importRumiCurveFit(StatsService.CurveFitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
                 if (rumi5PLFit != null)
                 {
                     newCurveFits.add(rumi5PLFit);
                 }
-                CurveFit rumi4PLFit = importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+                CurveFit rumi4PLFit = importRumiCurveFit(StatsService.CurveFitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
                 if (rumi4PLFit != null)
                 {
                     newCurveFits.add(rumi4PLFit);
@@ -1021,13 +1019,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** @return null if we can't find matching Rumi curve fit data */
     @Nullable
-    private CurveFit importRumiCurveFit(DilutionCurve.FitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws DilutionCurve.FitFailedException, SQLException
+    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws DilutionCurve.FitFailedException, SQLException
     {
-        if (fitType != DilutionCurve.FitType.FIVE_PARAMETER && fitType != DilutionCurve.FitType.FOUR_PARAMETER)
+        if (fitType != StatsService.CurveFitType.FIVE_PARAMETER && fitType != StatsService.CurveFitType.FOUR_PARAMETER)
         {
             throw new IllegalArgumentException("Unsupported fit type: " + fitType);
         }
-        String suffix = fitType == DilutionCurve.FitType.FIVE_PARAMETER ? "_5pl" : "_4pl";
+        String suffix = fitType == StatsService.CurveFitType.FIVE_PARAMETER ? "_5pl" : "_4pl";
         Object value = dataRow.getExtraProperties().get("Slope" + suffix);
         Number slope = (value == null ? (Number)value : Double.parseDouble(value.toString()));
         value = dataRow.getExtraProperties().get("Upper" + suffix);
@@ -1045,7 +1043,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if ((slope != null && upper != null && lower != null && inflection != null && ec50 != null) || flag != null)
         {
-            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
+            FitParameters params = new FitParameters();
             if (flag == null)
             {
                 params.min = lower.doubleValue();
@@ -1060,12 +1058,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    private ParameterCurveImpl.FitParameters parseBioPlexStdCurve(String stdCurve)
+    private FitParameters parseBioPlexStdCurve(String stdCurve)
     {
         Matcher matcher = CURVE_PATTERN.matcher(stdCurve);
         if (matcher.matches())
         {
-            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
+            FitParameters params = new FitParameters();
             params.min = Double.parseDouble(matcher.group(1));
             params.max = Double.parseDouble(matcher.group(2)) - Double.parseDouble(matcher.group(1));
             params.inflection = Double.parseDouble(matcher.group(4));
@@ -1084,7 +1082,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testBioPlexCurveParsingNegativeMinimum()
         {
-            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
+            FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
             assertNotNull("Couldn't parse standard curve", params);
             assertEquals(params.asymmetry, 0.215266, DELTA);
             assertEquals(params.min, -2.08995, DELTA);
@@ -1096,14 +1094,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testBioPlexCurveParsingBadInput()
         {
-            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FIA = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
+            FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FIA = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
             assertNull("Shouldn't return a standard curve", params);
         }
 
         @Test
         public void testBioPlexCurveParsingScientific()
         {
-            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -0.723451 + (2.48266E+006 + 0.723451) / ((1 + (Conc / 21.932)^-0.192152))^10");
+            FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -0.723451 + (2.48266E+006 + 0.723451) / ((1 + (Conc / 21.932)^-0.192152))^10");
             assertNotNull("Couldn't parse standard curve", params);
             assertEquals(params.asymmetry, 10.0, DELTA);
             assertEquals(params.min, -0.723451, DELTA);
@@ -1115,7 +1113,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testBioPlexCurveParsingPositiveMinimum()
         {
-            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998");
+            FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998");
             assertNotNull("Couldn't parse standard curve", params);
             assertEquals(0.0999998, params.asymmetry, DELTA);
             assertEquals(.441049, params.min, DELTA);
@@ -1359,7 +1357,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @NotNull
-    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
+    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source, CurveFit[] existingCurveFits)
             throws DilutionCurve.FitFailedException, SQLException
     {
         CurveFit fit = createCurveFit(titration, analyte, params, ec50, flag, fitType, source);
@@ -1390,7 +1388,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private CurveFit createCurveFit(Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source)
+    private CurveFit createCurveFit(Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source)
             throws DilutionCurve.FitFailedException
     {
         CurveFit fit = new CurveFit();
@@ -1406,7 +1404,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             fit.setMaxAsymptote(params.getMax());
             fit.setInflection(params.getInflection());
             fit.setSlope(params.getSlope());
-            if (fitType == DilutionCurve.FitType.FIVE_PARAMETER)
+            if (fitType == StatsService.CurveFitType.FIVE_PARAMETER)
             {
                 fit.setAsymmetry(params.getAsymmetry());
             }
@@ -1445,10 +1443,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             GuideSetTable guideSetTable = schema.createGuideSetTable(false);
             FieldKey maxFIAverageFK = FieldKey.fromParts("MaxFIAverage");
             FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
-            FieldKey ec504plAverageFK = FieldKey.fromParts(DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            FieldKey ec504plStdDevFK = FieldKey.fromParts(DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
-            FieldKey ec505plAverageFK = FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            FieldKey ec505plStdDevFK = FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
+            FieldKey ec504plAverageFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average");
+            FieldKey ec504plStdDevFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
+            FieldKey ec505plAverageFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
+            FieldKey ec505plStdDevFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
             FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
             FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(
@@ -1486,14 +1484,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 {
                     String flagType = null;
 
-                    if (curveFit.getCurveType().equals(DilutionCurve.FitType.FOUR_PARAMETER.getLabel()))
+                    if (curveFit.getCurveType().equals(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
                     {
                         average = (Double)guideSetRow.get(cols.get(ec504plAverageFK).getAlias());
                         stdDev = (Double)guideSetRow.get(cols.get(ec504plStdDevFK).getAlias());
                         value = curveFit.getEC50();
                         flagType = QC_FLAG_EC50_4PL_FLAG_TYPE;
                     }
-                    else if (curveFit.getCurveType().equals(DilutionCurve.FitType.FIVE_PARAMETER.getLabel()))
+                    else if (curveFit.getCurveType().equals(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
                     {
                         average = (Double)guideSetRow.get(cols.get(ec505plAverageFK).getAlias());
                         stdDev = (Double)guideSetRow.get(cols.get(ec505plStdDevFK).getAlias());
@@ -2189,5 +2187,69 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             return Priority.HIGH;
         }
         return null;
+    }
+
+    public static class FitParameters implements Cloneable
+    {
+        public Double fitError;
+        public double asymmetry;
+        public double inflection;
+        public double slope;
+        public double max;
+        public double min;
+
+        public FitParameters copy()
+        {
+            try
+            {
+                return (FitParameters) super.clone();
+            }
+            catch (CloneNotSupportedException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public Double getFitError()
+        {
+            return fitError;
+        }
+
+        public double getAsymmetry()
+        {
+            return asymmetry;
+        }
+
+        public double getInflection()
+        {
+            return inflection;
+        }
+
+        public double getSlope()
+        {
+            return slope;
+        }
+
+        public double getMax()
+        {
+            return max;
+        }
+
+        public double getMin()
+        {
+            return min;
+        }
+
+        public Map<String, Object> toMap()
+        {
+            Map<String, Object> params = new HashMap<>();
+            params.put("asymmetry", getAsymmetry());
+            params.put("inflection", getInflection());
+            params.put("slope", getSlope());
+            params.put("max", getMax());
+            params.put("min", getMin());
+
+            return Collections.unmodifiableMap(params);
+        }
     }
 }
