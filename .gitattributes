@@ -1,6 +1,5 @@
 * text=auto !eol
 authentication/Authentication.iml -text
-authentication/jopenid-1.08.jar -text
 authentication/lib/jopenid-1.08.jar -text
 authentication/module.properties -text
 authentication/resources/credits/jars.txt -text
