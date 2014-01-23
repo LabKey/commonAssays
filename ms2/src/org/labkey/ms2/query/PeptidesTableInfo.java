@@ -437,6 +437,12 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
      */
     private Collection<MS2RunType> getRunTypes()
     {
+        // If we're already targeting a single kind of run, just use that
+        if (_runTypes.length == 1)
+        {
+            return Collections.singleton(_runTypes[0]);
+        }
+
         List<MS2Run> runs = _userSchema.getRuns();
 
         Collection<MS2RunType> runTypes = new HashSet<>(Arrays.asList(_runTypes));

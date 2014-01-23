@@ -29,9 +29,10 @@
 #  - 4.2.20121121 : Changes for LabKey server 12.3, Issue 15042: Transform script (and AUC calculation error) when luminex file uploaded that has an ExpConc value of zero for a standard well
 #  - 5.0.20121210 : Change for LabKey server 13.1
 #  - 5.1.20130424 : Move fix for Issue 15042 up to earliest curve fit calculation
+#  - 6.0.20140117 : Changes for LabKey server 13.3, Issue 19391: Could not convert '-Inf' for field EstLogConc_5pl
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "5.1.20130424";
+transformVersion = "6.0.20140117";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -679,7 +680,11 @@ if (any(dat$isStandard) & length(standards) > 0)
                     run.data$SE_5pl[runDataIndex] = se;
                 }
 
-                # convert Inf and -Inf to Java string representation for DB persistance
+                # convert Inf and -Inf to Java string representation for DB persistance (issue 19391: add similar conversion for other calculated values)
+                run.data$EstLogConc_5pl[run.data$EstLogConc_5pl == "Inf"] = "Infinity";
+                run.data$EstLogConc_5pl[run.data$EstLogConc_5pl == "-Inf"] = "-Infinity";
+                run.data$EstConc_5pl[run.data$EstConc_5pl == "Inf"] = "Infinity";
+                run.data$EstConc_5pl[run.data$EstConc_5pl == "-Inf"] = "-Infinity";
                 run.data$SE_5pl[run.data$SE_5pl == "Inf"] = "Infinity";
                 run.data$SE_5pl[run.data$SE_5pl == "-Inf"] = "-Infinity";
             }
@@ -714,7 +719,11 @@ if (any(dat$isStandard) & length(standards) > 0)
                     run.data$SE_4pl[runDataIndex] = se;
                 }
 
-                # convert Inf and -Inf to Java string representation for DB persistance
+                # convert Inf and -Inf to Java string representation for DB persistance (issue 19391: add similar conversion for other calculated values)
+                run.data$EstLogConc_4pl[run.data$EstLogConc_4pl == "Inf"] = "Infinity";
+                run.data$EstLogConc_4pl[run.data$EstLogConc_4pl == "-Inf"] = "-Infinity";
+                run.data$EstConc_4pl[run.data$EstConc_4pl == "Inf"] = "Infinity";
+                run.data$EstConc_4pl[run.data$EstConc_4pl == "-Inf"] = "-Infinity";
                 run.data$SE_4pl[run.data$SE_4pl == "Inf"] = "Infinity";
                 run.data$SE_4pl[run.data$SE_4pl == "-Inf"] = "-Infinity";
             }
