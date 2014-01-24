@@ -831,11 +831,18 @@ abstract public class FlowJoWorkspace extends Workspace
             assertAdvanced(workspace, "10.0.5", false);
         }
 
-        //@Test
+        @Test
         public void loadPCAdvanced_10_0_6() throws Exception
         {
             Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.6.wsp");
             assertAdvanced(workspace, "10.0.6", false);
+        }
+
+        @Test
+        public void loadPCAdvanced_10_0_7() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.7.wsp");
+            assertAdvanced(workspace, "10.0.7", false);
         }
 
         private void assertAdvanced(Workspace workspace, String version, boolean mac)
@@ -854,6 +861,13 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertEquals(11, workspace.getWarnings().size());
                 assertTrue(workspace.getWarnings().get(0).contains("Coefficient of Variation statistic value missing"));
                 assertTrue(workspace.getWarnings().get(1).contains("Mode statistic not yet supported"));
+            }
+            else if ("10.0.7".equals(version))
+            {
+                // Median values for some of the samples aren't present (the populations have 0 count)
+                assertEquals(StringUtils.join(workspace.getWarnings(), "\n"), 5, workspace.getWarnings().size());
+                assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
+                assertTrue(workspace.getWarnings().get(1).contains("Median statistic value missing"));
             }
             else
             {
@@ -1001,6 +1015,25 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                }
+                else if ("10.0.6".equals(version) || "10.0.7".equals(version))
+                {
+                    // It's tiresome caring about stat values
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")).intValue());
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+                    //assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:RobustCV(Fluor)")), 0.001d);
+                    // XXX: FreqOfParent wasn't migrated properly by FlowJo from v7.6.5 to v10.0.5
+                    //assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                    assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                 }
                 else
                 {

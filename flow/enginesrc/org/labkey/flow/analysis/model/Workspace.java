@@ -119,12 +119,17 @@ public abstract class Workspace implements IWorkspace, Serializable
             }
             else if (version >= 1.6 && version < 1.8)
             {
-                // GatingML 1.5 appears in version >= 1.6 (FlowJo version > 7.5.5 and < 10.0.5)
+                // Version 1.6 (FlowJo 7.5.5) changes:
+                // - GatingML 1.5
                 return new PC75Workspace(name, path, elDoc);
             }
-            else if (version >= 1.8 && version < 2.0)
+            else if ((version >= 1.8 && version < 2.0) || version == 20.0)
             {
-                // GatingML 2.0 appears in version >= 1.8 (FlowJo version > 10.0.6)
+                // Version 1.8 (FlowJo 10.0.6) changes:
+                // - GatingML 2.0
+
+                // Version 20.0 (FlowJo 10.0.7) changes:
+                // - Adds plate editor, moves per-sample Cytometer settings to top-level
                 return new FlowJo10_0_6Workspace(name, path, elDoc);
             }
 
