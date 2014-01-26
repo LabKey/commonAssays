@@ -521,6 +521,7 @@ public class MS1Controller extends SpringActionController
             //the container of the source url
             ViewContext vctx = new ViewContext();
             vctx.setContainer(ContainerManager.getForPath(url.getExtraPath()));
+            vctx.setUser(getUser());
             fvaction.setViewContext(vctx);
             
             return fvaction.getFeaturesView(url);
