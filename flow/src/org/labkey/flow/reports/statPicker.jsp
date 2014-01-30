@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.flow.query.FlowPropertySet" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.flow.persist.AttributeCache" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowPropertySet fps = new FlowPropertySet(getContainer());
@@ -31,8 +32,9 @@
     StringBuilder jsonStats = new StringBuilder();
     jsonStats.append("[");
     String comma = "";
-    for (StatisticSpec spec : fps.getStatistics().keySet())
+    for (AttributeCache.StatisticEntry entry : fps.getStatistics())
     {
+        StatisticSpec spec = entry.getAttribute();
         jsonStats.append(comma);
         jsonStats.append("{");
         jsonStats.append("text:").append(PageFlowUtil.jsString(spec.toString())).append(",");
