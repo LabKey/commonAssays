@@ -78,6 +78,9 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
 
             // Load from the cache by rowid
             FlowEntry flowEntry = FlowManager.get().getAttributeEntry(containerId, _type, name);
+            if (flowEntry == null)
+                return null;
+
             E entry = byRowId(flowEntry._rowId);
             //LOG.info("-Loaded " + _type + " by name: " + key);
             return entry;
