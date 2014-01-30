@@ -18,20 +18,21 @@ package org.labkey.flow.query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.util.KeywordUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,21 +40,19 @@ public class FlowPropertySet
 {
     static private final Logger _log = Logger.getLogger(FlowPropertySet.class);
     private Container _container;
-    private ColumnInfo _colDataId;
-    private Map<String, Integer> _keywords;
-    private Map<StatisticSpec, Integer> _statistics;
-    private Map<GraphSpec, Integer> _graphs;
+
+    private Collection<AttributeCache.KeywordEntry> _keywords;
+    private Collection<AttributeCache.StatisticEntry> _statistics;
+    private Collection<AttributeCache.GraphEntry> _graphs;
     private Map<String, SubsetSpec> _subsetNameAncestorMap;
 
     public FlowPropertySet(ExpDataTable table)
     {
-        _colDataId = table.getColumn("RowId");
         _container = table.getContainer();
     }
 
     public FlowPropertySet(Container c)
     {
-        _colDataId = DbSchema.get("exp").getTable("data").getColumn("rowid");
         _container = c;
     }
 
@@ -153,43 +152,51 @@ public class FlowPropertySet
     {
         if (_subsetNameAncestorMap != null)
             return;
-        _statistics = AttributeCache.STATS.getAttrValues(_container, _colDataId, true);
-        _graphs = AttributeCache.GRAPHS.getAttrValues(_container, _colDataId, true);
+        _statistics = AttributeCache.STATS.byContainer(_container);
+        _graphs = AttributeCache.GRAPHS.byContainer(_container);
         Set<SubsetSpec> subsets = new HashSet<>();
-        for (StatisticSpec stat : _statistics.keySet())
+        for (AttributeCache.StatisticEntry stat : _statistics)
         {
-            subsets.add(stat.getSubset());
+            StatisticSpec spec = stat.getAttribute();
+            subsets.add(spec.getSubset());
         }
-        for (GraphSpec graph : _graphs.keySet())
+        for (AttributeCache.GraphEntry graph : _graphs)
         {
-            subsets.add(graph.getSubset());
+            GraphSpec spec = graph.getAttribute();
+            subsets.add(spec.getSubset());
         }
         _subsetNameAncestorMap = getSubsetNameAncestorMap(subsets);
     }
 
-    public Map<StatisticSpec, Integer> getStatistics()
+    public Collection<AttributeCache.StatisticEntry> getStatistics()
     {
         initStatisticsAndGraphs();
         return _statistics;
     }
 
-    public Map<GraphSpec, Integer> getGraphProperties()
+    public Collection<AttributeCache.GraphEntry> getGraphProperties()
     {
         initStatisticsAndGraphs();
         return _graphs;
     }
 
-    public Map<String, Integer> getKeywordProperties()
+    public Collection<AttributeCache.KeywordEntry> getKeywordProperties()
     {
         if (_keywords == null)
         {
-            _keywords = AttributeCache.KEYWORDS.getAttrValues(_container, _colDataId, true);
+            _keywords = AttributeCache.KEYWORDS.byContainer(_container);
         }
         return _keywords;
     }
 
     public Collection<String> getVisibleKeywords()
     {
-        return KeywordUtil.filterHidden(getKeywordProperties().keySet());
+        List<String> visible = new ArrayList<>();
+        for (AttributeCache.KeywordEntry entry : getKeywordProperties())
+        {
+            if (!KeywordUtil.isHidden(entry.getAttribute()))
+                visible.add(entry.getAttribute());
+        }
+        return visible;
     }
 }

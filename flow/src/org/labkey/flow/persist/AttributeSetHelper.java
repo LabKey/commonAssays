@@ -26,8 +26,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.data.AttributeType;
-import org.labkey.flow.query.AttributeCache;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -92,13 +90,14 @@ public class AttributeSetHelper
         ensureKeywordNames(attrs, c, attrs.getKeywordNames());
         ensureStatisticNames(attrs, c, attrs.getStatisticNames());
         ensureGraphNames(attrs, c, attrs.getGraphNames());
+        AttributeCache.uncacheAll(c);
     }
 
     private static void ensureKeywordNames(AttributeSet attrs, Container c, Collection<String> specs)
     {
         for (String spec : specs)
         {
-            FlowManager.get().ensureKeywordNameAndAliases(c, spec, attrs.getKeywordAliases(spec));
+            FlowManager.get().ensureKeywordNameAndAliases(c, spec, attrs.getKeywordAliases(spec), false);
         }
     }
 
@@ -107,7 +106,7 @@ public class AttributeSetHelper
         for (StatisticSpec spec : specs)
         {
             String s = spec.toString();
-            FlowManager.get().ensureStatisticNameAndAliases(c, s, attrs.getStatisticAliases(spec));
+            FlowManager.get().ensureStatisticNameAndAliases(c, s, attrs.getStatisticAliases(spec), false);
         }
     }
 
@@ -116,7 +115,7 @@ public class AttributeSetHelper
         for (GraphSpec spec : specs)
         {
             String s = spec.toString();
-            FlowManager.get().ensureGraphNameAndAliases(c, s, attrs.getGraphAliases(spec));
+            FlowManager.get().ensureGraphNameAndAliases(c, s, attrs.getGraphAliases(spec), false);
         }
     }
 
@@ -141,7 +140,8 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<String, String> entry : keywords.entrySet())
                 {
-                    paramsList.add(Arrays.asList(obj.getRowId(), mgr.getAttributeId(c, AttributeType.keyword, entry.getKey()), entry.getValue()));
+                    AttributeCache.Entry a = AttributeCache.KEYWORDS.preferred(c, entry.getKey());
+                    paramsList.add(Arrays.asList(obj.getRowId(), a.getRowId(), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
@@ -153,7 +153,8 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
                 {
-                    paramsList.add(Arrays.<Object>asList(obj.getRowId(), mgr.getAttributeId(c, AttributeType.statistic, entry.getKey().toString()), entry.getValue()));
+                    AttributeCache.Entry a = AttributeCache.STATS.preferred(c, entry.getKey());
+                    paramsList.add(Arrays.<Object>asList(obj.getRowId(), a.getRowId(), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
@@ -165,7 +166,8 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
                 {
-                    paramsList.add(Arrays.asList(obj.getRowId(), mgr.getAttributeId(c, AttributeType.graph, entry.getKey().toString()), entry.getValue()));
+                    AttributeCache.Entry a = AttributeCache.GRAPHS.preferred(c, entry.getKey());
+                    paramsList.add(Arrays.asList(obj.getRowId(), a.getRowId(), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
@@ -173,7 +175,7 @@ public class AttributeSetHelper
         }
         finally
         {
-            AttributeCache.invalidateCache(data.getContainer());
+            AttributeCache.uncacheAll(data.getContainer());
         }
 
     }

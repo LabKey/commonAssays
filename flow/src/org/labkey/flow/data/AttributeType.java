@@ -16,9 +16,114 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.data.TableInfo;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.persist.FlowManager;
+
 public enum AttributeType
 {
-    keyword,
-    statistic,
-    graph,
+    keyword
+            {
+                @Override
+                public Object createAttribute(String name)
+                {
+                    return name;
+                }
+
+                @Override
+                public TableInfo getAttributeTable()
+                {
+                    return FlowManager.get().getTinfoKeywordAttr();
+                }
+
+                @Override
+                public TableInfo getValueTable()
+                {
+                    return FlowManager.get().getTinfoKeyword();
+                }
+
+                @Override
+                public String getValueTableAttributeIdColumn()
+                {
+                    return "keywordid";
+                }
+            },
+
+    statistic
+            {
+                @Override
+                public Object createAttribute(String name)
+                {
+                    return new StatisticSpec(name);
+                }
+
+                @Override
+                public TableInfo getAttributeTable()
+                {
+                    return FlowManager.get().getTinfoStatisticAttr();
+                }
+
+                @Override
+                public TableInfo getValueTable()
+                {
+                    return FlowManager.get().getTinfoStatistic();
+                }
+
+                @Override
+                public String getValueTableAttributeIdColumn()
+                {
+                    return "statisticid";
+                }
+            },
+    graph
+            {
+                @Override
+                public Object createAttribute(String name)
+                {
+                    return new GraphSpec(name);
+                }
+
+                @Override
+                public TableInfo getAttributeTable()
+                {
+                    return FlowManager.get().getTinfoGraphAttr();
+                }
+
+                @Override
+                public TableInfo getValueTable()
+                {
+                    return FlowManager.get().getTinfoGraph();
+                }
+
+                @Override
+                public String getValueTableAttributeIdColumn()
+                {
+                    return "graphid";
+                }
+            };
+
+    /** Created a parsed representation of the attribute. */
+    public abstract Object createAttribute(String name);
+
+    /** The attribute table where the keyword, statistic, graph name and alias information is stored. */
+    public abstract TableInfo getAttributeTable();
+
+    /** The value table where the keyword value, statistic value, or graph bytes are stored. */
+    public abstract TableInfo getValueTable();
+
+    /** The column name of attribute id column on the value table. */
+    public abstract String getValueTableAttributeIdColumn();
+
+    public static AttributeType fromClass(Class c)
+    {
+        if (c == String.class)
+            return keyword;
+        if (c == StatisticSpec.class)
+            return statistic;
+        if (c == GraphSpec.class)
+            return graph;
+        throw new IllegalArgumentException();
+    }
+
 }

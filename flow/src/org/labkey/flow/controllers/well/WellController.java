@@ -65,7 +65,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.query.AttributeCache;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -78,6 +78,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -636,8 +637,11 @@ public class WellController extends BaseFlowController
 
         public TreeSet<String> getKeywords(ViewContext context)
         {
-            Map<String,Integer> map = AttributeCache.KEYWORDS.getAttrValues(context.getContainer(), null, true);
-            return new TreeSet<>(map.keySet());
+            Collection<AttributeCache.KeywordEntry> entries = AttributeCache.KEYWORDS.byContainer(context.getContainer());
+            TreeSet<String> keywords = new TreeSet<>();
+            for (AttributeCache.KeywordEntry entry : entries)
+                keywords.add(entry.getAttribute());
+            return keywords;
         }
 
         public TreeSet<String> getValues(ViewContext context, String keyword)

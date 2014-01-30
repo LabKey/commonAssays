@@ -48,6 +48,7 @@ import org.labkey.flow.analysis.web.SubsetParser;
 import org.labkey.flow.analysis.web.SubsetTests;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.ReportsController;
+import org.labkey.flow.controllers.attribute.AttributeController;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -130,6 +131,9 @@ public class FlowModule extends DefaultModule
         addController("flow-protocol", ProtocolController.class);
         addController("flow-remote", FlowRemoteController.class);
         addController("flow-reports", ReportsController.class);
+
+        addController("flow-attribute", AttributeController.class);
+
         FlowProperty.register();
         ContainerManager.addContainerListener(new FlowContainerListener());
 

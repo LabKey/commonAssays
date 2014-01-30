@@ -26,8 +26,10 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.util.KeywordUtil;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
@@ -54,7 +56,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         return field;
     }
 
-    protected Map<String, Integer> getAttributes()
+    protected Collection<AttributeCache.KeywordEntry> getAttributes()
     {
         return _fps.getKeywordProperties();
     }

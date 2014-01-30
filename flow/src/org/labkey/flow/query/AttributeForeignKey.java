@@ -21,12 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasManager;
 import org.labkey.flow.data.AttributeType;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 
-import java.util.Map;
+import java.util.Collection;
 
 abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 {
@@ -54,14 +55,13 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         };
 
         AliasManager am = new AliasManager(ret.getSchema());
-        for (Map.Entry<T, Integer> attr : getAttributes().entrySet())
+        for (AttributeCache.Entry<T, ? extends AttributeCache.Entry> entry : getAttributes())
         {
-            T attrName = attr.getKey();
-            Integer attrId = attr.getValue();
+            T attrName = entry.getAttribute();
+            AttributeCache.Entry preferred = entry.getAliasedEntry();
 
-            FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), attrId);
             ColumnInfo column = new ColumnInfo(new FieldKey(null, attrName.toString()), ret);
-            String alias = am.decideAlias(StringUtils.defaultString(preferred==null?null:preferred._name, attrName.toString()));
+            String alias = am.decideAlias(StringUtils.defaultString(preferred==null?null:preferred.getName(), attrName.toString()));
             column.setAlias(alias);
             initColumn(attrName, preferred, column);
             ret.addColumn(column);
@@ -69,13 +69,13 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         return ret;
     }
 
-    private void initColumn(T attrName, FlowManager.FlowEntry preferred, ColumnInfo column)
+    private void initColumn(T attrName, AttributeCache.Entry preferred, ColumnInfo column)
     {
-        initColumn(attrName, preferred != null ? preferred._name : null, column);
+        initColumn(attrName, preferred != null ? preferred.getName() : null, column);
 
         if (preferred != null)
         {
-            column.setDescription("Alias for '" + preferred._name + "'");
+            column.setDescription("Alias for '" + preferred.getName() + "'");
             column.setHidden(true);
         }
     }
@@ -85,22 +85,24 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         if (displayField == null)
             return null;
 
-        T attrName = attributeFromString(displayField);
-        if (attrName == null)
+        T attr = attributeFromString(displayField);
+        if (attr == null)
             return null;
 
-        int rowId = FlowManager.get().getAttributeRowId(_container, type(), attrName.toString());
-        FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), rowId);
+        AttributeCache cache = AttributeCache.forType(type());
+        AttributeCache.Entry entry = cache.byAttribute(_container, attr);
+        AttributeCache.Entry preferred = entry == null ? null : entry.getAliasedEntry();
+        int rowId = entry == null ? 0 : entry.getRowId();
 
-        SQLFragment sql = sqlValue(parent, attrName, preferred != null ? preferred._rowId : rowId);
+        SQLFragment sql = sqlValue(parent, attr, preferred != null ? preferred.getRowId() : rowId);
         ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, JdbcType.NULL, parent);
-        initColumn(attrName, preferred, ret);
+        initColumn(attr, preferred, ret);
 
         return ret;
     }
 
     abstract protected AttributeType type();
-    abstract protected Map<T, Integer> getAttributes();
+    abstract protected Collection<? extends AttributeCache.Entry<T, ? extends AttributeCache.Entry>> getAttributes();
     abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, int attrId);
     abstract protected void initColumn(T attrName, String preferredName, ColumnInfo column);
     abstract protected T attributeFromString(String field);

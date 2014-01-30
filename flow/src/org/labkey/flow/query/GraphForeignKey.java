@@ -25,11 +25,13 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.AttributeType;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.view.GraphColumn;
 
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,7 +51,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         return AttributeType.graph;
     }
 
-    protected Map<GraphSpec, Integer> getAttributes()
+    protected Collection<AttributeCache.GraphEntry> getAttributes()
     {
         return _fps.getGraphProperties();
     }

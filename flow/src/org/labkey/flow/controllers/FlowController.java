@@ -56,7 +56,7 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.query.AttributeCache;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowJob;
@@ -118,9 +118,9 @@ public class FlowController extends BaseFlowController
         {
             public void run()
             {
-                AttributeCache.STATS.getAttrValues(c, null, false);
-                AttributeCache.GRAPHS.getAttrValues(c, null, false);
-                AttributeCache.KEYWORDS.getAttrValues(c, null, false);
+                AttributeCache.STATS.byContainer(c);
+                AttributeCache.GRAPHS.byContainer(c);
+                AttributeCache.KEYWORDS.byContainer(c);
             }
         };
         JobRunner.getDefault().execute(r);

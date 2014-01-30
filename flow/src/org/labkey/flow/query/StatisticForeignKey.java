@@ -24,8 +24,9 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataType;
+import org.labkey.flow.persist.AttributeCache;
 
-import java.util.Map;
+import java.util.Collection;
 
 public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 {
@@ -45,7 +46,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         return AttributeType.statistic;
     }
 
-    protected Map<StatisticSpec, Integer> getAttributes()
+    protected Collection<AttributeCache.StatisticEntry> getAttributes()
     {
         return _fps.getStatistics();
     }

@@ -24,9 +24,9 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.persist.AttributeCache;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Collection;
 
 public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 {
@@ -48,15 +48,9 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         return AttributeType.statistic;
     }
 
-    protected Map<StatisticSpec, Integer> getAttributes()
+    protected Collection<AttributeCache.StatisticEntry> getAttributes()
     {
-        Map<StatisticSpec, Integer> all = _fps.getStatistics();
-        Map<StatisticSpec, Integer> pct = new TreeMap<>();
-        for (Map.Entry<StatisticSpec, Integer> entry : all.entrySet())
-        {
-            pct.put(entry.getKey(), entry.getValue());
-        }
-        return pct;
+        return _fps.getStatistics();
     }
 
     protected StatisticSpec attributeFromString(String field)

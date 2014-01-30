@@ -401,6 +401,12 @@ flow/src/org/labkey/flow/controllers/IWorkspaceForm.java -text
 flow/src/org/labkey/flow/controllers/NewFolderForm.java -text
 flow/src/org/labkey/flow/controllers/ReportsController.java -text
 flow/src/org/labkey/flow/controllers/WorkspaceData.java -text
+flow/src/org/labkey/flow/controllers/attribute/AttributeController.java -text
+flow/src/org/labkey/flow/controllers/attribute/createAlias.jsp -text
+flow/src/org/labkey/flow/controllers/attribute/deleteUnused.jsp -text
+flow/src/org/labkey/flow/controllers/attribute/details.jsp -text
+flow/src/org/labkey/flow/controllers/attribute/edit.jsp -text
+flow/src/org/labkey/flow/controllers/attribute/summary.jsp -text
 flow/src/org/labkey/flow/controllers/compensation/CompensationController.java -text
 flow/src/org/labkey/flow/controllers/compensation/UploadCompensationForm.java -text
 flow/src/org/labkey/flow/controllers/compensation/begin.jsp -text
@@ -525,12 +531,12 @@ flow/src/org/labkey/flow/data/FlowWorkspace.java -text
 flow/src/org/labkey/flow/data/ICSMetadata.java -text
 flow/src/org/labkey/flow/data/SampleKey.java -text
 flow/src/org/labkey/flow/persist/AttrObject.java -text
+flow/src/org/labkey/flow/persist/AttributeCache.java -text
 flow/src/org/labkey/flow/persist/AttributeSetHelper.java -text
 flow/src/org/labkey/flow/persist/FlowContainerListener.java -text
 flow/src/org/labkey/flow/persist/FlowDataHandler.java -text
 flow/src/org/labkey/flow/persist/FlowManager.java -text
 flow/src/org/labkey/flow/persist/Script.java -text
-flow/src/org/labkey/flow/query/AttributeCache.java -text
 flow/src/org/labkey/flow/query/AttributeForeignKey.java -text
 flow/src/org/labkey/flow/query/BackgroundForeignKey.java -text
 flow/src/org/labkey/flow/query/BackgroundMethod.java -text
