@@ -23,6 +23,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -598,9 +599,11 @@ public class PepXmlImporter extends MS2Importer
         }
     }
 
-    public static boolean isFractionsFile(File pepXmlFile)
+    public static boolean isFractionsFile(File pepXmlFile, String joinedBaseName)
     {
         PepXMLFileType ft = new PepXMLFileType();
-        return ft.isType(pepXmlFile) && "all".equals(ft.getBaseName(pepXmlFile));
+        String baseName = ft.getBaseName(pepXmlFile);
+        return ft.isType(pepXmlFile) &&
+                (AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME.equals(baseName) || joinedBaseName.equals(baseName));
     }
 }

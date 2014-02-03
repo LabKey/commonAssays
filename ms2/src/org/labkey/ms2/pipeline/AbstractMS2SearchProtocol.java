@@ -36,7 +36,7 @@ import java.util.Map;
  */
 abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPipelineJob> extends AbstractFileAnalysisProtocol<JOB>
 {
-    public static final FileType FT_MZXML = new massSpecDataFileType();   
+    public static final FileType FT_MZXML = new massSpecDataFileType();
     public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
 
     private File _dirSeqRoot;
@@ -46,6 +46,12 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     public AbstractMS2SearchProtocol(String name, String description, String xml)
     {
         super(name, description, xml);
+    }
+
+    @Override
+    public String getJoinedBaseName()
+    {
+        return LEGACY_JOINED_BASENAME;
     }
 
     public File getDirSeqRoot()

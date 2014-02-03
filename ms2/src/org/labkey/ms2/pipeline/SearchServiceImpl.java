@@ -493,7 +493,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         if (!statusSingle)
         {
             fileStatus = PipelineJob.FT_LOG.newFile(dirAnalysis,
-                    AbstractFileAnalysisProtocol.getDataSetBaseName(dirData));
+                    protocol.getJoinedBaseName());
         }
         else if (fileInputName != null)
         {

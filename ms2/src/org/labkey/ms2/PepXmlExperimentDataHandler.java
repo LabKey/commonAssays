@@ -53,14 +53,18 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         ExpRun expRun = data.getRun();
         // We need to no-op if this file is one of the intermediate pep.xml files
         // that are produced in the fraction case.
-        if (!PepXmlImporter.isFractionsFile(dataFile))
+        // HACK: The combined name used to always be simply "all", but we've changed the
+        // HACK: default combined/joined name to the protocol name.
+        // HACK: However, we don't have the protocol available here -- luckily the the parent directory name is the protocol name.
+        final String joinedBaseName = dataFile.getParentFile().getName();
+        if (!PepXmlImporter.isFractionsFile(dataFile, joinedBaseName))
         {
             File parentDir = dataFile.getParentFile();
             File[] combinedFile = parentDir.listFiles(new FileFilter()
             {
                 public boolean accept(File f)
                 {
-                    return PepXmlImporter.isFractionsFile(f);
+                    return PepXmlImporter.isFractionsFile(f, joinedBaseName);
                 }
             });
             if (combinedFile.length > 0)

@@ -24,6 +24,7 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
@@ -131,7 +132,7 @@ public class PipelineController extends SpringActionController
                     protocolName = "none";
                     // dirDataOriginal = file;
                     description = AbstractFileAnalysisJob.
-                            getDataDescription(null, file.getName(), protocolName);
+                            getDataDescription(null, file.getName(), AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName);
                 }
                 else
                 {
@@ -145,7 +146,7 @@ public class PipelineController extends SpringActionController
                         dirDataOriginal = dirDataOriginal.getParentFile();
                     }
                     description = AbstractFileAnalysisJob.
-                            getDataDescription(dirDataOriginal, baseName, protocolName);
+                            getDataDescription(dirDataOriginal, baseName, AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName);
                 }
 
                 ViewBackgroundInfo info = getViewBackgroundInfo();
