@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
@@ -39,6 +38,7 @@ import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
@@ -956,7 +956,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
         }
-        catch (DilutionCurve.FitFailedException e)
+        catch (FitFailedException e)
         {
             throw new ExperimentException(e);
         }
@@ -1019,7 +1019,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** @return null if we can't find matching Rumi curve fit data */
     @Nullable
-    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws DilutionCurve.FitFailedException, SQLException
+    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws FitFailedException, SQLException
     {
         if (fitType != StatsService.CurveFitType.FIVE_PARAMETER && fitType != StatsService.CurveFitType.FOUR_PARAMETER)
         {
@@ -1123,7 +1123,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
-        public void testAUCSummaryData() throws DilutionCurve.FitFailedException, ExperimentException
+        public void testAUCSummaryData() throws FitFailedException, ExperimentException
         {
             // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<>();
@@ -1169,7 +1169,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
-        public void testAUCRawData() throws DilutionCurve.FitFailedException, ExperimentException
+        public void testAUCRawData() throws FitFailedException, ExperimentException
         {
             // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<>();
@@ -1358,7 +1358,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     @NotNull
     private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source, CurveFit[] existingCurveFits)
-            throws DilutionCurve.FitFailedException, SQLException
+            throws FitFailedException, SQLException
     {
         CurveFit fit = createCurveFit(titration, analyte, params, ec50, flag, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
@@ -1389,7 +1389,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     private CurveFit createCurveFit(Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source)
-            throws DilutionCurve.FitFailedException
+            throws FitFailedException
     {
         CurveFit fit = new CurveFit();
         fit.setAnalyteId(analyte.getRowId());

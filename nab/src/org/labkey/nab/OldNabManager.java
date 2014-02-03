@@ -21,7 +21,6 @@ import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.assay.nab.Luc5Assay;
@@ -30,6 +29,7 @@ import org.labkey.api.assay.dilution.SampleInfo;
 import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
@@ -423,7 +423,7 @@ public class OldNabManager extends AbstractNabManager
                 }
                 group.setProperty(SampleProperty.FitError.name(), dilution.getFitError());
             }
-            catch (DilutionCurve.FitFailedException e)
+            catch (FitFailedException e)
             {
                 throw new IOException(e.getMessage());
             }

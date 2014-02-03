@@ -16,8 +16,8 @@
 package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionAssayRun;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.Position;
@@ -97,7 +97,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 }
                 sample.put("replicates", replicates);
             }
-            catch (DilutionCurve.FitFailedException e)
+            catch (FitFailedException e)
             {
                 throw new RuntimeException(e);
             }

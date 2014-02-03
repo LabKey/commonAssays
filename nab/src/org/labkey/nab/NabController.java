@@ -38,7 +38,6 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
-import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.dilution.SafeTextConverter;
 import org.labkey.api.assay.dilution.SampleInfo;
@@ -62,6 +61,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.DoublePoint;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
@@ -867,7 +867,7 @@ public class NabController extends SpringActionController
     };
 
 
-    private void renderChartPNG(HttpServletResponse response, DilutionSummary[] dilutionSummaries, int[] cutoffs) throws IOException, DilutionCurve.FitFailedException
+    private void renderChartPNG(HttpServletResponse response, DilutionSummary[] dilutionSummaries, int[] cutoffs) throws IOException, FitFailedException
     {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();
