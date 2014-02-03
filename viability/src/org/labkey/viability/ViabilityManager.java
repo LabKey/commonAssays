@@ -360,8 +360,7 @@ public class ViabilityManager
         }
 
         @Test
-        public void testViability()
-            throws Exception
+        public void testViability() throws Exception
         {
             Container c = JunitUtil.getTestContainer();
             TestContext context = TestContext.get();
@@ -473,7 +472,5 @@ public class ViabilityManager
                 assertNull(result);
             }
         }
-
-
     }
 }
