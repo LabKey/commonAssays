@@ -183,7 +183,7 @@ public class MicroarrayManager
         SimpleFilter featureFilter = SimpleFilter.createContainerFilter(c);
         featureFilter.addCondition(FieldKey.fromParts("FeatureAnnotationSetId"), featureSetRowId);
 
-        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("ProbeId", "RowId"), featureFilter, null);
+        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSchemaTableInfo(), PageFlowUtil.set("ProbeId", "RowId"), featureFilter, null);
         return featureAnnotationSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
     }
 

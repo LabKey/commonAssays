@@ -160,7 +160,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         TableSelector sampleTableSelector = new TableSelector(ExperimentService.get().getTinfoMaterial(), selectNames, sampleSetFilter, null);
         Map<String, Object>[] sampleSetResults = sampleTableSelector.getMapArray();
         if (sampleSetResults.length < 1)
-            throw new ExperimentException("No samples found");
+            throw new ExperimentException("No matching samples found");
 
         // CONSIDER: Create missing samples automatically ?
         Map<String, Integer> sampleMap = sampleTableSelector.getValueMap();
@@ -168,9 +168,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         {
             Set<String> missingSamples = new HashSet<>(sampleNames);
             missingSamples.removeAll(sampleMap.keySet());
-            StringBuilder msg = new StringBuilder("No samples found for: ");
-            msg.append(StringUtils.join(missingSamples, ", "));
-            throw new ExperimentException(msg.toString());
+            throw new ExperimentException("No samples found for: " + StringUtils.join(missingSamples, ", "));
         }
 
         return sampleMap;
