@@ -95,11 +95,10 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
 
                 if (wellgroup != null)
                 {
-                    String virusId = (String)row.get(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME);
-
-                    if (virusId == null)
+                    if (row.get(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME) == null)
                         throw new ExperimentException("Every row in the metadata file must contain a value for the column \"" + NabAssayProvider.VIRUS_NAME_PROPERTY_NAME + "\".");
 
+                    String virusId = row.get(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME).toString();
                     String key = getKey(virusId, wellGroupName);
                     Map<DomainProperty, String> sampleProperties = allProperties.get(key);
                     if (sampleProperties == null)
