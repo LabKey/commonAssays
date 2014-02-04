@@ -102,25 +102,27 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            TabLoader loader = new TabLoader(dataFile, true);
-            ColumnDescriptor[] cols = loader.getColumns();
-            List<String> columnNames = new ArrayList<>(cols.length);
-            for (ColumnDescriptor col : cols)
-                columnNames.add(col.getColumnName());
-
-            Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), columnNames);
-
-            boolean importValues = true;
-            if (runProps.containsKey(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
+            try (TabLoader loader = new TabLoader(dataFile, true))
             {
-                String importValuesStr = runProps.get(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName());
-                if (importValuesStr != null)
-                    importValues = Boolean.valueOf(importValuesStr);
-            }
+                ColumnDescriptor[] cols = loader.getColumns();
+                List<String> columnNames = new ArrayList<>(cols.length);
+                for (ColumnDescriptor col : cols)
+                    columnNames.add(col.getColumnName());
 
-            if (importValues)
-            {
-                insertExpressionMatrixData(info.getContainer(), samplesMap, loader, runProps, data.getRowId());
+                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), columnNames);
+
+                boolean importValues = true;
+                if (runProps.containsKey(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
+                {
+                    String importValuesStr = runProps.get(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName());
+                    if (importValuesStr != null)
+                        importValues = Boolean.valueOf(importValuesStr);
+                }
+
+                if (importValues)
+                {
+                    insertExpressionMatrixData(info.getContainer(), samplesMap, loader, runProps, data.getRowId());
+                }
             }
         }
         catch (IOException e)

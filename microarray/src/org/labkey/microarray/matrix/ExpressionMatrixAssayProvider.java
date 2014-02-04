@@ -19,9 +19,11 @@ package org.labkey.microarray.matrix;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
@@ -33,15 +35,19 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayModule;
+import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.util.Collections;
@@ -139,6 +145,15 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     }
 
     @Override
+    public List<NavTree> getHeaderLinks(ViewContext viewContext, ExpProtocol protocol, ContainerFilter containerFilter)
+    {
+        List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
+        result.add(new NavTree("manage feature annotation sets", new ActionURL(FeatureAnnotationSetController.ManageAction.class, viewContext.getContainer())));
+        result.add(new NavTree("manage samples", PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleSetListURL(viewContext.getContainer())));
+        return result;
+    }
+
+    @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
@@ -152,11 +167,11 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
         featureSet.setRequired(true);
 
         DomainProperty importValues = addProperty(runDomain, IMPORT_VALUES_COLUMN.getName(), IMPORT_VALUES_COLUMN.getLabel(), PropertyType.BOOLEAN);
-        featureSet.setShownInInsertView(false);
-        featureSet.setShownInUpdateView(false);
-        featureSet.setShownInDetailsView(false);
-        featureSet.setHidden(true);
-        featureSet.setRequired(false);
+        importValues.setShownInInsertView(false);
+        importValues.setShownInUpdateView(false);
+        importValues.setShownInDetailsView(false);
+        importValues.setHidden(true);
+        importValues.setRequired(false);
 
         return result;
     }
