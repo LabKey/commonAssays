@@ -39,7 +39,7 @@ public class SinglePointControlTable extends AbstractLuminexTable
 
         // Alias the RunId column to be consistent with other Schema columns
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
-        runColumn.setFk(new QueryForeignKey(schema, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
+        runColumn.setFk(new QueryForeignKey(schema, null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
     }
 
     @Override

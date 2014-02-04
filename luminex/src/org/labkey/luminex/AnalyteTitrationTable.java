@@ -100,7 +100,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         addColumn(maxFiFlagEnabledColumn);
 
         ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
-        guideSetCol.setFk(new QueryForeignKey(schema, "GuideSet", "RowId", "AnalyteName"));
+        guideSetCol.setFk(new QueryForeignKey(schema, null, "GuideSet", "RowId", "AnalyteName"));
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 

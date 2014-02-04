@@ -27,7 +27,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.microarray.assay.MicroarrayProtocolSchema;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         ColumnInfo featureIdColumn = addColumn(wrapColumn(getRealTable().getColumn("FeatureId")));
         featureIdColumn.setHidden(false);
         featureIdColumn.setLabel("Probe Id");
-        featureIdColumn.setFk(new QueryForeignKey(MicroarrayUserSchema.SCHEMA_NAME, schema.getContainer(),
+        featureIdColumn.setFk(new QueryForeignKey(MicroarrayUserSchema.SCHEMA_NAME, schema.getContainer(), null,
                 schema.getUser(), MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, "RowId", "ProbeId"));
 
         ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
@@ -61,7 +60,7 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
 
         // Allow for multiple sample sets, but assume we're displaying data from whichever is currently active.
         String activeSampleSet = ExperimentService.get().ensureActiveSampleSet(schema.getContainer()).getName();
-        sampleIdColumn.setFk(new QueryForeignKey(SamplesSchema.SCHEMA_NAME, schema.getContainer(), schema.getUser(),
+        sampleIdColumn.setFk(new QueryForeignKey(SamplesSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(),
                 activeSampleSet,"RowId","Name"));
 
         SQLFragment runSQL = new SQLFragment("(SELECT d.RunId FROM ");
@@ -71,12 +70,12 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         runSQL.append(".DataId)");
         ColumnInfo runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
         addColumn(runIdColumn);
-        runIdColumn.setFk(new QueryForeignKey(getUserSchema(), AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
+        runIdColumn.setFk(new QueryForeignKey(getUserSchema(), null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
 
         ColumnInfo dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
         dataIdColumn.setHidden(false);
         dataIdColumn.setLabel("Data Id");
-        dataIdColumn.setFk(new QueryForeignKey(ExpSchema.SCHEMA_NAME, schema.getContainer(), schema.getUser(), "data",
+        dataIdColumn.setFk(new QueryForeignKey(ExpSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(), ExpSchema.TableType.Data.toString(),
                 "RowId", "Name"));
 
         List<FieldKey> columns = new ArrayList<>(getDefaultVisibleColumns());

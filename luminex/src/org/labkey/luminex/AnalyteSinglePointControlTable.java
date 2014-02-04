@@ -63,13 +63,13 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         setName(LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
 
         ColumnInfo singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
-        singlePointControlCol.setFk(new QueryForeignKey(schema, "SinglePointControl", "RowId", "Name"));
+        singlePointControlCol.setFk(new QueryForeignKey(schema, null, "SinglePointControl", "RowId", "Name"));
 
         ColumnInfo runColumn = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
-        runColumn.setFk(new QueryForeignKey(schema, "Analyte", "RowId", "Name"));
+        runColumn.setFk(new QueryForeignKey(schema, null, "Analyte", "RowId", "Name"));
 
         ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
-        guideSetCol.setFk(new QueryForeignKey(schema, "GuideSet", "RowId", "AnalyteName"));
+        guideSetCol.setFk(new QueryForeignKey(schema, null, "GuideSet", "RowId", "AnalyteName"));
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 

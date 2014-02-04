@@ -4007,7 +4007,7 @@ public class MS2Controller extends SpringActionController
             {
                 run = form.validateRun();
                 QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
-                SimpleFilter filter = new SimpleFilter();
+                SimpleFilter filter = getAllPeptidesFilter(getViewContext(), getViewContext().getActionURL().clone(), run);
                 AbstractQueryMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
                 protein.setPeptides(new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), filter, new Sort("Peptide")).getArray(String.class));
             }

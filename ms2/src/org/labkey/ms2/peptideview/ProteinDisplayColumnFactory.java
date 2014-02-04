@@ -16,12 +16,14 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.ProteinDisplayColumn;
 
@@ -54,6 +56,20 @@ public class ProteinDisplayColumnFactory implements DisplayColumnFactory
         Map<String, FieldKey> params = new HashMap<>();
         params.put("seqId", new FieldKey(colInfo.getFieldKey().getParent(), "SeqId"));
         params.put("run", new FieldKey(new FieldKey(colInfo.getFieldKey().getParent(), "Fraction"), "Run"));
+
+        // Propagate filters from the URL if we have one available
+        ViewContext viewContext = HttpView.currentContext();
+        if (viewContext != null)
+        {
+            ActionURL currentURL = viewContext.getActionURL();
+            for (String parameterName : currentURL.getParameterMap().keySet())
+            {
+                if (!params.containsKey(parameterName))
+                {
+                    detailsURL.addParameter(parameterName, currentURL.getParameter(parameterName));
+                }
+            }
+        }
         ProteinDisplayColumn result = new ProteinDisplayColumn(colInfo, detailsURL, params);
         if (_url != null)
         {
