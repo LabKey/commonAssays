@@ -75,7 +75,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     @Override @NotNull
     public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
-        return new AssayTableMetadata(this, protocol, null, FieldKey.fromParts("DataId", "Run"), FieldKey.fromParts("RowId"));
+        return new AssayTableMetadata(this, protocol, null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
     }
 
     @Override
