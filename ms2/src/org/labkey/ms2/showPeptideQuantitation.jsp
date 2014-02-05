@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
 <%@ page import="org.labkey.api.util.URLHelper"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.ms2.ElutionGraph"%>
 <%@ page import="org.labkey.ms2.MS2Controller"%>
-<%@ page import="org.labkey.ms2.MS2Fraction" %>
-<%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.PeptideQuantitation" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="java.text.DecimalFormat" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.ms2.ElutionGraph" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
 JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -62,15 +58,15 @@ if (errorMessage != null)
 <a name="quantitation"></a>
 <table class="labkey-tab-strip">
     <tr>
-        <td class="labkey-tab-space"><img width="5" src="<%= getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
         <% for (int i = 1; i <= 6; i++)
         {
             URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", Integer.toString(i)); %>
-            <td class="labkey-tab-space"><img width="5" src="<%= getContextPath() %>/_.gif"></td>
+            <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
             <td class="labkey-tab<%= i == currentCharge ? "-selected" : "" %>" style="margin-bottom: 0;"><a href="<%= h(chargeUrl ) %>#quantitation"><%= i %>+</a></td><%
         } %>
         <td class="labkey-tab-space" width="100%"></td>
-        <td class="labkey-tab-space"><img width="5" src="<%= getContextPath() %>/_.gif"></td>
+        <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
     </tr>
 </table>
 <table style="height: <%= ElutionGraph.HEIGHT * 3 + 50 %>px;">

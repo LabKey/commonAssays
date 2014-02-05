@@ -132,7 +132,7 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
     }
     else
     {
-        %><img src="<%= contextPath%>/_.gif" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
+        %><img src="<%=getWebappURL("_.gif")%>" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
     }
 }
 %>
@@ -195,7 +195,7 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
     }
     else
     {
-        %><img src="<%= contextPath%>/_.gif" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
+        %><img src="<%=getWebappURL("_.gif")%>" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
     }
 }
 %>

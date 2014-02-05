@@ -132,4 +132,4 @@
     for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
 [<a class="<%=entry.getKey().equals(graphSize) ? "labkey-selected-link" : ""%>" name="graphSize<%=entry.getKey()%>" onclick="setGraphSize(<%=entry.getKey()%>)"><%=h(entry.getValue())%></a>]
 <% } %>
-<img id="updateGraphSize" height="1" width="1" src="<%=request.getContextPath()%>/_.gif">
+<img id="updateGraphSize" height="1" width="1" src="<%=getWebappURL("_.gif")%>">

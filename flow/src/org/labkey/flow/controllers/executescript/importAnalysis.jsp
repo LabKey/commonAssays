@@ -57,7 +57,7 @@
             if (step.getNumber() > 1) {
                 %>
                 <td valign="middle">
-                    <img src="<%=getContextPath()%>/_.gif" style="background:<%=text(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
+                    <img src="<%=getWebappURL("_.gif")%>" style="background:<%=text(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
                 </td>
                 <%
             }
