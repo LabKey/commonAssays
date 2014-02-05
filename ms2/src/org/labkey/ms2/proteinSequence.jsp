@@ -29,12 +29,12 @@
     %>
     <table class="labkey-tab-strip">
         <tr>
-            <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
+            <td class="labkey-tab-space"><img width="5" src="<%= getWebappURL("_.gif") %>"></td>
             <td class="labkey-tab" style="margin-bottom: 0;"><a href="<%= toggleURL %>">Detail View</a></td>
-            <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
+            <td class="labkey-tab-space"><img width="5" src="<%= getWebappURL("_.gif") %>"></td>
             <td class="labkey-tab-selected" style="margin-bottom: 0;"><a href="#">Summary View</a></td>
             <td class="labkey-tab-space" width="100%"></td>
-            <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
+            <td class="labkey-tab-space"><img width="5" src="<%= getWebappURL("_.gif") %>"></td>
         </tr>
     </table>
 <% } %>
