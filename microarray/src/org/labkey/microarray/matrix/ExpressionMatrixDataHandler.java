@@ -102,7 +102,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            try (TabLoader loader = new TabLoader(dataFile, true))
+            try (TabLoader loader = createTabLoader(dataFile))
             {
                 ColumnDescriptor[] cols = loader.getColumns();
                 List<String> columnNames = new ArrayList<>(cols.length);
@@ -137,6 +137,18 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         {
             throw new ExperimentException(e);
         }
+    }
+
+    protected static TabLoader createTabLoader(File file) throws IOException
+    {
+        TabLoader loader = new TabLoader(file, true);
+
+        // If the 0th column is missing a name, consider it the ID_REF column
+        ColumnDescriptor[] cols = loader.getColumns();
+        if (cols[0].name.equals("column0"))
+            cols[0].name = PROBE_ID_COLUMN_NAME;
+
+        return loader;
     }
 
     protected static Map<String, Integer> ensureSamples(Container container, Collection<String> columnNames) throws ExperimentException

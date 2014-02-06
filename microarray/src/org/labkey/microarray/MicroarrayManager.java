@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -95,18 +96,20 @@ public class MicroarrayManager
     {
         DbScope scope = MicroarrayUserSchema.getSchema().getScope();
 
+        Integer[] ids = ArrayUtils.toObject(rowId);
+
         try (DbScope.Transaction tx = scope.ensureTransaction())
         {
             // Delete all annotations first.
             TableInfo annotationSchemaTableInfo = getAnnotationSchemaTableInfo();
             SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(FieldKey.fromParts("FeatureAnnotationSetId"), Arrays.asList(rowId));
+            filter.addInClause(FieldKey.fromParts("FeatureAnnotationSetId"), Arrays.asList(ids));
             int rowsDeleted = Table.delete(annotationSchemaTableInfo, filter);
 
             // Then delete annotation set.
             TableInfo annotationSetSchemaTableInfo = getAnnotationSetSchemaTableInfo();
             filter = new SimpleFilter();
-            filter.addInClause(FieldKey.fromParts("RowId"), Arrays.asList(rowId));
+            filter.addInClause(FieldKey.fromParts("RowId"), Arrays.asList(ids));
             Table.delete(annotationSetSchemaTableInfo, filter);
 
             tx.commit();

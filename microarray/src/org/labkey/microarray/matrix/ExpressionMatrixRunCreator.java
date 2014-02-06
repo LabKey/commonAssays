@@ -51,18 +51,21 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
         try
         {
             File dataFile = getPrimaryFile(context);
-            TabLoader loader = new TabLoader(dataFile, true);
-            ColumnDescriptor[] cols = loader.getColumns();
-
-            List<String> columnNames = new ArrayList<>(cols.length);
-            for (ColumnDescriptor col : cols)
-                columnNames.add(col.getColumnName());
-
-            Map<String, Integer> samplesMap = ExpressionMatrixDataHandler.ensureSamples(context.getContainer(), columnNames);
-            List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterials(samplesMap.values());
-            for (ExpMaterial material : materials)
+            try (TabLoader loader = ExpressionMatrixDataHandler.createTabLoader(dataFile))
             {
-                inputMaterials.put(material, SAMPLES_ROLE_NAME);
+                ColumnDescriptor[] cols = loader.getColumns();
+
+                List<String> columnNames = new ArrayList<>(cols.length);
+                for (ColumnDescriptor col : cols)
+                    columnNames.add(col.getColumnName());
+
+                Map<String, Integer> samplesMap = ExpressionMatrixDataHandler.ensureSamples(context.getContainer(), columnNames);
+                List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterials(samplesMap.values());
+                for (ExpMaterial material : materials)
+                {
+                    // TODO: Check if there is some other role that might be useful (well id)
+                    inputMaterials.put(material, SAMPLES_ROLE_NAME);
+                }
             }
         }
         catch (IOException e)

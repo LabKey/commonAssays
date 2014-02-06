@@ -51,6 +51,7 @@ import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -158,20 +159,25 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
         Domain runDomain = result.getKey();
-        Container lookupContainer = c.getProject();
 
         DomainProperty featureSet = addProperty(runDomain, FEATURE_ANNOTATION_SET_ID_COLUMN.getName(), FEATURE_ANNOTATION_SET_ID_COLUMN.getLabel(), PropertyType.INTEGER);
-        featureSet.setLookup(new Lookup(lookupContainer, MicroarrayUserSchema.SCHEMA_NAME, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET));
+        featureSet.setLookup(new Lookup(null, MicroarrayUserSchema.SCHEMA_NAME, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET));
         featureSet.setShownInInsertView(true);
         featureSet.setShownInUpdateView(false);
         featureSet.setRequired(true);
 
         DomainProperty importValues = addProperty(runDomain, IMPORT_VALUES_COLUMN.getName(), IMPORT_VALUES_COLUMN.getLabel(), PropertyType.BOOLEAN);
-        importValues.setShownInInsertView(false);
+        importValues.setShownInInsertView(true);
         importValues.setShownInUpdateView(false);
         importValues.setShownInDetailsView(false);
         importValues.setHidden(true);
         importValues.setRequired(false);
+
+        // Default the ImportValues column as true by default
+        Map<DomainProperty, Object> defaultValues = new HashMap<>();
+        defaultValues.put(importValues, Boolean.TRUE);
+
+        result.setValue(defaultValues);
 
         return result;
     }
