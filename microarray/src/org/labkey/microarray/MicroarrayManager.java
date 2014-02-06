@@ -181,9 +181,9 @@ public class MicroarrayManager
         return -1;
     }
 
-    public Map<String, Integer> getFeatureAnnotationSetProbeIds(Container c, int featureSetRowId)
+    public Map<String, Integer> getFeatureAnnotationSetProbeIds(int featureSetRowId)
     {
-        SimpleFilter featureFilter = SimpleFilter.createContainerFilter(c);
+        SimpleFilter featureFilter = new SimpleFilter();
         featureFilter.addCondition(FieldKey.fromParts("FeatureAnnotationSetId"), featureSetRowId);
 
         TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSchemaTableInfo(), PageFlowUtil.set("ProbeId", "RowId"), featureFilter, null);

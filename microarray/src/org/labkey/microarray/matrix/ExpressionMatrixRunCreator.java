@@ -59,7 +59,7 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
                 for (ColumnDescriptor col : cols)
                     columnNames.add(col.getColumnName());
 
-                Map<String, Integer> samplesMap = ExpressionMatrixDataHandler.ensureSamples(context.getContainer(), columnNames);
+                Map<String, Integer> samplesMap = ExpressionMatrixDataHandler.ensureSamples(context.getContainer(), context.getUser(), columnNames);
                 List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterials(samplesMap.values());
                 for (ExpMaterial material : materials)
                 {

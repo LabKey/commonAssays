@@ -18,6 +18,7 @@ package org.labkey.microarray.matrix;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -109,7 +110,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
                 for (ColumnDescriptor col : cols)
                     columnNames.add(col.getColumnName());
 
-                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), columnNames);
+                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames);
 
                 boolean importValues = true;
                 if (runProps.containsKey(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
@@ -151,7 +152,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         return loader;
     }
 
-    protected static Map<String, Integer> ensureSamples(Container container, Collection<String> columnNames) throws ExperimentException
+    protected static Map<String, Integer> ensureSamples(Container container, User user, Collection<String> columnNames) throws ExperimentException
     {
         Set<String> sampleNames = new HashSet<>(columnNames.size());
         for (String name : columnNames)
@@ -164,7 +165,11 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
         SimpleFilter sampleSetFilter = new SimpleFilter();
         sampleSetFilter.addInClause(FieldKey.fromParts("Name"), sampleNames);
-        sampleSetFilter.addCondition(FieldKey.fromParts("Container"), container);
+
+        // SampleSet may live in different container
+        ContainerFilter.CurrentPlusProjectAndShared containerFilter = new ContainerFilter.CurrentPlusProjectAndShared(user);
+        SimpleFilter.FilterClause clause = containerFilter.createFilterClause(ExperimentService.get().getSchema(), FieldKey.fromParts("Container"), container);
+        sampleSetFilter.addClause(clause);
 
         Set<String> selectNames = new LinkedHashSet<>();
         selectNames.add("Name");
@@ -202,7 +207,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
             // Grab the probe name to rowId mapping for this run's annotation set
             int featureSet = Integer.parseInt(runProps.get("featureSet"));
-            Map<String, Integer> probeIds = MicroarrayManager.get().getFeatureAnnotationSetProbeIds(c, featureSet);
+            Map<String, Integer> probeIds = MicroarrayManager.get().getFeatureAnnotationSetProbeIds(featureSet);
 
             for (Map<String, Object> row : loader)
             {
