@@ -107,19 +107,7 @@ public class FlowModule extends DefaultModule
 
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
-                // don't create twice for same request
-                FlowSchema fs;
-                ViewContext c = HttpView.getRootContext();
-                if (null != c)
-                {
-                    fs = (FlowSchema)c.get("org.labkey.flow.FlowModule$FlowSchema");
-                    if (null != fs)
-                        return fs;
-                }
-                fs = new FlowSchema(schema.getUser(), schema.getContainer());
-                if (null != c)
-                    c.put("org.labkey.flow.FlowModule$FlowSchema", fs);
-                return fs;
+                return new FlowSchema(schema.getUser(), schema.getContainer());
             }
         });
         addController("flow", FlowController.class);
