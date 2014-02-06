@@ -16,6 +16,7 @@
 package org.labkey.elispot.pipeline;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
@@ -98,9 +99,8 @@ public class BackgroundSubtractionJob extends PipelineJob
             {
                 ExpRun run = ExperimentService.get().getExpRun(rowId);
 
-                try
+                try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
                 {
-                    ExperimentService.get().getSchema().getScope().ensureTransaction();
                     info("Starting background substraction for run : " + runId);
 
                     AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
@@ -151,17 +151,13 @@ public class BackgroundSubtractionJob extends PipelineJob
                         if (subtractBackground != null)
                             run.setProperty(getUser(), subtractBackground.getPropertyDescriptor(), true);
                     }
-                    ExperimentService.get().getSchema().getScope().commitTransaction();
                     setStatus(PipelineJob.COMPLETE_STATUS, "Job finished at: " + DateUtil.nowISO());
+                    transaction.commit();
                 }
                 catch (Exception e)
                 {
                     error("Error occurred running the background subtraction job", e);
                     setStatus(PipelineJob.ERROR_STATUS, "Job finished at: " + DateUtil.nowISO());
-                }
-                finally
-                {
-                    ExperimentService.get().getSchema().getScope().closeConnection();
                 }
             }
             else

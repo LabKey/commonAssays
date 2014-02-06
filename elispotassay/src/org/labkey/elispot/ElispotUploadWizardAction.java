@@ -22,6 +22,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpData;
@@ -321,20 +322,19 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
         {
-            try
-            {
-                PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form, 
-                        getSelectedParticipantVisitResolverType(form.getProvider(), form));
-                form.setSampleProperties(helper.getPostedPropertyValues(form.getRequest()));
+            PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form,
+                    getSelectedParticipantVisitResolverType(form.getProvider(), form));
+            form.setSampleProperties(helper.getPostedPropertyValues(form.getRequest()));
 
-                form.setAntigenProperties(_postedAntigenProperties);
-                ElispotAssayProvider provider = form.getProvider();
+            form.setAntigenProperties(_postedAntigenProperties);
+            ElispotAssayProvider provider = form.getProvider();
+            try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
+            {
                 ExpRun run = saveExperimentRun(form);
 
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
-                    form.saveDefaultValues(entry.getValue(), entry.getKey());
+                form.saveDefaultValues(entry.getValue(), entry.getKey());
 
-                ExperimentService.get().getSchema().getScope().ensureTransaction();
                 ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
                 if (data.length != 1)
                     throw new ExperimentException("Elispot should only upload a single file per run.");
@@ -369,11 +369,12 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     ElispotDataHandler.populateAntigenDataProperties(run, plate, postedPropMap, false, subtractBackground);
                     ElispotDataHandler.populateAntigenRunProperties(run, plate, postedPropMap, false, subtractBackground);
                 }
-                ExperimentService.get().getSchema().getScope().commitTransaction();
 
                 if (!errors.hasErrors())
                 {
-                    return afterRunCreation(form, run, errors);
+                    ModelAndView result = afterRunCreation(form, run, errors);
+                    transaction.commit();
+                    return result;
                 }
             }
             catch (ValidationException ve)
@@ -385,11 +386,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
             }
-            finally
-            {
-                ExperimentService.get().getSchema().getScope().closeConnection();
-            }
-            
+
             return getAntigenView(form, true, errors);
         }
 

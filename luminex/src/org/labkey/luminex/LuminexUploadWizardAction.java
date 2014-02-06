@@ -24,6 +24,7 @@ import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.DisplayColumnGroup;
@@ -707,29 +708,28 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         @Override
         public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
-            try
+            if (!form.isResetDefaultValues())
             {
-                LuminexProtocolSchema.getSchema().getScope().ensureTransaction();
-                if (!form.isResetDefaultValues())
+                for (String analyte : form.getAnalyteNames())
                 {
-                    for (String analyte : form.getAnalyteNames())
-                    {
-                        // validate analyte domain properties
-                        Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte);
-                        validatePostedProperties(properties, errors);
+                    // validate analyte domain properties
+                    Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte);
+                    validatePostedProperties(properties, errors);
 
-                        // validate analyte column properties
-                        Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte);
-                        validateColumnProperties(colProperties, errors);
-                    }
+                    // validate analyte column properties
+                    Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte);
+                    validateColumnProperties(colProperties, errors);
                 }
+            }
 
-                if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
-                {
-                    throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
-                }
+            if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
+            {
+                throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
+            }
 
-                if (!form.isResetDefaultValues() && errors.getErrorCount() == 0)
+            if (!form.isResetDefaultValues() && errors.getErrorCount() == 0)
+            {
+                try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                 {
                     ExpRun run = saveExperimentRun(form);
 
@@ -807,28 +807,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                     PropertyManager.saveProperties(defaultWellRoleValues);
 
-                    LuminexProtocolSchema.getSchema().getScope().commitTransaction();
+                    transaction.commit();
                     getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
                     form.resetUploadAttemptID();
                     return afterRunCreation(form, run, errors);
                 }
-                else
+                catch (ValidationException ve)
                 {
-                    return getAnalytesView(form.getAnalyteNames(), form, true, errors);
+                    for (ValidationError error : ve.getErrors())
+                        errors.addError(new LabkeyError(error.getMessage()));
+                }
+                catch (ExperimentException e)
+                {
+                    errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
                 }
             }
-            catch (ValidationException ve)
+            else
             {
-                for (ValidationError error : ve.getErrors())
-                    errors.addError(new LabkeyError(error.getMessage()));
-            }
-            catch (ExperimentException e)
-            {
-                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-            }
-            finally
-            {
-                LuminexProtocolSchema.getSchema().getScope().closeConnection();
+                return getAnalytesView(form.getAnalyteNames(), form, true, errors);
             }
 
             return getAnalytesView(form.getAnalyteNames(), form, true, errors);
