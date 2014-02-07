@@ -73,7 +73,7 @@
 
   <ns:table tableName="FeatureAnnotation" tableDbType="TABLE">
       <ns:pkColumnName>RowId</ns:pkColumnName>
-      <ns:titleColumn>ProbeId</ns:titleColumn>
+      <ns:titleColumn>FeatureId</ns:titleColumn>
       <ns:tableUrl></ns:tableUrl>
       <ns:deleteUrl></ns:deleteUrl>
       <ns:insertUrl></ns:insertUrl>
@@ -97,8 +97,17 @@
                   <ns:fkTable>FeatureAnnotationSet</ns:fkTable>
               </ns:fk>
           </ns:column>
-          <ns:column columnName="ProbeId"/>
+          <ns:column columnName="FeatureId">
+              <ns:importAliases>
+                  <ns:importAlias>ProbeId</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
           <ns:column columnName="GeneSymbol"/>
+          <ns:column columnName="UniGeneId"/>
+          <ns:column columnName="GeneId"/>
+          <ns:column columnName="AccessionId"/>
+          <ns:column columnName="ReqSeqProteinId"/>
+          <ns:column columnName="ReqSeqTranscriptId"/>
           <ns:column columnName="Created">
               <ns:description>Contains the date and time that this data was added to the system</ns:description>
               <ns:isHidden>true</ns:isHidden>

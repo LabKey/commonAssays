@@ -2,7 +2,7 @@
     <columns>
         <column name="Value"/>
         <column name="FeatureId/GeneSymbol"/>
-        <column name="FeatureId/ProbeId"/>
+        <column name="FeatureId/FeatureId"/>
         <column name="SampleId"/>
         <column name="Run"/>
         <column name="Run/LogData"/>

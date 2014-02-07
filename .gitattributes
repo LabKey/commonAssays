@@ -811,6 +811,7 @@ microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-9.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-11.30-12.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.20-13.30.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.30-13.31.sql -text
+microarray/resources/schemas/dbscripts/postgresql/microarray-13.31-13.32.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-11.30-11.31.sql -text
@@ -821,6 +822,7 @@ microarray/resources/schemas/dbscripts/sqlserver/microarray-0.00-9.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-11.30-12.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.20-13.30.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.30-13.31.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/microarray-13.31-13.32.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-11.30-11.31.sql -text

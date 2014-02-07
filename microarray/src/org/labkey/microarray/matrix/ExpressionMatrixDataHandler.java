@@ -62,7 +62,7 @@ import java.util.Set;
 
 public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 {
-    private static final String PROBE_ID_COLUMN_NAME = "ID_REF";
+    private static final String FEATURE_ID_COLUMN_NAME = "ID_REF";
 
     private static final Logger LOG = Logger.getLogger(ExpressionMatrixDataHandler.class);
 
@@ -147,7 +147,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         // If the 0th column is missing a name, consider it the ID_REF column
         ColumnDescriptor[] cols = loader.getColumns();
         if (cols[0].name.equals("column0"))
-            cols[0].name = PROBE_ID_COLUMN_NAME;
+            cols[0].name = FEATURE_ID_COLUMN_NAME;
 
         return loader;
     }
@@ -157,7 +157,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         Set<String> sampleNames = new HashSet<>(columnNames.size());
         for (String name : columnNames)
         {
-            if (!name.equals(PROBE_ID_COLUMN_NAME))
+            if (!name.equals(FEATURE_ID_COLUMN_NAME))
             {
                 sampleNames.add(name);
             }
@@ -207,28 +207,28 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
             // Grab the probe name to rowId mapping for this run's annotation set
             int featureSet = Integer.parseInt(runProps.get("featureSet"));
-            Map<String, Integer> probeIds = MicroarrayManager.get().getFeatureAnnotationSetProbeIds(featureSet);
+            Map<String, Integer> featureIds = MicroarrayManager.get().getFeatureAnnotationSetFeatureIds(featureSet);
 
             for (Map<String, Object> row : loader)
             {
-                Object probeObject = row.get(PROBE_ID_COLUMN_NAME);
-                String probeName = probeObject == null ? null : probeObject.toString();
+                Object featureObject = row.get(FEATURE_ID_COLUMN_NAME);
+                String featureName = featureObject == null ? null : featureObject.toString();
 
-                if (probeName == null || StringUtils.trimToNull(probeName) == null)
+                if (featureName == null || StringUtils.trimToNull(featureName) == null)
                 {
-                    throw new ExperimentException("Probe ID (ID_REF) must be present and cannot be blank");
+                    throw new ExperimentException("Feature ID (ID_REF) must be present and cannot be blank");
                 }
 
-                Integer featureId = probeIds.get(probeName);
+                Integer featureId = featureIds.get(featureName);
                 if (featureId == null)
                 {
-                    throw new ExperimentException("Unable to find a feature/probe with name '" + probeName + "'");
+                    throw new ExperimentException("Unable to find a feature/probe with name '" + featureName + "'");
                 }
 
                 // All of the column headers are sample names except for the probe id column.
                 for (String sampleName : row.keySet())
                 {
-                    if (sampleName.equals(PROBE_ID_COLUMN_NAME) || row.get(sampleName) == null)
+                    if (sampleName.equals(FEATURE_ID_COLUMN_NAME) || row.get(sampleName) == null)
                         continue;
 
                     statement.setInt(1, dataRowId);

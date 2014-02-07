@@ -52,7 +52,7 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         featureIdColumn.setHidden(false);
         featureIdColumn.setLabel("Probe Id");
         featureIdColumn.setFk(new QueryForeignKey(MicroarrayUserSchema.SCHEMA_NAME, schema.getContainer(), null,
-                schema.getUser(), MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, "RowId", "ProbeId"));
+                schema.getUser(), MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, "RowId", "FeatureId"));
 
         ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
         sampleIdColumn.setHidden(false);

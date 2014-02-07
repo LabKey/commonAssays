@@ -632,7 +632,7 @@
                 queryName: 'Data',
                 requiredVersion: 9.1,
                 maxRows: 1,
-                columns: ["Value", "SampleId", "DataId/Name", "FeatureId/GeneSymbol", "FeatureId/RowId", "FeatureId/ProbeId", "Run/LogData"],
+                columns: ["Value", "SampleId", "DataId/Name", "FeatureId/GeneSymbol", "FeatureId/RowId", "FeatureId/FeatureId", "Run/LogData"],
                 scope: scope,
                 success: callback
             };
@@ -659,7 +659,7 @@
                                 renderTo: divId,
                                 viewName: 'PreviewGrid',
                                 frame: 'none',
-                                columns: ["Value", "SampleId", "DataId/Name", "FeatureId/GeneSymbol", "FeatureId/RowId", "FeatureId/ProbeId", "Run/LogData"],
+                                columns: ["Value", "SampleId", "DataId/Name", "FeatureId/GeneSymbol", "FeatureId/RowId", "FeatureId/FeatureId", "Run/LogData"],
                                 removeableFilters: filters,
                                 scope: this,
                                 success: function(){

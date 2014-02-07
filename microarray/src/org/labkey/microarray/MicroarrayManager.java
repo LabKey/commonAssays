@@ -169,10 +169,10 @@ public class MicroarrayManager
         return -1;
     }
 
+    /** Creates feature annotation set AND inserts all feature annotations from TSV */
     public Integer createFeatureAnnotationSet(User user, Container c, FeatureAnnotationSetController.FeatureAnnotationSetForm form, DataLoader loader, BatchValidationException errors)
             throws SQLException, BatchValidationException, QueryUpdateServiceException, DuplicateKeyException
     {
-        // Creates feature annotation set AND inserts all feature annotations from TSV
         Integer rowId = insertFeatureAnnotationSet(user, c, form.getName(), form.getVendor(), form.getDescription(), errors);
 
         if (!errors.hasErrors() && rowId != null)
@@ -181,12 +181,12 @@ public class MicroarrayManager
         return -1;
     }
 
-    public Map<String, Integer> getFeatureAnnotationSetProbeIds(int featureSetRowId)
+    public Map<String, Integer> getFeatureAnnotationSetFeatureIds(int featureSetRowId)
     {
         SimpleFilter featureFilter = new SimpleFilter();
         featureFilter.addCondition(FieldKey.fromParts("FeatureAnnotationSetId"), featureSetRowId);
 
-        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSchemaTableInfo(), PageFlowUtil.set("ProbeId", "RowId"), featureFilter, null);
+        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSchemaTableInfo(), PageFlowUtil.set("FeatureId", "RowId"), featureFilter, null);
         return featureAnnotationSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
     }
 
