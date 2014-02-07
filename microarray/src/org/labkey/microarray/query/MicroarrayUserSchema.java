@@ -19,6 +19,7 @@ package org.labkey.microarray.query;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -102,7 +103,12 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         if (getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
-            return new SimpleUserSchema.SimpleTable(this, tableInfo).init();
+            SimpleTable table = new SimpleUserSchema.SimpleTable(this, tableInfo).init();
+            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET) || name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
+            {
+                table.setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(getUser()));
+            }
+            return table;
         }
 
         return null;
