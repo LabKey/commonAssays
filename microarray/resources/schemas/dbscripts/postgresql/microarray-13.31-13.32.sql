@@ -18,8 +18,9 @@
 ALTER TABLE microarray.FeatureAnnotation
   RENAME ProbeId TO FeatureId;
 
-ALTER TABLE microarray.featureannotation
-  RENAME CONSTRAINT UQ_FeatureAnnotation_ProbeId_FeatureAnnotationSetId TO UQ_FeatureAnnotation_FeatureId_FeatureAnnotationSetId;
+-- Rename UNIQUE constraint
+ALTER TABLE microarray.featureannotation DROP CONSTRAINT uq_featureannotation_probeid_featureannotationsetid;
+CREATE UNIQUE INDEX UQ_FeatureAnnotation_FeatureId_FeatureAnnotationSetId ON microarray.featureannotation(FeatureId, FeatureAnnotationSetId);
 
 -- Restore original GEOMicroarray FeatureAnnotation columns
 ALTER TABLE microarray.FeatureAnnotation ADD UniGeneId VARCHAR(2000);
