@@ -736,14 +736,7 @@ public class NabController extends SpringActionController
             filter.addCondition(FieldKey.fromParts("RowId"), assay.getRunRowId(), CompareType.NEQ);
             PlateQueryView duplicateDataFileView = PlateService.get().getPlateGridView(context, filter);
             duplicateDataFileView.setShowExportButtons(false);
-            ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(InsertPermission.class);
             List<ActionButton> buttons = new ArrayList<>();
-            buttons.add(selectButton);
-
-            ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(InsertPermission.class);
-            buttons.add(clearButton);
 
             ActionButton deleteButton = new ActionButton(DeleteRunsAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setRequiresSelection(true);
@@ -1063,14 +1056,6 @@ public class NabController extends SpringActionController
             PlateQueryView previousRuns = PlateService.get().getPlateGridView(getViewContext());
 
             List<ActionButton> buttons = new ArrayList<>();
-
-            ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(InsertPermission.class);
-            buttons.add(selectButton);
-
-            ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(InsertPermission.class);
-            buttons.add(clearButton);
 
             ActionButton deleteButton = new ActionButton(DeleteRunsAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setDisplayPermission(DeletePermission.class);
@@ -1487,14 +1472,6 @@ public class NabController extends SpringActionController
             PlateQueryView queryView = PlateService.get().getWellGroupGridView(getViewContext(), WellGroup.Type.SPECIMEN);
 
             List<ActionButton> buttons = new ArrayList<>();
-            ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(InsertPermission.class);
-            buttons.add(selectButton);
-
-            ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(InsertPermission.class);
-            buttons.add(clearButton);
-
             ActionButton graphSelectedButton = new ActionButton(GraphSelectedAction.class, "Graph Selected");
             graphSelectedButton.setActionType(ActionButton.Action.POST);
             graphSelectedButton.setRequiresSelection(true);
