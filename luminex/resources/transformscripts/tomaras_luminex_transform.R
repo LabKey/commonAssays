@@ -248,6 +248,8 @@ getPositivityThreshold <- function(analytedata, analyteVal)
             threshold = analytedata$PositivityThreshold[analytedata$Name == analyteVal];
         }
     }
+
+    threshold
 }
 
 getVisitsFIAggData <- function(rundata, fidata, analyteVal, participantVal)
