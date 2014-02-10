@@ -8,11 +8,12 @@ Ext4.define('Microarray.GeoExportPanel', {
     extend: 'Ext.tab.Panel',
     initComponent: function(){
 
-        var items = [];
-        items.push(this.getSeriesTab());
-        items.push(this.getSamplesTab());
-        items.push(this.getProtocolsTab());
-        items.push(this.getCommentsTab());
+        var items = [
+            this.getSeriesTab(),
+            this.getSamplesTab(),
+            this.getProtocolsTab(),
+            this.getCommentsTab()
+        ];
 
         Ext4.apply(this, {
             itemId: 'geoExportPanel',
@@ -918,7 +919,7 @@ Ext4.define('Microarray.GeoExportPanel', {
         };
 
         if(name == 'Contributor'){
-            configObj.items[1].xtype = 'labkey-contributorfield';
+            configObj.items[1].xtype = 'microarray-contributorfield';
         }
 
         return configObj;
@@ -1023,7 +1024,7 @@ Ext4.define('Microarray.GeoExportPanel', {
             row = [];
             fields.each(function(field){
                 val = rec.get(field.name);
-                val = Ext4.isDefined(val) ? LABKEY.ext.Ext4Helper.getDisplayString(val, field, rec, resultStore) : '';
+                val = Ext4.isDefined(val) ? LABKEY.ext4.Util.getDisplayString(val, field, rec, resultStore) : '';
                 row.push(val);
             }, this);
             sections.Samples.push(row);
@@ -1069,9 +1070,9 @@ Ext4.define('Microarray.GeoExportPanel', {
     }
 });
 
-Ext4.define('LABKEY.ext4.ContributorField', {
+Ext4.define('Microarray.ContributorField', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.labkey-contributorfield',
+    alias: 'widget.microarray-contributorfield',
     initComponent: function(){
         Ext4.apply(this, {
             border: false,
