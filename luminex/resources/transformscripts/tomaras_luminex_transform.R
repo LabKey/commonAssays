@@ -30,9 +30,10 @@
 #  - 5.0.20121210 : Change for LabKey server 13.1
 #  - 5.1.20130424 : Move fix for Issue 15042 up to earliest curve fit calculation
 #  - 6.0.20140117 : Changes for LabKey server 13.3, Issue 19391: Could not convert '-Inf' for field EstLogConc_5pl
+#  - 7.0.20140207 : Changes for LabKey server 14.1: refactor script to use more function calls, calculate positivity based on baselines from another run in the same folder
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "6.0.20140117";
+transformVersion = "7.0.20140207";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -119,43 +120,276 @@ compareNumbersForEquality <- function(val1, val2, epsilon)
 	equal
 }
 
-######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
-
-# set up a data frame to store the run properties
-run.props = data.frame(NA, NA, NA, NA);
-colnames(run.props) = c("name", "val1", "val2", "val3");
-
-#read in the run properties from the TSV
-lines = readLines("${runInfo}");
-
-# each line has a run property with the name, val1, val2, etc.
-for (i in 1:length(lines))
+readRunPropertiesFile <- function()
 {
-	# split the line into the various parts (tab separated)
-	parts = strsplit(lines[i], split="\t")[[1]];
+    # set up a data frame to store the run properties
+    properties = data.frame(NA, NA, NA, NA);
+    colnames(properties) = c("name", "val1", "val2", "val3");
 
-	# if the line does not have 4 parts, add NA's as needed
-	if (length(parts) < 4)
-	{
-		for (j in 1:4)
-		{
-			if (is.na(parts[j]))
-			{
-				parts[j] = NA;
-			}
-		}
-	}
+    #read in the run properties from the TSV
+    lines = readLines("${runInfo}");
 
-	# add the parts for the given run property to the run.props data frame
-	run.props[i,] = parts;
+    # each line has a run property with the name, val1, val2, etc.
+    for (i in 1:length(lines))
+    {
+        # split the line into the various parts (tab separated)
+        parts = strsplit(lines[i], split="\t")[[1]];
+
+        # if the line does not have 4 parts, add NA's as needed
+        if (length(parts) < 4)
+        {
+            for (j in 1:4)
+            {
+                if (is.na(parts[j]))
+                {
+                    parts[j] = NA;
+                }
+            }
+        }
+
+        # add the parts for the given run property to the properties data frame
+        properties[i,] = parts;
+    }
+
+    properties
 }
 
+populateTitrationData <- function(rundata, titrationdata)
+{
+    rundata$isStandard = NA;
+    rundata$isQCControl = NA;
+    rundata$isUnknown = NA;
+
+    # apply the titration data to the rundata object
+    rundata$isStandard[rundata$titration == "false"] = FALSE;
+    rundata$isQCControl[rundata$titration == "false"] = FALSE;
+    rundata$isUnknown[rundata$titration == "false"] = TRUE;
+    if (nrow(titrationdata) > 0)
+    {
+        for (tIndex in 1:nrow(titrationdata))
+        {
+            titrationName = as.character(titrationdata[tIndex,]$Name);
+            rundata$isStandard[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$Standard == "true");
+            rundata$isQCControl[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$QCControl == "true");
+            rundata$isUnknown[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$Unknown == "true");
+        }
+    }
+
+    rundata
+}
+
+populateBlankBeadSubtraction <- function(rundata)
+{
+    # initialize the FI - Bkgd - Blank variable
+    rundata$fiBackgroundBlank = NA;
+
+    # get the unique analyte values
+    analytes = unique(rundata$name);
+
+    # if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
+    if (any(regexpr("^blank", analytes, ignore.case=TRUE) > -1))
+    {
+        # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
+        blanks = regexpr("^blank", rundata$name, ignore.case=TRUE) > -1;
+        nonBlanks = regexpr("^blank", rundata$name, ignore.case=TRUE) == -1;
+        unks = (is.na(rundata$isStandard) & is.na(rundata$isQCControl)) | (!rundata$isStandard & !rundata$isQCControl);
+
+        # read the run property from user to determine if we are to only blank bead subtract from unks
+        unksOnly = TRUE;
+        if (any(run.props$name == "SubtBlankFromAll"))
+        {
+            if (getRunPropertyValue(run.props, "SubtBlankFromAll") == "1")
+            {
+                unksOnly = FALSE;
+            }
+        }
+
+        # loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
+        blankdata = rundata[blanks,];
+        combos = unique(subset(blankdata, select=c("dataFile", "description", "dilution", "expConc")));
+
+        for (index in 1:nrow(combos))
+        {
+            dataFile = combos$dataFile[index];
+            description = combos$description[index];
+            dilution = combos$dilution[index];
+            expConc = combos$expConc[index];
+
+            # only standards have expConc, the rest are NA
+            combo = rundata$dataFile == dataFile & rundata$description == description & rundata$dilution == dilution & !is.na(rundata$expConc) & rundata$expConc == expConc;
+            if (is.na(expConc))
+            {
+                combo = rundata$dataFile == dataFile & rundata$description == description & rundata$dilution == dilution & is.na(rundata$expConc);
+            }
+
+            # get the mean blank bead FI-Bkgrd values for the given description/dilution
+            blankmean = mean(rundata$fiBackground[blanks & combo]);
+
+            # calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
+            if (unksOnly) {
+                rundata$fiBackgroundBlank[unks & nonBlanks & combo] = rundata$fiBackground[unks & nonBlanks & combo] - blankmean;
+            } else{
+                rundata$fiBackgroundBlank[nonBlanks & combo] = rundata$fiBackground[nonBlanks & combo] - blankmean;
+            }
+        }
+    }
+
+    rundata
+}
+
+getPositivityThreshold <- function(analytedata, analyteVal)
+{
+    # default MFI threshold is set by the server, but that can be changed manually on upload per analyte
+    threshold = NA;
+    if (!is.null(analytedata$PositivityThreshold))
+    {
+        if (!is.na(analytedata$PositivityThreshold[analytedata$Name == analyteVal]))
+        {
+            threshold = analytedata$PositivityThreshold[analytedata$Name == analyteVal];
+        }
+    }
+}
+
+getVisitsFIAggData <- function(rundata, fidata, analyteVal, participantVal)
+{
+    # Issue 15279, for titrated unknowns, just use the smallest/minimum dilution for the positivity calculation
+    visitDilutionDat = subset(rundata, name == analyteVal & participantID == participantVal & !is.na(visitID) & !is.na(dilution), select=c("name", "participantID", "visitID", "dilution"));
+    visitDiliutionFIAgg = aggregate(fidata, by = list(analyte=visitDilutionDat$name, ptid=visitDilutionDat$participantID, visit=visitDilutionDat$visitID, dilution=visitDilutionDat$dilution), FUN = mean);
+    getVisitsByMinDilution(visitDiliutionFIAgg);
+}
+
+determineIndividualPositivityValue <- function(visitsFIagg, index, threshold, baseVisitFiBkgd, baseVisitFiBkgdBlank, foldchange)
+{
+    val = NA;
+
+    if (!is.na(visitsFIagg$fiBackground[index]) & !is.na(visitsFIagg$fiBackgroundBlank[index]))
+    {
+        # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
+        if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
+        {
+            if ((visitsFIagg$fiBackground[index] > threshold) & (visitsFIagg$fiBackground[index] > (baseVisitFiBkgd * as.numeric(foldchange))) &
+                (visitsFIagg$fiBackgroundBlank[index] > threshold) & (visitsFIagg$fiBackgroundBlank[index] > (baseVisitFiBkgdBlank * as.numeric(foldchange))))
+            {
+                val = "positive"
+            } else
+            {
+                val = "negative"
+            }
+        } else
+        {
+            # since there is no baseline data for this participant, compare each visit FI-Bkgd and FI-Bkgd-Blank values against the threshold
+            if (visitsFIagg$fiBackground[index] > threshold & visitsFIagg$fiBackgroundBlank[index] > threshold)
+            {
+                val = "positive"
+            } else
+            {
+                val = "negative"
+            }
+        }
+    }
+
+    val
+}
+
+calculatePositivityForAnalytePtid <- function(rundata, analytedata, analyteVal, participantVal, basevisit, foldchange)
+{
+    # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified,
+    # for any participants that do not have baseline data, just compare against the threshold
+
+    threshold = getPositivityThreshold(analytedata, analyteVal);
+    if (!is.na(threshold))
+    {
+        fidata = subset(rundata, name == analyteVal & participantID == participantVal & !is.na(visitID) & !is.na(dilution), select=c("fiBackground", "fiBackgroundBlank"));
+        if (nrow(fidata) > 0)
+        {
+            visitsFIagg = getVisitsFIAggData(rundata, fidata, analyteVal, participantVal);
+
+            if (!is.na(basevisit) & any(compareNumbersForEquality(visitsFIagg$visit, basevisit, 1e-10)))
+            {
+                # if there is a baseline visit supplied, make sure the fold change is not null as well
+                if (is.na(foldchange))
+                {
+                    stop("No value provided for 'Positivity Fold Change'.");
+                }
+
+                baseVisitFiBkgd = fiConversion(visitsFIagg$fiBackground[compareNumbersForEquality(visitsFIagg$visit, basevisit, 1e-10)]);
+                baseVisitFiBkgdBlank = fiConversion(visitsFIagg$fiBackgroundBlank[compareNumbersForEquality(visitsFIagg$visit, basevisit, 1e-10)]);
+                if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
+                {
+                    for (v in 1:nrow(visitsFIagg))
+                    {
+                        # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
+                        visit = visitsFIagg$visit[v];
+                        if (!compareNumbersForEquality(visit, basevisit, 1e-10))
+                        {
+                            runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v] & rundata$dilution == visitsFIagg$dilution[v];
+                            rundata$Positivity[runDataIndex] = determineIndividualPositivityValue(visitsFIagg, v, threshold, baseVisitFiBkgd, baseVisitFiBkgdBlank, foldchange);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (v in 1:nrow(visitsFIagg))
+                {
+                    runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v] & rundata$dilution == visitsFIagg$dilution[v];
+                    rundata$Positivity[runDataIndex] = determineIndividualPositivityValue(visitsFIagg, v, threshold, NA, NA, NA);
+                }
+            }
+        }
+    }
+
+    rundata
+}
+
+populatePositivity <- function(rundata, analytedata)
+{
+    rundata$Positivity = NA;
+
+    # get the run property that are used for the positivity calculation
+    calc.positivity = getRunPropertyValue(run.props, "CalculatePositivity");
+    base.visit = getRunPropertyValue(run.props, "BaseVisit");
+    fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
+
+    # if calc positivity is true, continue
+    if (!is.na(calc.positivity) & calc.positivity == "1")
+    {
+        analytePtids = subset(rundata, select=c("name", "participantID")); # note: analyte variable column name is "name"
+        analytePtids = unique(analytePtids[!is.na(rundata$participantID),]);
+        if (nrow(analytePtids) > 0)
+        {
+            for (index in 1:nrow(analytePtids))
+            {
+                rundata <- calculatePositivityForAnalytePtid(rundata, analytedata, analytePtids$name[index], analytePtids$participantID[index], base.visit, fold.change);
+            }
+        }
+    }
+
+    rundata
+}
+
+######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
+
+run.props = readRunPropertiesFile();
+
 # save the important run.props as separate variables
-run.data.file = run.props$val1[run.props$name == "runDataFile"];
+run.data.file = getRunPropertyValue(run.props, "runDataFile");
 run.output.file = run.props$val3[run.props$name == "runDataFile"];
 
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
+
+# read in the analyte information (to get the mapping from analyte to standard/titration)
+analyte.data.file = getRunPropertyValue(run.props, "analyteData");
+analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
+
+# read in the titration information
+titration.data.file = getRunPropertyValue(run.props, "titrationData");
+titration.data = data.frame();
+if (file.exists(titration.data.file)) {
+    titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
+}
+run.data <- populateTitrationData(run.data, titration.data);
 
 # determine if the data contains both raw and summary data
 # if both exists, only the raw data will be used for the calculations
@@ -163,7 +397,7 @@ bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "f
 
 ######################## STEP 1: SET THE VERSION NUMBERS ################################
 
-runprop.output.file = run.props$val1[run.props$name == "transformedRunPropertiesFile"];
+runprop.output.file = getRunPropertyValue(run.props, "transformedRunPropertiesFile");
 fileConn<-file(runprop.output.file);
 writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
     paste("RuminexVersion",ruminexVersion,sep="\t")), fileConn);
@@ -171,82 +405,7 @@ close(fileConn);
 
 ################################# STEP 2: BLANK BEAD SUBTRACTION ################################
 
-# read in the titration information
-run.data$isStandard = NA;
-run.data$isQCControl = NA;
-run.data$isUnknown = NA;
-titration.data.file = run.props$val1[run.props$name == "titrationData"];
-titration.data = data.frame();
-if (file.exists(titration.data.file))
-{
-    titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
-
-    # apply the titration data to the run.data object
-    run.data$isStandard[run.data$titration == "false"] = FALSE;
-    run.data$isQCControl[run.data$titration == "false"] = FALSE;
-    run.data$isUnknown[run.data$titration == "false"] = TRUE;
-    for (tIndex in 1:nrow(titration.data))
-    {
-        titrationName = as.character(titration.data[tIndex,]$Name);
-        run.data$isStandard[run.data$titration == "true" & run.data$description == titrationName] = (titration.data[tIndex,]$Standard == "true");
-        run.data$isQCControl[run.data$titration == "true" & run.data$description == titrationName] = (titration.data[tIndex,]$QCControl == "true");
-        run.data$isUnknown[run.data$titration == "true" & run.data$description == titrationName] = (titration.data[tIndex,]$Unknown == "true");
-    }
-}
-
-# initialize the FI - Bkgd - Blank variable
-run.data$fiBackgroundBlank = NA;
-
-# get the unique analyte values
-analytes = unique(run.data$name);
-
-# if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
-if (any(regexpr("^blank", analytes, ignore.case=TRUE) > -1))
-{
-    # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
-    blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
-    nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
-    unks = (is.na(run.data$isStandard) & is.na(run.data$isQCControl)) | (!run.data$isStandard & !run.data$isQCControl);
-
-    # read the run property from user to determine if we are to only blank bead subtract from unks
-    unksOnly = TRUE;
-    if (any(run.props$name == "SubtBlankFromAll"))
-    {
-        if (run.props$val1[run.props$name == "SubtBlankFromAll"] == "1")
-        {
-            unksOnly = FALSE;
-        }
-    }
-
-	# loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
-	blank.data = run.data[blanks,];
-	combos = unique(subset(blank.data, select=c("dataFile", "description", "dilution", "expConc")));
-
-	for (index in 1:nrow(combos))
-	{
-	    dataFile = combos$dataFile[index];
-	    description = combos$description[index];
-	    dilution = combos$dilution[index];
-	    expConc = combos$expConc[index];
-
-        # only standards have expConc, the rest are NA
-	    combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & !is.na(run.data$expConc) & run.data$expConc == expConc;
-	    if (is.na(expConc))
-	    {
-	        combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & is.na(run.data$expConc);
-	    }
-
-		# get the mean blank bead FI-Bkgrd values for the given description/dilution
-		blank.mean = mean(run.data$fiBackground[blanks & combo]);
-
-		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
-        if (unksOnly) {
-		    run.data$fiBackgroundBlank[unks & nonBlanks & combo] = run.data$fiBackground[unks & nonBlanks & combo] - blank.mean;
-		} else{
-		    run.data$fiBackgroundBlank[nonBlanks & combo] = run.data$fiBackground[nonBlanks & combo] - blank.mean;
-		}
-	}
-}
+run.data <- populateBlankBeadSubtraction(run.data);
 
 ################################## STEP 3: TITRATION CURVE FIT #################################
 
@@ -264,6 +423,9 @@ run.data$Inflection_5pl = NA;
 run.data$Asymmetry_5pl = NA;
 run.data$EC50_5pl = NA;
 run.data$Flag_5pl = NA;
+
+# get the unique analyte values
+analytes = unique(run.data$name);
 
 # determine if the curve fits should be done with or without log transform
 curveFitLogTransform = TRUE;
@@ -484,10 +646,6 @@ if (nrow(titration.data) > 0)
 }  
 
 ################################## STEP 4: CALCULATE EST CONC #################################
-
-# read in the analyte information (to get the mapping from analyte to standard/titration)
-analyte.data.file = run.props$val1[run.props$name == "analyteData"];
-analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # get the analyte associated standard/titration information from the analyte data file and put it into the run.data object
 run.data$Standard = NA;
@@ -733,102 +891,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
 ################################## STEP 5: Positivity Calculation ################################
 
-run.data$Positivity = NA;
-
-# get the run property that are used for the positivity calculation
-calc.positivity = getRunPropertyValue(run.props, "CalculatePositivity");
-base.visit = getRunPropertyValue(run.props, "BaseVisit");
-fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
-
-# if calc positivity is true, continue
-if (!is.na(calc.positivity) & calc.positivity == "1")
-{
-    analytePtids = subset(run.data, select=c("name", "participantID")); # note: analyte variable column name is "name"
-    analytePtids = unique(analytePtids[!is.na(run.data$participantID),]);
-    if (nrow(analytePtids) > 0)
-    {
-        for (index in 1:nrow(analytePtids))
-        {
-            # default MFI threshold is set by the server, but that can be changed manually on upload per analyte
-            threshold = NA;
-            if (!is.null(analyte.data$PositivityThreshold))
-            {
-                if (!is.na(analyte.data$PositivityThreshold[analyte.data$Name == analytePtids$name[index]]))
-                {
-                    threshold = analyte.data$PositivityThreshold[analyte.data$Name == analytePtids$name[index]];
-                }
-            }
-
-            # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified,
-            # for any participants that do not have baseline data, just compare against the threshold
-            if (!is.na(threshold))
-            {
-                fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID) & !is.na(dilution), select=c("fiBackground", "fiBackgroundBlank"));
-                if (nrow(fi.dat) > 0)
-                {
-                    # Issue 15279, for titrated unknowns, just use the smallest/minimum dilution for the positivity calculation
-                    visit.dilution.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID) & !is.na(dilution), select=c("name", "participantID", "visitID", "dilution"));
-                    visit.diliution.fi.agg = aggregate(fi.dat, by = list(analyte=visit.dilution.dat$name, ptid=visit.dilution.dat$participantID, visit=visit.dilution.dat$visitID, dilution=visit.dilution.dat$dilution), FUN = mean);
-                    visits.fi.agg = getVisitsByMinDilution(visit.diliution.fi.agg);
-
-                    if (!is.na(base.visit) & any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
-                    {
-                        # if there is a baseline visit supplied, make sure the fold change is not null as well
-                        if (is.na(fold.change))
-                        {
-                            stop("No value provided for 'Positivity Fold Change'.");
-                        }
-
-                        baseVisitFiBkgd = fiConversion(visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
-                        baseVisitFiBkgdBlank = fiConversion(visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
-                        if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
-                        {
-                            for (v in 1:nrow(visits.fi.agg))
-                            {
-                                # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
-                                visit = visits.fi.agg$visit[v];
-                                if (!compareNumbersForEquality(visit, base.visit, 1e-10))
-                                {
-                                    # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
-                                    runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v] & run.data$dilution == visits.fi.agg$dilution[v];
-                                    if (!is.na(visits.fi.agg$fiBackground[v]) & !is.na(visits.fi.agg$fiBackgroundBlank[v]))
-                                    {
-                                        if ((visits.fi.agg$fiBackground[v] > threshold) & (visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) &
-                                            (visits.fi.agg$fiBackgroundBlank[v] > threshold) & (visits.fi.agg$fiBackgroundBlank[v] > (baseVisitFiBkgdBlank * as.numeric(fold.change))))
-                                        {
-                                            run.data$Positivity[runDataIndex] = "positive"
-                                        } else
-                                        {
-                                            run.data$Positivity[runDataIndex] = "negative"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (v in 1:nrow(visits.fi.agg))
-                        {
-                            # since there is no baseline data for this participant, compare each visit FI-Bkgd and FI-Bkgd-Blank values against the threshold
-                            runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v] & run.data$dilution == visits.fi.agg$dilution[v];
-                            if (!is.na(visits.fi.agg$fiBackground[v]) & !is.na(visits.fi.agg$fiBackgroundBlank[v]))
-                            {
-                                if (visits.fi.agg$fiBackground[v] > threshold & visits.fi.agg$fiBackgroundBlank[v] > threshold)
-                                {
-                                    run.data$Positivity[runDataIndex] = "positive"
-                                } else
-                                {
-                                    run.data$Positivity[runDataIndex] = "negative"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+run.data <- populatePositivity(run.data, analyte.data);
 
 #####################  STEP 6: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
 
