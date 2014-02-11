@@ -2533,7 +2533,7 @@ public class MS2Controller extends SpringActionController
 
             FastaReloaderJob job = new FastaReloaderJob(ids, getViewBackgroundInfo(), null);
 
-            PipelineService.get().getPipelineQueue().addJob(job);
+            PipelineService.get().queueJob(job);
 
             return true;
         }
@@ -5557,7 +5557,7 @@ public class MS2Controller extends SpringActionController
 
                 loader.setComment(form.getComment());
                 loader.validate();
-                PipelineService.get().getPipelineQueue().addJob(loader);
+                PipelineService.get().queueJob(loader);
 
                 return true;
             }
@@ -6370,7 +6370,7 @@ public class MS2Controller extends SpringActionController
 
             ViewBackgroundInfo info = getViewBackgroundInfo();
             PipelineJob job = new MSPictureUpgradeJob(info, root);
-            PipelineService.get().getPipelineQueue().addJob(job);
+            PipelineService.get().queueJob(job);
 
             return true;
         }
@@ -6408,7 +6408,7 @@ public class MS2Controller extends SpringActionController
 
             ViewBackgroundInfo info = getViewBackgroundInfo();
             PipelineJob job = new ImportScanCountsUpgradeJob(info, root);
-            PipelineService.get().getPipelineQueue().addJob(job);
+            PipelineService.get().queueJob(job);
 
             return true;
         }

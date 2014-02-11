@@ -54,7 +54,6 @@ import org.labkey.api.study.Position;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
@@ -475,7 +474,7 @@ public class ElispotController extends SpringActionController
                 BackgroundSubtractionJob job = new BackgroundSubtractionJob(ElispotPipelineProvider.NAME, info,
                         PipelineService.get().findPipelineRoot(getContainer()), selections);
 
-                PipelineService.get().getPipelineQueue().addJob(job);
+                PipelineService.get().queueJob(job);
 
                 return true;
             }

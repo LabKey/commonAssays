@@ -451,6 +451,30 @@ public class PipelineController extends SpringActionController
                 AbstractMS2SearchPipelineJob job =
                         _protocol.createPipelineJob(getViewBackgroundInfo(), _root, mzXMLFiles, fileParameters);
 
+                boolean preserveId = false;
+
+                // Check for existing job
+                PipelineStatusFile existingJobStatusFile = PipelineService.get().getStatusFile(job.getLogFile());
+                if (existingJobStatusFile != null && existingJobStatusFile.getJobStore() != null)
+                {
+                    PipelineJob existingJob = PipelineJobService.get().getJobStore().fromXML(existingJobStatusFile.getJobStore());
+                    if (existingJob instanceof AbstractMS2SearchPipelineJob)
+                    {
+                        job = (AbstractMS2SearchPipelineJob)existingJob;
+                        // Add any new files
+                        List<File> inputFiles = job.getInputFiles();
+                        for (File mzXMLFile : mzXMLFiles)
+                        {
+                            if (!inputFiles.contains(mzXMLFile))
+                            {
+                                inputFiles.add(mzXMLFile);
+                            }
+                        }
+                    }
+                    existingJob.setActiveTaskId(existingJob.getTaskPipeline().getTaskProgression()[0]);
+                    preserveId = true;
+                }
+
                 boolean allFilesReady = true;
 
                 for (File mzXMLFile : mzXMLFiles)
@@ -464,7 +488,7 @@ public class PipelineController extends SpringActionController
 
                 if (allFilesReady)
                 {
-                    PipelineService.get().queueJob(job);
+                    PipelineService.get().queueJob(job, preserveId);
                 }
                 else
                 {
