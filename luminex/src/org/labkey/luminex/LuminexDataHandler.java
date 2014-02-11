@@ -400,16 +400,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
 
                 Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte.getName());
-                String posThresholdValue = null;
                 for (ColumnInfo col : colProperties.keySet())
                 {
                     if (col.getName().equals(POSITIVITY_THRESHOLD_COLUMN_NAME))
                     {
-                        posThresholdValue = colProperties.get(col);
-                        break;
+                        analyte.setPositivityThreshold(colProperties.get(col) != null ? Integer.parseInt(colProperties.get(col)) : null);
                     }
                 }
-                analyte.setPositivityThreshold(posThresholdValue != null ? Integer.parseInt(posThresholdValue) : null);
 
                 analyte = saveAnalyte(expRun, user, existingAnalytes, analyte);
 

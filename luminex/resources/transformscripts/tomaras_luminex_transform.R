@@ -252,6 +252,20 @@ getPositivityThreshold <- function(analytedata, analyteVal)
     threshold
 }
 
+isNegativeControl <- function(analytedata, analyteVal)
+{
+    negControl = FALSE;
+    if (!is.null(analytedata$NegativeControl))
+    {
+        if (!is.na(analytedata$NegativeControl[analytedata$Name == analyteVal]))
+        {
+            negControl = analytedata$NegativeControl[analytedata$Name == analyteVal];
+        }
+    }
+
+    negControl
+}
+
 getVisitsFIAggData <- function(rundata, fidata, analyteVal, participantVal)
 {
     # Issue 15279, for titrated unknowns, just use the smallest/minimum dilution for the positivity calculation
@@ -297,9 +311,12 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, analyteVal, 
 {
     # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified,
     # for any participants that do not have baseline data, just compare against the threshold
+    # skip those analytes that are designated as negative controls
 
     threshold = getPositivityThreshold(analytedata, analyteVal);
-    if (!is.na(threshold))
+    negativeControl = isNegativeControl(analytedata, analyteVal);
+
+    if (!is.na(threshold) & !negativeControl)
     {
         fidata = subset(rundata, name == analyteVal & participantID == participantVal & !is.na(visitID) & !is.na(dilution), select=c("fiBackground", "fiBackgroundBlank"));
         if (nrow(fidata) > 0)
