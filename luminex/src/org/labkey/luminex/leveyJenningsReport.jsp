@@ -207,6 +207,8 @@
             controlName: _controlName,
             controlType: _controlType,
             assayName: _protocolName,
+            networkExists: _networkExists,
+            protocolExists: _protocolExists,
             listeners: {
                 'currentGuideSetUpdated': function() {
                     trendPlotPanel.setTabsToRender();
@@ -250,6 +252,8 @@
             controlType: _controlType,
             assayName: _protocolName,
             defaultRowSize: defaultRowSize,
+            networkExists: _networkExists,
+            protocolExists: _protocolExists,
             listeners: {
                 'appliedGuideSetUpdated': function() {
                     trendPlotPanel.setTabsToRender();

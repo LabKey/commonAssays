@@ -149,16 +149,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
 
             // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
-            var allRunsCols = [
-                    {header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25},
-                    {header:'Assay Id', dataIndex:runPrefix + '/Name', renderer: this.encodingRenderer, width:200}
-                ];
-            if (_networkExists) {
-                allRunsCols.push({header:'Network', dataIndex:runPrefix + '/Batch/Network', width:75, renderer: this.encodingRenderer});
-            }
-            if (_protocolExists) {
-                allRunsCols.push({header:'Protocol', dataIndex:runPrefix + '/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
-            }
+            var allRunsCols = [];
+            allRunsCols.push({header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25});
+            allRunsCols.push({header:'Assay Id', dataIndex:runPrefix + '/Name', renderer: this.encodingRenderer, width:200});
+            allRunsCols.push({header:'Network', dataIndex:runPrefix + '/Batch/Network', width:75, renderer: this.encodingRenderer, hidden: !this.networkExists});
+            allRunsCols.push({header:'Protocol', dataIndex:runPrefix + '/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer, hidden: !this.protocolExists});
             allRunsCols.push({header:'Folder', dataIndex:runPrefix + '/Folder/Name', renderer: this.encodingRenderer, width:75});
             allRunsCols.push({header:'Notebook No.', dataIndex:runPrefix + '/NotebookNo', width:100, renderer: this.encodingRenderer});
             allRunsCols.push({header:'Assay Type', dataIndex:runPrefix + '/AssayType', width:100, renderer: this.encodingRenderer});
@@ -228,16 +223,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
-        var guideRunSetCols = [
-                {header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: this.guideSetId && !this.currentGuideSet, width:25},
-                {header:'Assay Id', dataIndex:runPrefix + '/Name', renderer: this.encodingRenderer, width:200}
-                ];
-        if (_networkExists) {
-            guideRunSetCols.push({header:'Network', dataIndex:runPrefix + '/Batch/Network', width:75, renderer: this.encodingRenderer});
-        }
-        if (_protocolExists) {
-            guideRunSetCols.push({header:'Protocol', dataIndex:runPrefix + '/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
-        }
+        var guideRunSetCols = [];
+        guideRunSetCols.push({header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: this.guideSetId && !this.currentGuideSet, width:25});
+        guideRunSetCols.push({header:'Assay Id', dataIndex:runPrefix + '/Name', renderer: this.encodingRenderer, width:200});
+        guideRunSetCols.push({header:'Network', dataIndex:runPrefix + '/Batch/Network', width:75, renderer: this.encodingRenderer, hidden: !this.networkExists});
+        guideRunSetCols.push({header:'Protocol', dataIndex:runPrefix + '/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer, hidden: !this.protocolExists});
         guideRunSetCols.push({header:'Folder', dataIndex:runPrefix + '/Folder/Name', renderer: this.encodingRenderer, width:75});
         guideRunSetCols.push({header:'Notebook No.', dataIndex:runPrefix + '/NotebookNo', width:100, renderer: this.encodingRenderer});
         guideRunSetCols.push({header:'Assay Type', dataIndex:runPrefix + '/AssayType', width:100, renderer: this.encodingRenderer});

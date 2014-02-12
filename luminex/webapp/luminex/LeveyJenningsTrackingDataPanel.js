@@ -263,8 +263,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header: 'Conjugate', dataIndex: 'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
                 {header: 'QC Flags', dataIndex: 'QCFlags', width: 75},
                 {header: 'Assay Id', dataIndex: 'Titration/Run/Name', renderer: this.assayIdHrefRendererTitration, width: 200},
-                {header: 'Network', dataIndex: 'Titration/Run/Batch/Network', width: 75, renderer: this.encodingRenderer},
-                {header: 'Protocol', dataIndex: 'Titration/Run/Batch/CustomProtocol', width: 75, renderer: this.encodingRenderer},
+                {header: 'Network', dataIndex: 'Titration/Run/Batch/Network', width: 75, renderer: this.encodingRenderer, hidden: !this.networkExists},
+                {header: 'Protocol', dataIndex: 'Titration/Run/Batch/CustomProtocol', width: 75, renderer: this.encodingRenderer, hidden: !this.protocolExists},
                 {header: 'Folder', dataIndex: 'Titration/Run/Folder/Name', width: 75, renderer: this.encodingRenderer},
                 {header: 'Notebook No.', dataIndex: 'Titration/Run/NotebookNo', width: 100, renderer: this.encodingRenderer},
                 {header: 'Assay Type', dataIndex: 'Titration/Run/AssayType', width: 100, renderer: this.encodingRenderer},
@@ -376,6 +376,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 isotype: this.isotype,
                 conjugate: this.conjugate,
                 selectedRecords: selectedRecords,
+                networkExists: this.networkExists,
+                protocolExists: this.protocolExists,
                 listeners: {
                     scope: this,
                     'closeApplyGuideSetPanel': function (hasUpdated)

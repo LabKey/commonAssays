@@ -211,6 +211,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 analyte: this.analyte,
                 isotype: this.isotype,
                 conjugate: this.conjugate,
+                networkExists: this.networkExists,
+                protocolExists: this.protocolExists,
                 listeners: {
                     scope: this,
                     'closeManageGuideSetPanel': function(saveResults) {

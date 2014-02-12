@@ -101,15 +101,10 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
-        var selectedHeaderCols = [
-                {header:'Assay Id', dataIndex: prefix + '/Run/Name', renderer: this.encodingRenderer, width:200}
-                ];
-        if (_networkExists) {
-            selectedHeaderCols.push({header:'Network', dataIndex:prefix + '/Run/Batch/Network', width:75, renderer: this.encodingRenderer});
-        }
-        if (_protocolExists) {
-            selectedHeaderCols.push({header:'Protocol', dataIndex:prefix + '/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer});
-        }
+        var selectedHeaderCols = [];
+        selectedHeaderCols.push({header:'Assay Id', dataIndex: prefix + '/Run/Name', renderer: this.encodingRenderer, width:200});
+        selectedHeaderCols.push({header:'Network', dataIndex:prefix + '/Run/Batch/Network', width:75, renderer: this.encodingRenderer, hidden: !this.networkExists});
+        selectedHeaderCols.push({header:'Protocol', dataIndex:prefix + '/Run/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer, hidden: !this.protocolExists});
         selectedHeaderCols.push({header:'Folder', dataIndex:prefix + '/Run/Folder/Name', renderer: this.encodingRenderer, width:75});
         selectedHeaderCols.push({header:'Notebook No.', dataIndex:prefix + '/Run/NotebookNo', width:100, renderer: this.encodingRenderer});
         selectedHeaderCols.push({header:'Assay Type', dataIndex:prefix + '/Run/AssayType', width:100, renderer: this.encodingRenderer});
