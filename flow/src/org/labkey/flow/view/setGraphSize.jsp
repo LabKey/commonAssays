@@ -62,15 +62,15 @@
         }
         var scrollTop = 0;
         var scrollLeft = 0;
-        if (window.pagexOffset != undefined)
+        if (window.pageXOffset != undefined)
         {
-            scrollLeft = window.pagexOffset;
-            scrollTop = window.pageyOffset;
+            scrollLeft = window.pageXOffset;
+            scrollTop = window.pageYOffset;
         }
         else
         {
-            scrollLeft = document.body.scrollLeft;
-            scrollTop = document.body.scrollTop;
+            scrollLeft = document.documentElement.scrollLeft;
+            scrollTop = document.documentElement.scrollTop;
         }
         var offsetX, offsetY;
         if (event.offsetX != undefined)
