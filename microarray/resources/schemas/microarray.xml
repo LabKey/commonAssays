@@ -106,8 +106,8 @@
           <ns:column columnName="UniGeneId"/>
           <ns:column columnName="GeneId"/>
           <ns:column columnName="AccessionId"/>
-          <ns:column columnName="ReqSeqProteinId"/>
-          <ns:column columnName="ReqSeqTranscriptId"/>
+          <ns:column columnName="RefSeqProteinId"/>
+          <ns:column columnName="RefSeqTranscriptId"/>
           <ns:column columnName="Created">
               <ns:description>Contains the date and time that this data was added to the system</ns:description>
               <ns:isHidden>true</ns:isHidden>
