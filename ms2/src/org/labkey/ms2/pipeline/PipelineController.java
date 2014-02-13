@@ -16,20 +16,44 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.action.*;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.GWTServiceAction;
+import org.labkey.api.action.LabkeyError;
+import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleRedirectAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.jsp.FormPage;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
-import org.labkey.api.util.*;
-import org.labkey.api.view.*;
+import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GWTView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
@@ -39,10 +63,10 @@ import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
-import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
-import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineJob;
+import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -50,10 +74,15 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <code>PipelineController</code>
@@ -510,6 +539,17 @@ public class PipelineController extends SpringActionController
             catch (IOException e)
             {
                 errors.reject(ERROR_MSG, "Failure attempting to write input parameters." + e.getMessage());
+                return false;
+            }
+            catch (NotFoundException e)
+            {
+                // Let this pass through normally
+                throw e;
+            }
+            catch (RuntimeException e)
+            {
+                ExceptionUtil.logExceptionToMothership(getViewContext().getRequest(), e);
+                errors.reject(ERROR_MSG, "Failure when attempting to submit search. " + e.getMessage());
                 return false;
             }
 
