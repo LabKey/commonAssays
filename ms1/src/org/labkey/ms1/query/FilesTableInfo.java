@@ -56,7 +56,7 @@ public class FilesTableInfo extends FilteredTable<ExpSchema>
         SQLFragment sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE ");
         sf.add(true);
         sf.add(false);
-        sf.append(filter.getSQLFragment(getSchema(), "Container", _userSchema.getContainer()));
+        sf.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), _userSchema.getContainer()));
         sf.append(")");
         addCondition(sf, FieldKey.fromParts("Imported"), FieldKey.fromParts("Deleted"), FieldKey.fromParts("ExpDataFileId"));
     }

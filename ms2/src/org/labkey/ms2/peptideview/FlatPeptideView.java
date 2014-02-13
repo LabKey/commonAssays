@@ -236,7 +236,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         fragment.append(MS2Manager.getTableInfoPeptides());
         fragment.append(" ");
         SimpleFilter filter = ProteinManager.getPeptideFilter(queryUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run);
-        fragment.append(filter.getWhereSQL(ProteinManager.getSqlDialect()));
+        fragment.append(filter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
         fragment.addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
         return fragment;
     }

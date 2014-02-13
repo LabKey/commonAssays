@@ -60,7 +60,7 @@ public class TitrationTable extends AbstractLuminexTable
         SQLFragment sql = new SQLFragment("RunId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
         sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
         sql.append(")");
         return sql;
     }

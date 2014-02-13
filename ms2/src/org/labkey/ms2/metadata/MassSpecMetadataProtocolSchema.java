@@ -151,7 +151,7 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
             separator = " OR ";
         }
         searchCountSQL.append(") AND ");
-        searchCountSQL.append(containerFilter.getSQLFragment(ExperimentService.get().getSchema(), "er.Container", container));
+        searchCountSQL.append(containerFilter.getSQLFragment(ExperimentService.get().getSchema(), new SQLFragment("er.Container"), container));
 
         searchCountSQL.append(")");
         return searchCountSQL;

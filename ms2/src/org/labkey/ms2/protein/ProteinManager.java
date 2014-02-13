@@ -1182,7 +1182,7 @@ public class ProteinManager
         peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         if (null != extraPeptideWhere)
             peptideFilter.addWhereClause(extraPeptideWhere, new Object[]{});
-        proteinSql.append(peptideFilter.getWhereSQL(getSqlDialect()));
+        proteinSql.append(peptideFilter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
 
         proteinSql.append(") pep LEFT OUTER JOIN ");
@@ -1193,7 +1193,7 @@ public class ProteinManager
         // Construct Protein HAVING clause
         SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins());
         proteinFilter = ProteinManager.reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteins());
-        String proteinHaving = proteinFilter.getWhereSQL(getSqlDialect()).replaceFirst("WHERE", "HAVING");
+        String proteinHaving = proteinFilter.getWhereSQL(MS2Manager.getTableInfoProteins()).replaceFirst("WHERE", "HAVING");
 
         // Can't use SELECT aliases in HAVING clause, so replace names with aggregate functions & disambiguate Mass
         proteinHaving = proteinHaving.replaceAll("UniquePeptides", "COUNT(DISTINCT Peptide)");
@@ -1321,7 +1321,7 @@ public class ProteinManager
         // Have to apply the peptide filter again, otherwise we'll just get all peptides mapping to each protein
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, user, run);
         peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
-        sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
+        sql.append(peptideFilter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
         sql.append('\n');
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
         if (addOrderBy)
@@ -1398,7 +1398,7 @@ public class ProteinManager
         peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoSimplePeptides());
         if (null != extraWhere)
             peptideFilter.addWhereClause(extraWhere, new Object[]{});
-        sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
+        sql.append(peptideFilter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
 
         sql.append("\n");
@@ -1420,7 +1420,7 @@ public class ProteinManager
             }
         }
         proteinFilter = reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        String proteinWhere = proteinFilter.getWhereSQL(getSqlDialect());
+        String proteinWhere = proteinFilter.getWhereSQL(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         if (proteinWhere != null && !"".equals(proteinWhere))
         {
             proteinWhere = proteinWhere.replaceFirst("WHERE", "AND");

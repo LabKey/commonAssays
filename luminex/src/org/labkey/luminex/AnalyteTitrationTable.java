@@ -155,7 +155,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         sql.append(" WHERE DataId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
         sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
         sql.append("))");
         return sql;
     }

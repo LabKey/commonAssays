@@ -136,7 +136,7 @@ public class ProteinCompareQuery extends CompareQuery
 
 
         // TODO: Make Nick happy by using a sub-SELECT instead of HAVING
-        String proteinHaving = proteinFilter.getWhereSQL(MS2Manager.getSqlDialect()).replaceFirst("WHERE", "HAVING");
+        String proteinHaving = proteinFilter.getWhereSQL(MS2Manager.getTableInfoProteins()).replaceFirst("WHERE", "HAVING");
         // Can't use SELECT aliases in HAVING clause, so replace names with aggregate functions
         proteinHaving = proteinHaving.replaceAll("UniquePeptides", "COUNT(DISTINCT Peptide)");
         proteinHaving = proteinHaving.replaceAll("Peptides", "COUNT(Peptide)");

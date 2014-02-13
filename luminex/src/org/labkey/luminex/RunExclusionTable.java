@@ -29,8 +29,6 @@ import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.study.assay.AssaySchema;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.UnauthorizedException;
 
 import java.util.ArrayList;
@@ -78,7 +76,7 @@ public class RunExclusionTable extends AbstractExclusionTable
         SQLFragment sql = new SQLFragment("RunId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
         sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
         sql.append(")");
         return sql;
     }

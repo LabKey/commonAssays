@@ -203,7 +203,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
 
         return MS2Manager.getTableInfoProteinProphetFiles() + " ppf, " +
             " ( SELECT * FROM " + MS2Manager.getTableInfoProteinGroupsWithQuantitation() +
-            " " + proteinGroupFilter.getWhereSQL(MS2Manager.getSqlDialect()) + " ) pg, " +
+            " " + proteinGroupFilter.getWhereSQL(MS2Manager.getTableInfoProteinGroupsWithQuantitation()) + " ) pg, " +
             MS2Manager.getTableInfoProteinGroupMemberships() + " pgm";
     }
 

@@ -226,7 +226,7 @@ public abstract class CompareQuery extends SQLFragment
             }
         }
 
-        append(filter.getWhereSQL(MS2Manager.getSqlDialect()));
+        append(filter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
         addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
         
         appendNewLine();

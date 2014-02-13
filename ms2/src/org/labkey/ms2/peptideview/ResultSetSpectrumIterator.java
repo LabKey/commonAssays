@@ -265,7 +265,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             sql.append(" pep LEFT OUTER JOIN ");         // We want all peptides, even those without spectra in the database
             sql.append(MS2Manager.getTableInfoSpectraData());
             sql.append(" sd ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan) X\n");
-            sql.append(_filter.getWhereSQL(MS2Manager.getSqlDialect()));
+            sql.append(_filter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
             sql.append('\n');
             sql.append(_sort.getOrderByClause(MS2Manager.getSqlDialect()));
 

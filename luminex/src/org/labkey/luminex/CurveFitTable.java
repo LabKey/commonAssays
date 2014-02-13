@@ -99,7 +99,7 @@ public class CurveFitTable extends AbstractLuminexTable
         sql.append(" WHERE t.RunId IN (SELECT r.RowId FROM ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
         sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), "r.Container", container));
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container"), container));
         sql.append("))");
         return sql;
 
