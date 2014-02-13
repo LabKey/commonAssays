@@ -19,8 +19,19 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.protein.CustomAnnotationType" %>
 <%@ page import="org.labkey.ms2.protein.ProteinController" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%!
+
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("ext3"));
+        return resources;
+    }
+%>
 
 <%
     JspView<ProteinController.UploadAnnotationsForm> me = (JspView<ProteinController.UploadAnnotationsForm>) HttpView.currentView();
@@ -81,7 +92,7 @@
             <td width="100%">
                 <textarea id="annotationsText" style="width: 100%" rows="15" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
                 <script type="text/javascript">
-                    Ext.EventManager.on('annotationsText', 'keydown', handleTabsInTextArea);
+                    Ext.EventManager.on('annotationsText', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
                 </script>
             </td>
         </tr>

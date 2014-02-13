@@ -64,7 +64,9 @@
 
 <textarea id="scriptTextArea" wrap="off" rows="20" cols="80" name="script"><%=h(script.getAnalysisScript())%></textarea>
     <script type="text/javascript">
-        Ext.EventManager.on('scriptTextArea', 'keydown', handleTabsInTextArea);
+        LABKEY.requiresExt3ClientAPI(true, function() {
+            Ext.EventManager.on('scriptTextArea', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
+        });
     </script>
 <br>
 <input type="submit" value="Submit">
