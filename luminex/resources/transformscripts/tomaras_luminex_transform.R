@@ -43,6 +43,9 @@ source("${srcDirectory}/youtil.R");
 suppressMessages(library(Ruminex));
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
+${rLabkeySessionId}
+suppressMessages(library(Rlabkey));
+
 ########################################## FUNCTIONS ##########################################
 
 getCurveFitInputCol <- function(runProps, fiRunCol, defaultFiCol)
@@ -307,7 +310,41 @@ determineIndividualPositivityValue <- function(visitsFIagg, index, threshold, ba
     val
 }
 
-calculatePositivityForAnalytePtid <- function(rundata, analytedata, analyteVal, participantVal, basevisit, foldchange)
+getBaselineVisitFiValue <- function(ficolumn, visitsfiagg, baselinedata, basevisit)
+{
+    val = NA;
+
+    # if there is a baseline visit supplied, we expect each ptid to have baseline visit data
+    if (!any(compareNumbersForEquality(visitsfiagg$visit, basevisit, 1e-10)))
+    {
+        ptid = visitsfiagg[1, "ptid"];
+        analyte = visitsfiagg[1, "analyte"];
+        dilution = visitsfiagg[1, "dilution"];
+
+        if (nrow(baselinedata) > 0) {
+            rowIndex = baselinedata$participantid==ptid & baselinedata$analyte==analyte & baselinedata$dilution==dilution;
+            if (any(rowIndex)) {
+                val = baselinedata[rowIndex, tolower(ficolumn)];
+            }
+        }
+
+        if (is.na(val)) {
+            writeError(paste("Error: No baseline visit data found: Analyte=", analyte, ", Participant=", ptid,
+                         ", Visit=", basevisit, ", Column=", ficolumn, ".", sep=""));
+        } else if (baselinedata[rowIndex, "runcount"] > 1)
+        {
+            writeError(paste("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
+                         ", Participant=", ptid, ", Visit=", basevisit, ".", sep=""));
+        }
+    } else
+    {
+        val = fiConversion(visitsfiagg[compareNumbersForEquality(visitsfiagg$visit, basevisit, 1e-10), ficolumn]);
+    }
+
+    val
+}
+
+calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata, analyteVal, participantVal, basevisit, foldchange)
 {
     # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified,
     # for any participants that do not have baseline data, just compare against the threshold
@@ -323,21 +360,15 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, analyteVal, 
         {
             visitsFIagg = getVisitsFIAggData(rundata, fidata, analyteVal, participantVal);
 
-            if (!is.na(basevisit) & any(compareNumbersForEquality(visitsFIagg$visit, basevisit, 1e-10)))
+            if (!is.na(basevisit))
             {
-                # if there is a baseline visit supplied, make sure the fold change is not null as well
-                if (is.na(foldchange))
-                {
-                    stop("No value provided for 'Positivity Fold Change'.");
-                }
+                baseVisitFiBkgd = getBaselineVisitFiValue("fiBackground", visitsFIagg, baselinedata, basevisit);
+                baseVisitFiBkgdBlank = getBaselineVisitFiValue("fiBackgroundBlank", visitsFIagg, baselinedata, basevisit);
 
-                baseVisitFiBkgd = fiConversion(visitsFIagg$fiBackground[compareNumbersForEquality(visitsFIagg$visit, basevisit, 1e-10)]);
-                baseVisitFiBkgdBlank = fiConversion(visitsFIagg$fiBackgroundBlank[compareNumbersForEquality(visitsFIagg$visit, basevisit, 1e-10)]);
                 if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
                 {
                     for (v in 1:nrow(visitsFIagg))
                     {
-                        # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
                         visit = visitsFIagg$visit[v];
                         if (!compareNumbersForEquality(visit, basevisit, 1e-10))
                         {
@@ -361,7 +392,49 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, analyteVal, 
     rundata
 }
 
-populatePositivity <- function(rundata, analytedata)
+queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit, runprops)
+{
+    data = data.frame();
+
+    # get list of analytes that are not marked as Negative Controls
+    analyteList = toString(sQuote(analytedata$Name));
+    if (!is.null(analytedata$NegativeControl)) {
+        analyteList = toString(sQuote(analytedata$Name[is.na(analytedata$NegativeControl)]));
+    }
+
+    if (!is.na(basevisit) & nchar(analyteList) > 0 & length(ptids) > 0)
+    {
+        baseUrl = getRunPropertyValue(runprops, "baseUrl");
+        folderPath = getRunPropertyValue(runprops, "containerPath");
+        schemaName = paste("assay.Luminex.",getRunPropertyValue(runprops, "assayName"), sep="");
+
+        whereClause = paste("FlaggedAsExcluded = false AND Dilution IS NOT NULL ",
+                            "AND VisitID=", basevisit,
+                            "AND ParticipantID IN (",toString(sQuote(ptids)),")",
+                            "AND Data.Analyte.Name IN (",analyteList,")");
+
+        sql = paste("SELECT Data.Analyte.Name AS Analyte, Data.ParticipantID, Data.VisitID, Data.Dilution, ",
+                    "AVG(Data.FIBackground) AS FIBackground, AVG(Data.FIBackgroundBlank) AS FIBackgroundBlank, ",
+                    "COUNT(DISTINCT Data.Data.Run.RowId) AS RunCount ",
+                    "FROM Data WHERE ", whereClause,
+                    "GROUP BY Analyte.Name, ParticipantID, VisitID, Dilution");
+
+        data = labkey.executeSql(baseUrl=baseUrl, folderPath=folderPath, schemaName=schemaName, sql=sql, colNameOpt="rname");
+    }
+
+    data
+}
+
+verifyPositivityInputProperties <- function(basevisit, foldchange)
+{
+    # if there is a baseline visit supplied, make sure the fold change is not null as well
+    if (!is.na(basevisit) & is.na(foldchange))
+    {
+        writeError("Error: No value provided for 'Positivity Fold Change'.");
+    }
+}
+
+populatePositivity <- function(rundata, analytedata, runprops)
 {
     rundata$Positivity = NA;
 
@@ -373,18 +446,30 @@ populatePositivity <- function(rundata, analytedata)
     # if calc positivity is true, continue
     if (!is.na(calc.positivity) & calc.positivity == "1")
     {
+        verifyPositivityInputProperties(base.visit, fold.change);
+
         analytePtids = subset(rundata, select=c("name", "participantID")); # note: analyte variable column name is "name"
         analytePtids = unique(analytePtids[!is.na(rundata$participantID),]);
+
+        prevBaselineVisitData = queryPreviousBaselineVisitData(analytedata, unique(analytePtids$participantID), base.visit, runprops);
+
         if (nrow(analytePtids) > 0)
         {
             for (index in 1:nrow(analytePtids))
             {
-                rundata <- calculatePositivityForAnalytePtid(rundata, analytedata, analytePtids$name[index], analytePtids$participantID[index], base.visit, fold.change);
+                rundata <- calculatePositivityForAnalytePtid(rundata, analytedata, prevBaselineVisitData,
+                                analytePtids$name[index], analytePtids$participantID[index], base.visit, fold.change);
             }
         }
     }
 
     rundata
+}
+
+writeError <- function(msg)
+{
+    write(paste("error", "error", msg, sep="\t"), file=error.file);
+    quit("no", 0, FALSE);
 }
 
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
@@ -394,6 +479,7 @@ run.props = readRunPropertiesFile();
 # save the important run.props as separate variables
 run.data.file = getRunPropertyValue(run.props, "runDataFile");
 run.output.file = run.props$val3[run.props$name == "runDataFile"];
+error.file = getRunPropertyValue(run.props, "errorsFile");
 
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
@@ -543,7 +629,7 @@ if (nrow(titration.data) > 0)
                 if (nrow(zeroDoses) > 0)
                 {
                     wells = paste(zeroDoses$description, zeroDoses$well, collapse=', ');
-                    stop(paste("Zero values not allowed in dose (i.e. ExpConc/Dilution) for titration curve fit calculation:", wells));
+                    writeError(paste("Error: Zero values not allowed in dose (i.e. ExpConc/Dilution) for titration curve fit calculation:", wells));
                 }
 
                 if (fitTypes[typeIndex] == "4pl")
@@ -910,7 +996,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
 ################################## STEP 5: Positivity Calculation ################################
 
-run.data <- populatePositivity(run.data, analyte.data);
+run.data <- populatePositivity(run.data, analyte.data, run.props);
 
 #####################  STEP 6: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
 
