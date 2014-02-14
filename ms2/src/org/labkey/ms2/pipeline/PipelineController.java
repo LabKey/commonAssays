@@ -517,7 +517,7 @@ public class PipelineController extends SpringActionController
 
                 if (allFilesReady)
                 {
-                    PipelineService.get().queueJob(job, preserveId);
+                    PipelineService.get().queueJob(job);
                 }
                 else
                 {
