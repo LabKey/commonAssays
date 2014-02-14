@@ -498,7 +498,6 @@ flow/src/org/labkey/flow/controllers/run/moveToWorkspace.jsp -text
 flow/src/org/labkey/flow/controllers/run/plate.jsp -text
 flow/src/org/labkey/flow/controllers/run/showRun.jsp -text
 flow/src/org/labkey/flow/controllers/run/showRuns.jsp -text
-flow/src/org/labkey/flow/controllers/runningJobs.jsp -text
 flow/src/org/labkey/flow/controllers/selectReport.jsp -text
 flow/src/org/labkey/flow/controllers/well/ChooseGraphForm.java -text
 flow/src/org/labkey/flow/controllers/well/EditWellForm.java -text

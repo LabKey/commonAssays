@@ -28,6 +28,7 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
@@ -303,21 +304,6 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
-    public class ShowJobsAction extends SimpleViewAction<Object>
-    {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
-        {
-            return new JspView<>(FlowController.class, "runningJobs.jsp", null, errors);
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            root.addChild("Running Flow Jobs", new ActionURL(ShowJobsAction.class, getContainer()));
-            return root;
-        }
-    }
-
     FlowJob findJob(String statusFile)
     {
         PipelineService service = PipelineService.get();
@@ -373,7 +359,8 @@ public class FlowController extends BaseFlowController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            root.addChild("Error Cancelling Job", new ActionURL(ShowJobsAction.class, getContainer()));
+            ActionURL jobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer());
+            root.addChild("Error Cancelling Job", jobsURL);
             return root;
         }
     }

@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.User;
@@ -134,7 +135,8 @@ public class FlowOverview extends Overview
             int jobCount = PipelineService.get().getQueuedStatusFiles(getContainer()).length;
             if (jobCount != 0)
             {
-                Action action = new Action("Show jobs", new ActionURL(FlowController.ShowJobsAction.class, getContainer()));
+                ActionURL runningJobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer(), true);
+                Action action = new Action("Show jobs", runningJobsURL);
                 action.setDescriptionHTML("There are " + jobCount + " jobs running in this folder.");
                 addAction(action);
             }
