@@ -329,11 +329,11 @@ getBaselineVisitFiValue <- function(ficolumn, visitsfiagg, baselinedata, basevis
         }
 
         if (is.na(val)) {
-            writeError(paste("Error: No baseline visit data found: Analyte=", analyte, ", Participant=", ptid,
+            writeErrorOrWarning("warn", paste("Warning: No baseline visit data found: Analyte=", analyte, ", Participant=", ptid,
                          ", Visit=", basevisit, ", Column=", ficolumn, ".", sep=""));
         } else if (baselinedata[rowIndex, "runcount"] > 1)
         {
-            writeError(paste("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
+            writeErrorOrWarning("error", paste("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
                          ", Participant=", ptid, ", Visit=", basevisit, ".", sep=""));
         }
     } else
@@ -430,7 +430,7 @@ verifyPositivityInputProperties <- function(basevisit, foldchange)
     # if there is a baseline visit supplied, make sure the fold change is not null as well
     if (!is.na(basevisit) & is.na(foldchange))
     {
-        writeError("Error: No value provided for 'Positivity Fold Change'.");
+        writeErrorOrWarning("error", "Error: No value provided for 'Positivity Fold Change'.");
     }
 }
 
@@ -466,10 +466,12 @@ populatePositivity <- function(rundata, analytedata, runprops)
     rundata
 }
 
-writeError <- function(msg)
+writeErrorOrWarning <- function(type, msg)
 {
-    write(paste("error", "error", msg, sep="\t"), file=error.file);
-    quit("no", 0, FALSE);
+    write(paste(type, type, msg, sep="\t"), file=error.file, append=TRUE);
+    if (type == "error") {
+        quit("no", 0, FALSE);
+    }
 }
 
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
@@ -629,7 +631,7 @@ if (nrow(titration.data) > 0)
                 if (nrow(zeroDoses) > 0)
                 {
                     wells = paste(zeroDoses$description, zeroDoses$well, collapse=', ');
-                    writeError(paste("Error: Zero values not allowed in dose (i.e. ExpConc/Dilution) for titration curve fit calculation:", wells));
+                    writeErrorOrWarning("error", paste("Error: Zero values not allowed in dose (i.e. ExpConc/Dilution) for titration curve fit calculation:", wells));
                 }
 
                 if (fitTypes[typeIndex] == "4pl")
@@ -643,7 +645,7 @@ if (nrow(titration.data) > 0)
 
                             ec50 = maxValueConversion(as.numeric(coef(fit))[4]);
                             if (ec50 > 10e6) {
-                                print("EC50 value over the acceptable level (10e6).")
+                                writeErrorOrWarning("warn", paste("Warning: EC50 4pl value over the acceptable level (10e6) for ", titrationName, " ", analyteName, ".", sep=""));
                             } else {
                                 run.data[runDataIndex,]$EC50_4pl = ec50
                             }
@@ -695,7 +697,7 @@ if (nrow(titration.data) > 0)
                             }
                             ec50 = unname(getConc(fit, y))[3];
                             if (is.nan(ec50) | ec50 > 10e6) {
-                                print("EC50 value out of acceptable range (either outside standards MFI or greater than 10e6).")
+                                writeErrorOrWarning("warn", paste("Warning: EC50 5pl value out of acceptable range (either outside standards MFI or greater than 10e6) for ", titrationName, " ", analyteName, ".", sep=""));
                             } else {
                                 run.data[runDataIndex,]$EC50_5pl = ec50;
                             }
@@ -901,7 +903,7 @@ if (any(dat$isStandard) & length(standards) > 0)
                     # remove the rows from the standard.dat object where the max FI < 1000
                     if (agg.dat$x[aggIndex] < 1000)
                     {
-                        print(paste("Max(FI) is < 1000 for ", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], ", don't calculate estimated concentrations for this standard/analyte.", sep=""));
+                        writeErrorOrWarning("warn", paste("Warning: Max(FI) is < 1000 for ", agg.dat$Standard[aggIndex], " ", agg.dat$Analyte[aggIndex], ", not calculating estimated concentrations for this standard/analyte.", sep=""));
                         standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
                     }
                 }

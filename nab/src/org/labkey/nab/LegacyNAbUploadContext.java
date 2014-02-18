@@ -15,6 +15,7 @@
  */
 package org.labkey.nab;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -454,5 +455,11 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             }
             catch (NumberFormatException ignored) {}
         }
+    }
+
+    @Override
+    public Logger getLogger()
+    {
+        return null;
     }
 }
