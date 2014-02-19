@@ -369,14 +369,12 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     ElispotDataHandler.populateAntigenDataProperties(run, plate, postedPropMap, false, subtractBackground);
                     ElispotDataHandler.populateAntigenRunProperties(run, plate, postedPropMap, false, subtractBackground);
                 }
+                transaction.commit();
 
                 if (!errors.hasErrors())
                 {
-                    ModelAndView result = afterRunCreation(form, run, errors);
-                    transaction.commit();
-                    return result;
+                    return afterRunCreation(form, run, errors);
                 }
-                transaction.commit();
             }
             catch (ValidationException ve)
             {
