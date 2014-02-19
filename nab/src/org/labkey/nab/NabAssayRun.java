@@ -20,6 +20,7 @@ import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.view.RunDetailOptions;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -124,7 +125,7 @@ public abstract class NabAssayRun extends DilutionAssayRun
                 if (!summary.isBlank())
                 {
                     DilutionMaterialKey key = summary.getMaterialKey();
-                    String shortCaption = key.getDisplayString(false);
+                    String shortCaption = key.getDisplayString(RunDetailOptions.DataIdentifier.DefaultFormat);
                     if (captions.contains(shortCaption))
                         longCaptions = true;
                     captions.add(shortCaption);
