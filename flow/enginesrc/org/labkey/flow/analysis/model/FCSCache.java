@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
@@ -122,6 +123,20 @@ public class FCSCache
             if (x.getCause() instanceof IOException)
                 throw (IOException)x.getCause();
             throw x;
+        }
+    }
+
+    public void clear(@Nullable URI uri)
+    {
+        if (uri == null)
+        {
+            _fcsCache.clear();
+            _fcsHeaderCache.clear();
+        }
+        else
+        {
+            _fcsCache.remove(uri);
+            _fcsHeaderCache.remove(uri);
         }
     }
 }

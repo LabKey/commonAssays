@@ -25,6 +25,7 @@ import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.util.MemTracker;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
@@ -324,9 +325,10 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
         KEYWORDS.uncache(c);
         STATS.uncache(c);
         GRAPHS.uncache(c);
+        FCSAnalyzer.get().clearFCSCache(null);
     }
 
-    public void uncache(Container c)
+    protected void uncache(Container c)
     {
         if (c == null)
         {

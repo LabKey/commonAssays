@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.chart.DensityPlot;
@@ -102,6 +103,11 @@ public class FCSAnalyzer
     public FCS readFCS(URI uri) throws IOException
     {
         return _cache.readFCS(uri);
+    }
+
+    public void clearFCSCache(@Nullable URI uri)
+    {
+        _cache.clear(uri);
     }
 
     public PopulationSet findSubGroup(PopulationSet group, SubsetSpec subset)
