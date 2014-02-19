@@ -376,6 +376,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     transaction.commit();
                     return result;
                 }
+                transaction.commit();
             }
             catch (ValidationException ve)
             {
