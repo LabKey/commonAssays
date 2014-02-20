@@ -101,12 +101,12 @@ public class PendingMageMLFilesView extends QueryView
             }
             else
             {
-                if (microarrayProtocols.size() == 1)
+                if (microarrayProtocols.size() > 1)
                 {
                     ExpProtocol protocol = microarrayProtocols.get(0);
                     ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);
                     ActionButton button = new ActionButton(url, "Import using " + protocol.getName());
-                    button.setRequiresSelection(true, null, null, null, null, view.getDataRegion().getJavascriptFormReference(true));
+                    button.setRequiresSelection(true, null, null, null, null, view.getDataRegion().getJavascriptFormReference(false));
                     button.setActionType(ActionButton.Action.POST);
                     button.setDisplayPermission(InsertPermission.class);
                     bar.add(button);
