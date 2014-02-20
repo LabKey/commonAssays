@@ -461,6 +461,14 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 }
             }
         });
+
+        // for testing, narrow window puts left aligned buttons off of the page
+        win.on('show', function(cmp) {
+            var posArr = cmp.getPosition();
+            if (posArr[0] < 0)
+                cmp.setPosition(0, posArr[1]);
+        });
+
         win.show(this);
 
         this.updateCurvesPlot(win, plotDiv.getId(), false, false);
