@@ -68,6 +68,8 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
                 sampleGroupNames.put(sampleGroup.getName(), sampleGroup);
 
             ExcelLoader loader = new ExcelLoader(metadataFile, true);
+            loader.setScanAheadLineCount(1000); // issue 19539
+
             boolean hasSampleNameCol = false;
             boolean hasVirusIdCol = false;
             String wellGroupColumnName;
