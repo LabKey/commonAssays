@@ -87,7 +87,7 @@ maxValueConversion <- function(val)
     min(val, 10e37);
 }
 
-getRunPropertyValue <- function(runProps, colName)
+getRunPropertyValue <- function(colName)
 {
     value = NA;
     if (any(run.props$name == colName))
@@ -201,7 +201,7 @@ populateBlankBeadSubtraction <- function(rundata)
         unksOnly = TRUE;
         if (any(run.props$name == "SubtBlankFromAll"))
         {
-            if (getRunPropertyValue(run.props, "SubtBlankFromAll") == "1")
+            if (getRunPropertyValue("SubtBlankFromAll") == "1")
             {
                 unksOnly = FALSE;
             }
@@ -331,7 +331,7 @@ getBaselineVisitFiValue <- function(ficolumn, visitsfiagg, baselinedata, basevis
         if (is.na(val)) {
             writeErrorOrWarning("warn", paste("Warning: No baseline visit data found: Analyte=", analyte, ", Participant=", ptid,
                          ", Visit=", basevisit, ", Column=", ficolumn, ".", sep=""));
-        } else if (baselinedata[rowIndex, "runcount"] > 1)
+        } else if (baselinedata[rowIndex, "dataidcount"] > 1)
         {
             writeErrorOrWarning("error", paste("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
                          ", Participant=", ptid, ", Visit=", basevisit, ".", sep=""));
@@ -392,7 +392,7 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
     rundata
 }
 
-queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit, runprops)
+queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit)
 {
     data = data.frame();
 
@@ -404,9 +404,9 @@ queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit, runpro
 
     if (!is.na(basevisit) & nchar(analyteList) > 0 & length(ptids) > 0)
     {
-        baseUrl = getRunPropertyValue(runprops, "baseUrl");
-        folderPath = getRunPropertyValue(runprops, "containerPath");
-        schemaName = paste("assay.Luminex.",getRunPropertyValue(runprops, "assayName"), sep="");
+        baseUrl = getRunPropertyValue("baseUrl");
+        folderPath = getRunPropertyValue("containerPath");
+        schemaName = paste("assay.Luminex.",getRunPropertyValue("assayName"), sep="");
 
         whereClause = paste("FlaggedAsExcluded = false AND Dilution IS NOT NULL ",
                             "AND VisitID=", basevisit,
@@ -415,7 +415,7 @@ queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit, runpro
 
         sql = paste("SELECT Data.Analyte.Name AS Analyte, Data.ParticipantID, Data.VisitID, Data.Dilution, ",
                     "AVG(Data.FIBackground) AS FIBackground, AVG(Data.FIBackgroundBlank) AS FIBackgroundBlank, ",
-                    "COUNT(DISTINCT Data.Data.Run.RowId) AS RunCount ",
+                    "COUNT(DISTINCT Data.Data) AS DataIdCount ",
                     "FROM Data WHERE ", whereClause,
                     "GROUP BY Analyte.Name, ParticipantID, VisitID, Dilution");
 
@@ -434,14 +434,14 @@ verifyPositivityInputProperties <- function(basevisit, foldchange)
     }
 }
 
-populatePositivity <- function(rundata, analytedata, runprops)
+populatePositivity <- function(rundata, analytedata)
 {
     rundata$Positivity = NA;
 
     # get the run property that are used for the positivity calculation
-    calc.positivity = getRunPropertyValue(run.props, "CalculatePositivity");
-    base.visit = getRunPropertyValue(run.props, "BaseVisit");
-    fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
+    calc.positivity = getRunPropertyValue("CalculatePositivity");
+    base.visit = getRunPropertyValue("BaseVisit");
+    fold.change = getRunPropertyValue("PositivityFoldChange");
 
     # if calc positivity is true, continue
     if (!is.na(calc.positivity) & calc.positivity == "1")
@@ -451,7 +451,7 @@ populatePositivity <- function(rundata, analytedata, runprops)
         analytePtids = subset(rundata, select=c("name", "participantID")); # note: analyte variable column name is "name"
         analytePtids = unique(analytePtids[!is.na(rundata$participantID),]);
 
-        prevBaselineVisitData = queryPreviousBaselineVisitData(analytedata, unique(analytePtids$participantID), base.visit, runprops);
+        prevBaselineVisitData = queryPreviousBaselineVisitData(analytedata, unique(analytePtids$participantID), base.visit);
 
         if (nrow(analytePtids) > 0)
         {
@@ -479,19 +479,19 @@ writeErrorOrWarning <- function(type, msg)
 run.props = readRunPropertiesFile();
 
 # save the important run.props as separate variables
-run.data.file = getRunPropertyValue(run.props, "runDataFile");
+run.data.file = getRunPropertyValue("runDataFile");
 run.output.file = run.props$val3[run.props$name == "runDataFile"];
-error.file = getRunPropertyValue(run.props, "errorsFile");
+error.file = getRunPropertyValue("errorsFile");
 
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
 # read in the analyte information (to get the mapping from analyte to standard/titration)
-analyte.data.file = getRunPropertyValue(run.props, "analyteData");
+analyte.data.file = getRunPropertyValue("analyteData");
 analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # read in the titration information
-titration.data.file = getRunPropertyValue(run.props, "titrationData");
+titration.data.file = getRunPropertyValue("titrationData");
 titration.data = data.frame();
 if (file.exists(titration.data.file)) {
     titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
@@ -504,7 +504,7 @@ bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "f
 
 ######################## STEP 1: SET THE VERSION NUMBERS ################################
 
-runprop.output.file = getRunPropertyValue(run.props, "transformedRunPropertiesFile");
+runprop.output.file = getRunPropertyValue("transformedRunPropertiesFile");
 fileConn<-file(runprop.output.file);
 writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
     paste("RuminexVersion",ruminexVersion,sep="\t")), fileConn);
@@ -537,14 +537,14 @@ analytes = unique(run.data$name);
 # determine if the curve fits should be done with or without log transform
 curveFitLogTransform = TRUE;
 if (any(run.props$name == "CurveFitLogTransform")) {
-    propVal = getRunPropertyValue(run.props, "CurveFitLogTransform");
+    propVal = getRunPropertyValue("CurveFitLogTransform");
     if (!is.na(propVal) & propVal != "1") curveFitLogTransform = FALSE;
 }
 
 # set the weighting variance variable for use in the non-log tranform curve fits
 drm.weights.var.power = -1.8;
 if (any(run.props$name == "WeightingPower")) {
-    propVal = getRunPropertyValue(run.props, "WeightingPower");
+    propVal = getRunPropertyValue("WeightingPower");
     if (!is.na(propVal) & propVal != "") drm.weights.var.power = as.numeric(propVal);
 }
 
@@ -998,7 +998,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
 ################################## STEP 5: Positivity Calculation ################################
 
-run.data <- populatePositivity(run.data, analyte.data, run.props);
+run.data <- populatePositivity(run.data, analyte.data);
 
 #####################  STEP 6: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
 
