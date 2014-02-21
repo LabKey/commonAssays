@@ -191,7 +191,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 items.add(getItem(readerList, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty));
                 items.add(getItem(readerList, "AID", nameProperty, TextPlateReader.TYPE, typeProperty));
                 items.add(getItem(readerList, "Zeiss", nameProperty, TextPlateReader.TYPE, typeProperty));
-                readerList.insertListItems(user, items);
+                readerList.insertListItems(user, c, items);
             }
             catch (Exception e)
             {
