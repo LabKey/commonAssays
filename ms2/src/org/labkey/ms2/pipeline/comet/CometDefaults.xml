@@ -13,9 +13,7 @@
     <note> New feature added by Brendan MacLean; valid values = average | monoisotopic.
 		Sets the Comet mass_type_fragment parameter. No X!Tandem label for parent mass type,
 		see: comet, mass_type_parent</note>
-  <note type="input" label="spectrum, fragment mass error">1.0</note>
-	<note>bioworks browser's default setting is 1.0; 
-         This tag deprecates "spectrum, fragment monoisotopic mass error "</note>
+  <note type="input" label="spectrum, fragment mass error">1.0005</note>
   <note type="input" label="spectrum, parent monoisotopic mass error plus">2.0</note>
   <note type="input" label="spectrum, parent monoisotopic mass error minus">2.0</note>
 	<note>The max and min labels set the Comet peptide_mass_tolerance parameter.

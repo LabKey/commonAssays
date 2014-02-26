@@ -287,7 +287,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
 
         _params.addProperty(new SequestParam(
             70,                                                       //sortOrder
-            "1.005",                                                    // default value of the property
+            "1.0005",                                                    // default value of the property
             "fragment_bin_tol",                                 // parameters file property name
             "binning to use on fragment ions",// comment in the parameters file
             ConverterFactory.getSequestBasicConverter(),                             
