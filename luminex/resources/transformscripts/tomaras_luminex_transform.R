@@ -45,6 +45,7 @@ ruminexVersion = installed.packages()["Ruminex","Version"];
 
 ${rLabkeySessionId}
 suppressMessages(library(Rlabkey));
+print(R.version);
 
 ########################################## FUNCTIONS ##########################################
 
