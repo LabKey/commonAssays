@@ -42,7 +42,7 @@ public class ElisaModule extends DefaultModule
     @Override
     public double getVersion()
     {
-        return 13.30;
+        return 14.10;
     }
 
     @Override

@@ -91,7 +91,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 13.30;
+        return 14.10;
     }
 
     protected void init()
