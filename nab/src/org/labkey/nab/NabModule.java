@@ -60,7 +60,7 @@ public class NabModule extends DefaultModule
 
     protected void init()
     {
-        addController("nab", NabController.class);
+//        addController("nab", NabController.class);
         addController("nabassay", NabAssayController.class);
 
         NabProviderSchema.register(this);
@@ -86,7 +86,7 @@ public class NabModule extends DefaultModule
 
     public void doStartup(ModuleContext moduleContext)
     {
-        PlateService.get().registerDetailsLinkResolver(new PlateService.PlateDetailsResolver()
+/*        PlateService.get().registerDetailsLinkResolver(new PlateService.PlateDetailsResolver()
         {
             public ActionURL getDetailsURL(Plate plate)
             {
@@ -96,7 +96,7 @@ public class NabModule extends DefaultModule
                 return url;
             }
         });
-
+*/
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
         AssayService.get().registerAssayProvider(new NabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new SinglePlateNabDataHandler());
