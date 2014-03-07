@@ -1196,51 +1196,52 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public Map<FieldKey, ColumnInfo> getExtendedColumns(boolean hidden)
+        public Map<FieldKey, ColumnInfo> getExtendedColumns(boolean includeHidden)
         {
-            LinkedHashMap<FieldKey, ColumnInfo> ret = new LinkedHashMap<>(super.getExtendedColumns(hidden));
+            LinkedHashMap<FieldKey, ColumnInfo> ret = new LinkedHashMap<>(super.getExtendedColumns(includeHidden));
 
             // Add Keyword, Statistics, Background, Sample, and Report columns
-            addAllColumns(ret, getColumn("Keyword"), hidden);
-            addAllColumns(ret, getColumn("Statistic"), hidden);
-            addAllColumns(ret, getColumn("Background"), hidden);
+            addAllColumns(ret, getColumn("Keyword"), includeHidden);
+            addAllColumns(ret, getColumn("Statistic"), includeHidden);
+            addAllColumns(ret, getColumn("Background"), includeHidden);
 
             // Include FCSFile and Sample columns
             ColumnInfo fcsFileCol = getColumn(FCSFILE_FIELDKEY);
             if (fcsFileCol != null)
             {
-                addAllColumns(ret, fcsFileCol, hidden);
+                addAllColumns(ret, fcsFileCol, includeHidden);
 
                 TableInfo fcsFileTable = fcsFileCol.getFkTableInfo();
                 if (fcsFileTable != null)
-                    addAllColumns(ret, fcsFileTable.getColumn("Sample"), hidden);
+                    addAllColumns(ret, fcsFileTable.getColumn("Sample"), includeHidden);
             }
             else if (getColumn("Sample") != null)
             {
-                addAllColumns(ret, getColumn("Sample"), hidden);
+                addAllColumns(ret, getColumn("Sample"), includeHidden);
             }
 
             // iterating the reports can be expensive. can we hold onto a column reference for the reports? XXX: Only check on FCSAnalysis table for reports
             for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
             {
                 FieldKey fieldKey = new FieldKey(null, report.getDescriptor().getReportName());
-                addAllColumns(ret, getColumn(fieldKey), hidden);
+                addAllColumns(ret, getColumn(fieldKey), includeHidden);
             }
 
             return Collections.unmodifiableMap(ret);
         }
 
-        private void addAllColumns(Map<FieldKey, ColumnInfo> ret, ColumnInfo lookupColumn, boolean hidden)
+        private void addAllColumns(Map<FieldKey, ColumnInfo> ret, ColumnInfo lookupColumn, boolean includeHidden)
         {
             if (lookupColumn == null)
                 return;
 
-            if (lookupColumn != null)
+            // Issue 19790: flow: background columns showing up in timechart measure picker even though they should be hidden
+            if (includeHidden || !lookupColumn.isHidden())
             {
                 TableInfo lookupTable = lookupColumn.getFkTableInfo();
                 if (lookupTable != null)
                 {
-                    for (Map.Entry<FieldKey, ColumnInfo> entry : lookupTable.getExtendedColumns(hidden).entrySet())
+                    for (Map.Entry<FieldKey, ColumnInfo> entry : lookupTable.getExtendedColumns(includeHidden).entrySet())
                     {
                         FieldKey fieldKey = entry.getKey();
                         ColumnInfo col = entry.getValue();

@@ -280,9 +280,9 @@ queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit)
     data = data.frame();
 
     # get list of analytes that are not marked as Negative Controls
-    analyteList = toString(sQuote(analytedata$Name));
+    analyteList = toString(paste("'",analytedata$Name,"'", sep=""));
     if (!is.null(analytedata$NegativeControl)) {
-        analyteList = toString(sQuote(analytedata$Name[is.na(analytedata$NegativeControl)]));
+        analyteList = toString(paste("'",analytedata$Name[is.na(analytedata$NegativeControl)],"'", sep=""));
     }
 
     if (!is.na(basevisit) & nchar(analyteList) > 0 & length(ptids) > 0)
@@ -293,7 +293,7 @@ queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit)
 
         whereClause = paste("FlaggedAsExcluded = false AND Dilution IS NOT NULL ",
                             "AND VisitID=", basevisit,
-                            "AND ParticipantID IN (",toString(sQuote(ptids)),")",
+                            "AND ParticipantID IN (",toString(paste("'",ptids,"'", sep="")),")",
                             "AND Data.Analyte.Name IN (",analyteList,")");
 
         sql = paste("SELECT Data.Analyte.Name AS Analyte, Data.ParticipantID, Data.VisitID, Data.Dilution, ",
