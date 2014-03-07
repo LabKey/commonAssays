@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.data.ContainerManager" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.MS2AdminBean bean = ((JspView<MS2Controller.MS2AdminBean>)HttpView.currentView()).getModelBean();
@@ -43,7 +42,7 @@
     else
     { %>
 <form method="post" action="<%=h(new ActionURL(MS2Controller.PurgeRunsAction.class, ContainerManager.getRoot()))%>">
-<table class="labkey-data-region"><tr><td>Currently set to purge all MS2 runs deleted <input name="days" value="<%=bean.days%>" size="2"> days ago or before&nbsp;<%=PageFlowUtil.generateSubmitButton("Update", "this.form.action='showMS2Admin.view';")%></td></tr>
-<tr><td><%=generateSubmitButton("Purge Deleted MS2 Runs")%></td></tr></table></form><%
+<table class="labkey-data-region"><tr><td>Currently set to purge all MS2 runs deleted <input name="days" value="<%=bean.days%>" size="2"> days ago or before&nbsp;<%= button("Update").submit(true).onClick("this.form.action='showMS2Admin.view';") %></td></tr>
+<tr><td><%= button("Purge Deleted MS2 Runs").submit(true) %></td></tr></table></form><%
     }
 %>

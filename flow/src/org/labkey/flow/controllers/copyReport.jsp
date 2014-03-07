@@ -41,6 +41,6 @@
     <p>
     <input type="text" id="reportName" name="reportName" value="<%=h(form.getReportName())%>" size="50">
     <p>
-    <%= generateSubmitButton("Copy") %>
-    <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? generateButton("Cancel", ReportsController.BeginAction.class) : generateButton("Cancel", form.getReturnUrl())%>
+    <%= button("Copy").submit(true) %>
+    <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? button("Cancel").href(ReportsController.BeginAction.class, getContainer()) : button("Cancel").href(form.getReturnUrl()) %>
 </form>

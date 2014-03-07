@@ -29,7 +29,7 @@
                 the <a href="<%=urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</td>
     </tr>
     <tr><td>&nbsp;</td></tr>
-    <tr><td><%=generateSubmitButton("Import Scan Counts")%></td></tr>
+    <tr><td><%= button("Import Scan Counts").submit(true) %></td></tr>
 </table>
 </form>
 

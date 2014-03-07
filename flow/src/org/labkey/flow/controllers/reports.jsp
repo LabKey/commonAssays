@@ -115,6 +115,6 @@ table.reports td {
     </table>
     <p>
     <% if (canEdit) { %>
-        <%=generateButton("create qc report", new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, ControlsQCReport.TYPE))%>
-        <%=generateButton("create positivity report", new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, PositivityFlowReport.TYPE))%>
+        <%= button("create qc report").href(new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, ControlsQCReport.TYPE)) %>
+        <%= button("create positivity report").href(new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, PositivityFlowReport.TYPE)) %>
     <% } %>

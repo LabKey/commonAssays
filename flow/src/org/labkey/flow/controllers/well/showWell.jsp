@@ -426,7 +426,7 @@ for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getRepor
 <%
     if (getContainer().hasPermission(getUser(), UpdatePermission.class))
     {
-%><br><%=generateButton("edit", well.urlFor(WellController.EditWellAction.class))%><br>
+%><br><%= button("edit").href(well.urlFor(WellController.EditWellAction.class)) %><br>
 <%
     }
 %>

@@ -27,7 +27,7 @@
         <tr>
             <td class="labkey-form-label">Base&nbsp;URL<%= PageFlowUtil.helpPopup("Base URL", "The sequence will be appended to the end of the URL to create links to the BLAST server")%></td>
             <td><input size="100" type="text" name="blastServerBaseURL" value="<%=h(url)%>"/></td>
-            <td><%=generateSubmitButton("Save")%></td>
+            <td><%= button("Save").submit(true) %></td>
         </tr>
     </table>
 </form>

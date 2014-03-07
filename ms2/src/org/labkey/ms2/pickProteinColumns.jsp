@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -31,20 +30,20 @@
         <td><strong>Common:</strong></td>
         <td><%=h(bean.commonColumns)%></td>
         <td nowrap>
-            <%=PageFlowUtil.generateSubmitButton("Pick", "setCurrent('" + h(bean.commonColumns) + "');return false;")%>
-            <%=PageFlowUtil.generateSubmitButton("Add", "appendToCurrent('" + h(bean.commonColumns) + "');return false;")%></td>
+            <%= button("Pick").submit(true).onClick("setCurrent('" + h(bean.commonColumns) + "');return false;")%>
+            <%= button("Add").submit(true).onClick("appendToCurrent('" + h(bean.commonColumns) + "');return false;")%></td>
     </tr>
     <tr>
         <td nowrap><strong>Protein Prophet:</strong></td>
         <td><%=h(bean.proteinProphetColumns)%></td>
         <td nowrap align=right>
-            <%=PageFlowUtil.generateSubmitButton("Add", "appendToCurrent('" + h(bean.proteinProphetColumns) + "');return false;")%></td>
+            <%= button("Add").submit(true).onClick("appendToCurrent('" + h(bean.proteinProphetColumns) + "');return false;")%></td>
     </tr>
     <tr>
         <td><strong>Quantitation:</strong></td>
         <td><%=h(bean.quantitationColumns)%></td>
         <td nowrap align=right>
-            <%=PageFlowUtil.generateSubmitButton("Add", "appendToCurrent('" + h(bean.quantitationColumns) + "');return false;")%></td>
+            <%= button("Add").submit(true).onClick("appendToCurrent('" + h(bean.quantitationColumns) + "');return false;")%></td>
     </tr>
     <tr>
         <td>&nbsp;</td>
@@ -63,8 +62,8 @@
         <td><strong>Default:</strong></td>
         <td><%=h(bean.defaultColumns)%></td>
         <td nowrap >
-            <%=PageFlowUtil.generateSubmitButton("Pick", "setCurrent('" + h(bean.defaultColumns) + "');return false;")%>
-            <%=PageFlowUtil.generateSubmitButton("Add", "appendToCurrent('" +h(bean.defaultColumns) + "');return false;")%></td>
+            <%= button("Pick").submit(true).onClick("setCurrent('" + h(bean.defaultColumns) + "');return false;")%>
+            <%= button("Add").submit(true).onClick("appendToCurrent('" + h(bean.defaultColumns) + "');return false;")%></td>
     </tr>
       <tr>
           <td>&nbsp;</td>
@@ -74,8 +73,8 @@
         <td><textarea style="width: 100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
     </tr>
     <tr><td colspan=2 align=center>
-        <%=PageFlowUtil.generateSubmitButton("Pick Columns", "this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false) + "';")%>
-        <%=PageFlowUtil.generateSubmitButton("Save As Default", "this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true) + "';")%></td></tr>
+        <%= button("Pick Columns").submit(true).onClick("this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false) + "';")%>
+        <%= button("Save As Default").submit(true).onClick("this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true) + "';")%></td></tr>
   </table></form></td>
 </tr></table>
 

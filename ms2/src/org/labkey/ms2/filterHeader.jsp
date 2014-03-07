@@ -30,22 +30,22 @@
     <table>
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
-            <td valign=bottom><%=generateSubmitButton("Go")%></td>
+            <td valign=bottom><%= button("Go").submit(true) %></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign=bottom><% if (!user.isGuest()) { %>
-                <%=generateButton("Save View", bean.saveViewURL)%><% } %></td>
+                <%= button("Save View").href(bean.saveViewURL) %><% } %></td>
             <td valign=bottom><% if (!user.isGuest()) { %>
-                <%=generateButton("Manage Views", bean.manageViewsURL)%><% } %></td><%
+                <%= button("Manage Views").href(bean.manageViewsURL) %><% } %></td><%
             if (bean.currentViewType.supportsPeptideColumnPicker())
             { %>
             <td valign=bottom>
-                <%=PageFlowUtil.generateButton("Pick Peptide Columns", bean.pickPeptideColumnsURL.toString(), "", "id=\"pickPeptideColumns\"")%><% } %>
+                <%= PageFlowUtil.button("Pick Peptide Columns").href(bean.pickPeptideColumnsURL).attributes("id=\"pickPeptideColumns\"") %><% } %>
             </td>
             <%
             if (bean.currentViewType.supportsProteinColumnPicker())
             { %>
             <td valign=bottom>
-                <%=PageFlowUtil.generateButton("Pick Protein Columns", bean.pickProteinColumnsURL.toString(), "", "id=\"pickProteinColumns\"")%></td><%
+                <%= PageFlowUtil.button("Pick Protein Columns").href(bean.pickProteinColumnsURL).attributes("id=\"pickProteinColumns\"") %></td><%
             } %>
         </tr>
     </table>
@@ -69,7 +69,7 @@
                             </td>
                             <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=checked(bean.expanded)%><%=disabled(!bean.currentViewType.supportsExpansion())%>>Expanded<%=PageFlowUtil.helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
                             <td style="vertical-align: middle;" nowrap>
-                                <%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"viewTypeSubmitButton\"")%></td>
+                                <%= button("Go").submit(true).attributes("id=\"viewTypeSubmitButton\"") %></td>
                         </tr>
                     </table>
                 </fieldset>
@@ -86,7 +86,7 @@
                                     <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=PageFlowUtil.helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
                                     <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=PageFlowUtil.helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>
                                     <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="<%=bean.charge3%>" size="2"><%=PageFlowUtil.helpPopup("3+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 3+ charge state.")%></td>
-                                    <td nowrap style="vertical-align: middle;"><%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"AddChargeScoreFilterButton\"")%></td>
+                                    <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddChargeScoreFilterButton\"") %></td>
                                 </tr>
                             </table>
                         </fieldset>
@@ -102,7 +102,7 @@
                                     <input type="radio" name="tryptic"<%=checked(1 == bean.tryptic)%> value="1">1<%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
                                     <input type="radio" name="tryptic"<%=checked(2 == bean.tryptic)%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
                                 </td>
-                                <td nowrap style="vertical-align: middle;"><%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"AddTrypticEndsFilterButton\"")%></td>
+                                <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddTrypticEndsFilterButton\"") %></td>
                             </tr>
                         </table>
                     </fieldset>

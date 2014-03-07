@@ -39,7 +39,7 @@ if (bean.canShare)
         </tr><%
 } %>
         <tr>
-            <td colspan=2><%=generateSubmitButton("Save View")%><%=generateButton("Cancel", bean.returnURL)%></td>
+            <td colspan=2><%= button("Save View").submit(true) %><%= button("Cancel").href(bean.returnURL) %></td>
         </tr>
     </table>
 </form>

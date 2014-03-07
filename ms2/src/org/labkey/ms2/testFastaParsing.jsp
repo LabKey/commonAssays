@@ -35,7 +35,7 @@
         </tr>
         <tr>
             <td />
-            <td><%=generateSubmitButton("Submit")%></td>
+            <td><%= button("Submit").submit(true) %></td>
         </tr>
 
         <% if (form.getHeader() != null) {

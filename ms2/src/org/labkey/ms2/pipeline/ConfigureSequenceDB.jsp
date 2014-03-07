@@ -30,7 +30,7 @@
             <td><input type="text" name="localPathRoot" size="40" value="<%= h(getLocalPathRoot()) %>"></td>
         </tr>
         <tr>
-            <td><%= generateSubmitButton("Save")%> <%=generateButton("Cancel", urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
+            <td><%= button("Save").submit(true) %> <%= button("Cancel").href(urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
         </tr>
     </table>
 </form>

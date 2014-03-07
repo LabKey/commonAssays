@@ -598,7 +598,7 @@ public class WellController extends BaseFlowController
             sb.append("<span style='color:green;'>");
             sb.append(PageFlowUtil.filter(message));
             sb.append("</span><br>");
-            sb.append(PageFlowUtil.generateButton("OK", url));
+            sb.append(PageFlowUtil.button("OK").href(url));
             setHtml(sb.toString());
         }
     }

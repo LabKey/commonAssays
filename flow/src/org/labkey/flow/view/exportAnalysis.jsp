@@ -82,9 +82,9 @@
         <td></td>
         <td>
             <% if (bean.getRunId() != null || bean.getWellId() != null) { %>
-            <%=PageFlowUtil.generateSubmitButton("Export", null, "rel='nofollow'")%>
+            <%= button("Export").submit(true).attributes("rel='nofollow'")%>
             <% } else { %>
-            <%=PageFlowUtil.generateSubmitButton("Export", "return verifySelected(this.form, '" + exportURL + "', 'POST', " + q(selectionType) + ")", "rel='nofollow'")%>
+            <%= button("Export").submit(true).onClick("return verifySelected(this.form, '" + exportURL + "', 'POST', " + q(selectionType) + ")").attributes("rel='nofollow'") %>
             <% } %>
         </td>
     </tr>

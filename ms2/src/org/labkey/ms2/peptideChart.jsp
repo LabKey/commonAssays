@@ -45,7 +45,7 @@
                             <option value="<%=GoTypes.PROCESS%>"<%=selected(GoTypes.PROCESS == bean.goChartType)%>><%=h(GoTypes.PROCESS.toString())%></option>
                         </select>
                     </td>
-                    <td valign="middle"><%=generateSubmitButton("Submit")%></td>
+                    <td valign="middle"><%= button("Submit").submit(true) %></td>
                 </tr>
             </table>
         </td>

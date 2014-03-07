@@ -34,7 +34,7 @@
         <tr>
             <td class="labkey-form-label"><label for="pepSeq">Peptide sequence</label> *<%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%></td>
             <td><input id="pepSeq" type="text" name="<%=ProteinService.PeptideSearchForm.ParamNames.pepSeq.name()%>" value="<%=h(model.getPepSeq())%>" size="40"/></td>
-            <td><%=PageFlowUtil.generateSubmitButton("Search", "", "id=\"btnSearch\" name=\"submit\"")%></td>
+            <td><%= button("Search").submit(true).attributes("id=\"btnSearch\" name=\"submit\"")%></td>
         </tr>
         <tr>
             <td class="labkey-form-label"><label for="cbxExact">Exact matches only</label><%=helpPopup("Exact matches only", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%></td>

@@ -105,7 +105,7 @@
             </table>
         </td></tr>
         <tr>
-            <td colspan="2"><%=generateSubmitButton("Submit")%></td>
+            <td colspan="2"><%= button("Submit").submit(true) %></td>
         </tr>
 <%
         params.append("&size=").append(validRuns);

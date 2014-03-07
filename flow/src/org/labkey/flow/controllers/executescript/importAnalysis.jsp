@@ -109,8 +109,8 @@
 <% if (form.getWizardStep().getNumber() < AnalysisScriptController.ImportAnalysisStep.CONFIRM.getNumber()) { %>
 
     <%=generateBackButton()%>
-    <%=generateSubmitButton("Next")%>
-    <%=generateButton("Cancel", cancelUrl)%>
+    <%= button("Next").submit(true) %>
+    <%= button("Cancel").href(cancelUrl) %>
 
     <%
         JspView<ImportAnalysisForm> view = null;
@@ -144,8 +144,8 @@
     %>
 
     <%=generateBackButton()%>
-    <%=generateSubmitButton("Next")%>
-    <%=generateButton("Cancel", cancelUrl)%>
+    <%= button("Next").submit(true) %>
+    <%= button("Cancel").href(cancelUrl) %>
     
 <% } else { %>
     <%

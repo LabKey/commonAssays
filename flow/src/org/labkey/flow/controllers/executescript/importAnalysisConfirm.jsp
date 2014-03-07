@@ -250,6 +250,6 @@
 </ul>
 
 <%=generateBackButton()%>
-<%=generateSubmitButton("Finish")%>
-<%=generateButton("Cancel", cancelUrl)%>
+<%= button("Finish").submit(true) %>
+<%= button("Cancel").href(cancelUrl) %>
 

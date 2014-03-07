@@ -265,7 +265,7 @@
     You can safely skip this step, however no graphs can be generated
     when importing the <%=h(workspace.getKindName())%> without the FCS files.</p><%
     if (canSetPipelineRoot) {
-%><%=generateButton("Set pipeline root", urlProvider(PipelineUrls.class).urlSetup(container))%><%
+%><%= button("Set pipeline root").href(urlProvider(PipelineUrls.class).urlSetup(container)) %><%
 } else {
 %>Contact your administrator to set the pipeline root for this folder.<%
         }

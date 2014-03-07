@@ -56,7 +56,7 @@ fail, in which case you should switch to the "Manual" tab and follow the instruc
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
 <form action="<%=h(buildURL(MS2Controller.LoadGoAction.class))%>" method="post">
-    <%=generateSubmitButton("Continue")%>
-    <%=generateButton("Cancel", MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl())%>
+    <%= button("Continue").submit(true) %>
+    <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
 </form>
 </td></tr></table>

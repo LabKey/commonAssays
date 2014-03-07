@@ -47,7 +47,7 @@
     %></select>
 
     <% if (canEdit && id != null) { %>
-    <%=generateButton("Edit", id.getReport(context).getEditReportURL(context))%>
+    <%= button("Edit").href(id.getReport(context).getEditReportURL(context)) %>
     <% } %>
     
 <script type="text/javascript">

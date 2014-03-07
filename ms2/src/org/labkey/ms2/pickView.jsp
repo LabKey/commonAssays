@@ -37,5 +37,5 @@
     <%=bean.select%><br/>
     <br/><br/>
     <% out.flush(); bean.extraOptionsView.render(request, response); %><br/>
-    <%=PageFlowUtil.generateSubmitButton(bean.buttonText, "", "name=\"submit\"")%>
+    <%= button(bean.buttonText).submit(true).attributes("name=\"submit\"") %>
 </form>

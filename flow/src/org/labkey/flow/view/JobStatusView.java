@@ -133,7 +133,7 @@ public class JobStatusView extends HttpView
         {
             ActionURL cancelURL = new ActionURL(FlowController.CancelJobAction.class, getViewContext().getContainer());
             cancelURL.addParameter("statusFile", _psf.getFilePath());
-            out.write("<br>" + PageFlowUtil.generateButton("Cancel Job", cancelURL));
+            out.write("<br>" + PageFlowUtil.button("Cancel Job").href(cancelURL));
         }
         out.write("<script type='text/javascript'>\n");
         out.write("Ext.onReady(function () { Ext.get(\"end\").scrollIntoView(Ext.get(\"statusFile\")); });\n");

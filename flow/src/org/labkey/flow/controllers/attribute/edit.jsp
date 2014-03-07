@@ -47,8 +47,8 @@
         <tr>
             <td>&nbsp;</td>
             <td>
-                <%=generateSubmitButton("Submit")%>
-                <%=generateButton("Cancel", returnURL)%>
+                <%= button("Submit").submit(true) %>
+                <%= button("Cancel").href(returnURL) %>
             </td>
         </tr>
     </table>

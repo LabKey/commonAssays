@@ -194,14 +194,14 @@
                 if (model.getPrevFeatureId() < 0)
                     out.write(PageFlowUtil.generateDisabledButton(prevFeatureCaption));
                 else
-                    out.print(generateButton(prevFeatureCaption, model.getPrevFeatureUrl()));
+                    out.print(button(prevFeatureCaption).href(model.getPrevFeatureUrl()));
 
                 out.write("&nbsp;");
 
                 if (model.getNextFeatureId() < 0)
                     out.write(PageFlowUtil.generateDisabledButton(nextFeatureCaption));
                 else
-                    out.print(generateButton(nextFeatureCaption, model.getNextFeatureUrl()));
+                    out.print(button(nextFeatureCaption).href(model.getNextFeatureUrl()));
             %>
         </td>
 
@@ -350,14 +350,14 @@
                 if (null == prevScanUrl)
                     out.print(PageFlowUtil.generateDisabledButton(prevScanCaption));
                 else
-                    out.print(generateButton(prevScanCaption, prevScanUrl));
+                    out.print(button(prevScanCaption).href(prevScanUrl));
 
                 out.print("&nbsp;");
 
                 if (null == nextScanUrl)
                     out.print(PageFlowUtil.generateDisabledButton(nextScanCaption));
                 else
-                    out.print(generateButton(nextScanCaption, nextScanUrl));
+                    out.print(button(nextScanCaption).href(nextScanUrl));
 
             %>
             <!-- m/z and intensity peaks mass chart -->
@@ -411,9 +411,9 @@
                 </tr>
                 <tr>
                     <td colspan="3" style="text-align:right">
-                        <%=PageFlowUtil.generateSubmitButton("Cancel", "cancelMzFilter();", "title=\"Cancel Chanages\" tabindex=\"4\"")%>
-                        <%=PageFlowUtil.generateSubmitButton("Reset", "resetMzWindowFilter();", "title=\"Reset to Defaults and Refresh\" tabindex=\"5\"")%>
-                        <%=PageFlowUtil.generateSubmitButton("Filter", "submitMzWindowFilter();", "title=\"Set Filter and Refresh\" tabindex=\"6\"")%>
+                        <%= button("Cancel").submit(true).onClick("cancelMzFilter();").attributes("title=\"Cancel Chanages\" tabindex=\"4\"")%>
+                        <%= button("Reset").submit(true).onClick("resetMzWindowFilter();").attributes("title=\"Reset to Defaults and Refresh\" tabindex=\"5\"")%>
+                        <%= button("Filter").submit(true).onClick("submitMzWindowFilter();").attributes("title=\"Set Filter and Refresh\" tabindex=\"6\"")%>
                     </td>
                 </tr>
             </table>
@@ -486,9 +486,9 @@
                 </tr>
                 <tr>
                     <td nowrap style="text-align:right">
-                        <%=PageFlowUtil.generateSubmitButton("Cancel", "cancelScanFilter();", "title=\"Cancel Chanages\" tabindex=\"104\"")%>
-                        <%=PageFlowUtil.generateSubmitButton("Reset", "resetScanWindowFilter();", "title=\"Reset to Defaults and Refresh\" tabindex=\"105\"")%>
-                        <%=PageFlowUtil.generateSubmitButton("Filter", "submitScanWindowFilter();", "title=\"Set Filter and Refresh\" tabindex=\"106\"")%>
+                        <%= button("Cancel").submit(true).onClick("cancelScanFilter();").attributes("title=\"Cancel Chanages\" tabindex=\"104\"")%>
+                        <%= button("Reset").submit(true).onClick("resetScanWindowFilter();").attributes("title=\"Reset to Defaults and Refresh\" tabindex=\"105\"")%>
+                        <%= button("Filter").submit(true).onClick("submitScanWindowFilter();").attributes("title=\"Set Filter and Refresh\" tabindex=\"106\"")%>
                     </td>
                 </tr>
             </table>

@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -53,4 +51,4 @@
     exportUrl.setAction(MS2Controller.ExportProteinCoverageMapAction.class);
     if (null==exportUrl.getParameter("seqId"))
         exportUrl.addParameter("seqId", bean.protein.getSeqId());
-%><%=PageFlowUtil.generateButton("Export", exportUrl)%></p>
+%><%= button("Export").href(exportUrl) %></p>

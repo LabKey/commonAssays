@@ -53,7 +53,7 @@
             </tr>
         <% } %>
     </table><br/>
-    <%=generateSubmitButton("OK")%> <%=generateButton("Cancel", bean.getReturnURL())%>
+    <%= button("OK").submit(true) %> <%= button("Cancel").href(bean.getReturnURL()) %>
 </form>
 
 <script type="text/javascript">

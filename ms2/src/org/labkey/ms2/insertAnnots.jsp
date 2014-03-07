@@ -62,7 +62,7 @@
     </tr>
     <tr>
       <td/>
-      <td><%=generateSubmitButton("Load Annotations")%></td>
+      <td><%= button("Load Annotations").submit(true) %></td>
    </tr>
 </table>
 </form>

@@ -110,7 +110,7 @@
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align:right">
-                            <%=PageFlowUtil.generateSubmitButton("Search", "name=\"submit\"")%>
+                            <%= button("Search").submit(true) %>
                         </td>
                     </tr>
                 </table>

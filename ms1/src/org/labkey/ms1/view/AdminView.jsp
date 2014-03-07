@@ -35,7 +35,7 @@
 <p>Data marked for deletion will be automatically purged during the scheduled system maintenance process,
 but you can manually start a purge now by clicking the button below.
 </p>
-<p><%=generateButton("Purge Deleted MS1 Data Now", ctx.getPurgeNowUrl())%></p>
+<p><%= button("Purge Deleted MS1 Data Now").href(ctx.getPurgeNowUrl()) %></p>
 <% } %>
 
 <% if (ctx.isPurgeRunning()) { %>
