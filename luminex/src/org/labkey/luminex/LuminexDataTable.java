@@ -151,7 +151,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createTitrationTable(true);
+                return _userSchema.createTitrationTable(false);
             }
         });
 
