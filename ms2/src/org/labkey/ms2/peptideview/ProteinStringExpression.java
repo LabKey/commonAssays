@@ -16,6 +16,9 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.StringExpression;
 
@@ -77,5 +80,19 @@ public class ProteinStringExpression implements StringExpression, Cloneable
         {
             throw new RuntimeException(x);
         }
+    }
+
+    @Nullable
+    @Override
+    public Object getJdbcParameterValue()
+    {
+        return getSource();
+    }
+
+    @NotNull
+    @Override
+    public JdbcType getJdbcParameterType()
+    {
+        return JdbcType.VARCHAR;
     }
 }
