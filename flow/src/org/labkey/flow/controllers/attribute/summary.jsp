@@ -83,7 +83,7 @@
         </td>
         <td>
             <% if (usages != null && usages > 0) { %>
-            <i>(<a href='<%=editURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>'><%=usages%> usages</a>)</i>
+            <i>(<a href='<%=detailsURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>'><%=usages%> usages</a>)</i>
             <% } else { %>
             <i class="labkey-error">(unused)</i>
             <% } %>

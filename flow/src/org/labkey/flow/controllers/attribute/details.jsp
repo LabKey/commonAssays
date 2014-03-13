@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.persist.AttributeCache" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -28,7 +29,16 @@
 
     AttributeCache.Entry aliased = entry.getAliasedEntry();
     Collection<AttributeCache.Entry> aliases = entry.getAliases();
-    Collection<FlowDataObject> usages = entry.getUsages();
+    Collection<FlowDataObject> usages;
+    if (aliased == null)
+    {
+        usages = entry.getUsages();
+    }
+    else
+    {
+        Map<AttributeCache.Entry, Collection<FlowDataObject>> allUsages = aliased.getAllUsages();
+        usages = allUsages.get(entry);
+    }
 
     ActionURL detailsURL = getActionURL();
 %>
@@ -50,7 +60,7 @@
 <% } %>
 
 <b>Usages:</b>
-<% if (usages.isEmpty()) { %>
+<% if (usages == null || usages.isEmpty()) { %>
 <div class="labkey-error">no usages</div>
 <% } else { %>
 <ul>
