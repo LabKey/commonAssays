@@ -421,7 +421,7 @@ public class Protein
                     label = linkText;
                     if (!_forCoverageMapExport)
                     {
-                        details += String.format("\nUnmodified: %d",counts.getCountUnmodifiedPeptides());
+                        details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
                         label = helpPopup("Peptide Details", details, false, linkText, 200, onClickScript );
                     }
                     label = continuationLeft + label + continuationRight;
@@ -507,11 +507,12 @@ public class Protein
 
         public void setCountInstances(int n)
         {
-            countInstances =n;
+            countInstances = n;
         }
 
-        public PeptideCounts() {
-            countModifications =new HashMap<>();
+        public PeptideCounts()
+        {
+            countModifications = new LinkedHashMap<>();
             countScans=0;
             countUnmodifiedPeptides=0;
             countInstances =0;
@@ -528,7 +529,7 @@ public class Protein
                     if (!mod.getVariable())
                         continue;
                     String marker= mod.getAminoAcid() + mod.getSymbol();
-                    if (peptide.indexOf(marker)>=0)
+                    if (peptide.contains(marker))
                     {
                         Integer curCount = countModifications.get(marker);
                         if (null == curCount )
@@ -748,9 +749,10 @@ public class Protein
     */
     public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
     {
-        Map<String,PeptideCounts> uniquePeptides = new HashMap<>();
-        if (null==_peptides || _peptides.length <= 0)
+        Map<String, PeptideCounts> uniquePeptides = new LinkedHashMap<>();
+        if (null == _peptides || _peptides.length <= 0)
             return uniquePeptides;
+
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
         List<MS2Modification> mods = Collections.emptyList();
         if (run != null && run.getRun() > -1)
@@ -760,13 +762,13 @@ public class Protein
         {
             String peptideToMap;
             if (run == null)
-                peptideToMap= MS2Peptide.stripPeptideAZDash(peptide);
+                peptideToMap = MS2Peptide.stripPeptideAZDash(peptide);
             else
-                peptideToMap= MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide));
+                peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide));
 
             PeptideCounts cnt;
             cnt = uniquePeptides.get(peptideToMap);
-            if (null==cnt)
+            if (null == cnt)
             {
                 uniquePeptides.put(peptideToMap,new PeptideCounts());
                 cnt = uniquePeptides.get(peptideToMap);
