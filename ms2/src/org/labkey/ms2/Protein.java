@@ -512,7 +512,7 @@ public class Protein
 
         public PeptideCounts()
         {
-            countModifications = new LinkedHashMap<>();
+            countModifications = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             countScans=0;
             countUnmodifiedPeptides=0;
             countInstances =0;
@@ -749,7 +749,7 @@ public class Protein
     */
     public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
     {
-        Map<String, PeptideCounts> uniquePeptides = new LinkedHashMap<>();
+        Map<String, PeptideCounts> uniquePeptides = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (null == _peptides || _peptides.length <= 0)
             return uniquePeptides;
 

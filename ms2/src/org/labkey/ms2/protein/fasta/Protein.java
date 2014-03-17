@@ -37,7 +37,7 @@ public class Protein
 
     //known identifier types.  Multiple identifiers found in fasta files can often
     //boil down to the same thing
-    public static HashMap<String, String> IdentTypeMap = new HashMap<>();
+    public static final HashMap<String, String> IDENT_TYPE_MAP = new HashMap<>();
 
     /* for parsing header lines of FASTA files */
     public static final String SEPARATOR_PATTERN = "\\|";
@@ -45,37 +45,37 @@ public class Protein
     //populate the hashmap of known identifier types
     static
     {
-        IdentTypeMap.put("GI", "GI");
-        IdentTypeMap.put("REF", "REFSEQ");
-        IdentTypeMap.put("GB", "Genbank");
-        IdentTypeMap.put("EMB", "Genbank");
-        IdentTypeMap.put("SPROT_NAME", "SwissProt");
-        IdentTypeMap.put("DBJ", "Genbank");
-        IdentTypeMap.put("SP", "SwissProtAccn");
-        IdentTypeMap.put("IPI", "IPI");
-        IdentTypeMap.put("COG", "COG");
-        IdentTypeMap.put("ENSEMBL", "ENSEMBL");
-        IdentTypeMap.put("REFSEQ_NP", "REFSEQ");
-        IdentTypeMap.put("PDB", "PDB");
-        IdentTypeMap.put("UNIPROT/TREMBL", "SwissProtAccn");
-        IdentTypeMap.put("TREMBL", "SwissProtAccn");
-        IdentTypeMap.put("REFSEQ_XP", "REFSEQ");
-        IdentTypeMap.put("ORFP", "SGD_LOCUS");
-        IdentTypeMap.put("UNIPROT/SPROT", "SwissProtAccn");
-        IdentTypeMap.put("SWISS-PROT", "SwissProtAccn");
-        IdentTypeMap.put("TPG", "Genbank");
-        IdentTypeMap.put("UG", "Unigene");
-        IdentTypeMap.put("SI", "SI");
-        IdentTypeMap.put("UPTR", "SwissProt");
-        IdentTypeMap.put("UPSP", "SwissProt");
-        IdentTypeMap.put("GP", "Genbank");
-        IdentTypeMap.put("PIR", "PIR");
-        IdentTypeMap.put("PIR2", "PIR");
-        IdentTypeMap.put("UNIREF100", "UniRef100");
-        IdentTypeMap.put("REFSEQ", "REFSEQ");
-        IdentTypeMap.put("SGDID", "SGDID");
-        IdentTypeMap.put("SGD_GN", "GeneName");
-        IdentTypeMap.put("GN", "GeneName");
+        IDENT_TYPE_MAP.put("GI", "GI");
+        IDENT_TYPE_MAP.put("REF", "REFSEQ");
+        IDENT_TYPE_MAP.put("GB", "Genbank");
+        IDENT_TYPE_MAP.put("EMB", "Genbank");
+        IDENT_TYPE_MAP.put("SPROT_NAME", "SwissProt");
+        IDENT_TYPE_MAP.put("DBJ", "Genbank");
+        IDENT_TYPE_MAP.put("SP", "SwissProtAccn");
+        IDENT_TYPE_MAP.put("IPI", "IPI");
+        IDENT_TYPE_MAP.put("COG", "COG");
+        IDENT_TYPE_MAP.put("ENSEMBL", "ENSEMBL");
+        IDENT_TYPE_MAP.put("REFSEQ_NP", "REFSEQ");
+        IDENT_TYPE_MAP.put("PDB", "PDB");
+        IDENT_TYPE_MAP.put("UNIPROT/TREMBL", "SwissProtAccn");
+        IDENT_TYPE_MAP.put("TREMBL", "SwissProtAccn");
+        IDENT_TYPE_MAP.put("REFSEQ_XP", "REFSEQ");
+        IDENT_TYPE_MAP.put("ORFP", "SGD_LOCUS");
+        IDENT_TYPE_MAP.put("UNIPROT/SPROT", "SwissProtAccn");
+        IDENT_TYPE_MAP.put("SWISS-PROT", "SwissProtAccn");
+        IDENT_TYPE_MAP.put("TPG", "Genbank");
+        IDENT_TYPE_MAP.put("UG", "Unigene");
+        IDENT_TYPE_MAP.put("SI", "SI");
+        IDENT_TYPE_MAP.put("UPTR", "SwissProt");
+        IDENT_TYPE_MAP.put("UPSP", "SwissProt");
+        IDENT_TYPE_MAP.put("GP", "Genbank");
+        IDENT_TYPE_MAP.put("PIR", "PIR");
+        IDENT_TYPE_MAP.put("PIR2", "PIR");
+        IDENT_TYPE_MAP.put("UNIREF100", "UniRef100");
+        IDENT_TYPE_MAP.put("REFSEQ", "REFSEQ");
+        IDENT_TYPE_MAP.put("SGDID", "SGDID");
+        IDENT_TYPE_MAP.put("SGD_GN", "GeneName");
+        IDENT_TYPE_MAP.put("GN", "GeneName");
     }
 
 
@@ -237,7 +237,7 @@ public class Protein
             Map<String, Set<String>>  additionalIds=null;
             // if the current token is the last or only token, or the token is
             // not recognized as an Identtype name, see if it matches a pattern in the list
-            if ((i == tokens.length - 1) || (!IdentTypeMap.containsKey(tokens[i].toUpperCase())))
+            if ((i == tokens.length - 1) || (!IDENT_TYPE_MAP.containsKey(tokens[i].toUpperCase())))
             {
                 for (String typeName : IdPattern.UNTYPED_ID_PATTERN_LIST)
                 {
@@ -273,9 +273,9 @@ public class Protein
                 value = tokens[++i];
             }
 
-            if (value != null && IdentTypeMap.containsKey(key.toUpperCase()))
+            if (value != null && IDENT_TYPE_MAP.containsKey(key.toUpperCase()))
             {
-                String newKey = IdentTypeMap.get(key.toUpperCase());
+                String newKey = IDENT_TYPE_MAP.get(key.toUpperCase());
                 if (IdPattern.TYPED_ID_PATTERN_LIST.contains(newKey))
                     additionalIds = IdPattern.ID_PATTERN_MAP.get(newKey).getIdFromPattern(new String[]{value}, 0);
                 else

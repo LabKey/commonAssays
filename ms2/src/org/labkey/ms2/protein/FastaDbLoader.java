@@ -417,11 +417,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             for (String key : identifiers.keySet())
             {
                 String identTypeName = key;
-                if (!Protein.IdentTypeMap.containsValue(key))
+                if (!Protein.IDENT_TYPE_MAP.containsValue(key))
                 {
                     // unexpected ident type.  first check to see if it is an alias
-                    if (Protein.IdentTypeMap.containsKey(key))
-                        identTypeName=Protein.IdentTypeMap.get(key);
+                    if (Protein.IDENT_TYPE_MAP.containsKey(key))
+                        identTypeName=Protein.IDENT_TYPE_MAP.get(key);
                 }
                 Set<String> idvals = identifiers.get(key);
                 for (String val : idvals)
