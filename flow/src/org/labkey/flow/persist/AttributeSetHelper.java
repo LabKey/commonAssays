@@ -140,7 +140,7 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<String, String> entry : keywords.entrySet())
                 {
-                    AttributeCache.Entry a = AttributeCache.KEYWORDS.preferred(c, entry.getKey());
+                    AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, entry.getKey());
                     paramsList.add(Arrays.asList(obj.getRowId(), a.getRowId(), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
@@ -153,7 +153,7 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
                 {
-                    AttributeCache.Entry a = AttributeCache.STATS.preferred(c, entry.getKey());
+                    AttributeCache.Entry a = AttributeCache.STATS.byAttribute(c, entry.getKey());
                     paramsList.add(Arrays.<Object>asList(obj.getRowId(), a.getRowId(), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
@@ -166,7 +166,7 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
                 {
-                    AttributeCache.Entry a = AttributeCache.GRAPHS.preferred(c, entry.getKey());
+                    AttributeCache.Entry a = AttributeCache.GRAPHS.byAttribute(c, entry.getKey());
                     paramsList.add(Arrays.asList(obj.getRowId(), a.getRowId(), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
