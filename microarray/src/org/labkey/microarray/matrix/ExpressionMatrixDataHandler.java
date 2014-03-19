@@ -19,18 +19,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -65,6 +69,9 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
     private static final String FEATURE_ID_COLUMN_NAME = "ID_REF";
 
     private static final Logger LOG = Logger.getLogger(ExpressionMatrixDataHandler.class);
+
+    // CONSIDER: move this flag to the assay design
+    private static boolean autoCreateSamples = true;
 
     @Override
     public DataType getDataType()
@@ -175,20 +182,62 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         selectNames.add("Name");
         selectNames.add("RowId");
         TableSelector sampleTableSelector = new TableSelector(ExperimentService.get().getTinfoMaterial(), selectNames, sampleSetFilter, null);
-        Map<String, Object>[] sampleSetResults = sampleTableSelector.getMapArray();
-        if (sampleSetResults.length < 1)
-            throw new ExperimentException("No matching samples found");
+        if (!autoCreateSamples)
+        {
+            Map<String, Object>[] sampleSetResults = sampleTableSelector.getMapArray();
+            if (sampleSetResults.length < 1)
+                throw new ExperimentException("No matching samples found");
+        }
 
-        // CONSIDER: Create missing samples automatically ?
         Map<String, Integer> sampleMap = sampleTableSelector.getValueMap();
         if (sampleMap.size() < sampleNames.size())
         {
             Set<String> missingSamples = new HashSet<>(sampleNames);
             missingSamples.removeAll(sampleMap.keySet());
-            throw new ExperimentException("No samples found for: " + StringUtils.join(missingSamples, ", "));
+            if (!autoCreateSamples)
+                throw new ExperimentException("No samples found for: " + StringUtils.join(missingSamples, ", "));
+
+            // Create missing samples in the active SampleSet
+            Map<String, Integer> createdSamples = createSamples(container, user, missingSamples);
+            sampleMap.putAll(createdSamples);
         }
 
         return sampleMap;
+    }
+
+    private static Map<String, Integer> createSamples(Container c, User user, Set<String> missingSamples) throws ExperimentException
+    {
+        DbScope scope = ExperimentService.get().getSchema().getScope();
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
+        {
+            ExpSampleSet sampleSet = ExperimentService.get().ensureActiveSampleSet(c);
+            if (sampleSet == null)
+                throw new ExperimentException("No active sample set in container");
+
+            Map<String, Integer> createdSamples = new HashMap<>();
+
+            // Create materials directly using Name.
+            // XXX: Doesn't handle idColumn concat magic.
+            for (String name : missingSamples)
+            {
+                Lsid lsid = new Lsid(sampleSet.getMaterialLSIDPrefix() + "test");
+                lsid.setObjectId(name);
+                String materialLsid = lsid.toString();
+
+                ExpMaterial material = ExperimentService.get().getExpMaterial(materialLsid);
+                if (material != null)
+                    throw new ExperimentException("Sample with name '" + name + "' already exists.");
+
+                material = ExperimentService.get().createExpMaterial(c, materialLsid, name);
+                material.setCpasType(sampleSet.getLSID());
+                material.save(user);
+
+                createdSamples.put(name, material.getRowId());
+            }
+
+            transaction.commit();
+            return createdSamples;
+        }
     }
 
     private void insertExpressionMatrixData(Container c,
