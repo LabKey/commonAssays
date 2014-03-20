@@ -161,7 +161,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    public boolean hasPermissionOverridable(UserPrincipal user, Class<? extends Permission> perm)
+    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         return (perm.equals(UpdatePermission.class) || perm.equals(ReadPermission.class))
                 && _userSchema.getContainer().hasPermission(user, perm);

@@ -152,7 +152,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    public boolean hasPermissionOverridable(UserPrincipal user, Class<? extends Permission> perm)
+    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         // First check if the user has the permission in the folder where the assay is defined
         if (_userSchema.getProtocol().getContainer().hasPermission(user, perm))
