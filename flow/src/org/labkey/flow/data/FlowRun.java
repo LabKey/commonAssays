@@ -67,12 +67,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return "Run";
     }
 
-    static public FlowRun[] fromRuns(ExpRun[] runs)
+    static public FlowRun[] fromRuns(List<? extends ExpRun> runs)
     {
-        FlowRun[] ret = new FlowRun[runs.length];
-        for (int i = 0; i < runs.length; i ++)
+        FlowRun[] ret = new FlowRun[runs.size()];
+        for (int i = 0; i < runs.size(); i ++)
         {
-            ret[i] = new FlowRun(runs[i]);
+            ret[i] = new FlowRun(runs.get(i));
         }
         return ret;
     }
@@ -161,8 +161,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
                     return (FlowWell)obj;
         }
 
-        ExpData[] datas = getExperimentRun().getOutputDatas(null);
-        for (ExpData data : datas)
+        for (ExpData data : getExperimentRun().getOutputDatas(null))
         {
             FlowDataObject obj = FlowDataObject.fromData(data);
             if (obj instanceof FlowWell)
@@ -195,15 +194,15 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public FlowCompensationMatrix getCompensationMatrix()
     {
-        ExpData[] outputs = getExperimentRun().getOutputDatas(FlowDataType.CompensationMatrix);
-        if (outputs.length > 0)
+        List<? extends ExpData> outputs = getExperimentRun().getOutputDatas(FlowDataType.CompensationMatrix);
+        if (outputs.size() > 0)
         {
-            return new FlowCompensationMatrix(outputs[0]);
+            return new FlowCompensationMatrix(outputs.get(0));
         }
-        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.CompensationMatrix.toString(), ExpProtocol.ApplicationType.ExperimentRun);
-        if (datas.length == 0)
+        List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.CompensationMatrix.toString(), ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.isEmpty())
             return null;
-        return new FlowCompensationMatrix(datas[0]);
+        return new FlowCompensationMatrix(datas.get(0));
     }
     
     public int getRunId()
@@ -258,18 +257,18 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     private int getScriptId()
     {
-        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
-        if (datas.length == 0)
+        List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.isEmpty())
             return 0;
-        return datas[0].getRowId();
+        return datas.get(0).getRowId();
     }
 
     public FlowScript getScript()
     {
-        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
-        if (datas.length == 0)
+        List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.isEmpty())
             return null;
-        return (FlowScript) FlowDataObject.fromData(datas[0]);
+        return (FlowScript) FlowDataObject.fromData(datas.get(0));
     }
 
     public String getPath()
@@ -296,10 +295,10 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public FlowWorkspace getWorkspace()
     {
-        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
-        if (datas.length == 0)
+        List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.size() == 0)
             return null;
-        return (FlowWorkspace) FlowDataObject.fromData(datas[0]);
+        return (FlowWorkspace) FlowDataObject.fromData(datas.get(0));
     }
 
     public ActionURL getDownloadWorkspaceURL()

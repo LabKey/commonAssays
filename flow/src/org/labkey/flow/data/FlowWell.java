@@ -140,9 +140,8 @@ public class FlowWell extends FlowDataObject
      */
     public List<FlowFCSFile> getFCSFileOutputs()
     {
-        ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
         List<FlowFCSFile> ret = new ArrayList<>();
-        for (ExpProtocolApplication app : apps)
+        for (ExpProtocolApplication app : getExpObject().getTargetApplications())
         {
             addDataOfType(app.getOutputDatas(), FlowDataType.FCSFile, ret);
         }
@@ -155,9 +154,8 @@ public class FlowWell extends FlowDataObject
      */
     public List<FlowFCSAnalysis> getFCSAnalysisOutputs()
     {
-        ExpProtocolApplication[] apps = getExpObject().getTargetApplications();
         List<FlowFCSAnalysis> ret = new ArrayList<>();
-        for (ExpProtocolApplication app : apps)
+        for (ExpProtocolApplication app : getExpObject().getTargetApplications())
         {
             addDataOfType(app.getOutputDatas(), FlowDataType.FCSAnalysis, ret);
         }
@@ -316,7 +314,7 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    public List<ExpMaterial> getSamples()
+    public List<? extends ExpMaterial> getSamples()
     {
         ExpProtocolApplication app = getExpObject().getSourceApplication();
         if (app == null)

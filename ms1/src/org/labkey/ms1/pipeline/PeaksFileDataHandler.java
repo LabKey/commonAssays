@@ -41,6 +41,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Imports the Peaks XML file format used by Ceadars-Sinai
@@ -126,7 +127,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         if(null == run)
             return null;
 
-        ExpData[] inputs = run.getInputDatas(null, null);
+        List<? extends ExpData> inputs = run.getInputDatas(null, null);
         if(null == inputs)
             return null;
         

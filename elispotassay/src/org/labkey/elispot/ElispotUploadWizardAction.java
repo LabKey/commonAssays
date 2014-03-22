@@ -337,8 +337,8 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
                 form.saveDefaultValues(entry.getValue(), entry.getKey());
 
-                ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
-                if (data.length != 1)
+                List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
+                if (data.size() != 1)
                     throw new ExperimentException("Elispot should only upload a single file per run.");
 
                 PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
@@ -352,7 +352,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
                     PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getUser(), form.getContainer(), provider);
-                    plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
+                    plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
                 }
 
                 boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;

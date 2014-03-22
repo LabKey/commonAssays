@@ -388,7 +388,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return getUnlinkedSampleCount(ss.getSamples());
     }
 
-    public static int getUnlinkedSampleCount(ExpMaterial[] samples)
+    public static int getUnlinkedSampleCount(List<? extends ExpMaterial> samples)
     {
         if (samples == null)
             return 0;
@@ -408,9 +408,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (material == null)
             return Collections.emptyList();
 
-        ExpProtocolApplication[] apps = material.getTargetApplications();
-        if (apps == null || apps.length == 0)
-            Collections.emptyList();
+        List<? extends ExpProtocolApplication> apps = material.getTargetApplications();
+        if (apps == null || apps.size() == 0)
+            return Collections.emptyList();
 
         ArrayList<FlowFCSFile> result = new ArrayList<>();
         for (ExpProtocolApplication app : apps)

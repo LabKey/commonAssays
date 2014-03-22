@@ -86,8 +86,8 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         try {
             Container container = data.getContainer();
 
-            ExpData[] runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
-            assert(runData.length == 1);
+            List<? extends ExpData> runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
+            assert(runData.size() == 1);
 
             for (Map<String, Object> row : inputData)
             {
@@ -96,7 +96,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
                 int rowPos = ConvertHelper.convert(row.get(WELL_ROW_PROPERTY), Integer.class);
                 int colPos = ConvertHelper.convert(row.get(WELL_COLUMN_PROPERTY), Integer.class);
-                String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData[0].getLSID(), rowPos, colPos).toString();
+                String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData.get(0).getLSID(), rowPos, colPos).toString();
 
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
                 List<ObjectProperty> results = new ArrayList<>();

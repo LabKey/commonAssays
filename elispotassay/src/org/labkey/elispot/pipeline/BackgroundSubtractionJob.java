@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,8 +105,8 @@ public class BackgroundSubtractionJob extends PipelineJob
                     info("Starting background substraction for run : " + runId);
 
                     AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
-                    ExpData[] data = run.getOutputDatas(elipotDataType);
-                    if (data.length != 1)
+                    List<? extends ExpData> data = run.getOutputDatas(elipotDataType);
+                    if (data.size() != 1)
                         throw new ExperimentException("Elispot should only upload a single file per run.");
 
                     Map<String, DomainProperty> runPropMap = new HashMap<>();
@@ -116,7 +117,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
                     if (plate != null)
                     {
-                        String dataLsid = data[0].getLSID();
+                        String dataLsid = data.get(0).getLSID();
                         Map<String, Object> propMap = new HashMap<>();
                         Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
 
@@ -168,18 +169,18 @@ public class BackgroundSubtractionJob extends PipelineJob
     private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, DomainProperty plateReaderProp) throws ExperimentException
     {
         PlateTemplate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
-        ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
+        List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         Plate plate = null;
 
         Object plateReader = run.getProperty(plateReaderProp);
         if (plateReader != null)
         {
-            File dataFile = data[0].getFile();
+            File dataFile = data.get(0).getFile();
 
             if (dataFile.exists())
             {
                 PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReader.toString(), getUser(), getContainer(), provider);
-                plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
+                plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
             }
             else
                 error("The original run data file does not exist: " + dataFile.getName());

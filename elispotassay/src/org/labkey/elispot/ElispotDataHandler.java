@@ -214,11 +214,11 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
             List<? extends DomainProperty> antigenProps = antigenDomain.getProperties();
 
-            ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
-            if (data.length != 1)
+            List<? extends ExpData> data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+            if (data.size() != 1)
                 throw new ExperimentException("Elispot should only upload a single file per run.");
 
-            String dataLsid = data[0].getLSID();
+            String dataLsid = data.get(0).getLSID();
 
             // for each antigen well group, we want to flatten that information to the well level
             List<ObjectProperty> results = new ArrayList<>();
@@ -318,11 +318,11 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
 
-            ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
-            if (data.length != 1)
+            List<? extends ExpData> data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+            if (data.size() != 1)
                 throw new ExperimentException("Elispot should only upload a single file per run.");
 
-            String dataLsid = data[0].getLSID();
+            String dataLsid = data.get(0).getLSID();
 
             // calculate antigen statistics on a per sample basis
             Map<String, ExpMaterial> materialMap = new HashMap<>();

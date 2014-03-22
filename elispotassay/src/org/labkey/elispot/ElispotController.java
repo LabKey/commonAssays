@@ -210,8 +210,8 @@ public class ElispotController extends SpringActionController
     {
         Map<Position, WellInfo> map = new HashMap<>();
 
-        ExpData[] data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
-        assert(data.length == 1);
+        List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
+        assert(data.size() == 1);
 
         Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
         List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
@@ -227,7 +227,7 @@ public class ElispotController extends SpringActionController
                 Position position = template.getPosition(row, col);
                 WellInfo wellInfo = new WellInfo();
 
-                Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), position);
+                Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data.get(0).getLSID(), position);
                 String specimenGroup = "";
 
                 for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())

@@ -82,7 +82,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
             // the barcode matches
             for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(getContainer(), getUser(), true))
             {
-                ExpMaterial[] materials = sampleSet.getSamples();
+                List<? extends ExpMaterial> materials = sampleSet.getSamples();
                 Domain domain = sampleSet.getType();
                 List<? extends DomainProperty> properties = domain == null ? Collections.<DomainProperty>emptyList() : domain.getProperties();
                 // Check all of the possible barcode field names

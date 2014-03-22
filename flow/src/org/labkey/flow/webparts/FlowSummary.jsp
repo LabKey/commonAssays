@@ -43,6 +43,7 @@
 <%@ page import="org.labkey.flow.persist.ObjectType" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.List" %>
 <%@page extends="org.labkey.api.jsp.JspBase" %>
 <%
     Container c = getContainer();
@@ -67,7 +68,7 @@
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
     ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
-    ExpMaterial[] _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples();
+    List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples();
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
     Arrays.sort(_scripts);
@@ -160,7 +161,7 @@
         });
         </script>
         <div id="fcsFileRuns-div">
-            <a href="<%=fcsFileRunsURL%>">FCS Files (<%=_fcsRunCount%> <%=_fcsRunCount == 1 ? "run" : "runs"%>)</a>
+            <a href="<%=fcsFileRunsURL%>">FCS Files (<%=_fcsRunCount%> <%=text(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsRunCount > 0) --%>
 
@@ -184,7 +185,7 @@
         });
         </script>
         <div id="fcsAnalysisRuns-div">
-            <a href="<%=fcsAnalysisRunsURL%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=_fcsAnalysisRunCount == 1 ? "run" : "runs"%>)</a>
+            <a href="<%=fcsAnalysisRunsURL%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=text(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
 
@@ -207,33 +208,33 @@
         });
         </script>
         <div id="compensationMatrices-div">
-            <a href="<%=h(compMatricesURL)%>">Compensation (<%=_compensationMatrixCount%> <%=_compensationMatrixCount == 1 ? "matrix" : "matrices"%>)</a>
+            <a href="<%=h(compMatricesURL)%>">Compensation (<%=_compensationMatrixCount%> <%=text(_compensationMatrixCount == 1 ? "matrix" : "matrices")%>)</a>
         </div>
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
-    <% if (_sampleSetSamples != null && _sampleSetSamples.length > 0) { %>
+    <% if (_sampleSetSamples != null && _sampleSetSamples.size() > 0) { %>
         <script type="text/javascript">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "samples-div",
                 html: "<table border='0'>" +
                       <%
-                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleSetSamples.length; sampleIndex++)
+                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleSetSamples.size(); sampleIndex++)
                         {
-                            ExpMaterial sample = _sampleSetSamples[sampleIndex];
+                            ExpMaterial sample = _sampleSetSamples.get(sampleIndex);
                             String name = sample.getName();
                             String url = sample.detailsURL().getLocalURIString();
                             String comment = sample.getComment() != null ? " title='" + h(sample.getComment()) + "'" : "";
                             String src = StringUtils.isNotEmpty(sample.getComment()) ? sample.urlFlag(true) : AppProps.getInstance().getContextPath() + "/_.gif";
                       %>
                           "<tr>" +
-                          "<td><a<%=comment%> href='<%=url%>'><img src='<%=src%>'></a>" +
-                          "<td nowrap><a<%=comment%> href='<%=url%>'><%=name%></a>" +
+                          "<td><a<%=comment%> href='<%=h(url)%>'><img src='<%=src%>'></a>" +
+                          "<td nowrap><a<%=comment%> href='<%=h(url)%>'><%=h(name)%></a>" +
                           "</tr>" +
                       <%
                          }
 
-                         if (_sampleSetSamples.length > DISPLAY_MAX_ROWS)
+                         if (_sampleSetSamples.size() > DISPLAY_MAX_ROWS)
                          {
                       %>
                             "<tr>" +
@@ -247,7 +248,7 @@
         });
         </script>
         <div id="samples-div">
-            <a title="<%=_sampleSet.getDescription()%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().length%>)</a>
+            <a title="<%=h(_sampleSet.getDescription())%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().size()%>)</a>
         </div>
     <% } %>
 
@@ -307,8 +308,8 @@
                                     '<div><a href="<%=script.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>">Upload FlowJo Compensation</a></div>',
                                 <% } %>
                                 <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.analysis)%>"><%=canEditScript ? "Edit" : "View"%> Gate Definitions</a></div>',
-                                    '<div><a href="<%=script.urlFor(ScriptController.EditAnalysisAction.class)%>"><%=canEditScript ? "Edit" : "View"%> Statistics and Graphs</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.analysis)%>"><%=text(canEditScript ? "Edit" : "View")%> Gate Definitions</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.EditAnalysisAction.class)%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
                                     <% if (canEditScript) { %>
                                         '<div><a href="<%=script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',
                                     <% } %>
@@ -343,7 +344,7 @@
             });
             </script>
             <div id="script-<%=script.getScriptId()%>-div" style="white-space:nowrap;">
-                <a href="<%=script.urlShow()%>"><%=script.getName()%> (<%=runCount%> <%=runCount == 1 ? "run" : "runs"%>)</a>
+                <a href="<%=script.urlShow()%>"><%=h(script.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
             </div>
             <%
         }
@@ -383,7 +384,7 @@
             }
             %>
             <div id="script-<%=experiment.getExperimentId()%>-div">
-                <a href="<%=h(experiment.urlShow())%>"><%=experiment.getName()%> (<%=runCount%> <%=runCount == 1 ? "run" : "runs"%>)</a>
+                <a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
             </div>
             <%
         }

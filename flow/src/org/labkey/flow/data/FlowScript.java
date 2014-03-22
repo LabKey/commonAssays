@@ -91,7 +91,7 @@ public class FlowScript extends FlowDataObject
 
     static public FlowScript[] getScripts(Container container)
     {
-        ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script, null);
+        List<? extends ExpData> datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script, null);
         List<FlowScript> ret = new ArrayList<>();
         for (ExpData data : datas)
         {
@@ -301,7 +301,7 @@ public class FlowScript extends FlowDataObject
 
     public int getRunCount()
     {
-        return getExpObject().getTargetRuns().length;
+        return getExpObject().getTargetRuns().size();
     }
 
     public ActionURL getRunsUrl()
@@ -322,7 +322,7 @@ public class FlowScript extends FlowDataObject
 
     public int getTargetApplicationCount()
     {
-        return getExpObject().getTargetApplications().length;
+        return getExpObject().getTargetApplications().size();
     }
 
     public boolean requiresCompensationMatrix(FlowProtocolStep step)

@@ -40,9 +40,8 @@ public class RunListCache
         {
             throw new RunListException(NO_RUNS_MESSAGE);
         }
-        ExpRun[] expRuns = group.getRuns();
         List<MS2Run> ms2Runs = new ArrayList<>();
-        for (ExpRun expRun : expRuns)
+        for (ExpRun expRun : group.getRuns())
         {
             ms2Runs.add(MS2Manager.getRunByExperimentRunLSID(expRun.getLSID()));
         }

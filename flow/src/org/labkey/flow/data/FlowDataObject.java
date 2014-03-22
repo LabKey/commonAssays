@@ -39,9 +39,9 @@ import java.util.Objects;
 
 abstract public class FlowDataObject extends FlowObject<ExpData>
 {
-    static public List<FlowDataObject> fromDatas(ExpData[] datas)
+    static public List<FlowDataObject> fromDatas(List<? extends ExpData> datas)
     {
-        List<ExpData> flowDatas = new ArrayList<>(datas.length);
+        List<ExpData> flowDatas = new ArrayList<>(datas.size());
         for (ExpData data : datas)
         {
             if (data.getDataType() instanceof FlowDataType)
@@ -49,7 +49,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         }
 
         List<AttrObject> attrs = FlowManager.get().getAttrObjects(flowDatas);
-        Map<Integer, AttrObject> attrMap = new HashMap<>(2*datas.length);
+        Map<Integer, AttrObject> attrMap = new HashMap<>(2*datas.size());
         for (AttrObject attr : attrs)
         {
             attrMap.put(attr.getDataId(), attr);
@@ -131,7 +131,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return fromRowId(obj.getDataId());
     }
 
-    static public void addDataOfType(List<ExpData> datas, FlowDataType typeFilter, Collection list)
+    static public void addDataOfType(List<? extends ExpData> datas, FlowDataType typeFilter, Collection list)
     {
         for (ExpData data : datas)
         {

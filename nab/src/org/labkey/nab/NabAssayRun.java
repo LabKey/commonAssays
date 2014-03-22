@@ -78,13 +78,13 @@ public abstract class NabAssayRun extends DilutionAssayRun
             DilutionDataHandler handler = _provider.getDataHandler();
             DataType dataType = handler.getDataType();
 
-            ExpData[] outputDatas = _run.getOutputDatas(null); //handler.getDataType());
+            List<? extends ExpData> outputDatas = _run.getOutputDatas(null); //handler.getDataType());
             ExpData outputObject = null;
-            if (outputDatas.length == 1 && outputDatas[0].getDataType() == dataType)
+            if (outputDatas.size() == 1 && outputDatas.get(0).getDataType() == dataType)
             {
-                outputObject = outputDatas[0];
+                outputObject = outputDatas.get(0);
             }
-            else if (outputDatas.length > 1)
+            else if (outputDatas.size() > 1)
             {
                 // If there is a transformed dataType, use that
                 ExpData dataWithHandlerType = null;
@@ -94,13 +94,13 @@ public abstract class NabAssayRun extends DilutionAssayRun
                     if (SinglePlateNabDataHandler.NAB_TRANSFORMED_DATA_TYPE.getNamespacePrefix().equalsIgnoreCase(expData.getLSIDNamespacePrefix()))
                     {
                         if (null != dataWithTransformedType)
-                            throw new IllegalStateException("Expected a single data file output for this NAb run. Found at least 2 transformed expDatas and a total of " + outputDatas.length);
+                            throw new IllegalStateException("Expected a single data file output for this NAb run. Found at least 2 transformed expDatas and a total of " + outputDatas.size());
                         dataWithTransformedType = expData;
                     }
                     else if (dataType.equals(expData.getDataType()))
                     {
                         if (null != dataWithHandlerType)
-                            throw new IllegalStateException("Expected a single data file output for this NAb run. Found at least 2 expDatas with the expected datatype and a total of " + outputDatas.length);
+                            throw new IllegalStateException("Expected a single data file output for this NAb run. Found at least 2 expDatas with the expected datatype and a total of " + outputDatas.size());
                         dataWithHandlerType = expData;
                     }
                 }
@@ -114,7 +114,7 @@ public abstract class NabAssayRun extends DilutionAssayRun
                 }
             }
             if (null == outputObject)
-                throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.length);
+                throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.size());
 
             Map<String, DilutionResultProperties> allProperties = getSampleProperties(outputObject);
             Set<String> captions = new HashSet<>();

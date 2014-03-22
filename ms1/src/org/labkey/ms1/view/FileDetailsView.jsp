@@ -16,11 +16,12 @@
  */
 %>
 <%@ page import="org.labkey.api.exp.api.ExpData" %>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms1.model.DataFile" %>
-<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<DataFile> me = (JspView<DataFile>) HttpView.currentView();
@@ -42,7 +43,7 @@
         <td>Source MzXML:</td>
         <%
             urlDownload.deleteParameters();
-            ExpData[] inputs = expData.getRun().getInputDatas(null, null);
+            List<? extends ExpData> inputs = expData.getRun().getInputDatas(null, null);
 
             for (ExpData input : inputs)
             {

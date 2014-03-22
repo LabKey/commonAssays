@@ -32,15 +32,15 @@
     ProtocolController.ShowSamplesForm form = (ProtocolController.ShowSamplesForm) __form;
     FlowProtocol protocol = form.getProtocol();
     ExpSampleSet ss = protocol.getSampleSet();
-    ExpMaterial[] samples = ss == null ? null : ss.getSamples();
+    List<? extends ExpMaterial> samples = ss == null ? null : ss.getSamples();
     boolean unlinkedOnly = form.isUnlinkedOnly();
 %>
-<% if (ss == null || samples == null || samples.length == 0) { %>
+<% if (ss == null || samples == null || samples.size() == 0) { %>
     No samples have been uploaded in this folder.<br>
     <labkey:link href="<%=protocol.urlUploadSamples(ss != null)%>" text="Upload samples from a spreadsheet" /><br>
 <% } else { %>
 <p>
-There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descriptions</a> in this folder.
+There are <a href="<%=h(ss.detailsURL())%>"><%=samples.size()%> sample descriptions</a> in this folder.
 
 <% if (protocol.getSampleSetJoinFields().size() == 0) { %>
     <p>
@@ -60,7 +60,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descripti
     %>
 
     <% if (unlinkedCount > 0) { %>
-        <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedCount%> <%=unlinkedCount == 1 ? "sample is" : "samples are"%> not joined</a> to any FCS Files.
+        <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedCount%> <%=text(unlinkedCount == 1 ? "sample is" : "samples are")%> not joined</a> to any FCS Files.
     <% } %>
     </p>
     <p>
@@ -77,20 +77,20 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descripti
         </tr>
         </thead>
         <%
-            for (int i = 0; i < samples.length; i++)
+            for (int i = 0; i < samples.size(); i++)
             {
-                ExpMaterial sample = samples[i];
+                ExpMaterial sample = samples.get(i);
                 List<FlowFCSFile> fcsFiles = FlowProtocol.getFCSFiles(sample);
                 if (unlinkedOnly && fcsFiles.size() > 0)
                     continue;
 
                 %>
                 <tr class="<%=getShadeRowClass(i%2==0)%>">
-                <td valign="top"><a href="<%=h(sample.detailsURL())%>"><%= sample.getName()%></a></td>
+                <td valign="top"><a href="<%=h(sample.detailsURL())%>"><%= h(sample.getName())%></a></td>
                 <td>
                     <% if (fcsFiles.size() > 0) { %>
                         <% for (FlowFCSFile fcsFile : fcsFiles) { %>
-                            <a href="<%=h(fcsFile.urlShow())%>"><%=fcsFile.getName()%></a><br>
+                            <a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a><br>
                         <% } %>
                     <% } else { %>
                         <em>unlinked</em>
