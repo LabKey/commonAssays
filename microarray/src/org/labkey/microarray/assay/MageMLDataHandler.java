@@ -92,8 +92,8 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
         Domain dataDomain = provider.getResultsDomain(protocol);
-        DomainProperty[] columns = dataDomain.getProperties();
-        if (columns.length == 0)
+        List<? extends DomainProperty> columns = dataDomain.getProperties();
+        if (columns.isEmpty())
         {
             // Return a single, empty row of results so that we get an entry in the results table and can copy it to
             // a study, which is useful because it propagates the run and batch properties
@@ -143,7 +143,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
                     InputStream tsvIn = new TrimmedFileInputStream(dataFile, startingOffset, endingOffset);
                     try
                     {
-                        Map<String, Class> expectedColumns = new HashMap<>(columns.length);
+                        Map<String, Class> expectedColumns = new HashMap<>(columns.size());
                         for (DomainProperty col : columns)
                             expectedColumns.put(col.getName().toLowerCase(), col.getPropertyDescriptor().getPropertyType().getJavaType());
                         for (DomainProperty col : columns)

@@ -47,6 +47,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,7 +119,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     protected InsertView getConcentrationsView(ElisaRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException, ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", new DomainProperty[0], errorReshow, ConcentrationStepHandler.NAME, form, errors);
+                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, ConcentrationStepHandler.NAME, form, errors);
 
         PlateConcentrationPropertyHelper concentrationsHelper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
         concentrationsHelper.addSampleColumns(view, form.getUser(), form, errorReshow);

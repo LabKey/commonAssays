@@ -214,7 +214,7 @@ public class ElispotController extends SpringActionController
         assert(data.length == 1);
 
         Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
-        DomainProperty[] sampleProperties = sampleDomain.getProperties();
+        List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
 
         Map<String, ExpMaterial> inputs = new HashMap<>();
         for (ExpMaterial material : run.getMaterialInputs().keySet())

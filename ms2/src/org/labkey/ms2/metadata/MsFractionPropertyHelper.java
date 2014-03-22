@@ -84,7 +84,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         return !getNamePDs().contains(pd);
     }
 
-    public static DomainProperty[] getProperties(@NotNull ExpSampleSet sampleSet, Container c)
+    public static List<? extends DomainProperty> getProperties(@NotNull ExpSampleSet sampleSet, Container c)
     {
         if (sampleSet.getType() != null)
         {
@@ -98,7 +98,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
             namePD.setLabel("Name");
             namePD.setType(PropertyService.get().getType(c, PropertyType.STRING.getXmlName()));
             namePD.setRequired(true);
-            return new DomainProperty[] { namePD };
+            return Collections.singletonList(namePD);
         }
     }
 

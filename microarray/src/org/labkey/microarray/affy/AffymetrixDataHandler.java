@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
         List<ExpData> dataOutputs = run.getDataOutputs();
         Map<ExpMaterial, String> materialInputs = run.getMaterialInputs();
 
-        Map<String, DomainProperty> importMap = ImportAliasable.Helper.createImportMap(Arrays.asList(provider.getResultsDomain(protocol).getProperties()), false);
+        Map<String, ? extends DomainProperty> importMap = ImportAliasable.Helper.createImportMap(provider.getResultsDomain(protocol).getProperties(), false);
 
         try
         {

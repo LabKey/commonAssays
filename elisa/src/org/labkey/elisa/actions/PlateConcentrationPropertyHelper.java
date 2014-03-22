@@ -21,12 +21,11 @@ import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.elisa.ElisaAssayProvider;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +40,7 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
     private Set<String> _controlNames;
     private final PlateTemplate _template;
 
-    public PlateConcentrationPropertyHelper(DomainProperty[] domainProperties, PlateTemplate template)
+    public PlateConcentrationPropertyHelper(List<? extends DomainProperty> domainProperties, PlateTemplate template)
     {
         super(domainProperties);
         _template = template;
@@ -101,14 +100,14 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
     }
 
     @Override
-    public void setDomainProperties(DomainProperty[] domainProperties)
+    public void setDomainProperties(List<? extends DomainProperty> domainProperties)
     {
         for (DomainProperty prop : domainProperties)
         {
             // only interested in the concentration property
             if (ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME.equals(prop.getName()))
             {
-                domainProperties = new DomainProperty[]{prop};
+                domainProperties = Collections.singletonList(prop);
                 break;
             }
         }

@@ -57,7 +57,6 @@ import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.FileType;
-import org.labkey.api.view.Stats;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -213,7 +212,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
-            DomainProperty[] antigenProps = antigenDomain.getProperties();
+            List<? extends DomainProperty> antigenProps = antigenDomain.getProperties();
 
             ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
             if (data.length != 1)

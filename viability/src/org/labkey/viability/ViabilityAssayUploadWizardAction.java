@@ -143,7 +143,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     }
 
     @Override
-    protected DataRegion createDataRegionForInsert(TableInfo baseTable, String lsidCol, DomainProperty[] domainProperties, Map<String, String> columnNameToPropertyName)
+    protected DataRegion createDataRegionForInsert(TableInfo baseTable, String lsidCol, List<? extends DomainProperty> domainProperties, Map<String, String> columnNameToPropertyName)
     {
         // The base implementation adds ColumnInfos to the DataRegion, but we
         // do this manually in _getResultsView() for the Results table.
@@ -158,7 +158,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     }
 
     @Override
-    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean errorReshow, String uploadStepName, ViabilityAssayRunUploadForm form, BindException errors)
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, List<? extends DomainProperty> properties, boolean errorReshow, String uploadStepName, ViabilityAssayRunUploadForm form, BindException errors)
     {
         InsertView view = super.createInsertView(baseTable, lsidCol, properties, errorReshow, uploadStepName, form, errors);
         if (form.isDelete())
@@ -172,7 +172,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         Map<String, Map<String, Object>> reRunResults = form.getReRunResults();
 
         Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
-        DomainProperty[] resultDomainProperties = resultDomain.getProperties();
+        List<? extends DomainProperty> resultDomainProperties = resultDomain.getProperties();
         String lsidCol = "RowID";
         InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, resultDomainProperties, errorReshow, ResultsStepHandler.NAME, form, errors);
 

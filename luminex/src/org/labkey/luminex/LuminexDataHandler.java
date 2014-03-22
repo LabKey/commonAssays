@@ -1639,12 +1639,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Clear out the values - this is necessary if this is a XAR import where the run properties would
         // have been loaded as part of the ExperimentRun itself.
         Integer objectId = OntologyManager.ensureObject(container, data.getLSID());
-        DomainProperty[] props = domain.getProperties();
-        PropertyDescriptor[] pds = new PropertyDescriptor[props.length];
-        for (int i = 0; i < props.length; i++)
+        List<? extends DomainProperty> props = domain.getProperties();
+        PropertyDescriptor[] pds = new PropertyDescriptor[props.size()];
+        for (int i = 0; i < props.size(); i++)
         {
-            OntologyManager.deleteProperty(data.getLSID(), props[i].getPropertyURI(), container, protocol.getContainer());
-            pds[i] = props[i].getPropertyDescriptor();
+            OntologyManager.deleteProperty(data.getLSID(), props.get(i).getPropertyURI(), container, protocol.getContainer());
+            pds[i] = props.get(i).getPropertyDescriptor();
         }
 
         List<Map<String, Object>> excelRunPropsList = new ArrayList<>();

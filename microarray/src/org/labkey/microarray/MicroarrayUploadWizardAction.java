@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 
 import javax.servlet.ServletException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
             {
                 ExpMaterial[] materials = sampleSet.getSamples();
                 Domain domain = sampleSet.getType();
-                DomainProperty[] properties = domain == null ? new DomainProperty[0] : domain.getProperties();
+                List<? extends DomainProperty> properties = domain == null ? Collections.<DomainProperty>emptyList() : domain.getProperties();
                 // Check all of the possible barcode field names
                 for (String barcodeFieldName : barcodeFieldNames)
                 {
@@ -171,7 +172,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
 
         InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", userProperties.toArray(new DomainProperty[userProperties.size()]),
+                "lsid", userProperties,
                 errorReshow, RunStepHandler.NAME, form, errors);
         
         for (Map.Entry<DomainProperty, String> entry : mageMLProperties.entrySet())

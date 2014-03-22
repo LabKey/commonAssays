@@ -89,8 +89,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     protected void addRunActionButtons(LuminexRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-        DomainProperty[] analyteColumns = analyteDomain.getProperties();
-        if (analyteColumns.length == 0)
+        List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
+        if (analyteColumns.isEmpty())
         {
             super.addRunActionButtons(newRunForm, insertView, bbar);
         }
@@ -146,7 +146,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 vbox.addView(top);
             }
 
-            InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
+            InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, Collections.<DomainProperty>emptyList(), form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
             view.setTitle("Analyte Properties");
             view.setTitlePopupHelp("Analyte Properties", "Each Luminex assay design defines a set of properties to track for analytes. Additionally, if multiple titrations are present in a given run, each analyte may be assigned to the appropriate set of titrations.");
 
@@ -154,7 +154,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 view.getDataRegion().addHiddenFormField("analyteNames", analyte);
 
             Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-            DomainProperty[] analyteColumns = analyteDomain.getProperties();
+            List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
 
             // each analyte may have a different set of default values.  Because it may be expensive to query for the
             // entire set of values for every property, we use the following map to cache the default value sets by analyte name.

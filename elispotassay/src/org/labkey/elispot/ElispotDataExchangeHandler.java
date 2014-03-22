@@ -30,6 +30,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewContext;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,8 +70,8 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
             PlateTemplate template = plateProvider.getPlateTemplate(viewContext.getContainer(), protocol);
             if (template != null)
             {
-                DomainProperty[] props = plateProvider.getSampleWellGroupDomain(protocol).getProperties();
-                DomainProperty[] antigenProps = plateProvider.getAntigenWellGroupDomain(protocol).getProperties();
+                List<? extends DomainProperty> props = plateProvider.getSampleWellGroupDomain(protocol).getProperties();
+                List<? extends DomainProperty> antigenProps = plateProvider.getAntigenWellGroupDomain(protocol).getProperties();
 
                 Map<String, Map<DomainProperty, String>>specimens = createTestSampleProperties(props, template, WellGroup.Type.SPECIMEN);
                 Map<String, Map<DomainProperty, String>>antigens = createTestSampleProperties(antigenProps, template, WellGroup.Type.ANTIGEN);

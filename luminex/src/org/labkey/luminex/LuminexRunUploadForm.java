@@ -32,8 +32,6 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -60,7 +58,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         _analyteNames = analyteNames;
     }
 
-    protected Map<DomainProperty, String> getAnalytePropertyMapFromRequest(List<DomainProperty> columns, String analyteName)
+    protected Map<DomainProperty, String> getAnalytePropertyMapFromRequest(List<? extends DomainProperty> columns, String analyteName)
     {
         Map<DomainProperty, String> properties = new LinkedHashMap<>();
         for (DomainProperty dp : columns)
@@ -78,7 +76,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-        List<DomainProperty> domainProperties = Arrays.asList(analyteDomain.getProperties());
+        List<? extends DomainProperty> domainProperties = analyteDomain.getProperties();
         return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
     }
 
@@ -98,7 +96,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         //  Issue 14851: added check for isMultiRunUpload to if statement for case when "Save and Import Another Run" gets default values for the Run properties
         if (!isMultiRunUpload() && !isResetDefaultValues() && domain.getDomainKind() instanceof LuminexAnalyteDomainKind)
         {
-            DomainProperty[] analyteColumns = domain.getProperties();
+            List<? extends DomainProperty> analyteColumns = domain.getProperties();
             Map<DomainProperty, Object> analyteDefaultValues = DefaultValueService.get().getDefaultValues(getContainer(), domain);
             Map<DomainProperty, Object> userDefaultValues = new HashMap<>();
 

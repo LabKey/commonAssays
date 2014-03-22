@@ -249,10 +249,10 @@ public class FlowReportJob extends RReportJob
             public void updateStatistics(int currentRow) throws SQLException { }
         };
 
-        DomainProperty[] dps = domain.getProperties();
-        PropertyDescriptor[] pds = new PropertyDescriptor[dps.length];
-        for (int i = 0; i < dps.length; i++)
-            pds[i] = dps[i].getPropertyDescriptor();
+        List<? extends DomainProperty> dps = domain.getProperties();
+        PropertyDescriptor[] pds = new PropertyDescriptor[dps.size()];
+        for (int i = 0; i < dps.size(); i++)
+            pds[i] = dps.get(i).getPropertyDescriptor();
 
         Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
 

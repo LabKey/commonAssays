@@ -53,7 +53,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -147,8 +149,8 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     protected void addRunActionButtons(ElispotRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
-        DomainProperty[] antigenColumns = antigenDomain.getProperties();
-        if (antigenColumns.length == 0)
+        List<? extends DomainProperty> antigenColumns = antigenDomain.getProperties();
+        if (antigenColumns.isEmpty())
         {
             super.addRunActionButtons(newRunForm, insertView, bbar);
         }
@@ -162,7 +164,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", new DomainProperty[0], errorReshow, AntigenStepHandler.NAME, form, errors);
+                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, AntigenStepHandler.NAME, form, errors);
 
         try {
             PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
@@ -271,8 +273,8 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             }
 
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
-            DomainProperty[] antigenColumns = antigenDomain.getProperties();
-            if (antigenColumns.length == 0)
+            List<? extends DomainProperty> antigenColumns = antigenDomain.getProperties();
+            if (antigenColumns.isEmpty())
             {
                 return super.handleSuccessfulPost(form, errors);
             }

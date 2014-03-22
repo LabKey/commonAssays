@@ -16,31 +16,36 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.AssayFileWriter;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.RuntimeSQLException;
-import static org.labkey.api.action.SpringActionController.ERROR_MSG;
-
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.ConversionException;
+import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.actions.UploadWizardAction;
+import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.assay.AssayFileWriter;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.springframework.validation.BindException;
 
-import java.util.*;
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
 /**
  * User: kevink
@@ -117,7 +122,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 throw new ExperimentException("No rows!");
 
             Domain resultsDomain = getProvider().getResultsDomain(getProtocol());
-            List<DomainProperty> domainProperties = Arrays.asList(resultsDomain.getProperties());
+            List<? extends DomainProperty> domainProperties = resultsDomain.getProperties();
 
             List<Map<String, Object>> rows = new ArrayList<>(_poolIDs.length);
             for (int rowIndex = 0; rowIndex < _poolIDs.length; rowIndex++)
@@ -133,7 +138,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return _resultProperties;
     }
 
-    private Map<String, Object> getPropertyMapFromRequest(List<DomainProperty> columns, int rowIndex, String poolID, BindException errors) throws ExperimentException
+    private Map<String, Object> getPropertyMapFromRequest(List<? extends DomainProperty> columns, int rowIndex, String poolID, BindException errors) throws ExperimentException
     {
         String inputPrefix = INPUT_PREFIX + poolID + "_" + rowIndex;
         Map<String, Object> properties = new LinkedHashMap<>();

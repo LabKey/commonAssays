@@ -70,7 +70,7 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
     public AssayResultTable createDataTable(boolean includeCopiedToStudyColumns)
     {
         AssayResultTable result = new AssayResultTable(this, includeCopiedToStudyColumns);
-        if (AbstractAssayProvider.getDomainByPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
+        if (!AbstractAssayProvider.getDomainByPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().isEmpty())
         {
             List<FieldKey> cols = new ArrayList<>(result.getDefaultVisibleColumns());
             Iterator<FieldKey> iterator = cols.iterator();

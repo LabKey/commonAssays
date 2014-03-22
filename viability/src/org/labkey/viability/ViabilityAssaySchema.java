@@ -195,8 +195,8 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             setName(AssayProtocolSchema.DATA_TABLE_NAME);
 
             _resultsDomain = _provider.getResultsDomain(getProtocol());
-            DomainProperty[] resultDomainProperties = _resultsDomain.getProperties();
-            Map<String, DomainProperty> propertyMap = new LinkedHashMap<>(resultDomainProperties.length);
+            List<? extends DomainProperty> resultDomainProperties = _resultsDomain.getProperties();
+            Map<String, DomainProperty> propertyMap = new LinkedHashMap<>(resultDomainProperties.size());
             for (DomainProperty property : resultDomainProperties)
                 propertyMap.put(property.getName(), property);
 

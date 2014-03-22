@@ -36,7 +36,6 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -147,7 +146,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
             Integer rowCounter = 0;
 
             // Check if there are aliases
-            Map<String, DomainProperty> importMap = ImportAliasable.Helper.createImportMap(Arrays.asList(context.getProvider().getResultsDomain(context.getProtocol()).getProperties()), false);
+            Map<String, ? extends DomainProperty> importMap = ImportAliasable.Helper.createImportMap(context.getProvider().getResultsDomain(context.getProtocol()).getProperties(), false);
 
             for (Map<String, Object> rowData : loader)
             {

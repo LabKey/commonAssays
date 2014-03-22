@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFilePropertyHelper
 {
-    public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, DomainProperty[] sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
     {
         super(c, protocol, sampleProperties, template, inputFormat);
     }

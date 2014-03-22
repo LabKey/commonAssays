@@ -36,7 +36,7 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
     private List<String> _antigenNames;
     private final PlateTemplate _template;
 
-    public PlateAntigenPropertyHelper(DomainProperty[] antigenDomainProperties, PlateTemplate template)
+    public PlateAntigenPropertyHelper(List<? extends DomainProperty> antigenDomainProperties, PlateTemplate template)
     {
         super(antigenDomainProperties);
         _template = template;
