@@ -17,12 +17,13 @@
 package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.TextArea;
 import org.labkey.api.gwt.client.util.StringUtils;
-
-import java.util.*;
 
 /**
  * User: billnelson@uky.edu

@@ -15,7 +15,7 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.gwt.client.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 

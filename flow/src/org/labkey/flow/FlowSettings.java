@@ -16,10 +16,10 @@
 
 package org.labkey.flow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.PropertyManager;
-import org.labkey.api.gwt.client.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
