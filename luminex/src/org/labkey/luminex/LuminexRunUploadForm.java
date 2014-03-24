@@ -138,7 +138,11 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
                 }
             }
 
-            return DefaultValueService.get().getMergedValues(domain, userDefaultValues, analyteDefaultValues);
+            // Issue 19913: return the previous run values for re-run case instead of merging with the default values
+            if (getReRun() != null)
+                return userDefaultValues;
+            else
+                return DefaultValueService.get().getMergedValues(domain, userDefaultValues, analyteDefaultValues);
         }
         else
         {
