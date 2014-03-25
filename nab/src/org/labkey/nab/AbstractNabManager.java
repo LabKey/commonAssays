@@ -22,6 +22,7 @@ import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * User: brittp
@@ -35,15 +36,15 @@ public class AbstractNabManager extends DilutionManager
     {
         NabPlateTypeHandler nabHandler = new NabPlateTypeHandler();
         PlateTemplate template;
-        PlateTemplate[] templates = PlateService.get().getPlateTemplates(container);
-        if (templates == null || templates.length == 0)
+        List<? extends PlateTemplate> templates = PlateService.get().getPlateTemplates(container);
+        if (templates.isEmpty())
         {
             template = nabHandler.createPlate(NabPlateTypeHandler.SINGLE_PLATE_TYPE, container, 8, 12);
             template.setName(DEFAULT_TEMPLATE_NAME);
             PlateService.get().save(container, user, template);
         }
         else
-            template = templates[0];
+            template = templates.get(0);
         return template;
     }
 }
