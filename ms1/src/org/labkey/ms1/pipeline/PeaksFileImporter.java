@@ -17,8 +17,9 @@
 package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.ms1.MS1Manager;
@@ -87,10 +88,10 @@ public class PeaksFileImporter extends DefaultHandler
 
             commitTransaction();
         }
-        catch(SQLException e)
+        catch(RuntimeSQLException e)
         {
             closeConnection();
-            throw new SAXException(MS1Manager.get().getAllErrors(e));
+            throw new SAXException(MS1Manager.get().getAllErrors(e.getSQLException()));
         }
 
         _log.info("Finished importing " + _numScans + " scans, " + _numPeakFamilies + " peak families, and "

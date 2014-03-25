@@ -16,14 +16,12 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.ms2.reader.ProteinGroup;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -202,14 +200,7 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
             // No peptides available for quantitation
             if (_quantitation != null)
             {
-                try
-                {
-                    Table.delete(MS2Manager.getTableInfoProteinQuantitation(), getRowId());
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
+                Table.delete(MS2Manager.getTableInfoProteinQuantitation(), getRowId());
                 _quantitation = null;
             }
         }
@@ -264,20 +255,13 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
                 setHeavy2LightRatioStandardDev((float)Math.sqrt(h2l_variance) * getHeavy2LightRatioMean().floatValue());
             }
             setRatioNumberPeptides(ratioNum);
-            try
+            if (insert)
             {
-                if (insert)
-                {
-                    Table.insert(user, MS2Manager.getTableInfoProteinQuantitation(), _quantitation);
-                }
-                else
-                {
-                    Table.update(user, MS2Manager.getTableInfoProteinQuantitation(), _quantitation, getRowId());
-                }
+                Table.insert(user, MS2Manager.getTableInfoProteinQuantitation(), _quantitation);
             }
-            catch (SQLException e)
+            else
             {
-                throw new RuntimeSQLException(e);
+                Table.update(user, MS2Manager.getTableInfoProteinQuantitation(), _quantitation, getRowId());
             }
         }
     }

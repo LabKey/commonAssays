@@ -27,7 +27,6 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Selector.ForEachBlock;
 import org.labkey.api.data.SimpleFilter;
@@ -402,23 +401,16 @@ public class FlowManager
         map.put("Id", aliasId);
 
         TableInfo table = attributeTable(type);
-        try
-        {
-            map = Table.insert(null, table, map);
+        map = Table.insert(null, table, map);
 
-            // Set Id to RowId if we aren't inserting an alias
-            if (aliasId <= 0)
-            {
-                map.put("Id", map.get("RowId"));
-                Table.update(null, table, map, map.get("RowId"));
-            }
-
-            return getAttributeRowId(containerId, type, attr);
-        }
-        catch (SQLException e)
+        // Set Id to RowId if we aren't inserting an alias
+        if (aliasId <= 0)
         {
-            throw new RuntimeSQLException(e);
+            map.put("Id", map.get("RowId"));
+            Table.update(null, table, map, map.get("RowId"));
         }
+
+        return getAttributeRowId(containerId, type, attr);
     }
 
     private int ensureAttributeName(Container container, AttributeType type, String name)
@@ -555,11 +547,6 @@ public class FlowManager
         {
             TableInfo table = attributeTable(type);
             Table.update(null, table, map, rowId);
-
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
         }
         finally
         {

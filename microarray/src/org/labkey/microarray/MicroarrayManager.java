@@ -22,7 +22,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
@@ -114,10 +113,6 @@ public class MicroarrayManager
 
             tx.commit();
             return rowsDeleted;
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
         }
     }
 

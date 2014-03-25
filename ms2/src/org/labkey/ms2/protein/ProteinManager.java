@@ -416,10 +416,6 @@ public class ProteinManager
             Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
             transaction.commit();
         }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
     }
 
     public static CustomAnnotationSet getCustomAnnotationSet(Container c, int id, boolean includeProject)
@@ -527,45 +523,38 @@ public class ProteinManager
 
     private static Protein ensureProteinInDatabase(String sequence, String organismName, String name, String description)
     {
-        try
+        String genus = FastaDbLoader.extractGenus(organismName);
+        String species = FastaDbLoader.extractSpecies(organismName);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("species"), species);
+        filter.addCondition(FieldKey.fromParts("genus"), genus);
+        Organism organism = new TableSelector(getTableInfoOrganisms(), filter, null).getObject(Organism.class);
+        if (organism == null)
         {
-            String genus = FastaDbLoader.extractGenus(organismName);
-            String species = FastaDbLoader.extractSpecies(organismName);
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("species"), species);
-            filter.addCondition(FieldKey.fromParts("genus"), genus);
-            Organism organism = new TableSelector(getTableInfoOrganisms(), filter, null).getObject(Organism.class);
-            if (organism == null)
-            {
-                organism = new Organism();
-                organism.setGenus(genus);
-                organism.setSpecies(species);
-                organism = Table.insert(null, getTableInfoOrganisms(), organism);
-            }
-
-            Protein protein = getProtein(sequence, organism.getOrgId());
-            if (protein == null)
-            {
-                Map<String, Object> map = new CaseInsensitiveHashMap<>();
-                map.put("ProtSequence", sequence);
-                byte[] sequenceBytes = getSequenceBytes(sequence);
-                map.put("Mass", PeptideGenerator.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES));
-                map.put("OrgId", organism.getOrgId());
-                map.put("Hash", hashSequence(sequence));
-                map.put("Description", description == null ? null : (description.length() > 200 ? description.substring(0, 196) + "..." : description));
-                map.put("BestName", name);
-                map.put("Length", sequence.length());
-                map.put("InsertDate", new Date());
-                map.put("ChangeDate", new Date());
-
-                Table.insert(null, getTableInfoSequences(), map);
-                protein = getProtein(sequence, organism.getOrgId());
-            }
-            return protein;
+            organism = new Organism();
+            organism.setGenus(genus);
+            organism.setSpecies(species);
+            organism = Table.insert(null, getTableInfoOrganisms(), organism);
         }
-        catch (SQLException e)
+
+        Protein protein = getProtein(sequence, organism.getOrgId());
+        if (protein == null)
         {
-            throw new RuntimeSQLException(e);
+            Map<String, Object> map = new CaseInsensitiveHashMap<>();
+            map.put("ProtSequence", sequence);
+            byte[] sequenceBytes = getSequenceBytes(sequence);
+            map.put("Mass", PeptideGenerator.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES));
+            map.put("OrgId", organism.getOrgId());
+            map.put("Hash", hashSequence(sequence));
+            map.put("Description", description == null ? null : (description.length() > 200 ? description.substring(0, 196) + "..." : description));
+            map.put("BestName", name);
+            map.put("Length", sequence.length());
+            map.put("InsertDate", new Date());
+            map.put("ChangeDate", new Date());
+
+            Table.insert(null, getTableInfoSequences(), map);
+            protein = getProtein(sequence, organism.getOrgId());
         }
+        return protein;
     }
 
     public static int ensureProteinAndIdentifier(String sequence, String organismName, String identifier, String description, String identifierType)
@@ -633,14 +622,7 @@ public class ProteinManager
         values.put("identTypeId", identifierTypeId);
         values.put("seqId", seqId);
         values.put("entryDate", new Date());
-        try
-        {
-            Table.insert(null, getTableInfoIdentifiers(), values);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Table.insert(null, getTableInfoIdentifiers(), values);
     }
 
     private static boolean identifierExists(String identifier, int identifierTypeId, int seqId)

@@ -1248,14 +1248,7 @@ public class MS2Manager
         m.put("runs", runs);
         m.put("peptides", peptides);
 
-        try
-        {
-            Table.insert(null, getTableInfoHistory(), m);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Table.insert(null, getTableInfoHistory(), m);
     }
 
 
@@ -1305,15 +1298,8 @@ public class MS2Manager
 
     public static MS2Fraction writeHydro(MS2Fraction fraction, Map updateMap)
     {
-        try
-        {
-            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, fraction.getFraction());
-            _removeFractionFromCache(fraction.getFraction());
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, fraction.getFraction());
+        _removeFractionFromCache(fraction.getFraction());
 
         return MS2Manager.getFraction(fraction.getFraction());
     }
