@@ -204,14 +204,7 @@ public class ViabilityResult
     {
         if (specimenID == null)
         {
-            try
-            {
-                specimenID = Arrays.asList(ViabilityManager.getSpecimens(getRowID()));
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            specimenID = Arrays.asList(ViabilityManager.getSpecimens(getRowID()));
         }
         return specimenID;
     }

@@ -250,7 +250,7 @@ public class ProteinDictionaryHelpers
 
     private static final Object _lock = new Object();
 
-    protected static void getGOTypes() throws SQLException
+    protected static void getGOTypes()
     {
         synchronized (_lock)
         {

@@ -179,7 +179,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    protected void writePeptideProphetSummary(int runId, PeptideProphetSummary summary) throws SQLException
+    protected void writePeptideProphetSummary(int runId, PeptideProphetSummary summary)
     {
         if (null != summary)
         {

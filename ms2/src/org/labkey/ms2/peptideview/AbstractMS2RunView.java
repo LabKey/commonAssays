@@ -371,7 +371,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     }
 
 
-    public long[] getPeptideIndex(ActionURL url) throws SQLException
+    public long[] getPeptideIndex(ActionURL url)
     {
         String lookup = getIndexLookup(url);
         long[] index = MS2Manager.getPeptideIndex(lookup);
@@ -410,7 +410,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     }
 
 
-    protected Long[] generatePeptideIndex(ActionURL url) throws SQLException
+    protected Long[] generatePeptideIndex(ActionURL url)
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
         sort.insertSort(getPeptideSort());

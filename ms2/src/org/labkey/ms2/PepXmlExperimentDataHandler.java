@@ -198,10 +198,6 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         {
             throw new ExperimentException(e);
         }
-        catch (SQLException e)
-        {
-            throw new ExperimentException(e);
-        }
     }
 
     public Priority getPriority(ExpData data)

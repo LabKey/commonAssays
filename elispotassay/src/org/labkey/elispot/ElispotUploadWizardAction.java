@@ -161,53 +161,48 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
     }
 
-    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException
+    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
                 "lsid", Collections.<DomainProperty>emptyList(), errorReshow, AntigenStepHandler.NAME, form, errors);
 
-        try {
-            PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
-            antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
+        PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
+        antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
-            Map<String, Object> propNameToValue = new HashMap<>();
-            for (String name : antigenHelper.getSampleNames())
-                propNameToValue.put(name, name);
+        Map<String, Object> propNameToValue = new HashMap<>();
+        for (String name : antigenHelper.getSampleNames())
+            propNameToValue.put(name, name);
 
-            addDefaultValues(view, antigenHelper, ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME, propNameToValue);
+        addDefaultValues(view, antigenHelper, ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME, propNameToValue);
 
-            // add existing page properties
-            addHiddenBatchProperties(form, view);
-            addHiddenRunProperties(form, view);
+        // add existing page properties
+        addHiddenBatchProperties(form, view);
+        addHiddenRunProperties(form, view);
 
-            ElispotAssayProvider provider = form.getProvider();
-            PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
-            for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
-                addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
+        ElispotAssayProvider provider = form.getProvider();
+        PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
+        for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
+            addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
 
-            PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
-            collector.addHiddenFormFields(view, form);
+        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
+        collector.addHiddenFormFields(view, form);
 
-            ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
-            resolverType.addHiddenFormFields(form, view);
-            
-            ButtonBar bbar = new ButtonBar();
-            addFinishButtons(form, view, bbar);
-            addResetButton(form, view, bbar);
-            //addNextButton(bbar);
+        ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
+        resolverType.addHiddenFormFields(form, view);
 
-            ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
-            bbar.add(cancelButton);
+        ButtonBar bbar = new ButtonBar();
+        addFinishButtons(form, view, bbar);
+        addResetButton(form, view, bbar);
+        //addNextButton(bbar);
 
-            _stepDescription = "Antigen Properties";
+        ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
+        bbar.add(cancelButton);
 
-            view.getDataRegion().setHorizontalGroups(false);
-            view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
-        }
-        catch (ExperimentException e)
-        {
-            throw new ServletException(e);
-        }
+        _stepDescription = "Antigen Properties";
+
+        view.getDataRegion().setHorizontalGroups(false);
+        view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
+
         return view;
     }
 
@@ -257,7 +252,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -322,7 +317,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             return antigenPropsValid;
         }
 
-        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form,
                     getSelectedParticipantVisitResolverType(form.getProvider(), form));

@@ -78,7 +78,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     {
         return new PlateBasedRunStepHandler() {
             @Override
-            protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
+            protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws ExperimentException
             {
                 form.setSampleProperties(_postedSampleProperties);
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -216,7 +216,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             return super.validatePost(form, errors);
         }
 
-        protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
+        protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws ExperimentException
         {
             ExpRun run;
             try

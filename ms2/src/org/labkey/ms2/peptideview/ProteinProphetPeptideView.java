@@ -29,6 +29,7 @@ import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.ResultSetCollapser;
 import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
@@ -292,7 +293,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
     // Default behavior doesn't work for ProteinProphet groupings -- need to add in GroupId by joining to PeptideMemberships table
-    protected Long[] generatePeptideIndex(ActionURL url) throws SQLException
+    protected Long[] generatePeptideIndex(ActionURL url)
     {
         String extraWhere = null;
         String groupIdString = url.getParameter("proteinGroupId");
@@ -340,6 +341,10 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
                 rowIdsLong.add(rs.getLong(columnIndex));
 
             return rowIdsLong.toArray(new Long[rowIdsLong.size()]);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
         }
         finally
         {

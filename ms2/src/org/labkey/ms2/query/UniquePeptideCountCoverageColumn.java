@@ -34,7 +34,7 @@ public class UniquePeptideCountCoverageColumn extends PeptideAggregrationDisplay
         super(colInfo, peptideColumn, caption);
     }
 
-    protected Object calculateValue(RenderContext ctx, List<String> peptides) throws SQLException
+    protected Object calculateValue(RenderContext ctx, List<String> peptides)
     {
         return new HashSet<>(peptides).size();
     }

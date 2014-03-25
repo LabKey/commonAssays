@@ -106,7 +106,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             }
 
             @Override
-            protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
+            protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
             {
                 InsertView view = getResultsView(form, false, errors);
 
@@ -130,16 +130,9 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     }
 
 
-    protected InsertView getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException
+    protected InsertView getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
-        try
-        {
-            return _getResultsView(form, errorReshow, errors);
-        }
-        catch (ExperimentException e)
-        {
-            throw new ServletException(e);
-        }
+        return _getResultsView(form, errorReshow, errors);
     }
 
     @Override
@@ -375,7 +368,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
         {
             try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
             {

@@ -88,7 +88,7 @@ public abstract class CompareQuery extends SQLFragment
         _gridColumns.add(new RunColumn(label, name, aggregate, formatString));
     }
 
-    public ResultSet createResultSet(boolean export, int maxRows) throws SQLException
+    public ResultSet createResultSet(boolean export, int maxRows)
     {
         return new SqlSelector(MS2Manager.getSchema(), this).setMaxRows(maxRows).getResultSet(!export);
     }

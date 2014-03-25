@@ -453,7 +453,7 @@ public class MS2Manager
             transaction.commit();
             return expRun;
         }
-        catch (SQLException | URISyntaxException e)
+        catch (URISyntaxException e)
         {
             throw new ExperimentException(e);
         }
@@ -1305,7 +1305,7 @@ public class MS2Manager
     }
 
 
-    public static void updateRun(MS2Run run, User user) throws SQLException
+    public static void updateRun(MS2Run run, User user)
     {
         Table.update(user, getTableInfoRuns(), run, run.getRun());
     }

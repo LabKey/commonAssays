@@ -252,7 +252,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private AbstractMS2RunView<? extends WebPartView> getPeptideView(String grouping, MS2Run... runs) throws ServletException
+    private AbstractMS2RunView<? extends WebPartView> getPeptideView(String grouping, MS2Run... runs)
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
     }
@@ -920,7 +920,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private long[] getPeptideIndex(ActionURL currentURL, MS2Run run) throws SQLException, ServletException
+    private long[] getPeptideIndex(ActionURL currentURL, MS2Run run)
     {
         try
         {

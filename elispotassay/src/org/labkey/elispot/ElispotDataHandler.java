@@ -201,7 +201,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     /**
      * Adds antigen wellgroup properties to the elispot data table.
      */
-    public static void populateAntigenDataProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws SQLException, ValidationException, ExperimentException
+    public static void populateAntigenDataProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
@@ -306,7 +306,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     /**
      * Adds antigen wellgroup statistics to the antigen runs table (one row per sample)
      */
-    public static void populateAntigenRunProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws SQLException, ValidationException, ExperimentException
+    public static void populateAntigenRunProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {

@@ -20,7 +20,6 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
@@ -37,7 +36,6 @@ import org.labkey.api.study.assay.AssayService;
 import org.springframework.validation.BindException;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -224,21 +222,14 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         if (reRun != null)
         {
             ret = new HashMap<>();
-            try
+            ViabilityResult[] results = ViabilityManager.getResults(reRun, reRun.getContainer());
+            for (ViabilityResult result : results)
             {
-                ViabilityResult[] results = ViabilityManager.getResults(reRun, reRun.getContainer());
-                for (ViabilityResult result : results)
-                {
-                    String poolID = result.getPoolID();
-                    String lowerPoolID = poolID.replaceAll(" ", "").toLowerCase();
-                    // XXX: there can be more than one pool id in a run
-                    if (!ret.containsKey(lowerPoolID))
-                        ret.put(lowerPoolID, result.toMap());
-                }
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
+                String poolID = result.getPoolID();
+                String lowerPoolID = poolID.replaceAll(" ", "").toLowerCase();
+                // XXX: there can be more than one pool id in a run
+                if (!ret.containsKey(lowerPoolID))
+                    ret.put(lowerPoolID, result.toMap());
             }
         }
 

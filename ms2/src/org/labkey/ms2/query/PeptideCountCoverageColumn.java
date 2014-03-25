@@ -20,7 +20,6 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 
 import java.util.List;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -38,7 +37,7 @@ public class PeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
         return Integer.class;
     }
 
-    protected Object calculateValue(RenderContext ctx, List<String> peptides) throws SQLException
+    protected Object calculateValue(RenderContext ctx, List<String> peptides)
     {
         return peptides.size();
     }

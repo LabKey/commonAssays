@@ -17,24 +17,21 @@
 package org.labkey.nab;
 
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.assay.dilution.DilutionRunUploadForm;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
-import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.view.InsertView;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -103,7 +100,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             return runPropsValid && samplePropsValid && !errors.hasErrors();
         }
 
-        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
+        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws ExperimentException
         {
             form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -121,7 +118,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         }
     }
 
-    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException, ExperimentException
+    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ExperimentException
     {
         if (form.getReRun() != null)
             form.getReRun().delete(getUser());

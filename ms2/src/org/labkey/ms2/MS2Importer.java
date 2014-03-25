@@ -138,7 +138,7 @@ public abstract class MS2Importer
         }
     }
 
-    protected RunInfo prepareRun(boolean restart) throws SQLException
+    protected RunInfo prepareRun(boolean restart)
     {
         try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().ensureTransaction())
         {
@@ -256,7 +256,7 @@ public abstract class MS2Importer
     }
 
 
-    protected int getRun() throws SQLException
+    protected int getRun()
     {
         SimpleFilter filter = SimpleFilter.createContainerFilter(_container);
         filter.addCondition(FieldKey.fromParts("Path"), _path);
@@ -270,7 +270,7 @@ public abstract class MS2Importer
     }
 
 
-    protected int createRun() throws SQLException
+    protected int createRun()
     {
         HashMap<String, Object> runMap = new HashMap<>();
 
@@ -364,7 +364,7 @@ public abstract class MS2Importer
 
     // When we first create a fraction record we don't know what the spectrum file name or type is,
     // so update it after importing the spectra.
-    protected void updateFractionSpectrumFileName(File spectrumFile) throws SQLException
+    protected void updateFractionSpectrumFileName(File spectrumFile)
     {
         if (null != spectrumFile)
         {

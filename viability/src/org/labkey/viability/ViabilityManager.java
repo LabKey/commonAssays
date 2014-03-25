@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
@@ -73,12 +72,12 @@ public class ViabilityManager
         return (ViabilityAssayProvider) AssayService.get().getProvider(ViabilityAssayProvider.NAME);
     }
 
-    public static ViabilityResult[] getResults(ExpData data, Container container) throws SQLException
+    public static ViabilityResult[] getResults(ExpData data, Container container)
     {
         return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("DataID"), data.getRowId()), null).getArray(ViabilityResult.class);
     }
 
-    public static ViabilityResult[] getResults(ExpRun run, Container container) throws SQLException
+    public static ViabilityResult[] getResults(ExpRun run, Container container)
     {
         return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("DataID", "RunID"), run.getRowId()), null).getArray(ViabilityResult.class);
     }
@@ -100,7 +99,7 @@ public class ViabilityManager
         return result;
     }
 
-    static String[] getSpecimens(int resultRowId) throws SQLException
+    static String[] getSpecimens(int resultRowId)
     {
         return new TableSelector(
                 ViabilitySchema.getTableInfoResultSpecimens(),
@@ -163,12 +162,12 @@ public class ViabilityManager
         insertProperties(c, result);
     }
 
-    private static void insertSpecimens(User user, ViabilityResult result) throws SQLException
+    private static void insertSpecimens(User user, ViabilityResult result)
     {
         insertSpecimens(user, result.getRowID(), result.getSpecimenIDs());
     }
 
-    private static void insertSpecimens(User user, int resultId, List<String> specimens) throws SQLException
+    private static void insertSpecimens(User user, int resultId, List<String> specimens)
     {
 //        assert specimens != null && specimens.size() > 0;
         Collections.sort(specimens);
@@ -225,7 +224,7 @@ public class ViabilityManager
     /**
      * Delete a ViabilityResult row by rowid.
      */
-    public static void deleteResult(Container c, int resultRowID, int resultObjectID) throws SQLException
+    public static void deleteResult(Container c, int resultRowID, int resultObjectID)
     {
         deleteSpecimens(resultRowID);
         Table.delete(ViabilitySchema.getTableInfoResults(), resultRowID);
@@ -234,7 +233,7 @@ public class ViabilityManager
         OntologyManager.deleteOntologyObject(obj.getObjectURI(), c, true);
     }
 
-    private static void deleteSpecimens(int resultRowId) throws SQLException
+    private static void deleteSpecimens(int resultRowId)
     {
         Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowId));
     }
@@ -269,35 +268,28 @@ public class ViabilityManager
     // XXX: optimize
     public static void deleteAll(List<ExpData> datas, Container c)
     {
-        try
+        List<Integer> dataIDs = new ArrayList<>(datas.size());
+        for (ExpData data : datas)
+            dataIDs.add(data.getRowId());
+
+        Map<String, Object>[] rows =
+                new TableSelector(ViabilitySchema.getTableInfoResults(),
+                        new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                        new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null).getMapArray();
+
+        int[] objectIDs = new int[rows.length];
+
+        for (int i = 0; i < rows.length; i++)
         {
-            List<Integer> dataIDs = new ArrayList<>(datas.size());
-            for (ExpData data : datas)
-                dataIDs.add(data.getRowId());
+            Map<String, Object> row = rows[i];
+            Integer resultID = (Integer)row.get("RowID");
+            objectIDs[i] = ((Integer)row.get("ObjectID")).intValue();
 
-            Map<String, Object>[] rows =
-                    new TableSelector(ViabilitySchema.getTableInfoResults(),
-                            new HashSet<>(Arrays.asList("RowID", "ObjectID")),
-                            new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null).getMapArray();
-
-            int[] objectIDs = new int[rows.length];
-
-            for (int i = 0; i < rows.length; i++)
-            {
-                Map<String, Object> row = rows[i];
-                Integer resultID = (Integer)row.get("RowID");
-                objectIDs[i] = ((Integer)row.get("ObjectID")).intValue();
-
-                deleteSpecimens(resultID.intValue());
-                Table.delete(ViabilitySchema.getTableInfoResults(), resultID);
-            }
-
-            OntologyManager.deleteOntologyObjects(c, true, objectIDs);
+            deleteSpecimens(resultID.intValue());
+            Table.delete(ViabilitySchema.getTableInfoResults(), resultID);
         }
-        catch (SQLException ex)
-        {
-            throw new RuntimeSQLException(ex);
-        }
+
+        OntologyManager.deleteOntologyObjects(c, true, objectIDs);
     }
 
     public static class TestCase extends Assert
