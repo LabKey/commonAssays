@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.protein;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.JspView;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -62,21 +64,15 @@ public class ProteinServiceImpl implements ProteinService
 
     public int ensureProtein(String sequence, String organism, String name, String description)
     {
-        organism = guessOrganism(sequence, organism, name);
+        organism = guessOrganism(sequence, organism, name, description);
 
         return ProteinManager.ensureProtein(sequence, organism, name, description);
     }
 
-    public int ensureProteinAndIdentifier(String sequence, String organism, String identifier, String description, String identifierType)
+    private String guessOrganism(String sequence, String organism, String name, String description)
     {
-        organism = guessOrganism(sequence, organism, identifier);
-
-        return ProteinManager.ensureProteinAndIdentifier(sequence, organism, identifier, description, identifierType);
-    }
-
-    private String guessOrganism(String sequence, String organism, String name)
-    {
-        ProteinPlus pp = new ProteinPlus(new Protein(name, sequence.getBytes()));
+        String fullHeader = getWholeHeader(name, description);
+        ProteinPlus pp = new ProteinPlus(new Protein(fullHeader, sequence.getBytes()));
         if (organism == null)
         {
             for (OrganismGuessStrategy strategy : getStrategies())
@@ -95,9 +91,22 @@ public class ProteinServiceImpl implements ProteinService
         return organism;
     }
 
-    public void ensureIdentifiers(int seqId, Map<String, String> identifierAndTypes)
+    public void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
     {
-        ProteinManager.ensureIdentifiers(seqId, identifierAndTypes);
+        ProteinManager.ensureIdentifiers(seqId, typeAndIdentifiers);
+    }
+
+    public Map<String, Set<String>> getIdentifiers(String description, String... names)
+    {
+        String combinedNames = StringUtils.join(names, "|");
+        String wholeHeader = getWholeHeader(combinedNames, description);
+        return Protein.getIdentifierMap(combinedNames, wholeHeader);
+    }
+
+    private String getWholeHeader(String identifier, String description)
+    {
+        return identifier != null ? (description != null ? (identifier + " " + description) : identifier)
+                                  : description;
     }
 
     public void registerProteinSearchView(QueryViewProvider<ProteinSearchForm> provider)

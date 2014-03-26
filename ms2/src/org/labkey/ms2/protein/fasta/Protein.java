@@ -16,6 +16,7 @@
 package org.labkey.ms2.protein.fasta;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -199,14 +200,22 @@ public class Protein
     {
         if (_identifierMap == null)
         {
-            String lookupString = _lookup;
-            if (lookupString.startsWith("IPI") && !lookupString.contains("|") && _header.contains(" "))
-            {
-                lookupString = _header.substring(_header.indexOf(" ") + 1);
-            }
-            _identifierMap = identParse(lookupString,_header);
+            _identifierMap = getIdentifierMap(_lookup, _header);
         }
         return _identifierMap;
+    }
+
+    public static Map<String, Set<String>> getIdentifierMap(String fastaIdentifierString, String wholeHeader)
+    {
+        // fasta files from IPI have good annotation in their description field,
+        // not their name field.
+        // note that newer IPI files don't have this issue
+        if (fastaIdentifierString != null && fastaIdentifierString.startsWith("IPI") && !fastaIdentifierString.contains("|")
+            && wholeHeader != null && wholeHeader.contains(" ") &&  wholeHeader.contains("|"))
+        {
+            fastaIdentifierString = wholeHeader.substring(wholeHeader.indexOf(" ") + 1);
+        }
+        return tryMatchIdentAliasToIdentType(identParse(fastaIdentifierString, wholeHeader));
     }
 
     /**
@@ -300,5 +309,29 @@ public class Protein
         }
 
         return identifiers;
+    }
+
+    private static Map<String, Set<String>> tryMatchIdentAliasToIdentType(Map<String, Set<String>> identifiers)
+    {
+        Map<String, Set<String>> returnVals = new HashMap<>();
+        for (String key : identifiers.keySet())
+        {
+            String identTypeName = key;
+            if (!Protein.IDENT_TYPE_MAP.containsValue(key))
+            {
+                // unexpected ident type.  first check to see if it is an alias
+                if (Protein.IDENT_TYPE_MAP.containsKey(key))
+                    identTypeName=Protein.IDENT_TYPE_MAP.get(key);
+            }
+
+            Set<String> identifierSet = returnVals.get(identTypeName);
+            if(identifierSet == null)
+            {
+                identifierSet = new HashSet<>();
+                returnVals.put(identTypeName, identifierSet);
+            }
+            identifierSet.addAll(identifiers.get(key));
+        }
+        return returnVals;
     }
 }

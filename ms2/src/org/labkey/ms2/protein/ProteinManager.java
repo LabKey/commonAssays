@@ -20,6 +20,7 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -561,57 +562,54 @@ public class ProteinManager
     {
         Protein protein = ensureProteinInDatabase(sequence, organismName, identifier, description);
 
-        Map<String, String> identifierAndTypes= new HashMap<>();
-        identifierAndTypes.put(identifier, identifierType);
-        ensureIdentifiers(protein, identifierAndTypes);
-
+        Map<String, Set<String>> typeAndIdentifiers = Collections.singletonMap(identifierType, Collections.singleton(identifier));
+        ensureIdentifiers(protein, typeAndIdentifiers);
         return protein.getSeqId();
     }
 
-    public static void ensureIdentifiers(int seqId, Map<String, String> identifierAndTypes)
+    public static void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
     {
         Protein protein = getProtein(seqId);
         if(protein == null)
         {
             throw new NotFoundException("SeqId " + seqId + " does not exist.");
         }
-        ensureIdentifiers(protein, identifierAndTypes);
+        ensureIdentifiers(protein, typeAndIdentifiers);
     }
 
-    private static void ensureIdentifiers(Protein protein, Map<String, String> identifierAndTypes)
+    private static void ensureIdentifiers(Protein protein, Map<String, Set<String>> typeAndIdentifiers)
     {
-        int seqId = protein.getSeqId();
-
-        // identifier type name --> identifier type id
-        Map<String, Integer> identifierTypeIds = new HashMap<>();
-
-        for(Map.Entry<String, String> identifierAndType: identifierAndTypes.entrySet())
+        if(typeAndIdentifiers == null || typeAndIdentifiers.size() == 0)
         {
-            String identifier = identifierAndType.getKey();
-            String identifierType = identifierAndType.getValue();
+            return;
+        }
 
-            if(identifier == null || identifier.equalsIgnoreCase(protein.getBestName()))
-            {
-                continue;
-            }
+        for(Map.Entry<String, Set<String>> typeAndIdentifier: typeAndIdentifiers.entrySet())
+        {
+            String identifierType = typeAndIdentifier.getKey();
+            Set<String> identifiers = typeAndIdentifier.getValue();
 
-            Integer identifierTypeId = identifierTypeIds.get(identifierType);
+            Integer identifierTypeId = ensureIdentifierType(identifierType);
             if(identifierTypeId == null)
+                continue;
+
+            for(String identifier: identifiers)
             {
-                identifierTypeId = getIdentifierTypeId(identifierType);
-
-                if(identifierTypeId == null)
-                {
-                    throw new NotFoundException("Identifier type " + identifierType + " does not exist in the database.");
-                }
-
-                identifierTypeIds.put(identifierType, identifierTypeId);
+                ensureIdentifier(protein, identifierTypeId, identifier);
             }
+        }
+    }
 
-            if(!identifierExists(identifier, identifierTypeId, seqId))
-            {
-               addIdentifier(identifier, identifierTypeId, seqId);
-            }
+    private static void ensureIdentifier(Protein protein, Integer identifierTypeId, String identifier)
+    {
+        identifier = StringUtils.trimToNull(identifier);
+        if(identifier == null || identifier.equalsIgnoreCase(protein.getBestName()))
+        {
+            return;
+        }
+        if(!identifierExists(identifier, identifierTypeId, protein.getSeqId()))
+        {
+           addIdentifier(identifier, identifierTypeId, protein.getSeqId());
         }
     }
 
@@ -634,14 +632,26 @@ public class ProteinManager
         return new TableSelector(getTableInfoIdentifiers(), filter, null).exists();
     }
 
-    private static Integer getIdentifierTypeId(String identifierType)
+    private static Integer ensureIdentifierType(String identifierType)
     {
+        identifierType = StringUtils.trimToNull(identifierType);
         if(identifierType == null)
             return null;
 
-        return new SqlSelector(getSchema(),
-                "SELECT identTypeId FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
-                identifierType.toLowerCase()).getObject(Integer.class);
+        Integer identTypeId = new SqlSelector(getSchema(),
+                            "SELECT identTypeId FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
+                            identifierType.toLowerCase()).getObject(Integer.class);
+
+        if(identTypeId == null)
+        {
+            Map<String, Object> map = new HashMap<>();
+            map.put("identTypeId", null);
+            map.put("name", identifierType);
+            map.put("entryDate", new Date());
+            map = Table.insert(null, getTableInfoIdentTypes(), map);
+            identTypeId = (Integer)map.get("identTypeId");
+        }
+        return identTypeId;
     }
 
     private static String hashSequence(String sequence)

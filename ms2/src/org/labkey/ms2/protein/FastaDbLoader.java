@@ -405,24 +405,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             String wholeHeader=rawIdentString;
             if (null != desc )
                     wholeHeader += " " + desc;
-             // fasta files from IPI have good annotation in their description field,
-            // not their name field.
-            // todo:  this is almost the same code as in Protein.getIdentifier map and should be consolidated
-            // note that newer IPI files don't have this issue
-            if (rawIdentString != null && rawIdentString.startsWith("IPI") && !rawIdentString.contains("|") && desc != null && (desc.contains("|")))
-                 rawIdentString = desc;
 
-            Map<String, Set<String>> identifiers = Protein.identParse(rawIdentString, wholeHeader);
+            Map<String, Set<String>> identifiers = Protein.getIdentifierMap(rawIdentString, wholeHeader);
 
             for (String key : identifiers.keySet())
             {
-                String identTypeName = key;
-                if (!Protein.IDENT_TYPE_MAP.containsValue(key))
-                {
-                    // unexpected ident type.  first check to see if it is an alias
-                    if (Protein.IDENT_TYPE_MAP.containsKey(key))
-                        identTypeName=Protein.IDENT_TYPE_MAP.get(key);
-                }
                 Set<String> idvals = identifiers.get(key);
                 for (String val : idvals)
                 {
@@ -431,7 +418,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                         continue;
                     transactionCount++;
                     fdbu._addIdentStmt.setString(1, val);
-                    fdbu._addIdentStmt.setString(2, identTypeName);
+                    fdbu._addIdentStmt.setString(2, key);
                     fdbu._addIdentStmt.setInt(3, seqid);
                     // We have already set the timestamp, at index 4, once for all insertions in this batch
                     fdbu._addIdentStmt.addBatch();
@@ -921,6 +908,14 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                     ,"YAL001C TFC3 SGDID:S000000001, Chr I from 151168-151099,151008-147596, reverse complement, Verified ORF, \"Largest of six subunits of the RNA polymerase III transcription initiation factor complex (TFIIIC); part of the TauB domain of TFIIIC that binds DNA at the BoxB promoter sites of tRNA and similar genes; cooperates with Tfc6p in DNA binding\"");
 
             idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SGDID","S000000001"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","YAL001C"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GeneName","TFC3"));
+            parseAndCompareReplaceAlias("YAL001C", idMapE
+                    ,"YAL001C TFC3 SGDID:S000000001, Chr I from 151168-151099,151008-147596, reverse complement, Verified ORF, \"Largest of six subunits of the RNA polymerase III transcription initiation factor complex (TFIIIC); part of the TauB domain of TFIIIC that binds DNA at the BoxB promoter sites of tRNA and similar genes; cooperates with Tfc6p in DNA binding\"");
+
+
+            idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_001073825;XP_593190"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSBTAP00000028878"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q2KIJ2"));
@@ -928,6 +923,16 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00685094.1"));
             parseAndCompare("IPI:IPI00685094.1|SWISS-PROT:Q2KIJ2|ENSEMBL:ENSBTAP00000028878|REFSEQ:NP_001073825;XP_593190", idMapE,
                     "IPI:IPI00685094.1|SWISS-PROT:Q2KIJ2|ENSEMBL:ENSBTAP00000028878|REFSEQ:NP_001073825;XP_593190 Tax_Id=9913 Gene_Symbol=MGC137286;LOC515210 Uncharacterized protein C1orf156 homolog");
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_001073825;XP_593190"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSBTAP00000028878"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q2KIJ2"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GeneName","MGC137286;LOC515210"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00685094.1"));
+            parseAndCompareReplaceAlias("IPI:IPI00685094.1|SWISS-PROT:Q2KIJ2|ENSEMBL:ENSBTAP00000028878|REFSEQ:NP_001073825;XP_593190", idMapE,
+                    "IPI:IPI00685094.1|SWISS-PROT:Q2KIJ2|ENSEMBL:ENSBTAP00000028878|REFSEQ:NP_001073825;XP_593190 Tax_Id=9913 Gene_Symbol=MGC137286;LOC515210 Uncharacterized protein C1orf156 homolog");
+
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_001020605"));
@@ -954,6 +959,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN", "Smim17"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "A0A504_MOUSE"));
             parseAndCompare("tr|A0A504|A0A504_MOUSE", idMapE, "tr|A0A504|A0A504_MOUSE MCG116182, isoform CRA_b OS=Mus musculus GN=Smim17 PE=4 SV=1 or:");
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GeneName", "Smim17"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "A0A504_MOUSE"));
+            parseAndCompareReplaceAlias("tr|A0A504|A0A504_MOUSE", idMapE, "tr|A0A504|A0A504_MOUSE MCG116182, isoform CRA_b OS=Mus musculus GN=Smim17 PE=4 SV=1 or:");
+
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN", "Ccdc112"));
@@ -1034,6 +1045,13 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         protected void parseAndCompare(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)
         {
             Map<String, Set<String>> idMapReturned = Protein.identParse(strLookup, wholeHeader);
+            assertTrue(compareIdMaps(idMapExpected, idMapReturned));
+        }
+
+        protected void parseAndCompareReplaceAlias(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)
+        {
+            // getIdentifierMap will replace aliases like SGD_GN and GN with the GeneName identifier type
+            Map<String, Set<String>> idMapReturned = Protein.getIdentifierMap(strLookup, wholeHeader);
             assertTrue(compareIdMaps(idMapExpected, idMapReturned));
         }
     }
