@@ -724,7 +724,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
 
                 // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
-                if (showControls() && runId != null && NumberUtils.isNumber(runId))
+                if (showControls() && runId != null && NumberUtils.isDigits(runId))
                 {
                     ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
                     excludeAnalytes.setScript("analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");

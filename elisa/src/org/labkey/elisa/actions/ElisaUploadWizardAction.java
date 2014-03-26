@@ -37,6 +37,7 @@ import org.labkey.api.study.actions.PlateBasedUploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.util.NumberUtilsLabKey;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.RedirectException;
 import org.labkey.elisa.ElisaAssayProvider;
@@ -203,7 +204,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                         errors.reject(SpringActionController.ERROR_MSG, "Value for well group: " + entry.getKey() + " cannot be blank.");
                         break;
                     }
-                    if (!NumberUtils.isNumber(prop))
+                    if (!NumberUtilsLabKey.isNumber(prop))
                     {
                         errors.reject(SpringActionController.ERROR_MSG, "Value for well group: " + entry.getKey() + " must be a number.");
                         break;
