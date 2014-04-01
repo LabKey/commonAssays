@@ -203,11 +203,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 items: [
                     {
                         xtype: 'displayfield',
-                        value: 'List of all of the runs from the "' + this.assayName + '" assay that contain '
+                        value: Ext.util.Format.htmlEncode('List of all of the runs from the "' + this.assayName + '" assay that contain '
                             + this.controlName + ' ' + this.analyte + ' '
                             + (this.isotype == "" ? '[None]' : this.isotype) + ' '
                             + (this.conjugate == "" ? '[None]' : this.conjugate) + '.'
-                            + ' Note that runs that are already members of a different guide set will not be displayed.'
+                            + ' Note that runs that are already members of a different guide set will not be displayed.')
                     },
                     this.allRunsGrid
                 ]
