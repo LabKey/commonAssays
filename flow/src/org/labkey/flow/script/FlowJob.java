@@ -65,7 +65,7 @@ public abstract class FlowJob extends PipelineJob
     public void run()
     {
         _start = new Date();
-        if (!setStatus("Running"))
+        if (!setStatus(TaskStatus.running))
         {
             return;
         }
@@ -78,7 +78,7 @@ public abstract class FlowJob extends PipelineJob
         {
             _log.error("Exception", e);
             addStatus("Error " + e.toString());
-            setStatus(ERROR_STATUS, e.toString());
+            setStatus(TaskStatus.error, e.toString());
             return;
         }
         finally
@@ -91,11 +91,11 @@ public abstract class FlowJob extends PipelineJob
         }
         if (hasErrors())
         {
-            setStatus(ERROR_STATUS);
+            setStatus(TaskStatus.error);
         }
         else
         {
-            setStatus(COMPLETE_STATUS);
+            setStatus(TaskStatus.complete);
         }
     }
 
@@ -126,7 +126,7 @@ public abstract class FlowJob extends PipelineJob
     public void error(String message, Throwable t)
     {
         super.error(message, t);
-        setStatus(ERROR_STATUS);
+        setStatus(TaskStatus.error);
     }
 
     public boolean isComplete()

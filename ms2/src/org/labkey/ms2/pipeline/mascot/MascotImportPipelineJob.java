@@ -18,7 +18,6 @@ package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -195,7 +194,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
             }
             else
             {
-                setStatus(PipelineJob.COMPLETE_STATUS);
+                setStatus(TaskStatus.complete);
             }
             completeStatus = true;
         }
@@ -213,7 +212,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                     filePepXMLTGZ.renameTo (fileOutputTGZ);
                 if ((filePepXML != null) && filePepXML.exists())
                     filePepXML.renameTo (fileOutputXML);
-                setStatus(PipelineJob.ERROR_STATUS);
+                setStatus(TaskStatus.error);
             }
             if (workFile.exists())
             {

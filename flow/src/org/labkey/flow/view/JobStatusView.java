@@ -45,19 +45,19 @@ public class JobStatusView extends HttpView
     {
         _psf = psf;
         _job = job;
-        if (psf == null || PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
+        if (psf == null || PipelineJob.TaskStatus.complete.matches(psf.getStatus()))
         {
             _status = "This job is completed.";
         }
-        else if (PipelineJob.ERROR_STATUS.equals(psf.getStatus()))
+        else if (PipelineJob.TaskStatus.error.matches(psf.getStatus()))
         {
             _status = "This job encountered an error.";
         }
-        else if (PipelineJob.CANCELLED_STATUS.equals(psf.getStatus()))
+        else if (PipelineJob.TaskStatus.cancelled.matches(psf.getStatus()))
         {
             _status = "This job was cancelled at " + psf.getModified();
         }
-        else if (PipelineJob.WAITING_STATUS.equals(psf.getStatus()))
+        else if (PipelineJob.TaskStatus.waiting.matches(psf.getStatus()))
         {
             _status = "This job has not started yet.";
         }

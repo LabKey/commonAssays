@@ -25,7 +25,6 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -119,12 +118,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             setStatus("RUNNING");
             parseFile(getLogger());
             getLogger().info("Import completed successfully");
-            setStatus(PipelineJob.COMPLETE_STATUS);
+            setStatus(TaskStatus.complete);
         }
         catch (Exception e)
         {
             error("Import failed", e);
-            setStatus(PipelineJob.ERROR_STATUS);
+            setStatus(TaskStatus.error);
         }
     }
 

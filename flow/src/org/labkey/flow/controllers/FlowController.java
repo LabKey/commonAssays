@@ -224,7 +224,7 @@ public class FlowController extends BaseFlowController
                     return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
                 }
 
-                if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
+                if (PipelineJob.TaskStatus.complete.matches(psf.getStatus()))
                 {
                     if (form.getRedirect() != null)
                     {

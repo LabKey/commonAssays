@@ -80,7 +80,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         {
             MS2Run run = MS2Manager.importRun(getInfo(), getLogger(), _file, _runInfo, new XarContext(getDescription(), getContainer(), getUser()));
             MS2Manager.ensureWrapped(run, getUser());
-            setStatus(PipelineJob.COMPLETE_STATUS);
+            setStatus(TaskStatus.complete);
             completeStatus = true;
         }
         catch (Exception e)
@@ -91,7 +91,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         {
             if (!completeStatus)
             {
-                setStatus(PipelineJob.ERROR_STATUS);
+                setStatus(TaskStatus.error);
             }
         }
     }

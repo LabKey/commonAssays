@@ -106,12 +106,12 @@ public class ImportScanCountsUpgradeJob extends PipelineJob implements Serializa
         catch (Exception e)
         {
             error("Import failure", e);
-            setStatus(PipelineJob.ERROR_STATUS, "Job finished at: " + DateUtil.nowISO());
+            setStatus(TaskStatus.error, "Job finished at: " + DateUtil.nowISO());
         }
         finally
         {
             info(String.format(UPGRADE_STATS, count, imported));
-            setStatus(PipelineJob.COMPLETE_STATUS, "Job finished at: " + DateUtil.nowISO());
+            setStatus(TaskStatus.complete, "Job finished at: " + DateUtil.nowISO());
         }
     }
 }

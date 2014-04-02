@@ -26,7 +26,6 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
@@ -187,7 +186,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 if (keywordsJob.hasErrors())
                 {
                     getLogger().error("Failed to import keywords.");
-                    setStatus(PipelineJob.ERROR_STATUS);
+                    setStatus(TaskStatus.error);
                 }
                 else
                 {
@@ -242,7 +241,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
                 if (!hasErrors())
                 {
-                    setStatus(PipelineJob.COMPLETE_STATUS);
+                    setStatus(TaskStatus.complete);
                     completeStatus = true;
                 }
             }
@@ -255,7 +254,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         {
             if (!completeStatus)
             {
-                setStatus(PipelineJob.ERROR_STATUS);
+                setStatus(TaskStatus.error);
             }
         }
     }

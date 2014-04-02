@@ -152,13 +152,13 @@ public class BackgroundSubtractionJob extends PipelineJob
                         if (subtractBackground != null)
                             run.setProperty(getUser(), subtractBackground.getPropertyDescriptor(), true);
                     }
-                    setStatus(PipelineJob.COMPLETE_STATUS, "Job finished at: " + DateUtil.nowISO());
+                    setStatus(TaskStatus.complete, "Job finished at: " + DateUtil.nowISO());
                     transaction.commit();
                 }
                 catch (Exception e)
                 {
                     error("Error occurred running the background subtraction job", e);
-                    setStatus(PipelineJob.ERROR_STATUS, "Job finished at: " + DateUtil.nowISO());
+                    setStatus(TaskStatus.error, "Job finished at: " + DateUtil.nowISO());
                 }
             }
             else

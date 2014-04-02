@@ -97,12 +97,12 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         catch (Exception e)
         {
             error("Error occurred running the mspicture upgrade background job", e);
-            setStatus(PipelineJob.ERROR_STATUS, "Job finished at: " + DateUtil.nowISO());
+            setStatus(TaskStatus.error, "Job finished at: " + DateUtil.nowISO());
         }
         finally
         {
             info(String.format(UPGRADE_STATS, runsProcessed));
-            setStatus(PipelineJob.COMPLETE_STATUS, "Job finished at: " + DateUtil.nowISO());
+            setStatus(TaskStatus.complete, "Job finished at: " + DateUtil.nowISO());
         }
     }
 

@@ -764,7 +764,7 @@ Ext4.define('Microarray.GeoExportPanel', {
 
                         if(dupIdx > -1){
                             hasError = true;
-                            alert('Error: you cannot have duplicate propert names (' + data.prop_name + '). The form was not saved.');
+                            alert('Error: you cannot have duplicate property names (' + data.prop_name + '). The form was not saved.');
                             return false;
                         }
                         recordsToAdd.push(store.model.create(data));

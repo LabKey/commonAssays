@@ -273,7 +273,7 @@ public class RScriptJob extends FlowExperimentJob
             if (importJob.hasErrors())
             {
                 getLogger().error("Failed to import results from R analysis '" + dir + "'.");
-                setStatus(PipelineJob.ERROR_STATUS);
+                setStatus(TaskStatus.error);
             }
             else
             {

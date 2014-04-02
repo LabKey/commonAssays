@@ -84,18 +84,18 @@ public class FastaReloaderJob extends PipelineJob
                 else
                 {
                     error("Could not find FASTA id " + oldFastaId);
-                    setStatus(PipelineJob.ERROR_STATUS);
+                    setStatus(TaskStatus.error);
                     return;
                 }
             }
             catch(Exception e)
             {
                 error("Exception while updating SeqIds for FASTA id " + oldFastaId, e);
-                setStatus(PipelineJob.ERROR_STATUS);
+                setStatus(TaskStatus.error);
                 return;
             }
             info("Completed successfully");
-            setStatus(PipelineJob.COMPLETE_STATUS);
+            setStatus(TaskStatus.complete);
         }
     }
 

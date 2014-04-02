@@ -17,7 +17,6 @@
 package org.labkey.ms2.protein;
 
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.xml.sax.SAXException;
 
@@ -59,7 +58,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
         try
         {
             info("Starting annotation load for " + _file);
-            setStatus("RUNNING");
+            setStatus(TaskStatus.running);
             validate();
             Connection conn = ProteinManager.getSchema().getScope().ensureTransaction().getConnection();
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
@@ -68,7 +67,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
             ProteinManager.getSchema().getScope().commitTransaction();
             ProteinManager.indexProteins(null, (Date)null);
             info("Import completed successfully");
-            setStatus(PipelineJob.COMPLETE_STATUS);
+            setStatus(TaskStatus.complete);
             success = true;
         }
         catch (SAXException e)
@@ -87,7 +86,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
         if (!success)
         {
             // Need to do this outside of the connection, so can't do it inside the catch block above
-            setStatus(PipelineJob.ERROR_STATUS);
+            setStatus(TaskStatus.error);
         }
     }
 } // class XMLProteinLoader

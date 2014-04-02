@@ -68,26 +68,10 @@ public class ProteinProphetPipelineJob extends PipelineJob
             ProteinProphetImporter importer = new ProteinProphetImporter(_file, null, new XarContext(null, getContainer(), getUser()));
             MS2Run run = importer.importFile(getInfo(), getLogger());
             MS2Manager.ensureWrapped(run, getUser());
-            setStatus(PipelineJob.COMPLETE_STATUS);
+            setStatus(TaskStatus.complete);
             completeStatus = true;
         }
-        catch (SQLException e)
-        {
-            getLogger().error("ProteinProphet load failed", e);
-        }
-        catch (IOException e)
-        {
-            getLogger().error("ProteinProphet load failed", e);
-        }
-        catch (XMLStreamException e)
-        {
-            getLogger().error("ProteinProphet load failed", e);
-        }
-        catch (ExperimentException e)
-        {
-            getLogger().error("ProteinProphet load failed", e);
-        }
-        catch (RuntimeException e)
+        catch (SQLException | IOException | XMLStreamException | ExperimentException | RuntimeException e)
         {
             getLogger().error("ProteinProphet load failed", e);
         }
@@ -95,7 +79,7 @@ public class ProteinProphetPipelineJob extends PipelineJob
         {
             if (!completeStatus)
             {
-                setStatus(PipelineJob.ERROR_STATUS);
+                setStatus(TaskStatus.error);
             }
         }
 
