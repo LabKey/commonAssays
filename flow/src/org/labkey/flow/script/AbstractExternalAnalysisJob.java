@@ -18,6 +18,7 @@ package org.labkey.flow.script;
 
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -315,11 +316,10 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
         ExperimentService.Interface svc = ExperimentService.get();
         boolean success = false;
-        try
+        try (DbScope.Transaction transaction = svc.ensureTransaction())
         {
             addStatus("Begin transaction for " + analysisName);
 
-            svc.ensureTransaction();
             ExpRun run = svc.createExperimentRun(container, analysisName);
             FlowProtocol flowProtocol = getProtocol();
             ExpProtocol protocol = flowProtocol.getProtocol();
@@ -464,7 +464,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
             FlowManager.get().updateFlowObjectCols(container);
 
-            svc.commitTransaction();
+            transaction.commit();
             success = true;
             addStatus("Transaction completed successfully for " + analysisName);
 
@@ -472,7 +472,6 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         }
         finally
         {
-            svc.closeTransaction();
             if (!success)
             {
                 addStatus("Transaction failed to complete for " + analysisName);

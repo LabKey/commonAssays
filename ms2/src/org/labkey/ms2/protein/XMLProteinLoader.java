@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.protein;
 
+import org.labkey.api.data.DbScope;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.xml.sax.SAXException;
@@ -55,20 +56,20 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
     public void run()
     {
         boolean success = false;
-        try
+        info("Starting annotation load for " + _file);
+        setStatus(TaskStatus.running);
+        try (DbScope.Transaction transaction = ProteinManager.getSchema().getScope().ensureTransaction())
         {
-            info("Starting annotation load for " + _file);
-            setStatus(TaskStatus.running);
             validate();
-            Connection conn = ProteinManager.getSchema().getScope().ensureTransaction().getConnection();
+            Connection conn = transaction.getConnection();
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
             handler.parse(_file);
             conn.setAutoCommit(false);
-            ProteinManager.getSchema().getScope().commitTransaction();
             ProteinManager.indexProteins(null, (Date)null);
             info("Import completed successfully");
             setStatus(TaskStatus.complete);
             success = true;
+            transaction.commit();
         }
         catch (SAXException e)
         {
@@ -77,10 +78,6 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
         catch (Exception e)
         {
             error("Import failed", e);
-        }
-        finally
-        {
-            ProteinManager.getSchema().getScope().closeConnection();
         }
 
         if (!success)

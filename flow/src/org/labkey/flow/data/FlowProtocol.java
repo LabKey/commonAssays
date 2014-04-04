@@ -315,10 +315,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         ColumnInfo colSampleId = columns.get(fieldSampleRowId);
         int ret = 0;
 
-        try (ResultSet rs = new TableSelector(fcsFilesTable, new ArrayList<>(columns.values()), null, null).getResultSet())
+        try (ResultSet rs = new TableSelector(fcsFilesTable, new ArrayList<>(columns.values()), null, null).getResultSet();
+             DbScope.Transaction transaction = svc.ensureTransaction())
         {
-            svc.ensureTransaction();
-
             while (rs.next())
             {
                 int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
@@ -370,11 +369,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     ret ++;
                 }
             }
-            svc.commitTransaction();
-        }
-        finally
-        {
-            svc.closeTransaction();
+            transaction.commit();
         }
         return ret;
     }

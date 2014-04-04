@@ -50,16 +50,18 @@ public class PeaksFileImporter extends DefaultHandler
         _user = user;
     }
 
-    protected void beginTransaction() throws SAXException
+    protected void beginTransaction()
     {
         DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().beginTransaction();
     }
 
-    protected void commitTransaction() throws SAXException
+    @Deprecated
+    protected void commitTransaction()
     {
         DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().commitTransaction();
     }
 
+    @Deprecated
     protected void closeConnection()
     {
         DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().closeConnection();
