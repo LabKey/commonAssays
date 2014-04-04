@@ -101,7 +101,7 @@ public class PendingMageMLFilesView extends QueryView
             }
             else
             {
-                if (microarrayProtocols.size() > 1)
+                if (microarrayProtocols.size() == 1)
                 {
                     ExpProtocol protocol = microarrayProtocols.get(0);
                     ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);

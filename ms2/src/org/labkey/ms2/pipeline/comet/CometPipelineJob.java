@@ -65,11 +65,6 @@ public class CometPipelineJob extends AbstractMS2SearchPipelineJob
         return TASK_ID;
     }
 
-    public boolean isRefreshRequired()
-    {
-        return true;
-    }
-
     public File getSearchNativeOutputFile()
     {
         return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());
