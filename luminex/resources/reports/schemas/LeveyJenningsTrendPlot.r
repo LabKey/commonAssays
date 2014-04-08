@@ -112,8 +112,8 @@ if (!is.null(labkey.url.params$MaxRows)) {
 if (!is.null(isTitration)) {
     labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
                                 folderPath=labkey.url.path,
-                                schemaName="assay",
-                                queryName=paste(labkey.url.params$Protocol, "AnalyteTitration", sep=" "),
+                                schemaName=paste("assay.Luminex.", labkey.url.params$Protocol, sep=""),
+                                queryName="AnalyteTitration",
                                 colSelect=colSelect,
                                 colFilter=colFilter,
                                 colSort="-Analyte/Data/AcquisitionDate,-Titration/Run/Created",
@@ -123,8 +123,8 @@ if (!is.null(isTitration)) {
 } else {
     labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
                                 folderPath=labkey.url.path,
-                                schemaName="assay",
-                                queryName=paste(labkey.url.params$Protocol, "AnalyteSinglePointControl", sep=" "),
+                                schemaName=paste("assay.Luminex.", labkey.url.params$Protocol, sep=""),
+                                queryName="AnalyteSinglePointControl",
                                 colSelect=colSelect,
                                 colFilter=colFilter,
                                 colSort="-Analyte/Data/AcquisitionDate,-SinglePointControl/Run/Created",
