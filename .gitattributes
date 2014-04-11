@@ -522,6 +522,7 @@ flow/src/org/labkey/flow/data/FlowProtocol.java -text
 flow/src/org/labkey/flow/data/FlowProtocolImplementation.java -text
 flow/src/org/labkey/flow/data/FlowProtocolSchema.java -text
 flow/src/org/labkey/flow/data/FlowProtocolStep.java -text
+flow/src/org/labkey/flow/data/FlowProviderSchema.java -text
 flow/src/org/labkey/flow/data/FlowRun.java -text
 flow/src/org/labkey/flow/data/FlowRunWorkspace.java -text
 flow/src/org/labkey/flow/data/FlowScript.java -text

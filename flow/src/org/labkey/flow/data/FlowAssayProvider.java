@@ -45,6 +45,7 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -296,6 +297,12 @@ public class FlowAssayProvider extends AbstractAssayProvider
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container);
+    }
+
+    @Override
+    public AssayProviderSchema createProviderSchema(User user, Container container, Container targetStudy)
+    {
+        return new FlowProviderSchema(user, container, this, targetStudy);
     }
 
     @Override
