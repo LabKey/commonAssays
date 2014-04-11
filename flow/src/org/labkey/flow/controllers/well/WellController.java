@@ -289,22 +289,26 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
+            well = getWell();
+            if (well == null)
+            {
+                int objectId = getIntParam(FlowParam.objectId);
+                if (objectId == 0)
+                    return null;
+                FlowDataObject obj = FlowDataObject.fromAttrObjectId(objectId);
+                if (!(obj instanceof FlowWell))
+                    return null;
+                well = (FlowWell) obj;
+                well.checkContainer(getActionURL());
+            }
+
+            String graph = getParam(FlowParam.graph);
+            if (graph == null)
+                throw new NotFoundException("Graph spec required");
+
             byte[] bytes = null;
             try
             {
-                well = getWell();
-                if (well == null)
-                {
-                    int objectId = getIntParam(FlowParam.objectId);
-                    if (objectId == 0)
-                        return null;
-                    FlowDataObject obj = FlowDataObject.fromAttrObjectId(objectId);
-                    if (!(obj instanceof FlowWell))
-                        return null;
-                    well = (FlowWell) obj;
-                    well.checkContainer(getActionURL());
-                }
-                String graph = getParam(FlowParam.graph);
                 GraphSpec spec = new GraphSpec(graph);
                 bytes = well.getGraphBytes(spec);
             }
@@ -313,6 +317,7 @@ public class WellController extends BaseFlowController
                 _log.error("Error retrieving graph", ex);
                 ExceptionUtil.logExceptionToMothership(getRequest(), ex);
             }
+
             if (bytes != null)
             {
                 streamBytes(getViewContext().getResponse(),
@@ -340,11 +345,19 @@ public class WellController extends BaseFlowController
     {
         public ModelAndView getView(ChooseGraphForm form, BindException errors) throws IOException
         {
-            GraphSpec graph = new GraphSpec(getRequest().getParameter("graph"));
+            FlowWell well = form.getWell();
+            if (well == null)
+                throw new NotFoundException("Well not found");
+
+            String graph = getParam(FlowParam.graph);
+            if (graph == null)
+                throw new NotFoundException("Graph spec required");
+
+            GraphSpec graphSpec = new GraphSpec(graph);
             FCSAnalyzer.GraphResult res = null;
             try
             {
-                res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graph);
+                res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graphSpec);
             }
             catch (IOException ioe)
             {
