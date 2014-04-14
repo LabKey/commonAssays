@@ -15,6 +15,16 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.query.FieldKey;
+
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * Simple bean for mapping analytes to single point controls in the database
  * User: jeckels
@@ -51,5 +61,33 @@ public class AnalyteSinglePointControl extends AbstractLuminexControlAnalyte
     public void setSinglePointControlId(int singlePointControlId)
     {
         _singlePointControlId = singlePointControlId;
+    }
+
+    @Override
+    public void updateQCFlags(LuminexProtocolSchema schema) throws SQLException
+    {
+        // get the run, isotype, conjugate, and analtye/single point control information in order to update QC Flags
+        Analyte analyte = getAnalyteFromId();
+        SinglePointControl control = getSinglePointControlFromId();
+        ExpRun run = getRun(control.getRunId());
+        Map<String, String> runIsotypeConjugate = getIsotypeAndConjugate(run);
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
+        filter.addCondition(FieldKey.fromParts("SinglePointControl"), control.getRowId());
+        AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(true);
+        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
+        Double average = new TableSelector(analyteSinglePointControlTable, Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
+
+        LuminexDataHandler.insertOrUpdateAnalyteSinglePointControlQCFlags(schema.getUser(), run, schema.getProtocol(), this, analyte, control, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), average);
+    }
+
+    public SinglePointControl getSinglePointControlFromId()
+    {
+        SinglePointControl result = new TableSelector(LuminexProtocolSchema.getTableInfoSinglePointControl()).getObject(getSinglePointControlId(), SinglePointControl.class);
+        if (result == null)
+        {
+            throw new IllegalStateException("Unable to find referenced single point control: " + getSinglePointControlId());
+        }
+        return result;
     }
 }

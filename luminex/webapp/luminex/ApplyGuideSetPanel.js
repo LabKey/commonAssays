@@ -142,15 +142,16 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // add a grid with the list of possible guide sets for the given criteria
-        var guideSetColumns = 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet, ';
+        var guideSetColumns = 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet, ValueBased, ';
         if (this.controlType == 'Titration')
         {
-            guideSetColumns += 'Four ParameterCurveFit/EC50Average, Five ParameterCurveFit/EC50Average, '
+            guideSetColumns += 'ValueBasedEC504PLAverage, ValueBasedEC505PLAverage, ValueBasedAUCAverage, ValueBasedMaxFIAverage, '
+                            + 'Four ParameterCurveFit/EC50Average, Five ParameterCurveFit/EC50Average, '
                             + 'MaxFIAverage, TrapezoidalCurveFit/AUCAverage';
         }
         else
         {
-            guideSetColumns += 'SinglePointControlFIAverage';
+            guideSetColumns += 'ValueBasedMaxFIAverage, SinglePointControlFIAverage';
         }
         var guideSetsStore = new LABKEY.ext.Store({
             storeId: 'guideSetsStore',
@@ -169,6 +170,22 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             listeners: {
                 scope: this,
                 'load': function(store, records, options){
+                    Ext.each(records, function(record){
+
+                        // merge the values for the value-based vs run-based guide set averages into a single column
+                        if (this.controlType == 'Titration')
+                        {
+                            record.set("EC504PLAverage", record.get("ValueBasedEC504PLAverage") || record.get("Four ParameterCurveFit/EC50Average"));
+                            record.set("EC505PLAverage", record.get("ValueBasedEC505PLAverage") || record.get("Five ParameterCurveFit/EC50Average"));
+                            record.set("AUCAverage", record.get("ValueBasedAUCAverage") || record.get("TrapezoidalCurveFit/AUCAverage"));
+                            record.set("MFIAverage", record.get("ValueBasedMaxFIAverage") || record.get("MaxFIAverage"));
+                        }
+                        else
+                        {
+                            record.set("MFIAverage", record.get("ValueBasedMaxFIAverage") || record.get("SinglePointControlFIAverage"));
+                        }
+                    }, this);
+
                     // by default, check the current guide set
                     var index = store.find("CurrentGuideSet", true);
                     if (index > -1)
@@ -188,19 +205,20 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             guideSetsSelModel,
             {header: 'Created By', dataIndex: 'CreatedBy/DisplayName', width: 100},
             {header: 'Created', dataIndex: 'Created', renderer: this.dateRenderer},
-            {header: 'Current', dataIndex: 'CurrentGuideSet'},
-            {header: 'Comment', dataIndex: 'Comment', renderer: this.encodingRenderer, width: 200}
+            {header: 'Type', dataIndex: 'ValueBased', renderer: this.typeRenderer, width: 75},
+            {header: 'Current', dataIndex: 'CurrentGuideSet', width: 50},
+            {header: 'Comment', dataIndex: 'Comment', renderer: this.encodingRenderer, width: 200, sortable: false}
         ];
         if (this.controlType == 'Titration')
         {
-            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'});
-            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'Five ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'});
-            guideSetColumnModelColumns.push({header: 'Avg AUC', dataIndex: 'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'});
-            guideSetColumnModelColumns.push({header: 'Avg High MFI', dataIndex: 'MaxFIAverage', renderer: this.numberRenderer, align: 'right'});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'EC504PLAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'EC505PLAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg AUC', dataIndex: 'AUCAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg High MFI', dataIndex: 'MFIAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
         }
         else
         {
-            guideSetColumnModelColumns.push({header: 'MFI', dataIndex: 'SinglePointControlFIAverage', renderer: this.numberRenderer, align: 'right'});
+            guideSetColumnModelColumns.push({header: 'MFI', dataIndex: 'MFIAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
         }
         var guideSetsColModel = new Ext.grid.ColumnModel({
             defaults: {width: 75, sortable: true},
@@ -359,5 +377,9 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     encodingRenderer: function(value, p, record) {
         return $h(value);
+    },
+
+    typeRenderer: function(value) {
+        return value ? 'Value-based' : 'Run-based';
     }
 });

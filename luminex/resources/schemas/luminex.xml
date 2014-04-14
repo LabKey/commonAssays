@@ -83,6 +83,33 @@
             <column columnName="Conjugate" />
             <column columnName="Isotype" />
             <column columnName="ControlName" />
+            <column columnName="ValueBased">
+                <description>True to designate this guide set as value-based. False indicates a run-based guide set.</description>
+            </column>
+            <column columnName="EC504PLAverage">
+                <description>4PL EC50 metric average value for value-based guide set</description>
+            </column>
+            <column columnName="EC504PLStdDev">
+                <description>4PL EC50 metric standard deviation value for value-based guide set</description>
+            </column>
+            <column columnName="EC505PLAverage">
+                <description>5PL EC50 metric average value for value-based guide set</description>
+            </column>
+            <column columnName="EC505PLStdDev">
+                <description>5PL EC50 metric standard deviation value for value-based guide set</description>
+            </column>
+            <column columnName="AUCAverage">
+                <description>AUC metric average value for value-based guide set</description>
+            </column>
+            <column columnName="AUCStdDev">
+                <description>AUC metric standard deviation value for value-based guide set</description>
+            </column>
+            <column columnName="MaxFIAverage">
+                <description>MFI metric average value for value-based guide set</description>
+            </column>
+            <column columnName="MaxFIStdDev">
+                <description>MFI metric standard deviation value for value-based guide set</description>
+            </column>
             <column columnName="Comment" />
             <column columnName="Created" />
             <column columnName="CreatedBy" />

@@ -2,3 +2,45 @@
 .highlight {
     background-color: #C0C0C0;
 }
+
+table.guideset-tbl {
+    width: 100%;
+}
+
+table.guideset-tbl td {
+    background-color: #DDDDDD;
+    padding: 4px;
+    border: solid #CCCCCC 1px;
+}
+
+td.guideset-hdr {
+    width: 75px;
+    text-align: right;
+    vertical-align: top;
+    font-weight: bold;
+}
+
+div.guideset-no {
+    background-color: #DDDDDD;
+    padding: 3px;
+    border: solid #CCCCCC 1px;
+}
+
+.x-fieldset legend {
+    background-color: transparent;
+    border: none;
+    font: inherit;
+    font-weight: bold;
+    color: black;
+}
+
+div .guideset-numberfield {
+    margin: 2px 15px 3px 15px;
+    padding: 1px;
+}
+
+div.guideset-label {
+    background-color: #EEEEEE;
+    padding: 3px;
+    font-weight: bold;
+}

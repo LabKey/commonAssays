@@ -28,6 +28,16 @@ Ext.QuickTips.init();
  * @params conjugate 
  */
 LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
+
+    labelStyleStr : 'background-color:#EEEEEE; padding:3px; font-weight:bold;',
+
+    metrics : [
+        {name: 'EC504PL', label: 'EC50 4PL', includeForSinglePointControl: false},
+        {name: 'EC505PL', label: 'EC50 5PL (Rumi)', includeForSinglePointControl: false},
+        {name: 'AUC', label: 'AUC', includeForSinglePointControl: false},
+        {name: 'MaxFI', label: 'High MFI', includeForSinglePointControl: true}
+    ],
+
     constructor : function(config){
         // check that the config properties needed are present
         if (!config.assayName)
@@ -53,6 +63,12 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
         LABKEY.ManageGuideSetPanel.superclass.initComponent.call(this);
 
+        var columns = 'RowId, CurrentGuideSet, Comment, Created, ValueBased';
+        Ext.each(this.metrics, function(metric){
+            if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                columns += ', ValueBased' + metric.name + 'Average, ValueBased' + metric.name + 'StdDev';
+        }, this);
+
         if (this.guideSetId)
         {
             // query the server for the current guide set information
@@ -60,7 +76,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 schemaName: 'assay.Luminex.' + this.assayName,
                 queryName: 'GuideSet',
                 filterArray: [LABKEY.Filter.create('RowId', this.guideSetId)],
-                columns: 'RowId, CurrentGuideSet, Comment, Created',
+                columns: columns,
                 success: this.addGuideSetInfoLabels,
                 scope: this
             });
@@ -70,44 +86,86 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     },
 
     addGuideSetInfoLabels: function(data) {
-        if (data && data.rows.length > 1)
+        if (data)
         {
-            Ext.Msg.alert("Error", "More than one guide set found for id " + this.guideSetId);
+            if (data.rows.length > 1)
+            {
+                Ext.Msg.alert("Error", "More than one guide set found for id " + this.guideSetId);
+            }
+            else if(data && data.rows.length == 1)
+            {
+                this.guideSetRowData = data.rows[0];
+                this.valueBased = this.guideSetRowData["ValueBased"];
+            }
         }
-        else if(data && data.rows.length == 1)
+        else
         {
-            // store the guide set info from the data row
-            this.currentGuideSet = data.rows[0]["CurrentGuideSet"];
-            this.created = data.rows[0]["Created"];
-            this.comment = data.rows[0]["Comment"];
+            this.guideSetRowData = {};
         }
 
         // add labels for the guide set information to the top of the panel
         this.add(new Ext.Panel({
-            width: 800,
+            width: 1075,
             border: false,
             items: [{
                 border: false,
                 layout: 'column',
                 defaults:{
-                    columnWidth: 0.5,
+                    columnWidth: 0.35,
                     layout: 'form',
                     border: false
                 },
                 items: [{
-                    defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
+                    defaults:{xtype: 'label', labelStyle: this.labelStyleStr},
                     items: [
                         {fieldLabel: 'Guide Set ID', text: this.guideSetId ? this.guideSetId : "TBD", id: 'guideSetIdLabel'},
-                        {fieldLabel: this.controlType == 'Titration' ? 'Titration' : 'Single Point Control', text: this.controlName},
+                        {fieldLabel: this.isTitrationControlType() ? 'Titration' : 'Single Point Control', text: this.controlName},
                         {fieldLabel: 'Analyte', text: this.analyte, id: 'analyteLabel'}
                     ]
                 },{
-                    defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
+                    defaults:{xtype: 'label', labelStyle: this.labelStyleStr},
                     items: [
-                        {fieldLabel: 'Created', text: this.created ? this.dateRenderer(this.created) : "TBD"},
+                        {fieldLabel: 'Created', text: this.guideSetRowData["Created"] ? this.dateRenderer(this.guideSetRowData["Created"]) : "TBD"},
                         {fieldLabel: 'Isotype', text: this.isotype == "" ? '[None]' : this.isotype},
                         {fieldLabel: 'Conjugate', text: this.conjugate == "" ? '[None]' : this.conjugate}
                     ]
+                },{
+                    columnWidth: 0.3,
+                    items: [{
+                        xtype: 'label',
+                        labelStyle: this.labelStyleStr,
+                        fieldLabel: 'Type',
+                        text: this.guideSetRowData["ValueBased"] ? 'Value-based' : 'Run-based',
+                        hidden: !this.guideSetId
+                    },{
+                        xtype:'fieldset',
+                        title: 'Guide Set Type',
+                        collapsible: false,
+                        padding: 20,
+                        defaultType: 'radio',
+                        layout: 'hbox',
+                        hidden: this.guideSetId,
+                        items: [
+                            {
+                                hideLabel: true,
+                                boxLabel: 'Run-based',
+                                name: 'ValueBased',
+                                inputValue: false,
+                                checked: true,
+                                width: 150
+                            },
+                            {
+                                hideLabel: true,
+                                boxLabel: 'Value-based',
+                                name: 'ValueBased',
+                                inputValue: true,
+                                listeners: {
+                                    scope: this,
+                                    check: this.toggleGuideSetSections
+                                }
+                            }
+                        ]
+                    }]
                 }]
             }]
         }));
@@ -116,7 +174,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // make sure that this guide set is a "current" guide set (only current sets are editable)
         var fields;
         var runPrefix;
-        if (this.controlType == 'Titration')
+        if (this.isTitrationControlType())
         {
             fields = ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network', 'Titration/Run/Batch/CustomProtocol',
                 'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
@@ -131,7 +189,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             runPrefix = 'SinglePointControl/Run';
         }
 
-        if (this.guideSetId && !this.currentGuideSet)
+        if (this.currentGuideSetIsInactive())
         {
             this.add({
                 xtype: 'displayfield',
@@ -159,7 +217,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             allRunsCols.push({header:'Assay Type', dataIndex:runPrefix + '/AssayType', width:100, renderer: this.encodingRenderer});
             allRunsCols.push({header:'Experiment Performer', dataIndex:runPrefix + '/ExpPerformer', width:100, renderer: this.encodingRenderer});
             allRunsCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
-            if (this.controlType == 'Titration')
+            if (this.isTitrationControlType())
             {
                 allRunsCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
                 allRunsCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
@@ -193,12 +251,14 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     this.addRunToGuideSet(grid.getStore().getAt(rowIndex));
             }, this);
             this.allRunsGrid.on('viewready', function(grid){
-                grid.getEl().mask("loading...", "x-mask-loading");
-            });
+                if (!this.allRunsGrid.dataLoaded)
+                    grid.getEl().mask("loading...", "x-mask-loading");
+            }, this);
 
-            this.add(new Ext.Panel(
-            {
+            this.add(new Ext.Panel({
                 title: 'All Runs',
+                id: 'AllRunsGrid',
+                hidden: true,
                 width:1075,
                 items: [
                     {
@@ -213,7 +273,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 ]
             }));
         }
-        this.add(new Ext.Spacer({height: 20}));
+        this.add(new Ext.Spacer({
+            height: 20,
+            id: 'AllRunsGridSpacer',
+            hidden: true
+        }));
 
         // add a grid for the list of runs currently in the selected guide set
         var guideRunSetStore = new Ext.data.JsonStore({
@@ -224,7 +288,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
         var guideRunSetCols = [];
-        guideRunSetCols.push({header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: this.guideSetId && !this.currentGuideSet, width:25});
+        guideRunSetCols.push({header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: this.guideSetId && !this.guideSetRowData["CurrentGuideSet"], width:25});
         guideRunSetCols.push({header:'Assay Id', dataIndex:runPrefix + '/Name', renderer: this.encodingRenderer, width:200});
         guideRunSetCols.push({header:'Network', dataIndex:runPrefix + '/Batch/Network', width:75, renderer: this.encodingRenderer, hidden: !this.networkExists});
         guideRunSetCols.push({header:'Protocol', dataIndex:runPrefix + '/Batch/CustomProtocol', width:75, renderer: this.encodingRenderer, hidden: !this.protocolExists});
@@ -233,7 +297,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         guideRunSetCols.push({header:'Assay Type', dataIndex:runPrefix + '/AssayType', width:100, renderer: this.encodingRenderer});
         guideRunSetCols.push({header:'Experiment Performer', dataIndex:runPrefix + '/ExpPerformer', width:100, renderer: this.encodingRenderer});
         guideRunSetCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
-        if (this.controlType == 'Titration')
+        if (this.isTitrationControlType())
         {
             guideRunSetCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
             guideRunSetCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
@@ -266,37 +330,62 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.removeRunFromGuideSet(grid.getStore().getAt(rowIndex));
         }, this);
         this.guideRunSetGrid.on('viewready', function(grid){
-            grid.getEl().mask("loading...", "x-mask-loading");
-        });
+            if (!this.guideRunSetGrid.dataLoaded)
+                grid.getEl().mask("loading...", "x-mask-loading");
+        }, this);
 
         this.add(new Ext.Panel({
             title: 'Runs Assigned to This Guide Set',
+            id: 'GuideSetRunGrid',
+            hidden: true,
             width:1075,
             items: [
                 {xtype: 'displayfield', value: 'List of all of the runs included in the guide set calculations for the selected guide set.'},
                 this.guideRunSetGrid
             ]
         }));
-        this.add(new Ext.Spacer({height: 20}));
+        this.add(new Ext.Spacer({
+            height: 20,
+            id: 'GuideSetRunGridSpacer',
+            hidden: true
+        }));
+
+        this.add(new Ext.Panel({
+            title: 'Metric Values',
+            id: 'MetricValues',
+            hidden: true,
+            layout: 'column',
+            width: 1075,
+            padding: 20,
+            defaults: {
+                columnWidth: .15,
+                border: false
+            },
+            items: [
+                this.getMetricLabelsPanel(),
+                this.getMetricMeanValuesPanel(),
+                this.getMetricStdDevValuesPanel()
+            ]
+        }));
+        this.add(new Ext.Spacer({
+            height: 20,
+            id: 'MetricValuesSpacer',
+            hidden: true
+        }));
 
         // add a comment text field for the guide set
         this.commentTextField = new Ext.form.TextField({
             id: 'commentTextField',
-            labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold',
+            labelStyle: this.labelStyleStr,
             fieldLabel: 'Comment',
-            value: this.comment,
+            value: this.guideSetRowData["Comment"],
+            disabled: this.currentGuideSetIsInactive(),
             width: 965,
             enableKeyEvents: true,
             listeners: {
                 scope: this,
-                'keydown': function(){
-                    // enable the save button
-                    Ext.getCmp('saveButton').enable();
-                },
-                'change': function(){
-                    // enable the save button
-                    Ext.getCmp('saveButton').enable();
-                }
+                'keydown': function(){ Ext.getCmp('saveButton').enable(); },
+                'change': function(){ Ext.getCmp('saveButton').enable(); }
             }
         });
 
@@ -304,7 +393,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.add(new Ext.Spacer({height: 10}));
 
         // add save and cancel buttons to the toolbar
-        if (!this.guideSetId || this.currentGuideSet)
+        if (!this.guideSetId || this.guideSetRowData["CurrentGuideSet"])
         {
             this.addButton({
                 id: 'saveButton',
@@ -323,9 +412,135 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
         }
 
+        this.toggleGuideSetSections();
+
         this.doLayout();
 
         this.queryAllRunsForCriteria();
+    },
+
+    isTitrationControlType : function() {
+        return this.controlType == 'Titration';
+    },
+
+    currentGuideSetIsInactive : function() {
+        return this.guideSetId && !this.guideSetRowData["CurrentGuideSet"];
+    },
+
+    createLabelField : function(txt, style) {
+        return {
+            xtype: 'displayfield',
+            hideLabel: true,
+            cls: 'guideset-label',
+            style: style || 'text-align: right; margin: 5px;',
+            value: txt
+        };
+    },
+
+    createNumberField : function(name) {
+        return {
+            xtype: 'numberfield',
+            cls: 'guideset-numberfield',
+            itemId: name,
+            name: name,
+            hideLabel: true,
+            disabled: this.currentGuideSetIsInactive(),
+            value: this.guideSetRowData["ValueBased" + name],
+            enableKeyEvents: true,
+            listeners: {
+                scope: this,
+                'keydown': function(){ Ext.getCmp('saveButton').enable(); },
+                'change': function(){ Ext.getCmp('saveButton').enable(); }
+            }
+        };
+    },
+
+    getMetricLabelsPanel : function() {
+        if (!this.metricLabelsPanel)
+        {
+            this.metricLabelsPanel = new Ext.Panel({
+                items: [
+                    this.createLabelField('&nbsp;', 'margin: 5px; background-color: #FFFFFF;')
+                ]
+            });
+
+            Ext.each(this.metrics, function(metric){
+                if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                    this.metricLabelsPanel.add(this.createLabelField(metric.label + ':'));
+            }, this);
+        }
+
+        return this.metricLabelsPanel;
+    },
+
+    getMetricMeanValuesPanel : function() {
+        if (!this.metricMeanValuesPanel)
+        {
+            this.metricMeanValuesPanel = new Ext.Panel({
+                items: [
+                    this.createLabelField('Mean',  'text-align: center; margin: 5px;')
+                ]
+            });
+
+            Ext.each(this.metrics, function(metric){
+                if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                    this.metricMeanValuesPanel.add(this.createNumberField(metric.name + 'Average'));
+            }, this);
+        }
+
+        return this.metricMeanValuesPanel;
+    },
+
+    getMetricStdDevValuesPanel : function() {
+        if (!this.metricStdDevValuesPanel)
+        {
+            this.metricStdDevValuesPanel = new Ext.Panel({
+                items: [
+                    this.createLabelField('Std. Dev.',  'text-align: center; margin: 5px;')
+                ]
+            });
+
+            Ext.each(this.metrics, function(metric){
+                if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                    this.metricStdDevValuesPanel.add(this.createNumberField(metric.name + 'StdDev'));
+            }, this);
+        }
+
+        return this.metricStdDevValuesPanel;
+    },
+
+    getMetricValues : function() {
+        var values = {};
+
+        Ext.each(this.metrics, function(metric){
+            if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+            {
+                var numFld = this.getMetricMeanValuesPanel().getComponent(metric.name + 'Average');
+                values[numFld.getName()] = numFld.getValue();
+
+                numFld = this.getMetricStdDevValuesPanel().getComponent(metric.name + 'StdDev');
+                values[numFld.getName()] = numFld.getValue();
+            }
+        }, this);
+
+        return values;
+    },
+
+    toggleGuideSetSections : function(radio, selectedValueBased) {
+        var isValueBased = this.guideSetId && this.guideSetRowData["ValueBased"];
+        this.valueBased = isValueBased || selectedValueBased;
+
+        if (!this.currentGuideSetIsInactive())
+        {
+            Ext.getCmp('AllRunsGrid').setVisible(!this.valueBased);
+            Ext.getCmp('AllRunsGridSpacer').setVisible(!this.valueBased);
+        }
+
+        Ext.getCmp('GuideSetRunGrid').setVisible(!this.valueBased);
+        Ext.getCmp('GuideSetRunGridSpacer').setVisible(!this.valueBased);
+
+        Ext.getCmp('MetricValues').setVisible(this.valueBased);
+        Ext.getCmp('MetricValuesSpacer').setVisible(this.valueBased);
     },
 
     createGuideSet: function() {
@@ -394,35 +609,45 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }]
         }];
 
-        // get the list of modified records and set up the save rows array
-        var modRecords = this.allRunsGrid.getStore().getModifiedRecords();
-        var dataRows = [];
-        Ext.each(modRecords, function(record){
-
-            var dataRow = {
-                Analyte: record.get("Analyte"),
-                IncludeInGuideSetCalculation: record.get("IncludeInGuideSetCalculation"),
-                GuideSetId: record.get("IncludeInGuideSetCalculation") ? this.guideSetId : record.get("GuideSet")
-            };
-            if (this.controlType == 'Titration')
-            {
-                dataRow.Titration = record.get("Titration");
-            }
-            else
-            {
-                dataRow.SinglePointControl = record.get("SinglePointControl");
-            }
-            dataRows.push(dataRow);
-        }, this);
-
-        if (dataRows.length > 0)
+        // if we are creating a Value-based guide set, add the metric values
+        // otherwise get the information from the run grids
+        if (this.valueBased)
         {
-            commands.push({
-                schemaName: 'assay.Luminex.' + this.assayName,
-                queryName: this.controlType == 'Titration' ? 'AnalyteTitration' : 'AnalyteSinglePointControl',
-                command: 'update',
-                rows: dataRows
-            });
+            commands[0].rows[0].ValueBased = true;
+            Ext.apply(commands[0].rows[0], this.getMetricValues());
+        }
+        else
+        {
+            // get the list of modified records and set up the save rows array
+            var modRecords = this.allRunsGrid.getStore().getModifiedRecords();
+            var dataRows = [];
+            Ext.each(modRecords, function(record){
+
+                var dataRow = {
+                    Analyte: record.get("Analyte"),
+                    IncludeInGuideSetCalculation: record.get("IncludeInGuideSetCalculation"),
+                    GuideSetId: record.get("IncludeInGuideSetCalculation") ? this.guideSetId : record.get("GuideSet")
+                };
+                if (this.isTitrationControlType())
+                {
+                    dataRow.Titration = record.get("Titration");
+                }
+                else
+                {
+                    dataRow.SinglePointControl = record.get("SinglePointControl");
+                }
+                dataRows.push(dataRow);
+            }, this);
+
+            if (dataRows.length > 0)
+            {
+                commands.push({
+                    schemaName: 'assay.Luminex.' + this.assayName,
+                    queryName: this.isTitrationControlType() ? 'AnalyteTitration' : 'AnalyteSinglePointControl',
+                    command: 'update',
+                    rows: dataRows
+                });
+            }
         }
 
         var that = this; // work-around for 'too much recursion' error
@@ -445,7 +670,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         var columns;
         var runPrefix;
-        if (this.controlType == 'Titration')
+        if (this.isTitrationControlType())
         {
             columns = 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                                 + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/Batch/CustomProtocol, Titration/Run/NotebookNo, '
@@ -465,10 +690,10 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // query the server for the list of runs that meet the given criteria
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + this.assayName,
-            queryName: this.controlType == 'Titration' ? 'AnalyteTitration' : 'AnalyteSinglePointControl',
+            queryName: this.isTitrationControlType() ? 'AnalyteTitration' : 'AnalyteSinglePointControl',
             columns: columns,
             filterArray: [
-                this.controlType == 'Titration' ? LABKEY.Filter.create('Titration/Name', this.controlName) : LABKEY.Filter.create('SinglePointControl/Name', this.controlName),
+                this.isTitrationControlType() ? LABKEY.Filter.create('Titration/Name', this.controlName) : LABKEY.Filter.create('SinglePointControl/Name', this.controlName),
                 LABKEY.Filter.create('Analyte/Name', this.analyte),
                 LABKEY.Filter.create(runPrefix + '/Isotype', this.isotype, (this.isotype == "" ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                 LABKEY.Filter.create(runPrefix + '/Conjugate', this.conjugate, (this.conjugate == "" ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
@@ -505,12 +730,14 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         if (this.allRunsGrid)
         {
             this.allRunsGrid.getStore().loadData(allRunsStoreData);
+            this.allRunsGrid.dataLoaded = true;
             this.allRunsGrid.getEl().unmask();
         }
 
         if (this.guideRunSetGrid)
         {
             this.guideRunSetGrid.getStore().loadData(guideRunSetStoreData);
+            this.guideRunSetGrid.dataLoaded = true;
             this.guideRunSetGrid.getEl().unmask();
         }
     },
@@ -526,8 +753,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // enable the add icon in the all runs store by setting the IncludeInGuideSetCalculation value 
         var index = this.allRunsGrid.getStore().findBy(function(rec, id){
             return (record.get("Analyte") == rec.get("Analyte") &&
-                    ((this.controlType == 'Titration' && record.get("Titration") == rec.get("Titration")) || ((record.get("SinglePointControl") == rec.get("SinglePointControl")))));
-        });
+                    ((this.isTitrationControlType() && record.get("Titration") == rec.get("Titration")) || ((record.get("SinglePointControl") == rec.get("SinglePointControl")))));
+        }, this);
+
         if (index > -1)
             this.allRunsGrid.getStore().getAt(index).set("IncludeInGuideSetCalculation", false);
 

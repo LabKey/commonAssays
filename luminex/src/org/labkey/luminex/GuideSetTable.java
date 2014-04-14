@@ -22,6 +22,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -29,6 +30,7 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
@@ -55,8 +57,27 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     public GuideSetTable(final LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoGuideSet(), schema, filter, "RowId");
-        wrapAllColumns(true);
         setName(LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
+
+        for (ColumnInfo col : getRealTable().getColumns())
+        {
+            // value-based average and std dev columns will be aliased and only editable via the Manage Guide Set UI
+            if (col.getName().endsWith("Average") || col.getName().endsWith("StdDev"))
+            {
+                ColumnInfo valueBasedCol = addWrapColumn("ValueBased" + col.getName(), col);
+                valueBasedCol.setJdbcType(JdbcType.DOUBLE);
+                valueBasedCol.setHidden(true);
+                valueBasedCol.setUserEditable(false);
+            }
+            else
+            {
+                ColumnInfo wrapCol = addWrapColumn(col);
+                wrapCol.setHidden(col.isHidden());
+
+                if (wrapCol.getName().equals("ValueBased"))
+                    wrapCol.setUserEditable(false);
+            }
+        }
 
         ColumnInfo protocolCol = getColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");
@@ -180,14 +201,16 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     public static class GuideSetTableUpdateService extends RowIdQueryUpdateService<GuideSet>
     {
         private ExpProtocol _protocol;
+        private LuminexProtocolSchema _userSchema;
 
         public GuideSetTableUpdateService(GuideSetTable guideSetTable)
         {
             super(guideSetTable);
+            _userSchema = guideSetTable._userSchema;
             _protocol = guideSetTable._userSchema.getProtocol();
         }
 
-        public static GuideSet getMatchingCurrentTitrationGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
+        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
         {
             SQLFragment sql = new SQLFragment("SELECT * FROM ");
             sql.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
@@ -254,7 +277,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             validateProtocol(bean);
             validateGuideSetValues(bean);
             boolean current = bean.isCurrentGuideSet();
-            if (current && getMatchingCurrentTitrationGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype()) != null)
+            if (current && getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype()) != null)
             {
                 throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
             }
@@ -271,13 +294,34 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             validateGuideSetValues(bean);
             if (bean.isCurrentGuideSet())
             {
-                GuideSet currentGuideSet = getMatchingCurrentTitrationGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype());
+                GuideSet currentGuideSet = getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype());
                 if (currentGuideSet != null && currentGuideSet.getRowId() != oldKey.intValue())
                 {
                     throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/ControlName/Conjugate/Isotype combination");
                 }
             }
-            return Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
+            GuideSet updatedGuideSet = Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
+
+            // if value-based guide set, updates to it might change expected ranges so QC flags needs to be updated
+            if (updatedGuideSet.isValueBased())
+            {
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
+                TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
+                List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
+                for (AnalyteSinglePointControl singlePointControl : singlePointControls)
+                {
+                    singlePointControl.updateQCFlags(_userSchema);
+                }
+
+                selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
+                List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
+                for (AnalyteTitration titration : titrations)
+                {
+                    titration.updateQCFlags(_userSchema);
+                }
+            }
+
+            return updatedGuideSet;
         }
 
         private void validateProtocol(GuideSet bean) throws ValidationException
@@ -317,6 +361,11 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             if (bean.getControlName() != null && bean.getControlName().length() > maxLength)
             {
                 throw new ValidationException("ControlName value '" + bean.getControlName() + "' is too long, maximum length is " + maxLength + " characters");
+            }
+
+            if (!bean.isValueBased() && bean.hasMetricValues())
+            {
+                throw new ValidationException("Metric values should only be provided for value-based guide sets.");
             }
         }
     }

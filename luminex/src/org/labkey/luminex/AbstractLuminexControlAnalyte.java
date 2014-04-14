@@ -15,7 +15,15 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+
 import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -55,5 +63,47 @@ public abstract class AbstractLuminexControlAnalyte implements Serializable
     public void setIncludeInGuideSetCalculation(boolean includeInGuideSetCalculation)
     {
         _includeInGuideSetCalculation = includeInGuideSetCalculation;
+    }
+
+    public abstract void updateQCFlags(LuminexProtocolSchema schema) throws SQLException;
+
+    public Analyte getAnalyteFromId()
+    {
+        Analyte analyte = new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes()).getObject(getAnalyteId(), Analyte.class);
+        if (analyte == null)
+        {
+            throw new IllegalStateException("Unable to find referenced analyte: " + getAnalyteId());
+        }
+        return analyte;
+    }
+
+    public ExpRun getRun(int rowId)
+    {
+        ExpRun run = ExperimentService.get().getExpRun(rowId);
+        if (run == null)
+        {
+            throw new IllegalStateException("Unable to find referenced run: " + rowId);
+        }
+        return run;
+    }
+
+    public Map<String, String> getIsotypeAndConjugate(ExpRun run)
+    {
+        Map<String, String> isotypeConjugate = new HashMap<>();
+        isotypeConjugate.put("Isotype", null);
+        isotypeConjugate.put("Conjugate", null);
+        Map<String, ObjectProperty> runProps = run.getObjectProperties();
+        for (ObjectProperty property : runProps.values())
+        {
+            if (property.getName().equalsIgnoreCase("Isotype"))
+            {
+                isotypeConjugate.put("Isotype", property.getStringValue());
+            }
+            if (property.getName().equalsIgnoreCase("Conjugate"))
+            {
+                isotypeConjugate.put("Conjugate", property.getStringValue());
+            }
+        }
+        return isotypeConjugate;
     }
 }

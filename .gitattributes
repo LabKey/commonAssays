@@ -610,6 +610,7 @@ luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-12.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-13.20-13.30.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-14.10-14.11.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-10.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-11.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-11.20.sql -text
@@ -667,6 +668,7 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.30-10.10.sql -
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.30-9.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.20-13.30.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-14.10-14.11.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-10.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-11.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-11.20.sql -text

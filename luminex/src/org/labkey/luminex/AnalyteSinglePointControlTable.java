@@ -25,7 +25,6 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -42,10 +41,8 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.Pair;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -153,7 +150,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-        // Pair<Integer, Integer> is analyteid/titrationid combo
+        // Pair<Integer, Integer> is analyteid/singlePointControlId combo
         return new AbstractLuminexControlUpdateService<AnalyteSinglePointControl>(this, AnalyteSinglePointControl.class)
         {
             @Override
@@ -178,20 +175,9 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                 return new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getObject(AnalyteSinglePointControl.class);
             }
 
-
-            protected SinglePointControl getSinglePointControl(int rowId)
-            {
-                SinglePointControl result = new TableSelector(LuminexProtocolSchema.getTableInfoSinglePointControl()).getObject(rowId, SinglePointControl.class);
-                if (result == null)
-                {
-                    throw new IllegalStateException("Unable to find referenced single point control: " + rowId);
-                }
-                return result;
-            }
-
             protected void validate(AnalyteSinglePointControl bean, GuideSet guideSet, Analyte analyte) throws ValidationException
             {
-                SinglePointControl control = getSinglePointControl(bean.getSinglePointControlId());
+                SinglePointControl control = bean.getSinglePointControlFromId();
                 if (!Objects.equals(analyte.getName(), guideSet.getAnalyteName()))
                 {
                     throw new ValidationException("GuideSet is for analyte " + guideSet.getAnalyteName(), " but this row is mapped to analyte " + analyte.getName());
@@ -200,23 +186,6 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                 {
                     throw new ValidationException("GuideSet is for single point control" + guideSet.getControlName(), " but this row is mapped to " + control.getName());
                 }
-            }
-
-            protected void updateQCFlags(User user, AnalyteSinglePointControl bean) throws SQLException
-            {
-                // get the run, isotype, conjugate, and analtye/single point control information in order to update QC Flags
-                Analyte analyte = getAnalyte(bean.getAnalyteId());
-                SinglePointControl control = getSinglePointControl(bean.getSinglePointControlId());
-                ExpRun run = getRun(control.getRunId());
-                Map<String, String> runIsotypeConjugate = getIsotypeAndConjugate(run);
-
-                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
-                filter.addCondition(FieldKey.fromParts("SinglePointControl"), control.getRowId());
-                AnalyteSinglePointControlTable analyteSinglePointControlTable = getUserSchema().createAnalyteSinglePointControlTable(true);
-                analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
-                Double average = new TableSelector(analyteSinglePointControlTable, Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
-
-                LuminexDataHandler.insertOrUpdateAnalyteSinglePointControlQCFlags(user, run, _userSchema.getProtocol(), bean, analyte, control, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), average.doubleValue());
             }
         };
     }

@@ -680,7 +680,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private GuideSet determineGuideSet(Analyte analyte, AbstractLuminexControl control, String conjugate, String isotype, ExpProtocol protocol)
     {
-        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentTitrationGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype);
+        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype);
         if (guideSet != null)
         {
             return guideSet;
@@ -793,10 +793,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             // query the guide set table to get the average and stddev values for the comparisons
             GuideSetTable guideSetTable = schema.createGuideSetTable(false);
-            FieldKey fiAverageFK = FieldKey.fromParts("SinglePointControlFIAverage");
-            FieldKey fiStdDevFK = FieldKey.fromParts("SinglePointControlFIStdDev");
+
+            // run-based guide set metric columns
+            FieldKey fiAverageRunFK = FieldKey.fromParts("SinglePointControlFIAverage");
+            FieldKey fiStdDevRunFK = FieldKey.fromParts("SinglePointControlFIStdDev");
+
+            // value-based guide set metric columns
+            FieldKey isValueBasedFK = FieldKey.fromParts("ValueBased");
+            FieldKey fiAverageValueFK = FieldKey.fromParts("ValueBasedMaxFIAverage");
+            FieldKey fiStdDevValueFK = FieldKey.fromParts("ValueBasedMaxFIStdDev");
+
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(
-                    fiAverageFK, fiStdDevFK));
+                    isValueBasedFK, fiAverageRunFK, fiStdDevRunFK, fiAverageValueFK, fiStdDevValueFK));
             SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("RowId"), analyteSinglePointControl.getGuideSetId());
             Map<String, Object> guideSetRow = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMap();
 
@@ -811,8 +819,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         + (conjugate == null ? "[None]" : conjugate) + " ";
 
                 // add QCFlag for MFI, if out of guide set range
-                Double guideSetAverage = (Double)guideSetRow.get(cols.get(fiAverageFK).getAlias());
-                Double guideSetStdDev = (Double)guideSetRow.get(cols.get(fiStdDevFK).getAlias());
+                Boolean isValueBasedGuideSet = (Boolean)guideSetRow.get(cols.get(isValueBasedFK).getAlias());
+                Double guideSetAverage = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(fiAverageRunFK).getAlias()), guideSetRow.get(cols.get(fiAverageValueFK).getAlias()));
+                Double guideSetStdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(fiStdDevRunFK).getAlias()), guideSetRow.get(cols.get(fiStdDevValueFK).getAlias()));
                 String outOfRangeType = isOutOfGuideSetRange(averageFI, guideSetAverage, guideSetStdDev);
                 if (null != outOfRangeType)
                 {
@@ -838,6 +847,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), existingAnalyteTitrationQCFlag.getRowId());
             }
         }
+    }
+
+    private static Double getGuideSetRangeValue(boolean isValueBased, Object runBasedVal, Object valueBasedVal)
+    {
+        if (isValueBased)
+            return parseDouble(valueBasedVal != null ? valueBasedVal.toString() : null);
+        else
+            return parseDouble(runBasedVal != null ? runBasedVal.toString() : null);
     }
 
     private void insertAnalyteTitrationMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
@@ -1438,19 +1455,33 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             // query the guide set table to get the average and stddev values for the out of guide set range comparisons
             GuideSetTable guideSetTable = schema.createGuideSetTable(false);
-            FieldKey maxFIAverageFK = FieldKey.fromParts("MaxFIAverage");
-            FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
-            FieldKey ec504plAverageFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            FieldKey ec504plStdDevFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
-            FieldKey ec505plAverageFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            FieldKey ec505plStdDevFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
-            FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
-            FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
-            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(
-                    maxFIAverageFK, maxFIStdDevFK,
-                    ec504plAverageFK, ec504plStdDevFK,
-                    ec505plAverageFK, ec505plStdDevFK,
-                    aucAverageFK, aucStdDevFK));
+
+            // run-based guide set columns
+            FieldKey maxFIAverageRunFK = FieldKey.fromParts("MaxFIAverage");
+            FieldKey maxFIStdDevRunFK = FieldKey.fromParts("MaxFIStdDev");
+            FieldKey ec504plAverageRunFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average");
+            FieldKey ec504plStdDevRunFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
+            FieldKey ec505plAverageRunFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
+            FieldKey ec505plStdDevRunFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
+            FieldKey aucAverageRunFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
+            FieldKey aucStdDevRunFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
+
+            // value-based guide set columns
+            FieldKey isValueBasedFK = FieldKey.fromParts("ValueBased");
+            FieldKey maxFIAverageValueFK= FieldKey.fromParts("ValueBasedMaxFIAverage");
+            FieldKey maxFIStdDevValueFK = FieldKey.fromParts("ValueBasedMaxFIStdDev");
+            FieldKey ec504plAverageValueFK= FieldKey.fromParts("ValueBasedEC504PLAverage");
+            FieldKey ec504plStdDevValueFK = FieldKey.fromParts("ValueBasedEC504PLStdDev");
+            FieldKey ec505plAverageValueFK= FieldKey.fromParts("ValueBasedEC505PLAverage");
+            FieldKey ec505plStdDevValueFK = FieldKey.fromParts("ValueBasedEC505PLStdDev");
+            FieldKey aucAverageValueFK= FieldKey.fromParts("ValueBasedAUCAverage");
+            FieldKey aucStdDevValueFK = FieldKey.fromParts("ValueBasedAUCStdDev");
+
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(isValueBasedFK,
+                    maxFIAverageRunFK, maxFIStdDevRunFK, maxFIAverageValueFK, maxFIStdDevValueFK,
+                    ec504plAverageRunFK, ec504plStdDevRunFK, ec504plAverageValueFK, ec504plStdDevValueFK,
+                    ec505plAverageRunFK, ec505plStdDevRunFK, ec505plAverageValueFK, ec505plStdDevValueFK,
+                    aucAverageRunFK, aucStdDevRunFK, aucAverageValueFK, aucStdDevValueFK));
             SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("RowId"), analyteTitration.getGuideSetId());
             Map<String, Object>[] guideSetRows = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMapArray();
 
@@ -1467,9 +1498,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         + (conjugate == null ? "[None]" : conjugate) + " ";
 
                 // add QCFlag for High MFI, if out of guide set range
-                Double average = (Double)guideSetRow.get(cols.get(maxFIAverageFK).getAlias());
-                Double stdDev = (Double)guideSetRow.get(cols.get(maxFIStdDevFK).getAlias());
-                Double value = analyteTitration.getMaxFI(); 
+                Boolean isValueBasedGuideSet = (Boolean)guideSetRow.get(cols.get(isValueBasedFK).getAlias());
+                Double average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(maxFIAverageRunFK).getAlias()), guideSetRow.get(cols.get(maxFIAverageValueFK).getAlias()));
+                Double stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(maxFIStdDevRunFK).getAlias()), guideSetRow.get(cols.get(maxFIStdDevValueFK).getAlias()));
+                Double value = analyteTitration.getMaxFI();
                 String outOfRangeType = isOutOfGuideSetRange(value, average, stdDev);
                 if (null != outOfRangeType)
                 {
@@ -1483,22 +1515,22 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                     if (curveFit.getCurveType().equals(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
                     {
-                        average = (Double)guideSetRow.get(cols.get(ec504plAverageFK).getAlias());
-                        stdDev = (Double)guideSetRow.get(cols.get(ec504plStdDevFK).getAlias());
+                        average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec504plAverageRunFK).getAlias()), guideSetRow.get(cols.get(ec504plAverageValueFK).getAlias()));
+                        stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec504plStdDevRunFK).getAlias()), guideSetRow.get(cols.get(ec504plStdDevValueFK).getAlias()));
                         value = curveFit.getEC50();
                         flagType = QC_FLAG_EC50_4PL_FLAG_TYPE;
                     }
                     else if (curveFit.getCurveType().equals(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
                     {
-                        average = (Double)guideSetRow.get(cols.get(ec505plAverageFK).getAlias());
-                        stdDev = (Double)guideSetRow.get(cols.get(ec505plStdDevFK).getAlias());
+                        average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec505plAverageRunFK).getAlias()), guideSetRow.get(cols.get(ec505plAverageValueFK).getAlias()));
+                        stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec505plStdDevRunFK).getAlias()), guideSetRow.get(cols.get(ec505plStdDevValueFK).getAlias()));
                         value = curveFit.getEC50();
                         flagType = QC_FLAG_EC50_5PL_FLAG_TYPE;
                     }
                     else if (curveFit.getCurveType().equals("Trapezoidal"))
                     {
-                        average = (Double)guideSetRow.get(cols.get(aucAverageFK).getAlias());
-                        stdDev = (Double)guideSetRow.get(cols.get(aucStdDevFK).getAlias());
+                        average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(aucAverageRunFK).getAlias()), guideSetRow.get(cols.get(aucAverageValueFK).getAlias()));
+                        stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(aucStdDevRunFK).getAlias()), guideSetRow.get(cols.get(aucStdDevValueFK).getAlias()));
                         value = curveFit.getAUC();
                         flagType = QC_FLAG_AUC_FLAG_TYPE;
                     }

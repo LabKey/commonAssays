@@ -79,8 +79,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // add a display field listing the current guide set for the graph params
         this.guideSetDisplayField = new Ext.form.DisplayField({
             fieldLabel: "Current Guide Run Set",
-            value: "",
-            style: "background-color:#CCCCCC; padding:3px",
             width: 583,
             border: true
         });
@@ -149,7 +147,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('CurrentGuideSet', true)],
-            columns: 'RowId, Comment, Created',
+            columns: 'RowId, Comment, Created, ValueBased',
             success: this.updateGuideSetDisplayField(),
             failure: function(response){
                 this.guideSetDisplayField.setValue("Error: " + response.exception);
@@ -162,7 +160,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         return function(data) {
             if (data.rows.length == 0)
             {
-                this.guideSetDisplayField.setValue("No current guide set for the selected graph parameters");
+                this.guideSetDisplayField.setValue("<div class='guideset-no'>No current guide set for the selected graph parameters</div>");
 
                 // remove any reference to a current guide set and enable/disable buttons
                 this.currentGuideSetId = undefined;
@@ -173,8 +171,14 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             {
                 // there can only be one current guide set for any given set of graph params
                 var row = data.rows[0];
-                this.guideSetDisplayField.setValue('Created: ' + this.formatDate(row["Created"])
-                        + '; Comment: ' + (row["Comment"] == null ? "&nbsp;" : $h(row["Comment"])));
+
+                var html = '<table class="guideset-tbl">'
+                        + '<tr><td class="guideset-hdr">Created:</td><td width="200">' + this.formatDate(row["Created"]) + '</td>'
+                        + '<td class="guideset-hdr">Type: </td><td>' + (row["ValueBased"] ? 'Value-based' : 'Run-based') + '</td></tr>'
+                        + '<tr><td class="guideset-hdr">Comment:</td><td colspan="3">' + (row["Comment"] == null ? "&nbsp;" : $h(row["Comment"])) + '</td></tr>'
+                        + '</table>';
+
+                this.guideSetDisplayField.setValue(html);
 
                 // store a reference to the current guide set and enable buttons
                 this.currentGuideSetId = row["RowId"];
@@ -219,19 +223,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         // if the panel was closed because of a successful save, we need to reload some stuff
                         if (saveResults)
                         {
-                            for (var i = 0; i < saveResults.length; i++)
-                            {
-                                // if a change was made to the GuideSet table, it was the comment
-                                if (saveResults[i].queryName == "GuideSet")
-                                {
-                                    this.queryCurrentGuideSetInfo(false);
-                                }
-                                // if a change was made to the list of runs in the current guide set, update accordingly 
-                                else if (saveResults[i].queryName == "AnalyteTitration" || saveResults[i].queryName == "AnalyteSinglePointControl")
-                                {
-                                    this.fireEvent('currentGuideSetUpdated');
-                                }
-                            }
+                            this.queryCurrentGuideSetInfo(false);
+                            this.fireEvent('currentGuideSetUpdated');
                         }
 
                         win.close();

@@ -20,9 +20,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AbstractBeanQueryUpdateService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
@@ -34,7 +31,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,48 +53,6 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
         _rawTable = queryTable.getRealTable();
         _userSchema = queryTable.getUserSchema();
     }
-
-    protected Analyte getAnalyte(int rowId)
-    {
-        Analyte analyte = new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes()).getObject(rowId, Analyte.class);
-        if (analyte == null)
-        {
-            throw new IllegalStateException("Unable to find referenced analyte: " + rowId);
-        }
-        return analyte;
-    }
-
-    protected ExpRun getRun(int rowId)
-    {
-        ExpRun run = ExperimentService.get().getExpRun(rowId);
-        if (run == null)
-        {
-            throw new IllegalStateException("Unable to find referenced run: " + rowId);
-        }
-        return run;
-    }
-
-    protected Map<String, String> getIsotypeAndConjugate(ExpRun run)
-    {
-        Map<String, String> isotypeConjugate = new HashMap<>();
-        isotypeConjugate.put("Isotype", null);
-        isotypeConjugate.put("Conjugate", null);
-        Map<String, ObjectProperty> runProps = run.getObjectProperties();
-        for (ObjectProperty property : runProps.values())
-        {
-            if (property.getName().equalsIgnoreCase("Isotype"))
-            {
-                isotypeConjugate.put("Isotype", property.getStringValue());
-            }
-            if (property.getName().equalsIgnoreCase("Conjugate"))
-            {
-                isotypeConjugate.put("Conjugate", property.getStringValue());
-            }
-        }
-        return isotypeConjugate;
-    }
-
-    protected abstract void updateQCFlags(User user, Type bean) throws SQLException;
 
     @Override
     public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
@@ -130,7 +84,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
 
         for (Type t : forUpdate)
         {
-            updateQCFlags(user, t);
+            t.updateQCFlags(_userSchema);
         }
 
         return results;
@@ -153,7 +107,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
                 throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + newGuideSetId);
             }
 
-            Analyte analyte = getAnalyte(bean.getAnalyteId());
+            Analyte analyte = bean.getAnalyteFromId();
             validate(bean, guideSet, analyte);
         }
 
@@ -167,6 +121,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
     }
 
     protected abstract void validate(Type bean, GuideSet guideSet, Analyte analyte) throws ValidationException;
+
     @Override
     protected void delete(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException, SQLException
     {

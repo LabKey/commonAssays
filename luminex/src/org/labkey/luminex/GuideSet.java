@@ -29,6 +29,13 @@ public class GuideSet
     private String _conjugate;
     private String _isotype;
     private boolean _currentGuideSet;
+    private boolean _valueBased;
+    private Double _ec504plAverage;
+    private Double _ec504plStdDev;
+    private Double _ec505plAverage;
+    private Double _ec505plStdDev;
+    private Double _aucAverage;
+    private Double _aucStdDev;
     private Double _maxFIAverage;
     private Double _maxFIStdDev;
     private String _controlName;
@@ -176,5 +183,83 @@ public class GuideSet
     public void setModifiedBy(Integer modifiedBy)
     {
         _modifiedBy = modifiedBy;
+    }
+
+    public boolean isValueBased()
+    {
+        return _valueBased;
+    }
+
+    public void setValueBased(boolean valueBased)
+    {
+        _valueBased = valueBased;
+    }
+
+    public Double getEc504plAverage()
+    {
+        return _ec504plAverage;
+    }
+
+    public void setEc504plAverage(Double ec504plAverage)
+    {
+        _ec504plAverage = ec504plAverage;
+    }
+
+    public Double getEc504plStdDev()
+    {
+        return _ec504plStdDev;
+    }
+
+    public void setEc504plStdDev(Double ec504plStdDev)
+    {
+        _ec504plStdDev = ec504plStdDev;
+    }
+
+    public Double getEc505plAverage()
+    {
+        return _ec505plAverage;
+    }
+
+    public void setEc505plAverage(Double ec505plAverage)
+    {
+        _ec505plAverage = ec505plAverage;
+    }
+
+    public Double getEc505plStdDev()
+    {
+        return _ec505plStdDev;
+    }
+
+    public void setEc505plStdDev(Double ec505plStdDev)
+    {
+        _ec505plStdDev = ec505plStdDev;
+    }
+
+    public Double getAucAverage()
+    {
+        return _aucAverage;
+    }
+
+    public void setAucAverage(Double aucAverage)
+    {
+        _aucAverage = aucAverage;
+    }
+
+    public Double getAucStdDev()
+    {
+        return _aucStdDev;
+    }
+
+    public void setAucStdDev(Double aucStdDev)
+    {
+        _aucStdDev = aucStdDev;
+    }
+
+    public boolean hasMetricValues()
+    {
+        return (getEc504plAverage() != null || getEc504plStdDev() != null
+                || getEc505plAverage() != null || getEc505plStdDev() != null
+                || getAucAverage() != null || getAucStdDev() != null
+                || getMaxFIAverage() != null || getMaxFIStdDev() != null);
     }
 }

@@ -15,6 +15,15 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.query.FieldKey;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
 /**
  * User: jeckels
  * Date: Sep 6, 2011
@@ -61,5 +70,31 @@ public class AnalyteTitration extends AbstractLuminexControlAnalyte
         int result = getAnalyteId();
         result = 31 * result + _titrationId;
         return result;
+    }
+
+    @Override
+    public void updateQCFlags(LuminexProtocolSchema schema) throws SQLException
+    {
+        // get the run, isotype, conjugate, and analtye/titration curvefit information in order to update QC Flags
+        Analyte analyte = getAnalyteFromId();
+        Titration titration = getTitrationFromId();
+        ExpRun run = getRun(titration.getRunId());
+        Map<String, String> runIsotypeConjugate = getIsotypeAndConjugate(run);
+
+        SimpleFilter curveFitFilter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), getAnalyteId());
+        curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), getTitrationId());
+        List<CurveFit> curveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), curveFitFilter, null).getArrayList(CurveFit.class);
+
+        LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(schema.getUser(), run, schema.getProtocol(), this, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), curveFits);
+    }
+
+    public Titration getTitrationFromId()
+    {
+        Titration titration = new TableSelector(LuminexProtocolSchema.getTableInfoTitration()).getObject(getTitrationId(), Titration.class);
+        if (titration == null)
+        {
+            throw new IllegalStateException("Unable to find referenced titration: " + getTitrationId());
+        }
+        return titration;
     }
 }
