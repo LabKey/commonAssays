@@ -768,7 +768,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 Map<String, Object> keys = new CaseInsensitiveHashMap<>();
                 keys.put("AnalyteId", analyte.getRowId());
                 keys.put("SinglePointControlId", singlePointControl.getRowId());
-                Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), analyteSinglePointControl, keys);
+                Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), analyteSinglePointControl, keys);
             }
 
             insertOrUpdateAnalyteSinglePointControlQCFlags(user, expRun, protocol, analyteSinglePointControl, analyte, singlePointControl, isotype, conjugate, sum / count);
