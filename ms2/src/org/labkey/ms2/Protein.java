@@ -199,12 +199,12 @@ public class Protein
         protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
         objects and accumlates their html output.
      */
-    public StringBuffer getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
+    public StringBuilder getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
         return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS);
     }
 
-    public StringBuffer getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols)
+    public StringBuilder getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols)
     {
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
@@ -245,9 +245,9 @@ public class Protein
             overallMaxLevels = Math.max( overallMaxLevels, maxLevelsInRange + 1);
         }
 
-        StringBuffer sb = new StringBuffer(seqStacks.size() *  overallMaxLevels * 5);
-        StringBuffer address;
-        StringBuffer seqs;
+        StringBuilder sb = new StringBuilder(seqStacks.size() *  overallMaxLevels * 5);
+        StringBuilder address;
+        StringBuilder seqs;
 
         sb.append(_forCoverageMapExport?TABLE_TAG_EXPORT:String.format(TABLE_TAG, wrapCols * 10));
         int colst=0;
@@ -262,8 +262,8 @@ public class Protein
 
         while (colst<seqStacks.size())
         {
-            seqs = new StringBuffer(6* wrapCols);
-            address = new StringBuffer(6* wrapCols);
+            seqs = new StringBuilder(6* wrapCols);
+            address = new StringBuilder(6* wrapCols);
 
             lastCol=Math.min(colst + wrapCols -1, seqStacks.size()-1 );
             address.append("<tr class=\"address-row\" >");

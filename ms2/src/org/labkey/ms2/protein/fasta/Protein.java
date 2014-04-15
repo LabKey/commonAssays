@@ -236,7 +236,7 @@ public class Protein
     {
         Map<String, Set<String>> identifiers = new HashMap<>();
         if (fastaIdentifierString == null) return identifiers;
-        if (fastaIdentifierString.indexOf(" ") != -1) fastaIdentifierString = fastaIdentifierString.substring(0, fastaIdentifierString.indexOf(" "));
+        if (fastaIdentifierString.contains(" ")) fastaIdentifierString = fastaIdentifierString.substring(0, fastaIdentifierString.indexOf(" "));
         fastaIdentifierString = fastaIdentifierString.replaceAll(":", "|");
         fastaIdentifierString = fastaIdentifierString.replace("|$", "");
         String tokens[] = fastaIdentifierString.split(SEPARATOR_PATTERN);

@@ -132,7 +132,7 @@ public class FlowOverview extends Overview
         {
             addStep(getSamplesStep());
 
-            int jobCount = PipelineService.get().getQueuedStatusFiles(getContainer()).length;
+            int jobCount = PipelineService.get().getQueuedStatusFiles(getContainer()).size();
             if (jobCount != 0)
             {
                 ActionURL runningJobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer(), true);

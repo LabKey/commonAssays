@@ -448,7 +448,7 @@
             %><div><%=textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
         }
 
-        int jobCount = PipelineService.get().getQueuedStatusFiles(c).length;
+        int jobCount = PipelineService.get().getQueuedStatusFiles(c).size();
         %><div><%=textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
 
         if (_canCreateFolder && _hasPipelineRoot)

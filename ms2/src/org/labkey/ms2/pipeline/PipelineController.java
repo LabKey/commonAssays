@@ -521,7 +521,7 @@ public class PipelineController extends SpringActionController
                 }
                 else
                 {
-                    PipelineJobService.get().getStatusWriter().setStatus(job, PipelineJob.WAITING_FOR_FILES, null, true);
+                    PipelineJobService.get().getStatusWriter().setStatus(job, PipelineJob.TaskStatus.waitingForFiles.toString(), null, true);
                     PipelineJobService.get().getJobStore().storeJob(job);
                     job.getLogger().info("Job created, but not yet submitted because not all files are available");
                 }
