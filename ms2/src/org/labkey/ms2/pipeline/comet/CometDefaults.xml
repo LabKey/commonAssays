@@ -193,7 +193,7 @@
 
     <note type="input" label="comet, num_output_lines">10</note>
 		<note> peptide results to show </note>
-	<note type="input" label="comet, num_results">500</note>
+	<note type="input" label="comet, num_results">50</note>
 		<note> results to store </note>
 	<note type="input" label="comet, show_fragment_ions">0</note>
 		<note> 0=no, 1=yes </note>

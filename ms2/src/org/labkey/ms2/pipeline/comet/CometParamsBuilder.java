@@ -542,7 +542,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
     {
         String result = super.getSequestParamsText();
 
-        return "# comet_version 2013.02 rev. 0\n" +
+        return "# comet_version 2014.01 rev. 0\n" +
                 "\n" +
                 result +
                 "\n" +
