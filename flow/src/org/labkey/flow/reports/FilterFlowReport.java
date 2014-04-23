@@ -544,7 +544,7 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         @Override
-        public Results generateResults(ViewContext context) throws Exception
+        public Results generateResults(ViewContext context, boolean allowAsyncQuery) throws Exception
         {
             ResultSet rs = _report.generateResultSet(context);
             return rs == null ? null : new ResultsImpl(rs);

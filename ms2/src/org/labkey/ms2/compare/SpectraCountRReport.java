@@ -47,7 +47,7 @@ public class SpectraCountRReport extends RReport
     }
 
 
-    public Results generateResults(ViewContext context) throws Exception
+    public Results generateResults(ViewContext context, boolean allowAsyncQuery) throws Exception
     {
         return getQueryView(context).getResults();
     }
