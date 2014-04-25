@@ -251,7 +251,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {
                         id: 'highlightedRowDisplayField',
                         xtype: 'displayfield',
-                        value: 'NOTICE: Highlighted rows indicate that the selected assay is a member of a guide run set. '
+                        value: 'NOTICE: Highlighted rows indicate that the selected assay is a member of a run-based guide set. '
                             + 'You are currently not allowed to apply guide sets to these assays, so they will be ignored '
                             + 'with the \'Apply Thresholds\' action.',
                         hidden: true
@@ -260,7 +260,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }),
             new Ext.Spacer({height: 20}),
             new Ext.Panel({
-                title: 'Guide Run Sets for ' + this.controlName + ' : ' + this.analyte + ' '
+                title: 'Guide Sets for ' + this.controlName + ' : ' + this.analyte + ' '
                         + (this.isotype == '' ? '[None]' : this.isotype) + ' '
                         + (this.conjugate == '' ? '[None]' : this.conjugate),
                 width:1075,
@@ -287,7 +287,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     }
 
                     // get the list of runs from the top grid and apply the selected guide set to those that are
-                    // not member runs (i.e. not members of a guide run set)
+                    // not member runs (i.e. not members of a guide set)
                     var allSelectedRecords = this.selectedRunsGrid.getStore().getRange();
                     var nonMemberUpdateRows = [];
                     for (var i = 0; i < allSelectedRecords.length; i++)
@@ -314,7 +314,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     // persist the applied guide set changes to the server
                     if (nonMemberUpdateRows.length > 0)
                     {
-                        this.getEl().mask('Applying guide run set...', "x-mask-loading");
+                        this.getEl().mask('Applying guide set...', "x-mask-loading");
                         LABKEY.Query.updateRows({
                             schemaName: 'assay.Luminex.' + this.assayName,
                             queryName: 'Analyte' + (this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl'),

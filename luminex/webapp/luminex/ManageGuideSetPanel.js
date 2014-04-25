@@ -722,7 +722,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             if (!(row["GuideSet"] != this.guideSetId && row["IncludeInGuideSetCalculation"]))
                 allRunsStoreData.rows.push(row);
 
-            // include in guide run set if that is the case
+            // include in guide set if that is the case
             if (row["GuideSet"] == this.guideSetId && row["IncludeInGuideSetCalculation"])
                 guideRunSetStoreData.rows.push(row);    
         }
@@ -747,7 +747,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     },
 
     removeRunFromGuideSet: function(record) {
-        // remove the record from the guide run set store
+        // remove the record from the guide set store
         this.guideRunSetGrid.getStore().remove(record);
 
         // enable the add icon in the all runs store by setting the IncludeInGuideSetCalculation value 
@@ -776,7 +776,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             // disable the add icon in the all runs store by setting the IncludeInGuideSetCalculation value
             record.set("IncludeInGuideSetCalculation", true);
 
-            // add the record to the guide run set store
+            // add the record to the guide set store
             this.guideRunSetGrid.getStore().insert(0, record.copy());
 
             // enable the save button

@@ -78,7 +78,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // add a display field listing the current guide set for the graph params
         this.guideSetDisplayField = new Ext.form.DisplayField({
-            fieldLabel: "Current Guide Run Set",
+            fieldLabel: "Current Guide Set",
             width: 583,
             border: true
         });
@@ -87,7 +87,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.editGuideSetButton = new Ext.Button({
             disabled: true,
             text: "Edit",
-            tooltip: "Edit current guide run set",
+            tooltip: "Edit current guide set",
             handler: function() {
                 this.manageGuideSetClicked(false);
             },
@@ -98,7 +98,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.newGuideSetButton = new Ext.Button({
             disabled: true,
             text: "New",
-            tooltip: "Create new guide run set",
+            tooltip: "Create new guide set",
             handler: this.newGuideSetClicked,
             scope: this
         });

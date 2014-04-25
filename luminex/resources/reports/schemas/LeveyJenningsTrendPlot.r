@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 #
 # R script to create a quality control trending plot for the Luminex assay showing a records EC50, AUC, or Max MFI plotted
-# with the average and +/- 3 standard deviation range for the record's associated guide run set.
+# with the average and +/- 3 standard deviation range for the record's associated guide set.
 #
 # The script expects URL parameters for the Assay Protocol Name and the selected graph parameters (Titration, Analyte, Isotype, and Conjugate)
 #
