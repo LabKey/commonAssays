@@ -291,7 +291,7 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
     public AttributeCache(AttributeType type)
     {
         _type = type;
-        _cache = CacheManager.getBlockingStringKeyCache(1000, CacheManager.DAY, "Flow " + _type + " cache", null);
+        _cache = CacheManager.getBlockingStringKeyCache(10000, CacheManager.DAY, "Flow " + _type + " cache", null);
     }
 
     @Nullable
