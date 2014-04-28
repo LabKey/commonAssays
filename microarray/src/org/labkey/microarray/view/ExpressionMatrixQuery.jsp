@@ -833,7 +833,7 @@
     };
 
     Ext4.onReady(function() {
-        LABKEY.Ajax.request({
+        Ext4.Ajax.request({
             url : LABKEY.ActionURL.buildURL('core', 'getModuleProperties', null),
             method : 'POST',
             scope: this,
