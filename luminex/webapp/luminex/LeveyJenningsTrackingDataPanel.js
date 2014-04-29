@@ -114,7 +114,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }
 
         this.fbar = [
-            {xtype: 'label', text: 'Bold values in the "Guide Set Date" column indicate assays that are members of a guide set.'}
+            {xtype: 'label', text: 'Bold values in the "Guide Set Date" column indicate runs that are members of a guide set.'}
         ];
 
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.initComponent.call(this);

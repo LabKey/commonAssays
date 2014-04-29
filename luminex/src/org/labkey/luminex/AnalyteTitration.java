@@ -20,7 +20,6 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.FieldKey;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +72,7 @@ public class AnalyteTitration extends AbstractLuminexControlAnalyte
     }
 
     @Override
-    public void updateQCFlags(LuminexProtocolSchema schema) throws SQLException
+    public void updateQCFlags(LuminexProtocolSchema schema)
     {
         // get the run, isotype, conjugate, and analtye/titration curvefit information in order to update QC Flags
         Analyte analyte = getAnalyteFromId();

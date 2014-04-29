@@ -241,7 +241,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         {
            Ext.Msg.show({
                 title:'Confirmation...',
-                msg: 'Creating a new guide set will set the current guide set to be inactive. Would you like to proceed?',
+                msg: 'Creating a new guide set will cause the current guide set to be uneditable. Would you like to proceed?',
                 buttons: Ext.Msg.YESNO,
                 fn: function(btnId, text, opt){
                     if(btnId == 'yes'){

@@ -145,13 +145,13 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var guideSetColumns = 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet, ValueBased, ';
         if (this.controlType == 'Titration')
         {
-            guideSetColumns += 'ValueBasedEC504PLAverage, ValueBasedEC505PLAverage, ValueBasedAUCAverage, ValueBasedMaxFIAverage, '
+            guideSetColumns += 'EC504PLAverage, EC505PLAverage, AUCAverage, MaxFIAverage, '
                             + 'Four ParameterCurveFit/EC50Average, Five ParameterCurveFit/EC50Average, '
-                            + 'MaxFIAverage, TrapezoidalCurveFit/AUCAverage';
+                            + 'TitrationMaxFIAverage, TrapezoidalCurveFit/AUCAverage';
         }
         else
         {
-            guideSetColumns += 'ValueBasedMaxFIAverage, SinglePointControlFIAverage';
+            guideSetColumns += 'MaxFIAverage, SinglePointControlFIAverage';
         }
         var guideSetsStore = new LABKEY.ext.Store({
             storeId: 'guideSetsStore',
@@ -175,14 +175,14 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         // merge the values for the value-based vs run-based guide set averages into a single column
                         if (this.controlType == 'Titration')
                         {
-                            record.set("EC504PLAverage", record.get("ValueBasedEC504PLAverage") || record.get("Four ParameterCurveFit/EC50Average"));
-                            record.set("EC505PLAverage", record.get("ValueBasedEC505PLAverage") || record.get("Five ParameterCurveFit/EC50Average"));
-                            record.set("AUCAverage", record.get("ValueBasedAUCAverage") || record.get("TrapezoidalCurveFit/AUCAverage"));
-                            record.set("MFIAverage", record.get("ValueBasedMaxFIAverage") || record.get("MaxFIAverage"));
+                            record.set("EC504PLAverage", record.get("EC504PLAverage") || record.get("Four ParameterCurveFit/EC50Average"));
+                            record.set("EC505PLAverage", record.get("EC505PLAverage") || record.get("Five ParameterCurveFit/EC50Average"));
+                            record.set("AUCAverage", record.get("AUCAverage") || record.get("TrapezoidalCurveFit/AUCAverage"));
+                            record.set("MFIAverage", record.get("MaxFIAverage") || record.get("TitrationMaxFIAverage"));
                         }
                         else
                         {
-                            record.set("MFIAverage", record.get("ValueBasedMaxFIAverage") || record.get("SinglePointControlFIAverage"));
+                            record.set("MFIAverage", record.get("MaxFIAverage") || record.get("SinglePointControlFIAverage"));
                         }
                     }, this);
 

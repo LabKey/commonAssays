@@ -21,7 +21,6 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,7 +64,7 @@ public abstract class AbstractLuminexControlAnalyte implements Serializable
         _includeInGuideSetCalculation = includeInGuideSetCalculation;
     }
 
-    public abstract void updateQCFlags(LuminexProtocolSchema schema) throws SQLException;
+    public abstract void updateQCFlags(LuminexProtocolSchema schema);
 
     public Analyte getAnalyteFromId()
     {

@@ -82,15 +82,15 @@ colSelect = paste(colSelect, "AverageFiBkgd", sep=",");
 # get the columns needed for run-based guide set ranges
 colSelect = paste(colSelect, "GuideSet/Four ParameterCurveFit/EC50Average", "GuideSet/Four ParameterCurveFit/EC50StdDev", sep=",");
 colSelect = paste(colSelect, "GuideSet/Five ParameterCurveFit/EC50Average", "GuideSet/Five ParameterCurveFit/EC50StdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/MaxFIAverage", "GuideSet/MaxFIStdDev", sep=",");
+colSelect = paste(colSelect, "GuideSet/TitrationMaxFIAverage", "GuideSet/TitrationMaxFIStdDev", sep=",");
 colSelect = paste(colSelect, "GuideSet/TrapezoidalCurveFit/AUCAverage", "GuideSet/TrapezoidalCurveFit/AUCStdDev", sep=",");
 colSelect = paste(colSelect, "GuideSet/SinglePointControlFIAverage", "GuideSet/SinglePointControlFIStdDev", sep=",");
 
 # get the columns needed for value-based guide set ranges
-colSelect = paste(colSelect, "GuideSet/ValueBasedEC504PLAverage", "GuideSet/ValueBasedEC504PLStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/ValueBasedEC505PLAverage", "GuideSet/ValueBasedEC505PLStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/ValueBasedMaxFIAverage", "GuideSet/ValueBasedMaxFIStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/ValueBasedAUCAverage", "GuideSet/ValueBasedAUCStdDev", sep=",");
+colSelect = paste(colSelect, "GuideSet/EC504PLAverage", "GuideSet/EC504PLStdDev", sep=",");
+colSelect = paste(colSelect, "GuideSet/EC505PLAverage", "GuideSet/EC505PLStdDev", sep=",");
+colSelect = paste(colSelect, "GuideSet/MaxFIAverage", "GuideSet/MaxFIStdDev", sep=",");
+colSelect = paste(colSelect, "GuideSet/AUCAverage", "GuideSet/AUCStdDev", sep=",");
 
 # either filter on start and end date or on max number of rows
 maxRows = NA;
@@ -175,24 +175,24 @@ for (typeIndex in 1:length(plotTypes))
 	# setup the data frame based on the selected plot type
 	if (plotType == "EC50 4PL") {
 	    dat$plottype_value = dat$four_parametercurvefit_ec50;
-	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedec504plaverage, dat$guideset_four_parametercurvefit_ec50average);
-	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedec504plstddev, dat$guideset_four_parametercurvefit_ec50stddev);
+	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_ec504plaverage, dat$guideset_four_parametercurvefit_ec50average);
+	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_ec504plstddev, dat$guideset_four_parametercurvefit_ec50stddev);
 	} else if (plotType == "EC50 5PL") {
 	    dat$plottype_value = dat$five_parametercurvefit_ec50;
-        dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedec505plaverage, dat$guideset_five_parametercurvefit_ec50average);
-        dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedec505plstddev, dat$guideset_five_parametercurvefit_ec50stddev);
+        dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_ec505plaverage, dat$guideset_five_parametercurvefit_ec50average);
+        dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_ec505plstddev, dat$guideset_five_parametercurvefit_ec50stddev);
 	} else if (plotType == "High MFI") {
 	    dat$plottype_value = dat$maxfi;
-	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedmaxfiaverage, dat$guideset_maxfiaverage);
-	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedmaxfistddev, dat$guideset_maxfistddev);
+	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_maxfiaverage, dat$guideset_titrationmaxfiaverage);
+	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_maxfistddev, dat$guideset_titrationmaxfistddev);
 	} else if (plotType == "AUC") {
 	    dat$plottype_value = dat$trapezoidalcurvefit_auc;
-	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedaucaverage, dat$guideset_trapezoidalcurvefit_aucaverage);
-	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedaucstddev, dat$guideset_trapezoidalcurvefit_aucstddev);
+	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_aucaverage, dat$guideset_trapezoidalcurvefit_aucaverage);
+	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_aucstddev, dat$guideset_trapezoidalcurvefit_aucstddev);
 	} else if (plotType == "MFI") {
 	    dat$plottype_value = dat$averagefibkgd;
-        dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedmaxfiaverage, dat$guideset_singlepointcontrolfiaverage);
-        dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_valuebasedmaxfistddev, dat$guideset_singlepointcontrolfistddev);
+        dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_maxfiaverage, dat$guideset_singlepointcontrolfiaverage);
+        dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_maxfistddev, dat$guideset_singlepointcontrolfistddev);
 	}
 
 	# determine if the request is for log scale or not

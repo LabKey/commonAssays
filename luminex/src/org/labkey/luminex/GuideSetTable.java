@@ -64,7 +64,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             // value-based average and std dev columns will be aliased and only editable via the Manage Guide Set UI
             if (col.getName().endsWith("Average") || col.getName().endsWith("StdDev"))
             {
-                ColumnInfo valueBasedCol = addWrapColumn("ValueBased" + col.getName(), col);
+                ColumnInfo valueBasedCol = addWrapColumn(col);
                 valueBasedCol.setJdbcType(JdbcType.DOUBLE);
                 valueBasedCol.setHidden(true);
                 valueBasedCol.setUserEditable(false);
@@ -94,7 +94,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
         });
 
-        addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "Max", "Max", "GuideSetId");
+        addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "TitrationMax", "Titration Max", "GuideSetId");
         AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(false);
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");

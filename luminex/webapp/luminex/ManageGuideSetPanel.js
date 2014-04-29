@@ -66,7 +66,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var columns = 'RowId, CurrentGuideSet, Comment, Created, ValueBased';
         Ext.each(this.metrics, function(metric){
             if (this.isTitrationControlType() || metric.includeForSinglePointControl)
-                columns += ', ValueBased' + metric.name + 'Average, ValueBased' + metric.name + 'StdDev';
+                columns += ', ' + metric.name + 'Average, ' + metric.name + 'StdDev';
         }, this);
 
         if (this.guideSetId)
@@ -438,21 +438,39 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     },
 
     createNumberField : function(name) {
-        return {
-            xtype: 'numberfield',
+        return new Ext.form.NumberField({
             cls: 'guideset-numberfield',
             itemId: name,
             name: name,
             hideLabel: true,
             disabled: this.currentGuideSetIsInactive(),
-            value: this.guideSetRowData["ValueBased" + name],
+            value: this.guideSetRowData[name],
+            decimalPrecision: 6, //match change from issue 16767
             enableKeyEvents: true,
             listeners: {
                 scope: this,
-                'keydown': function(){ Ext.getCmp('saveButton').enable(); },
-                'change': function(){ Ext.getCmp('saveButton').enable(); }
+                'keyup': this.onNumberFieldChange,
+                'change': this.onNumberFieldChange
             }
-        };
+        });
+    },
+
+    onNumberFieldChange : function(field) {
+        // issue 20152: don't allow std dev is average is blank
+        if (field.getName().indexOf("Average") > -1)
+        {
+            var avgFieldName = field.getName().replace("Average", "StdDev");
+            var stdDevField = this.getMetricStdDevValuesPanel().getComponent(avgFieldName);
+            this.updateStdDevField(stdDevField, field.getValue());
+        }
+
+        Ext.getCmp('saveButton').enable();
+    },
+
+    updateStdDevField : function(stdDevField, avgFieldVal) {
+        var isAvgBlank = avgFieldVal == null || avgFieldVal.length == 0;
+        stdDevField.setDisabled(isAvgBlank);
+        if (isAvgBlank) stdDevField.setValue(null);
     },
 
     getMetricLabelsPanel : function() {
@@ -502,7 +520,14 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
             Ext.each(this.metrics, function(metric){
                 if (this.isTitrationControlType() || metric.includeForSinglePointControl)
-                    this.metricStdDevValuesPanel.add(this.createNumberField(metric.name + 'StdDev'));
+                {
+                    // issue 20152: don't allow std dev is average is blank
+                    var stdDevField = this.createNumberField(metric.name + 'StdDev');
+                    var avgFieldVal = this.getMetricMeanValuesPanel().getComponent(metric.name + 'Average').getValue();
+                    this.updateStdDevField(stdDevField, avgFieldVal);
+
+                    this.metricStdDevValuesPanel.add(stdDevField);
+                }
             }, this);
         }
 

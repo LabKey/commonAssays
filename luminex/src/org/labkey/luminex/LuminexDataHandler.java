@@ -529,7 +529,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** Inserts or updates an analyte row in the hard table */
     private Analyte saveAnalyte(ExpRun expRun, User user, Map<String, Analyte> existingAnalytes, Analyte analyte)
-            throws SQLException
     {
         Analyte existingAnalyte = existingAnalytes.get(analyte.getName());
         if (existingAnalyte != null)
@@ -651,7 +650,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /* Insert QC Flags for %CV values that are over the threshold (Unknown > 20%, Standard/Control > 15%) */
     private void insertCVQCFlags(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte)
-            throws SQLException
     {
         LuminexWellGroup wellGroup = analyte.buildWellGroup(dataRows);
         List<LuminexWell> allReplicates = wellGroup.getWellData(true); // combine replicates and get mean MFI and %CV
@@ -691,7 +689,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, String stndCurveFitInput, String unkCurveFitInput, ExpProtocol protocol)
-            throws ExperimentException, SQLException
+            throws ExperimentException
     {
         // Insert mappings for all of the titrations that aren't standards
         for (Titration titration : titrations.values())
@@ -715,7 +713,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     private void insertSinglePointControlAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, SinglePointControl> singlePointControls, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
-            throws ExperimentException, SQLException
+            throws ExperimentException
     {
         // Insert mappings for all of the controls
         for (SinglePointControl singlePointControl : singlePointControls.values())
@@ -724,7 +722,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private void insertAnalyteSinglePointControlMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, SinglePointControl singlePointControl, String conjugate, String isotype, ExpProtocol protocol) throws SQLException
+    private void insertAnalyteSinglePointControlMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, SinglePointControl singlePointControl, String conjugate, String isotype, ExpProtocol protocol)
     {
         // Calculate the average FI value
         double sum = 0;
@@ -777,7 +775,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** Insert or Update QC Flags for MFI that are out of the guide set range if this AnalyteSinglePointControl record
      * has a current GuideSet */
-    public static void insertOrUpdateAnalyteSinglePointControlQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteSinglePointControl analyteSinglePointControl, Analyte analyte, SinglePointControl singlePointControl, String isotype, String conjugate, double averageFI) throws SQLException
+    public static void insertOrUpdateAnalyteSinglePointControlQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteSinglePointControl analyteSinglePointControl, Analyte analyte, SinglePointControl singlePointControl, String isotype, String conjugate, double averageFI)
     {
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), protocol, null);
 
@@ -791,22 +789,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if (null != analyteSinglePointControl.getGuideSetId())
         {
-            // query the guide set table to get the average and stddev values for the comparisons
             GuideSetTable guideSetTable = schema.createGuideSetTable(false);
-
-            // run-based guide set metric columns
-            FieldKey fiAverageRunFK = FieldKey.fromParts("SinglePointControlFIAverage");
-            FieldKey fiStdDevRunFK = FieldKey.fromParts("SinglePointControlFIStdDev");
-
-            // value-based guide set metric columns
-            FieldKey isValueBasedFK = FieldKey.fromParts("ValueBased");
-            FieldKey fiAverageValueFK = FieldKey.fromParts("ValueBasedMaxFIAverage");
-            FieldKey fiStdDevValueFK = FieldKey.fromParts("ValueBasedMaxFIStdDev");
-
-            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(
-                    isValueBasedFK, fiAverageRunFK, fiStdDevRunFK, fiAverageValueFK, fiStdDevValueFK));
-            SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("RowId"), analyteSinglePointControl.getGuideSetId());
-            Map<String, Object> guideSetRow = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMap();
+            GuideSet guideSetRow = new TableSelector(guideSetTable).getObject(analyteSinglePointControl.getGuideSetId(), GuideSet.class);
 
             if (guideSetRow == null)
             {
@@ -814,24 +798,21 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             }
             else
             {
-                String descriptionPrefix = singlePointControl.getName() + " " + analyte.getName() + " - "
-                        + (isotype == null ? "[None]" : isotype) + " "
-                        + (conjugate == null ? "[None]" : conjugate) + " ";
-
                 // add QCFlag for MFI, if out of guide set range
-                Boolean isValueBasedGuideSet = (Boolean)guideSetRow.get(cols.get(isValueBasedFK).getAlias());
-                Double guideSetAverage = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(fiAverageRunFK).getAlias()), guideSetRow.get(cols.get(fiAverageValueFK).getAlias()));
-                Double guideSetStdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(fiStdDevRunFK).getAlias()), guideSetRow.get(cols.get(fiStdDevValueFK).getAlias()));
-                String outOfRangeType = isOutOfGuideSetRange(averageFI, guideSetAverage, guideSetStdDev);
+                String outOfRangeType = guideSetRow.getOutOfRangeTypeForMaxFI(averageFI, guideSetTable, "SinglePointControlFIAverage", "SinglePointControlFIStdDev");
                 if (null != outOfRangeType)
                 {
+                    String descriptionPrefix = singlePointControl.getName() + " " + analyte.getName() + " - "
+                            + (isotype == null ? "[None]" : isotype) + " "
+                            + (conjugate == null ? "[None]" : conjugate) + " ";
+
                     newQCFlags.add(new AnalyteSinglePointControlQCFlag(expRun.getRowId(), descriptionPrefix + outOfRangeType + " threshold for MFI", analyte.getRowId(), singlePointControl.getRowId()));
                 }
             }
         }
 
         // insert new flags if a matching QC Flag does not exist (based on runId, flagType, desription, analyteId, and titrationId)
-       for (AnalyteSinglePointControlQCFlag newQCFlag : newQCFlags)
+        for (AnalyteSinglePointControlQCFlag newQCFlag : newQCFlags)
         {
             if (!existingQCFlags.contains(newQCFlag))
             {
@@ -858,7 +839,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     private void insertAnalyteTitrationMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
-            throws SQLException, ExperimentException
+            throws ExperimentException
     {
         LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
 
@@ -1033,7 +1014,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** @return null if we can't find matching Rumi curve fit data */
     @Nullable
-    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws FitFailedException, SQLException
+    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws FitFailedException
     {
         if (fitType != StatsService.CurveFitType.FIVE_PARAMETER && fitType != StatsService.CurveFitType.FOUR_PARAMETER)
         {
@@ -1328,51 +1309,52 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         public void testGuideSetOutOfRange()
         {
             // check some actual values used in the first set of runs for the LuminexGuideSetTest (all are in range)
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(164.07, 177.15, 18.49));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(190.23, 177.15, 18.49));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(43988.21, 43426.10, 794.95));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(42863.98, 43426.10, 794.95));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(9031.46, 8662.50, 521.79));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(8293.54, 8662.50, 521.79));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(85464.34, 80851.83, 6523.08));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(76239.32, 80851.83, 6523.08));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(11845.50, 11457.15, 549.21));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(11068.80, 11457.15, 549.21));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(164.07, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(190.23, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(43988.21, 43426.10, 794.95));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(42863.98, 43426.10, 794.95));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(9031.46, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(8293.54, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(85464.34, 80851.83, 6523.08));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(76239.32, 80851.83, 6523.08));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(11845.50, 11457.15, 549.21));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(11068.80, 11457.15, 549.21));
 
             // check some of the values used in the second set of runs for the LuminexGuideSetTest
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(138.90, 177.15, 18.49));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(207.49, 177.15, 18.49));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(151.95, 177.15, 18.49));
-            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(6333.02, 8662.50, 521.79));
-            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(7028.96, 8662.50, 521.79));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(7491.69, 8662.50, 521.79));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(28005.89, 42158.22, 4833.76));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(36676.66, 42158.22, 4833.76));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(45809.80, 42158.22, 4833.76));
-            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(78448.67, 85268.04, 738.55));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(84451.16, 85268.04, 738.55));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(85888.60, 85268.04, 738.55));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(138.90, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(207.49, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(151.95, 177.15, 18.49));
+            assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(6333.02, 8662.50, 521.79));
+            assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(7028.96, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(7491.69, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(28005.89, 42158.22, 4833.76));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(36676.66, 42158.22, 4833.76));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(45809.80, 42158.22, 4833.76));
+            assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(78448.67, 85268.04, 738.55));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(84451.16, 85268.04, 738.55));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(85888.60, 85268.04, 738.55));
 
             // other checks using null values, etc.
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(90.0, 60.0, 10.0));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(30.0, 60.0, 10.0));
-            assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(91.0, 60.0, 10.0));
-            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(29.0, 60.0, 10.0));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(null, 60.0, 10.0));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(90.0, null, null));
-            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(60.0, 60.0, null));
-            assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(60.01, 60.0, null));
-            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(59.99, 60.0, null));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(90.0, 60.0, 10.0));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(30.0, 60.0, 10.0));
+            assertEquals("Wrong out of guide set range type", "over", GuideSet.getOutOfRangeType(91.0, 60.0, 10.0));
+            assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(29.0, 60.0, 10.0));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(null, 60.0, 10.0));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(90.0, null, null));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(60.0, 60.0, null));
+            assertEquals("Wrong out of guide set range type", "over", GuideSet.getOutOfRangeType(60.01, 60.0, null));
+            assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(59.99, 60.0, null));
 
             // Issue 16767
-            assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(0.024779, 0.016229, null));
-            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(0.017644, 0.021754, null));
+            assertEquals("Wrong out of guide set range type", "over", GuideSet.getOutOfRangeType(0.024779, 0.016229, null));
+            assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(0.017644, 0.021754, null));
+            assertEquals("Wrong out of guide set range type", null, GuideSet.getOutOfRangeType(0.017644, 0.017644, 0.0));
         }
     }
 
     @NotNull
     private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source, CurveFit[] existingCurveFits)
-            throws FitFailedException, SQLException
+            throws FitFailedException
     {
         CurveFit fit = createCurveFit(titration, analyte, params, ec50, flag, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
@@ -1380,7 +1362,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     @NotNull
     private CurveFit insertOrUpdateCurveFit(User user, CurveFit fit, CurveFit[] existingCurveFits)
-            throws SQLException
     {
         CurveFit matchingFit = null;
         for (CurveFit existingCurveFit : existingCurveFits)
@@ -1439,7 +1420,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     /** Insert or Update QC Flags for High MFI, 4PL EC50, 5PL EC50, or AUC values that are
       out of the guide set range if this AnalyteTitration record has a current GuideSet */
     public static void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, @NotNull AnalyteTitration analyteTitration, @NotNull Analyte analyte, @NotNull Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
-            throws SQLException
     {
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), protocol, null);
 
@@ -1455,54 +1435,20 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             // query the guide set table to get the average and stddev values for the out of guide set range comparisons
             GuideSetTable guideSetTable = schema.createGuideSetTable(false);
+            GuideSet guideSetRow = new TableSelector(guideSetTable).getObject(analyteTitration.getGuideSetId(), GuideSet.class);
 
-            // run-based guide set columns
-            FieldKey maxFIAverageRunFK = FieldKey.fromParts("MaxFIAverage");
-            FieldKey maxFIStdDevRunFK = FieldKey.fromParts("MaxFIStdDev");
-            FieldKey ec504plAverageRunFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            FieldKey ec504plStdDevRunFK = FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
-            FieldKey ec505plAverageRunFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            FieldKey ec505plStdDevRunFK = FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
-            FieldKey aucAverageRunFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
-            FieldKey aucStdDevRunFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
-
-            // value-based guide set columns
-            FieldKey isValueBasedFK = FieldKey.fromParts("ValueBased");
-            FieldKey maxFIAverageValueFK= FieldKey.fromParts("ValueBasedMaxFIAverage");
-            FieldKey maxFIStdDevValueFK = FieldKey.fromParts("ValueBasedMaxFIStdDev");
-            FieldKey ec504plAverageValueFK= FieldKey.fromParts("ValueBasedEC504PLAverage");
-            FieldKey ec504plStdDevValueFK = FieldKey.fromParts("ValueBasedEC504PLStdDev");
-            FieldKey ec505plAverageValueFK= FieldKey.fromParts("ValueBasedEC505PLAverage");
-            FieldKey ec505plStdDevValueFK = FieldKey.fromParts("ValueBasedEC505PLStdDev");
-            FieldKey aucAverageValueFK= FieldKey.fromParts("ValueBasedAUCAverage");
-            FieldKey aucStdDevValueFK = FieldKey.fromParts("ValueBasedAUCStdDev");
-
-            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(isValueBasedFK,
-                    maxFIAverageRunFK, maxFIStdDevRunFK, maxFIAverageValueFK, maxFIStdDevValueFK,
-                    ec504plAverageRunFK, ec504plStdDevRunFK, ec504plAverageValueFK, ec504plStdDevValueFK,
-                    ec505plAverageRunFK, ec505plStdDevRunFK, ec505plAverageValueFK, ec505plStdDevValueFK,
-                    aucAverageRunFK, aucStdDevRunFK, aucAverageValueFK, aucStdDevValueFK));
-            SimpleFilter guideSetFilter = new SimpleFilter(FieldKey.fromParts("RowId"), analyteTitration.getGuideSetId());
-            Map<String, Object>[] guideSetRows = new TableSelector(guideSetTable, cols.values(), guideSetFilter, null).getMapArray();
-
-            if (guideSetRows.length != 1)
+            if (guideSetRow == null)
             {
                 throw new IllegalStateException("Unable to find referenced guide set: " + analyteTitration.getGuideSetId());
             }
             else
             {
-                Map<String, Object> guideSetRow = guideSetRows[0];
-
                 String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - "
                         + (isotype == null ? "[None]" : isotype) + " "
                         + (conjugate == null ? "[None]" : conjugate) + " ";
 
                 // add QCFlag for High MFI, if out of guide set range
-                Boolean isValueBasedGuideSet = (Boolean)guideSetRow.get(cols.get(isValueBasedFK).getAlias());
-                Double average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(maxFIAverageRunFK).getAlias()), guideSetRow.get(cols.get(maxFIAverageValueFK).getAlias()));
-                Double stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(maxFIStdDevRunFK).getAlias()), guideSetRow.get(cols.get(maxFIStdDevValueFK).getAlias()));
-                Double value = analyteTitration.getMaxFI();
-                String outOfRangeType = isOutOfGuideSetRange(value, average, stdDev);
+                String outOfRangeType = guideSetRow.getOutOfRangeTypeForMaxFI(analyteTitration.getMaxFI(), guideSetTable, "TitrationMaxFIAverage", "TitrationMaxFIStdDev");
                 if (null != outOfRangeType)
                 {
                     newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), QC_FLAG_HIGH_MFI_FLAG_TYPE, descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
@@ -1515,33 +1461,23 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                     if (curveFit.getCurveType().equals(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
                     {
-                        average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec504plAverageRunFK).getAlias()), guideSetRow.get(cols.get(ec504plAverageValueFK).getAlias()));
-                        stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec504plStdDevRunFK).getAlias()), guideSetRow.get(cols.get(ec504plStdDevValueFK).getAlias()));
-                        value = curveFit.getEC50();
+                        outOfRangeType = guideSetRow.getOutOfRangeTypeForEC504PL(curveFit.getEC50(), guideSetTable);
                         flagType = QC_FLAG_EC50_4PL_FLAG_TYPE;
                     }
                     else if (curveFit.getCurveType().equals(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
                     {
-                        average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec505plAverageRunFK).getAlias()), guideSetRow.get(cols.get(ec505plAverageValueFK).getAlias()));
-                        stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(ec505plStdDevRunFK).getAlias()), guideSetRow.get(cols.get(ec505plStdDevValueFK).getAlias()));
-                        value = curveFit.getEC50();
+                        outOfRangeType = guideSetRow.getOutOfRangeTypeForEC505PL(curveFit.getEC50(), guideSetTable);
                         flagType = QC_FLAG_EC50_5PL_FLAG_TYPE;
                     }
                     else if (curveFit.getCurveType().equals("Trapezoidal"))
                     {
-                        average = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(aucAverageRunFK).getAlias()), guideSetRow.get(cols.get(aucAverageValueFK).getAlias()));
-                        stdDev = getGuideSetRangeValue(isValueBasedGuideSet, guideSetRow.get(cols.get(aucStdDevRunFK).getAlias()), guideSetRow.get(cols.get(aucStdDevValueFK).getAlias()));
-                        value = curveFit.getAUC();
+                        outOfRangeType = guideSetRow.getOutOfRangeTypeForAUC(curveFit.getAUC(), guideSetTable);
                         flagType = QC_FLAG_AUC_FLAG_TYPE;
                     }
 
-                    if (null != flagType)
+                    if (null != flagType && null != outOfRangeType)
                     {
-                        outOfRangeType = isOutOfGuideSetRange(value, average, stdDev);
-                        if (null != outOfRangeType)
-                        {
-                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), flagType, descriptionPrefix + outOfRangeType + " threshold for " + flagType, analyte.getRowId(), titration.getRowId()));
-                        }
+                        newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), flagType, descriptionPrefix + outOfRangeType + " threshold for " + flagType, analyte.getRowId(), titration.getRowId()));
                     }
                 }
             }
@@ -1566,35 +1502,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    /**
-     * Check if the given value is outside of the Guide Set range (i.e. average +/- 3 stdDev threshold)
-     * @param value The value to be compared with the range
-     * @param average The average of the given guide set
-     * @param stdDev The standard deviation of the given guide set
-     * @return Return null if the value is within range and "over" or "under" if the value is not in the range
-     */
-    public static String isOutOfGuideSetRange(Double value, Double average, Double stdDev)
-    {
-        if (null != value && null != average)
-        {
-            // set the stdDev to zero if there is none
-            if (null == stdDev)
-                stdDev = 0.0;
-
-            // compare everything to six decimal places, Issue 16767
-            int precision = 1000000;
-            value = (double)Math.round(value * precision) / precision;
-            double top = (double)Math.round((average + 3 * stdDev) * precision) / precision;
-            double bottom = (double)Math.round((average - 3 * stdDev) * precision) / precision;
-
-            if (value > top)
-                return "over";
-            else if (value < bottom)
-                return "under";
-        }
-        return null;
-    }
-
     private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)
             throws ExperimentException
     {
@@ -1609,8 +1516,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** @return Name->Titration */
-    private Map<String, Titration> insertTitrations(ExpRun expRun, User user, List<Titration> titrations)
-            throws ExperimentException, SQLException
+    private Map<String, Titration> insertTitrations(ExpRun expRun, User user, List<Titration> titrations) throws ExperimentException
     {
         Map<String, Titration> result = new CaseInsensitiveHashMap<>();
 
@@ -1638,8 +1544,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** @return Name->SinglePointControl */
-        private Map<String, SinglePointControl> insertSinglePointControls(ExpRun expRun, User user, List<SinglePointControl> singlePointControls)
-                throws ExperimentException, SQLException
+        private Map<String, SinglePointControl> insertSinglePointControls(ExpRun expRun, User user, List<SinglePointControl> singlePointControls) throws ExperimentException
         {
             Map<String, SinglePointControl> result = new CaseInsensitiveHashMap<>();
 
