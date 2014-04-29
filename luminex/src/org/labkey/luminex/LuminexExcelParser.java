@@ -361,6 +361,10 @@ public class LuminexExcelParser
             {
                 String propName = cellContents.substring(0, index);
                 String value = cellContents.substring((propName + ":").length()).trim();
+                if (value.isEmpty())
+                {
+                    value = null;
+                }
 
                 if ("Regression Type".equalsIgnoreCase(propName))
                 {
