@@ -175,14 +175,14 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         // merge the values for the value-based vs run-based guide set averages into a single column
                         if (this.controlType == 'Titration')
                         {
-                            record.set("EC504PLAverage", record.get("EC504PLAverage") || record.get("Four ParameterCurveFit/EC50Average"));
-                            record.set("EC505PLAverage", record.get("EC505PLAverage") || record.get("Five ParameterCurveFit/EC50Average"));
-                            record.set("AUCAverage", record.get("AUCAverage") || record.get("TrapezoidalCurveFit/AUCAverage"));
-                            record.set("MFIAverage", record.get("MaxFIAverage") || record.get("TitrationMaxFIAverage"));
+                            record.set("AverageEC504PL", record.get("EC504PLAverage") || record.get("Four ParameterCurveFit/EC50Average"));
+                            record.set("AverageEC505PL", record.get("EC505PLAverage") || record.get("Five ParameterCurveFit/EC50Average"));
+                            record.set("AverageAUC", record.get("AUCAverage") || record.get("TrapezoidalCurveFit/AUCAverage"));
+                            record.set("AverageMFI", record.get("MaxFIAverage") || record.get("TitrationMaxFIAverage"));
                         }
                         else
                         {
-                            record.set("MFIAverage", record.get("MaxFIAverage") || record.get("SinglePointControlFIAverage"));
+                            record.set("AverageMFI", record.get("MaxFIAverage") || record.get("SinglePointControlFIAverage"));
                         }
                     }, this);
 
@@ -211,10 +211,10 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         ];
         if (this.controlType == 'Titration')
         {
-            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'EC504PLAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
-            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'EC505PLAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
-            guideSetColumnModelColumns.push({header: 'Avg AUC', dataIndex: 'AUCAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
-            guideSetColumnModelColumns.push({header: 'Avg High MFI', dataIndex: 'MFIAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'AverageEC504PL', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'AverageEC505PL', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg AUC', dataIndex: 'AverageAUC', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg High MFI', dataIndex: 'AverageMFI', renderer: this.numberRenderer, align: 'right', sortable: false});
         }
         else
         {
