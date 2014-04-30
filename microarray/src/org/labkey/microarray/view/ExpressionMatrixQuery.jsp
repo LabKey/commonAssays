@@ -75,7 +75,7 @@
         var assayDesignName = moduleProperties.values.AssayDesignName.effectiveValue;
         if (!assayDesignName)
         {
-            LABKEY.ExtAdapter.Msg.alert("Error", "Missing AssayDesignName in Microarray module properties. Please set " +
+            Ext4.Msg.alert("Error", "Missing AssayDesignName in Microarray module properties. Please set " +
                     "a value in the Folder Management UI.")
         }
         var reportId = moduleProperties.values.ComparisonReportId.effectiveValue;
@@ -83,7 +83,7 @@
         {
             // The ComparisonReportId is the id of the R report to be executed when "Compare" is clicked.
             // The id should look like db:3047
-            LABKEY.ExtAdapter.Msg.alert("Error", "Missing ComparisonReportId in Microarray module properties. Please " +
+            Ext4.Msg.alert("Error", "Missing ComparisonReportId in Microarray module properties. Please " +
                     "set a value in the Folder Management UI.")
         }
 
