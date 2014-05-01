@@ -126,7 +126,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
         if (sampleSet != null)
         {
-            for (DomainProperty pd : sampleSet.getPropertiesForType())
+            for (DomainProperty pd : sampleSet.getType().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }

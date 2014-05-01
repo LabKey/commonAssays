@@ -233,7 +233,7 @@ public class EditICSMetadataForm extends ProtocolForm
         {
             if (sampleSet.hasNameAsIdCol())
                 ret.put(new FieldKey(sampleProperty, "Name"), "Sample Name");
-            for (DomainProperty pd : sampleSet.getPropertiesForType())
+            for (DomainProperty pd : sampleSet.getType().getProperties())
             {
                 ret.put(new FieldKey(sampleProperty, pd.getName()), "Sample " + pd.getName());
             }

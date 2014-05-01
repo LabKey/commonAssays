@@ -52,7 +52,7 @@ public class ElisaResultsTable extends AssayResultTable
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
         if (sampleSet != null)
         {
-            for (DomainProperty pd : sampleSet.getPropertiesForType())
+            for (DomainProperty pd : sampleSet.getType().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY,
                         ExpMaterialTable.Column.Property.toString(), pd.getName()));

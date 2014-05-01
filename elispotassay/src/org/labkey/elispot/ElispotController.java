@@ -53,6 +53,7 @@ import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
@@ -277,7 +278,7 @@ public class ElispotController extends SpringActionController
         {
             super(protocol, provider, true, true, containerFilter);
 
-            _links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
+            _links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter), AssayProtocolSchema.getLastFilterScope(_protocol))));
         }
 
 

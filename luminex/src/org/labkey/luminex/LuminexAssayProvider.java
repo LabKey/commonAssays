@@ -49,6 +49,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayRunDatabaseContext;
 import org.labkey.api.study.assay.AssayRunUploadContext;
@@ -335,7 +336,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             url.addParameter("RunExclusion.RunId~eq", currentRunId);
             url.addParameter("TitrationExclusion.DataId/Run/RowId~eq", currentRunId);
         }
-        result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
+        result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
         /*
          * add header menu for the QC Report
@@ -354,7 +355,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         // just show titrations that are either standards or qc controls
         url.addParameter("AnalyteTitration.Titration/Unknown~eq", "false");
-        qcReportMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url)));
+        qcReportMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
         // add a URL for the single point control report
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.SinglePointControlQcReportAction.class);
@@ -366,7 +367,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             url.addParameter("AnalyteSinglePointControl.SinglePointControl/Run/RowId~eq", currentRunId);
         }
-        qcReportMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url)));
+        qcReportMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
         // add link to view Levey-Jenning reports
         qcReportMenu.addChild("view levey-jennings reports", new ActionURL(LuminexController.LeveyJenningsMenuAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()));

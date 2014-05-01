@@ -18,15 +18,14 @@ package org.labkey.flow.controllers.protocol;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
-import javax.servlet.ServletException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -75,7 +74,7 @@ public class JoinSampleSetForm extends ProtocolForm
         {
             if (sampleSet.hasNameAsIdCol())
                 ret.put("Name", "Name");
-            for (DomainProperty property : sampleSet.getPropertiesForType())
+            for (DomainProperty property : sampleSet.getType().getProperties())
             {
                 ret.put(property.getName(), property.getName());
             }

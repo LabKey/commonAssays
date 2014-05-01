@@ -62,7 +62,7 @@
         ExpSampleSet sampleSet = protocol.getSampleSet();
         if (sampleSet != null)
         {
-            for (DomainProperty dp : sampleSet.getPropertiesForType())
+            for (DomainProperty dp : sampleSet.getType().getProperties())
                 sampleSetProperties.add(dp.getName());
         }
     }
