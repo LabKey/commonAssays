@@ -589,12 +589,12 @@ public class FlowSchema extends UserSchema
             sqlFlowData.append("WHERE ");
             sqlFlowData.append("_flowObject." + _flowObject.getColumn("typeid").getName() + "=" + _type.getObjectType().getTypeId());
             sqlFlowData.append(" AND ");
-            sqlFlowData.append("_flowObject." + _flowObject.getColumn("container").getName() + "='" + getContainer().getId() + "'");
+            sqlFlowData.append("_flowObject.").append(_flowObject.getColumn("container").getName()).append("='").append(getContainer().getId()).append("'");
             return sqlFlowData;
         }
 
         @Override
-        public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
+        public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
         {
             return _expData.hasPermission(user, perm);
         }

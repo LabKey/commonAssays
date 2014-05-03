@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -159,7 +160,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
+    public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
     {
         return (perm.equals(UpdatePermission.class) || perm.equals(ReadPermission.class))
                 && _userSchema.getContainer().hasPermission(user, perm);

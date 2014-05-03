@@ -78,7 +78,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
     public abstract QueryUpdateService getUpdateService();
 
     @Override
-    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
+    public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
     {
         return _userSchema.getContainer().hasPermission(user, perm);
     }
