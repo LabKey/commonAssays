@@ -119,6 +119,7 @@ public class WorkspaceData implements Serializable
         catch (Exception ex)
         {
             errors.reject(null, ex.getMessage());
+            ExceptionUtil.decorateException(ex, ExceptionUtil.ExceptionInfo.ExtraMessage, "name: " + this.name + ", path: " + this.path, true);
             ExceptionUtil.logExceptionToMothership(request, ex);
         }
     }
