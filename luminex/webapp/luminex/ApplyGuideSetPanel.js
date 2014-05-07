@@ -218,7 +218,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            guideSetColumnModelColumns.push({header: 'MFI', dataIndex: 'MFIAverage', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'MFI', dataIndex: 'AverageMFI', renderer: this.numberRenderer, align: 'right', sortable: false});
         }
         var guideSetsColModel = new Ext.grid.ColumnModel({
             defaults: {width: 75, sortable: true},
