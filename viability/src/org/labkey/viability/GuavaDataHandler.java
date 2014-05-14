@@ -26,6 +26,7 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -372,8 +373,28 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         Map<DataType, List<Map<String, Object>>> result = new HashMap<>();
         if (context instanceof AssayUploadXarContext)
         {
-            ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)((AssayUploadXarContext)context).getContext();
-            List<Map<String, Object>> rows = form.getResultProperties(null);
+            List<Map<String, Object>> rows;
+            AssayRunUploadContext<ViabilityAssayProvider> uploadContext = ((AssayUploadXarContext) context).getContext();
+            if (uploadContext instanceof ViabilityAssayRunUploadForm)
+            {
+                // Importing via standard assay import wizard
+                ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm) ((AssayUploadXarContext) context).getContext();
+                rows = form.getResultProperties(null);
+            }
+            else
+            {
+                // Importing via ImportRunApiAction
+                ViabilityAssayProvider provider = uploadContext.getProvider();
+                ExpProtocol protocol = uploadContext.getProtocol();
+                Domain runDomain = provider.getRunDomain(protocol);
+                Domain resultsDomain = provider.getResultsDomain(protocol);
+
+                // Parse with either Guava or TSV parser
+                ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(dataFile, runDomain, resultsDomain);
+                rows = parser.getResultData();
+                ViabilityAssayDataHandler.validateData(rows, false);
+            }
+
             // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transormation
             result.put(ViabilityTsvDataHandler.DATA_TYPE, rows);
         }

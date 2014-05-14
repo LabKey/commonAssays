@@ -23,6 +23,8 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
@@ -100,7 +102,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             {
                 Map<String, Object> row = it.next();
 
-                String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
+                String poolID = String.valueOf(row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
                 if (poolID == null || poolID.length() == 0)
                     throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
 
@@ -190,6 +192,29 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
     public abstract Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile);
 
+    public static Parser createParser(File dataFile, ExpProtocol protocol) throws ExperimentException
+    {
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        Domain runDomain = provider.getRunDomain(protocol);
+        Domain resultsDomain = provider.getResultsDomain(protocol);
+
+        return createParser(dataFile, runDomain, resultsDomain);
+    }
+
+    public static Parser createParser(File dataFile, Domain runDomain, Domain resultsDomain) throws ExperimentException
+    {
+        ViabilityAssayDataHandler.Parser parser;
+        String fileName = dataFile.getName().toLowerCase();
+        if (fileName.endsWith(".tsv") || fileName.endsWith(".txt"))
+            parser = new ViabilityTsvDataHandler.Parser(runDomain, resultsDomain, dataFile);
+        else if (fileName.endsWith(".csv"))
+            parser = new GuavaDataHandler.Parser(runDomain, resultsDomain, dataFile);
+        else
+            throw new ExperimentException("Don't know how to parse uploaded file: " + fileName);
+
+        return parser;
+    }
+
     @Override
     public DataType getDataType()
     {
@@ -233,7 +258,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         for (ListIterator<Map<String, Object>> it = rows.listIterator(); it.hasNext();)
         {
             Map<String, Object> row = it.next();
-            String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
+            String poolID = String.valueOf(row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
             if (poolID == null || poolID.length() == 0)
                 throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
 
