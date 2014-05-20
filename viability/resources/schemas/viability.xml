@@ -91,10 +91,11 @@
             <ns:column columnName="ViableCells"/>
 
             <!-- calculated specimen aggregates -->
+            <ns:column columnName="SpecimenAggregatesUpdated"/>
             <ns:column columnName="SpecimenCount"/>
             <ns:column columnName="SpecimenMatchCount"/>
             <ns:column columnName="SpecimenIDs"/>
-            <ns:column columnName="SpecimenMatchIDs"/>
+            <ns:column columnName="SpecimenMatches"/>
             <ns:column columnName="OriginalCells"/>
         </ns:columns>
     </ns:table>
