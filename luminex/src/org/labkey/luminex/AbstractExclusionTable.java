@@ -63,7 +63,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         analytesColumn.setUserEditable(true);
         analytesColumn.setReadOnly(false);
 
-        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 

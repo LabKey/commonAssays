@@ -99,7 +99,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
-        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 
