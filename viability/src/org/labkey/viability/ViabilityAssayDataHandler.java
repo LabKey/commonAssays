@@ -308,14 +308,18 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap);
 
             ViabilityResult result = ViabilityResult.fromMap(pair.first, pair.second);
+            assert result.getRunID() == 0;
             assert result.getDataID() == 0;
             assert result.getObjectID() == 0;
+            result.setRunID(run.getRowId());
             result.setDataID(data.getRowId());
             result.setContainer(container.getId());
             result.setProtocolID(protocol.getRowId());
 
             ViabilityManager.saveResult(user, container, result, rowIndex++);
         }
+
+        ViabilityManager.updateSpecimenAggregates(user, container, protocol, run);
     }
 
     private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap)

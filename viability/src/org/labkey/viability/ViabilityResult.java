@@ -16,7 +16,8 @@
 
 package org.labkey.viability;
 
-import org.labkey.api.data.ObjectFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -34,6 +35,7 @@ public class ViabilityResult
 
     private String containerID;
     private int protocolID;
+    private int runID;
     private int dataID;
     private int objectID;
     private String participantID;
@@ -45,18 +47,56 @@ public class ViabilityResult
     private int totalCells;
     private int viableCells;
 
-    private List<String> specimenID;
+    private List<String> specimenIDList;
+
     private Map<PropertyDescriptor, Object> properties;
 
     public ViabilityResult() { }
 
     public static ViabilityResult fromMap(Map<String, Object> base, Map<PropertyDescriptor, Object> extra)
     {
-        ObjectFactory<ViabilityResult> factory = ObjectFactory.Registry.getFactory(ViabilityResult.class);
-        ViabilityResult result = factory.fromMap(base);
+        ViabilityResult result = new ViabilityResult();
 
-        if (result.getSpecimenIDs() == null)
-            result.setSpecimenIDs(Collections.<String>emptyList());
+        if (base.get("rowid") != null)
+            result.setRowID((int)base.get("rowId"));
+        if (base.get("container") != null)
+            result.setContainer((String) base.get("container"));
+        if (base.get("protocolID") != null)
+            result.setProtocolID((int) base.get("protocolID"));
+        if (base.get("runID") != null)
+            result.setRunID((int) base.get("runID"));
+        if (base.get("dataID") != null)
+            result.setDataID((int) base.get("dataID"));
+        if (base.get("objectID") != null)
+            result.setObjectID((int) base.get("objectID"));
+        if (base.get("participantID") != null)
+            result.setParticipantID(String.valueOf(base.get("participantID")));
+        if (base.get("visitID") != null)
+            result.setVisitID(((Number) base.get("visitID")).doubleValue());
+        if (base.get("date") != null)
+            result.setDate((Date) base.get("date"));
+
+        if (base.get("sampleNum") != null)
+            result.setSampleNum((int)base.get("sampleNum"));
+        if (base.get("poolID") != null)
+            result.setPoolID(String.valueOf(base.get("poolID")));
+        if (base.get("totalCells") != null)
+            result.setTotalCells(((Number) base.get("totalCells")).intValue());
+        if (base.get("viableCells") != null)
+            result.setViableCells(((Number) base.get("viableCells")).intValue());
+
+        // NOTE: We use the 'string' version of 'specimenIDs' when binding to the database in TableSelector.
+        // NOTE: The 'list' version of 'SpecimenIDs' is used when the guava file is parsed.
+        if (base.get("specimenIDs") != null)
+        {
+            Object o = base.get("specimenIDs");
+            if (o instanceof String)
+                result.setSpecimenIDs((String) o);
+            else if (o instanceof List)
+                result.setSpecimenIDList((List<String>) o);
+            else
+                throw new IllegalArgumentException("Expected comma separated list or a collecting of specimen IDs");
+        }
 
         if (extra != null)
             result.setProperties(extra);
@@ -67,8 +107,27 @@ public class ViabilityResult
 
     public Map<String, Object> toMap()
     {
-        ObjectFactory<ViabilityResult> factory = ObjectFactory.Registry.getFactory(ViabilityResult.class);
-        Map<String, Object> ret = factory.toMap(this, null);
+        Map<String, Object> ret = new CaseInsensitiveHashMap<>();
+
+        ret.put("rowid", getRowID());
+        ret.put("container", getContainer());
+        ret.put("protocolID", getProtocolID());
+        ret.put("runID", getRunID());
+        ret.put("dataID", getDataID());
+        ret.put("objectID", getObjectID());
+        ret.put("participantID", getParticipantID());
+        ret.put("visitID", getVisitID());
+        ret.put("date", getDate());
+
+        ret.put("sampleNum", getSampleNum());
+        ret.put("poolID", getPoolID());
+        ret.put("totalCells", getTotalCells());
+        ret.put("viableCells", getViableCells());
+
+        // NOTE: We use the 'string' version of 'specimenIDs' when converting to/from a map.
+        // NOTE: The 'list' version of 'SpecimenIDs' is used when the guava file is parsed.
+        ret.put("specimenIDs", getSpecimenIDList());
+
         ret.putAll(getStringProperties());
         return ret;
     }
@@ -101,6 +160,16 @@ public class ViabilityResult
     public void setProtocolID(int protocolID)
     {
         this.protocolID = protocolID;
+    }
+
+    public int getRunID()
+    {
+        return runID;
+    }
+
+    public void setRunID(int runID)
+    {
+        this.runID = runID;
     }
 
     public int getDataID()
@@ -200,18 +269,53 @@ public class ViabilityResult
         return 0;
     }
 
-    public List<String> getSpecimenIDs()
+    // Gets the concatenated String of specimen IDs.
+    // NOTE: Only used when inserting into viability.result table
+    @Nullable
+    public String getSpecimenIDs()
     {
-        if (specimenID == null)
-        {
-            specimenID = Arrays.asList(ViabilityManager.getSpecimens(getRowID()));
-        }
-        return specimenID;
+        return specimenIDList == null ? null : StringUtils.join(specimenIDList, ",");
     }
 
-    public void setSpecimenIDs(List<String> specimenID)
+    // NOTE: Used when instantiating ViabilityResult bean from viability.result table
+    public void setSpecimenIDs(@Nullable String specimenIDs)
     {
-        this.specimenID = specimenID;
+        if (specimenIDs == null)
+        {
+            setSpecimenIDList(null);
+        }
+        else
+        {
+            setSpecimenIDList(Arrays.asList(StringUtils.split(specimenIDs, ",")));
+        }
+    }
+
+    @Nullable
+    public List<String> getSpecimenIDList()
+    {
+        return specimenIDList;
+    }
+
+    public void setSpecimenIDList(@Nullable List<String> specimenID)
+    {
+        if (specimenID == null || specimenID.isEmpty())
+            this.specimenIDList = null;
+        else
+        {
+            this.specimenIDList = new ArrayList<>(specimenID);
+            Collections.sort(this.specimenIDList);
+        }
+    }
+
+    // NOTE: Only used when inserting into viability.result table
+    public int getSpecimenCount()
+    {
+        return specimenIDList == null ? 0 : specimenIDList.size();
+    }
+
+    public void setSpecimenCount(int specimenCount)
+    {
+        // no-op
     }
 
     public Map<PropertyDescriptor, Object> getProperties()

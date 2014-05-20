@@ -17,7 +17,9 @@
 package org.labkey.viability;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -41,7 +43,7 @@ public class ViabilityModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.10;
+        return 14.11;
     }
 
     public boolean hasScripts()
@@ -89,5 +91,12 @@ public class ViabilityModule extends DefaultModule
                 ViabilityManager.TestCase.class,
                 GuavaDataHandler.TestCase.class
         ));
+    }
+
+    @Nullable
+    @Override
+    public UpgradeCode getUpgradeCode()
+    {
+        return new ViabilityUpgradeCode();
     }
 }

@@ -58,6 +58,14 @@
                     <ns:fkColumnName>RowID</ns:fkColumnName>
                 </ns:fk>
             </ns:column>
+            <ns:column columnName="RunID">
+                <ns:isHidden>true</ns:isHidden>
+                <ns:fk>
+                    <ns:fkDbSchema>exp</ns:fkDbSchema>
+                    <ns:fkTable>experimentrun</ns:fkTable>
+                    <ns:fkColumnName>RowID</ns:fkColumnName>
+                </ns:fk>
+            </ns:column>
             <ns:column columnName="DataID">
                 <ns:fk>
                     <ns:fkDbSchema>exp</ns:fkDbSchema>
@@ -81,6 +89,13 @@
             <ns:column columnName="PoolID"/>
             <ns:column columnName="TotalCells"/>
             <ns:column columnName="ViableCells"/>
+
+            <!-- calculated specimen aggregates -->
+            <ns:column columnName="SpecimenCount"/>
+            <ns:column columnName="SpecimenMatchCount"/>
+            <ns:column columnName="SpecimenIDs"/>
+            <ns:column columnName="SpecimenMatchIDs"/>
+            <ns:column columnName="OriginalCells"/>
         </ns:columns>
     </ns:table>
 

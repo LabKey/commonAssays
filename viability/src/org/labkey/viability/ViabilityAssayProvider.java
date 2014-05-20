@@ -143,7 +143,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     static {
         ResultDomainProperty[] props = new ResultDomainProperty[] {
-            new ResultDomainProperty(SAMPLE_NUM_PROPERTY_NAME, SAMPLE_NUM_PROPERTY_CAPTION, PropertyType.STRING, "Sample number"),
+            new ResultDomainProperty(SAMPLE_NUM_PROPERTY_NAME, SAMPLE_NUM_PROPERTY_CAPTION, PropertyType.INTEGER, "Sample number"),
 
             new ResultDomainProperty(PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING, "Used with either " + VISITID_PROPERTY_NAME + " or " + DATE_PROPERTY_NAME + " to identify subject and timepoint for assay."),
             new ResultDomainProperty(VISITID_PROPERTY_NAME,  VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE, "Used with " + PARTICIPANTID_PROPERTY_NAME + " to identify subject and timepoint for assay."),
@@ -151,10 +151,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             new ResultDomainProperty(SPECIMENIDS_PROPERTY_NAME,  SPECIMENIDS_PROPERTY_CAPTION, PropertyType.STRING, "When a matching specimen exists in a study, can be used to identify subject and timepoint for assay."),
 
             new ResultDomainProperty(POOL_ID_PROPERTY_NAME, POOL_ID_PROPERTY_CAPTION, PropertyType.STRING, "Unique identifier for each pool of specimens"),
+            // CONSIDER: Cell count properties should be integer values instead of doubles.
             new ResultDomainProperty(TOTAL_CELLS_PROPERTY_NAME, TOTAL_CELLS_PROPERTY_CAPTION, PropertyType.DOUBLE, "Total cell count"),
             new ResultDomainProperty(VIABLE_CELLS_PROPERTY_NAME, VIABLE_CELLS_PROPERTY_CAPTION, PropertyType.DOUBLE, "Total viable cell count"),
             new ResultDomainProperty(ORIGINAL_CELLS_PROPERTY_NAME, ORIGINAL_CELLS_PROPERTY_CAPTION, PropertyType.DOUBLE, "Original cell count (sum of specimen vials original cell count)"),
-            // XXX: not in db, should be in domain?
+
+            // Computed properties
             new ResultDomainProperty(VIABILITY_PROPERTY_NAME, VIABILITY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent viable cell count"),
             new ResultDomainProperty(RECOVERY_PROPERTY_NAME, RECOVERY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
         };
@@ -365,6 +367,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             AssayProvider provider = getProvider();
             ExpProtocol protocol = getProtocol();
 
+            Container c = getViewContext().getContainer();
+            User user = getViewContext().getUser();
+
             // UCK. Getting query filter parameter from url.
             PropertyValue pv = getViewContext().getBindPropertyValues().getPropertyValue("Data.Run/RowId~eq");
             if (pv != null && pv.getValue() != null)
@@ -380,9 +385,6 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
                         runId = Integer.parseInt((String)value);
                     }
                     catch (NumberFormatException nfe) { }
-
-                Container c = getViewContext().getContainer();
-                User user = getViewContext().getUser();
 
                 boolean canInsert = c.hasPermission(user, InsertPermission.class);
                 boolean canDelete = c.hasPermission(user, DeletePermission.class);
@@ -406,6 +408,17 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
                     }
                 }
             }
+
+            // Force recalc of all specimen aggregates (mostly for testing)
+            if (user.isSiteAdmin())
+            {
+                ActionURL url = new ActionURL(ViabilityController.RecalculateSpecimenAggregatesAction.class, c);
+                url.addParameter("rowId", protocol.getRowId());
+                url.addReturnURL(getViewContext().getActionURL());
+
+                links.add(new NavTree("recalc specimen aggregates", url));
+            }
+
             return links;
         }
     }

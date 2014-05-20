@@ -16,14 +16,22 @@
 
 package org.labkey.viability;
 
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.Lsid;
@@ -37,13 +45,17 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.CPUTimer;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.TestContext;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +67,7 @@ import java.util.Map;
 
 public class ViabilityManager
 {
+    private static final Logger LOG = org.apache.log4j.Logger.getLogger(ViabilityManager.class);
     private static final ViabilityManager _instance = new ViabilityManager();
 
     private ViabilityManager()
@@ -79,7 +92,7 @@ public class ViabilityManager
 
     public static ViabilityResult[] getResults(ExpRun run, Container container)
     {
-        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("DataID", "RunID"), run.getRowId()), null).getArray(ViabilityResult.class);
+        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("RunID"), run.getRowId()), null).getArray(ViabilityResult.class);
     }
 
     /**
@@ -137,9 +150,7 @@ public class ViabilityManager
         assert user != null && c != null : "user or container is null";
         assert result.getDataID() > 0 : "DataID is not set";
         assert result.getPoolID() != null : "PoolID is not set";
-//        assert result.getTotalCells() > 0 : "TotalCells is not set";
-//        assert result.getViableCells() > 0 : "ViableCells is not set";
-//        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
+        assert result.getRunID() > 0 : "RunID is not set";
 
         if (result.getRowID() == 0)
         {
@@ -164,13 +175,14 @@ public class ViabilityManager
 
     private static void insertSpecimens(User user, ViabilityResult result)
     {
-        insertSpecimens(user, result.getRowID(), result.getSpecimenIDs());
+        insertSpecimens(user, result.getRowID(), result.getSpecimenIDList());
     }
 
     private static void insertSpecimens(User user, int resultId, List<String> specimens)
     {
-//        assert specimens != null && specimens.size() > 0;
-        Collections.sort(specimens);
+        if (specimens == null || specimens.size() == 0)
+            return;
+
         for (int index = 0; index < specimens.size(); index++)
         {
             String specimenID = specimens.get(index);
@@ -209,6 +221,110 @@ public class ViabilityManager
         }
 
         OntologyManager.insertProperties(c, obj.getObjectURI(), oprops.toArray(new ObjectProperty[oprops.size()]));
+    }
+
+    // TODO: call when: specimens imported, editable specimens inserted/updated/deleted, target study edited (for editable assay)
+    // DONE: call when: run inserted
+    public static void updateSpecimenAggregates(User user, Container c, ExpProtocol protocol, @Nullable ExpRun run)
+    {
+        ViabilityAssaySchema schema = new ViabilityAssaySchema(user, c, protocol, null);
+        SQLFragment specimenAggregates = specimenAggregates(schema, run);
+
+        SQLFragment updateFrag = new SQLFragment();
+        updateFrag.append("UPDATE ").append(ViabilitySchema.getTableInfoResults()).append(" SET\n");
+        updateFrag.append("  SpecimenAggregatesUpdated = specimen_agg.SpecimenAggregatesUpdated,\n");
+        updateFrag.append("  SpecimenCount = specimen_agg.SpecimenCount,\n");
+        updateFrag.append("  SpecimenMatchCount = specimen_agg.SpecimenMatchCount,\n");
+        updateFrag.append("  OriginalCells = specimen_agg.OriginalCells,\n");
+        updateFrag.append("  SpecimenIDs = CASE WHEN specimen_agg.SpecimenCount = 0 THEN NULL ELSE specimen_agg.SpecimenIDs END,\n");
+        updateFrag.append("  SpecimenMatches = CASE WHEN specimen_agg.SpecimenMatchCount = 0 THEN NULL ELSE specimen_agg.SpecimenMatches END\n");
+        updateFrag.append("FROM (\n");
+        updateFrag.append(specimenAggregates).append("\n");
+        updateFrag.append(") specimen_agg\n");
+        updateFrag.append("WHERE RowId = specimen_agg.ResultId\n");
+        // TODO: Don't update rows where the values are the same
+        // TODO: Clear values where no specimens match
+
+        DbScope scope = schema.getDbSchema().getScope();
+
+        // Debug the specimen aggregates
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug(String.format("viability specimen aggregates for container=%s, protocol=%d, run=%d", c.getPath(), protocol.getRowId(), run == null ? 0 : run.getRowId()));
+            ResultSet rs = new SqlSelector(scope, specimenAggregates).getResultSet();
+            ResultSetUtil.logData(rs, LOG);
+        }
+
+        CPUTimer t = new CPUTimer("viability.updateSpecimenAggregates");
+        t.start();
+        SqlExecutor exec = new SqlExecutor(scope);
+        int rows = exec.execute(updateFrag);
+        t.stop();
+
+        LOG.debug(String.format("viability specimen aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
+    }
+
+    public static SQLFragment specimenAggregates(ViabilityAssaySchema schema, ExpRun run)
+    {
+        ViabilityAssaySchema.ResultSpecimensTable rs = schema.createResultSpecimensTable();
+        rs.setContainerFilter(ContainerFilter.EVERYTHING);
+
+        List<FieldKey> fields = new ArrayList<>();
+        FieldKey resultId = FieldKey.fromParts("ResultID");
+        FieldKey specimenId = FieldKey.fromParts("SpecimenID");
+        FieldKey volume = FieldKey.fromParts("SpecimenID", "Volume");
+        FieldKey globalUniqueId = FieldKey.fromParts("SpecimenID", "GlobalUniqueId");
+        fields.add(resultId);
+        fields.add(specimenId);
+        fields.add(volume);
+        fields.add(globalUniqueId);
+
+        // TODO: Add resolved targetstudy as a column on viability.results
+        // TargetStudy could be on the Results, Run, or Batch table.
+        fields.add(FieldKey.fromParts("ResultID", "TargetStudy"));
+        fields.add(FieldKey.fromParts("ResultID", "Run", "TargetStudy"));
+        fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "TargetStudy"));
+
+        Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
+
+        SimpleFilter filter = new SimpleFilter();
+        if (run != null)
+        {
+            // Only update results in the run
+            filter.addCondition(FieldKey.fromParts("ResultID", "Run"), run.getRowId());
+        }
+        SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
+
+        SQLFragment groupFrag = new SQLFragment();
+        groupFrag.append("SELECT\n");
+        groupFrag.append("  {fn now()} AS SpecimenAggregatesUpdated,\n");
+        groupFrag.append("  " + columnMap.get(resultId).getAlias() + " AS ResultID,\n");
+        groupFrag.append("  SUM(" + columnMap.get(volume).getAlias() + ") AS OriginalCells,\n");
+        groupFrag.append("  COUNT(" + columnMap.get(specimenId).getAlias() + ") AS SpecimenCount,\n");
+        groupFrag.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") AS SpecimenMatchCount,\n");
+
+        if (schema.getDbSchema().getSqlDialect().supportsGroupConcat())
+        {
+            // It's silly to use group-concat for the specimen IDs since we already know them, but it keeps all the viability specimen aggregate code in one place
+            SQLFragment specimenID = new SQLFragment(columnMap.get(specimenId).getAlias());
+            SQLFragment specimenIDs = schema.getDbSchema().getSqlDialect().getGroupConcat(specimenID, true, true);
+            groupFrag.append("  ").append(specimenIDs).append(" AS SpecimenIDs,\n");
+
+            SQLFragment guid = new SQLFragment(columnMap.get(globalUniqueId).getAlias());
+            SQLFragment specimenMatches = schema.getDbSchema().getSqlDialect().getGroupConcat(guid, true, true);
+            groupFrag.append("  ").append(specimenMatches).append(" AS SpecimenMatches\n");
+        }
+        else
+        {
+            groupFrag.append("  NULL AS SpecimenIDs,\n");
+            groupFrag.append("  NULL AS SpecimenMatches\n");
+        }
+
+        groupFrag.append("FROM (\n");
+        groupFrag.append(sub);
+        groupFrag.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
+
+        return groupFrag;
     }
 
     /**
@@ -252,7 +368,6 @@ public class ViabilityManager
     /*package*/ static ExpData getResultExpData(int resultRowId)
     {
         Integer dataId = new TableSelector(ViabilitySchema.getTableInfoResults(), Collections.singleton("DataID"), new SimpleFilter(FieldKey.fromParts("RowID"), resultRowId), null).getObject(Integer.class);
-// WAS:        Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), Integer.class);
         if (dataId != null)
             return ExperimentService.get().getExpData(dataId.intValue());
         return null;
@@ -297,6 +412,7 @@ public class ViabilityManager
         private static final double DELTA = 1E-8;
 
         private ExpProtocol _protocol;
+        private ExpRun _run;
         private ExpData _data;
         private PropertyDescriptor _propertyA;
         private PropertyDescriptor _propertyB;
@@ -314,7 +430,12 @@ public class ViabilityManager
             _protocol = ExperimentService.get().createExpProtocol(c, ExpProtocol.ApplicationType.ExperimentRun, "viability-exp-protocol");
             _protocol.save(user);
 
+            _run = ExperimentService.get().createExperimentRun(c, "viability-exp-run");
+            _run.setProtocol(_protocol);
+            _run.save(user);
+
             _data = ExperimentService.get().createData(c, ViabilityTsvDataHandler.DATA_TYPE, "viability-exp-data");
+            _data.setRun(_run);
             _data.save(user);
 
             _propertyA = new PropertyDescriptor("viability-juni-propertyA", PropertyType.STRING.getTypeUri(), "propertyA", c);
@@ -367,6 +488,7 @@ public class ViabilityManager
             // INSERT
             {
                 ViabilityResult result = new ViabilityResult();
+                result.setRunID(_run.getRowId());
                 result.setDataID(_data.getRowId());
                 result.setContainer(c.getId());
                 result.setProtocolID(_protocol.getRowId());
@@ -374,7 +496,7 @@ public class ViabilityManager
                 result.setTotalCells(10000);
                 result.setViableCells(9000);
                 assertEquals(0.9, result.getViability(), DELTA);
-                result.setSpecimenIDs(Arrays.asList("222", "111", "333"));
+                result.setSpecimenIDList(Arrays.asList("222", "111", "333"));
 
                 Map<PropertyDescriptor, Object> properties = new HashMap<>();
                 properties.put(_propertyA, "hello property");
@@ -394,10 +516,16 @@ public class ViabilityManager
                 ExpData d = ViabilityManager.getResultExpData(resultId);
                 assertEquals(_data.getRowId(), d.getRowId());
                 assertEquals(_data.getName(), d.getName());
+                assertEquals(_run.getRowId(), d.getRunId().intValue());
+
+                ViabilityResult[] results = ViabilityManager.getResults(_run, c);
+                assertEquals(1, results.length);
+                assertEquals(resultId, results[0].getRowID());
 
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
                 assertEquals(resultId, result.getRowID());
                 assertEquals(_data.getRowId(), result.getDataID());
+                assertEquals(_run.getRowId(), result.getRunID());
                 assertEquals("xxx-12345-67890", result.getPoolID());
                 assertEquals(10000, result.getTotalCells());
                 assertEquals(9000, result.getViableCells());
@@ -408,7 +536,7 @@ public class ViabilityManager
                 OntologyObject obj = OntologyManager.getOntologyObject(objectId);
                 objectURI = obj.getObjectURI();
 
-                List<String> specimenIDs = result.getSpecimenIDs();
+                List<String> specimenIDs = result.getSpecimenIDList();
                 assertEquals("111", specimenIDs.get(0));
                 assertEquals("222", specimenIDs.get(1));
                 assertEquals("333", specimenIDs.get(2));
@@ -422,12 +550,12 @@ public class ViabilityManager
             // UPDATE
             {
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
-                List<String> specimens = result.getSpecimenIDs();
+                List<String> specimens = result.getSpecimenIDList();
                 specimens = new ArrayList<>(specimens);
                 specimens.remove("222");
                 specimens.add("444");
                 specimens.add("000");
-                result.setSpecimenIDs(specimens);
+                result.setSpecimenIDList(specimens);
                 result.getProperties().put(_propertyA, "goodbye property");
                 result.getProperties().remove(_propertyB);
                 ViabilityManager.saveResult(user, c, result, 0);
@@ -436,7 +564,7 @@ public class ViabilityManager
             // verify
             {
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
-                List<String> specimenIDs = result.getSpecimenIDs();
+                List<String> specimenIDs = result.getSpecimenIDList();
                 assertEquals("000", specimenIDs.get(0));
                 assertEquals("111", specimenIDs.get(1));
                 assertEquals("333", specimenIDs.get(2));
@@ -462,6 +590,9 @@ public class ViabilityManager
 
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
                 assertNull(result);
+
+                ViabilityResult[] results = ViabilityManager.getResults(_run, c);
+                assertEquals(0, results.length);
             }
         }
     }
