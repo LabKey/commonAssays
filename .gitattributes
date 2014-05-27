@@ -600,6 +600,7 @@ flow/src/org/labkey/flow/webparts/FlowSummaryWebPart.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 freezerpro/FreezerPro.iml -text
 freezerpro/module.properties -text
+freezerpro/src/org/labkey/freezerpro/FreezerProConfig.java -text
 freezerpro/src/org/labkey/freezerpro/FreezerProController.java -text
 freezerpro/src/org/labkey/freezerpro/FreezerProModule.java -text
 freezerpro/src/org/labkey/freezerpro/FreezerProTransform.java -text
