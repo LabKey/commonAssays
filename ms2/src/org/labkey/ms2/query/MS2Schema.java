@@ -653,8 +653,8 @@ public class MS2Schema extends UserSchema
                 addCondition(sql, containerFieldKey);
             }
         };
-        result.setContainerFilter(result.getContainerFilter());
         result.wrapAllColumns(true);
+        result.setTitleColumn("FileName");
 
         SQLFragment notDeletedSQL = new SQLFragment("Run IN (SELECT r.Run FROM ");
         notDeletedSQL.append(MS2Manager.getTableInfoRuns(), "r");
