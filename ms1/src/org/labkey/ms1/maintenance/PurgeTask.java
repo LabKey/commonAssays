@@ -66,5 +66,8 @@ public class PurgeTask implements SystemMaintenance.MaintenanceTask
         return true;
     }
 
+    @Override
+    public boolean hideFromAdminPage() { return false; }
+
     private Logger _log = Logger.getLogger(PurgeTask.class);
 }
