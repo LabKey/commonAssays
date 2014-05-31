@@ -29,6 +29,7 @@
 #  - 6.0.20140117 : Changes for LabKey server 13.3, Issue 19391: Could not convert '-Inf' for field EstLogConc_5pl
 #  - 7.0.20140207 : Changes for LabKey server 14.1: refactor script to use more function calls, calculate positivity based on baselines from another run in the same folder
 #                   Move positivity calculation part of script to separate, lab specific, transform script
+#  - 7.1.20140526 : Issue 20457: Negative blank bead subtraction results in FI-Bkgd-Blank greater than FI-Bkgd
 #  - 8.0.20140509 : Changes for LabKey server 14.2: add run property to allow calc. of 4PL EC50 and AUC on upload without running Ruminex (see SkipRumiCalculation below)
 #
 # Author: Cory Nathe, LabKey
@@ -202,7 +203,8 @@ populateBlankBeadSubtraction <- function(rundata)
             }
 
             # get the mean blank bead FI-Bkgrd values for the given description/dilution
-            blankmean = mean(rundata$fiBackground[blanks & combo]);
+            # issue 20457: convert negative blank mean to zero to prevent subtracting a negative
+            blankmean = max(mean(rundata$fiBackground[blanks & combo]), 0);
 
             # calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
             if (unksOnly) {

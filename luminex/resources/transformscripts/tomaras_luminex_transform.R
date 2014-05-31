@@ -12,9 +12,10 @@
 #
 # CHANGES :
 #  - 1.0.20140228 : Move positivity calculation part of script out of labkey_luminex
+#  - 1.1.20140526 : Issue 20458: Lab wants positivity displayed next to each dilution
 #
 # Author: Cory Nathe, LabKey
-labTransformVersion = "1.0.20140228";
+labTransformVersion = "1.1.20140526";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -255,7 +256,8 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
                         visit = visitsFIagg$visit[v];
                         if (!compareNumbersForEquality(visit, basevisit, 1e-10))
                         {
-                            runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v] & rundata$dilution == visitsFIagg$dilution[v];
+                            # issue 20458: drop dilution from runDataIndex comparison
+                            runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v];
                             rundata$Positivity[runDataIndex] = determineIndividualPositivityValue(visitsFIagg, v, threshold, baseVisitFiBkgd, baseVisitFiBkgdBlank, foldchange);
                         }
                     }
@@ -265,7 +267,8 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
             {
                 for (v in 1:nrow(visitsFIagg))
                 {
-                    runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v] & rundata$dilution == visitsFIagg$dilution[v];
+                    # issue 20458: drop dilution from runDataIndex comparison
+                    runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v];
                     rundata$Positivity[runDataIndex] = determineIndividualPositivityValue(visitsFIagg, v, threshold, NA, NA, NA);
                 }
             }
