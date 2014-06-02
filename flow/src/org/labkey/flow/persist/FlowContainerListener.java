@@ -16,20 +16,14 @@
 
 package org.labkey.flow.persist;
 
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Container;
-import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.security.User;
 
-import java.beans.PropertyChangeEvent;
-
-public class FlowContainerListener implements ContainerManager.ContainerListener
+public class FlowContainerListener extends ContainerManager.AbstractContainerListener
 {
     static final private Logger _log = Logger.getLogger(FlowContainerListener.class);
-
-    public void containerCreated(Container c, User user)
-    {
-    }
 
     /**
      * Delete all Flow data from the container.
@@ -43,14 +37,5 @@ public class FlowContainerListener implements ContainerManager.ContainerListener
     public void containerDeleted(Container c, User user)
     {
         FlowManager.get().deleteContainer(c);
-    }
-
-    @Override
-    public void containerMoved(Container c, Container oldParent, User user)
-    {        
-    }
-
-    public void propertyChange(PropertyChangeEvent evt)
-    {
     }
 }

@@ -362,6 +362,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     {        
     }
 
+    @NotNull
+    @Override
+    public Collection<String> canMove(Container c, Container newParent, User user)
+    {
+        return Collections.emptyList();
+    }
+
     public void propertyChange(PropertyChangeEvent evt)
     {
     }

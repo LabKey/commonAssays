@@ -22,33 +22,18 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.ContainerUtil;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.beans.PropertyChangeEvent;
-
 /**
  * User: bbimber
  * Date: 2/23/12
  * Time: 4:42 PM
  */
-public class MicroarrayContainerListener implements ContainerManager.ContainerListener
+public class MicroarrayContainerListener extends ContainerManager.AbstractContainerListener
 {
-    public void containerCreated(Container c, User user)
-    {
-    }
-
     public void containerDeleted(Container c, User user)
     {
         DbSchema ms = MicroarrayUserSchema.getSchema();
         ContainerUtil.purgeTable(ms.getTable(MicroarrayUserSchema.TABLE_GEO_PROPS), c, "Container");
 
         MicroarrayManager.get().delete(c);
-    }
-
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
-    @Override
-    public void containerMoved(Container c, Container oldParent, User user)
-    {
     }
 }

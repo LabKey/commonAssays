@@ -16,24 +16,19 @@
 package org.labkey.nab;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.ContainerManager.ContainerListener;
 import org.labkey.api.security.User;
 
 import java.sql.SQLException;
-import java.beans.PropertyChangeEvent;
 
 /**
  * User: adam
  * Date: Nov 5, 2008
  * Time: 3:09:06 PM
  */
-public class NabContainerListener implements ContainerListener
+public class NabContainerListener extends ContainerManager.AbstractContainerListener
 {
-    public void containerCreated(Container c, User user)
-    {
-    }
-
     public void containerDeleted(Container c, User user)
     {
         try
@@ -44,14 +39,5 @@ public class NabContainerListener implements ContainerListener
         {
             throw new RuntimeSQLException(e);
         }
-    }
-
-    @Override
-    public void containerMoved(Container c, Container oldParent, User user)
-    {        
-    }
-
-    public void propertyChange(PropertyChangeEvent evt)
-    {
     }
 }

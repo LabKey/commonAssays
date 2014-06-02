@@ -4339,12 +4339,17 @@ public class MS2Controller extends SpringActionController
         User user = ctx.getUser();
         Container c = ctx.getContainer();
 
-        QueryDefinition queryDef = QueryService.get().createQueryDef(user, c, MS2Schema.SCHEMA_NAME, tableName);
-        String viewName = currentUrl.getParameter(viewNameParam);
-        CustomView view = queryDef.getCustomView(user, ctx.getRequest(), viewName);
-        if (view != null && view.hasFilterOrSort() && currentUrl.getParameter(MS2Manager.getDataRegionNamePeptides() + "." + QueryParam.ignoreFilter) == null)
+        UserSchema schema = QueryService.get().getUserSchema(user, c, MS2Schema.SCHEMA_NAME);
+        // If the schema isn't enabled, don't bother trying to apply a filter from its saved view
+        if (schema != null)
         {
-            view.applyFilterAndSortToURL(currentUrl, MS2Manager.getDataRegionNamePeptides());
+            QueryDefinition queryDef = QueryService.get().createQueryDef(user, c, schema.getSchemaPath(), tableName);
+            String viewName = currentUrl.getParameter(viewNameParam);
+            CustomView view = queryDef.getCustomView(user, ctx.getRequest(), viewName);
+            if (view != null && view.hasFilterOrSort() && currentUrl.getParameter(MS2Manager.getDataRegionNamePeptides() + "." + QueryParam.ignoreFilter) == null)
+            {
+                view.applyFilterAndSortToURL(currentUrl, MS2Manager.getDataRegionNamePeptides());
+            }
         }
         SimpleFilter filter = ProteinManager.getPeptideFilter(currentUrl,
                 ProteinManager.URL_FILTER + ProteinManager.PROTEIN_FILTER + ProteinManager.EXTRA_FILTER, ctx.getUser(), run);
