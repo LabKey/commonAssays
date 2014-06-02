@@ -105,7 +105,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
         return files.get(AssayDataCollector.PRIMARY_FILE);
     }
 
-    protected void addOutputDatas(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addOutputDatas(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpData, String> inputDatas, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         try
         {
@@ -113,7 +113,7 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
             ExpData mageData = DefaultAssayRunCreator.createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE, true);
 
             outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
-            addRelatedOutputDatas(context, outputDatas, mageMLFile);
+            addRelatedOutputDatas(context, inputDatas, outputDatas, mageMLFile);
         }
         catch (IOException e)
         {
