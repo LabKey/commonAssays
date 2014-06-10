@@ -37,8 +37,6 @@ import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DefaultWebPartFactory;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
@@ -64,6 +62,7 @@ import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.PersistTests;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.reports.PositivityFlowReport;
@@ -91,7 +90,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.10;
+        return 14.11;
     }
 
     protected void init()
@@ -194,6 +193,15 @@ public class FlowModule extends DefaultModule
                 StatisticSpec.TestCase.class,
                 FlowJoWorkspace.LoadTests.class,
                 AnalysisSerializer.TestCase.class));
+    }
+
+    @NotNull
+    @Override
+    public Set<Class> getIntegrationTests()
+    {
+        return new HashSet<Class>(Arrays.asList(
+                PersistTests.class
+        ));
     }
 
     public static String getShortProductName()

@@ -48,6 +48,12 @@ public enum AttributeType
                 {
                     return "keywordid";
                 }
+
+                @Override
+                public String getValueTableOriginalAttributeIdColumn()
+                {
+                    return "originalkeywordid";
+                }
             },
 
     statistic
@@ -75,6 +81,12 @@ public enum AttributeType
                 {
                     return "statisticid";
                 }
+
+                @Override
+                public String getValueTableOriginalAttributeIdColumn()
+                {
+                    return "originalstatisticid";
+                }
             },
     graph
             {
@@ -101,6 +113,12 @@ public enum AttributeType
                 {
                     return "graphid";
                 }
+
+                @Override
+                public String getValueTableOriginalAttributeIdColumn()
+                {
+                    return "originalgraphid";
+                }
             };
 
     /** Created a parsed representation of the attribute. */
@@ -114,6 +132,9 @@ public enum AttributeType
 
     /** The column name of attribute id column on the value table. */
     public abstract String getValueTableAttributeIdColumn();
+
+    /** The column name of original attribute id column on the value table. */
+    public abstract String getValueTableOriginalAttributeIdColumn();
 
     public static AttributeType fromClass(Class c)
     {

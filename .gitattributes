@@ -308,6 +308,7 @@ flow/resources/flowReports/ranalysis.r -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-12.30-13.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-13.10-13.20.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-14.10-14.11.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-10.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-8.10.sql -text
@@ -331,6 +332,7 @@ flow/resources/schemas/dbscripts/postgresql/obsolete/flow-8.30-9.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-12.30-13.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-13.10-13.20.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-14.10-14.11.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-10.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-8.10.sql -text
@@ -536,6 +538,7 @@ flow/src/org/labkey/flow/persist/AttributeSetHelper.java -text
 flow/src/org/labkey/flow/persist/FlowContainerListener.java -text
 flow/src/org/labkey/flow/persist/FlowDataHandler.java -text
 flow/src/org/labkey/flow/persist/FlowManager.java -text
+flow/src/org/labkey/flow/persist/PersistTests.java -text
 flow/src/org/labkey/flow/persist/Script.java -text
 flow/src/org/labkey/flow/query/AttributeForeignKey.java -text
 flow/src/org/labkey/flow/query/BackgroundForeignKey.java -text

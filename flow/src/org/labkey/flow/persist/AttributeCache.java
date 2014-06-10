@@ -211,6 +211,14 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
         {
             Map<Integer, Collection<FlowDataObject>> usagesMap = FlowManager.get().getAllUsages(_type, _rowId);
             Map<Z, Collection<FlowDataObject>> ret = new HashMap<>();
+
+            // Include usages of this attribute
+            Collection<FlowDataObject> thisUsages = usagesMap.get(getRowId());
+            if (thisUsages == null)
+                thisUsages = Collections.emptyList();
+            ret.put((Z)this, thisUsages);
+
+            // Include usages of all attribute aliases
             for (Z alias : getAliases())
             {
                 Collection<FlowDataObject> usages = usagesMap.get(alias.getRowId());
@@ -322,10 +330,12 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
 
     public static void uncacheAll(Container c)
     {
+        //LOG.info("+Uncache all: " + (c == null ? "entire world" : "container='" + c.getName() + "'"));
         KEYWORDS.uncache(c);
         STATS.uncache(c);
         GRAPHS.uncache(c);
         FCSAnalyzer.get().clearFCSCache(null);
+        //LOG.info("-Uncache all: " + (c == null ? "entire world" : "container='" + c.getName() + "'"));
     }
 
     protected void uncache(Container c)
@@ -369,11 +379,13 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
         uncache(c, entry.getRowId(), entry.getName());
     }
 
-    public void uncache(Container c, int rowId, String name)
+    public void uncache(@NotNull Container c, int rowId, String name)
     {
+        //LOG.info("+Uncache single: type=" + _type + ", container='" + c.getName() + "', rowid=" + rowId + ", name='" + name + "'");
         _cache.remove(createKey(c));
         _cache.remove(createKey(c, name));
         _cache.remove(createKey(rowId));
+        //LOG.info("-Uncache single: type=" + _type + ", container='" + c.getName() + "', rowid=" + rowId + ", name='" + name + "'");
     }
 
     /**

@@ -145,6 +145,12 @@ public class FlowManager
         return type.getValueTableAttributeIdColumn();
     }
 
+    /** The column name of original attribute id column on the value table. */
+    private String valueTableOriginalAttrIdColumn(AttributeType type)
+    {
+        return type.getValueTableOriginalAttributeIdColumn();
+    }
+
     /**
      * Get the row id of an attribute name.
      * DOES NOT CACHE.
@@ -768,9 +774,9 @@ public class FlowManager
         SQLFragment sql = new SQLFragment()
                 .append("-- Outermost query: get all rowids not in use\n")
                 .append("DELETE\n")
-                .append("FROM ").append(attrTable, "attr3").append("\n")
-                .append("WHERE attr3.container = ?\n")
-                .append("AND attr3.rowid NOT IN (\n")
+                .append("FROM ").append(attrTable).append("\n")
+                .append("WHERE container = ?\n")
+                .append("AND rowid NOT IN (\n")
                 .append("    -- Second query: all rowids in use; maps used ids back to alias or primary rowid\n")
                 .append("    SELECT attr2.rowid\n")
                 .append("    FROM ").append(attrTable, "attr2").append("\n")
@@ -802,18 +808,16 @@ public class FlowManager
         TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
+        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("SELECT attr.rowid AS AttrId, COUNT(fo.rowid) AS ObjectCount\n")
+                .append("SELECT val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId, COUNT(fo.rowid) AS ObjectCount\n")
                 .append("FROM ")
-                .append(attrTable, "attr").append(", ")
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                // XXX: should this be "attr.rowid=rowid AND attr.id=val.statisticid" ??
-                .append("  AND attr.id = ").append(entry._rowId).append("\n")
-                .append("  AND attr.rowid = val.").append(valueTableAttrIdColumn).append("\n")
-                .append("GROUP BY AttrId\n");
+                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").append(entry._rowId).append("\n")
+                .append("GROUP BY OriginalAttrId\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
         return selector.getValueMap();
@@ -831,17 +835,17 @@ public class FlowManager
         TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
+        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("SELECT fo.rowid, fo.dataid, attr.rowid AS AttrId, attr.id AS AliasId\n")
+                .append("SELECT fo.rowid, fo.dataid,")
+                .append(" val.").append(valueTableAttrIdColumn).append(" AS AttrId,")
+                .append(" val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId\n")
                 .append("FROM ")
-                .append(attrTable, "attr").append(", ")
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND attr.rowid = ").append(entry._rowId).append("\n")
-                .append("  AND attr.rowid = attr.id\n")
-                .append("  AND attr.rowid = val.").append(valueTableAttrIdColumn).append("\n");
+                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").append(rowId).append("\n");
 
         final List<FlowDataObject> usages = new ArrayList<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
@@ -872,16 +876,17 @@ public class FlowManager
         TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
+        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("SELECT fo.rowid, fo.dataid, attr.rowid AS AttrId, attr.id AS AliasId\n")
+                .append("SELECT fo.rowid, fo.dataid,")
+                .append(" val.").append(valueTableAttrIdColumn).append(" AS AttrId,")
+                .append(" val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId\n")
                 .append("FROM ")
-                .append(attrTable, "attr").append(", ")
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND attr.id = ").append(entry._rowId).append("\n")
-                .append("  AND attr.rowid = val.").append(valueTableAttrIdColumn).append("\n");
+                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").append(rowId).append("\n");
 
         final Map<Integer, Collection<FlowDataObject>> usages = new HashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
@@ -890,7 +895,7 @@ public class FlowManager
             @Override
             public void exec(Map<String, Object> row) throws SQLException
             {
-                Integer attributeRowId = (Integer)row.get("AttrId");
+                Integer attributeRowId = (Integer)row.get("OriginalAttrId");
                 Integer dataId = (Integer)row.get("DataId");
 
                 Collection<FlowDataObject> datas = usages.get(attributeRowId);

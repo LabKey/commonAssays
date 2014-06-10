@@ -136,12 +136,14 @@ public class AttributeSetHelper
             Map<String, String> keywords = attrs.getKeywords();
             if (!keywords.isEmpty())
             {
-                String sql = "INSERT INTO " + mgr.getTinfoKeyword() + " (ObjectId, KeywordId, Value) VALUES (?,?,?)";
+                String sql = "INSERT INTO " + mgr.getTinfoKeyword() + " (ObjectId, KeywordId, OriginalKeywordId, Value) VALUES (?,?,?,?)";
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<String, String> entry : keywords.entrySet())
                 {
                     AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, entry.getKey());
-                    paramsList.add(Arrays.asList(obj.getRowId(), a.getRowId(), entry.getValue()));
+                    int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+                    int originalId = a.getRowId();
+                    paramsList.add(Arrays.asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
@@ -149,12 +151,14 @@ public class AttributeSetHelper
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
             if (!statistics.isEmpty())
             {
-                String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, Value) VALUES (?,?,?)";
+                String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, OriginalStatisticId, Value) VALUES (?,?,?,?)";
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
                 {
                     AttributeCache.Entry a = AttributeCache.STATS.byAttribute(c, entry.getKey());
-                    paramsList.add(Arrays.<Object>asList(obj.getRowId(), a.getRowId(), entry.getValue()));
+                    int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+                    int originalId = a.getRowId();
+                    paramsList.add(Arrays.<Object>asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
@@ -162,12 +166,14 @@ public class AttributeSetHelper
             Map<GraphSpec, byte[]> graphs = attrs.getGraphs();
             if (!graphs.isEmpty())
             {
-                String sql = "INSERT INTO " + mgr.getTinfoGraph() + " (ObjectId, GraphId, Data) VALUES (?, ?, ?)";
+                String sql = "INSERT INTO " + mgr.getTinfoGraph() + " (ObjectId, GraphId, OriginalGraphId, Data) VALUES (?, ?, ?, ?)";
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
                 {
                     AttributeCache.Entry a = AttributeCache.GRAPHS.byAttribute(c, entry.getKey());
-                    paramsList.add(Arrays.asList(obj.getRowId(), a.getRowId(), entry.getValue()));
+                    int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+                    int originalId = a.getRowId();
+                    paramsList.add(Arrays.asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
@@ -185,9 +191,9 @@ public class AttributeSetHelper
         FlowManager mgr = FlowManager.get();
         int rowId = obj.getRowId();
 
-        String sqlKeywords = "SELECT flow.KeywordAttr.RowId, flow.KeywordAttr.name, flow.keyword.value " +
+        String sqlKeywords = "SELECT flow.KeywordAttr.name, flow.keyword.KeywordId, flow.keyword.OriginalKeywordId, flow.keyword.value " +
                 "FROM flow.keyword " +
-                "INNER JOIN flow.KeywordAttr ON flow.keyword.keywordid = flow.KeywordAttr.rowid " +
+                "INNER JOIN flow.KeywordAttr ON flow.keyword.OriginalKeywordId = flow.KeywordAttr.rowid " +
                 "WHERE flow.keyword.objectId = ?";
 
         final List<Integer> keywordIDs = new ArrayList<>();
@@ -198,8 +204,13 @@ public class AttributeSetHelper
             @Override
             public void exec(ResultSet rs) throws SQLException
             {
-                keywordIDs.add(rs.getInt(1));
-                keywords.put(rs.getString(2), rs.getString(3));
+                String name = rs.getString(1);
+                int preferredId = rs.getInt(2);
+                int originalId = rs.getInt(3);
+                String value = rs.getString(4);
+
+                keywordIDs.add(preferredId);
+                keywords.put(name, value);
             }
         });
 
@@ -224,9 +235,9 @@ public class AttributeSetHelper
             });
         }
 
-        String sqlStatistics = "SELECT flow.StatisticAttr.RowId, flow.StatisticAttr.name, flow.statistic.value " +
+        String sqlStatistics = "SELECT flow.StatisticAttr.name, flow.statistic.StatisticId, flow.statistic.OriginalStatisticId, flow.statistic.value " +
                 "FROM flow.statistic " +
-                "INNER JOIN flow.StatisticAttr ON flow.statistic.statisticid = flow.StatisticAttr.rowid " +
+                "INNER JOIN flow.StatisticAttr ON flow.statistic.OriginalStatisticId = flow.StatisticAttr.rowid " +
                 "WHERE flow.statistic.objectId = ?";
 
         final List<Integer> statisticIDs = new ArrayList<>();
@@ -234,10 +245,15 @@ public class AttributeSetHelper
         new SqlSelector(mgr.getSchema(), sqlStatistics, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
         {
             @Override
-            public void exec(ResultSet rsStatistics) throws SQLException
+            public void exec(ResultSet rs) throws SQLException
             {
-                statisticIDs.add(rsStatistics.getInt(1));
-                attrs.setStatistic(new StatisticSpec(rsStatistics.getString(2)), rsStatistics.getDouble(3));
+                String name = rs.getString(1);
+                int preferredId = rs.getInt(2);
+                int originalId = rs.getInt(3);
+                Double value = rs.getDouble(4);
+
+                statisticIDs.add(preferredId);
+                attrs.setStatistic(new StatisticSpec(name), value);
             }
         });
 
@@ -264,16 +280,16 @@ public class AttributeSetHelper
 
         if (!includeGraphBytes)
         {
-            sqlGraphs = "SELECT flow.GraphAttr.RowId, flow.GraphAttr.name " +
+            sqlGraphs = "SELECT flow.GraphAttr.name, flow.graph.GraphId, flow.graph.OriginalGraphId " +
                     "FROM flow.graph " +
-                    "INNER JOIN flow.GraphAttr ON flow.graph.graphid = flow.GraphAttr.rowid " +
+                    "INNER JOIN flow.GraphAttr ON flow.graph.OriginalGraphId = flow.GraphAttr.rowid " +
                     "WHERE flow.graph.objectid = ?";
         }
         else
         {
-            sqlGraphs = "SELECT flow.GraphAttr.RowId, flow.GraphAttr.name, flow.graph.data " +
+            sqlGraphs = "SELECT flow.GraphAttr.name, flow.graph.GraphId, flow.graph.OriginalGraphId, flow.graph.data " +
                     "FROM flow.graph " +
-                    "INNER JOIN flow.GraphAttr ON flow.graph.graphid = flow.GraphAttr.rowid " +
+                    "INNER JOIN flow.GraphAttr ON flow.graph.OriginalGraphId = flow.GraphAttr.rowid " +
                     "WHERE flow.graph.objectid = ?";
         }
 
@@ -282,17 +298,21 @@ public class AttributeSetHelper
         new SqlSelector(mgr.getSchema(), sqlGraphs, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
         {
             @Override
-            public void exec(ResultSet rsGraphs) throws SQLException
+            public void exec(ResultSet rs) throws SQLException
             {
-                graphIDs.add(rsGraphs.getInt(1));
+                String name = rs.getString(1);
+                int preferredId = rs.getInt(2);
+                int originalId = rs.getInt(3);
 
+                graphIDs.add(preferredId);
                 if (!includeGraphBytes)
                 {
-                    attrs.setGraph(new GraphSpec(rsGraphs.getString(2)), null);
+                    attrs.setGraph(new GraphSpec(name), null);
                 }
                 else
                 {
-                    attrs.setGraph(new GraphSpec(rsGraphs.getString(2)), rsGraphs.getBytes(3));
+                    byte[] value = rs.getBytes(4);
+                    attrs.setGraph(new GraphSpec(name), value);
                 }
 
             }

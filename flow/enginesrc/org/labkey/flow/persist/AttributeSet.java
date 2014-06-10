@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class AttributeSet implements Serializable
 {
@@ -404,11 +405,19 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableMap(_keywords);
     }
 
+    /** Get set of keyword names including any keyword names that have been aliased, but not explicitly added with a value. */
     public Set<String> getKeywordNames()
     {
-        if (_keywords == null)
+        if (_keywords == null && _keywordAliases == null)
             return Collections.emptySet();
-        return Collections.unmodifiableSet(_keywords.keySet());
+
+        TreeSet<String> keywordNames = new TreeSet<>();
+        if (_keywords != null)
+            keywordNames.addAll(_keywords.keySet());
+        if (_keywordAliases != null)
+            keywordNames.addAll(_keywordAliases.keySet());
+
+        return Collections.unmodifiableSet(keywordNames);
     }
 
     public Map<String, Set<String>> getKeywordAliases()
@@ -426,11 +435,19 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableMap(_statistics);
     }
 
+    /** Get set of stat names including any stat names that have been aliased, but not explicitly added with a value. */
     public Set<StatisticSpec> getStatisticNames()
     {
-        if (_statistics == null)
+        if (_statistics == null && _statisticAliases == null)
             return Collections.emptySet();
-        return Collections.unmodifiableSet(_statistics.keySet());
+
+        TreeSet<StatisticSpec> statisticNames = new TreeSet<>();
+        if (_statistics != null)
+            statisticNames.addAll(_statistics.keySet());
+        if (_statisticAliases != null)
+            statisticNames.addAll(_statisticAliases.keySet());
+
+        return Collections.unmodifiableSet(statisticNames);
     }
 
     public Map<StatisticSpec, Set<StatisticSpec>> getStatisticAliases()
@@ -448,11 +465,19 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableMap(_graphs);
     }
 
+    /** Get set of graph names including any graph names that have been aliased, but not explicitly added with a value. */
     public Set<GraphSpec> getGraphNames()
     {
-        if (_graphs == null)
+        if (_graphs == null && _graphAliases == null)
             return Collections.emptySet();
-        return Collections.unmodifiableSet(_graphs.keySet());
+
+        TreeSet<GraphSpec> graphNames = new TreeSet<>();
+        if (_graphs != null)
+            graphNames.addAll(_graphs.keySet());
+        if (_graphAliases != null)
+            graphNames.addAll(_graphAliases.keySet());
+
+        return Collections.unmodifiableSet(graphNames);
     }
 
     public Map<GraphSpec, Set<GraphSpec>> getGraphAliases()
