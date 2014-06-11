@@ -1098,7 +1098,7 @@ public class FlowManager
 
     static private String sqlSelectKeyword = "SELECT flow.keyword.value FROM flow.object" +
                                             "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
-                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.rowid = flow.keyword.keywordid" +
+                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.id = flow.keyword.keywordid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name = ?";
     public String getKeyword(ExpData data, String keyword)
     {
@@ -1109,7 +1109,7 @@ public class FlowManager
     // Select a set of keywords and values.  The keyword name IN clause will be appended.
     static private String sqlSelectKeywords = "SELECT flow.keywordAttr.name, flow.keyword.value FROM flow.object" +
                                             "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
-                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.rowid = flow.keyword.keywordid" +
+                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.id = flow.keyword.keywordid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name ";
     public Map<String, String> getKeywords(ExpData data, String... keywords)
     {
@@ -1121,7 +1121,7 @@ public class FlowManager
     }
 
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
-    static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, Value) VALUES (?, ?, ?)";
+    static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, OriginalKeywordId, Value) VALUES (?, ?, ?, ?)";
 
     // UNDONE: add audit log entries for keyword updates
     public void setKeyword(Container c, ExpData data, String keyword, String value)
@@ -1137,14 +1137,21 @@ public class FlowManager
         {
             throw new IllegalArgumentException("Object not found.");
         }
-        int keywordId = ensureKeywordName(c, keyword, false);
+
+        ensureKeywordName(c, keyword, false);
+
+        AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, keyword);
+        assert a != null;
+        int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+        int originalId = a.getRowId();
+
         DbSchema schema = getSchema();
         try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
         {
-            new SqlExecutor(schema).execute(sqlDeleteKeyword, obj.getRowId(), keywordId);
+            int rowsDeleted = new SqlExecutor(schema).execute(sqlDeleteKeyword, obj.getRowId(), preferredId);
             if (value != null)
             {
-                new SqlExecutor(schema).execute(sqlInsertKeyword, obj.getRowId(), keywordId, value);
+                new SqlExecutor(schema).execute(sqlInsertKeyword, obj.getRowId(), preferredId, originalId, value);
             }
             transaction.commit();
         }
@@ -1157,7 +1164,7 @@ public class FlowManager
 
     static private String sqlSelectStat = "SELECT flow.statistic.value FROM flow.object" +
                                             "\nINNER JOIN flow.statistic on flow.object.rowid = flow.statistic.objectid" +
-                                            "\nINNER JOIN flow.StatisticAttr ON flow.StatisticAttr.rowid = flow.statistic.statisticid" +
+                                            "\nINNER JOIN flow.StatisticAttr ON flow.StatisticAttr.id = flow.statistic.statisticid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.StatisticAttr.name = ?";
     public Double getStatistic(ExpData data, StatisticSpec stat)
     {
@@ -1166,7 +1173,7 @@ public class FlowManager
 
     static private String sqlSelectGraph = "SELECT flow.graph.data FROM flow.object" +
                                             "\nINNER JOIN flow.graph on flow.object.rowid = flow.graph.objectid" +
-                                            "\nINNER JOIN flow.GraphAttr ON flow.GraphAttr.rowid = flow.graph.graphid" +
+                                            "\nINNER JOIN flow.GraphAttr ON flow.GraphAttr.id = flow.graph.graphid" +
                                             "\nWHERE flow.object.dataid = ? AND flow.GraphAttr.name = ?";
     public byte[] getGraphBytes(ExpData data, GraphSpec graph)
     {

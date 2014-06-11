@@ -4,10 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableResultSet;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.JunitUtil;
@@ -22,12 +25,14 @@ import java.net.URI;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -73,17 +78,28 @@ public class PersistTests
 
         AttributeSetHelper.save(set, user, data);
 
+        AttrObject obj = FlowManager.get().getAttrObject(data);
+        assertNotNull(obj);
+
         // verify keyword1
         {
             // verify keyword inserted into database
             assertEquals("value1", FlowManager.get().getKeyword(data, "keyword1"));
-            assertNull(FlowManager.get().getKeyword(data, "keyword1-alias"));
+            assertEquals("value1", FlowManager.get().getKeyword(data, "keyword1-alias"));
 
             // verify keyword
             FlowManager.FlowEntry entry = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword1");
             assertEquals(c.getId(), entry._containerId);
             assertEquals("keyword1", entry._name);
             assertEquals(AttributeType.keyword, entry._type);
+
+            // verify keyword value stored using both keywordid and original keywordid
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromParts("objectid"), obj.getRowId());
+            filter.addCondition(FieldKey.fromParts("keywordid"), entry._rowId);
+            filter.addCondition(FieldKey.fromParts("originalkeywordid"), entry._rowId);
+            TableSelector selector = new TableSelector(FlowManager.get().getTinfoKeyword(), Collections.singleton("value"), filter, null);
+            assertEquals("value1", selector.getObject(String.class));
 
             // verify alias
             Collection<FlowManager.FlowEntry> aliases = FlowManager.get().getAliases(entry);
@@ -141,7 +157,7 @@ public class PersistTests
         {
             // verify keyword inserted into database
             assertEquals("value2", FlowManager.get().getKeyword(data, "keyword2"));
-            assertEquals(null, FlowManager.get().getKeyword(data, "keyword2-alias"));
+            assertEquals("value2", FlowManager.get().getKeyword(data, "keyword2-alias"));
 
             // verify cached keyword
             AttributeCache.KeywordEntry cacheEntry = AttributeCache.KEYWORDS.byName(c, "keyword2");
@@ -154,6 +170,14 @@ public class PersistTests
             AttributeCache.KeywordEntry cacheAlias = cacheAliases.iterator().next();
             assertEquals("keyword2-alias", cacheAlias.getAttribute());
             assertEquals(AttributeType.keyword, cacheAlias.getType());
+
+            // verify aliased keyword value stored using aliasid=keywordid and entry=originalkeywordid
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromParts("objectid"), obj.getRowId());
+            filter.addCondition(FieldKey.fromParts("keywordid"), cacheAlias.getAliasedId());
+            filter.addCondition(FieldKey.fromParts("originalkeywordid"), cacheAlias.getRowId());
+            TableSelector selector = new TableSelector(FlowManager.get().getTinfoKeyword(), Collections.singleton("value"), filter, null);
+            assertEquals("value2", selector.getObject(String.class));
 
             // verify usages of 'keyword2-alias' entry
             Collection<FlowDataObject> aliasUsages = cacheAlias.getUsages();
@@ -192,6 +216,26 @@ public class PersistTests
 
             assertFalse(results.next());
             results.close();
+        }
+
+        // verify updating keyword value
+        {
+            assertEquals("value1", FlowManager.get().getKeyword(data, "keyword1"));
+            FlowManager.get().setKeyword(c, data, "keyword1", "value1-updated");
+            assertEquals("value1-updated", FlowManager.get().getKeyword(data, "keyword1"));
+
+            assertEquals("value2", FlowManager.get().getKeyword(data, "keyword2"));
+            FlowManager.get().setKeyword(c, data, "keyword2-alias", "value2-updated");
+            assertEquals("value2-updated", FlowManager.get().getKeyword(data, "keyword2"));
+        }
+
+        // verify deleting keyword
+        {
+            FlowManager.get().setKeyword(c, data, "keyword1", null);
+            assertNull(FlowManager.get().getKeyword(data, "keyword1"));
+
+            FlowManager.get().setKeyword(c, data, "keyword2-alias", null);
+            assertNull(FlowManager.get().getKeyword(data, "keyword2"));
         }
     }
 
