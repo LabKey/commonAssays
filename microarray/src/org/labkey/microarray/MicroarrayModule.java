@@ -41,6 +41,7 @@ import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.matrix.ExpressionMatrixAssayProvider;
 import org.labkey.microarray.matrix.ExpressionMatrixDataHandler;
+import org.labkey.microarray.matrix.ExpressionMatrixMaterialListener;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 import org.labkey.microarray.view.FeatureAnnotationSetWebPart;
@@ -85,7 +86,7 @@ public class MicroarrayModule extends SpringModule
 
     public double getVersion()
     {
-        return 14.10;
+        return 14.11;
     }
 
     protected void init()
@@ -164,6 +165,7 @@ public class MicroarrayModule extends SpringModule
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new MicroarrayContainerListener());
 
+        ExperimentService.get().registerExperimentMaterialListener(new ExpressionMatrixMaterialListener());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());

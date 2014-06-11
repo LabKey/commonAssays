@@ -834,6 +834,7 @@ microarray/resources/schemas/dbscripts/postgresql/microarray-13.20-13.30.sql -te
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.30-14.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.31-13.32.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.32-13.33.sql -text
+microarray/resources/schemas/dbscripts/postgresql/microarray-14.10-14.11.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-9.10.sql -text
@@ -848,6 +849,7 @@ microarray/resources/schemas/dbscripts/sqlserver/microarray-13.20-13.30.sql -tex
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.30-14.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.31-13.32.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.32-13.33.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/microarray-14.10-14.11.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-9.10.sql -text
@@ -892,6 +894,7 @@ microarray/src/org/labkey/microarray/controllers/MicroarrayController.java -text
 microarray/src/org/labkey/microarray/matrix/ColumnMappingProperty.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixAssayProvider.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixDataHandler.java -text
+microarray/src/org/labkey/microarray/matrix/ExpressionMatrixMaterialListener.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixProtocolSchema.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixProviderSchema.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixRunCreator.java -text
