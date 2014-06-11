@@ -1915,71 +1915,71 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private void deleteDatas(List<Integer> ids)
+    private void deleteDatas(List<Integer> dataIds)
     {
-        Object[] params = ids.toArray(new Integer[ids.size()]);
-        String idSQL = StringUtils.repeat("?", ", ", ids.size());
+        SQLFragment idSQL = new SQLFragment();
+        OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds.toArray());
         // Clean up data row properties
         SqlExecutor executor = new SqlExecutor(LuminexProtocolSchema.getSchema());
-        executor.execute("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
+        executor.execute(new SQLFragment("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
                 LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
-                " o WHERE o.ObjectURI = dr.LSID AND dr.DataId IN (" + idSQL + "))", params);
-        executor.execute("DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " +
-                LuminexProtocolSchema.getTableInfoDataRow() + " WHERE DataId IN (" + idSQL + "))", params);
+                " o WHERE o.ObjectURI = dr.LSID AND dr.DataId ").append(idSQL).append(")"));
+        executor.execute(new SQLFragment("DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " +
+                LuminexProtocolSchema.getTableInfoDataRow() + " WHERE DataId ").append(idSQL).append(")"));
 
         // Clean up analyte properties
-        executor.execute("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
+        executor.execute(new SQLFragment("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
                 LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
                 " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE a.RowId = dr.AnalyteId AND o.ObjectURI = " +
-                "a.LSID AND dr.DataId IN (" + idSQL + "))", params);
-        executor.execute("DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT a.LSID FROM " +
+                "a.LSID AND dr.DataId ").append(idSQL).append(")"));
+        executor.execute(new SQLFragment("DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT a.LSID FROM " +
                 LuminexProtocolSchema.getTableInfoDataRow() + " dr, " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                " a WHERE dr.AnalyteId = a.RowId AND dr.DataId IN (" + idSQL + "))", params);
+                " a WHERE dr.AnalyteId = a.RowId AND dr.DataId ").append(idSQL).append(")"));
 
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoDataRow() +
-                " WHERE DataId IN (" + idSQL + ")", params);
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoDataRow() +
+                " WHERE DataId ").append(idSQL));
 
         // Clean up exclusions
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
                 " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
-                " WHERE DataId IN (" + idSQL + "))", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
-                " WHERE DataId IN (" + idSQL + ")", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
+                " WHERE DataId ").append(idSQL).append(")"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
+                " WHERE DataId ").append(idSQL));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
                 " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                 " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
-                " WHERE RowId IN (" + idSQL + ")))", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
+                " WHERE RowId ").append(idSQL).append("))"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
                 " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                 " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
-                " WHERE RowId IN (" + idSQL + ")))", params);
+                " WHERE RowId ").append(idSQL).append("))"));
 
         // Clean up curve fits
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +
                 " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                " WHERE DataId IN (" + idSQL + "))", params);
+                " WHERE DataId ").append(idSQL).append(")"));
 
         // Clean up analytes
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteTitration() +
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteTitration() +
                 " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                " WHERE DataId IN (" + idSQL + "))", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl() +
+                " WHERE DataId ").append(idSQL).append(")"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl() +
                         " WHERE SinglePointControlId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
                         " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                         " pa, " + ExperimentService.get().getTinfoData() +
-                        " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + ")))", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
-                " WHERE DataId IN (" + idSQL + ")", params);
+                        " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId ").append(idSQL).append("))"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoAnalytes() +
+                " WHERE DataId ").append(idSQL));
 
         // Delete titrations and SinglePointControls
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoTitration() +
                 " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                 " pa, " + ExperimentService.get().getTinfoData() +
-                " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
-        executor.execute("DELETE FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
+                " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId ").append(idSQL).append(")"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoSinglePointControl() +
                         " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
                         " pa, " + ExperimentService.get().getTinfoData() +
-                        " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
+                        " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId ").append(idSQL).append(")"));
     }
 
     public void deleteData(ExpData data, Container container, User user)

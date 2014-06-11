@@ -497,18 +497,6 @@ public class ProteinProphetImporter
         return groupId;
     }
 
-
-    private String getInClause(int length)
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.append("?");
-        for (int i = 1; i < length; i++)
-        {
-            sb.append(", ?");
-        }
-        return sb.toString();
-    }
-
     private String getPepXMLFileName() throws FileNotFoundException, XMLStreamException
     {
         SimpleXMLStreamReader parser = null;
