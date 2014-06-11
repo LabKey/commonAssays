@@ -1114,7 +1114,7 @@ public class FlowManager
     public Map<String, String> getKeywords(ExpData data, String... keywords)
     {
         SQLFragment sql = new SQLFragment(sqlSelectKeywords, data.getRowId());
-        getSchema().getSqlDialect().appendInClauseSql(sql, keywords);
+        getSchema().getSqlDialect().appendInClauseSql(sql, Arrays.asList(keywords));
         SqlSelector selector = new SqlSelector(getSchema(), sql);
 
         return selector.fillValueMap(new TreeMap<String, String>());

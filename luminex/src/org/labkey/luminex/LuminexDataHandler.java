@@ -1918,7 +1918,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private void deleteDatas(List<Integer> dataIds)
     {
         SQLFragment idSQL = new SQLFragment();
-        OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds.toArray());
+        OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds);
         // Clean up data row properties
         SqlExecutor executor = new SqlExecutor(LuminexProtocolSchema.getSchema());
         executor.execute(new SQLFragment("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
