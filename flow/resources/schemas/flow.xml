@@ -23,6 +23,7 @@
       <ns:column columnName="objectid"/>
       <ns:column columnName="statisticid"/>
       <ns:column columnName="value"/>
+      <ns:column columnName="originalstatisticid"/>
     </ns:columns>
   </ns:table>
   <ns:table tableName="statisticattr" tableDbType="TABLE">
@@ -39,6 +40,7 @@
       <ns:column columnName="objectid"/>
       <ns:column columnName="graphid"/>
       <ns:column columnName="data"/>
+      <ns:column columnName="originalgraphid"/>
     </ns:columns>
   </ns:table>
   <ns:table tableName="graphattr" tableDbType="TABLE">
@@ -55,6 +57,7 @@
       <ns:column columnName="objectid"/>
       <ns:column columnName="keywordid"/>
       <ns:column columnName="value"/>
+      <ns:column columnName="originalkeywordid"/>
     </ns:columns>
   </ns:table>
   <ns:table tableName="keywordattr" tableDbType="TABLE">
