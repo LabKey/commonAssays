@@ -84,6 +84,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
         // Additonal output from ProteinProphet, added as part of TPP 4.0 or so
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep-prot.xml_senserr.txt"), "ProtSensErr");
+
+        // Additonal output from ProteinProphet, added as part of TPP 4.6 or so
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot-MODELS.html"), "ProteinProphetModel");
     }
 
     private static final FileType FT_PEP_XSL = new FileType(".pep.xsl");
@@ -416,26 +419,42 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             if (null != xinteractFile.getParentFile() && xinteractFile.getParentFile().exists())
             {
                 String pathEnvName = "PATH";
+                String perlLibEnvName = "PERLLIB";
                 String path = "";
+                String perlLib = "";
                 for (String envName : builder.environment().keySet())
                 {
                     // Not sure what the casing for that PATH environment variable is going to be, so check in
                     // case insensitive way
-                    if ("PATH".equalsIgnoreCase(envName))
+                    if (pathEnvName.equalsIgnoreCase(envName))
                     {
                         pathEnvName = envName;
                         path = builder.environment().get(pathEnvName);
-                        break;
+                    }
+                    if (perlLibEnvName.equalsIgnoreCase(envName))
+                    {
+                        perlLibEnvName = envName;
+                        perlLib = builder.environment().get(perlLibEnvName);
                     }
                 }
                 path = xinteractFile.getParentFile().getAbsolutePath() + File.pathSeparatorChar + path;
                 builder.environment().put(pathEnvName, path);
+                perlLib = xinteractFile.getParentFile().getAbsolutePath() + File.pathSeparatorChar + perlLib;
+                builder.environment().put(perlLibEnvName, perlLib);
             }
             builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(xinteractPath).getParent()));
             // tell more modern TPP tools to run headless (so no perl calls etc) bpratt 4-14-09
             builder.environment().put("XML_ONLY", "1");
             // tell TPP tools not to mess with tmpdirs, we handle this at higher level
             builder.environment().put("WEBSERVER_TMP","");
+
+            // Copy the Perl file, if it exists, to the working directory so it can be run if there's real Perl installed
+            // See issue 19572
+            File realTppModelsFile = new File(PipelineJobService.get().getExecutablePath("tpp_models.pl", null, "tpp", ver, getJob().getLogger()));
+            if (realTppModelsFile.exists())
+            {
+                _wd.inputFile(realTppModelsFile, true);
+            }
 
             try
             {
