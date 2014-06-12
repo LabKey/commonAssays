@@ -13,9 +13,10 @@
 # CHANGES :
 #  - 1.0.20140228 : Move positivity calculation part of script out of labkey_luminex
 #  - 1.1.20140526 : Issue 20458: Lab wants positivity displayed next to each dilution
+#  - 1.2.20140612 : Issue 20548: Display multiple duplicate baseline positivity errors at once instead of just the first
 #
 # Author: Cory Nathe, LabKey
-labTransformVersion = "1.1.20140526";
+labTransformVersion = "1.2.20140612";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -214,11 +215,12 @@ getBaselineVisitFiValue <- function(ficolumn, visitsfiagg, baselinedata, basevis
 
         if (is.na(val)) {
             writeErrorOrWarning("warn", paste("Warning: No baseline visit data found: Analyte=", analyte, ", Participant=", ptid,
-                         ", Visit=", basevisit, ", Column=", ficolumn, ".", sep=""));
+                         ", Visit=", basevisit, ", Column=", ficolumn, ".", sep=""), FALSE);
         } else if (baselinedata[rowIndex, "dataidcount"] > 1)
         {
+            val = NA;
             writeErrorOrWarning("error", paste("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
-                         ", Participant=", ptid, ", Visit=", basevisit, ".", sep=""));
+                         ", Participant=", ptid, ", Visit=", basevisit, ".", sep=""), FALSE);
         }
     } else
     {
@@ -247,7 +249,12 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
             if (!is.na(basevisit))
             {
                 baseVisitFiBkgd = getBaselineVisitFiValue("fiBackground", visitsFIagg, baselinedata, basevisit);
-                baseVisitFiBkgdBlank = getBaselineVisitFiValue("fiBackgroundBlank", visitsFIagg, baselinedata, basevisit);
+
+                # Issue 20548 : Don't need to get baseline value for Fi-Bkgd-Blank if no baseline for FI-Bkgd
+                baseVisitFiBkgdBlank = NA;
+                if (!is.na(baseVisitFiBkgd)) {
+                    baseVisitFiBkgdBlank = getBaselineVisitFiValue("fiBackgroundBlank", visitsFIagg, baselinedata, basevisit);
+                }
 
                 if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
                 {
@@ -316,7 +323,7 @@ verifyPositivityInputProperties <- function(basevisit, foldchange)
     # if there is a baseline visit supplied, make sure the fold change is not null as well
     if (!is.na(basevisit) & is.na(foldchange))
     {
-        writeErrorOrWarning("error", "Error: No value provided for 'Positivity Fold Change'.");
+        writeErrorOrWarning("error", "Error: No value provided for 'Positivity Fold Change'.", TRUE);
     }
 }
 
@@ -346,17 +353,27 @@ populatePositivity <- function(rundata, analytedata)
                 rundata <- calculatePositivityForAnalytePtid(rundata, analytedata, prevBaselineVisitData,
                                 analytePtids$name[index], analytePtids$participantID[index], base.visit, fold.change);
             }
+
+            # Issue 20548: Display multiple duplicate baseline positivity errors at once instead of just the first
+            if (error.count > 0) {
+                quit("no", 0, FALSE);
+            }
         }
     }
 
     rundata
 }
 
-writeErrorOrWarning <- function(type, msg)
+error.count = 0;
+writeErrorOrWarning <- function(type, msg, stopExecution)
 {
     write(paste(type, type, msg, sep="\t"), file=error.file, append=TRUE);
     if (type == "error") {
-        quit("no", 0, FALSE);
+        error.count = error.count + 1;
+
+        if (stopExecution) {
+            quit("no", 0, FALSE);
+        }
     }
 }
 
