@@ -217,8 +217,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
-        Map<String, String> defaultAnalyteColumnValues = PropertyManager.getProperties(getUser(),
-                        getContainer(), _protocol.getName() + ": Analyte Column");
+        Map<String, String> defaultAnalyteColumnValues = form.getAnalyteColumnDefaultValues(_protocol);
         String calcPositivityValue = form.getRequest().getParameter(LuminexDataHandler.CALCULATE_POSITIVITY_COLUMN_NAME);
         if (null != calcPositivityValue && calcPositivityValue.equals("1"))
         {
@@ -739,10 +738,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         // for analyte column properties use the PropertyManager (similar to how well role and titration defaults values are persisted)
                         for (Map.Entry<ColumnInfo, String> colPropEntry : form.getAnalyteColumnProperties(analyteName).entrySet())
                         {
+                            // issue 20549: default values reset incorrectly when PositivityThreshold column is hidden
+                            boolean includeDefaultAnalyteColumnValue = hasAnalytePropertyInRequestParams(form, analyteName, colPropEntry.getKey());
+
                             // These need to be repopulated just like the rest of the analyte domain properties,
                             // but they aren't actually part of the domain- they're hard columns on the luminex.Analyte table
                             String inputName = getAnalytePropertyName(analyteName, colPropEntry.getKey().getName());
-                            defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
+                            if (includeDefaultAnalyteColumnValue)
+                                defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
                         }
                     }
                     PropertyManager.saveProperties(defaultAnalyteColumnValues);
@@ -828,6 +831,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             return NAME;
         }
+    }
+
+    private boolean hasAnalytePropertyInRequestParams(LuminexRunUploadForm form, String analyteName, ColumnInfo col)
+    {
+        return form.getRequest().getParameterMap().containsKey(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
     }
 
     @Override

@@ -18,6 +18,7 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.defaults.DefaultValueService;
@@ -25,6 +26,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -148,6 +150,30 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         {
             return super.getDefaultValues(domain, disambiguationId);
         }
+    }
+
+    public Map<String, String> getAnalyteColumnDefaultValues(ExpProtocol protocol)
+    {
+        if (getReRunId() != null)
+        {
+            SQLFragment sql = new SQLFragment("SELECT * FROM ");
+            sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
+            sql.append(" WHERE a.DataId IN (SELECT d.RowId FROM ");
+            sql.append(ExperimentService.get().getTinfoData(), "d");
+            sql.append(" WHERE d.RunId = ?)");
+            sql.add(getReRunId());
+            List<Analyte> analyteRows = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(Analyte.class);
+
+            Map<String, String> values = new HashMap<>();
+            for (Analyte analyte : analyteRows)
+            {
+                String inputName = LuminexUploadWizardAction.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                values.put(inputName, analyte.getPositivityThreshold() != null ? analyte.getPositivityThreshold().toString() : null);
+            }
+            return values;
+        }
+        else
+            return PropertyManager.getProperties(getUser(), getContainer(), protocol.getName() + ": Analyte Column");
     }
 
     public LuminexExcelParser getParser() throws ExperimentException
