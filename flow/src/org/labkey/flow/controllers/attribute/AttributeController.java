@@ -31,6 +31,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.controllers.BaseFlowController;
+import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.persist.AttributeCache;
@@ -398,7 +399,7 @@ public class AttributeController extends BaseFlowController
         @Override
         public URLHelper getSuccessURL(ReturnUrlForm form)
         {
-            return form.getReturnActionURL();
+            return form.getReturnActionURL(new ActionURL(ProtocolController.ShowProtocolAction.class, getContainer()));
         }
     }
 
