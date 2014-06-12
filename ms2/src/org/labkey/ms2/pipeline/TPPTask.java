@@ -450,10 +450,18 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             // Copy the Perl file, if it exists, to the working directory so it can be run if there's real Perl installed
             // See issue 19572
-            File realTppModelsFile = new File(PipelineJobService.get().getExecutablePath("tpp_models.pl", null, "tpp", ver, getJob().getLogger()));
-            if (realTppModelsFile.exists())
+            try
             {
-                _wd.inputFile(realTppModelsFile, true);
+                File realTppModelsFile = new File(PipelineJobService.get().getExecutablePath("tpp_models.pl", null, "tpp", ver, getJob().getLogger()));
+                if (realTppModelsFile.exists())
+                {
+                    _wd.inputFile(realTppModelsFile, true);
+                }
+            }
+            catch (FileNotFoundException ignored)
+            {
+                // As long as we're running with the no-op Perl implementation, we'll be fine. Otherwise, job will
+                // error out
             }
 
             try
