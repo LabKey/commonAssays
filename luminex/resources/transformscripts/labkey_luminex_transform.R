@@ -31,9 +31,10 @@
 #                   Move positivity calculation part of script to separate, lab specific, transform script
 #  - 7.1.20140526 : Issue 20457: Negative blank bead subtraction results in FI-Bkgd-Blank greater than FI-Bkgd
 #  - 8.0.20140509 : Changes for LabKey server 14.2: add run property to allow calc. of 4PL EC50 and AUC on upload without running Ruminex (see SkipRumiCalculation below)
+#  - 8.1.20140612 : Issue 20316: Rumi estimated concentrations not calculated for unselected titrated unknowns in subclass assay case
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "8.0.20140509";
+transformVersion = "8.1.20140612";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -136,14 +137,11 @@ readRunPropertiesFile <- function()
 
 populateTitrationData <- function(rundata, titrationdata)
 {
-    rundata$isStandard = NA;
-    rundata$isQCControl = NA;
-    rundata$isUnknown = NA;
+    rundata$isStandard = FALSE;
+    rundata$isQCControl = FALSE;
+    rundata$isUnknown = FALSE;
 
     # apply the titration data to the rundata object
-    rundata$isStandard[rundata$titration == "false"] = FALSE;
-    rundata$isQCControl[rundata$titration == "false"] = FALSE;
-    rundata$isUnknown[rundata$titration == "false"] = TRUE;
     if (nrow(titrationdata) > 0)
     {
         for (tIndex in 1:nrow(titrationdata))
@@ -151,9 +149,11 @@ populateTitrationData <- function(rundata, titrationdata)
             titrationName = as.character(titrationdata[tIndex,]$Name);
             rundata$isStandard[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$Standard == "true");
             rundata$isQCControl[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$QCControl == "true");
-            rundata$isUnknown[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$Unknown == "true");
         }
     }
+
+    # Issue 20316: incorrectly labeling unselected titrated unknowns as not "isUnknown"
+    rundata$isUnknown[(is.na(rundata$isStandard) & is.na(rundata$isQCControl)) | (!rundata$isStandard & !rundata$isQCControl)] = TRUE;
 
     rundata
 }
