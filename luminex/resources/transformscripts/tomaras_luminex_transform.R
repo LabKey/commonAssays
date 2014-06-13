@@ -215,7 +215,7 @@ getBaselineVisitFiValue <- function(ficolumn, visitsfiagg, baselinedata, basevis
 
         if (is.na(val)) {
             writeErrorOrWarning("warn", paste("Warning: No baseline visit data found: Analyte=", analyte, ", Participant=", ptid,
-                         ", Visit=", basevisit, ", Column=", ficolumn, ".", sep=""), FALSE);
+                         ", Visit=", basevisit, ".", sep=""), FALSE);
         } else if (baselinedata[rowIndex, "dataidcount"] > 1)
         {
             val = NA;
