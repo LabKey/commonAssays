@@ -75,6 +75,7 @@ import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -199,9 +200,7 @@ public class FlowModule extends DefaultModule
     @Override
     public Set<Class> getIntegrationTests()
     {
-        return new HashSet<Class>(Arrays.asList(
-                PersistTests.class
-        ));
+        return Collections.<Class>singleton(PersistTests.class);
     }
 
     public static String getShortProductName()
