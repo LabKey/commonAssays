@@ -1750,7 +1750,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs, boolean parseDescription)
+    protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs, boolean parseDescription) throws ExperimentException
     {
         if (resolver == null)
         {
@@ -1852,7 +1852,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return match.getParticipantID() != null || match.getVisitID() != null || match.getDate() != null;
     }
 
-    private ParticipantVisit resolveParticipantVisitInfo(ParticipantVisitResolver resolver, String specimenID, String[] parts)
+    private ParticipantVisit resolveParticipantVisitInfo(ParticipantVisitResolver resolver, String specimenID, String[] parts) throws ExperimentException
     {
         // First part is participant id
         String participantId = parts[0].trim();
