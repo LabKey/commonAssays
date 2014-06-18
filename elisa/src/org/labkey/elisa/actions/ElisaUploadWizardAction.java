@@ -16,7 +16,6 @@
 package org.labkey.elisa.actions;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -49,7 +48,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -125,10 +123,6 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         PlateConcentrationPropertyHelper concentrationsHelper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
         concentrationsHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
-        Map<String, Object> propNameToValue = new HashMap<>();
-        for (String name : concentrationsHelper.getSampleNames())
-            propNameToValue.put(name, name);
-
         // add existing page properties
         addHiddenBatchProperties(form, view);
         addHiddenRunProperties(form, view);
@@ -138,7 +132,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
             addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
 
-        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
+        PreviouslyUploadedDataCollector<ElisaRunUploadForm> collector = new PreviouslyUploadedDataCollector<>(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
         collector.addHiddenFormFields(view, form);
 
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
@@ -168,7 +162,6 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     public class ConcentrationStepHandler extends RunStepHandler
     {
         public static final String NAME = "CONCENTRATIONS";
-        private Map<String, Map<DomainProperty, String>> _postedConcentrationProperties = null;
 
         @Override
         public String getName()
@@ -224,18 +217,13 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             {
                 PlateConcentrationPropertyHelper helper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
 
-                if (form instanceof ElisaRunUploadForm)
-                {
-                    Map<String, Map<DomainProperty, String>> postedProps = helper.getPostedPropertyValues(form.getRequest());
-                    form.setConcentrationProperties(postedProps);
+                Map<String, Map<DomainProperty, String>> postedProps = helper.getPostedPropertyValues(form.getRequest());
+                form.setConcentrationProperties(postedProps);
 
-                    run = saveExperimentRun(form);
+                run = saveExperimentRun(form);
 
-                    for (Map.Entry<String, Map<DomainProperty, String>> entry : postedProps.entrySet())
-                        form.saveDefaultValues(entry.getValue(), entry.getKey());
-                }
-                else
-                    throw new ExperimentException("The form is not an instance of ElisaRunUploadForm, concentration values were not accesible.");
+                for (Map.Entry<String, Map<DomainProperty, String>> entry : postedProps.entrySet())
+                    form.saveDefaultValues(entry.getValue(), entry.getKey());
             }
             catch (ValidationException e)
             {
