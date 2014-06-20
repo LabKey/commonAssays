@@ -260,7 +260,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                 });
                 // use a default value of 100 if there is no last entry value to populate the initial value
-                view.setInitialValue(inputName, defaultAnalyteColumnValues.containsKey(inputName) ? defaultAnalyteColumnValues.get(inputName) : 100);
+                view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName) != null ? defaultAnalyteColumnValues.get(inputName) : 100);
                 DisplayColumn col = info.getRenderer();
                 posThresholdCols.add(col);
             }

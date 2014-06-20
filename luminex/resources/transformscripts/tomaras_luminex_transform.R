@@ -219,7 +219,13 @@ getBaselineVisitFiValue <- function(ficolumn, visitsfiagg, baselinedata, basevis
         } else if (baselinedata[rowIndex, "dataidcount"] > 1)
         {
             val = NA;
-            writeErrorOrWarning("error", paste("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
+
+            separator = "";
+            if (has.errors) {
+                separator = "\\n";
+            }
+
+            writeErrorOrWarning("error", paste(separator, "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=", analyte,
                          ", Participant=", ptid, ", Visit=", basevisit, ".", sep=""), FALSE);
         }
     } else
@@ -355,7 +361,7 @@ populatePositivity <- function(rundata, analytedata)
             }
 
             # Issue 20548: Display multiple duplicate baseline positivity errors at once instead of just the first
-            if (error.count > 0) {
+            if (has.errors) {
                 quit("no", 0, FALSE);
             }
         }
@@ -364,12 +370,12 @@ populatePositivity <- function(rundata, analytedata)
     rundata
 }
 
-error.count = 0;
+assign("has.errors", FALSE, envir = .GlobalEnv)
 writeErrorOrWarning <- function(type, msg, stopExecution)
 {
     write(paste(type, type, msg, sep="\t"), file=error.file, append=TRUE);
     if (type == "error") {
-        error.count = error.count + 1;
+        assign("has.errors", TRUE, envir = .GlobalEnv)
 
         if (stopExecution) {
             quit("no", 0, FALSE);

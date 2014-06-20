@@ -431,6 +431,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         return {
             xtype: 'displayfield',
             hideLabel: true,
+            height: 25,
             cls: 'guideset-label',
             style: style || 'text-align: right; margin: 5px;',
             value: txt
@@ -439,6 +440,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     createNumberField : function(name) {
         return new Ext.form.NumberField({
+            height: 25,
             cls: 'guideset-numberfield',
             itemId: name,
             name: name,
