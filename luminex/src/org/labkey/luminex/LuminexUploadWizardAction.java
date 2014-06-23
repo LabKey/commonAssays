@@ -728,7 +728,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                     // Save default values for analytes
                     PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(
-                            getUser(), getContainer(), _protocol.getName() + ": Analyte Column", true);
+                            getUser(), getContainer(), form.getAnatlyeColumnCategory(_protocol), true);
                     for (String analyteName : form.getAnalyteNames())
                     {
                         // for analyte domain properties use the standard assay default value persistance

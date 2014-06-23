@@ -173,7 +173,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             return values;
         }
         else
-            return PropertyManager.getProperties(getUser(), getContainer(), protocol.getName() + ": Analyte Column");
+            return PropertyManager.getProperties(getUser(), getContainer(), getAnatlyeColumnCategory(protocol));
     }
 
     public LuminexExcelParser getParser() throws ExperimentException
@@ -241,4 +241,8 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return result;
     }
 
+    public String getAnatlyeColumnCategory(ExpProtocol protocol)
+    {
+        return protocol.getName() + ": Analyte Column";
+    }
 }
