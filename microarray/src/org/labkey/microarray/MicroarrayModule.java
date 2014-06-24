@@ -149,6 +149,10 @@ public class MicroarrayModule extends SpringModule
     @NotNull
     public Collection<String> getSummary(Container c)
     {
+        long count = MicroarrayManager.get().featureAnnotationSetCount(c);
+        if (count > 0)
+            return Arrays.asList(count + " " + (count > 1 ? "Feature annotation sets" : "Feature annotation set"));
+
         return Collections.emptyList();
     }
 

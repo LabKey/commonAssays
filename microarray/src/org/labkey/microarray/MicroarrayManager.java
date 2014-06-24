@@ -24,6 +24,7 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -89,6 +90,12 @@ public class MicroarrayManager
     {
         DbSchema schema = MicroarrayUserSchema.getSchema();
         return schema.getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION);
+    }
+
+    public long featureAnnotationSetCount(Container c)
+    {
+        TableSelector selector = new TableSelector(getAnnotationSetSchemaTableInfo(), SimpleFilter.createContainerFilter(c), null);
+        return selector.getRowCount();
     }
 
     public int deleteFeatureAnnotationSet(int... rowId)
@@ -187,6 +194,15 @@ public class MicroarrayManager
 
     public void delete(Container container)
     {
+        // Purge microarray.FeatureData table first
+        TableInfo featureData = ExpressionMatrixProtocolSchema.getTableInfoFeatureData();
+        SQLFragment deleteFrag = new SQLFragment();
+        deleteFrag.append("DELETE FROM ").append(featureData).append(" WHERE featureid IN (");
+        deleteFrag.append(" SELECT rowid FROM ").append(MicroarrayManager.getAnnotationSchemaTableInfo(), "a").append(" WHERE a.container = ?");
+        deleteFrag.add(container.getEntityId());
+        deleteFrag.append(")");
+        new SqlExecutor(featureData.getSchema()).execute(deleteFrag);
+
         ContainerUtil.purgeTable(getAnnotationSchemaTableInfo(), container, "Container");
         ContainerUtil.purgeTable(getAnnotationSetSchemaTableInfo(), container, "Container");
     }
