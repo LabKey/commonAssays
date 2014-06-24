@@ -232,6 +232,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
+    @Nullable
     public Pair<ExpProtocol.AssayDomainTypes, DomainProperty> findTargetStudyProperty(ExpProtocol protocol)
     {
         // UNDONE: Get target study from the FlowProtocol metadata ?

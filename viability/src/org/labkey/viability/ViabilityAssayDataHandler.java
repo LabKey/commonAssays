@@ -291,23 +291,54 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    protected void insertRowData(ExpData data, User user, Container container, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo) throws SQLException, ValidationException
+    protected void insertRowData(ExpData data, User user, Container container, ExpRun run, ExpProtocol protocol, AssayProvider provider, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo) throws SQLException, ValidationException
     {
+        // Find the target study property on the batch, run, or result domains.
+        // If the target study is on the batch or run domain, get the value from the ExpRun or the ExpExperiment.
+        // If the target study is on the result domain, pass the DomainProperty to splitBaseFromExtra()
+        String batchOrRunTargetStudy = null;
+        DomainProperty resultLevelTargetStudyProperty = null;
+        Pair<ExpProtocol.AssayDomainTypes, DomainProperty> targetStudyPair = provider.findTargetStudyProperty(protocol);
+        if (targetStudyPair != null)
+        {
+            DomainProperty targetStudyProperty = targetStudyPair.getValue();
+            if (targetStudyPair.getKey() == ExpProtocol.AssayDomainTypes.Batch)
+            {
+                ExpExperiment experiment = AssayService.get().findBatch(run);
+                if (experiment != null)
+                    batchOrRunTargetStudy = (String)experiment.getProperty(targetStudyProperty);
+            }
+            else if (targetStudyPair.getKey() == ExpProtocol.AssayDomainTypes.Run)
+            {
+                batchOrRunTargetStudy = (String)run.getProperty(targetStudyProperty);
+            }
+            else if (targetStudyPair.getKey() == ExpProtocol.AssayDomainTypes.Result)
+            {
+                resultLevelTargetStudyProperty = targetStudyProperty;
+            }
+        }
+
         Map<String, PropertyDescriptor> importMap = new HashMap<>();
         for (DomainProperty prop : dataDomain.getProperties())
         {
             importMap.put(prop.getName(), prop.getPropertyDescriptor());
         }
 
-        ExpRun run = data.getRun();
-        ExpProtocol protocol = run.getProtocol();
-
         int rowIndex = 0;
         for (Map<String, Object> row : fileData)
         {
-            Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap);
+            Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap, resultLevelTargetStudyProperty);
+            Map<String, Object> base = pair.first;
+            Map<PropertyDescriptor, Object> extra = pair.second;
 
-            ViabilityResult result = ViabilityResult.fromMap(pair.first, pair.second);
+            // If available, copy the target study value from the run or batch.
+            // If the property is on the result domain, it's already in the base map.
+            if (batchOrRunTargetStudy != null)
+            {
+                base.put("targetStudy", batchOrRunTargetStudy);
+            }
+
+            ViabilityResult result = ViabilityResult.fromMap(base, extra);
             assert result.getRunID() == 0;
             assert result.getDataID() == 0;
             assert result.getObjectID() == 0;
@@ -322,13 +353,14 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         ViabilityManager.updateSpecimenAggregates(user, container, protocol, run);
     }
 
-    private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap)
+    private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap, DomainProperty resultLevelTargetStudyProperty)
     {
         Map<String, Object> base = new CaseInsensitiveHashMap<>();
         Map<PropertyDescriptor, Object> extra = new HashMap<>();
         for (Map.Entry<String, Object> entry : row.entrySet())
         {
-            if (ViabilityAssayProvider.RESULT_DOMAIN_PROPERTIES.containsKey(entry.getKey()))
+            if (ViabilityAssayProvider.RESULT_DOMAIN_PROPERTIES.containsKey(entry.getKey()) ||
+                (resultLevelTargetStudyProperty != null && resultLevelTargetStudyProperty.getName().equals(entry.getKey())))
             {
                 base.put(entry.getKey(), entry.getValue());
             }

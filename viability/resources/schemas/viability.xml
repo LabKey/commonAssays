@@ -97,6 +97,9 @@
             <ns:column columnName="SpecimenIDs"/>
             <ns:column columnName="SpecimenMatches"/>
             <ns:column columnName="OriginalCells"/>
+
+            <!-- copied TargetStudy column -->
+            <ns:column columnName="TargetStudy"/>
         </ns:columns>
     </ns:table>
 

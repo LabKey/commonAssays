@@ -48,6 +48,7 @@ public class ViabilityResult
     private int viableCells;
 
     private List<String> specimenIDList;
+    private String targetStudy;
 
     private Map<PropertyDescriptor, Object> properties;
 
@@ -98,6 +99,9 @@ public class ViabilityResult
                 throw new IllegalArgumentException("Expected comma separated list or a collecting of specimen IDs");
         }
 
+        if (base.get("targetStudy") instanceof String)
+            result.setTargetStudy((String)base.get("targetStudy"));
+
         if (extra != null)
             result.setProperties(extra);
         else
@@ -127,6 +131,8 @@ public class ViabilityResult
         // NOTE: We use the 'string' version of 'specimenIDs' when converting to/from a map.
         // NOTE: The 'list' version of 'SpecimenIDs' is used when the guava file is parsed.
         ret.put("specimenIDs", getSpecimenIDList());
+
+        ret.put("targetStudy", getTargetStudy());
 
         ret.putAll(getStringProperties());
         return ret;
@@ -316,6 +322,16 @@ public class ViabilityResult
     public void setSpecimenCount(int specimenCount)
     {
         // no-op
+    }
+
+    public String getTargetStudy()
+    {
+        return targetStudy;
+    }
+
+    public void setTargetStudy(String targetStudy)
+    {
+        this.targetStudy = targetStudy;
     }
 
     public Map<PropertyDescriptor, Object> getProperties()

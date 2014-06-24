@@ -1766,6 +1766,7 @@ viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.30-0.40.sq
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.40-0.50.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-14.10-14.11.sql -text
+viability/resources/schemas/dbscripts/postgresql/viability-14.11-14.12.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.00-0.10.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.10-0.20.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.20-0.30.sql -text
@@ -1773,6 +1774,7 @@ viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.30-0.40.sql
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.40-0.50.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-14.10-14.11.sql -text
+viability/resources/schemas/dbscripts/sqlserver/viability-14.11-14.12.sql -text
 viability/resources/schemas/viability.xml -text
 viability/src/org/labkey/viability/GuavaDataHandler.java -text
 viability/src/org/labkey/viability/ViabilityAssayDataHandler.java -text
@@ -1786,6 +1788,7 @@ viability/src/org/labkey/viability/ViabilityManager.java -text
 viability/src/org/labkey/viability/ViabilityModule.java -text
 viability/src/org/labkey/viability/ViabilityResult.java -text
 viability/src/org/labkey/viability/ViabilitySchema.java -text
+viability/src/org/labkey/viability/ViabilityServiceImpl.java -text
 viability/src/org/labkey/viability/ViabilityTsvDataHandler.java -text
 viability/src/org/labkey/viability/ViabilityUpgradeCode.java -text
 viability/src/org/labkey/viability/data/MultiSpecimenPropertyColumnDecorator.java -text

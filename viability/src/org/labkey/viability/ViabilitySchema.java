@@ -17,7 +17,7 @@
 package org.labkey.viability;
 
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 
 /**
@@ -56,12 +56,12 @@ public class ViabilitySchema
         return getSchema().getSqlDialect();
     }
 
-    public static TableInfo getTableInfoResults()
+    public static SchemaTableInfo getTableInfoResults()
     {
         return getSchema().getTable(Tables.Results.name());
     }
 
-    public static TableInfo getTableInfoResultSpecimens()
+    public static SchemaTableInfo getTableInfoResultSpecimens()
     {
         return getSchema().getTable(Tables.ResultSpecimens.name());
     }

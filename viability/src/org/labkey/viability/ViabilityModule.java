@@ -18,11 +18,13 @@ package org.labkey.viability;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.viability.ViabilityService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
 
@@ -43,7 +45,7 @@ public class ViabilityModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.11;
+        return 14.12;
     }
 
     public boolean hasScripts()
@@ -60,6 +62,7 @@ public class ViabilityModule extends DefaultModule
     protected void init()
     {
         addController(ViabilityController.NAME, ViabilityController.class);
+        ServiceRegistry.get().registerService(ViabilityService.class, ViabilityServiceImpl.get());
     }
 
     public void doStartup(ModuleContext moduleContext)

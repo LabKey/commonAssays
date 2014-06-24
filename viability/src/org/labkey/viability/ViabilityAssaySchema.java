@@ -24,6 +24,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DelegatingContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
@@ -51,6 +52,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayTableMetadata;
@@ -227,6 +229,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 }
             });
 
+            boolean addedTargetStudy = false;
             ColumnInfo objectIdCol = wrapColumn(_rootTable.getColumn("ObjectId"));
             for (DomainProperty dp : resultDomainProperties)
             {
@@ -240,6 +243,12 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                     col = addColumn(copyProperties(wrapColumn(getRealTable().getColumn(dp.getName())), dp));
                     if (!ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME.equals(dp.getName()))
                         addDefaultVisible(col.getName());
+
+                    if (AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME.equals(dp.getName()))
+                        addedTargetStudy = true;
+
+                    if (ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME.equals(dp.getName()))
+                        col.setDisplayColumnFactory(new MissingSpecimenPopupFactory());
                 }
                 else if (ViabilityAssayProvider.VIABILITY_PROPERTY_NAME.equals(dp.getName()))
                 {
@@ -261,13 +270,6 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 {
                     col = wrapColumn("OriginalCells", getRealTable().getColumn("OriginalCells"));
                     copyProperties(col, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
-                    addVisible(col);
-                }
-                else if (ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME.equals(dp.getName()))
-                {
-                    col = addColumn(wrapColumn("SpecimenIDs", getRealTable().getColumn("SpecimenIDs")));
-                    copyProperties(col, propertyMap.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
-                    col.setDisplayColumnFactory(new MissingSpecimenPopupFactory());
                     addVisible(col);
                 }
                 else
@@ -311,6 +313,12 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             specimenMatches.setHidden(true);
             addColumn(specimenMatches);
 
+            if (!addedTargetStudy)
+            {
+                ColumnInfo targetStudy = createTargetStudyCol();
+                addColumn(targetStudy);
+            }
+
             SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
             protocolIDFilter.add(getProtocol().getRowId());
             addCondition(protocolIDFilter, FieldKey.fromParts("ProtocolID"));
@@ -346,6 +354,19 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             }
 
             return result;
+        }
+
+        private ColumnInfo createTargetStudyCol()
+        {
+            ColumnInfo col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
+            fixupRenderers(col, col);
+            col.setUserEditable(false);
+            col.setReadOnly(true);
+            col.setHidden(true);
+            col.setShownInDetailsView(false);
+            col.setShownInInsertView(false);
+            col.setShownInUpdateView(false);
+            return col;
         }
 
         public class SpecimenAggregateColumn extends ExprColumn
@@ -443,23 +464,19 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                         String id = (String)ctx.get(specimenIDs);
                         String match = (String)ctx.get(specimenMatches);
 
-                        // XXX: SpecimenMatches column isn't supported on SQLServer yet
-                        if (ViabilityAssaySchema.this.getSqlDialect().isPostgreSQL())
-                        {
-                            String[] ids = id != null ? id.split(",") : new String[0];
-                            String[] matches = match != null ? match.split(",") : new String[0];
+                        String[] ids = id != null ? id.split(",") : new String[0];
+                        String[] matches = match != null ? match.split(",") : new String[0];
 
-                            HashSet<String> s = new LinkedHashSet<>(Arrays.asList(ids));
-                            s.removeAll(Arrays.asList(matches));
+                        HashSet<String> s = new LinkedHashSet<>(Arrays.asList(ids));
+                        s.removeAll(Arrays.asList(matches));
 
-                            popupText += "<p>" + PageFlowUtil.filter(StringUtils.join(s, ", ")) + "</p>";
-                        }
+                        popupText += "<p>" + PageFlowUtil.filter(StringUtils.join(s, ", ")) + "</p>";
 
                         String imgHtml = "<img align=\"top\" src=\"" +
                                 HttpView.currentContext().getContextPath() +
                                 "/_images/mv_indicator.gif\" class=\"labkey-mv-indicator\">";
 
-                        out.write(PageFlowUtil.helpPopup("Matched Specimen IDs", popupText, true, imgHtml, 0));
+                        out.write(PageFlowUtil.helpPopup("Unmatched Specimen IDs", popupText, true, imgHtml, 0));
                     }
                 }
 
@@ -490,7 +507,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 public TableInfo getLookupTableInfo()
                 {
                     ResultsTable results = new ResultsTable();
-                    results.setContainerFilter(getContainerFilter());
+                    results.setContainerFilter(new DelegatingContainerFilter(ResultSpecimensTable.this));
                     return results;
                 }
             });

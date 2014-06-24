@@ -96,6 +96,14 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             // Can't lookup to Specimen ID from Results table
             return null;
         }
+
+        @Override
+        public FieldKey getTargetStudyFieldKey()
+        {
+            // Always use the TargetStudy copied to the viability.results table
+            return FieldKey.fromParts(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
+        }
+
     }
 
     /** Relative from ResultSpecimens table. */
@@ -113,8 +121,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         }
 
         @Override
-        protected FieldKey getTargetStudyFieldKeyOnResults()
+        public FieldKey getTargetStudyFieldKey()
         {
+            // Always use the TargetStudy copied to the viability.results table
             return new FieldKey(getResultRowIdFieldKey(), AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
         }
     }
@@ -159,6 +168,8 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             // Computed properties
             new ResultDomainProperty(VIABILITY_PROPERTY_NAME, VIABILITY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent viable cell count"),
             new ResultDomainProperty(RECOVERY_PROPERTY_NAME, RECOVERY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
+
+            // NOTE: TargetStudy is a column on the viability.results table, but we don't create a property descriptor for it by deafult.
         };
 
         LinkedHashMap<String, ResultDomainProperty> map = new LinkedHashMap<>();

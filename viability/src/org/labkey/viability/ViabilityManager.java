@@ -22,11 +22,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.labkey.api.data.BaseSelector;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
@@ -34,6 +36,7 @@ import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.TempTableTracker;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
@@ -48,6 +51,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.CPUTimer;
 import org.labkey.api.util.JunitUtil;
@@ -55,6 +59,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.TestContext;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -90,9 +95,18 @@ public class ViabilityManager
         return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("DataID"), data.getRowId()), null).getArray(ViabilityResult.class);
     }
 
-    public static ViabilityResult[] getResults(ExpRun run, Container container)
+    public static ViabilityResult[] getResults(@Nullable ExpRun run, @Nullable Container container)
     {
-        return new TableSelector(ViabilitySchema.getTableInfoResults(), SimpleFilter.createContainerFilter(container).addCondition(FieldKey.fromParts("RunID"), run.getRowId()), null).getArray(ViabilityResult.class);
+        if (run == null && container == null)
+            throw new IllegalArgumentException();
+
+        SimpleFilter filter = new SimpleFilter();
+        if (container != null)
+            filter.addCondition(FieldKey.fromParts("Container"), container);
+        if (run != null)
+            filter.addCondition(FieldKey.fromParts("runid"), run.getRowId());
+
+        return new TableSelector(ViabilitySchema.getTableInfoResults(), filter, null).getArray(ViabilityResult.class);
     }
 
     /**
@@ -223,45 +237,134 @@ public class ViabilityManager
         OntologyManager.insertProperties(c, obj.getObjectURI(), oprops.toArray(new ObjectProperty[oprops.size()]));
     }
 
+
+    // need an an object to track the temptable (don't want to use String, too confusing)
+    static class SpecimenAggregateTempTableToken
+    {
+        SpecimenAggregateTempTableToken(String name)
+        {
+            this.name = name;
+        }
+        String name;
+    }
+
     // TODO: call when: specimens imported, editable specimens inserted/updated/deleted, target study edited (for editable assay)
-    // DONE: call when: run inserted
+    // DONE: call when: run inserted, LetvinController.CreateVialsAction
     public static void updateSpecimenAggregates(User user, Container c, ExpProtocol protocol, @Nullable ExpRun run)
     {
         ViabilityAssaySchema schema = new ViabilityAssaySchema(user, c, protocol, null);
-        SQLFragment specimenAggregates = specimenAggregates(schema, run);
-
-        SQLFragment updateFrag = new SQLFragment();
-        updateFrag.append("UPDATE ").append(ViabilitySchema.getTableInfoResults()).append(" SET\n");
-        updateFrag.append("  SpecimenAggregatesUpdated = specimen_agg.SpecimenAggregatesUpdated,\n");
-        updateFrag.append("  SpecimenCount = specimen_agg.SpecimenCount,\n");
-        updateFrag.append("  SpecimenMatchCount = specimen_agg.SpecimenMatchCount,\n");
-        updateFrag.append("  OriginalCells = specimen_agg.OriginalCells,\n");
-        updateFrag.append("  SpecimenIDs = CASE WHEN specimen_agg.SpecimenCount = 0 THEN NULL ELSE specimen_agg.SpecimenIDs END,\n");
-        updateFrag.append("  SpecimenMatches = CASE WHEN specimen_agg.SpecimenMatchCount = 0 THEN NULL ELSE specimen_agg.SpecimenMatches END\n");
-        updateFrag.append("FROM (\n");
-        updateFrag.append(specimenAggregates).append("\n");
-        updateFrag.append(") specimen_agg\n");
-        updateFrag.append("WHERE RowId = specimen_agg.ResultId\n");
-        // TODO: Don't update rows where the values are the same
-        // TODO: Clear values where no specimens match
 
         DbScope scope = schema.getDbSchema().getScope();
 
-        // Debug the specimen aggregates
-        if (LOG.isDebugEnabled())
-        {
-            LOG.debug(String.format("viability specimen aggregates for container=%s, protocol=%d, run=%d", c.getPath(), protocol.getRowId(), run == null ? 0 : run.getRowId()));
-            ResultSet rs = new SqlSelector(scope, specimenAggregates).getResultSet();
-            ResultSetUtil.logData(rs, LOG);
-        }
+        SQLFragment specimenAggregates = specimenAggregates(schema, run);
+
+        // Create temp table with specimen aggregate results
+        String shortName = "VaibilitySpecimenAgg_" + protocol.getRowId();
+        String tempTableName = schema.getSqlDialect().getGlobalTempTablePrefix() + shortName;
+        SpecimenAggregateTempTableToken tok = new SpecimenAggregateTempTableToken(tempTableName);
+        TempTableTracker tracker = TempTableTracker.track(schema.getDbSchema(), tempTableName, tok);
 
         CPUTimer t = new CPUTimer("viability.updateSpecimenAggregates");
-        t.start();
-        SqlExecutor exec = new SqlExecutor(scope);
-        int rows = exec.execute(updateFrag);
-        t.stop();
+        try (DbScope.Transaction tx = scope.ensureTransaction())
+        {
+            // Working with a temp table, so use the same connection for all updates
+            Connection connection = scope.getConnection();
+            SqlExecutor executor = new SqlExecutor(scope, connection);
 
-        LOG.debug(String.format("viability specimen aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
+            SQLFragment insertSQL = new SQLFragment();
+            insertSQL.append("SELECT X.* INTO ").append(tempTableName).append(" FROM (\n");
+            insertSQL.append(specimenAggregates).append("\n");
+            insertSQL.append(") X");
+
+            t.start();
+            executor.execute(insertSQL);
+            t.stop();
+
+            if (LOG.isDebugEnabled())
+            {
+                long count = executor.executeWithResults(new SQLFragment("SELECT COUNT(*) FROM " + tempTableName), new BaseSelector.ResultSetHandler<Long>()
+                {
+                    @Override
+                    public Long handle(ResultSet rs, Connection conn) throws SQLException
+                    {
+                        rs.next();
+                        return rs.getLong(1);
+                    }
+                });
+                LOG.debug(String.format("viability specimens: create temp table: rows=%d, duration=%d", count, t.getTotalMilliseconds()));
+            }
+
+            // CONSIDER: add indices on the temp table
+
+
+// NULL-ing out the values doesn't seem necessary
+//            //
+//            // NULL out the aggregate values for rows that no longer have any specimen matches
+//            //
+//
+//            SQLFragment nullFrag = new SQLFragment();
+//            nullFrag.append("UPDATE ").append(ViabilitySchema.getTableInfoResults()).append(" SET\n");
+//            nullFrag.append("  SpecimenAggregatesUpdated = {fn now()},\n");
+//            nullFrag.append("  SpecimenCount = specimen_agg.SpecimenCount,\n");
+//            nullFrag.append("  SpecimenMatchCount = NULL,\n");
+//            nullFrag.append("  OriginalCells = NULL,\n");
+//            nullFrag.append("  SpecimenMatches = NULL\n");
+//            nullFrag.append("WHERE\n");
+//            nullFrag.append("  ProtocolId = ").append(protocol.getRowId()).append(" AND\n");
+//            if (run != null)
+//            {
+//                nullFrag.append("  RunId = ").append(run.getRowId()).append(" AND\n");
+//            }
+//            // Only update rows that previously held specimen match values and no longer do
+//            nullFrag.append("  SpecimenMatches IS NOT NULL AND\n");
+//            nullFrag.append("  RowId NOT IN (SELECT ResultId FROM ").append(tempTableName).append(" specimen_agg)\n");
+//
+//            t.start();
+//            int rows = executor.execute(nullFrag);
+//            t.stop();
+//            LOG.debug(String.format("viability specimens: null aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
+
+
+            //
+            // update the aggregate values for rows that have specimen matches, skipping rows whoose values aren't changed.
+            //
+
+            SQLFragment updateFrag = new SQLFragment();
+            updateFrag.append("UPDATE ").append(ViabilitySchema.getTableInfoResults()).append(" SET\n");
+            updateFrag.append("  SpecimenAggregatesUpdated = agg.SpecimenAggregatesUpdated,\n");
+            updateFrag.append("  SpecimenCount = agg.SpecimenCount,\n");
+            updateFrag.append("  SpecimenMatchCount = agg.SpecimenMatchCount,\n");
+            updateFrag.append("  OriginalCells = agg.OriginalCells,\n");
+            updateFrag.append("  SpecimenIDs = CASE WHEN agg.SpecimenCount = 0 THEN NULL ELSE agg.SpecimenIDs END,\n");
+            updateFrag.append("  SpecimenMatches = CASE WHEN agg.SpecimenMatchCount = 0 THEN NULL ELSE agg.SpecimenMatches END\n");
+            updateFrag.append("FROM ").append(tempTableName).append(" agg\n");
+            // The EXISTS clause excludes rows that are the same in both tables and handles NULLs correctly
+            updateFrag.append("WHERE\n");
+            updateFrag.append("  ProtocolId = ").append(protocol.getRowId()).append(" AND\n");
+            updateFrag.append("  RowId = agg.ResultId AND\n");
+            updateFrag.append("  EXISTS (\n");
+            updateFrag.append("    SELECT results.RowId, results.SpecimenCount, results.SpecimenMatchCount, results.OriginalCells, results.SpecimenMatches\n");
+            updateFrag.append("    EXCEPT\n");
+            updateFrag.append("    SELECT agg.ResultId, agg.SpecimenCount, agg.SpecimenMatchCount, agg.OriginalCells, agg.SpecimenMatches\n");
+            updateFrag.append("  )\n");
+
+            t.start();
+            int rows = executor.execute(updateFrag);
+            t.stop();
+            LOG.debug(String.format("viability specimens: update aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
+
+            tx.commit();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        finally
+        {
+            // Clean up the temp table
+            if (tracker != null)
+                tracker.delete();
+        }
     }
 
     public static SQLFragment specimenAggregates(ViabilityAssaySchema schema, ExpRun run)
@@ -279,11 +382,8 @@ public class ViabilityManager
         fields.add(volume);
         fields.add(globalUniqueId);
 
-        // TODO: Add resolved targetstudy as a column on viability.results
-        // TargetStudy could be on the Results, Run, or Batch table.
-        fields.add(FieldKey.fromParts("ResultID", "TargetStudy"));
-        fields.add(FieldKey.fromParts("ResultID", "Run", "TargetStudy"));
-        fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "TargetStudy"));
+        // Use the copied TargetStudy as a column from viability.results instead of the TargetStudy that is on the batch or run domain.
+        fields.add(FieldKey.fromParts("ResultID", AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME));
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
 
@@ -305,7 +405,8 @@ public class ViabilityManager
 
         if (schema.getDbSchema().getSqlDialect().supportsGroupConcat())
         {
-            // It's silly to use group-concat for the specimen IDs since we already know them, but it keeps all the viability specimen aggregate code in one place
+            // New viability.resultspecimens are added by the LetvinController.CreateVialsAction.importSpecimens() method
+            // We need to re-generate the group-concat of the specimen IDs.
             SQLFragment specimenID = new SQLFragment(columnMap.get(specimenId).getAlias());
             SQLFragment specimenIDs = schema.getDbSchema().getSqlDialect().getGroupConcat(specimenID, true, true);
             groupFrag.append("  ").append(specimenIDs).append(" AS SpecimenIDs,\n");
@@ -323,6 +424,20 @@ public class ViabilityManager
         groupFrag.append("FROM (\n");
         groupFrag.append(sub);
         groupFrag.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
+
+        // Debug the specimen aggregate queries
+        if (LOG.isDebugEnabled())
+        {
+            DbScope scope = schema.getDbSchema().getScope();
+
+            LOG.debug(String.format("viability specimens: all for container=%s, protocol=%d, run=%d", schema.getContainer().getPath(), schema.getProtocol().getRowId(), run == null ? 0 : run.getRowId()));
+            ResultSet allResultSet = new SqlSelector(scope, sub).getResultSet();
+            ResultSetUtil.logData(allResultSet, LOG);
+
+            LOG.debug(String.format("viability specimens: aggregates for container=%s, protocol=%d, run=%d", schema.getContainer().getPath(), schema.getProtocol().getRowId(), run == null ? 0 : run.getRowId()));
+            ResultSet groupResultSet = new SqlSelector(scope, groupFrag).getResultSet();
+            ResultSetUtil.logData(groupResultSet, LOG);
+        }
 
         return groupFrag;
     }

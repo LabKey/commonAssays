@@ -53,6 +53,4 @@ ALTER TABLE viability.results ADD SpecimenMatches VARCHAR(1000);
 -- Sum of cell counts in the matched Specimen vials in the target study.  Calculated in ViabilityManager.updateSpecimenAggregates()
 ALTER TABLE viability.results ADD OriginalCells INT;
 
--- Schedule the viability aggregates to be updated after startup
-EXEC core.executeJavaUpgradeCode 'updateViabilitySpecimenAggregates';
 
