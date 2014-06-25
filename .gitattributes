@@ -910,7 +910,7 @@ microarray/src/org/labkey/microarray/query/FeatureAnnotationTable.java -text
 microarray/src/org/labkey/microarray/query/MicroarrayUserSchema.java -text
 microarray/src/org/labkey/microarray/statistics.jsp -text
 microarray/src/org/labkey/microarray/view/ExpressionMatrixQuery.jsp -text
-microarray/src/org/labkey/microarray/view/FeatureAnnotationSetWebPart.java -text
+microarray/src/org/labkey/microarray/view/FeatureAnnotationSetQueryView.java -text
 microarray/src/org/labkey/microarray/view/SampleDisplayColumn.java -text
 microarray/src/org/labkey/microarray/view/uploadFeatureAnnotation.jsp -text
 microarray/webapp/WEB-INF/microarray/microarrayContext.xml -text

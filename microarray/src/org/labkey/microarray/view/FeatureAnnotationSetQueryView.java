@@ -15,42 +15,45 @@
  */
 package org.labkey.microarray.view;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryForm;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
-import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
-import org.labkey.microarray.query.MicroarrayUserSchema;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
+import org.springframework.validation.Errors;
 
 /**
  * User: tgaluhn
  * Date: 4/29/13
  */
-public class FeatureAnnotationSetWebPart extends QueryView
+public class FeatureAnnotationSetQueryView extends QueryView
 {
-    private String _featureAnnotationSetError;
-
-    public FeatureAnnotationSetWebPart(ViewContext viewContext)
+    public FeatureAnnotationSetQueryView(QueryForm form, Errors errors)
     {
-        super(new MicroarrayUserSchema(viewContext.getUser(), viewContext.getContainer()));
+        super(form, errors);
+        init();
+    }
 
-        setSettings(createQuerySettings(viewContext, "FeatureAnnotationSet"));
+    public FeatureAnnotationSetQueryView(UserSchema schema, QuerySettings settings, @Nullable Errors errors)
+    {
+        super(schema, settings, errors);
+        init();
+    }
+
+    protected void init()
+    {
         setTitle("Feature Annotation Sets");
-        setTitleHref(new ActionURL(FeatureAnnotationSetController.ManageAction.class, viewContext.getContainer()));
+        setTitleHref(new ActionURL(FeatureAnnotationSetController.ManageAction.class, getSchema().getContainer()));
 
         setShowDetailsColumn(false);
         setShowDeleteButton(false);
@@ -63,18 +66,8 @@ public class FeatureAnnotationSetWebPart extends QueryView
         setShadeAlternatingRows(true);
 
         setAllowableContainerFilterTypes(ContainerFilter.Type.Current, ContainerFilter.Type.CurrentPlusProjectAndShared);
-    }
 
-    private QuerySettings createQuerySettings(ViewContext portalCtx, String dataRegionName)
-    {
-        UserSchema schema = getSchema();
-        QuerySettings settings = schema.getSettings(portalCtx, dataRegionName, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET);
-        if (settings.getContainerFilterName() == null)
-        {
-            settings.setContainerFilterName(ContainerFilter.CurrentPlusProjectAndShared.class.getSimpleName());
-        }
-        settings.getBaseSort().insertSortColumn(FieldKey.fromParts("Name"));
-        return settings;
+        getSettings().getBaseSort().insertSortColumn(FieldKey.fromParts("Name"));
     }
 
     @Override
@@ -101,19 +94,4 @@ public class FeatureAnnotationSetWebPart extends QueryView
     }
 
 
-    @Override
-    protected void renderView(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
-    {
-        PrintWriter out = response.getWriter();
-        if (_featureAnnotationSetError != null)
-        {
-            out.write("<font class=\"labkey-error\">" + PageFlowUtil.filter(_featureAnnotationSetError) + "</font><br>");
-        }
-        super.renderView(model, request, response);
-    }
-
-    public void setFeatureAnnotationSetError(String featureAnnotationSetError)
-    {
-        _featureAnnotationSetError = featureAnnotationSetError;
-    }
 }

@@ -54,7 +54,6 @@ import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
-import org.labkey.microarray.view.FeatureAnnotationSetWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -105,9 +104,9 @@ public class FeatureAnnotationSetController extends SpringActionController
         @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            FeatureAnnotationSetWebPart view = new FeatureAnnotationSetWebPart(getViewContext());
+            MicroarrayUserSchema schema = new MicroarrayUserSchema(getUser(), getContainer());
+            QueryView view = schema.createView(getViewContext(), MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET, errors);
             view.setFrame(WebPartView.FrameType.NONE);
-            view.setFeatureAnnotationSetError(getViewContext().getRequest().getParameter("featureAnnotationSetError"));
 
             return view;
         }

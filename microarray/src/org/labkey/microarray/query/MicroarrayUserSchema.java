@@ -38,14 +38,19 @@ import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayDetailRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.view.FeatureAnnotationSetQueryView;
+import org.springframework.validation.BindException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,8 +108,12 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         if (getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
-            SimpleTable table = new SimpleUserSchema.SimpleTable(this, tableInfo).init();
-            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET) || name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
+            SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo).init();
+            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
+            {
+                table.setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(getUser()));
+            }
+            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
             {
                 table.setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(getUser()));
             }
@@ -112,6 +121,21 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         }
 
         return null;
+    }
+
+    @Override
+    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        String queryName = settings.getQueryName();
+        if (queryName != null)
+        {
+            if (queryName.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
+            {
+                return new FeatureAnnotationSetQueryView(this, settings, errors);
+            }
+        }
+
+        return super.createView(context, settings, errors);
     }
 
     public TableInfo getAnnotationSetTable()

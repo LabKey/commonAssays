@@ -44,7 +44,6 @@ import org.labkey.microarray.matrix.ExpressionMatrixDataHandler;
 import org.labkey.microarray.matrix.ExpressionMatrixMaterialListener;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.labkey.microarray.query.MicroarrayUserSchema;
-import org.labkey.microarray.view.FeatureAnnotationSetWebPart;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -135,7 +134,9 @@ public class MicroarrayModule extends SpringModule
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
                 {
-                    return new FeatureAnnotationSetWebPart(portalCtx);
+                    String dataRegionName = MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET + webPart.getIndex();
+                    MicroarrayUserSchema schema = new MicroarrayUserSchema(portalCtx.getUser(), portalCtx.getContainer());
+                    return schema.createView(portalCtx, dataRegionName, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET, null);
                 }
             }
         ));
