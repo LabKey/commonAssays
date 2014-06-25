@@ -264,6 +264,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             return concentrations;
         }
         else
-            throw new ExperimentException("The form is not an instance of ElisaRunUploadForm, concentration values were not accesible.");
+            throw new ExperimentException("The form is not an instance of ElisaRunUploadForm, concentration values were not accessible.");
     }
 }
