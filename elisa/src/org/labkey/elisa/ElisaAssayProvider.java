@@ -195,7 +195,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new ElisaProtocolSchema(user, container, protocol, targetStudy);
+        return new ElisaProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     protected Map<String, Set<String>> getRequiredDomainProperties()

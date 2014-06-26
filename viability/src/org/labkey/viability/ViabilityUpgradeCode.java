@@ -94,7 +94,7 @@ public class ViabilityUpgradeCode implements UpgradeCode
 
                 // Finally, update all specimen aggregates
                 ModuleUpgrader.getLogger().info(String.format("viability assay '%s': calculating aggregates...", protocol.getName()));
-                ViabilityManager.updateSpecimenAggregates(context.getUpgradeUser(), c, protocol, null);
+                ViabilityManager.updateSpecimenAggregates(context.getUpgradeUser(), c, provider, protocol, null);
             }
         }
     }

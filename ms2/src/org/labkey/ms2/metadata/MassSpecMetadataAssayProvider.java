@@ -135,7 +135,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new MassSpecMetadataProtocolSchema(user, container, protocol, targetStudy);
+        return new MassSpecMetadataProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createFractionDomain(Container c)

@@ -241,7 +241,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public ElispotProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new ElispotProtocolSchema(user, container, protocol, this, targetStudy);
+        return new ElispotProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     public PipelineProvider getPipelineProvider()

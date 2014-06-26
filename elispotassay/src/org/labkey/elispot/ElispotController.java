@@ -143,7 +143,7 @@ public class ElispotController extends SpringActionController
             QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
             settings.setAllowChooseView(true);
 
-            QueryView queryView = new QueryView(new ElispotProtocolSchema(getUser(), getContainer(), _protocol, (ElispotAssayProvider)AssayService.get().getProvider(_protocol), null), settings, errors);
+            QueryView queryView = new QueryView(new ElispotProtocolSchema(getUser(), getContainer(), (ElispotAssayProvider)AssayService.get().getProvider(_protocol), _protocol, null), settings, errors);
             queryView.setShadeAlternatingRows(true);
             queryView.setShowBorders(true);
             queryView.setShowDetailsColumn(false);

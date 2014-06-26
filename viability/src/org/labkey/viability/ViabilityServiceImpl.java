@@ -6,6 +6,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssayProvider;
 
 /**
  * User: kevink
@@ -23,8 +24,8 @@ public class ViabilityServiceImpl implements ViabilityService
     private ViabilityServiceImpl() { }
 
     @Override
-    public void updateSpecimenAggregates(User user, Container c, ExpProtocol protocol, @Nullable ExpRun run)
+    public void updateSpecimenAggregates(User user, Container c, AssayProvider provider, ExpProtocol protocol, @Nullable ExpRun run)
     {
-        ViabilityManager.updateSpecimenAggregates(user, c, protocol, run);
+        ViabilityManager.updateSpecimenAggregates(user, c, provider, protocol, run);
     }
 }

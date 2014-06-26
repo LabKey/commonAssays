@@ -76,7 +76,7 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new AffymetrixProtocolSchema(user, container, protocol, targetStudy);
+        return new AffymetrixProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     @Override

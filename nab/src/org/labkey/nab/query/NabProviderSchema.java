@@ -16,6 +16,7 @@
 
 package org.labkey.nab.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.data.*;
@@ -49,14 +50,25 @@ public class NabProviderSchema extends DilutionProviderSchema
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 // Nab top-level schema for backwards compatibility <12.3.  Moved to assay schema.
-                return new NabProviderSchema(schema.getUser(), schema.getContainer(), AssayService.get().getProvider(NabAssayProvider.NAME), null, true);
+                AssayProvider provider = AssayService.get().getProvider(NabAssayProvider.NAME);
+                if (provider instanceof NabAssayProvider)
+                    return new NabProviderSchema(schema.getUser(), schema.getContainer(), (NabAssayProvider)provider, null, true);
+
+                return null;
             }
         });
     }
 
-    public NabProviderSchema(User user, Container container, AssayProvider provider, @Nullable Container targetStudy, boolean hidden)
+    public NabProviderSchema(User user, Container container, NabAssayProvider provider, @Nullable Container targetStudy, boolean hidden)
     {
         super(user, container, provider, SCHEMA_NAME, targetStudy, hidden);
+    }
+
+    @NotNull
+    @Override
+    public NabAssayProvider getProvider()
+    {
+        return (NabAssayProvider)super.getProvider();
     }
 
     @Override
@@ -113,6 +125,6 @@ public class NabProviderSchema extends DilutionProviderSchema
 
     public NabRunDataTable createDataRowTable(ExpProtocol protocol)
     {
-        return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), protocol, getTargetStudy()), protocol);
+        return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), getProvider(), protocol, getTargetStudy()), protocol);
     }
 }

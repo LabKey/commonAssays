@@ -48,9 +48,9 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
 {
     public static final String ANTIGEN_STATS_TABLE_NAME = "AntigenStats";
 
-    public ElispotProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @NotNull ElispotAssayProvider provider, @Nullable Container targetStudy)
+    public ElispotProtocolSchema(User user, Container container, @NotNull ElispotAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
     }
 
     @NotNull

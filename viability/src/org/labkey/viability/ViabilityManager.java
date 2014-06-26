@@ -17,6 +17,7 @@
 package org.labkey.viability;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
@@ -52,6 +53,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.CPUTimer;
 import org.labkey.api.util.JunitUtil;
@@ -250,9 +252,12 @@ public class ViabilityManager
 
     // TODO: call when: specimens imported, editable specimens inserted/updated/deleted, target study edited (for editable assay)
     // DONE: call when: run inserted, LetvinController.CreateVialsAction
-    public static void updateSpecimenAggregates(User user, Container c, ExpProtocol protocol, @Nullable ExpRun run)
+    public static void updateSpecimenAggregates(User user, Container c, @NotNull AssayProvider provider, @NotNull ExpProtocol protocol, @Nullable ExpRun run)
     {
-        ViabilityAssaySchema schema = new ViabilityAssaySchema(user, c, protocol, null);
+        if (!(provider instanceof ViabilityAssayProvider))
+            throw new IllegalArgumentException("Viability assay provider required");
+
+        ViabilityAssaySchema schema = new ViabilityAssaySchema(user, c, (ViabilityAssayProvider)provider, protocol, null);
 
         DbScope scope = schema.getDbSchema().getScope();
 

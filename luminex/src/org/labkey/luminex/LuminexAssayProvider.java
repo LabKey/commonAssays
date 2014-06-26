@@ -101,7 +101,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     @Override
     public LuminexProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new LuminexProtocolSchema(user, container, protocol, targetStudy);
+        return new LuminexProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     public void registerLsidHandler()

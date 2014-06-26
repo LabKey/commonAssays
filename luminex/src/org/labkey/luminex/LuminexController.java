@@ -29,6 +29,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.util.HelpTopic;
@@ -86,9 +87,12 @@ public class LuminexController extends SpringActionController
         public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
         {
             _protocol = form.getProtocol();
+            AssayProvider provider = form.getProvider();
+            if (!(provider instanceof LuminexAssayProvider))
+                throw new ProtocolIdForm.ProviderNotFoundException("Luminex assay provider not found", _protocol);
 
             AssayView result = new AssayView();
-            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), _protocol, null);
+            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), (LuminexAssayProvider)provider, _protocol, null);
             QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME);
             QueryView runsView = createQueryView(runsSetting, schema, errors);
             runsView.setTitle("Excluded Analytes");

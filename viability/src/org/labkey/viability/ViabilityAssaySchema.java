@@ -83,10 +83,9 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         ResultSpecimens
     }
 
-    public ViabilityAssaySchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public ViabilityAssaySchema(User user, Container container, @NotNull ViabilityAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
-        assert protocol != null;
+        super(user, container, provider, protocol, targetStudy);
     }
 
     public static DbSchema getSchema()

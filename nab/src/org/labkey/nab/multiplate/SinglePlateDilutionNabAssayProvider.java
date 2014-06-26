@@ -127,7 +127,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     @Override
     public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new NabProtocolSchema(user, container, protocol, targetStudy)
+        return new NabProtocolSchema(user, container, this, protocol, targetStudy)
         {
             Map<String, Object> _extraParams = new HashMap<>();
 

@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.metadata;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -41,7 +43,6 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
@@ -62,9 +63,9 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
     public static final String SEARCH_COUNT_COLUMN = "MS2SearchCount";
     public static final String SEARCHES_COLUMN = "MS2Searches";
 
-    public MassSpecMetadataProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public MassSpecMetadataProtocolSchema(User user, Container container, @NotNull MassSpecMetadataAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
     }
 
     @Override

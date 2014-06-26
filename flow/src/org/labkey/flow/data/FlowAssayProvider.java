@@ -309,7 +309,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new FlowProtocolSchema(user, container, protocol, targetStudy);
+        return new FlowProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     @Override

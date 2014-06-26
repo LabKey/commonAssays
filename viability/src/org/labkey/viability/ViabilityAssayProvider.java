@@ -220,7 +220,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new ViabilityAssaySchema(user, container, protocol, targetStudy);
+        return new ViabilityAssaySchema(user, container, this, protocol, targetStudy);
     }
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)

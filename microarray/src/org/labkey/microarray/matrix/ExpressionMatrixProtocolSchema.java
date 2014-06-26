@@ -15,6 +15,8 @@
  */
 package org.labkey.microarray.matrix;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.CrosstabDimension;
 import org.labkey.api.data.CrosstabMeasure;
@@ -30,7 +32,6 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.microarray.MicroarrayManager;
-import org.labkey.microarray.matrix.FeatureDataTable;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.sql.SQLException;
@@ -44,9 +45,9 @@ public class ExpressionMatrixProtocolSchema extends AssayProtocolSchema
     public static final String FEATURE_DATA_TABLE_NAME = "FeatureData";
     public static final String FEATURE_DATA_BY_SAMPLE_TABLE_NAME = "FeatureDataBySample";
 
-    public ExpressionMatrixProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public ExpressionMatrixProtocolSchema(User user, Container container, @NotNull ExpressionMatrixAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
     }
     
     @Override

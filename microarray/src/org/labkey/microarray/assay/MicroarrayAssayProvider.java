@@ -163,7 +163,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new MicroarrayProtocolSchema(user, container, protocol, targetStudy);
+        return new MicroarrayProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     public ActionURL getImportURL(Container container, ExpProtocol protocol)

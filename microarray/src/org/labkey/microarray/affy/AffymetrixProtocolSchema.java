@@ -30,10 +30,11 @@ import org.labkey.microarray.view.SampleDisplayColumn;
 
 public class AffymetrixProtocolSchema extends AssayProtocolSchema
 {
-    AffymetrixProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
+    AffymetrixProtocolSchema(User user, Container container, @NotNull AffymetrixAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
     }
+
     @Nullable
     @Override
     public ContainerFilterable createDataTable(boolean includeCopiedToStudyColumns)

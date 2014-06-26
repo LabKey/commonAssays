@@ -350,7 +350,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             ViabilityManager.saveResult(user, container, result, rowIndex++);
         }
 
-        ViabilityManager.updateSpecimenAggregates(user, container, protocol, run);
+        ViabilityManager.updateSpecimenAggregates(user, container, provider, protocol, run);
     }
 
     private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap, DomainProperty resultLevelTargetStudyProperty)

@@ -15,12 +15,12 @@
  */
 package org.labkey.flow.data;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProtocolSchema;
@@ -37,9 +37,16 @@ import org.springframework.validation.BindException;
  */
 public class FlowProtocolSchema extends AssayProtocolSchema
 {
-    public FlowProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public FlowProtocolSchema(User user, Container container, @NotNull FlowAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
+    }
+
+    @NotNull
+    @Override
+    public FlowAssayProvider getProvider()
+    {
+        return (FlowAssayProvider)super.getProvider();
     }
 
     @Override

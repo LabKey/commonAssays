@@ -66,7 +66,7 @@ public class ViabilityController extends SpringActionController
         public boolean handlePost(ProtocolIdForm protocolIdForm, BindException errors) throws Exception
         {
             ExpProtocol protocol = protocolIdForm.getProtocol(false);
-            ViabilityManager.updateSpecimenAggregates(getUser(), protocol.getContainer(), protocol, null);
+            ViabilityManager.updateSpecimenAggregates(getUser(), protocol.getContainer(), protocolIdForm.getProvider(), protocol, null);
             return true;
         }
 

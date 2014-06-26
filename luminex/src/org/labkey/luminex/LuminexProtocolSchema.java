@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -71,9 +72,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     private List<String> _curveTypes;
 
-    public LuminexProtocolSchema(User user, Container container, ExpProtocol protocol, Container targetStudy)
+    public LuminexProtocolSchema(User user, Container container, @NotNull LuminexAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
+    }
+
+    @NotNull
+    @Override
+    public LuminexAssayProvider getProvider()
+    {
+        return (LuminexAssayProvider)super.getProvider();
     }
 
     public Set<String> getTableNames()

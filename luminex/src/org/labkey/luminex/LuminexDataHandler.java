@@ -64,6 +64,7 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.ParticipantVisit;
+import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayProvider;
@@ -77,6 +78,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -777,7 +779,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
      * has a current GuideSet */
     public static void insertOrUpdateAnalyteSinglePointControlQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteSinglePointControl analyteSinglePointControl, Analyte analyte, SinglePointControl singlePointControl, String isotype, String conjugate, double averageFI)
     {
-        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), protocol, null);
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        if (!(provider instanceof LuminexAssayProvider))
+            throw new NotFoundException("Luminex assay provider not found");
+
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), (LuminexAssayProvider)provider, protocol, null);
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
         ExpQCFlagTable qcFlagTable = schema.createAnalyteSinglePointControlQCFlagTable();
@@ -1421,7 +1427,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
       out of the guide set range if this AnalyteTitration record has a current GuideSet */
     public static void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, @NotNull AnalyteTitration analyteTitration, @NotNull Analyte analyte, @NotNull Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
     {
-        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), protocol, null);
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        if (!(provider instanceof LuminexAssayProvider))
+            throw new NotFoundException("Luminex assay provider not found");
+
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), (LuminexAssayProvider)provider, protocol, null);
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
         ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
@@ -2033,9 +2043,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
      */
     private Set<Object> getExcludedWellKeys(ExpRun run, ExpProtocol protocol, ViewBackgroundInfo info)
     {
-        LuminexProtocolSchema schema = new LuminexProtocolSchema(info.getUser(), info.getContainer(), protocol, null);
-        LuminexDataTable table = new LuminexDataTable(schema);
         AssayProvider provider = AssayService.get().getProvider(protocol);
+        if (!(provider instanceof LuminexAssayProvider))
+            throw new NotFoundException("Luminex assay provider not found");
+
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(info.getUser(), info.getContainer(), (LuminexAssayProvider)provider, protocol, null);
+        LuminexDataTable table = new LuminexDataTable(schema);
 
         final Set<Object> excludedWells = new HashSet<>();
 

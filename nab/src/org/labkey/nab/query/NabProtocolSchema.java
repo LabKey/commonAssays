@@ -44,6 +44,7 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayController;
+import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
 import org.springframework.validation.BindException;
 
@@ -63,9 +64,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
     private Set<Double> _cutoffValues;
 
-    public NabProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
+    public NabProtocolSchema(User user, Container container, @NotNull NabAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        super(user, container, protocol, targetStudy);
+        super(user, container, provider, protocol, targetStudy);
     }
 
     @Override

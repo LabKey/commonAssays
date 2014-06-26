@@ -104,7 +104,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new NabProtocolSchema(user, container, protocol, targetStudy);
+        return new NabProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     @Override
