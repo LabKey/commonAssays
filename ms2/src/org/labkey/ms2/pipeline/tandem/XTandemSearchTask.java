@@ -260,7 +260,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         params.remove("list path, default parameters");
 
         // CONSIDER: If we remove these, they will not end up in the pepXML file.
-        //  ... which is a bad thing, since we currently rely on "pipline, import spectra"
+        //  ... which is a bad thing, since we currently rely on "pipeline, import spectra"
         //  to keep from loading all spectra into the database.
 /*        for (String key : params.keySet().toArray(new String[params.size()]))
         {

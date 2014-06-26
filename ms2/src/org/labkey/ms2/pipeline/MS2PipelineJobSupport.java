@@ -22,7 +22,7 @@ import java.io.IOException;
 
 /**
  * <code>MS2PipelineJobSupport</code> Interface for providing MS2 search support to
- * PiplineJob tasks.
+ * PipelineJob tasks.
  */
 public interface MS2PipelineJobSupport extends FileAnalysisJobSupport
 {
