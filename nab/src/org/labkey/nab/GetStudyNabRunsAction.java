@@ -17,14 +17,15 @@ package org.labkey.nab;
 
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.springframework.validation.BindException;
 
 import java.util.ArrayList;
@@ -80,13 +81,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
             return null;
         else
         {
-            return new ApiResponse()
-            {
-                public Map<String, ?> getProperties()
-                {
-                    return properties;
-                }
-            };
+            return new ApiSimpleResponse(properties);
         }
     }
 

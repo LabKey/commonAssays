@@ -17,7 +17,9 @@ package org.labkey.nab;
 
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.RuntimeSQLException;
@@ -36,7 +38,6 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
@@ -186,9 +187,9 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
     {
         if (form.getAssayName() == null)
             throw new IllegalArgumentException("Assay name is a required parameter.");
-        final Map<String, Object> _properties = new HashMap<>();
+        final Map<String, Object> response = new HashMap<>();
         List<NabRunPropertyMap> runList = new ArrayList<>();
-        _properties.put("runs", runList);
+        response.put("runs", runList);
         Container container = form.getViewContext().getContainer();
         ExpProtocol protocol = null;
         for (Iterator<ExpProtocol> it = AssayService.get().getAssayProtocols(container).iterator(); it.hasNext() && protocol == null;)
@@ -203,9 +204,9 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         if (!(provider instanceof NabAssayProvider))
             throw new IllegalArgumentException("Assay " + form.getAssayName() + " is not a NAb assay: it is of type " + provider.getName());
 
-        _properties.put("assayName", protocol.getName());
-        _properties.put("assayDescription", protocol.getDescription());
-        _properties.put("assayId", protocol.getRowId());
+        response.put("assayName", protocol.getName());
+        response.put("assayDescription", protocol.getDescription());
+        response.put("assayId", protocol.getRowId());
         DilutionDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
         for (ExpRun run : getRuns(protocol, provider, form, errors))
         {
@@ -213,12 +214,6 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));
 
         }
-        return new ApiResponse()
-        {
-            public Map<String, ?> getProperties()
-            {
-                return _properties;
-            }
-        };
+        return new ApiSimpleResponse(response);
     }
 }

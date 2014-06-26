@@ -17,15 +17,17 @@ package org.labkey.nab;
 
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.springframework.validation.BindException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * User: brittp
@@ -60,12 +62,6 @@ public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
         returnValue.put("url", url.getLocalURIString());
         returnValue.put("objectIds", readableIds.keySet());
 
-        return new ApiResponse()
-        {
-            public Map<String, ?> getProperties()
-            {
-                return returnValue;
-            }
-        };
+        return new ApiSimpleResponse(returnValue);
     }
 }
