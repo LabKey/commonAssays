@@ -118,7 +118,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new ExpressionMatrixProtocolSchema(user, container, protocol, targetStudy);
+        return new ExpressionMatrixProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
     @Override
