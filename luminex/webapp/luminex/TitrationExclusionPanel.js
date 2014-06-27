@@ -425,14 +425,14 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
     {
         var retString = '';
 
-        for(var thing in this.present)
+        for (var i = 0; i < this.present.length; i++)
         {
-            if(thing != 'remove' && !(this.preExcludedIds[thing] == undefined && this.present[thing] == 0))
+            if(!(this.preExcludedIds[i] == undefined && this.present[i] == 0))
             {
-                if(this.present[thing] != 1)
-                    retString += this.availableTitrationsGrid.getStore().getAt(thing).get('Name') + ': ' + this.present[thing] + ' analytes excluded.<br>';
+                if(this.present[i] != 1)
+                    retString += this.availableTitrationsGrid.getStore().getAt(i).get('Name') + ': ' + this.present[i] + ' analytes excluded.<br>';
                 else
-                    retString += this.availableTitrationsGrid.getStore().getAt(thing).get('Name') + ': ' + this.present[thing] + ' analyte excluded.<br>';
+                    retString += this.availableTitrationsGrid.getStore().getAt(i).get('Name') + ': ' + this.present[i] + ' analyte excluded.<br>';
             }
         }
         return retString;
@@ -462,19 +462,15 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
     },
 
     insertUpdateWellExclusions: function(){
-        // mask the window until the insert/update is complete (or if something goes wrong)
-//        var message = "Saving replicate group exclusion...";
-//        if (this.findById('reCalcDisplay').isVisible())
-//            message = "Saving replicate group exclusion and re-calculating curve...";
-//        this.findParentByType('window').getEl().mask(message, "x-mask-loading");
 
         // generage a comma delim string of the analyte Ids to exclude
-        for(var key in this.excluded)
+        for (var index = 0; index < this.excluded.length; index++)
         {
-            var dataId = this.excludedDataIds[key];
-            var analytesForExclusion = this.excluded[key];
-            if(key==='remove')
+            var dataId = this.excludedDataIds[index];
+            var analytesForExclusion = this.excluded[index];
+            if (analytesForExclusion == undefined)
                 continue;
+
             var analytesForExclusionStr = "";
             Ext.each(analytesForExclusion, function(record){
                 analytesForExclusionStr += (analytesForExclusionStr != "" ? "," : "") + record.data.RowId;
@@ -486,7 +482,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
                 rows: [{
                     description: analytesForExclusion.name,
                     dataId: dataId,
-                    comment: this.comments[key],
+                    comment: this.comments[index],
                     "analyteId/RowId": (analytesForExclusionStr != "" ? analytesForExclusionStr : null)
                 }],
                 success: function(){
@@ -504,9 +500,9 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
             // insert, update, or delete to/from the WellExclusions table with config information
 
-            if (typeof this.preExcludedIds[key] === 'number')
+            if (typeof this.preExcludedIds[index] === 'number')
             {
-                config.rows[0].rowId = this.preExcludedIds[key];
+                config.rows[0].rowId = this.preExcludedIds[index];
                 if (analytesForExclusionStr != "")
                 {
                     LABKEY.Query.updateRows(config);
