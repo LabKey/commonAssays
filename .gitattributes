@@ -309,6 +309,7 @@ flow/resources/schemas/dbscripts/postgresql/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-12.30-13.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-13.10-13.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-14.10-14.11.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-14.10-14.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-10.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-8.10.sql -text
@@ -333,6 +334,7 @@ flow/resources/schemas/dbscripts/sqlserver/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-12.30-13.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-13.10-13.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-14.10-14.11.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-14.10-14.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-10.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-8.10.sql -text
@@ -624,6 +626,7 @@ luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-12.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-13.20-13.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.10-14.11.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-14.10-14.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.11-14.12.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.12-14.13.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-10.10.sql -text
@@ -684,6 +687,7 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.30-9.31.sql -t
 luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-13.20-13.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.10-14.11.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-14.10-14.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.11-14.12.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.12-14.13.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-10.10.sql -text
@@ -835,6 +839,7 @@ microarray/resources/schemas/dbscripts/postgresql/microarray-13.30-14.10.sql -te
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.31-13.32.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-13.32-13.33.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-14.10-14.11.sql -text
+microarray/resources/schemas/dbscripts/postgresql/microarray-14.10-14.20.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-9.10.sql -text
@@ -850,6 +855,7 @@ microarray/resources/schemas/dbscripts/sqlserver/microarray-13.30-14.10.sql -tex
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.31-13.32.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-13.32-13.33.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-14.10-14.11.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/microarray-14.10-14.20.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-9.10.sql -text
@@ -1074,6 +1080,7 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-12.10-12.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.10-13.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.20-13.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-14.10-14.11.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-14.10-14.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-1.00.sql -text
@@ -1174,6 +1181,7 @@ ms2/resources/schemas/dbscripts/sqlserver/ms2-12.10-12.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-13.10-13.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-13.20-13.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-14.10-14.11.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-14.10-14.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-0.62.sql -text
@@ -1766,6 +1774,7 @@ viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.30-0.40.sq
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.40-0.50.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-14.10-14.11.sql -text
+viability/resources/schemas/dbscripts/postgresql/viability-14.10-14.20.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-14.11-14.12.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.00-0.10.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.10-0.20.sql -text
@@ -1774,6 +1783,7 @@ viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.30-0.40.sql
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-0.40-0.50.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-14.10-14.11.sql -text
+viability/resources/schemas/dbscripts/sqlserver/viability-14.10-14.20.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-14.11-14.12.sql -text
 viability/resources/schemas/viability.xml -text
 viability/src/org/labkey/viability/GuavaDataHandler.java -text
