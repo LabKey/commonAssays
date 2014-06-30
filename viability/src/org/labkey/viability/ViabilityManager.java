@@ -356,7 +356,7 @@ public class ViabilityManager
             t.start();
             int rows = executor.execute(updateFrag);
             t.stop();
-            LOG.debug(String.format("viability specimens: update aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
+            LOG.info(String.format("viability specimens: update aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
 
             tx.commit();
         }

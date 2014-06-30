@@ -25,6 +25,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.study.SpecimenService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
 
@@ -70,6 +71,7 @@ public class ViabilityModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(new ViabilityTsvDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new GuavaDataHandler());
         AssayService.get().registerAssayProvider(new ViabilityAssayProvider());
+        SpecimenService.get().registerSpecimenChangeListener(new ViabilitySpecimenChangeListener());
     }
 
     @NotNull
