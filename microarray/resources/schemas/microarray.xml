@@ -127,7 +127,7 @@
       </ns:columns>
   </ns:table>
 
-  <ns:table tableName="FeatureData" tableDbType="TABLE">
+  <ns:table tableName="FeatureData" tableDbType="TABLE" hidden="true">
       <ns:pkColumnName>RowId</ns:pkColumnName>
       <ns:tableUrl></ns:tableUrl>
       <ns:deleteUrl></ns:deleteUrl>
