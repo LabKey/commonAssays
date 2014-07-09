@@ -411,7 +411,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" style="text-align:right">
-                        <%= button("Cancel").submit(true).onClick("cancelMzFilter();").attributes("title=\"Cancel Chanages\" tabindex=\"4\"")%>
+                        <%= button("Cancel").submit(true).onClick("cancelMzFilter();").attributes("title=\"Cancel Changes\" tabindex=\"4\"")%>
                         <%= button("Reset").submit(true).onClick("resetMzWindowFilter();").attributes("title=\"Reset to Defaults and Refresh\" tabindex=\"5\"")%>
                         <%= button("Filter").submit(true).onClick("submitMzWindowFilter();").attributes("title=\"Set Filter and Refresh\" tabindex=\"6\"")%>
                     </td>
@@ -486,7 +486,7 @@
                 </tr>
                 <tr>
                     <td nowrap style="text-align:right">
-                        <%= button("Cancel").submit(true).onClick("cancelScanFilter();").attributes("title=\"Cancel Chanages\" tabindex=\"104\"")%>
+                        <%= button("Cancel").submit(true).onClick("cancelScanFilter();").attributes("title=\"Cancel Changes\" tabindex=\"104\"")%>
                         <%= button("Reset").submit(true).onClick("resetScanWindowFilter();").attributes("title=\"Reset to Defaults and Refresh\" tabindex=\"105\"")%>
                         <%= button("Filter").submit(true).onClick("submitScanWindowFilter();").attributes("title=\"Set Filter and Refresh\" tabindex=\"106\"")%>
                     </td>
