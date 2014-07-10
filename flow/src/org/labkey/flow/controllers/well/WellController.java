@@ -31,6 +31,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.SecurityPolicy;
@@ -283,6 +284,7 @@ public class WellController extends BaseFlowController
     }
 
     @RequiresPermissionClass(ReadPermission.class)
+    @ContextualRoles(GraphContextualRoles.class)
     public class ShowGraphAction extends SimpleViewAction
     {
         FlowWell well;

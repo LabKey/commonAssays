@@ -505,6 +505,7 @@ flow/src/org/labkey/flow/controllers/run/showRuns.jsp -text
 flow/src/org/labkey/flow/controllers/selectReport.jsp -text
 flow/src/org/labkey/flow/controllers/well/ChooseGraphForm.java -text
 flow/src/org/labkey/flow/controllers/well/EditWellForm.java -text
+flow/src/org/labkey/flow/controllers/well/GraphContextualRoles.java -text
 flow/src/org/labkey/flow/controllers/well/WellController.java -text
 flow/src/org/labkey/flow/controllers/well/bulkUpdate.jsp -text
 flow/src/org/labkey/flow/controllers/well/chooseGraph.jsp -text
