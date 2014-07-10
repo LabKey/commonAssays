@@ -96,9 +96,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             ColumnDescriptor[] columns = loader.getColumns();
             if (columns == null || columns.length == 0)
             {
-                throwParseError(dataFile, "No columns found in data file.");
-                // return to suppress intellij warnings (line above will always throw):
-                return null;
+                throw createParseError(dataFile, "No columns found in data file.");
             }
 
             // The results column is defined as the last column in the file for this file format:
@@ -123,17 +121,15 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 Object dataValue = rowData.get(resultColumnHeader);
                 if (dataValue == null || !(dataValue instanceof Integer))
                 {
-                    throwParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                    throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
                             "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
-                    return null;
                 }
 
                 Object virusName = rowData.get(virusNameColumnHeader);
                 if (virusName == null || !(virusName instanceof String))
                 {
-                    throwParseError(dataFile, "No valid virus name value found on line " + line + ".  Expected string " +
+                    throw createParseError(dataFile, "No valid virus name value found on line " + line + ".  Expected string " +
                             "result values  (\"" + virusNameColumnHeader + "\") found: " + virusName);
-                    return null;
                 }
 
                 if (!plateToVirusMap.containsKey(plateCount))
@@ -141,7 +137,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 else
                 {
                     if (!plateToVirusMap.get(plateCount).equals(virusName.toString()))
-                        throwParseError(dataFile, "more than one virus name on a plate found for : plate " + plateCount +
+                        throw createParseError(dataFile, "more than one virus name on a plate found for : plate " + plateCount +
                                 " and virus name : " + virusName);
                 }
 
@@ -158,15 +154,14 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             }
             if (wellCount != 0)
             {
-                throwParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
+                throw createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
                         plateCount + " complete plates of data, plus " + wellCount + " extra rows.");
             }
             return plates;
         }
         catch (IOException e)
         {
-            throwParseError(dataFile, null, e);
-            return null;
+            throw createParseError(dataFile, null, e);
         }
     }
 

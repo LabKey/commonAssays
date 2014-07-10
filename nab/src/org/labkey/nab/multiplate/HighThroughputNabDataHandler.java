@@ -41,7 +41,6 @@ import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.NabDataHandler;
-import org.labkey.nab.NabManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,23 +67,23 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
 
     private static final String LOCATION_COLUMNN_HEADER = "Well Location";
 
-    protected void throwWellLocationParseError(File dataFile, int lineNumber, Object locationValue) throws ExperimentException
+    protected ExperimentException createWellLocationParseError(File dataFile, int lineNumber, Object locationValue) throws ExperimentException
     {
-        throwParseError(dataFile, "Failed to find valid location in column \"" + LOCATION_COLUMNN_HEADER + "\" on line " + lineNumber +
-                    ".  Locations should be identified by a single row letter and column number, such as " +
-                    "A1 or P24.  Found \"" + (locationValue != null ? locationValue.toString() : "") + "\".");
+        return createParseError(dataFile, "Failed to find valid location in column \"" + LOCATION_COLUMNN_HEADER + "\" on line " + lineNumber +
+                ".  Locations should be identified by a single row letter and column number, such as " +
+                "A1 or P24.  Found \"" + (locationValue != null ? locationValue.toString() : "") + "\".");
     }
 
     protected Pair<Integer, Integer> getWellLocation(PlateTemplate template, File dataFile, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(LOCATION_COLUMNN_HEADER);
         if (locationValue == null || !(locationValue instanceof String) || ((String) locationValue).length() < 2)
-            throwWellLocationParseError(dataFile, lineNumber, locationValue);
+            throw createWellLocationParseError(dataFile, lineNumber, locationValue);
         String location = (String) locationValue;
         Character rowChar = location.charAt(0);
         rowChar = Character.toUpperCase(rowChar);
         if (!(rowChar >= 'A' && rowChar <= 'Z'))
-            throwWellLocationParseError(dataFile, lineNumber, locationValue);
+            throw createWellLocationParseError(dataFile, lineNumber, locationValue);
 
         Integer col;
         try
@@ -93,23 +92,21 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         }
         catch (NumberFormatException e)
         {
-            throwWellLocationParseError(dataFile, lineNumber, locationValue);
-            // return to suppress intellij warnings (line will never be reached)
-            return null;
+            throw createWellLocationParseError(dataFile, lineNumber, locationValue);
         }
         int row = rowChar - 'A' + 1;
 
         // 1-based row and column indexing:
         if (row > template.getRows())
         {
-            throwParseError(dataFile, "Invalid row " + row + " specified on line " + lineNumber +
+            throw createParseError(dataFile, "Invalid row " + row + " specified on line " + lineNumber +
                     ".  The current plate template defines " + template.getRows() + " rows.");
         }
 
         // 1-based row and column indexing:
         if (col > template.getColumns())
         {
-            throwParseError(dataFile, "Invalid column " + col + " specified on line " + lineNumber +
+            throw createParseError(dataFile, "Invalid column " + col + " specified on line " + lineNumber +
                     ".  The current plate template defines " + template.getColumns() + " columns.");
         }
         return new Pair<>(row, col);
@@ -134,9 +131,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             ColumnDescriptor[] columns = loader.getColumns();
             if (columns == null || columns.length == 0)
             {
-                throwParseError(dataFile, "No columns found in data file.");
-                // return to suppress intellij warnings (line above will always throw):
-                return null;
+                throw createParseError(dataFile, "No columns found in data file.");
             }
 
             // The results column is defined as the last column in the file for this file format:
@@ -158,9 +153,8 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
                 Object dataValue = rowData.get(resultColumnHeader);
                 if (dataValue == null || !(dataValue instanceof Integer))
                 {
-                    throwParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                    throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
                             "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
-                    return null;
                 }
 
                 wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;
@@ -173,15 +167,14 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             }
             if (wellCount != 0)
             {
-                throwParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
+                throw createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
                         plateCount + " complete plates of data, plus " + wellCount + " extra rows.");
             }
             return plates;
         }
         catch (IOException e)
         {
-            throwParseError(dataFile, null, e);
-            return null;
+            throw createParseError(dataFile, null, e);
         }
     }
 

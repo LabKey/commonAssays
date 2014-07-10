@@ -97,19 +97,15 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     private double[][] getCellValues(File dataFile, PlateTemplate nabTemplate) throws ExperimentException
     {
-        Workbook workbook = null;
+        Workbook workbook;
 
         try
         {
             workbook = ExcelFactory.create(dataFile);
         }
-        catch (IOException e)
+        catch (IOException | InvalidFormatException e)
         {
-            throwParseError(dataFile, null, e);
-        }
-        catch (InvalidFormatException e)
-        {
-            throwParseError(dataFile, null, e);
+            throw createParseError(dataFile, null, e);
         }
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
 
@@ -132,7 +128,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             startRow = START_ROW;
             startColumn = START_COL;
             if (workbook.getNumberOfSheets() < 2)
-                throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: no plate data was found.");
+                throw createParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: no plate data was found.");
             plateSheet = workbook.getSheetAt(1);
         }
         else
@@ -145,8 +141,8 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         {
             Row firstRow = plateSheet.getLastRowNum() >= startRow ? plateSheet.getRow(startRow) : null;
             int colCount = firstRow != null ? firstRow.getLastCellNum() : -1;
-            throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: expected " +
-                    (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " columns, but found "+
+            throw createParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: expected " +
+                    (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " columns, but found " +
                     (plateSheet.getLastRowNum() + 1) + " rows and " + (colCount > 0 ? colCount : "no populated") + " columns.");
         }
 
@@ -154,7 +150,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         {
             Row currentRow = plateSheet.getRow(row + startRow);
             if (null == currentRow)
-                throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: row '" + row + "' is null.");
+                throw createParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: row '" + row + "' is null.");
 
             for (int col = 0; col < nabTemplate.getColumns(); col++)
             {
@@ -168,7 +164,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 }
                 catch (NumberFormatException e)
                 {
-                    throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
+                    throw createParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
                             cell.getStringCellValue() + "' as a number.", e);
                 }
             }
