@@ -1043,26 +1043,13 @@ public abstract class SequestParamsBuilder
 
     public void writeFile(File output) throws SequestParamsException
     {
-        BufferedWriter writer = null;
-        try
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(output)))
         {
-            writer = new BufferedWriter(new FileWriter(output));
             writer.write(getSequestParamsText());
         }
         catch (IOException e)
         {
             throw new SequestParamsException(e);
-        }
-        finally
-        {
-            if (writer != null)
-            {
-                try
-                {
-                    writer.close();
-                }
-                catch (IOException ignored) {}
-            }
         }
     }
 }

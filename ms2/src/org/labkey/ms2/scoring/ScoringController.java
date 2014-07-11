@@ -149,10 +149,9 @@ public class ScoringController extends SpringActionController
                 {
                     XYSeries series = collection.getSeries(i);
                     File tempFile = new File(tempDir, series.getKey() + ".tsv");
-                    FileWriter writer = null;
-                    try
+
+                    try (FileWriter writer = new FileWriter(tempFile))
                     {
-                        writer = new FileWriter(tempFile);
                         for (int point = 0; point < series.getItemCount(); point++)
                         {
                             writer.write(series.getX(point).toString());
@@ -164,14 +163,6 @@ public class ScoringController extends SpringActionController
                     catch (IOException e)
                     {
                         _log.error("Failed to save scoring TSV " + tempFile, e);
-                    }
-                    finally
-                    {
-                        if (writer != null)
-                        {
-                            try { writer.close(); }
-                            catch(Exception e) {}
-                        }
                     }
                 }
             }

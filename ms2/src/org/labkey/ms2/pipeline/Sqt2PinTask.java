@@ -64,18 +64,14 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                 TaskPath decoyListTP = new TaskPath(".decoy.list");
                 File targetListFile = _wd.newWorkFile(WorkDirectory.Function.output, targetListTP, job.getBaseName());
                 File decoyListFile = _wd.newWorkFile(WorkDirectory.Function.output, decoyListTP, job.getBaseName());
-                BufferedWriter targetWriter = null;
-                BufferedWriter decoyWriter = null;
-                try
-                {
-                    targetWriter = new BufferedWriter(new FileWriter(targetListFile));
-                    decoyWriter = new BufferedWriter(new FileWriter(decoyListFile));
 
+                try (BufferedWriter targetWriter = new BufferedWriter(new FileWriter(targetListFile)); BufferedWriter decoyWriter = new BufferedWriter(new FileWriter(decoyListFile)))
+                {
                     FileType targetSQTFileType = new FileType(".sqt");
                     FileType decoySQTFileType = new FileType(".decoy.sqt");
 
                     int index = 1;
-                    for (String inputBaseName :((AbstractFileAnalysisJob)getJob()).getSplitBaseNames())
+                    for (String inputBaseName : ((AbstractFileAnalysisJob) getJob()).getSplitBaseNames())
                     {
                         String targetFileName = targetSQTFileType.getName(job.getAnalysisDirectory(), inputBaseName);
                         targetWriter.write(targetFileName);
@@ -92,11 +88,6 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                         action.addInput(inputDecoyFile, "DecoySQT" + (index == 1 ? "" : Integer.toString(index)));
                         index++;
                     }
-                }
-                finally
-                {
-                    if (targetWriter != null) { try { targetWriter.close(); } catch (IOException ignored) {} }
-                    if (decoyWriter != null) { try { decoyWriter.close(); } catch (IOException ignored) {} }
                 }
 
                 File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");

@@ -437,17 +437,11 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
      */
     private void rewritePepXML(File fileWorkPepXMLRaw, File pepXmlFile, Map<String, String> substitutions) throws PipelineJobException
     {
-        InputStream fIn = null;
-        BufferedReader reader = null;
-        OutputStream fOut = null;
-        BufferedWriter writer = null;
-        try
+        try (InputStream fIn = new FileInputStream(pepXmlFile);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(fIn));
+             OutputStream fOut = new FileOutputStream(fileWorkPepXMLRaw);
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fOut)))
         {
-            fIn = new FileInputStream(pepXmlFile);
-            fOut = new FileOutputStream(fileWorkPepXMLRaw);
-            reader = new BufferedReader(new InputStreamReader(fIn));
-            writer = new BufferedWriter(new OutputStreamWriter(fOut));
-
             String line;
             while ((line = reader.readLine()) != null)
             {
@@ -463,13 +457,6 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         catch (IOException e)
         {
             throw new PipelineJobException(e);
-        }
-        finally
-        {
-            if (reader != null) { try { reader.close(); } catch (IOException ignored) {} }
-            if (writer != null) { try { writer.close(); } catch (IOException ignored) {} }
-            if (fOut != null) { try { fOut.close(); } catch (IOException ignored) {} }
-            if (fIn != null) { try { fIn.close(); } catch (IOException ignored) {} }
         }
 
         if (!pepXmlFile.delete())

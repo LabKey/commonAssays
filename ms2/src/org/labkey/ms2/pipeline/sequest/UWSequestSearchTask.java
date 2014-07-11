@@ -282,7 +282,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 FileUtil.deleteDir(decoyDir);
             }
 
-            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+            try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
             {
                 RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
                 sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
@@ -344,14 +344,9 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         sequestArgs.addAll(_factory.getSequestOptions());
         sequestArgs.add(FileUtil.relativize(workingDir, fileMzXMLWork, false));
         ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
-        Writer writer = new FileWriter(resultsFile);
-        try
+        try (Writer writer = new FileWriter(resultsFile))
         {
             writeParams(writer, paramsFile, getJob().getLogger(), getJob().getSequenceFiles()[0], sequestVersion);
-        }
-        finally
-        {
-            writer.close();
         }
         getJob().runSubProcess(sequestPB, workingDir, resultsFile, 10, true);
         return sequestArgs;
@@ -438,8 +433,8 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         N_prot = N_AA = flag_stat = flag_diff = N_dup = N_rm_pr = 0;
         mdif1 = mdif2 = mdif3 = mstat = ion_cutoff = 0.0f;
         N_rd_fr = N_a = N_b = N_y = N_enz = N_diff_mod = 0;
-        BufferedReader reader = new BufferedReader(new FileReader(paramsFile));
-        try
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(paramsFile)))
         {
             while ((line = reader.readLine()) != null)
             {
@@ -715,8 +710,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             }
             //exit(0);
 
-            BufferedReader fastaReader = new BufferedReader(new FileReader(fastaFile));
-            try
+            try (BufferedReader fastaReader = new BufferedReader(new FileReader(fastaFile)))
             {
                 while ((line = fastaReader.readLine()) != null)
                 {
@@ -726,10 +720,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                         N_AA += line.length() - 1;
                 }
             }
-            finally
-            {
-                fastaReader.close();
-            }
+
             if (0 == ixcorr)
             {
                 writer.write(String.format("%s%s", version, version2));
@@ -766,7 +757,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             // TODO - use real times?
             szDate = DateUtil.formatDateTime(new Date(), "M/d/y, H:mm a");
             writer.write(String.format("H\tStartTime %s\n", szDate));
-    //          strftime(szDate, 22, "%m/%d/%Y, %I:%M %p", localtime(&tEndTime));
+            //          strftime(szDate, 22, "%m/%d/%Y, %I:%M %p", localtime(&tEndTime));
             writer.write(String.format("H\tEndTime %s\n", szDate));
             writer.write(String.format("H\tDatabase\t%s\n", szDbase));
             writer.write(String.format("H\tDBSeqLength\t%d\n", N_AA));
@@ -835,10 +826,6 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
               writer.write(" %s\n", szEnzyme);
             */
         }
-        finally
-        {
-            reader.close();
-        }
     }
 
     private static String getSingleValue(String line)
@@ -848,7 +835,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 
     private static String[] getValues(String line)
     {
-        if (line.indexOf("=") < 0)
+        if (!line.contains("="))
         {
             throw new IllegalArgumentException("No '=' in line: " + line);
         }
@@ -939,8 +926,9 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 
     public static void main(String... args) throws Exception
     {
-        FileWriter writer = new FileWriter("c:/temp/headers.txt");
-        writeParams(writer, new File("c:/temp/sequestProduction.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/149Proteins.fsa"), "2050059");
-        writer.close();
+        try (FileWriter writer = new FileWriter("c:/temp/headers.txt"))
+        {
+            writeParams(writer, new File("c:/temp/sequestProduction.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/149Proteins.fsa"), "2050059");
+        }
     }
 }

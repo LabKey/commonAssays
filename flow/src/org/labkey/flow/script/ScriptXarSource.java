@@ -49,9 +49,11 @@ public class ScriptXarSource extends XarSource
         try
         {
             File xarfile = new File(_workingDirectory, "flow.xar.xml");
-            FileWriter writer = new FileWriter(xarfile);
-            writer.write(doc.toString());
-            writer.close();
+
+            try (FileWriter writer = new FileWriter(xarfile))
+            {
+                writer.write(doc.toString());
+            }
         }
         catch (Exception e)
         {

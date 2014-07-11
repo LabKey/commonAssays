@@ -1279,11 +1279,13 @@ public class AnalysisSerializer
         if (results != null && results.second.size() > 0)
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(STATISTICS_FILENAME);
-            PrintWriter pw = new PrintWriter(statisticsFile);
-            TSVWriter writer = new TSVMapWriter(results.first, results.second);
-            writer.write(pw);
-            pw.flush();
-            pw.close();
+
+            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            {
+                TSVWriter writer = new TSVMapWriter(results.first, results.second);
+                writer.write(pw);
+                pw.flush();
+            }
         }
     }
 
@@ -1383,11 +1385,13 @@ public class AnalysisSerializer
         if (results != null && results.second.size() > 0)
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(KEYWORDS_FILENAME);
-            PrintWriter pw = new PrintWriter(statisticsFile);
-            TSVWriter writer = new TSVMapWriter(results.first, results.second);
-            writer.write(pw);
-            pw.flush();
-            pw.close();
+
+            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            {
+                TSVWriter writer = new TSVMapWriter(results.first, results.second);
+                writer.write(pw);
+                pw.flush();
+            }
         }
     }
 
@@ -1397,7 +1401,7 @@ public class AnalysisSerializer
             return;
 
         List<String> columns = Arrays.asList(CompensationColumnName.Sample.toString(), CompensationColumnName.Path.toString());
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[0]));
+        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
         List<Map<String, Object>> rows = new ArrayList<>();
 
         Map<CompensationMatrix, String> compPaths = new HashMap<>();
@@ -1426,11 +1430,13 @@ public class AnalysisSerializer
         if (rows.size() > 0)
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(COMPENSATION_FILENAME);
-            PrintWriter pw = new PrintWriter(statisticsFile);
-            TSVWriter writer = new TSVMapWriter(columns, rows);
-            writer.write(pw);
-            pw.flush();
-            pw.close();
+
+            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            {
+                TSVWriter writer = new TSVMapWriter(columns, rows);
+                writer.write(pw);
+                pw.flush();
+            }
         }
     }
 
@@ -1529,11 +1535,13 @@ public class AnalysisSerializer
         if (rows.size() > 0)
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(GRAPHS_FILENAME);
-            PrintWriter pw = new PrintWriter(statisticsFile);
-            TSVWriter writer = new TSVMapWriter(columns, rows);
-            writer.write(pw);
-            pw.flush();
-            pw.close();
+
+            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            {
+                TSVWriter writer = new TSVMapWriter(columns, rows);
+                writer.write(pw);
+                pw.flush();
+            }
         }
     }
 

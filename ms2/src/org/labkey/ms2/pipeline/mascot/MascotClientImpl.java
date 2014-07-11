@@ -341,59 +341,72 @@ public class MascotClientImpl implements SearchClient
         }
 
 
-        PrintWriter writer=new PrintWriter(fOut);
-        long offset=0;
-        while (offset<filesize) {
-            String result = downloadDBChunk(db, release, offset, hash, filesize, timestamp);
-            if (result.startsWith("STATUS=OK\n")) {
-                String chunkSize="";
-                int nPos2=0;
-                int nPos1=result.indexOf("SIZE=");
-                if (-1!=nPos1) {
-                    nPos2=result.indexOf("\n",nPos1+1);
-                    if (-1!=nPos2) {
-                        chunkSize = result.substring(nPos1+5, nPos2);
+        try (PrintWriter writer = new PrintWriter(fOut))
+        {
+            long offset = 0;
+            while (offset < filesize)
+            {
+                String result = downloadDBChunk(db, release, offset, hash, filesize, timestamp);
+                if (result.startsWith("STATUS=OK\n"))
+                {
+                    String chunkSize = "";
+                    int nPos2 = 0;
+                    int nPos1 = result.indexOf("SIZE=");
+                    if (-1 != nPos1)
+                    {
+                        nPos2 = result.indexOf("\n", nPos1 + 1);
+                        if (-1 != nPos2)
+                        {
+                            chunkSize = result.substring(nPos1 + 5, nPos2);
+                        }
                     }
+                    if ("".equals(chunkSize))
+                    {
+                        errorCode = 2;
+                        errorString = "Fail to parse chunk size";
+                        break;
+                    }
+
+                    int nBytes = result.length() - (nPos2 + 1);
+                    int numChunkSize = Integer.parseInt(chunkSize);
+                    if (numChunkSize <= nBytes)
+                    {
+                        // we skip the last "\n" which is added by our system
+                        writer.write(result, nPos2 + 1, numChunkSize);
+                        offset += numChunkSize;
+
+                        getLogger().info("Downloaded " + offset + " bytes.");
+
+                    }
+                    else
+                    {
+                        errorCode = 3;
+                        errorString = "Chunk size " + chunkSize + " greater than read size " + nBytes;
+                        break;
+                    }
+
                 }
-                if ("".equals(chunkSize)) {
-                    errorCode = 2;
-                    errorString="Fail to parse chunk size";
+                else
+                {
+                    // there was some problem, we bait out
+                    errorCode = 1;
+                    StringBuffer sb = new StringBuffer();
+                    int nPos1 = result.indexOf("\n");
+                    if (-1 != nPos1)
+                    {
+                        sb.append(result.substring(0, nPos1 - 1));
+                    }
+                    int nPos2 = result.indexOf("\n", nPos1 + 1);
+                    if (-1 != nPos2)
+                    {
+                        if (-1 != nPos1) sb.append(",");
+                        sb.append(result.substring(nPos1 + 1, nPos2 - 1));
+                    }
+                    errorString = sb.toString();
                     break;
                 }
-
-                int nBytes=result.length()-(nPos2+1);
-                int numChunkSize=Integer.parseInt(chunkSize);
-                if (numChunkSize<=nBytes) {
-                    // we skip the last "\n" which is added by our system
-                    writer.write(result, nPos2+1, numChunkSize);
-                    offset+=numChunkSize;
-
-                    getLogger().info("Downloaded "+offset+" bytes.");
-
-                } else {
-                    errorCode = 3;
-                    errorString="Chunk size "+chunkSize+" greater than read size "+nBytes;
-                    break;
-                }
-
-            } else {
-                // there was some problem, we bait out
-                errorCode = 1;
-                StringBuffer sb=new StringBuffer();
-                int nPos1=result.indexOf("\n");
-                if (-1!=nPos1) {
-                    sb.append(result.substring(0, nPos1-1));
-                }
-                int nPos2=result.indexOf("\n",nPos1+1);
-                if (-1!=nPos2) {
-                    if (-1!=nPos1) sb.append(",");
-                    sb.append(result.substring(nPos1+1, nPos2-1));
-                }
-                errorString=sb.toString();
-                break;
             }
         }
-        writer.close();
 
         return errorCode;
     }

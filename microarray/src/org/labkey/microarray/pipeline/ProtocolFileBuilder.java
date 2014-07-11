@@ -56,26 +56,22 @@ public class ProtocolFileBuilder
 
     public void build(File protocolFile, FeatureExtractorTask.Factory factory, Collection<File> images) throws IOException, PipelineJobException
     {
-        String resultsDirectory = protocolFile.getParent();
-        PrintWriter outputWriter = null;
-        Connection conn = null;
         try
         {
-            try
-            {
-                Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
-            }
-            catch (Throwable t)
-            {
-                throw new RuntimeException(t);
-            }
+            Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
+        }
+        catch (Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
 
-            conn = DriverManager.getConnection(factory.getJdbcURL(), factory.getJdbcUser(), factory.getJdbcPassword());
+        String resultsDirectory = protocolFile.getParent();
 
-            outputWriter = new PrintWriter(new FileWriter(protocolFile));
-
+        try (PrintWriter outputWriter = new PrintWriter(new FileWriter(protocolFile)); Connection conn = DriverManager.getConnection(factory.getJdbcURL(), factory.getJdbcUser(), factory.getJdbcPassword()))
+        {
             //Determine extraction sets by finding unique extraction names
             HashSet<String> extractions = new HashSet<>();
+
             for (File image : images)
             {
                 extractions.add(getExtractionName(image));
@@ -106,19 +102,10 @@ public class ProtocolFileBuilder
             outputWriter.println(getFEProjectTagEnd());
             outputWriter.println(getFEMLTagEnd());
             outputWriter.println();
-            outputWriter.close();
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            if (outputWriter != null)
-            {
-                outputWriter.close();
-            }
-            if (conn != null) { try { conn.close(); } catch (SQLException e) {} }
         }
     }
 

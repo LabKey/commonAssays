@@ -296,21 +296,14 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         taxonomyBuffer.append("</bioml>\n");
         String taxonomyText = taxonomyBuffer.toString();
 
-        BufferedWriter taxonomyWriter = null;
-        try
+        try (BufferedWriter taxonomyWriter = new BufferedWriter(new FileWriter(fileTaxonomy)))
         {
-            taxonomyWriter = new BufferedWriter(new FileWriter(fileTaxonomy));
             String[] lines = taxonomyText.split("\n");
             for (String line : lines)
             {
                 taxonomyWriter.write(line);
                 taxonomyWriter.newLine();
             }
-        }
-        finally
-        {
-            if (taxonomyWriter != null)
-                taxonomyWriter.close();
         }
     }
 }

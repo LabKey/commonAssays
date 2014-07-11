@@ -183,10 +183,11 @@ public class PlotTests extends Assert
         sb.append("</body>");
         sb.append("</html>");
 
-        FileWriter writer = new FileWriter(new File(outDir, "index.html"));
-        writer.append(sb.toString());
-        writer.flush();
-        writer.close();
+        try (FileWriter writer = new FileWriter(new File(outDir, "index.html")))
+        {
+            writer.append(sb.toString());
+            writer.flush();
+        }
     }
 
     public void generatePlotsAndCompare(File outDir, File workspaceFile, File fcsFile, File expectedImageDir) throws Exception
