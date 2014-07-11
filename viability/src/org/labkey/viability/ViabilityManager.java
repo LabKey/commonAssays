@@ -262,6 +262,8 @@ public class ViabilityManager
         DbScope scope = schema.getDbSchema().getScope();
 
         SQLFragment specimenAggregates = specimenAggregates(schema, run);
+        if (null == specimenAggregates)
+            return;
 
         // Create temp table with specimen aggregate results
         String shortName = "VaibilitySpecimenAgg_" + protocol.getRowId();
@@ -372,7 +374,8 @@ public class ViabilityManager
         }
     }
 
-    public static SQLFragment specimenAggregates(ViabilityAssaySchema schema, ExpRun run)
+    @Nullable
+    private static SQLFragment specimenAggregates(ViabilityAssaySchema schema, ExpRun run)
     {
         ViabilityAssaySchema.ResultSpecimensTable rs = schema.createResultSpecimensTable();
         rs.setContainerFilter(ContainerFilter.EVERYTHING);
@@ -391,6 +394,9 @@ public class ViabilityManager
         fields.add(FieldKey.fromParts("ResultID", AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME));
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
+
+        if (!columnMap.containsKey(resultId) || !columnMap.containsKey(volume) || !columnMap.containsKey(specimenId) || !columnMap.containsKey(globalUniqueId))
+            return null;
 
         SimpleFilter filter = new SimpleFilter();
         if (run != null)
