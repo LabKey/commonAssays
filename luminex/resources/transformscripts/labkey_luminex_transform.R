@@ -44,6 +44,8 @@ source("${srcDirectory}/youtil.R");
 suppressMessages(library(Ruminex));
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
+rVersion = paste(R.version$major, R.version$minor, R.version$arch, sep=".");
+
 ########################################## FUNCTIONS ##########################################
 
 getCurveFitInputCol <- function(runProps, fiRunCol, defaultFiCol)
@@ -259,7 +261,8 @@ bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "f
 runprop.output.file = getRunPropertyValue("transformedRunPropertiesFile");
 fileConn<-file(runprop.output.file);
 writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
-    paste("RuminexVersion",ruminexVersion,sep="\t")), fileConn);
+    paste("RuminexVersion",ruminexVersion,sep="\t"),
+    paste("RVersion",rVersion,sep="\t")), fileConn);
 close(fileConn);
 
 ################################# STEP 2: BLANK BEAD SUBTRACTION ################################

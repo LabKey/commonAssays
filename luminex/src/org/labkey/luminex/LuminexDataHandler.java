@@ -696,13 +696,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Insert mappings for all of the titrations that aren't standards
         for (Titration titration : titrations.values())
         {
-            if (!titration.isStandard() && titration.isQcControl())
+            if (!titration.isStandard() && (titration.isQcControl() || titration.isUnknown()))
             {
-                insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
-            }
-            else if (!titration.isStandard() && titration.isUnknown())
-            {
-                insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, unkCurveFitInput, protocol);
+                String curveFitInput = titration.isUnknown() ? unkCurveFitInput : stndCurveFitInput;
+                insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, curveFitInput, protocol);
             }
         }
 
