@@ -60,15 +60,24 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%!
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("Ext3"));
+        resources.add(ClientDependency.fromFilePath("Flow/util.js"));
+        resources.add(ClientDependency.fromFilePath("TreeGrid.js"));
+        return resources;
+    }
+%>
 <style type="text/css">
     .right {text-align:right;}
 </style>
-<script type="text/javascript" src="<%=getContextPath()%>/Flow/util.js"></script>
 <script type="text/javascript">
-LABKEY.requiresClientAPI(true);
-LABKEY.requiresScript("TreeGrid.js");
 Ext.QuickTips.init();
 </script>
 <%

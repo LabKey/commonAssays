@@ -57,6 +57,7 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowStatus;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
@@ -133,7 +134,6 @@ public class FlowController extends BaseFlowController
     {
         String query;
         FlowExperiment experiment;
-//        FlowScript script;
         FlowRun run;
 
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -255,7 +255,10 @@ public class FlowController extends BaseFlowController
                     helper.replaceParameter("refresh", Integer.toString(refresh));
                     getViewContext().getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
                 }
-                return new JobStatusView(psf, findJob(form.getStatusFile()));
+                FlowStatus status = new FlowStatus();
+                status.setPipelineStatusFile(psf);
+                status.setJob(findJob(form.getStatusFile()));
+                return new JobStatusView(status);
             }
         }
 

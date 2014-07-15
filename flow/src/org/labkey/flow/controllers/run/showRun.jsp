@@ -43,8 +43,19 @@
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%!
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        // TODO: --Ext3-- This should be declared as part of the included views
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
+        return resources;
+    }
+%>
 <%
     RunForm form = (RunForm) HttpView.currentModel();
     ViewContext context = getViewContext();

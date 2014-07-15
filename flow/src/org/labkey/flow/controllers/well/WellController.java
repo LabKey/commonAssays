@@ -142,7 +142,9 @@ public class WellController extends BaseFlowController
         {
             Page page = getPage("showWell.jsp");
             well = page.getWell();
-            return new JspView(page);
+            JspView v = new JspView(page);
+            v.setClientDependencies(page.getClientDependencies());
+            return v;
         }
 
         public NavTree appendNavTrail(NavTree root)

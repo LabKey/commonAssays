@@ -30,8 +30,19 @@
 <%@ page import="org.labkey.flow.query.FlowSchema" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%!
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        // TODO: --Ext3-- This should be declared as part of the included views
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
+        return resources;
+    }
+%>
 <%
     final FlowScript script = (FlowScript)getModelBean();
     ViewContext context = getViewContext();
