@@ -32,9 +32,10 @@
 #  - 7.1.20140526 : Issue 20457: Negative blank bead subtraction results in FI-Bkgd-Blank greater than FI-Bkgd
 #  - 8.0.20140509 : Changes for LabKey server 14.2: add run property to allow calc. of 4PL EC50 and AUC on upload without running Ruminex (see SkipRumiCalculation below)
 #  - 8.1.20140612 : Issue 20316: Rumi estimated concentrations not calculated for unselected titrated unknowns in subclass assay case
+#  - 9.0.20140716 : Changes for LabKey server 14.3: add Other Control type for titrations
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "8.1.20140612";
+transformVersion = "9.0.20140716";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -44,7 +45,7 @@ source("${srcDirectory}/youtil.R");
 suppressMessages(library(Ruminex));
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
-rVersion = paste(R.version$major, R.version$minor, R.version$arch, sep=".");
+rVersion = paste(R.version$major, R.version$minor, R.version$arch, R.version$os, sep=".");
 
 ########################################## FUNCTIONS ##########################################
 
@@ -142,6 +143,7 @@ populateTitrationData <- function(rundata, titrationdata)
     rundata$isStandard = FALSE;
     rundata$isQCControl = FALSE;
     rundata$isUnknown = FALSE;
+    rundata$isOtherControl = FALSE;
 
     # apply the titration data to the rundata object
     if (nrow(titrationdata) > 0)
@@ -151,11 +153,12 @@ populateTitrationData <- function(rundata, titrationdata)
             titrationName = as.character(titrationdata[tIndex,]$Name);
             rundata$isStandard[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$Standard == "true");
             rundata$isQCControl[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$QCControl == "true");
+            rundata$isOtherControl[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$OtherControl == "true");
         }
     }
 
     # Issue 20316: incorrectly labeling unselected titrated unknowns as not "isUnknown"
-    rundata$isUnknown[(is.na(rundata$isStandard) & is.na(rundata$isQCControl)) | (!rundata$isStandard & !rundata$isQCControl)] = TRUE;
+    rundata$isUnknown[(is.na(rundata$isStandard) & is.na(rundata$isQCControl) & is.na(rundata$isOtherControl)) | (!rundata$isStandard & !rundata$isQCControl & !rundata$isOtherControl)] = TRUE;
 
     rundata
 }
@@ -174,7 +177,7 @@ populateBlankBeadSubtraction <- function(rundata)
         # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
         blanks = regexpr("^blank", rundata$name, ignore.case=TRUE) > -1;
         nonBlanks = regexpr("^blank", rundata$name, ignore.case=TRUE) == -1;
-        unks = (is.na(rundata$isStandard) & is.na(rundata$isQCControl)) | (!rundata$isStandard & !rundata$isQCControl);
+        unks = (is.na(rundata$isStandard) & is.na(rundata$isQCControl) & is.na(rundata$isOtherControl)) | (!rundata$isStandard & !rundata$isQCControl & !rundata$isOtherControl);
 
         # read the run property from user to determine if we are to only blank bead subtract from unks
         unksOnly = TRUE;
@@ -310,6 +313,7 @@ if (nrow(titration.data) > 0)
   {
     if (titration.data[tIndex,]$Standard == "true" |
         titration.data[tIndex,]$QCControl == "true" |
+        titration.data[tIndex,]$OtherControl == "true" |
         titration.data[tIndex,]$Unknown == "true")
     {
        titrationName = as.character(titration.data[tIndex,]$Name);
@@ -331,7 +335,7 @@ if (nrow(titration.data) > 0)
             dat = subset(run.data, description == titrationName & name == analyteName);
 
             yLabel = "";
-            if (titration.data[tIndex,]$Standard == "true" | titration.data[tIndex,]$QCControl == "true") {
+            if (titration.data[tIndex,]$Standard == "true" | titration.data[tIndex,]$QCControl == "true" | titration.data[tIndex,]$OtherControl == "true") {
                 # choose the FI column for standards and qc controls based on the run property provided by the user, default to the FI-Bkgd value
                 if (any(run.props$name == "StndCurveFitInput"))
                 {
@@ -564,7 +568,7 @@ if (runRumiCalculation)
     standards = setdiff(unique(run.data$Standard), c(NA, ""));
 
     # setup the dataframe needed for the call to rumi
-    dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded", "isStandard", "isQCControl", "isUnknown"));
+    dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded", "isStandard", "isQCControl", "isOtherControl", "isUnknown"));
 
     # if both raw and summary data are available, just use the raw data for the calc
     if (bothRawAndSummary) {
@@ -592,6 +596,7 @@ if (runRumiCalculation)
             fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fi")
             dat$fi[dat$isStandard] = dat[dat$isStandard, fiCol]
             dat$fi[dat$isQCControl] = dat[dat$isQCControl, fiCol]
+            dat$fi[dat$isOtherControl] = dat[dat$isOtherControl, fiCol]
         }
 
         # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value

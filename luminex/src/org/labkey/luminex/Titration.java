@@ -28,6 +28,7 @@ public class Titration extends AbstractLuminexControl
     private boolean _standard;
     private boolean _qcControl;
     private boolean _unknown;
+    private boolean _otherControl;
     private double _maxFI;
 
     public Titration()
@@ -66,6 +67,16 @@ public class Titration extends AbstractLuminexControl
         _unknown = unknown;
     }
 
+    public boolean isOtherControl()
+    {
+        return _otherControl;
+    }
+
+    public void setOtherControl(boolean otherControl)
+    {
+        _otherControl = otherControl;
+    }
+
     public boolean isUnknown()
     {
         return _unknown;
@@ -73,7 +84,7 @@ public class Titration extends AbstractLuminexControl
 
     public boolean hasRole()
     {
-        return _standard || _qcControl || _unknown;
+        return _standard || _qcControl || _unknown || _otherControl;
     }
 
     public double getMaxFI()
@@ -144,6 +155,19 @@ public class Titration extends AbstractLuminexControl
             public void setEnabled(Titration titration, boolean enabled)
             {
                 titration.setUnknown(enabled);
+            }
+        },
+        othercontrol
+        {
+            @Override
+            public boolean isEnabled(Titration titration)
+            {
+                return titration.isOtherControl();
+            }
+            @Override
+            public void setEnabled(Titration titration, boolean enabled)
+            {
+                titration.setOtherControl(enabled);
             }
         };
 

@@ -112,6 +112,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             logger.info("\t\t*Standard:  " + titration.isStandard());
             logger.info("\t\t*QC Control:  " + titration.isQcControl());
             logger.info("\t\t*Unknown:  " + titration.isUnknown());
+            logger.info("\t\t*Other Control:  " + titration.isOtherControl());
         }
         for (SinglePointControl singlePointControl : _singlePointControls)
         {

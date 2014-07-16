@@ -57,6 +57,7 @@
                 <td>&nbsp;</td>
                 <td class="labkey-form-label">Standard</td>
                 <td class="labkey-form-label">QC Control</td>
+                <td class="labkey-form-label">Other Control</td>
             </tr>
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
@@ -70,6 +71,10 @@
                 </td>
                 <td>
                     <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
+                           value='1' onClick='titrationRoleChecked(this);' />
+                </td>
+                <td>
+                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);' />
                 </td>
             </tr>

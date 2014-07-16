@@ -75,6 +75,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
             titrationRow.put("QCControl", titration.isQcControl());
             titrationRow.put("Standard", titration.isStandard());
             titrationRow.put("Unknown", titration.isUnknown());
+            titrationRow.put("OtherControl", titration.isOtherControl());
             titrations.add(titrationRow);
         }
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);

@@ -432,6 +432,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         {
                             roles.add("QC Control");
                         }
+                        if (titration.isOtherControl())
+                        {
+                            roles.add("Other Control");
+                        }
                         if (!roles.isEmpty())
                         {
                             dataRow.setWellRole(StringUtils.join(roles, ", "));
@@ -696,7 +700,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Insert mappings for all of the titrations that aren't standards
         for (Titration titration : titrations.values())
         {
-            if (!titration.isStandard() && (titration.isQcControl() || titration.isUnknown()))
+            if (!titration.isStandard() && (titration.isQcControl() || titration.isUnknown() || titration.isOtherControl()))
             {
                 String curveFitInput = titration.isUnknown() ? unkCurveFitInput : stndCurveFitInput;
                 insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, curveFitInput, protocol);

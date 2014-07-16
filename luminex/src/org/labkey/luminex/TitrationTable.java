@@ -48,6 +48,7 @@ public class TitrationTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("Standard")));
         addColumn(wrapColumn(getRealTable().getColumn("QCControl")));
         addColumn(wrapColumn(getRealTable().getColumn("Unknown")));
+        addColumn(wrapColumn(getRealTable().getColumn("OtherControl")));
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
         QueryForeignKey runFk = new QueryForeignKey(schema, null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name");
         runColumn.setFk(runFk);
