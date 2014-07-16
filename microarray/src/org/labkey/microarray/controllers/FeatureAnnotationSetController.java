@@ -49,6 +49,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DetailsView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.WebPartView;
@@ -266,6 +267,10 @@ public class FeatureAnnotationSetController extends SpringActionController
         @Override
         public ModelAndView getView(FeatureAnnotationSetForm form, BindException errors) throws Exception
         {
+            Integer rowId = form.getRowId();
+            if (rowId == null)
+                throw new NotFoundException("Feature annotation set rowId required");
+
             DataRegion dr = new DataRegion();
             DetailsView dv = new DetailsView(dr, form.getRowId());
             MicroarrayUserSchema schema = new MicroarrayUserSchema(getUser(), getContainer());
