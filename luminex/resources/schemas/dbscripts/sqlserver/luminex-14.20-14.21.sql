@@ -15,5 +15,6 @@
  */
 
 ALTER TABLE luminex.Titration ADD OtherControl BIT;
+GO
 UPDATE luminex.Titration SET OtherControl=0;
 ALTER TABLE luminex.Titration ALTER COLUMN OtherControl BIT NOT NULL;
