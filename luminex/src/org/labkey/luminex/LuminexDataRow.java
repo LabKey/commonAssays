@@ -16,7 +16,6 @@
 
 package org.labkey.luminex;
 
-import org.apache.commons.beanutils.ConvertUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
@@ -53,7 +52,7 @@ public class LuminexDataRow
     private String _fiBackgroundString;
     private Double _fiBackground;
     private String _fiBackgroundOORIndicator;
-    private Double _fiBackgroundBlank;
+    private Double _fiBackgroundNegative;
     private String _stdDevString;
     private Double _stdDev;
     private String _stdDevOORIndicator;
@@ -193,14 +192,14 @@ public class LuminexDataRow
         _fiBackground = fiBackground;
     }
 
-    public Double getFiBackgroundBlank()
+    public Double getFiBackgroundNegative()
     {
-        return _fiBackgroundBlank;
+        return _fiBackgroundNegative;
     }
 
-    public void setFiBackgroundBlank(Double fiBackgroundBlank)
+    public void setFiBackgroundNegative(Double fiBackgroundNegative)
     {
-        _fiBackgroundBlank = fiBackgroundBlank;
+        _fiBackgroundNegative = fiBackgroundNegative;
     }
 
     public Double getStdDev()

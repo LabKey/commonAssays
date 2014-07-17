@@ -458,7 +458,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     },
 
     onNumberFieldChange : function(field) {
-        // issue 20152: don't allow std dev is average is blank
+        // issue 20152: don't allow std dev if average is blank
         if (field.getName().indexOf("Average") > -1)
         {
             var avgFieldName = field.getName().replace("Average", "StdDev");
@@ -523,7 +523,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             Ext.each(this.metrics, function(metric){
                 if (this.isTitrationControlType() || metric.includeForSinglePointControl)
                 {
-                    // issue 20152: don't allow std dev is average is blank
+                    // issue 20152: don't allow std dev if average is blank
                     var stdDevField = this.createNumberField(metric.name + 'StdDev');
                     var avgFieldVal = this.getMetricMeanValuesPanel().getComponent(metric.name + 'Average').getValue();
                     this.updateStdDevField(stdDevField, avgFieldVal);

@@ -5,8 +5,8 @@
 #
 # Transform script for Luminex Assay.
 #
-# First, the script subtracts the FI-Bkgd value for the blank bead from the FI-Bkgd value
-# for the other analytes within a given run data file. It also converts FI -Bkgd and FI -Bkgd - Blank
+# First, the script subtracts the FI-Bkgd value for the negative bead from the FI-Bkgd value
+# for the other analytes within a given run data file. It also converts FI-Bkgd and FI-Bkgd-Neg
 # values that are <= 0 to 1 (as per the lab's request).
 #
 # Next, the script calculates curve fit parameters for each titration/analyte combination using both
@@ -33,9 +33,10 @@
 #  - 8.0.20140509 : Changes for LabKey server 14.2: add run property to allow calc. of 4PL EC50 and AUC on upload without running Ruminex (see SkipRumiCalculation below)
 #  - 8.1.20140612 : Issue 20316: Rumi estimated concentrations not calculated for unselected titrated unknowns in subclass assay case
 #  - 9.0.20140716 : Changes for LabKey server 14.3: add Other Control type for titrations
+#  - 9.1.20140718 : Allow use of alternate negative control bead on per-analyte basis (FI-Bkgd-Neg instead of FI-Bkgd-Blank)
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "9.0.20140716";
+transformVersion = "9.1.20140718";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -56,8 +57,8 @@ getCurveFitInputCol <- function(runProps, fiRunCol, defaultFiCol)
         runCol = "fi"
     } else if (runCol == "FI-Bkgd") {
     	runCol = "fiBackground"
-    } else if (runCol == "FI-Bkgd-Blank") {
-    	runCol = "fiBackgroundBlank"
+    } else if (runCol == "FI-Bkgd-Blank" | runCol == "FI-Bkgd-Neg") {
+    	runCol = "FIBackgroundNegative"
     } else {
         runCol = defaultFiCol
     }
@@ -71,8 +72,8 @@ getFiDisplayName <- function(fiCol)
         displayVal = "FI"
     } else if (fiCol == "fiBackground") {
         displayVal = "FI-Bkgd"
-    } else if (fiCol == "fiBackgroundBlank") {
-        displayVal = "FI-Bkgd-Blank"
+    } else if (fiCol == "FIBackgroundNegative") {
+        displayVal = "FI-Bkgd-Neg"
     }
     displayVal;
 }
@@ -164,10 +165,10 @@ populateTitrationData <- function(rundata, titrationdata)
     rundata
 }
 
-populateBlankBeadSubtraction <- function(rundata)
+populateNegativeBeadSubtraction <- function(rundata)
 {
-    # initialize the FI - Bkgd - Blank variable
-    rundata$fiBackgroundBlank = NA;
+    # initialize the FI-Bkgd-Neg variable
+    rundata$FIBackgroundNegative = NA;
 
     # get the unique analyte values
     analytes = unique(rundata$name);
@@ -175,24 +176,24 @@ populateBlankBeadSubtraction <- function(rundata)
     # if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
     if (any(regexpr("^blank", analytes, ignore.case=TRUE) > -1))
     {
-        # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
-        blanks = regexpr("^blank", rundata$name, ignore.case=TRUE) > -1;
-        nonBlanks = regexpr("^blank", rundata$name, ignore.case=TRUE) == -1;
+        # store a boolean vector of negControls, nonNegControls, and unknowns (i.e. non-standards)
+        negControls = regexpr("^blank", rundata$name, ignore.case=TRUE) > -1;
+        nonNegControls = regexpr("^blank", rundata$name, ignore.case=TRUE) == -1;
         unks = !(rundata$isStandard | rundata$isQCControl | rundata$isOtherControl);
 
-        # read the run property from user to determine if we are to only blank bead subtract from unks
+        # read the run property from user to determine if we are to only negative bead subtract from unks
         unksOnly = TRUE;
-        if (any(run.props$name == "SubtBlankFromAll"))
+        if (any(run.props$name == "SubtNegativeFromAll"))
         {
-            if (getRunPropertyValue("SubtBlankFromAll") == "1")
+            if (getRunPropertyValue("SubtNegativeFromAll") == "1")
             {
                 unksOnly = FALSE;
             }
         }
 
-        # loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
-        blankdata = rundata[blanks,];
-        combos = unique(subset(blankdata, select=c("dataFile", "description", "dilution", "expConc")));
+        # loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean negative control fiBackground from the fiBackground
+        negControlData = rundata[negControls,];
+        combos = unique(subset(negControlData, select=c("dataFile", "description", "dilution", "expConc")));
 
         for (index in 1:nrow(combos))
         {
@@ -208,15 +209,15 @@ populateBlankBeadSubtraction <- function(rundata)
                 combo = rundata$dataFile == dataFile & rundata$description == description & rundata$dilution == dilution & is.na(rundata$expConc);
             }
 
-            # get the mean blank bead FI-Bkgrd values for the given description/dilution
-            # issue 20457: convert negative blank mean to zero to prevent subtracting a negative
-            blankmean = max(mean(rundata$fiBackground[blanks & combo]), 0);
+            # get the mean negative bead FI-Bkgrd values for the given description/dilution
+            # issue 20457: convert negative "negative control" mean to zero to prevent subtracting a negative
+            negControlMean = max(mean(rundata$fiBackground[negControls & combo]), 0);
 
-            # calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
+            # calc the FIBackgroundNegative for all of the non-"Negative Control" analytes for this combo
             if (unksOnly) {
-                rundata$fiBackgroundBlank[unks & nonBlanks & combo] = rundata$fiBackground[unks & nonBlanks & combo] - blankmean;
+                rundata$FIBackgroundNegative[unks & nonNegControls & combo] = rundata$fiBackground[unks & nonNegControls & combo] - negControlMean;
             } else{
-                rundata$fiBackgroundBlank[nonBlanks & combo] = rundata$fiBackground[nonBlanks & combo] - blankmean;
+                rundata$FIBackgroundNegative[nonNegControls & combo] = rundata$fiBackground[nonNegControls & combo] - negControlMean;
             }
         }
     }
@@ -269,9 +270,9 @@ writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
     paste("RVersion",rVersion,sep="\t")), fileConn);
 close(fileConn);
 
-################################# STEP 2: BLANK BEAD SUBTRACTION ################################
+################################# STEP 2: NEGATIVE BEAD SUBTRACTION ################################
 
-run.data <- populateBlankBeadSubtraction(run.data);
+run.data <- populateNegativeBeadSubtraction(run.data);
 
 ################################## STEP 3: TITRATION CURVE FIT #################################
 
@@ -571,7 +572,7 @@ if (runRumiCalculation)
     standards = setdiff(unique(run.data$Standard), c(NA, ""));
 
     # setup the dataframe needed for the call to rumi
-    dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded", "isStandard", "isQCControl", "isOtherControl", "isUnknown"));
+    dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "FIBackgroundNegative", "dilution", "well_role", "summary", "FlaggedAsExcluded", "isStandard", "isQCControl", "isOtherControl", "isUnknown"));
 
     # if both raw and summary data are available, just use the raw data for the calc
     if (bothRawAndSummary) {

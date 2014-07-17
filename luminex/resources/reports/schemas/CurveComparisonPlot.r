@@ -29,7 +29,7 @@ if (is.null(labkey.url.params$Titration)){
 
 # create a list of the columns that are needed for the comparison plot
 colSelect = paste("Data/Run", "Data/Run/NotebookNo", "Analyte/Name", "Titration/Name", "Type", "Data/Run/StndCurveFitInput",
-                "FI", "FIBackground", "fiBackgroundBlank", "Dilution", "ExpConc",
+                "FI", "FIBackground", "FIBackgroundNegative", "Dilution", "ExpConc",
                 "AnalyteTitration/Four ParameterCurveFit/MinAsymptote", "AnalyteTitration/Four ParameterCurveFit/MaxAsymptote",
                 "AnalyteTitration/Four ParameterCurveFit/Inflection", "AnalyteTitration/Four ParameterCurveFit/Slope", sep=",");
 
@@ -87,8 +87,8 @@ for (index in 1:nrow(runs))
         runsData$fi[runIndices] = labkey.data$fibackground[runIndices];
         if (fiCol == "FI") {
             runsData$fi[runIndices] = labkey.data$fi[runIndices];
-        } else if (fiCol == "FI-Bkgd-Blank") {
-            runsData$fi[runIndices] = labkey.data$fibackgroundblank[runIndices];
+        } else if (fiCol == "FI-Bkgd-Blank" | fiCol == "FI-Bkgd-Neg") {
+            runsData$fi[runIndices] = labkey.data$fibackgroundnegative[runIndices];
         }
 
         # set the x-axis values (dose) based on the titration type (default: dilution)

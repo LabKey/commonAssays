@@ -84,8 +84,8 @@ public class LuminexWellGroup implements WellGroup
             int countFi = 0;
             double sumFiBackground = 0;
             int countFiBackground = 0;
-            double sumFiBackgroundBlank = 0;
-            int countFiBackgroundBlank = 0;
+            double sumFiBackgroundNegative = 0;
+            int countFiBackgroundNegative = 0;
             Double cv = null;
             String wellRole = null;
             boolean excluded = false;
@@ -106,12 +106,12 @@ public class LuminexWellGroup implements WellGroup
                     countFiBackground++;
                 }
 
-                Object fbb = well.getDataRow().getExtraProperties().get("fiBackgroundBlank");
+                Object fbb = well.getDataRow().getExtraProperties().get("FIBackgroundNegative");
                 if (fbb != null)
                 {
                     value = Double.parseDouble(fbb.toString());
-                    sumFiBackgroundBlank += value.doubleValue();
-                    countFiBackgroundBlank++;
+                    sumFiBackgroundNegative += value.doubleValue();
+                    countFiBackgroundNegative++;
                 }
 
                 cv = well.getDataRow().getCv();
@@ -129,8 +129,8 @@ public class LuminexWellGroup implements WellGroup
                 fakeDataRow.setFi(sumFi / countFi);
             if (countFiBackground > 0)
                 fakeDataRow.setFiBackground(sumFiBackground / countFiBackground);
-            if (countFiBackgroundBlank > 0)
-                fakeDataRow.setFiBackgroundBlank(sumFiBackgroundBlank / countFiBackgroundBlank);
+            if (countFiBackgroundNegative > 0)
+                fakeDataRow.setFiBackgroundNegative(sumFiBackgroundNegative / countFiBackgroundNegative);
             fakeDataRow.setType(entry.getKey().getType());
             fakeDataRow.setExcluded(excluded);
             fakeDataRow.setCv(cv);

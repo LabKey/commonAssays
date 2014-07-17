@@ -83,8 +83,8 @@ public class LuminexWell implements WellData, Comparable<LuminexWell>
         {
             if (curveFitInput.equals("FI"))
                 return _dataRow.getFi();
-            else if (curveFitInput.equals("FI-Bkgd-Blank"))
-                return _dataRow.getFiBackgroundBlank();
+            else if (curveFitInput.equals("FI-Bkgd-Blank") || curveFitInput.equals("FI-Bkgd-Neg"))
+                return _dataRow.getFiBackgroundNegative();
             else
                 return _dataRow.getFiBackground();
         }

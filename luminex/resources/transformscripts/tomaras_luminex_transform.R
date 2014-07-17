@@ -8,7 +8,7 @@
 # This script is for Tomaras lab specific calculations and uses the output from the labkey_luminex_transform.R script.
 #
 # The script calculates positivity of samples by comparing 3x or 5x fold change of the baseline visit
-# FI-Bkgd and FI-Bkgd-Blank values with other visits.
+# FI-Bkgd and FI-Bkgd-Neg values with other visits.
 #
 # CHANGES :
 #  - 1.0.20140228 : Move positivity calculation part of script out of labkey_luminex
@@ -162,17 +162,17 @@ getVisitsFIAggData <- function(rundata, fidata, analyteVal, participantVal)
     getVisitsByMinDilution(visitDiliutionFIAgg);
 }
 
-determineIndividualPositivityValue <- function(visitsFIagg, index, threshold, baseVisitFiBkgd, baseVisitFiBkgdBlank, foldchange)
+determineIndividualPositivityValue <- function(visitsFIagg, index, threshold, baseVisitFiBkgd, baseVisitFiBkgdNegative, foldchange)
 {
     val = NA;
 
-    if (!is.na(visitsFIagg$fiBackground[index]) & !is.na(visitsFIagg$fiBackgroundBlank[index]))
+    if (!is.na(visitsFIagg$fiBackground[index]) & !is.na(visitsFIagg$FIBackgroundNegative[index]))
     {
-        # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
-        if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
+        # if the FI-Bkgd and FI-Bkgd-Neg values are greater than the baseline visit value * fold change, consider them positive
+        if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdNegative))
         {
             if ((visitsFIagg$fiBackground[index] > threshold) & (visitsFIagg$fiBackground[index] > (baseVisitFiBkgd * as.numeric(foldchange))) &
-                (visitsFIagg$fiBackgroundBlank[index] > threshold) & (visitsFIagg$fiBackgroundBlank[index] > (baseVisitFiBkgdBlank * as.numeric(foldchange))))
+                (visitsFIagg$FIBackgroundNegative[index] > threshold) & (visitsFIagg$FIBackgroundNegative[index] > (baseVisitFiBkgdNegative * as.numeric(foldchange))))
             {
                 val = "positive"
             } else
@@ -181,8 +181,8 @@ determineIndividualPositivityValue <- function(visitsFIagg, index, threshold, ba
             }
         } else
         {
-            # since there is no baseline data for this participant, compare each visit FI-Bkgd and FI-Bkgd-Blank values against the threshold
-            if (visitsFIagg$fiBackground[index] > threshold & visitsFIagg$fiBackgroundBlank[index] > threshold)
+            # since there is no baseline data for this participant, compare each visit FI-Bkgd and FI-Bkgd-Neg values against the threshold
+            if (visitsFIagg$fiBackground[index] > threshold & visitsFIagg$FIBackgroundNegative[index] > threshold)
             {
                 val = "positive"
             } else
@@ -247,7 +247,7 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
 
     if (!is.na(threshold) & !negativeControl)
     {
-        fidata = subset(rundata, name == analyteVal & participantID == participantVal & !is.na(visitID) & !is.na(dilution), select=c("fiBackground", "fiBackgroundBlank"));
+        fidata = subset(rundata, name == analyteVal & participantID == participantVal & !is.na(visitID) & !is.na(dilution), select=c("fiBackground", "FIBackgroundNegative"));
         if (nrow(fidata) > 0)
         {
             visitsFIagg = getVisitsFIAggData(rundata, fidata, analyteVal, participantVal);
@@ -256,13 +256,13 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
             {
                 baseVisitFiBkgd = getBaselineVisitFiValue("fiBackground", visitsFIagg, baselinedata, basevisit);
 
-                # Issue 20548 : Don't need to get baseline value for Fi-Bkgd-Blank if no baseline for FI-Bkgd
-                baseVisitFiBkgdBlank = NA;
+                # Issue 20548 : Don't need to get baseline value for Fi-Bkgd-Neg if no baseline for FI-Bkgd
+                baseVisitFiBkgdNegative = NA;
                 if (!is.na(baseVisitFiBkgd)) {
-                    baseVisitFiBkgdBlank = getBaselineVisitFiValue("fiBackgroundBlank", visitsFIagg, baselinedata, basevisit);
+                    baseVisitFiBkgdNegative = getBaselineVisitFiValue("FIBackgroundNegative", visitsFIagg, baselinedata, basevisit);
                 }
 
-                if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
+                if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdNegative))
                 {
                     for (v in 1:nrow(visitsFIagg))
                     {
@@ -271,7 +271,7 @@ calculatePositivityForAnalytePtid <- function(rundata, analytedata, baselinedata
                         {
                             # issue 20458: drop dilution from runDataIndex comparison
                             runDataIndex = rundata$name == visitsFIagg$analyte[v] & rundata$participantID == visitsFIagg$ptid[v] & rundata$visitID == visitsFIagg$visit[v];
-                            rundata$Positivity[runDataIndex] = determineIndividualPositivityValue(visitsFIagg, v, threshold, baseVisitFiBkgd, baseVisitFiBkgdBlank, foldchange);
+                            rundata$Positivity[runDataIndex] = determineIndividualPositivityValue(visitsFIagg, v, threshold, baseVisitFiBkgd, baseVisitFiBkgdNegative, foldchange);
                         }
                     }
                 }
@@ -313,7 +313,7 @@ queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit)
                             "AND Data.Analyte.Name IN (",analyteList,")");
 
         sql = paste("SELECT Data.Analyte.Name AS Analyte, Data.ParticipantID, Data.VisitID, Data.Dilution, ",
-                    "AVG(Data.FIBackground) AS FIBackground, AVG(Data.FIBackgroundBlank) AS FIBackgroundBlank, ",
+                    "AVG(Data.FIBackground) AS FIBackground, AVG(Data.FIBackgroundNegative) AS FIBackgroundNegative, ",
                     "COUNT(DISTINCT Data.Data) AS DataIdCount ",
                     "FROM Data WHERE ", whereClause,
                     "GROUP BY Analyte.Name, ParticipantID, VisitID, Dilution");
