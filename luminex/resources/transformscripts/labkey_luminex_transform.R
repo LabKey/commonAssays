@@ -151,14 +151,15 @@ populateTitrationData <- function(rundata, titrationdata)
         for (tIndex in 1:nrow(titrationdata))
         {
             titrationName = as.character(titrationdata[tIndex,]$Name);
-            rundata$isStandard[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$Standard == "true");
-            rundata$isQCControl[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$QCControl == "true");
-            rundata$isOtherControl[rundata$titration == "true" & rundata$description == titrationName] = (titrationdata[tIndex,]$OtherControl == "true");
+            titrationRows = rundata$titration == "true" & rundata$description == titrationName;
+            rundata$isStandard[titrationRows] = (titrationdata[tIndex,]$Standard == "true");
+            rundata$isQCControl[titrationRows] = (titrationdata[tIndex,]$QCControl == "true");
+            rundata$isOtherControl[titrationRows] = (titrationdata[tIndex,]$OtherControl == "true");
         }
     }
 
     # Issue 20316: incorrectly labeling unselected titrated unknowns as not "isUnknown"
-    rundata$isUnknown[(is.na(rundata$isStandard) & is.na(rundata$isQCControl) & is.na(rundata$isOtherControl)) | (!rundata$isStandard & !rundata$isQCControl & !rundata$isOtherControl)] = TRUE;
+    rundata$isUnknown[!(rundata$isStandard | rundata$isQCControl | rundata$isOtherControl)] = TRUE;
 
     rundata
 }
@@ -177,7 +178,7 @@ populateBlankBeadSubtraction <- function(rundata)
         # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
         blanks = regexpr("^blank", rundata$name, ignore.case=TRUE) > -1;
         nonBlanks = regexpr("^blank", rundata$name, ignore.case=TRUE) == -1;
-        unks = (is.na(rundata$isStandard) & is.na(rundata$isQCControl) & is.na(rundata$isOtherControl)) | (!rundata$isStandard & !rundata$isQCControl & !rundata$isOtherControl);
+        unks = !(rundata$isStandard | rundata$isQCControl | rundata$isOtherControl);
 
         # read the run property from user to determine if we are to only blank bead subtract from unks
         unksOnly = TRUE;
@@ -311,19 +312,21 @@ if (nrow(titration.data) > 0)
 {
   for (tIndex in 1:nrow(titration.data))
   {
-    if (titration.data[tIndex,]$Standard == "true" |
-        titration.data[tIndex,]$QCControl == "true" |
-        titration.data[tIndex,]$OtherControl == "true" |
-        titration.data[tIndex,]$Unknown == "true")
+    titrationDataRow = titration.data[tIndex,];
+
+    if (titrationDataRow$Standard == "true" |
+        titrationDataRow$QCControl == "true" |
+        titrationDataRow$OtherControl == "true" |
+        titrationDataRow$Unknown == "true")
     {
-       titrationName = as.character(titration.data[tIndex,]$Name);
+       titrationName = as.character(titrationDataRow$Name);
 
        # 2 types of curve fits for the EC50 calculations, with separate PDFs for the QC Curves
        fitTypes = c("4pl", "5pl");
        for (typeIndex in 1:length(fitTypes))
        {
           # we want to create PDF plots of the curves for QC Controls
-          if (titration.data[tIndex,]$QCControl == "true") {
+          if (titrationDataRow$QCControl == "true") {
               mypdf(file=paste(titrationName, "QC_Curves", toupper(fitTypes[typeIndex]), sep="_"), mfrow=c(1,1));
           }
 
@@ -335,7 +338,7 @@ if (nrow(titration.data) > 0)
             dat = subset(run.data, description == titrationName & name == analyteName);
 
             yLabel = "";
-            if (titration.data[tIndex,]$Standard == "true" | titration.data[tIndex,]$QCControl == "true" | titration.data[tIndex,]$OtherControl == "true") {
+            if (titrationDataRow$Standard == "true" | titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
                 # choose the FI column for standards and qc controls based on the run property provided by the user, default to the FI-Bkgd value
                 if (any(run.props$name == "StndCurveFitInput"))
                 {
@@ -410,7 +413,7 @@ if (nrow(titration.data) > 0)
                             }
 
                             # plot the curve fit for the QC Controls
-                            if (titration.data[tIndex,]$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true") {
                                 plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                             }
                         },
@@ -418,7 +421,7 @@ if (nrow(titration.data) > 0)
                             print(e);
 
                             # plot the individual data points for the QC Controls
-                            if (titration.data[tIndex,]$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true") {
                                 plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
                         }
@@ -462,7 +465,7 @@ if (nrow(titration.data) > 0)
                             }
 
                             # plot the curve fit for the QC Controls
-                            if (titration.data[tIndex,]$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true") {
                                 plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                             }
                         },
@@ -476,7 +479,7 @@ if (nrow(titration.data) > 0)
                             } else {
                                 logAxes = "x";
                             }
-                            if (titration.data[tIndex,]$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true") {
                                 plot(fi ~ dose, data = dat, log=logAxes, cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
                         }
@@ -489,7 +492,7 @@ if (nrow(titration.data) > 0)
                 }
             } else {
                 # create an empty plot indicating that there is no data available
-                if (titration.data[tIndex,]$QCControl == "true") {
+                if (titrationDataRow$QCControl == "true") {
                     if (curveFitLogTransform) {
                         yLabel = paste("log(",yLabel,")", sep="");
                         logAxes = "xy"
@@ -503,7 +506,7 @@ if (nrow(titration.data) > 0)
           }
 
           # if we are creating a PDF for the QC Control, close the device
-          if (titration.data[tIndex,]$QCControl == "true") {
+          if (titrationDataRow$QCControl == "true") {
             dev.off();
           }
        }
