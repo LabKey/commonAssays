@@ -56,6 +56,8 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
         result.add("Max Standard Recovery");
         result.add(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         result.add(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME);
+        result.add(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+        result.add(LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME);
         return result;
     }
 }

@@ -47,6 +47,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         Titration toAdd = new Titration();
         toAdd.setName("Titration 1");
         toAdd.setQcControl(false);
+        toAdd.setOtherControl(true);
         toAdd.setStandard(true);
         toAdd.setUnknown(false);
         _titrations.add(toAdd);
@@ -171,8 +172,10 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         Map<ColumnInfo, String> ret = new HashMap<>();
         ColumnInfo item = new ColumnInfo("PositivityThreshold");
         ret.put(item, "50.0");
-                
-        return ret;  //To change body of implemented methods use File | Settings | File Templates.
+        ColumnInfo item2 = new ColumnInfo("NegativeBead");
+        ret.put(item2, "Blank (3)");
+
+        return ret;
     }
 
     @Override

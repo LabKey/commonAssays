@@ -14,9 +14,10 @@
 #  - 1.0.20140228 : Move positivity calculation part of script out of labkey_luminex
 #  - 1.1.20140526 : Issue 20458: Lab wants positivity displayed next to each dilution
 #  - 1.2.20140612 : Issue 20548: Display multiple duplicate baseline positivity errors at once instead of just the first
+#  - 2.0.20140718 : Changes for LabKey 14.3: FI-Bkgd-Neg instead of FI-Bkgd-Blank
 #
 # Author: Cory Nathe, LabKey
-labTransformVersion = "1.2.20140612";
+labTransformVersion = "2.0.20140718";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));

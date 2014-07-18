@@ -85,9 +85,14 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     {
         Map<ColumnInfo, String> properties = new HashMap<>();
         Analyte analyte = getAnalyte(analyteName);
+
         ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         Integer value = analyte.getPositivityThreshold();
         properties.put(col, value != null ? value.toString() : null);
+
+        col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+        properties.put(col, analyte.getNegativeBead());
+
         return properties;
     }
 

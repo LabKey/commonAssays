@@ -39,6 +39,7 @@ public class Analyte
     private int _minStandardRecovery;
     private int _maxStandardRecovery;
     private Integer _positivityThreshold;
+    private String _negativeBead;
 
     public Analyte()
     {
@@ -138,6 +139,16 @@ public class Analyte
     public void setPositivityThreshold(Integer positivityThreshold)
     {
         _positivityThreshold = positivityThreshold;
+    }
+
+    public String getNegativeBead()
+    {
+        return _negativeBead;
+    }
+
+    public void setNegativeBead(String negativeBead)
+    {
+        _negativeBead = negativeBead;
     }
 
     public int getMaxStandardRecovery()

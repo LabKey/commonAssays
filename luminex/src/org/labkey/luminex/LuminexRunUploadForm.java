@@ -85,10 +85,13 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
         Map<ColumnInfo, String> properties = new HashMap<>();
-        ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
-        String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
-        value = StringUtils.trimToNull(value);
-        properties.put(col, value);
+        for (String propName : new String[]{LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME})
+        {
+            ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(propName);
+            String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
+            value = StringUtils.trimToNull(value);
+            properties.put(col, value);
+        }
         return properties;
     }
 
@@ -169,6 +172,9 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             {
                 String inputName = LuminexUploadWizardAction.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 values.put(inputName, analyte.getPositivityThreshold() != null ? analyte.getPositivityThreshold().toString() : null);
+
+                inputName = LuminexUploadWizardAction.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                values.put(inputName, analyte.getNegativeBead());
             }
             return values;
         }

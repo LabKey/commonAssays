@@ -235,10 +235,8 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         List<ColumnInfo> columns = LuminexProtocolSchema.getTableInfoAnalytes().getColumns();
         for (ColumnInfo column : columns)
         {
-            if (column.getName().equals(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME))
-            {
+            if (column.getName().equals(columnName))
                 return column;
-            }
         }
         throw new IllegalStateException("Could not find property: " + columnName);
     }
@@ -300,8 +298,10 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             assert(output.contains("Run Name: Name of the Run"));
             assert(output.contains("Name:  Name of the Project"));
             assert(output.contains("*PositivityThreshold:  50.0"));
+            assert(output.contains("*NegativeBead:  Blank (3)"));
             assert(output.contains("Standard:  true"));
             assert(output.contains("QC Control:  false"));
+            assert(output.contains("Other Control:  true"));
             assert(output.contains("Unknown:  false"));
             assert(output.contains("Single Point Control: true"));
         }

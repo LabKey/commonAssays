@@ -216,8 +216,23 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
         }
 
-        // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
         Map<String, String> defaultAnalyteColumnValues = form.getAnalyteColumnDefaultValues(_protocol);
+
+        // add the Negative Bead column for each analyte
+        List<DisplayColumn> negativeBeadCols = new ArrayList<>();
+        for (String analyte : analyteNames)
+        {
+            ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
+            String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+            info.setName(inputName);
+            info.setDisplayColumnFactory(createAnalytePropertyDisplayColumnFactory(inputName, LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME));
+            view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName));
+            DisplayColumn col = info.getRenderer();
+            negativeBeadCols.add(col);
+        }
+        view.getDataRegion().addGroup(new DisplayColumnGroup(negativeBeadCols, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME, true));
+
+        // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
         String calcPositivityValue = form.getRequest().getParameter(LuminexDataHandler.CALCULATE_POSITIVITY_COLUMN_NAME);
         if (null != calcPositivityValue && calcPositivityValue.equals("1"))
         {
@@ -227,38 +242,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
                 final String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 info.setName(inputName);
-                info.setDisplayColumnFactory(new DisplayColumnFactory()
-                {
-                    @Override
-                    public DisplayColumn createRenderer(ColumnInfo colInfo)
-                    {
-                        return new DataColumn(colInfo)
-                        {
-                            @Override
-                            public String getFormFieldName(RenderContext ctx)
-                            {
-                                return inputName;
-                            }
-
-                            @Override
-                            public void renderTitle(RenderContext ctx, Writer out) throws IOException
-                            {
-                                out.write(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME);
-                            }
-
-                            @Override
-                            public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
-                            {
-                                out.write("<td class='labkey-form-label'>");
-                                renderTitle(ctx, out);
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
-                                out.write(PageFlowUtil.helpPopup(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME, sb.toString()));
-                                out.write("</td>");
-                            }
-                        };
-                    }
-                });
+                info.setDisplayColumnFactory(createAnalytePropertyDisplayColumnFactory(inputName, LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME));
                 // use a default value of 100 if there is no last entry value to populate the initial value
                 view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName) != null ? defaultAnalyteColumnValues.get(inputName) : 100);
                 DisplayColumn col = info.getRenderer();
@@ -546,6 +530,42 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         vbox.addView(view);
 
         return vbox;
+    }
+
+    private DisplayColumnFactory createAnalytePropertyDisplayColumnFactory(final String inputName, final String displayName)
+    {
+        return new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DataColumn(colInfo)
+                {
+                    @Override
+                    public String getFormFieldName(RenderContext ctx)
+                    {
+                        return inputName;
+                    }
+
+                    @Override
+                    public void renderTitle(RenderContext ctx, Writer out) throws IOException
+                    {
+                        out.write(displayName);
+                    }
+
+                    @Override
+                    public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+                    {
+                        out.write("<td class='labkey-form-label'>");
+                        renderTitle(ctx, out);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
+                        out.write(PageFlowUtil.helpPopup(displayName, sb.toString()));
+                        out.write("</td>");
+                    }
+                };
+            }
+        };
     }
 
     private Map<String, Analyte> getExistingAnalytes(ExpRun reRun)

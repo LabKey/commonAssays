@@ -267,6 +267,8 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         defaultCols.add(FieldKey.fromParts("VisitID"));
         defaultCols.add(FieldKey.fromParts("FI"));
         defaultCols.add(FieldKey.fromParts("FIBackground"));
+        defaultCols.add(FieldKey.fromParts("FIBackgroundNegative"));
+        defaultCols.add(FieldKey.fromParts("Analyte", "NegativeBead"));
         defaultCols.add(FieldKey.fromParts("StdDev"));
         defaultCols.add(FieldKey.fromParts("ObsConc"));
         defaultCols.add(FieldKey.fromParts("ExpConc"));

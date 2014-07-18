@@ -76,6 +76,7 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("RegressionType")));
         addColumn(wrapColumn(getRealTable().getColumn("StdCurve")));
         addColumn(wrapColumn(getRealTable().getColumn("PositivityThreshold")));
+        addColumn(wrapColumn(getRealTable().getColumn("NegativeBead")));
 
         ColumnInfo titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
         titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("Analyte")
