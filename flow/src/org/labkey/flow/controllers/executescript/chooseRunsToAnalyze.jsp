@@ -27,15 +27,19 @@
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-<style type="text/css">
-    .disabledRow td, .disabledRow td a, .disabledRow td a:link
-    {
-        color: gray;
-    }
-</style>
 <%!
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        // TODO: --Ext3-- This should be declared as part of the included views
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
+        return resources;
+    }
+
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)
     {
         return PageFlowUtil.strSelect(name, FlowObject.idLabelsFor(objs, nullLabel), curVal);
@@ -49,6 +53,12 @@
     targetExperiments.add(null);
     PopulationSet analysis = form.getProtocol().getCompensationCalcOrAnalysis(form.getProtocolStep());
 %>
+<style type="text/css">
+    .disabledRow td, .disabledRow td a, .disabledRow td a:link
+    {
+        color: gray;
+    }
+</style>
 <labkey:errors/>
 <form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
     <table>
