@@ -5,7 +5,7 @@ Ext4.onReady(function(){
 
 function attachAnalyteNegativeControlListeners()
 {
-    var negBeadEls = document.getElementsByClassName("negative-bead-input");
+    var negBeadEls = document.querySelectorAll(".negative-bead-input");
     for (var i = 0; i < negBeadEls.length; i++)
     {
         var negControlEl = getAnalyteNegativeControlEl(negBeadEls[i].name);
@@ -16,7 +16,7 @@ function attachAnalyteNegativeControlListeners()
 function getAnalyteSelectedNegativeControls()
 {
     var negControlAnalytes = [];
-    var negBeadEls = document.getElementsByClassName("negative-bead-input");
+    var negBeadEls = document.querySelectorAll(".negative-bead-input");
     for (var i = 0; i < negBeadEls.length; i++)
     {
         var negControlEl = getAnalyteNegativeControlEl(negBeadEls[i].name);
@@ -58,7 +58,7 @@ function updateAnalyteNegativeBeadInputs()
 
     var negControlAnalytes = getAnalyteSelectedNegativeControls();
 
-    var negBeadEls = document.getElementsByClassName("negative-bead-input");
+    var negBeadEls = document.querySelectorAll(".negative-bead-input");
     for (var i = 0; i < negBeadEls.length; i++)
     {
         var negBeadEl = negBeadEls[i];
