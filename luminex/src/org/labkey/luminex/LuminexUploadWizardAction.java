@@ -31,7 +31,6 @@ import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableSelector;
@@ -72,6 +71,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * User: jeckels
@@ -154,10 +154,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
+        Set<String> initNegativeControlAnalytes = new TreeSet<>();
 
         // each analyte may have a different set of default values.  Because it may be expensive to query for the
         // entire set of values for every property, we use the following map to cache the default value sets by analyte name.
-        Map<String, Map<DomainProperty, Object>> domains = new HashMap<>();
+        Map<String, Map<DomainProperty, Object>> defaultAnalytePropertyValues = new HashMap<>();
         for (DomainProperty analyteDP : analyteColumns)
         {
             List<DisplayColumn> cols = new ArrayList<>();
@@ -166,7 +167,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 // from SamplePropertyHelper:
                 // get the map of default values that corresponds to our current sample:
                 String defaultValueKey = analyte + "_" + analyteDP.getDomain().getName();
-                Map<DomainProperty, Object> defaultValues = domains.get(defaultValueKey);
+                Map<DomainProperty, Object> defaultValues = defaultAnalytePropertyValues.get(defaultValueKey);
                 if (defaultValues == null)
                 {
                     try
@@ -177,7 +178,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     {
                         errors.addError(new LabkeyError(e));
                     }
-                    domains.put(defaultValueKey,  defaultValues);
+                    defaultAnalytePropertyValues.put(defaultValueKey,  defaultValues);
                 }
                 final String inputName = getAnalytePropertyName(analyte, analyteDP);
                 Object analyteDefaultValue = defaultValues != null ? defaultValues.get(analyteDP) : null;
@@ -210,6 +211,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     view.getDataRegion().addHiddenFormField(inputName, analyteDefaultValue.toString());
                 }
+
+                // track the initial set of "Negative Control" analytes for the Negative Bead select list
+                if (LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName()) && analyteDefaultValue != null && analyteDefaultValue.equals(true))
+                {
+                    initNegativeControlAnalytes.add(analyte);
+                }
             }
 
             if (cols.size() > 0)
@@ -218,19 +225,22 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         Map<String, String> defaultAnalyteColumnValues = form.getAnalyteColumnDefaultValues(_protocol);
 
-        // add the Negative Bead column for each analyte
-        List<DisplayColumn> negativeBeadCols = new ArrayList<>();
-        for (String analyte : analyteNames)
+        // add the Negative Bead column for each analyte, if the assay design has a LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME analyte property
+        if (analyteDomain.getPropertyByName(LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME) != null)
         {
-            ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
-            String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
-            info.setName(inputName);
-            info.setDisplayColumnFactory(createAnalytePropertyDisplayColumnFactory(inputName, LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME));
-            view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName));
-            DisplayColumn col = info.getRenderer();
-            negativeBeadCols.add(col);
+            List<DisplayColumn> negativeBeadCols = new ArrayList<>();
+            for (String analyte : analyteNames)
+            {
+                ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
+                String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                info.setName(inputName);
+                info.setDisplayColumnFactory(new NegativeBeadDisplayColumnFactory(analyte, inputName, LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME, initNegativeControlAnalytes));
+                view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName));
+                DisplayColumn col = info.getRenderer();
+                negativeBeadCols.add(col);
+            }
+            view.getDataRegion().addGroup(new DisplayColumnGroup(negativeBeadCols, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME, true));
         }
-        view.getDataRegion().addGroup(new DisplayColumnGroup(negativeBeadCols, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME, true));
 
         // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
         String calcPositivityValue = form.getRequest().getParameter(LuminexDataHandler.CALCULATE_POSITIVITY_COLUMN_NAME);
@@ -240,7 +250,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             for (String analyte : analyteNames)
             {
                 ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
-                final String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 info.setName(inputName);
                 info.setDisplayColumnFactory(createAnalytePropertyDisplayColumnFactory(inputName, LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME));
                 // use a default value of 100 if there is no last entry value to populate the initial value
@@ -273,7 +283,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             getContainer(), _protocol.getName() + ": Well Role");
 
         final Map<String, Titration> existingTitrations = getExistingTitrations(form.getReRun());
-        final Map<String, Analyte> existingAnalytes = getExistingAnalytes(form.getReRun());
         final Set<String> existingSinglePointControls = getExistingSinglePointControls(form.getReRun());
 
         // get a set of which titrations are going to be pre-selected as standards (based on default value, well type, etc.)
@@ -312,7 +321,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
 
         // add hidden form fields (3 types) for the titration well role definition section (controlled by titrationWellRoles.jsp after render)
-        for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+        for (Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
         {
             String propertyName;
             String defVal;
@@ -353,7 +362,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         // add hidden form fields for the single point control section (controlled by titrationWellRoles.jsp after render)
-        for (final String singlePointControl : form.getParser().getSinglePointControls())
+        for (String singlePointControl : form.getParser().getSinglePointControls())
         {
             String propertyName;
             String defVal;
@@ -377,11 +386,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 continue;
             }
 
-            final Map<String, String> defaultTitrationValues = PropertyManager.getProperties(getUser(),
-                    getContainer(), _protocol.getName() + ": " + titrationEntry.getValue().getName());
-
             String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-            final String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
             final boolean hideCell;
             if (errorReshow && getViewContext().getRequest().getParameter(titrationCheckboxName + "_showcol").equals("true"))
                 hideCell = false;
@@ -390,90 +395,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             else
                 hideCell = true;
 
-            final List<DisplayColumn> cols = new ArrayList<>();
-            for (final String analyte : analyteNames)
+            List<DisplayColumn> cols = new ArrayList<>();
+            for (String analyte : analyteNames)
             {
-                final DisplayColumn col = new SimpleDisplayColumn()
-                {
-                    @Override
-                    public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
-                    {
-                        String titrationName = titrationEntry.getValue().getName();
-                        String propertyName = PageFlowUtil.filter(getTitrationCheckboxName(titrationName, analyte));
-                        String defVal = defaultTitrationValues.get(propertyName);
-                        // If we're replacing this run, and the previous version of the run had the analyte/titration
-                        // combination, see if it they were used together
-                        if (form.getReRun() != null && existingTitrations.containsKey(titrationName) && existingAnalytes.containsKey(analyte))
-                        {
-                            SQLFragment selectedSQL = new SQLFragment("SELECT at.* FROM ");
-                            selectedSQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
-                            selectedSQL.append(", ");
-                            selectedSQL.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
-                            selectedSQL.append(", ");
-                            selectedSQL.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
-                            selectedSQL.append(" WHERE LOWER(a.Name) = LOWER(?) AND a.RowId = at.AnalyteId AND ");
-                            selectedSQL.add(analyte);
-                            selectedSQL.append("t.RowId = at.TitrationId AND t.RunId = ? AND LOWER(t.Name) = LOWER(?)");
-                            selectedSQL.add(form.getReRun().getRowId());
-                            selectedSQL.add(titrationName);
-
-                            if (new SqlSelector(LuminexProtocolSchema.getSchema(), selectedSQL).exists())
-                            {
-                                defVal = Boolean.TRUE.toString();
-                            }
-
-                        }
-                        String checked = "";
-
-                        // if reshowing form on error, preselect based on request value
-                        if (errorReshow)
-                        {
-                            if (getViewContext().getRequest().getParameter(propertyName) != null)
-                                checked = "CHECKED";
-                        }
-                        // if there is only one standard, then preselect the checkbox
-                        else if (standardTitrations.size() == 1 && standardTitrations.contains(titrationEntry.getValue()))
-                        {
-                            checked = "CHECKED";
-                        }
-                        else if (standardTitrations.size() > 1)
-                        {
-                            // if > 1 standard and default value exists, set checkbox based on default value
-                            if (defVal != null && defVal.toLowerCase().equals("true"))
-                                checked = "CHECKED";
-                            // if no default value and titration is standard, then preselect the checkbox
-                            else if (defVal == null && standardTitrations.contains(titrationEntry.getValue()))
-                                checked = "CHECKED";
-                        }
-
-                        out.write("<input type='checkbox' value='" + value + "' name='" + propertyName + "' " + checked + " />");
-                    }
-
-                    @Override
-                    public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
-                    {
-                        out.write("<td colspan=" + span + " name='" + titrationCellName
-                                + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
-                        renderInputHtml(ctx, out, 1);
-                        out.write("</td>");
-                    }
-
-                    @Override
-                    public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
-                    {
-                        out.write("<td name='" + titrationCellName + "' "
-                            + " class='labkey-form-label' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
-                        renderTitle(ctx, out);
-                        out.write("</td>");
-                    }
-
-                    @Override
-                    public String getFormFieldName(RenderContext ctx)
-                    {
-                        return PageFlowUtil.filter(getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte));
-                    }
-                };
-
+                DisplayColumn col = new AnalytePropStandardsDisplayColumn(form, titrationEntry.getValue(), analyte,
+                        _protocol.getName(), errorReshow, hideCell, standardTitrations);
                 col.setCaption("Use " + titrationEntry.getKey() + " Standard");
                 cols.add(col);
             }
@@ -482,6 +408,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 @Override
                 public void writeSameCheckboxCell(RenderContext ctx, Writer out) throws IOException
                 {
+                    String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
                     String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
                     out.write("<td name='" + titrationCellName + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
                     out.write("<input type=checkbox name='" + groupName + "CheckBox' id='" + groupName + "CheckBox' onchange=\"");
@@ -568,7 +495,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         };
     }
 
-    private Map<String, Analyte> getExistingAnalytes(ExpRun reRun)
+    public static Map<String, Analyte> getExistingAnalytes(ExpRun reRun)
     {
         if (reRun == null)
         {
@@ -589,7 +516,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return result;
     }
 
-    private Map<String, Titration> getExistingTitrations(ExpRun reRun)
+    public static Map<String, Titration> getExistingTitrations(ExpRun reRun)
     {
         if (reRun == null)
         {
@@ -608,7 +535,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return result;
     }
 
-    private Set<String> getExistingSinglePointControls(ExpRun reRun)
+    public static Set<String> getExistingSinglePointControls(ExpRun reRun)
     {
         if (reRun == null)
         {

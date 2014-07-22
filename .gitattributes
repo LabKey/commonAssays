@@ -768,6 +768,7 @@ luminex/src/org/labkey/luminex/AbstractLuminexControlUpdateService.java -text
 luminex/src/org/labkey/luminex/AbstractLuminexTable.java -text
 luminex/src/org/labkey/luminex/Analyte.java -text
 luminex/src/org/labkey/luminex/AnalyteImportHelper.java -text
+luminex/src/org/labkey/luminex/AnalytePropStandardsDisplayColumn.java -text
 luminex/src/org/labkey/luminex/AnalyteSinglePointControl.java -text
 luminex/src/org/labkey/luminex/AnalyteSinglePointControlQCFlag.java -text
 luminex/src/org/labkey/luminex/AnalyteSinglePointControlTable.java -text
@@ -809,6 +810,7 @@ luminex/src/org/labkey/luminex/LuminexUnitTestContext.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
 luminex/src/org/labkey/luminex/LuminexWellGroup.java -text
+luminex/src/org/labkey/luminex/NegativeBeadDisplayColumnFactory.java -text
 luminex/src/org/labkey/luminex/QCFlagHighlightDisplayColumn.java -text
 luminex/src/org/labkey/luminex/RunExclusionTable.java -text
 luminex/src/org/labkey/luminex/SinglePointControl.java -text
@@ -829,6 +831,7 @@ luminex/webapp/luminex/LeveyJenningsReport.css -text
 luminex/webapp/luminex/LeveyJenningsTrackingDataPanel.js -text
 luminex/webapp/luminex/LeveyJenningsTrendPlotPanel.js -text
 luminex/webapp/luminex/ManageGuideSetPanel.js -text
+luminex/webapp/luminex/NegativeBeadPopulation.js -text
 luminex/webapp/luminex/TitrationExclusionPanel.js -text
 luminex/webapp/luminex/WellExclusionPanel.js -text
 luminex/webapp/luminex/excluded.png -text

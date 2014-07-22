@@ -122,6 +122,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String POSITIVITY_THRESHOLD_COLUMN_NAME = "PositivityThreshold";
     public static final String POSITIVITY_THRESHOLD_DISPLAY_NAME = "Positivity Threshold";
     public static final String CALCULATE_POSITIVITY_COLUMN_NAME = "calculatePositivity";
+    public static final String NEGATIVE_CONTROL_COLUMN_NAME = "NegativeControl";
     public static final String NEGATIVE_BEAD_COLUMN_NAME = "NegativeBead";
     public static final String NEGATIVE_BEAD_DISPLAY_NAME = "Subtract Negative Bead";
     public static final Double MAX_CURVE_PARAM_VALUE = 10e37; // Issue 15200
