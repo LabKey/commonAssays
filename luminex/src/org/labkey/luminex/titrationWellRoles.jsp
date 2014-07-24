@@ -57,7 +57,7 @@
                 <td>&nbsp;</td>
                 <td class="labkey-form-label">Standard</td>
                 <td class="labkey-form-label">QC Control</td>
-                <td class="labkey-form-label">Other Control</td>
+                <td class="labkey-form-label">Other Control<%= PageFlowUtil.helpPopup("Other Control", "AUC and EC50 values are valculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots")%></td>
             </tr>
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
