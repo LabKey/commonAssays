@@ -350,6 +350,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isQcControl());
                 value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isQcControl()) ? "true" : "";
                 view.getDataRegion().addHiddenFormField(propertyName, value);
+
+                propertyName = getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
+                // If we have an existing titration as a baseline from the run we're replacing, use its value
+                defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isOtherControl());
+                value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isOtherControl()) ? "true" : "";
+                view.getDataRegion().addHiddenFormField(propertyName, value);
             }
             else
             {
@@ -714,6 +720,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                             defaultWellRoleValues.put(propertyName, Boolean.toString(value));
 
                             propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
                             value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                             defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                         }

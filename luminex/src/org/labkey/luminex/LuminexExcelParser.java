@@ -184,7 +184,7 @@ public class LuminexExcelParser
                             _titrations.put(desc, potentialTitrations.get(desc));
                         }
                         // detect potential single point controls
-                        if (potentialTitrations.get(desc) != null && potentialTitrations.get(desc).isQcControl() == true) // Type starts with 'C'
+                        if (potentialTitrations.get(desc) != null && potentialTitrations.get(desc).isQcControl()) // Type starts with 'C'
                         {
                             if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT) ||
                                     (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT))

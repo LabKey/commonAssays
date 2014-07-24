@@ -37,7 +37,7 @@
     </table>
     
     <table tableName="Titration" tableDbType="TABLE">
-        <description>Contains one row per titration (standard or QC control). A single Luminex run may have more than one titration</description>
+        <description>Contains one row per titration (Standard, QC control, etc.). A single Luminex run may have more than one titration.</description>
         <columns>
             <column columnName="RowId" />
             <column columnName="RunId" />
