@@ -354,7 +354,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             url.addParameter("AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
         }
         // just show titrations that are either standards or qc controls
-        url.addParameter("AnalyteTitration.Titration/Unknown~eq", "false");
         qcReportMenu.addChild(new NavTree("view titration qc report", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
         // add a URL for the single point control report
