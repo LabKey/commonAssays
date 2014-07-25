@@ -44,6 +44,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.writer.ContainerUser;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowProtocol;
@@ -65,6 +66,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class FilterFlowReport extends FlowReport
@@ -524,6 +526,14 @@ public abstract class FilterFlowReport extends FlowReport
 
             return new SimpleFilter(colName, value, compareType);
         }
+
+        public boolean equals(Filter otherFilter)
+        {
+            return Objects.equals(property, otherFilter.property)
+                    && Objects.equals(value, otherFilter.value)
+                    && Objects.equals(op, otherFilter.op)
+                    && Objects.equals(type, otherFilter.type);
+        }
     }
 
     // Move from annonymous class to static inner class that takes a filterFlowReport to allow de-serialization in Java 7
@@ -587,5 +597,42 @@ public abstract class FilterFlowReport extends FlowReport
             file.mkdirs();
             return file;
         }
+    }
+
+    protected boolean filterListEqual(List<Filter> otherFilters)
+    {
+        List<Filter> myFitlers = getFilters();
+        if (myFitlers.size() != otherFilters.size())
+            return false;
+        else
+        {
+            for (int i = 0; i < myFitlers.size(); i++)
+            {
+                if (!myFitlers.get(i).equals(otherFilters.get(i)))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    protected boolean hasContentModified(ContainerUser context, String descriptorPropName)
+    {
+        // Content modified if descriptorProp is changed or any of the filter values are changed
+        String newSubsetStr = getDescriptor().getProperty(descriptorPropName);
+
+        if (getReportId() != null)
+        {
+            FilterFlowReport origReport = (FilterFlowReport)getReportId().getReport(context);
+            if (origReport != null)
+            {
+                String origSubsetStr = origReport.getDescriptor().getProperty(descriptorPropName);
+
+                return (newSubsetStr != null && !newSubsetStr.equals(origSubsetStr))
+                        || !filterListEqual(origReport.getFilters());
+            }
+        }
+
+        return false;
     }
 }

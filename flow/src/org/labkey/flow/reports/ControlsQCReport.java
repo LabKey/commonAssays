@@ -35,6 +35,7 @@ import java.io.IOException;
 public class ControlsQCReport extends FilterFlowReport
 {
     public static String TYPE = "Flow.QCControlReport";
+    public static final String STATISTIC_PROP = "statistic";
 
     public String getType()
     {
@@ -63,7 +64,7 @@ public class ControlsQCReport extends FilterFlowReport
     protected void addSelectList(ViewContext context, String tableName, StringBuilder query)
     {
         ReportDescriptor d = getDescriptor();
-        String statistic = d.getProperty("statistic");
+        String statistic = d.getProperty(STATISTIC_PROP);
 
         query.append("  ").append(tableName).append(".Statistic(").append(toSQL(statistic)).append(") AS value,\n");
         query.append("  ").append(toSQL(statistic)).append(" AS statistic\n");
@@ -73,10 +74,15 @@ public class ControlsQCReport extends FilterFlowReport
     public boolean updateProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override)
     {
         super.updateBaseProperties(cu, pvs, errors, override);
-        updateFromPropertyValues(pvs, "statistic");
+        updateFromPropertyValues(pvs, STATISTIC_PROP);
         if (!override)
             updateFilterProperties(pvs);
         return true;
     }
 
+    @Override
+    public boolean hasContentModified(ContainerUser context)
+    {
+        return hasContentModified(context, STATISTIC_PROP);
+    }
 }

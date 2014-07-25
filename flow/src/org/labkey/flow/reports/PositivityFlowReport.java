@@ -54,6 +54,7 @@ import java.util.List;
 public class PositivityFlowReport extends FilterFlowReport
 {
     public static final String TYPE = "Flow.PositivityReport";
+    public static final String SUBSET_PROP = "subset";
     private SubsetSpec _subset;
     private SubsetSpec _parentSubset;
 
@@ -86,7 +87,7 @@ public class PositivityFlowReport extends FilterFlowReport
         if (_subset == null)
         {
             ReportDescriptor d = getDescriptor();
-            String subset = StringUtils.trimToNull(d.getProperty("subset"));
+            String subset = StringUtils.trimToNull(d.getProperty(SUBSET_PROP));
             if (subset == null)
                 throw new IllegalArgumentException("subset required");
 
@@ -185,7 +186,7 @@ public class PositivityFlowReport extends FilterFlowReport
         else
         {
             super.updateBaseProperties(cu, pvs, errors, override);
-            updateFromPropertyValues(pvs, "subset");
+            updateFromPropertyValues(pvs, SUBSET_PROP);
             if (!override)
                 updateFilterProperties(pvs);
             return true;
@@ -216,5 +217,11 @@ public class PositivityFlowReport extends FilterFlowReport
         ret.add(adjP);
 
         return ret;
+    }
+
+    @Override
+    public boolean hasContentModified(ContainerUser context)
+    {
+        return hasContentModified(context, SUBSET_PROP);
     }
 }
