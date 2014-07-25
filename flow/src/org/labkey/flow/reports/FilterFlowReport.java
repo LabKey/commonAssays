@@ -619,16 +619,16 @@ public abstract class FilterFlowReport extends FlowReport
     protected boolean hasContentModified(ContainerUser context, String descriptorPropName)
     {
         // Content modified if descriptorProp is changed or any of the filter values are changed
-        String newSubsetStr = getDescriptor().getProperty(descriptorPropName);
+        String newPropStr = getDescriptor().getProperty(descriptorPropName);
 
         if (getReportId() != null)
         {
             FilterFlowReport origReport = (FilterFlowReport)getReportId().getReport(context);
             if (origReport != null)
             {
-                String origSubsetStr = origReport.getDescriptor().getProperty(descriptorPropName);
+                String origPropStr = origReport.getDescriptor().getProperty(descriptorPropName);
 
-                return (newSubsetStr != null && !newSubsetStr.equals(origSubsetStr))
+                return (newPropStr != null && !newPropStr.equals(origPropStr))
                         || !filterListEqual(origReport.getFilters());
             }
         }
