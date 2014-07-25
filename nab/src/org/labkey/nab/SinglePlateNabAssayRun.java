@@ -15,16 +15,26 @@
  */
 package org.labkey.nab;
 
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -34,6 +44,10 @@ public class SinglePlateNabAssayRun extends NabAssayRun
 {
     protected Plate _plate;
     private DilutionSummary[] _dilutionSummaries;
+    public static final String SAMPLE_WELL_GROUP_NAME = "SampleWellGroupName";
+
+    private Map<Position, WellGroup> _positionToVirusMap = new HashMap<>();
+    private Map<String, Map<WellGroup, WellGroup>> _virusGroupToControlMap = new HashMap<>();
 
     public SinglePlateNabAssayRun(DilutionAssayProvider provider, ExpRun run, Plate plate,
                                   User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
@@ -55,4 +69,241 @@ public class SinglePlateNabAssayRun extends NabAssayRun
     {
         return Collections.singletonList(_plate);
     }
+
+    @Override
+    protected DilutionSummary[] getDilutionSumariesForWellGroups(List<? extends WellGroup> specimenGroups)
+    {
+        List<WellGroup> specimenVirusGroups = new ArrayList<>();
+        for (WellGroup specimenGroup : specimenGroups)
+        {
+            // for the multi virus case, we need to produce dilution summaries over the intersection of the
+            // sample and virus well groups
+            Set<WellGroup> virusGroups = specimenGroup.getOverlappingGroups(WellGroup.Type.VIRUS);
+            if (!virusGroups.isEmpty())
+            {
+                for (WellGroup virusGroup : virusGroups)
+                {
+                    List<Position> specimenVirusPos = new ArrayList<>();
+                    for (Position position : virusGroup.getPositions())
+                    {
+                        if (specimenGroup.contains(position))
+                            specimenVirusPos.add(position);
+                    }
+                    WellGroup specimenVirusGroup = PlateService.get().createWellGroup(_plate, specimenGroup.getName() + ":" + virusGroup.getName(),
+                            WellGroup.Type.SPECIMEN, specimenVirusPos);
+
+                    // transfer the sample properties to the new sample/virus well group so dilutions can be computed
+                    for (String propName : specimenGroup.getPropertyNames())
+                        specimenVirusGroup.setProperty(propName, specimenGroup.getProperty(propName));
+                    specimenVirusGroup.setProperty(SAMPLE_WELL_GROUP_NAME, specimenGroup.getName());
+                    specimenVirusGroup.setProperty(AbstractPlateBasedAssayProvider.VIRUS_WELL_GROUP_NAME, virusGroup.getName());
+
+                    specimenVirusGroups.add(specimenVirusGroup);
+                }
+            }
+            else
+                specimenVirusGroups.add(specimenGroup);
+        }
+
+        return super.getDilutionSumariesForWellGroups(specimenVirusGroups);
+    }
+
+
+    @Override
+    public ExpMaterial getMaterial(WellGroup wellgroup)
+    {
+        ExpMaterial material = super.getMaterial(wellgroup);
+
+        if (material == null)
+        {
+            String sampleWellgroupName = wellgroup.getProperty(SAMPLE_WELL_GROUP_NAME).toString();
+            if (sampleWellgroupName != null)
+            {
+                for (Map.Entry<WellGroup, ExpMaterial> entry : _wellGroupMaterialMapping.entrySet())
+                {
+                    if (entry.getKey().getName().equals(sampleWellgroupName))
+                        return entry.getValue();
+                }
+            }
+        }
+        assert (material != null) : "Unable to find the ExpMaterial associated with the wellgroup : " + wellgroup.getName();
+
+        return material;
+    }
+
+    @Override
+    protected String getSampleKey(DilutionSummary summary)
+    {
+        String key = (String) summary.getFirstWellGroup().getProperty(SAMPLE_WELL_GROUP_NAME);
+
+        if (key == null)
+            key = super.getSampleKey(summary);
+        assert (key != null) : "Unable to find the Sample key associated with the wellgroup : " + summary.getFirstWellGroup().getName();
+
+        return key;
+    }
+
+/*
+    @Override
+    protected String getSampleKey(ExpMaterial material)
+    {
+        String virusName = "";
+        String wellgroup = getWellGroupName(material);
+        for (Map.Entry<PropertyDescriptor, Object> entry : material.getPropertyValues().entrySet())
+        {
+            if (entry.getKey().getName().equals(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME))
+                virusName = entry.getValue().toString();
+        }
+        return SinglePlateDilutionSamplePropertyHelper.getKey(virusName, wellgroup);
+    }
+*/
+
+    @Nullable
+    @Override
+    public WellGroup getCellControlWells(Plate plate, @Nullable List<Position> dataPositions)
+    {
+        if (dataPositions != null)
+        {
+            WellGroup virusGroup = getVirusGroupForPositions(plate, dataPositions);
+            if (virusGroup != null)
+            {
+                WellGroup controlGroup = getControlWellsForVirus(plate, virusGroup, DilutionManager.CELL_CONTROL_SAMPLE);
+                if (controlGroup != null)
+                    return controlGroup;
+            }
+        }
+        return plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.CELL_CONTROL_SAMPLE);
+    }
+
+    @Nullable
+    @Override
+    public WellGroup getVirusControlWells(Plate plate, @Nullable List<Position> dataPositions)
+    {
+        if (dataPositions != null)
+        {
+            WellGroup virusGroup = getVirusGroupForPositions(plate, dataPositions);
+            if (virusGroup != null)
+            {
+                WellGroup controlGroup = getControlWellsForVirus(plate, virusGroup, DilutionManager.VIRUS_CONTROL_SAMPLE);
+                if (controlGroup != null)
+                    return controlGroup;
+            }
+        }
+        return plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.VIRUS_CONTROL_SAMPLE);
+    }
+
+    /**
+     * Returns the virus well group that contains the specified positions.
+     * @param plate
+     * @param positions
+     * @return
+     */
+    @Nullable
+    private WellGroup getVirusGroupForPositions(Plate plate, List<Position> positions)
+    {
+        // save the map of positions to virus well groups (if any)
+        if (_positionToVirusMap.isEmpty())
+        {
+            for (WellGroup group : plate.getWellGroups(WellGroup.Type.VIRUS))
+            {
+                for (Position position : group.getPositions())
+                    _positionToVirusMap.put(position, group);
+            }
+        }
+
+        WellGroup virusGroup = null;
+        if (!_positionToVirusMap.isEmpty())
+        {
+            for (Position position : positions)
+            {
+                if (_positionToVirusMap.containsKey(position))
+                {
+                    WellGroup group = _positionToVirusMap.get(position);
+
+                    // ensure that positions don't span multiple virus groups
+                    if (virusGroup != null)
+                        assert virusGroup.equals(group);
+                    else
+                        virusGroup = group;
+                }
+            }
+        }
+
+        return virusGroup;
+    }
+
+    /**
+     * Returns the control well group that corresponds to the specified virus group. Plate templates that support
+     * multiple viruses can indicate separate control well groups for each virus by overlaying the cell and virus control
+     * wells with the virus well group that it is associated with. For an example see the default NAb multi-virus
+     * plate template.
+     */
+    @Nullable
+    private WellGroup getControlWellsForVirus(Plate plate, WellGroup virusGroup, String controlGroupName)
+    {
+        // build up a map of virus group to control well group for each type of control group (virus and cell)
+        //
+        if (!_virusGroupToControlMap.containsKey(controlGroupName))
+        {
+            WellGroup control = plate.getWellGroup(WellGroup.Type.CONTROL, controlGroupName);
+            List<? extends  WellGroup> virusGroups = plate.getWellGroups(WellGroup.Type.VIRUS);
+            Map<WellGroup, List<Position>> virusToControlPositions = new HashMap<>();
+
+            for (Position pos : control.getPositions())
+            {
+                for (WellGroup virus : virusGroups)
+                {
+                    if (virus.contains(pos))
+                    {
+                        if (!virusToControlPositions.containsKey(virus))
+                            virusToControlPositions.put(virus, new ArrayList<Position>());
+
+                        virusToControlPositions.get(virus).add(pos);
+                        break;
+                    }
+                }
+            }
+
+            Map<WellGroup, WellGroup> virusToControl = new HashMap<>();
+            for (Map.Entry<WellGroup, List<Position>> entry : virusToControlPositions.entrySet())
+            {
+                WellGroup controlGroup = PlateService.get().createWellGroup(plate, entry.getKey().getName(), WellGroup.Type.CONTROL, entry.getValue());
+                virusToControl.put(entry.getKey(), controlGroup);
+            }
+            _virusGroupToControlMap.put(controlGroupName, virusToControl);
+        }
+
+        Map<WellGroup, WellGroup> virusToControl = _virusGroupToControlMap.get(controlGroupName);
+        if (virusToControl != null)
+            return virusToControl.get(virusGroup);
+
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getVirusNames()
+    {
+        if (_virusNames == null)
+        {
+            List<? extends WellGroup> virusWellGroups = _plate.getWellGroups(WellGroup.Type.VIRUS);
+            _virusNames = new HashMap<>();
+            if (!virusWellGroups.isEmpty())
+            {
+                for (WellGroup virusWellGroup : virusWellGroups)
+                {
+                    String virusWellGroupName = virusWellGroup.getName();
+                    _virusNames.put(virusWellGroupName, getVirusName(virusWellGroupName));
+                }
+            }
+            else
+            {
+                String virusName = getVirusName(AbstractPlateBasedAssayProvider.VIRUS_NAME_PROPERTY_NAME);
+                if (null != virusName)
+                    _virusNames.put("Virus", virusName);
+            }
+        }
+        return _virusNames;
+    }
+
+
 }

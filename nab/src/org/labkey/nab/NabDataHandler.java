@@ -25,6 +25,7 @@ import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.nab.query.NabProtocolSchema;
 
 import java.sql.SQLException;
@@ -144,6 +145,9 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 nabSpecimenEntries.put("PositiveAuc_4pl", group.get(pAUC_PREFIX + PL4_SUFFIX));
                 nabSpecimenEntries.put("Auc_5pl", group.get(AUC_PREFIX + PL5_SUFFIX));
                 nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + PL5_SUFFIX));
+                String virusWellGroupName = (String)group.get(AbstractPlateBasedAssayProvider.VIRUS_WELL_GROUP_NAME);
+                nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
+
                 int nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);
 
                 for (Integer cutoffValue : cutoffFormats.keySet())

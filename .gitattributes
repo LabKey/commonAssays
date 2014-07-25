@@ -1732,6 +1732,8 @@ nab/module.properties -text
 nab/resources/schemas/dbscripts/postgresql/nab-11.10-11.20.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-12.30-13.10.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-13.10-13.20.sql -text
+nab/resources/schemas/dbscripts/postgresql/nab-14.20-14.21.sql -text
+nab/resources/schemas/dbscripts/postgresql/nab-14.21-14.22.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-12.31-12.32.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-12.32-12.33.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-12.34-12.35.sql -text
@@ -1739,6 +1741,8 @@ nab/resources/schemas/dbscripts/postgresql/obsolete/nab-13.11-13.12.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-11.10-11.20.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-12.30-13.10.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-13.10-13.20.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-14.20-14.21.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-14.21-14.22.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.31-12.32.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.32-12.33.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.34-12.35.sql -text
@@ -1761,6 +1765,7 @@ nab/src/org/labkey/nab/NabRunPropertyMap.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text
 nab/src/org/labkey/nab/NabUpgradeCode.java -text
 nab/src/org/labkey/nab/NabUploadWizardAction.java -text
+nab/src/org/labkey/nab/NabVirusPropertyHelper.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text
 nab/src/org/labkey/nab/RunSettings.java -text
 nab/src/org/labkey/nab/SinglePlateNabAssayRun.java -text
@@ -1778,8 +1783,11 @@ nab/src/org/labkey/nab/multiplate/SinglePlateDilutionSamplePropertyHelper.java -
 nab/src/org/labkey/nab/query/NabDataLinkDisplayColumn.java -text
 nab/src/org/labkey/nab/query/NabProtocolSchema.java -text
 nab/src/org/labkey/nab/query/NabProviderSchema.java -text
+nab/src/org/labkey/nab/query/NabRunCreator.java -text
 nab/src/org/labkey/nab/query/NabRunDataBaseTable.java -text
 nab/src/org/labkey/nab/query/NabRunDataTable.java -text
+nab/src/org/labkey/nab/query/NabVirusDataTable.java -text
+nab/src/org/labkey/nab/query/NabVirusDomainKind.java -text
 viability/Viability.iml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-0.00-0.10.sql -text

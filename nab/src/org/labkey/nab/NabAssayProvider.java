@@ -33,17 +33,23 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayProviderSchema;
+import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -52,11 +58,12 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
+import org.labkey.nab.query.NabRunCreator;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +81,6 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     public static final String CUSTOM_DETAILS_VIEW_NAME = "CustomDetailsView";
     private static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
     private static final String NAB_ASSAY_PROTOCOL = "NabAssayProtocol";
-    public static final String VIRUS_NAME_PROPERTY_NAME = "VirusName";
     public static final String VIRUS_ID_PROPERTY_NAME = "VirusID";
     public static final String HOST_CELL_PROPERTY_NAME = "HostCell";
     public static final String STUDY_NAME_PROPERTY_NAME = "StudyName";
@@ -84,6 +90,9 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     public static final String PLATE_NUMBER_PROPERTY_NAME = "PlateNumber";
     public static final String EXPERIMENT_DATE_PROPERTY_NAME = "ExperimentDate";
     public static final String FILE_ID_PROPERTY_NAME = "FileID";
+
+    public static final String VIRUS_LSID_COLUMN_NAME = "VirusLsid";
+    public static final String ASSAY_DOMAIN_VIRUS_WELLGROUP = ExpProtocol.ASSAY_DOMAIN_PREFIX + "VirusWellGroup";
 
     public NabAssayProvider()
     {
@@ -155,8 +164,11 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     protected void addPassThroughRunProperties(Domain runDomain)
     {
-        addProperty(runDomain, VIRUS_NAME_PROPERTY_NAME, "Virus Name", PropertyType.STRING);
-        addProperty(runDomain, VIRUS_ID_PROPERTY_NAME, "Virus ID", PropertyType.STRING);
+        if (!supportsMultiVirusPlate())
+        {
+            addProperty(runDomain, VIRUS_NAME_PROPERTY_NAME, "Virus Name", PropertyType.STRING);
+            addProperty(runDomain, VIRUS_ID_PROPERTY_NAME, "Virus ID", PropertyType.STRING);
+        }
         addProperty(runDomain, HOST_CELL_PROPERTY_NAME, "Host Cell", PropertyType.STRING);
         addProperty(runDomain, STUDY_NAME_PROPERTY_NAME, "Study Name", PropertyType.STRING);
         addProperty(runDomain, EXPERIMENT_PERFORMER_PROPERTY_NAME, "Experiment Performer", PropertyType.STRING);
@@ -281,5 +293,65 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     {
         return new ActionURL(NabAssayController.DetailsAction.class,
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");
+    }
+
+    public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
+    {
+        List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
+        if (supportsMultiVirusPlate())
+            result.add(createVirusWellGroupDomain(c, user));
+        return result;
+    }
+
+    public boolean supportsMultiVirusPlate()
+    {
+        return true;
+    }
+
+    protected Pair<Domain, Map<DomainProperty, Object>> createVirusWellGroupDomain(Container c, User user)
+    {
+        String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_VIRUS_WELLGROUP);
+        Domain virusWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Virus Fields");
+
+        virusWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the virus well groups in their chosen plate template.");
+        addProperty(virusWellGroupDomain, VIRUS_NAME_PROPERTY_NAME, PropertyType.STRING);
+        addProperty(virusWellGroupDomain, VIRUS_ID_PROPERTY_NAME, PropertyType.STRING);
+
+        return new Pair<>(virusWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
+    }
+
+    public Domain getVirusWellGroupDomain(ExpProtocol protocol)
+    {
+        if (supportsMultiVirusPlate())
+            return getDomainByPrefixIfExists(protocol, ASSAY_DOMAIN_VIRUS_WELLGROUP);
+        else
+            return null;
+    }
+
+    public PlateSamplePropertyHelper getVirusPropertyHelper(PlateUploadForm context)
+    {
+        PlateTemplate template = getPlateTemplate(context.getContainer(), context.getProtocol());
+        try
+        {
+            AssayProvider provider = context.getProvider();
+            if (supportsMultiVirusPlate() && provider instanceof NabAssayProvider)
+            {
+                Domain domain = ((NabAssayProvider)provider).getVirusWellGroupDomain(context.getProtocol());
+
+                if (domain != null)
+                    return new NabVirusPropertyHelper(domain.getProperties(), template);
+            }
+            return null;
+        }
+        catch (IllegalArgumentException e)
+        {
+            return null;        // TODO: temp until we deal with assays created before this version
+        }
+    }
+
+    @Override
+    public AssayRunCreator getRunCreator()
+    {
+        return new NabRunCreator(this);
     }
 }

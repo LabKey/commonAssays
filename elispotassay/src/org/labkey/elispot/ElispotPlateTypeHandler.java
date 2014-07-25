@@ -59,7 +59,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
         return "ELISpot";
     }
 
-    public List<String> getTemplateTypes()
+    public List<String> getTemplateTypes(Pair<Integer, Integer> size)
     {
         List<String> names = new ArrayList<>();
         names.add(BLANK_PLATE);

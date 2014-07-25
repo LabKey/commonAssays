@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
@@ -36,6 +37,7 @@ import org.labkey.nab.multiplate.SinglePlateDilutionNabAssayProvider;
 import org.labkey.nab.multiplate.SinglePlateDilutionNabDataHandler;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
+import org.labkey.nab.query.NabVirusDomainKind;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,12 +57,11 @@ public class NabModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.20;
+        return 14.22;
     }
 
     protected void init()
     {
-//        addController("nab", NabController.class);
         addController("nabassay", NabAssayController.class);
 
         NabProviderSchema.register(this);
@@ -105,6 +106,8 @@ public class NabModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(new CrossPlateDilutionNabDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new SinglePlateDilutionNabDataHandler());
         ContainerManager.addContainerListener(new NabContainerListener());
+
+        PropertyService.get().registerDomainKind(new NabVirusDomainKind());
     }
 
 

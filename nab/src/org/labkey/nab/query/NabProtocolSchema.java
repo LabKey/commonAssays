@@ -33,11 +33,13 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.RunListDetailsQueryView;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.study.query.RunListQueryView;
@@ -58,9 +60,9 @@ import java.util.Set;
 public class NabProtocolSchema extends AssayProtocolSchema
 {
     private static final Cache<String, Set<Double>> CUTOFF_CACHE = new BlockingCache<>(new DatabaseCache<Wrapper<Set<Double>>>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"));
-
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
     public static final String NAB_DBSCHEMA_NAME = "nab";
+    public static final String NAB_VIRUS_SCHEMA_NAME = "nabvirus";
 
     private Set<Double> _cutoffValues;
 
@@ -191,6 +193,13 @@ public class NabProtocolSchema extends AssayProtocolSchema
             {
                 return createNAbSpecimenTable();
             }
+
+            if (DilutionManager.VIRUS_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                Domain virusDomain = getVirusWellGroupDomain();
+                if (virusDomain != null)
+                    return new NabVirusDataTable(this, virusDomain);
+            }
         }
         return super.createProviderTable(tableType);
     }
@@ -214,6 +223,21 @@ public class NabProtocolSchema extends AssayProtocolSchema
     {
         Set<String> result = super.getTableNames();
         result.add(DilutionManager.CUTOFF_VALUE_TABLE_NAME);
+
+        if (getVirusWellGroupDomain() != null)
+            result.add(DilutionManager.VIRUS_TABLE_NAME);
+
         return result;
+    }
+
+    @Nullable
+    private Domain getVirusWellGroupDomain()
+    {
+        AssayProvider provider = getProvider();
+        if ((provider instanceof NabAssayProvider) && ((NabAssayProvider)provider).supportsMultiVirusPlate())
+        {
+            return ((NabAssayProvider)provider).getVirusWellGroupDomain(getProtocol());
+        }
+        return null;
     }
 }

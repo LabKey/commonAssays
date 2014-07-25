@@ -22,6 +22,7 @@ import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.view.RunDetailOptions;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
@@ -116,11 +117,13 @@ public abstract class NabAssayRun extends DilutionAssayRun
             if (null == outputObject)
                 throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.size());
 
-            Map<String, DilutionResultProperties> allProperties = getSampleProperties(outputObject);
+            Map<String, Map<PropertyDescriptor, Object>> samplePropertiesMap = getSampleProperties();
+            DilutionSummary[] dilutionSummaries = getSummaries();
+            Map<String, DilutionResultProperties> allProperties = getSampleProperties(outputObject, dilutionSummaries, samplePropertiesMap);
             Set<String> captions = new HashSet<>();
             boolean longCaptions = false;
 
-            for (DilutionSummary summary : getSummaries())
+            for (DilutionSummary summary : dilutionSummaries)
             {
                 if (!summary.isBlank())
                 {
@@ -130,8 +133,9 @@ public abstract class NabAssayRun extends DilutionAssayRun
                         longCaptions = true;
                     captions.add(shortCaption);
 
-                    DilutionResultProperties props = allProperties.get(getSampleKey(summary));
-                    sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
+                    Map<PropertyDescriptor, Object> sampleProperties = samplePropertiesMap.get(getSampleKey(summary));
+                    DilutionResultProperties props = allProperties.get(summary.getFirstWellGroup().getName());
+                    sampleResults.add(new SampleResult(_provider, outputObject, summary, key, sampleProperties, props));
                 }
             }
 

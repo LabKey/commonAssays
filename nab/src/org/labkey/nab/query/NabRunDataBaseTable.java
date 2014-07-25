@@ -42,10 +42,12 @@ import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.query.QcAwarePropertyForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
+import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
 
 import java.util.ArrayList;
@@ -71,7 +73,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
     public NabRunDataBaseTable(final NabProtocolSchema schema, final ExpProtocol protocol)
     {
         super(new NAbSpecimenTable(schema), schema);
-        _nabSpecimenTable = (NAbSpecimenTable)getRealTable();
+        _nabSpecimenTable = (NAbSpecimenTable) getRealTable();
         _schema = schema;
         _protocol = protocol;
 
@@ -116,6 +118,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
             if (!hiddenProperties.contains(prop.getName()))
                 visibleColumns.add(FieldKey.fromParts("Run", AssayService.BATCH_COLUMN_NAME, prop.getName()));
         }
+
         setDefaultVisibleColumns(visibleColumns);
     }
 
@@ -144,7 +147,7 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
 
         // add object ID again, this time as a lookup to a virtual property table that contains our selected NAB properties:
 
-        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(pds, this, schema)             // Needed by NewNab only to ger defaultHiddenProperties
+        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(pds, this, schema)             // Needed by NewNab only to get defaultHiddenProperties
         {
             @Override
             protected ColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
@@ -289,6 +292,31 @@ public abstract class NabRunDataBaseTable extends FilteredTable<AssaySchema>
                     if (null != key)
                         visibleColumns.add(key);
                 }
+            }
+        }
+
+        if (provider instanceof NabAssayProvider && ((NabAssayProvider)provider).supportsMultiVirusPlate())
+        {
+            Domain domain = ((NabAssayProvider)provider).getVirusWellGroupDomain(protocol);
+            if (null != domain)
+            {
+                ColumnInfo virusColumn = wrapColumn(_rootTable.getColumn("VirusLsid"));
+                virusColumn.setLabel("Virus");
+                virusColumn.setIsUnselectable(true);
+                virusColumn.setKeyField(false);
+                LookupForeignKey fkVirus = new LookupForeignKey("VirusLsid")
+                {
+                    @Override
+                    public TableInfo getLookupTableInfo()
+                    {
+                        AssayProtocolSchema protocolSchema = provider.createProtocolSchema(schema.getUser(), getContainer(), protocol, null);
+                        return protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+                    }
+                };
+                virusColumn.setFk(fkVirus);
+                addColumn(virusColumn);
+                visibleColumns.add(new FieldKey(virusColumn.getFieldKey(), "VirusName"));
+                visibleColumns.add(new FieldKey(virusColumn.getFieldKey(), "VirusID"));
             }
         }
     }

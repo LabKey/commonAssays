@@ -42,6 +42,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.Position;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
@@ -52,11 +53,13 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -183,7 +186,54 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
         List<? extends WellData> wells = group.getWellData(true);
         boolean reverseDirection = Boolean.parseBoolean((String) group.getProperty(SampleProperty.ReverseDilutionDirection.name()));
-        applyDilution(wells, sampleInput, properties, reverseDirection);
+
+        // for the multi virus case, we need to produce dilution summaries over the intersection of the
+        // sample and virus well groups
+        Set<WellGroup> virusGroups = group.getOverlappingGroups(WellGroup.Type.VIRUS);
+        if (!virusGroups.isEmpty())
+        {
+            Set<WellGroup> replicates = group.getOverlappingGroups(WellGroup.Type.REPLICATE);
+            Map<String, WellGroup> replicateToVirusGroup = new HashMap<>();
+
+            for (WellGroup replicateGroup : replicates)
+            {
+                for (Position p : replicateGroup.getPositions())
+                {
+                    for (WellGroup virusGroup : virusGroups)
+                    {
+                        if (virusGroup.contains(p))
+                        {
+                            // need to ensure replicate groups are completely contained
+                            if (replicateToVirusGroup.containsKey(replicateGroup.getName()))
+                            {
+                                if (!replicateToVirusGroup.get(replicateGroup.getName()).equals(virusGroup))
+                                    throw new ExperimentException("The replicate group: " + replicateGroup + " spans more than one virus group");
+                            }
+                            else
+                                replicateToVirusGroup.put(replicateGroup.getName(), virusGroup);
+                        }
+                    }
+                }
+            }
+
+            // loop over the replicate groups
+            for (WellGroup virusGroup : virusGroups)
+            {
+                List<WellData> virusData = new ArrayList<>();
+                for (WellData well : wells)
+                {
+                    if (well instanceof WellGroup)
+                    {
+                        String groupName = ((WellGroup)well).getName();
+                        if (virusGroup.equals(replicateToVirusGroup.get(groupName)))
+                            virusData.add(well);
+                    }
+                }
+                applyDilution(virusData, sampleInput, properties, reverseDirection);
+            }
+        }
+        else
+            applyDilution(wells, sampleInput, properties, reverseDirection);
     }
 
     private Pair<Integer, Integer> getPlateDataLocation(Sheet plateSheet, int plateHeight, int plateWidth)
