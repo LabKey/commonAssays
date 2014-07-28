@@ -84,7 +84,8 @@ public class AnalyteTitration extends AbstractLuminexControlAnalyte
         curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), getTitrationId());
         List<CurveFit> curveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), curveFitFilter, null).getArrayList(CurveFit.class);
 
-        LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(schema.getUser(), run, schema.getProtocol(), this, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), curveFits);
+        if (titration.isStandard() || titration.isQcControl())
+            LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(schema.getUser(), run, schema.getProtocol(), this, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), curveFits);
     }
 
     public Titration getTitrationFromId()

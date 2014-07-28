@@ -38,6 +38,7 @@ if (!is.null(isTitration)) {
 if (!is.null(isTitration)) {
     colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
     colFilter=rbind(colFilter,makeFilter(c("Titration/Name","EQUAL",labkey.url.params$Titration)));
+    colFilter=rbind(colFilter,makeFilter(c("Titration/IncludeInQcReport","EQUAL",TRUE)));
     if (labkey.url.params$Conjugate == "") {
         colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","MISSING",labkey.url.params$Conjugate)));
     } else {

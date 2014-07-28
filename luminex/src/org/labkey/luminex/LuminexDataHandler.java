@@ -963,7 +963,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
             }
 
-            insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
+            if (titration.isStandard() || titration.isQcControl())
+                insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
         }
         catch (FitFailedException e)
         {

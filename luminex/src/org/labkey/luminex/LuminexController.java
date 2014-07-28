@@ -22,6 +22,7 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
@@ -151,8 +152,7 @@ public class LuminexController extends SpringActionController
             AssayView result = new AssayView();
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
-            SimpleFilter filter = new SimpleFilter(new SimpleFilter.SQLClause("Titration_fs_Standard=? OR Titration_fs_QCControl=?", new Object[]{true, true}));
-            settings.setBaseFilter(filter);
+            settings.setBaseFilter(new SimpleFilter(FieldKey.fromParts("Titration", "IncludeInQcReport"), true));
             setHelpTopic(new HelpTopic("applyGuideSets"));
             QueryView view = new QueryView(schema, settings, errors)
             {

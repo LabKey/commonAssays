@@ -217,7 +217,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
         {
             sql =  'SELECT DISTINCT x.Analyte.Name AS Analyte, x.Titration.Run.Isotype AS Isotype, x.Titration.Run.Conjugate AS Conjugate, '
                 + 'FROM AnalyteTitration AS x '
-                + ' WHERE x.Titration.Name = \'' + this.controlName.replace(/'/g, "''") + '\'';
+                + ' WHERE x.Titration.IncludeInQcReport=true AND x.Titration.Name = \'' + this.controlName.replace(/'/g, "''") + '\'';
         }
         else
         {

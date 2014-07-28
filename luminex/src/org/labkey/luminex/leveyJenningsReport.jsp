@@ -117,7 +117,7 @@
         {
             reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
             queryName = 'AnalyteTitration';
-            filterArray = [LABKEY.Filter.create('Titration/Name', _controlName)];
+            filterArray = [LABKEY.Filter.create('Titration/Name', _controlName), LABKEY.Filter.create('Titration/IncludeInQcReport', true)];
         }
         else
         {

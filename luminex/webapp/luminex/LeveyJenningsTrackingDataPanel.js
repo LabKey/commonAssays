@@ -200,6 +200,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         {
             return [
                 LABKEY.Filter.create('Titration/Name', this.controlName),
+                LABKEY.Filter.create('Titration/IncludeInQcReport', true),
                 LABKEY.Filter.create('Analyte/Name', this.analyte),
                 LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                 LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))

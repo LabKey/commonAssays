@@ -18,8 +18,11 @@ package org.labkey.luminex;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.util.StringExpressionFactory;
@@ -45,10 +48,20 @@ public class TitrationTable extends AbstractLuminexTable
         // to import correctly. This is important because not all Luminex rows will have a titration, and therefore
         // they won't all have a titration name.
         nameColumn.setNullable(true);
+
         addColumn(wrapColumn(getRealTable().getColumn("Standard")));
         addColumn(wrapColumn(getRealTable().getColumn("QCControl")));
         addColumn(wrapColumn(getRealTable().getColumn("Unknown")));
         addColumn(wrapColumn(getRealTable().getColumn("OtherControl")));
+
+        // issue 21138
+        String bTRUE = getSchema().getSqlDialect().getBooleanTRUE();
+        String bFALSE = getSchema().getSqlDialect().getBooleanFALSE();
+        SQLFragment qcReportSQL = new SQLFragment();
+        qcReportSQL.append("(CASE WHEN Standard=").append(bTRUE).append(" OR QCControl=").append(bTRUE);
+        qcReportSQL.append(" THEN ").append(bTRUE).append(" ELSE ").append(bFALSE).append(" END)");
+        addColumn(new ExprColumn(this, "IncludeInQcReport", qcReportSQL, JdbcType.BOOLEAN));
+
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
         QueryForeignKey runFk = new QueryForeignKey(schema, null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name");
         runColumn.setFk(runFk);
