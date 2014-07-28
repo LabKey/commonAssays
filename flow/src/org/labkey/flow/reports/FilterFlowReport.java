@@ -31,6 +31,7 @@ import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.reports.report.ScriptReportDescriptor;
@@ -623,7 +624,7 @@ public abstract class FilterFlowReport extends FlowReport
 
         if (getReportId() != null)
         {
-            FilterFlowReport origReport = (FilterFlowReport)getReportId().getReport(context);
+            FilterFlowReport origReport = (FilterFlowReport) ReportService.get().getReport(getReportId().getRowId());
             if (origReport != null)
             {
                 String origPropStr = origReport.getDescriptor().getProperty(descriptorPropName);
