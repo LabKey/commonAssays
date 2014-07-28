@@ -16,13 +16,20 @@
  */
 %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
-<%@ page import="org.labkey.flow.query.FlowPropertySet" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="org.labkey.flow.persist.AttributeCache" %>
+<%@ page import="org.labkey.flow.query.FlowPropertySet" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
-<script type="text/javascript">
-	LABKEY.requiresClientAPI();
-</script>
+<%!
+
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("Ext4"));
+        return resources;
+    }
+%>
 <style type="text/css">
     .well {height:24px; width:24px; font-size:8pt; text-align:center; vertical-align:middle; color:#000000;}
     .wellEmpty {height:24px; width:24px; font-size:8pt; text-align:center; vertical-align:middle; color:#997777; background-color:#ffdddd;}
@@ -41,7 +48,7 @@ function parseParameters()
 		var kv = a[i].split('=');
 		queryParams[kv[0]] = kv[1];
 	}
-};
+}
 parseParameters();
 
 var options = {};
@@ -55,13 +62,13 @@ options.CONCENTRATION= "FCSFile/Keyword/concentration";
 if (queryParams['runId'])
 	options.RUNID = queryParams['runId'];
 
-var h = Ext.util.Format.htmlEncode;
+var h = Ext4.util.Format.htmlEncode;
 function _id(s) {return document.getElementById(s);}
 function _div(node) { var div = document.createElement("DIV"); if (node) div.appendChild(node); return div; }
 function _tbody() { return document.createElement("TBODY"); }
 function _tr() { return document.createElement("TR"); }
 function _td(node) { var td = document.createElement("TD"); if (node) td.appendChild(node); return td;}
-function _text(s) {return document.createTextNode(s)};
+function _text(s) {return document.createTextNode(s)}
 function removeChildren(e)
 {
     while (e && e.firstChild)
@@ -73,7 +80,7 @@ Color = function(r,g,b)
     this.r = r;
     this.g = g;
     this.b = b;
-}
+};
 
 function _fix(c)
 {
@@ -88,7 +95,7 @@ Color.prototype.fix = function()
     this.g = _fix(this.g);
     this.b = _fix(this.b);
     return this;
-}
+};
 
 Color.prototype.toCSS = function()
 {
@@ -96,13 +103,13 @@ Color.prototype.toCSS = function()
     var c = this.r * (0x10000) + this.g * (0x100) + this.b * (0x1);
     var color = c.toString(16);
     return "#" + "000000".substr(color.length) + color;
-}
+};
 
 Color.prototype.isDark = function()
 {
     var a = this.r + this.g + this.b;
     return a < 255;
-}
+};
 
 Color.interpolate = function(a,b,x)
 {
@@ -111,7 +118,7 @@ Color.interpolate = function(a,b,x)
         a.g * (1-x) + b.g * x,
         a.b * (1-x) + b.b * x
     );
-}
+};
 
 // functions that take value [0-1.0] and map to color(0-255,0-255,0-255)
 var HEATMAPS =
@@ -229,7 +236,7 @@ function FCSAnalyses_Handler(responseObj)
 
 function Statistic_onChange()
 {
-    var e = Ext.get("statistic");
+    var e = Ext4.get("statistic");
     if (e.dom.selectedIndex == 0)
         return;
     var stat =  e.getValue();
@@ -253,7 +260,7 @@ function Statistics_Handler(responseObj)
 
 function populateStatistics(stats)
 {
-    var select = Ext.get("statistic").dom;
+    var select = Ext4.get("statistic").dom;
     for (var i=0 ; i<stats.length ; i++)
     {
         var name = stats[i];
@@ -263,7 +270,7 @@ function populateStatistics(stats)
 
 function getData()
 {
-    Ext.get("plateDisplay").update("<img src='<%=request.getContextPath()%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/shared/blue-loading.gif'>");
+    Ext4.get("plateDisplay").update("<img src='<%=request.getContextPath()%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/shared/blue-loading.gif'>");
     LABKEY.Query.selectRows(
         {
             schemaName:'flow',
@@ -317,7 +324,7 @@ function generateTables(plates)
     var foundAll = true;
     for (plate in plates)
     {
-        if (!Ext.get("T" + plate))
+        if (!Ext4.get("T" + plate))
             foundAll = false;
     }
     if (foundAll)
@@ -339,7 +346,7 @@ function generateTables(plates)
         }
         ret.push("</table>");
     }
-    Ext.get("plateDisplay").update(ret.join(""),false);
+    Ext4.get("plateDisplay").update(ret.join(""),false);
     wellTDs = {};
 }
 
@@ -420,10 +427,10 @@ function updateHeapMap(plates, map)
 
 function showHeatMap(min,max)
 {
-    if (Ext.get("legendMax"))
+    if (Ext4.get("legendMax"))
     {
-        Ext.get("legendMax").update(max);
-        Ext.get("legendMin").update(min);
+        Ext4.get("legendMax").update(max);
+        Ext4.get("legendMin").update(min);
         return;
     }
     var height=180;
@@ -438,7 +445,7 @@ function showHeatMap(min,max)
         html.push(img.replace("COLOR", c.toCSS()));
     }
     html.push("<span id='legendMin'>" + min + "</span><br>");
-    Ext.get("showMap").update(html.join(""));
+    Ext4.get("showMap").update(html.join(""));
 }
 
 
@@ -448,14 +455,12 @@ function encodeFieldKey(k)
 }
 
 
-Ext.onReady(function()
+Ext4.onReady(function()
 {
     getStatistics();
     //getData();
 });
 
-
-var statistics = null;  // for pure client API page this can be left null;
 var statistics = [<%
 String comma = "";
 FlowPropertySet ps = new FlowPropertySet(getContainer());
