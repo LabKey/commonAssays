@@ -25,7 +25,26 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.luminex.LeveyJenningsForm" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
 
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
+        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsGraphParamsPanel.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsGuideSetPanel.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsTrendPlotPanel.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsTrackingDataPanel.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/ManageGuideSetPanel.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/ApplyGuideSetPanel.js"));
+        resources.add(ClientDependency.fromFilePath("Experiment/QCFlagToggleWindow.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsReport.css"));
+        return resources;
+    }
+%>
 <%
     JspView<LeveyJenningsForm> me = (JspView<LeveyJenningsForm>) HttpView.currentView();
     LeveyJenningsForm bean = me.getModelBean();
@@ -44,15 +63,6 @@
 <div id="trackingDataPanel" style="margin-left:15px"></div>
 
 <script type="text/javascript">
-    LABKEY.requiresExt3ClientAPI(true, function(){
-        LABKEY.requiresScript("luminex/LeveyJenningsGraphParamsPanel.js");
-        LABKEY.requiresScript("luminex/LeveyJenningsGuideSetPanel.js");
-        LABKEY.requiresScript("luminex/LeveyJenningsTrendPlotPanel.js");
-        LABKEY.requiresScript("luminex/LeveyJenningsTrackingDataPanel.js");
-        LABKEY.requiresScript("luminex/ManageGuideSetPanel.js");
-        LABKEY.requiresScript("luminex/ApplyGuideSetPanel.js");
-        LABKEY.requiresScript("Experiment/QCFlagToggleWindow.js");
-        LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 
         var $h = Ext.util.Format.htmlEncode;
 
@@ -266,5 +276,4 @@
         }
 
         Ext.onReady(init);
-    });
 </script>
