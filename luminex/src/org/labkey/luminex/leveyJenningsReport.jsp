@@ -44,224 +44,227 @@
 <div id="trackingDataPanel" style="margin-left:15px"></div>
 
 <script type="text/javascript">
-    LABKEY.requiresScript("luminex/LeveyJenningsGraphParamsPanel.js");
-    LABKEY.requiresScript("luminex/LeveyJenningsGuideSetPanel.js");
-    LABKEY.requiresScript("luminex/LeveyJenningsTrendPlotPanel.js");
-    LABKEY.requiresScript("luminex/LeveyJenningsTrackingDataPanel.js");
-    LABKEY.requiresScript("luminex/ManageGuideSetPanel.js");
-    LABKEY.requiresScript("luminex/ApplyGuideSetPanel.js");
-    LABKEY.requiresScript("Experiment/QCFlagToggleWindow.js");
-    LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
+    LABKEY.requiresExt3ClientAPI(true, function(){
+        LABKEY.requiresScript("luminex/LeveyJenningsGraphParamsPanel.js");
+        LABKEY.requiresScript("luminex/LeveyJenningsGuideSetPanel.js");
+        LABKEY.requiresScript("luminex/LeveyJenningsTrendPlotPanel.js");
+        LABKEY.requiresScript("luminex/LeveyJenningsTrackingDataPanel.js");
+        LABKEY.requiresScript("luminex/ManageGuideSetPanel.js");
+        LABKEY.requiresScript("luminex/ApplyGuideSetPanel.js");
+        LABKEY.requiresScript("Experiment/QCFlagToggleWindow.js");
+        LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 
-    var $h = Ext.util.Format.htmlEncode;
+        var $h = Ext.util.Format.htmlEncode;
 
-    // the default number of records to return for the report when no start and end date are provided
-    var defaultRowSize = 30;
+        // the default number of records to return for the report when no start and end date are provided
+        var defaultRowSize = 30;
 
-    // local variables for storing the selected graph parameters
-    var _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
+        // local variables for storing the selected graph parameters
+        var _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
 
-    Ext.onReady(init);
-    function init()
-    {
-        _controlName = <%=PageFlowUtil.jsString(bean.getControlName())%>;
-        _controlType = <%=PageFlowUtil.jsString(bean.getControlType().toString())%>;
-        _protocolName = <%=PageFlowUtil.jsString(bean.getProtocol().getName())%>;
-
-        if ("" == _controlType || "" == _controlName)
+        function init()
         {
-            Ext.get('graphParamsPanel').update("Error: no control name specified.");
-            return;
-        }
-        if ('SinglePoint' != _controlType && 'Titration' != _controlType)
-        {
-            Ext.get('graphParamsPanel').update("Error: unsupported control type: '" + _controlType + "'");
-            return;
-        }
-        if ("" == _protocolName)
-        {
-            Ext.get('graphParamsPanel').update("Error: no protocol specified.");
-            return;
-        }
+            _controlName = <%=PageFlowUtil.jsString(bean.getControlName())%>;
+            _controlType = <%=PageFlowUtil.jsString(bean.getControlType().toString())%>;
+            _protocolName = <%=PageFlowUtil.jsString(bean.getProtocol().getName())%>;
 
-        var getByName, selectRows;
-        var loader = function() {
-            if (getByName && selectRows) {
-                initializeReportPanels();
+            if ("" == _controlType || "" == _controlName)
+            {
+                Ext.get('graphParamsPanel').update("Error: no control name specified.");
+                return;
             }
-        };
+            if ('SinglePoint' != _controlType && 'Titration' != _controlType)
+            {
+                Ext.get('graphParamsPanel').update("Error: unsupported control type: '" + _controlType + "'");
+                return;
+            }
+            if ("" == _protocolName)
+            {
+                Ext.get('graphParamsPanel').update("Error: no protocol specified.");
+                return;
+            }
 
-        // Perform an initial query to check for the Network and Protocol columns
-        LABKEY.Assay.getByName({
-            name: _protocolName,
-            success: function(data) {
-                var batchFields = data[0].domains[_protocolName + ' Batch Fields'];
-                for (var i=0; i<batchFields.length; i++) {
-                    if (batchFields[i].fieldKey.toLowerCase() == "network") {
-                        _networkExists = true;
-                    }
-                    if (batchFields[i].fieldKey.toLowerCase() == "customprotocol") {
-                        _protocolExists = true;
-                    }
+            var getByName, selectRows;
+            var loader = function() {
+                if (getByName && selectRows) {
+                    initializeReportPanels();
                 }
-                getByName = true;
-                loader();
-            }
-        });
+            };
 
-        // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
-        var reqColumns;
-        var queryName;
-        var filterArray;
-        if ('Titration' == _controlType)
-        {
-            reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
-            queryName = 'AnalyteTitration';
-            filterArray = [LABKEY.Filter.create('Titration/Name', _controlName), LABKEY.Filter.create('Titration/IncludeInQcReport', true)];
-        }
-        else
-        {
-            reqColumns = ['SinglePointControl/Name', 'SinglePointControl/Run/Isotype', 'SinglePointControl/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
-            queryName = 'AnalyteSinglePointControl';
-            filterArray = [LABKEY.Filter.create('SinglePointControl/Name', _controlName)];
-        }
-        LABKEY.Query.selectRows({
-            containerFilter: LABKEY.Query.containerFilter.allFolders,
-            schemaName: 'assay.Luminex.' + _protocolName,
-            queryName: queryName,
-            filterArray: filterArray,
-            columns: reqColumns.join(','),
-            maxRows: 1,
-            success: function(data) {
-                if (data.rows.length == 0)
-                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_controlName) + "'.");
-                else
-                {
-                    var missingColumns = '';
-                    var separator = '';
-                    // check that all of the required properties for the report exist
-                    for (var i = 0; i < reqColumns.length; i++)
-                    {
-                        if (!(reqColumns[i] in data.rows[0]))
-                        {
-                            missingColumns += separator + reqColumns[i];
-                            separator = ", ";
+            // Perform an initial query to check for the Network and Protocol columns
+            LABKEY.Assay.getByName({
+                name: _protocolName,
+                success: function(data) {
+                    var batchFields = data[0].domains[_protocolName + ' Batch Fields'];
+                    for (var i=0; i<batchFields.length; i++) {
+                        if (batchFields[i].fieldKey.toLowerCase() == "network") {
+                            _networkExists = true;
+                        }
+                        if (batchFields[i].fieldKey.toLowerCase() == "customprotocol") {
+                            _protocolExists = true;
                         }
                     }
-                    if (missingColumns.length > 0)
-                    {
-                        Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns + ") for the report do not exist in '" + $h(_protocolName) + "'.");
-                        return;
-                    }
-
-                    selectRows = true;
+                    getByName = true;
                     loader();
                 }
-            },
-            failure: function(response) {
-                Ext.get('graphParamsPanel').update("Error: " + response.exception);
+            });
+
+            // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
+            var reqColumns;
+            var queryName;
+            var filterArray;
+            if ('Titration' == _controlType)
+            {
+                reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
+                queryName = 'AnalyteTitration';
+                filterArray = [LABKEY.Filter.create('Titration/Name', _controlName), LABKEY.Filter.create('Titration/IncludeInQcReport', true)];
             }
-        });
-    }
-
-    function initializeReportPanels()
-    {
-        // initialize the graph parameters selection panel
-        var graphParamsPanel = new LABKEY.LeveyJenningsGraphParamsPanel({
-            renderTo: 'graphParamsPanel',
-            cls: 'extContainer',
-            controlName: _controlName,
-            controlType: _controlType,
-            assayName: _protocolName,
-            listeners: {
-                'applyGraphBtnClicked': function(analyte, isotype, conjugate){
-                    _analyte = analyte;
-                    _isotype = isotype;
-                    _conjugate = conjugate;
-
-                    guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
-                    trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
-                    trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate, null, null);
-                },
-                'graphParamsChanged': function(){
-                    guideSetPanel.disable();
-                    trendPlotPanel.disable();
-                    trackingDataPanel.disable();
-                }
+            else
+            {
+                reqColumns = ['SinglePointControl/Name', 'SinglePointControl/Run/Isotype', 'SinglePointControl/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
+                queryName = 'AnalyteSinglePointControl';
+                filterArray = [LABKEY.Filter.create('SinglePointControl/Name', _controlName)];
             }
-        });
-
-        var resizer = new Ext.Resizable('graphParamsPanel', {
-            handles: 'e',
-            minWidth: 225
-        });
-        resizer.on('resize', function(rez, width, height){
-            graphParamsPanel.setWidth(width);
-            graphParamsPanel.doLayout();
-        });        
-
-        // initialize the panel for user to interact with the current guide set (edit and create new)
-        var guideSetPanel = new LABKEY.LeveyJenningsGuideSetPanel({
-            renderTo: 'guideSetOverviewPanel',
-            cls: 'extContainer',
-            controlName: _controlName,
-            controlType: _controlType,
-            assayName: _protocolName,
-            networkExists: _networkExists,
-            protocolExists: _protocolExists,
-            listeners: {
-                'currentGuideSetUpdated': function() {
-                    trendPlotPanel.setTabsToRender();
-                    trendPlotPanel.displayTrendPlot();
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
-                },
-                'exportPdfBtnClicked': function() {
-                    if (trendPlotPanel.getPdfHref())
+            LABKEY.Query.selectRows({
+                containerFilter: LABKEY.Query.containerFilter.allFolders,
+                schemaName: 'assay.Luminex.' + _protocolName,
+                queryName: queryName,
+                filterArray: filterArray,
+                columns: reqColumns.join(','),
+                maxRows: 1,
+                success: function(data) {
+                    if (data.rows.length == 0)
+                        Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_controlName) + "'.");
+                    else
                     {
-                        window.location = trendPlotPanel.getPdfHref() + "&attachment=true&deleteFile=false";
+                        var missingColumns = '';
+                        var separator = '';
+                        // check that all of the required properties for the report exist
+                        for (var i = 0; i < reqColumns.length; i++)
+                        {
+                            if (!(reqColumns[i] in data.rows[0]))
+                            {
+                                missingColumns += separator + reqColumns[i];
+                                separator = ", ";
+                            }
+                        }
+                        if (missingColumns.length > 0)
+                        {
+                            Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns + ") for the report do not exist in '" + $h(_protocolName) + "'.");
+                            return;
+                        }
+
+                        selectRows = true;
+                        loader();
+                    }
+                },
+                failure: function(response) {
+                    Ext.get('graphParamsPanel').update("Error: " + response.exception);
+                }
+            });
+        }
+
+        function initializeReportPanels()
+        {
+            // initialize the graph parameters selection panel
+            var graphParamsPanel = new LABKEY.LeveyJenningsGraphParamsPanel({
+                renderTo: 'graphParamsPanel',
+                cls: 'extContainer',
+                controlName: _controlName,
+                controlType: _controlType,
+                assayName: _protocolName,
+                listeners: {
+                    'applyGraphBtnClicked': function(analyte, isotype, conjugate){
+                        _analyte = analyte;
+                        _isotype = isotype;
+                        _conjugate = conjugate;
+
+                        guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
+                        trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
+                        trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate, null, null);
+                    },
+                    'graphParamsChanged': function(){
+                        guideSetPanel.disable();
+                        trendPlotPanel.disable();
+                        trackingDataPanel.disable();
                     }
                 }
-            }
-        });
+            });
 
-        // initialize the panel that displays the R plot for the trend plotting of EC50, AUC, and High MFI
-        var trendPlotPanel = new LABKEY.LeveyJenningsTrendPlotPanel({
-            renderTo: 'rPlotPanel',
-            cls: 'extContainer',
-            controlName: _controlName,
-            controlType: _controlType,
-            assayName: _protocolName,
-            defaultRowSize: defaultRowSize,
-            networkExists: _networkExists,
-            protocolExists: _protocolExists,
-            listeners: {
-                'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, networkAny, protocol, protocolAny);
-                },
-                'togglePdfBtn': function(toEnable) {
-                    guideSetPanel.toggleExportBtn(toEnable);
-                }
-            }
-        });
+            var resizer = new Ext.Resizable('graphParamsPanel', {
+                handles: 'e',
+                minWidth: 225
+            });
+            resizer.on('resize', function(rez, width, height){
+                graphParamsPanel.setWidth(width);
+                graphParamsPanel.doLayout();
+            });
 
-        // initialize the grid panel to display the tracking data
-        var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
-            renderTo: 'trackingDataPanel',
-            cls: 'extContainer',
-            controlName: _controlName,
-            controlType: _controlType,
-            assayName: _protocolName,
-            defaultRowSize: defaultRowSize,
-            networkExists: _networkExists,
-            protocolExists: _protocolExists,
-            listeners: {
-                'appliedGuideSetUpdated': function() {
-                    trendPlotPanel.setTabsToRender();
-                    trendPlotPanel.displayTrendPlot();
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
-                            trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
+            // initialize the panel for user to interact with the current guide set (edit and create new)
+            var guideSetPanel = new LABKEY.LeveyJenningsGuideSetPanel({
+                renderTo: 'guideSetOverviewPanel',
+                cls: 'extContainer',
+                controlName: _controlName,
+                controlType: _controlType,
+                assayName: _protocolName,
+                networkExists: _networkExists,
+                protocolExists: _protocolExists,
+                listeners: {
+                    'currentGuideSetUpdated': function() {
+                        trendPlotPanel.setTabsToRender();
+                        trendPlotPanel.displayTrendPlot();
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
+                    },
+                    'exportPdfBtnClicked': function() {
+                        if (trendPlotPanel.getPdfHref())
+                        {
+                            window.location = trendPlotPanel.getPdfHref() + "&attachment=true&deleteFile=false";
+                        }
+                    }
                 }
-            }
-        });
-    }
+            });
+
+            // initialize the panel that displays the R plot for the trend plotting of EC50, AUC, and High MFI
+            var trendPlotPanel = new LABKEY.LeveyJenningsTrendPlotPanel({
+                renderTo: 'rPlotPanel',
+                cls: 'extContainer',
+                controlName: _controlName,
+                controlType: _controlType,
+                assayName: _protocolName,
+                defaultRowSize: defaultRowSize,
+                networkExists: _networkExists,
+                protocolExists: _protocolExists,
+                listeners: {
+                    'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, networkAny, protocol, protocolAny);
+                    },
+                    'togglePdfBtn': function(toEnable) {
+                        guideSetPanel.toggleExportBtn(toEnable);
+                    }
+                }
+            });
+
+            // initialize the grid panel to display the tracking data
+            var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
+                renderTo: 'trackingDataPanel',
+                cls: 'extContainer',
+                controlName: _controlName,
+                controlType: _controlType,
+                assayName: _protocolName,
+                defaultRowSize: defaultRowSize,
+                networkExists: _networkExists,
+                protocolExists: _protocolExists,
+                listeners: {
+                    'appliedGuideSetUpdated': function() {
+                        trendPlotPanel.setTabsToRender();
+                        trendPlotPanel.displayTrendPlot();
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
+                                trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
+                    }
+                }
+            });
+        }
+
+        Ext.onReady(init);
+    });
 </script>
