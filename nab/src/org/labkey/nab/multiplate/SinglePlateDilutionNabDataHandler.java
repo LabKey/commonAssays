@@ -99,6 +99,8 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 throw createParseError(dataFile, "No columns found in data file.");
             }
 
+            // TODO: Refactor to remove code duplication with NabDataHandler.parseList()
+
             // The results column is defined as the last column in the file for this file format:
             String resultColumnHeader = columns[columns.length - 1].name;
             String virusNameColumnHeader = NabAssayProvider.VIRUS_NAME_PROPERTY_NAME;
@@ -114,7 +116,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 // Current line in the data file is calculated by the number of wells we've already read,
                 // plus one for the current row, plus one for the header row:
                 int line = plateCount * wellsPerPlate + wellCount + 2;
-                Pair<Integer, Integer> location = getWellLocation(template, dataFile, rowData, line);
+                Pair<Integer, Integer> location = getWellLocation(dataFile, LOCATION_COLUMNN_HEADER, template.getRows(), template.getColumns(), rowData, line);
                 int plateRow = location.getKey();
                 int plateCol = location.getValue();
 

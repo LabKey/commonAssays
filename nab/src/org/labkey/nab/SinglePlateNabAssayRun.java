@@ -16,11 +16,20 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
@@ -28,6 +37,7 @@ import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -305,5 +315,136 @@ public class SinglePlateNabAssayRun extends NabAssayRun
         return _virusNames;
     }
 
+    @Override
+    protected String getVirusName(String virusWellGroupName)
+    {
+        List<? extends ExpData> outputDatas = _run.getOutputDatas(null);
+        if (outputDatas.size() > 0)
+        {
+            Lsid virusLsid = DilutionDataHandler.createVirusWellGroupLsid(outputDatas.get(0), virusWellGroupName);
+            AssayProtocolSchema schema = _provider.createProtocolSchema(_user, _run.getContainer(), _protocol, null);
+            TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+            if (null != virusTable)
+            {
+                ColumnInfo columnInfo = virusTable.getColumn(AbstractPlateBasedAssayProvider.VIRUS_NAME_PROPERTY_NAME);
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromString("VirusLsid"), virusLsid.toString());
+                List<String> results = new TableSelector(columnInfo, filter, null).getArrayList(String.class);
+                if (!results.isEmpty())
+                    return results.get(0);
+            }
+        }
+        return null;
+    }
 
+    protected WellGroup getWellGroupForVirus(Plate plate, String virusWellGroupName)
+    {
+        for (WellGroup group : plate.getWellGroups(WellGroup.Type.VIRUS))
+            if (virusWellGroupName.equalsIgnoreCase(group.getName()))
+                return group;
+        return null;
+    }
+
+    private WellGroup getControlWellGroupForVirus(Plate plate, String virusWellGroupName, String controlGroupName)
+    {
+        WellGroup virusWellGroup = getWellGroupForVirus(plate, virusWellGroupName);
+        if (null != virusWellGroup)
+            return getControlWellsForVirus(plate, virusWellGroup, controlGroupName);
+        else
+            return plate.getWellGroup(WellGroup.Type.CONTROL, controlGroupName);
+    }
+
+    private CaseInsensitiveHashMap<WellGroup> _cellControls = new CaseInsensitiveHashMap<>();
+    private CaseInsensitiveHashMap<WellGroup> _virusControls = new CaseInsensitiveHashMap<>();
+
+    private boolean ensureCellControl(Plate plate, String virusWellGroupName)
+    {
+        if (null == _cellControls.get(virusWellGroupName))
+            _cellControls.put(virusWellGroupName, getControlWellGroupForVirus(plate, virusWellGroupName, DilutionManager.CELL_CONTROL_SAMPLE));
+        return null != _cellControls.get(virusWellGroupName);
+    }
+
+    private boolean ensureVirusControl(Plate plate, String virusWellGroupName)
+    {
+        if (null == _virusControls.get(virusWellGroupName))
+            _virusControls.put(virusWellGroupName, getControlWellGroupForVirus(plate, virusWellGroupName, DilutionManager.VIRUS_CONTROL_SAMPLE));
+        return null != _virusControls.get(virusWellGroupName);
+    }
+
+    @Override
+    public WellGroup getCellControlWellGroup(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getCellControlWellGroup(plate, null);
+        if (ensureCellControl(plate, virusWellGroupName))
+            return _cellControls.get(virusWellGroupName);
+        return null;
+    }
+
+    @Override
+    public WellGroup getVirusControlWellGroup(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getVirusControlWellGroup(plate, null);
+        if (ensureVirusControl(plate, virusWellGroupName))
+            return _virusControls.get(virusWellGroupName);
+        return null;
+    }
+
+    @Override
+    public double getControlRange(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getControlRange(plate, null);
+        if (ensureCellControl(plate, virusWellGroupName) && ensureVirusControl(plate, virusWellGroupName))
+            return _virusControls.get(virusWellGroupName).getMean() - _cellControls.get(virusWellGroupName).getMean();
+        return 0.0;
+    }
+
+    @Override
+    public double getVirusControlMean(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getVirusControlMean(plate, null);
+        if (ensureVirusControl(plate, virusWellGroupName))
+            return _virusControls.get(virusWellGroupName).getMean();
+        return 0.0;
+    }
+
+    @Override
+    public double getCellControlMean(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getCellControlMean(plate, null);
+        if (ensureCellControl(plate, virusWellGroupName))
+            return _cellControls.get(virusWellGroupName).getMean();
+        return 0.0;
+    }
+
+    @Override
+    public double getVirusControlPlusMinus(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getVirusControlPlusMinus(plate, null);
+        if (ensureVirusControl(plate, virusWellGroupName))
+        {
+            double virusControlMean = _virusControls.get(virusWellGroupName).getMean();
+            double virusControlStdDev = _virusControls.get(virusWellGroupName).getStdDev();
+            return virusControlStdDev / virusControlMean;
+        }
+        return 0.0;
+    }
+
+    @Override
+    public double getCellControlPlusMinus(Plate plate, String virusWellGroupName)
+    {
+        if (null == virusWellGroupName)
+            return super.getCellControlPlusMinus(plate, null);
+        if (ensureCellControl(plate, virusWellGroupName))
+        {
+            double cellControlMean = _cellControls.get(virusWellGroupName).getMean();
+            double cellControlStdDev = _cellControls.get(virusWellGroupName).getStdDev();
+            return cellControlStdDev / cellControlMean;
+        }
+        return 0.0;
+    }
 }

@@ -17,6 +17,7 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.Plate;
@@ -56,6 +57,10 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         {
             Map<String, Object> sample = new HashMap<>();
             sample.put("properties", new PropertyNameMap(result.getSampleProperties()));
+            CaseInsensitiveHashMap<Object> virusProperties = result.getVirusProperties();
+            if (!virusProperties.isEmpty())
+                sample.put("virusProperties", virusProperties);
+
             DilutionSummary dilutionSummary = result.getDilutionSummary();
             sample.put("objectId", result.getObjectId());
             sample.put("wellgroupName", dilutionSummary.getFirstWellGroup().getName());
@@ -106,6 +111,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         }
         put("samples", samples);
 
+        Map<String, Object> virusNames = assay.getVirusNames();
         List<Plate> plates = assay.getPlates();
         if (plates != null)
         {
@@ -113,15 +119,43 @@ public class NabRunPropertyMap extends HashMap<String, Object>
             {
                 String indexSuffix = plates.size() > 1 ? "" + (i + 1) : "";
                 Plate plate = plates.get(i);
-                WellGroup cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
-                Map<String, Object> cellControlProperties = new HashMap<>();
-                addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
-                put("cellControl" + indexSuffix, cellControlProperties);
+                if (virusNames.isEmpty())
+                {
+                    WellGroup cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+                    Map<String, Object> cellControlProperties = new HashMap<>();
+                    addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
+                    put("cellControl" + indexSuffix, cellControlProperties);
 
-                WellGroup virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
-                Map<String, Object> virusControlProperties = new HashMap<>();
-                addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
-                put("virusControl" + indexSuffix, virusControlProperties);
+                    WellGroup virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+                    Map<String, Object> virusControlProperties = new HashMap<>();
+                    addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
+                    put("virusControl" + indexSuffix, virusControlProperties);
+                }
+                else
+                {
+                    List<Map<String, Object>> cellControls = new ArrayList<>();
+                    List<Map<String, Object>> virusControls = new ArrayList<>();
+                    for (Map.Entry<String, Object> virusEntry : virusNames.entrySet())
+                    {
+                        Map<String, Object> cellControlProperties = new HashMap<>();
+                        WellGroup cellControl = assay.getCellControlWellGroup(plate, virusEntry.getKey());
+                        if (null != cellControl)
+                        {
+                            addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
+                            cellControls.add(cellControlProperties);
+                        }
+
+                        Map<String, Object> virusControlProperties = new HashMap<>();
+                        WellGroup virusControl = assay.getVirusControlWellGroup(plate, virusEntry.getKey());
+                        if (null != virusControl)
+                        {
+                            addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
+                            virusControls.add(virusControlProperties);
+                        }
+                    }
+                    put("cellControls" + indexSuffix, cellControls);
+                    put("virusControls" + indexSuffix, virusControls);
+                }
             }
         }
     }

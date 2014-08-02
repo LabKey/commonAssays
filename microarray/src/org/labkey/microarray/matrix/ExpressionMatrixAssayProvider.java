@@ -142,7 +142,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     @Override
     public String getDescription()
     {
-        return "Import a GEO series matix-like TSV file of probe/sample values.";
+        return "Import a GEO series matrix-like TSV file of probe/sample values.";
     }
 
     @Override

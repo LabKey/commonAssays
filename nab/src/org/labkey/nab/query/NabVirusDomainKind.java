@@ -25,6 +25,8 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.nab.NabAssayProvider;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -33,6 +35,18 @@ import java.util.Set;
 public class NabVirusDomainKind extends AssayDomainKind
 {
     public static final String VIRUS_LSID_COLUMN_NAME = "virusLsid";
+    public static final String DATLSID_COLUMN_NAME = "dataLsid";
+    private static final Set<PropertyStorageSpec> _baseFields;
+
+    static
+    {
+        Set<PropertyStorageSpec> baseFields = new LinkedHashSet<>();
+        baseFields.add(new PropertyStorageSpec(VIRUS_LSID_COLUMN_NAME, JdbcType.VARCHAR).setPrimaryKey(true));
+        baseFields.add(new PropertyStorageSpec("Container", JdbcType.VARCHAR).setEntityId(true));
+        baseFields.add(new PropertyStorageSpec(DATLSID_COLUMN_NAME, JdbcType.VARCHAR));
+
+        _baseFields = Collections.unmodifiableSet(baseFields);
+    }
 
     public NabVirusDomainKind()
     {
@@ -48,10 +62,7 @@ public class NabVirusDomainKind extends AssayDomainKind
     @Override
     public Set<PropertyStorageSpec> getBaseProperties()
     {
-        PropertyStorageSpec spec = new PropertyStorageSpec(VIRUS_LSID_COLUMN_NAME, JdbcType.VARCHAR);
-        spec.setPrimaryKey(true);
-
-        return Collections.singleton(spec);
+        return _baseFields;
     }
 
     @Override
@@ -80,8 +91,11 @@ public class NabVirusDomainKind extends AssayDomainKind
     @Override
     public Set<String> getReservedPropertyNames(Domain domain)
     {
-        Set<String> result = getAssayReservedPropertyNames();
-        result.add(VIRUS_LSID_COLUMN_NAME);
-        return result;
+        Set<String> names = getAssayReservedPropertyNames();
+
+        for (PropertyStorageSpec spec : getBaseProperties())
+            names.add(spec.getName());
+
+        return names;
     }
 }

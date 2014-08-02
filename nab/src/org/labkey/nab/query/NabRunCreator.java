@@ -16,6 +16,7 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.ExperimentException;
@@ -77,19 +78,29 @@ public class NabRunCreator extends PlateBasedRunCreator<NabAssayProvider>
                 {
                     // create the virus lsid based on the virus well name
                     Lsid virusLsid = NabDataHandler.createVirusWellGroupLsid(outputData, entry.getKey());
-                    insertVirusRecord(table, context.getUser(), virusLsid.toString(), entry.getValue());
+                    insertVirusRecord(table, context.getContainer(), context.getUser(), outputData.getLSID(), virusLsid.toString(), entry.getValue());
                 }
             }
         }
     }
 
-    protected void insertVirusRecord(TableInfo table, User user, String virusLsid, Map<DomainProperty, String> values)
+    /**
+     * Adds a record to the nab virus table for each virus group in the run
+     *
+     * @param dataLsid the lsid for the (ExpData) run associated with this record
+     * @param virusLsid the lsid identifying the virus and associated run
+     * @param values a map of values for the virus domain table
+     */
+    protected void insertVirusRecord(TableInfo table, Container container, User user, String dataLsid, String virusLsid, Map<DomainProperty, String> values)
     {
         Map<String, Object> rowMap = new HashMap<>();
         for (Map.Entry<DomainProperty, String> entry : values.entrySet())
             rowMap.put(entry.getKey().getName(), entry.getValue());
 
         rowMap.put(NabVirusDomainKind.VIRUS_LSID_COLUMN_NAME, virusLsid);
+        rowMap.put("Container", container);
+        rowMap.put(NabVirusDomainKind.DATLSID_COLUMN_NAME, dataLsid);
+
         Table.insert(user, table, rowMap);
     }
 }

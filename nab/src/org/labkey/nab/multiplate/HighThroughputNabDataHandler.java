@@ -65,52 +65,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         return "csv";
     }
 
-    private static final String LOCATION_COLUMNN_HEADER = "Well Location";
-
-    protected ExperimentException createWellLocationParseError(File dataFile, int lineNumber, Object locationValue) throws ExperimentException
-    {
-        return createParseError(dataFile, "Failed to find valid location in column \"" + LOCATION_COLUMNN_HEADER + "\" on line " + lineNumber +
-                ".  Locations should be identified by a single row letter and column number, such as " +
-                "A1 or P24.  Found \"" + (locationValue != null ? locationValue.toString() : "") + "\".");
-    }
-
-    protected Pair<Integer, Integer> getWellLocation(PlateTemplate template, File dataFile, Map<String, Object> line, int lineNumber) throws ExperimentException
-    {
-        Object locationValue = line.get(LOCATION_COLUMNN_HEADER);
-        if (locationValue == null || !(locationValue instanceof String) || ((String) locationValue).length() < 2)
-            throw createWellLocationParseError(dataFile, lineNumber, locationValue);
-        String location = (String) locationValue;
-        Character rowChar = location.charAt(0);
-        rowChar = Character.toUpperCase(rowChar);
-        if (!(rowChar >= 'A' && rowChar <= 'Z'))
-            throw createWellLocationParseError(dataFile, lineNumber, locationValue);
-
-        Integer col;
-        try
-        {
-            col = Integer.parseInt(location.substring(1));
-        }
-        catch (NumberFormatException e)
-        {
-            throw createWellLocationParseError(dataFile, lineNumber, locationValue);
-        }
-        int row = rowChar - 'A' + 1;
-
-        // 1-based row and column indexing:
-        if (row > template.getRows())
-        {
-            throw createParseError(dataFile, "Invalid row " + row + " specified on line " + lineNumber +
-                    ".  The current plate template defines " + template.getRows() + " rows.");
-        }
-
-        // 1-based row and column indexing:
-        if (col > template.getColumns())
-        {
-            throw createParseError(dataFile, "Invalid column " + col + " specified on line " + lineNumber +
-                    ".  The current plate template defines " + template.getColumns() + " columns.");
-        }
-        return new Pair<>(row, col);
-    }
+    protected static final String LOCATION_COLUMNN_HEADER = "Well Location";
 
     @Override
     protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
@@ -126,56 +81,41 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             else
                 loader = new ExcelLoader(dataFile, true);
 
-            int wellsPerPlate = template.getRows() * template.getColumns();
+            final int expectedRows = template.getRows();
+            final int expectedCols = template.getColumns();
 
-            ColumnDescriptor[] columns = loader.getColumns();
-            if (columns == null || columns.length == 0)
-            {
-                throw createParseError(dataFile, "No columns found in data file.");
-            }
+            List<double[][]> matrices = parse(dataFile, loader.getColumns(), loader.load(), expectedRows, expectedCols);
+            if (matrices == null || matrices.size() == 0)
+                throw createParseError(dataFile, "No plate data found");
 
-            // The results column is defined as the last column in the file for this file format:
-            String resultColumnHeader = columns[columns.length - 1].name;
+            List<Plate> plates = new ArrayList<>(matrices.size());
+            for (double[][] matrix : matrices)
+                plates.add(PlateService.get().createPlate(template, matrix));
 
-            int wellCount = 0;
-            int plateCount = 0;
-            double[][] wellValues = new double[template.getRows()][template.getColumns()];
-            List<Plate> plates = new ArrayList<>();
-            for (Map<String, Object> rowData : loader)
-            {
-                // Current line in the data file is calculated by the number of wells we've already read,
-                // plus one for the current row, plus one for the header row:
-                int line = plateCount * wellsPerPlate + wellCount + 2;
-                Pair<Integer, Integer> location = getWellLocation(template, dataFile, rowData, line);
-                int plateRow = location.getKey();
-                int plateCol = location.getValue();
-
-                Object dataValue = rowData.get(resultColumnHeader);
-                if (dataValue == null || !(dataValue instanceof Integer))
-                {
-                    throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
-                            "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
-                }
-
-                wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;
-                if (++wellCount == wellsPerPlate)
-                {
-                    plates.add(PlateService.get().createPlate(template, wellValues));
-                    plateCount++;
-                    wellCount = 0;
-                }
-            }
-            if (wellCount != 0)
-            {
-                throw createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
-                        plateCount + " complete plates of data, plus " + wellCount + " extra rows.");
-            }
             return plates;
         }
         catch (IOException e)
         {
             throw createParseError(dataFile, null, e);
         }
+    }
+
+    protected List<double[][]> parse(File dataFile, ColumnDescriptor[] columns, List<Map<String, Object>> rows, int expectedRows, int expectedCols) throws ExperimentException
+    {
+        // attempt to parse list-style data
+        if (columns != null && columns.length > 0)
+        {
+            // Last column is the results column -- only attempt parsing if it has a non-default name, e.g. "column5"
+            String resultColumnHeader = columns[columns.length-1].name;
+            if (!resultColumnHeader.equals("column" + (columns.length-1)))
+            {
+                List<double[][]> values = parseList(dataFile, rows, LOCATION_COLUMNN_HEADER, resultColumnHeader, 0, expectedRows, expectedCols);
+                if (values != null && !values.isEmpty())
+                    return values;
+            }
+        }
+
+        return null;
     }
 
     @Override

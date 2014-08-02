@@ -20,6 +20,7 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.Parameter;
 import org.labkey.api.data.StatementUtils;
 import org.labkey.api.data.TableInfo;
@@ -83,13 +84,18 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
 
             col = wrapColumn(baseColumn);
 
-            if (NabAssayProvider.VIRUS_LSID_COLUMN_NAME.equalsIgnoreCase(col.getName()))
+            if (NabVirusDomainKind.VIRUS_LSID_COLUMN_NAME.equalsIgnoreCase(col.getName()))
+            {
+                col.setHidden(true);
+                col.setKeyField(true);
+            }
+            else if (NabVirusDomainKind.DATLSID_COLUMN_NAME.equalsIgnoreCase(col.getName()))
             {
                 col.setHidden(true);
             }
-            if (NabAssayProvider.VIRUS_LSID_COLUMN_NAME.equalsIgnoreCase(col.getName()))
+            else if ("Container".equalsIgnoreCase(col.getName()))
             {
-                col.setKeyField(true);
+                ContainerForeignKey.initColumn(col, schema);
             }
 
             DomainProperty domainProperty = _virusDomain.getPropertyByName(baseColumn.getName());

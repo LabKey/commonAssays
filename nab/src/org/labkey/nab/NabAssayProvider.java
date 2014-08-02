@@ -59,6 +59,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 import org.labkey.nab.query.NabRunCreator;
+import org.labkey.nab.query.NabVirusDomainKind;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -207,6 +208,11 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         sampleProperties.add(PARTICIPANTID_PROPERTY_NAME);
         sampleProperties.add(VISITID_PROPERTY_NAME);
         sampleProperties.add(DATE_PROPERTY_NAME);
+
+        if (!domainMap.containsKey(ASSAY_DOMAIN_VIRUS_WELLGROUP))
+            domainMap.put(ASSAY_DOMAIN_VIRUS_WELLGROUP, new HashSet<String>());
+
+        domainMap.get(ASSAY_DOMAIN_VIRUS_WELLGROUP).add(VIRUS_NAME_PROPERTY_NAME);
 
         return domainMap;
     }

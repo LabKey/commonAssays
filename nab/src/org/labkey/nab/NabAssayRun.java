@@ -18,9 +18,11 @@ package org.labkey.nab;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionMaterialKey;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.view.RunDetailOptions;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
@@ -117,6 +119,9 @@ public abstract class NabAssayRun extends DilutionAssayRun
             if (null == outputObject)
                 throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.size());
 
+            AssayProtocolSchema schema = _provider.createProtocolSchema(_user, _run.getContainer(), _protocol, null);
+            TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+
             Map<String, Map<PropertyDescriptor, Object>> samplePropertiesMap = getSampleProperties();
             DilutionSummary[] dilutionSummaries = getSummaries();
             Map<String, DilutionResultProperties> allProperties = getSampleProperties(outputObject, dilutionSummaries, samplePropertiesMap);
@@ -134,7 +139,8 @@ public abstract class NabAssayRun extends DilutionAssayRun
                     captions.add(shortCaption);
 
                     Map<PropertyDescriptor, Object> sampleProperties = samplePropertiesMap.get(getSampleKey(summary));
-                    DilutionResultProperties props = allProperties.get(summary.getFirstWellGroup().getName());
+                    String sampleKeyWithVirus = getSampleKeyForResultPoperties(summary, virusTable);
+                    DilutionResultProperties props = allProperties.get(sampleKeyWithVirus);
                     sampleResults.add(new SampleResult(_provider, outputObject, summary, key, sampleProperties, props));
                 }
             }
