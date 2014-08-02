@@ -115,6 +115,9 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         DetailsURL urlGraph = new DetailsURL(baseURL, graphParams);
         urlGraph.setContainerContext(_container);
         column.setURL(urlGraph);
+
+        column.setMeasure(false);
+        column.setDimension(false);
     }
 
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, int attrId)

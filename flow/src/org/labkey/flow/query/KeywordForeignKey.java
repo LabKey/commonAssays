@@ -69,6 +69,9 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         {
             column.setHidden(true);
         }
+
+        column.setDimension(KeywordUtil.isDimension(attrName));
+        column.setMeasure(false);
     }
 
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, String attrName, int attrId)

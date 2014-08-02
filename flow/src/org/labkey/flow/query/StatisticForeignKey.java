@@ -77,6 +77,9 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         column.setLabel(stat.toShortString());
         column.setSqlTypeName("DOUBLE");
         column.setFormat("#,##0.###");
+
+        column.setMeasure(stat.getStatistic() != StatisticSpec.STAT.Spill);
+        column.setDimension(false);
     }
 
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, int attrId)

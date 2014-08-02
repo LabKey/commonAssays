@@ -1245,7 +1245,8 @@ public class FlowSchema extends UserSchema
                     {
                         FieldKey fieldKey = entry.getKey();
                         ColumnInfo col = entry.getValue();
-                        FieldKey newFieldKey = new FieldKey(lookupColumn.getFieldKey(), col.getName());
+                        // Add the lookup column FieldKey as a parent to the column's FieldKey
+                        FieldKey newFieldKey = FieldKey.remap(fieldKey, lookupColumn.getFieldKey(), null);
                         col.setFieldKey(newFieldKey);
                         ret.put(newFieldKey, col);
                     }
@@ -1380,7 +1381,7 @@ public class FlowSchema extends UserSchema
             }
 
             // Background column will be hidden if the ICSMetadata doesn't have background information
-            if (!_colBackground.isHidden())
+            if (_colBackground != null && !_colBackground.isHidden())
             {
                 lookup = _colBackground.getFk().getLookupTableInfo();
                 if (lookup != null)
@@ -1654,12 +1655,7 @@ public class FlowSchema extends UserSchema
     {
         if (fieldKey != null)
         {
-            List<String> parts = fieldKey.getParts();
-            if (parts.get(0).equalsIgnoreCase(rootPart))
-            {
-                parts.remove(0);
-                return FieldKey.fromParts(parts);
-            }
+            return fieldKey.removeParent(rootPart);
         }
 
         return null;
@@ -1901,28 +1897,28 @@ public class FlowSchema extends UserSchema
 
         executor.execute(
                 "SELECT \n" +
-                        "    exp.data.RowId,\n" +
-                        "    exp.data.LSID,\n" +
-                        "    exp.data.Name,\n" +
-                        "    exp.data.CpasType,\n" +
-                        "    exp.data.SourceApplicationId,\n" +
-                        "    exp.data.DataFileUrl,\n" +
-                        "    exp.data.RunId,\n" +
-                        "    exp.data.Created,\n" +
-                        "    exp.data.CreatedBy,\n" +
-                        "    exp.data.Container,\n" +
-                        "    flow.object.RowId AS objectid,\n" +
-                        "    flow.object.TypeId,\n" +
-                        "    flow.object.compid,\n" +
-                        "    flow.object.fcsid,\n" +
-                        "    flow.object.scriptid,\n" +
-                        "    flow.object.uri,\n" +
-                        "    exp.RunList.ExperimentId\n" +
+                "    exp.data.RowId,\n" +
+                "    exp.data.LSID,\n" +
+                "    exp.data.Name,\n" +
+                "    exp.data.CpasType,\n" +
+                "    exp.data.SourceApplicationId,\n" +
+                "    exp.data.DataFileUrl,\n" +
+                "    exp.data.RunId,\n" +
+                "    exp.data.Created,\n" +
+                "    exp.data.CreatedBy,\n" +
+                "    exp.data.Container,\n" +
+                "    flow.object.RowId AS objectid,\n" +
+                "    flow.object.TypeId,\n" +
+                "    flow.object.compid,\n" +
+                "    flow.object.fcsid,\n" +
+                "    flow.object.scriptid,\n" +
+                "    flow.object.uri,\n" +
+                "    exp.RunList.ExperimentId\n" +
                         "INTO " + name + "\n" +
-                        "FROM exp.data\n" +
-                        "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
-                        "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
-                        "WHERE flow.Object.container = ? and TypeId = ?",
+                "FROM exp.data\n" +
+                "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
+                "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
+                "WHERE flow.Object.container = ? and TypeId = ?",
                 c.getId(), typeid);
 
         String create =

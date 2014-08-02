@@ -48,6 +48,7 @@ public class KeywordUtil
             "LASER\\d+.*|" +
             "\\$TIMESTEP|" +
             "FJ_\\$.*|" +
+            "FJ_FCS_VERSION|" +
             "BD\\$.*|" +
             "CST .*|" +
             "SPILL|" +
@@ -59,6 +60,8 @@ public class KeywordUtil
             "THRESHOLD|" +
             "AUTOBS|" +
             "GUID|" +
+            "SETTINGS|" +
+            "CYTNUM|" +
             "CYTOMETER CONFIG .*|" +
             "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
 
@@ -131,6 +134,19 @@ public class KeywordUtil
                 !isSideScatter(parameterName) &&
                 !isTimeChannel(parameterName) &&
                 !isElectronicVoltage(parameterName);
+    }
+
+    // TODO: allow the admin to configure which keywords are measures/dimensions
+    public static boolean isDimension(String keywordName)
+    {
+        if (isHidden(keywordName))
+            return false;
+
+        String lowerName = keywordName.toLowerCase();
+        if (lowerName.contains("date") || lowerName.contains("time"))
+            return false;
+
+        return true;
     }
 
 }
