@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/* flow-0.00-11.20.sql */
-
-/* flow-0.00-10.20.sql */
-
 /* flow-0.00-8.10.sql */
 
 CREATE SCHEMA Flow;
@@ -149,8 +145,6 @@ FROM flow.object OBJ INNER JOIN
 
 /* flow-11.10-11.20.sql */
 
-/* flow-11.10-11.19.sql */
-
 -- KeywordAttr ------------------
 
 -- Add RowId and Name to KeywordAttr
@@ -279,8 +273,6 @@ ALTER TABLE flow.Graph ADD CONSTRAINT FK_Graph_GraphAttr FOREIGN KEY (GraphId) R
 -- Change meaning of 'GraphAttr.Id' from FK Attribute.RowId to self GraphAttr.RowId and equal to Graph.GraphId
 -- When GraphAttr.Id == RowId, the Name column is the preferred name otherwise it is an alias.
 UPDATE flow.GraphAttr SET Id = RowId;
-
-/* flow-11.19-11.191.sql */
 
 -- Change 'PK_*' unique constraints to actually be primary key constraint.
 SELECT core.fn_dropifexists('Keyword', 'flow', 'constraint', 'PK_Keyword');
