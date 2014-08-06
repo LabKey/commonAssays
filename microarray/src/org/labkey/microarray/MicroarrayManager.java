@@ -33,6 +33,7 @@ import org.labkey.api.etl.DataIterator;
 import org.labkey.api.etl.DataIteratorBuilder;
 import org.labkey.api.etl.DataIteratorContext;
 import org.labkey.api.etl.SimpleTranslator;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
@@ -207,14 +208,20 @@ public class MicroarrayManager
         ContainerUtil.purgeTable(getAnnotationSetSchemaTableInfo(), container, "Container");
     }
 
-    public List<Map> getDistinctSamples(Container container) throws SQLException
+    // Issue 21134: filter by assay container and protocol
+    public List<Map> getDistinctSamples(ExpProtocol protocol) throws SQLException
     {
         SQLFragment frag = new SQLFragment("SELECT SampleId, Name FROM ");
         frag.append("(SELECT DISTINCT SampleId FROM ");
         frag.append(ExpressionMatrixProtocolSchema.getTableInfoFeatureData(), "f");
         frag.append(", ");
         frag.append(ExperimentService.get().getTinfoData(), "d");
-        frag.append(" WHERE f.DataId = d.RowId AND d.container=?").add(container);
+        frag.append(", ");
+        frag.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        frag.append(" WHERE f.DataId = d.RowId\n");
+        frag.append("   AND d.RunId = r.RowId\n");
+        frag.append("   AND d.container=?\n").add(protocol.getContainer());
+        frag.append("   AND r.ProtocolLSID = ?\n").add(protocol.getLSID());
         frag.append(") as fd, ");
         frag.append(ExperimentService.get().getTinfoMaterial(), "m");
         frag.append(" WHERE fd.SampleId = m.RowId");

@@ -17,6 +17,7 @@ package org.labkey.microarray.matrix;
 
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.api.ExperimentService;
@@ -81,5 +82,34 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         List<FieldKey> columns = new ArrayList<>(getDefaultVisibleColumns());
         columns.remove(dataIdColumn.getFieldKey());
         setDefaultVisibleColumns(columns);
+
+        // Issue 21134: filter by assay protocol
+        SQLFragment filter = new SQLFragment("DataId");
+        filter.append(" IN (SELECT d.RowId FROM ");
+        filter.append(ExperimentService.get().getTinfoData(), "d");
+        filter.append(", ");
+        filter.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        filter.append(" WHERE d.RunId = r.RowId");
+        if (schema.getProtocol() != null)
+        {
+            filter.append(" AND r.ProtocolLSID = ?");
+            filter.add(schema.getProtocol().getLSID());
+        }
+        filter.append(") ");
+
+        addCondition(filter, FieldKey.fromParts("DataId"));
     }
+
+    @Override
+    protected void applyContainerFilter(ContainerFilter filter)
+    {
+        // There isn't a container column directly on this table so do a special filter
+        if (getContainer() != null)
+        {
+            FieldKey containerColumn = FieldKey.fromParts("Run", "Folder");
+            clearConditions(containerColumn);
+            addCondition(filter.getSQLFragment(getSchema(), new SQLFragment("(SELECT d.Container FROM exp.Data d WHERE d.RowId = DataId)"), getContainer()), containerColumn);
+        }
+    }
+
 }

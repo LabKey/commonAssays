@@ -87,7 +87,7 @@ public class ExpressionMatrixProtocolSchema extends AssayProtocolSchema
         {
             List<FieldKey> defaultCols = new ArrayList<>();
             ArrayList<CrosstabMember> members = new ArrayList<>();
-            distinctSampleIds = MicroarrayManager.get().getDistinctSamples(getProtocol().getContainer());
+            distinctSampleIds = MicroarrayManager.get().getDistinctSamples(getProtocol());
 
             for (Map sample : distinctSampleIds)
             {
