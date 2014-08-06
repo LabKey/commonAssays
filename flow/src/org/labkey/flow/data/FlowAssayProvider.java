@@ -287,6 +287,12 @@ public class FlowAssayProvider extends AbstractAssayProvider
         return null;
     }
 
+    @Override
+    public String getProtocolPattern()
+    {
+        return "%:" + FlowProtocol.getProtocolLSIDPrefix() + ".%:" + FlowProtocol.DEFAULT_PROTOCOL_NAME;
+    }
+
     @NotNull
     @Override
     public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)

@@ -67,7 +67,7 @@ import java.util.Set;
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
     static private final Logger _log = Logger.getLogger(FlowProtocol.class);
-    static private final String DEFAULT_PROTOCOL_NAME = "Flow";
+    static protected final String DEFAULT_PROTOCOL_NAME = "Flow";
     static final private String SAMPLESET_NAME = "Samples";
 
     static public String getProtocolLSIDPrefix()
