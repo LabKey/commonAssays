@@ -234,12 +234,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
                 String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                 info.setName(inputName);
-                info.setDisplayColumnFactory(new NegativeBeadDisplayColumnFactory(analyte, inputName, LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME, initNegativeControlAnalytes));
+                info.setDisplayColumnFactory(new NegativeBeadDisplayColumnFactory(analyte, inputName, initNegativeControlAnalytes));
                 view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName));
                 DisplayColumn col = info.getRenderer();
                 negativeBeadCols.add(col);
             }
-            view.getDataRegion().addGroup(new DisplayColumnGroup(negativeBeadCols, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME, true));
+            view.getDataRegion().addGroup(new NegativeBeadDisplayColumnGroup(negativeBeadCols, getAnalytePropertyName(analyteNames[0], LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME)));
         }
 
         // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated

@@ -817,6 +817,7 @@ luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
 luminex/src/org/labkey/luminex/LuminexWellGroup.java -text
 luminex/src/org/labkey/luminex/NegativeBeadDisplayColumnFactory.java -text
+luminex/src/org/labkey/luminex/NegativeBeadDisplayColumnGroup.java -text
 luminex/src/org/labkey/luminex/QCFlagHighlightDisplayColumn.java -text
 luminex/src/org/labkey/luminex/RunExclusionTable.java -text
 luminex/src/org/labkey/luminex/SinglePointControl.java -text

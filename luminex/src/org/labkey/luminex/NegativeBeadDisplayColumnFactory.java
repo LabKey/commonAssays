@@ -36,11 +36,11 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
     private String _displayName;
     private Set<String> _initNegativeControlAnalytes;
 
-    public NegativeBeadDisplayColumnFactory(String analyteName, String inputName, String displayName, Set<String> initNegativeControlAnalytes)
+    public NegativeBeadDisplayColumnFactory(String analyteName, String inputName, Set<String> initNegativeControlAnalytes)
     {
         _analyteName = analyteName;
         _inputName = inputName;
-        _displayName = displayName;
+        _displayName = LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME;
         _initNegativeControlAnalytes = initNegativeControlAnalytes;
     }
 
@@ -80,17 +80,16 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             @Override
             public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
             {
+                boolean hidden = _initNegativeControlAnalytes.contains(_analyteName);
+
                 out.write("<select name=\"" + _inputName + "\" " +
                         "class=\"negative-bead-input\" " + // used by NegativeBeadPopulation.js
                         "analytename=\"" + _analyteName + "\" " + // used by NegativeBeadPopulation.js
-                        "width=\"200\" style=\"width:200px;\"");
-                if (_initNegativeControlAnalytes.contains(_analyteName))
+                        "width=\"200\" style=\"width:200px;" +
+                        (hidden ? "display:none;" : "display:inline-block;") + "\">");
+
+                if (!hidden)
                 {
-                    out.write(" DISABLED>");
-                }
-                else
-                {
-                    out.write(">");
                     out.write("<option value=\"\"></option>");
                     for (String negControlAnalyte : _initNegativeControlAnalytes)
                     {

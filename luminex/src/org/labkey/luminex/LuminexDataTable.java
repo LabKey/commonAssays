@@ -275,7 +275,13 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         defaultCols.add(FieldKey.fromParts("Dilution"));
         defaultCols.add(FieldKey.fromParts("BeadCount"));
         defaultCols.add(FieldKey.fromParts("Titration"));
-        defaultCols.add(FieldKey.fromParts("Analyte", "NegativeBead"));
+
+        // issue 21253: Conditional show/hide of the Negative Bead column in the Luminex assay results grid
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        if (analyteDomain.getPropertyByName(LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME) != null)
+        {
+            defaultCols.add(FieldKey.fromParts("Analyte", "NegativeBead"));
+        }
 
         Domain domain = getDomain();
         for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getContainer(), schema.getUser()))

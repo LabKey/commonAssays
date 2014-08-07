@@ -69,11 +69,12 @@ function updateAnalyteNegativeBeadInputs()
         var negBeadEl = negBeadEls[i];
         var prevValue = negBeadEl.value;
         var analyteName = negBeadEl.getAttribute("analytename");
+        var hidden = negControlAnalytes.indexOf(analyteName) > -1;
 
         negBeadEl.value = null;
         clearSelectOptions(negBeadEl);
-        negBeadEl.disabled = negControlAnalytes.indexOf(analyteName) > -1;
-        if (!negBeadEl.disabled)
+        negBeadEl.style.display = hidden ? 'none' : 'inline-block';
+        if (!hidden)
         {
             addSelectOptions(negBeadEl, negControlAnalytes, prevValue);
         }
