@@ -232,7 +232,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
+        return new HtmlView("The NAb data file is a specially formatted TSV, CSV or Excel file.");
     }
 
     @Override
@@ -244,7 +244,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     public String getDescription()
     {
-        return "Imports a specially formatted Excel 1997-2003 file (.xls). " +
+        return "Imports a specially formatted TSV, CSV or Excel file. " +
                 "Measures neutralization in TZM-bl cells as a function of a reduction in Tat-induced luciferase (Luc) " +
                 "reporter gene expression after a single round of infection. Montefiori, D.C. 2004" +
                 PageFlowUtil.helpPopup("NAb", "<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/18432938\">" +

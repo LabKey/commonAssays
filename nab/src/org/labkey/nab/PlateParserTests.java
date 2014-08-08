@@ -83,6 +83,10 @@ public class PlateParserTests
     }
 
     private static List<Pair<String, String>> singlePlateTests = Arrays.asList(
+            // The ".expected.tsv" files is a simple grid of numbers and are used to check the plate reader formats
+            // We also check that the .expected.tsv validates against itself.
+            Pair.of("sampledata/Nab/m0902051;3997.expected.tsv", "sampledata/Nab/m0902051;3997.expected.tsv"),
+
             Pair.of("sampledata/Nab/m0902051;3997.xls", "sampledata/Nab/m0902051;3997.expected.tsv"),
             Pair.of("sampledata/Nab/m0902055;4001.xlsx", "sampledata/Nab/m0902055;4001.expected.tsv"),
             Pair.of("sampledata/Nab/Luc5Samples02NotLocked1.xls", "sampledata/Nab/Luc5Samples02NotLocked1.expected.tsv"),
@@ -92,7 +96,8 @@ public class PlateParserTests
             //Pair.of("sampledata/Nab/seaman/RC121306.xls", "sampledata/Nab/seaman/RC121306.expected.tsv")
             Pair.of("sampledata/Nab/SpectraMax/20140612_0588.txt", "sampledata/Nab/SpectraMax/20140612_0588.expected.tsv"),
             Pair.of("sampledata/Nab/SpectraMax/20140102_140152 0063_PLATE.002.txt", "sampledata/Nab/SpectraMax/20140102_140152 0063_PLATE.002.expected.tsv"),
-            Pair.of("sampledata/Nab/EnVision/4 plate data set _001.csv", "sampledata/Nab/EnVision/4 plate data set _001.expected.tsv")
+            Pair.of("sampledata/Nab/EnVision/4 plate data set _001.csv", "sampledata/Nab/EnVision/4 plate data set _001.expected.tsv"),
+            Pair.of("sampledata/Nab/sheet2row6/ID50.xlsx", "sampledata/Nab/sheet2row6/ID50.expected.tsv")
     );
 
     @Test

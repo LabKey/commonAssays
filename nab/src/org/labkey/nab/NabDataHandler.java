@@ -338,14 +338,15 @@ public abstract class NabDataHandler extends DilutionDataHandler
             }
         }
 
-        // NOTE: Removed out since it hits false positives.
-//        if (matrix == null)
-//        {
-//            // attempt to parse a grid at the "well known" location (pun intended)
-//            matrix = parseGridAt(rows, START_ROW, START_COL, expectedRows, expectedCols);
-//            if (matrix != null)
-//                return matrix;
-//        }
+        // attempt to parse a grid at the "well known" location (pun intended)
+        matrix = parseGridAt(rows, START_ROW, START_COL, expectedRows, expectedCols);
+        if (matrix != null)
+            return matrix;
+
+        // attempt to parse as grid at 0,0
+        matrix = parseGridAt(rows, 0, 0, expectedRows, expectedCols);
+        if (matrix != null)
+            return matrix;
 
         return null;
     }

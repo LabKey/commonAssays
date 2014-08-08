@@ -124,7 +124,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         {
             // Special case for excel - The ExcelLoader only returns data for a single sheet so we need to create a new ExcelLoader for each sheet
             final String fileName = dataFile.getName();
-            if (fileName.endsWith(".xls")) // || fileName.endsWith(".xlsx"))
+            if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
             {
                 final Workbook workbook = ExcelFactory.create(dataFile);
                 for (int i = 0, len = workbook.getNumberOfSheets(); i < len; i++)
