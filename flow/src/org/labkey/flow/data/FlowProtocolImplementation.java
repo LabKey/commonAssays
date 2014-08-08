@@ -26,20 +26,24 @@ import org.labkey.api.exp.api.ProtocolImplementation;
 import org.labkey.api.security.User;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public class FlowProtocolImplementation extends ProtocolImplementation
 {
     static public final String NAME = "flow";
+
     static public void register()
     {
         ExperimentService.get().registerProtocolImplementation(new FlowProtocolImplementation());
     }
+
     public FlowProtocolImplementation()
     {
         super(NAME);
     }
 
-    public void onSamplesChanged(User user, ExpProtocol expProtocol, ExpMaterial[] materials) throws SQLException
+    @Override
+    public void onSamplesChanged(User user, ExpProtocol expProtocol, List<? extends ExpMaterial> materials) throws SQLException
     {
         FlowProtocol protocol = new FlowProtocol(expProtocol);
         protocol.updateSampleIds(user);
