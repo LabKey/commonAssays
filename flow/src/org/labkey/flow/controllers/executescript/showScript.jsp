@@ -32,6 +32,9 @@
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page import="java.util.LinkedHashSet" %>
+<%@ page import="org.labkey.api.action.NullSafeBindException" %>
+<%@ page import="org.labkey.api.query.QuerySettings" %>
+<%@ page import="org.springframework.validation.BindException" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -68,18 +71,19 @@ The analysis section describes which gates in the analysis, as well as the stati
     boolean showRuns = FlowPreference.showRuns.getBooleanValue(request);
     if (showRuns) {
         %><labkey:link href='<%=url.clone().replaceParameter("showRuns", "0")%>' text="Hide Runs"/><br/><%
-        QueryForm form = new QueryForm();
-        form.setViewContext(context);
-        form.setSchemaName(FlowSchema.SCHEMANAME);
-        form.setQueryName(FlowTableType.Runs.toString());
 
-        QueryView view = new QueryView(form, null);
+        BindException errors = new NullSafeBindException(new Object(), "fake");
+        FlowSchema schema = new FlowSchema(context);
+        QuerySettings settings = schema.getSettings(context, "Runs", FlowTableType.Runs.toString());
+        QueryView view = schema.createView(context, settings, errors);
+
         view.setShadeAlternatingRows(true);
         view.setShowPagination(false);
         view.setShowBorders(true);
         view.setShowRecordSelectors(false);
         view.setShowExportButtons(false);
         view.getSettings().setMaxRows(Table.ALL_ROWS);
+        view.getSettings().setAllowChooseQuery(false);
         view.getSettings().setAllowChooseView(false);
         view.getSettings().setAllowCustomizeView(false);
         view.getSettings().getBaseFilter().addCondition(FieldKey.fromParts("AnalysisScript", "RowId"), script.getScriptId(), CompareType.EQUAL);

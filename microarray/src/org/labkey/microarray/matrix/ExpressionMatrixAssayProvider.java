@@ -34,6 +34,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
@@ -136,7 +137,9 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     @Override
     public PipelineProvider getPipelineProvider()
     {
-        return null;
+        return new AssayPipelineProvider(MicroarrayModule.class,
+                new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()),
+                this, "Import Expression Matrix");
     }
 
     @Override
