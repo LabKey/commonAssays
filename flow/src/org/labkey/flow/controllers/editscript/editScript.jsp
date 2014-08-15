@@ -69,5 +69,5 @@
         });
     </script>
 <br>
-<input type="submit" value="Submit">
+<input type="Submit" value="Submit">
 </form>
