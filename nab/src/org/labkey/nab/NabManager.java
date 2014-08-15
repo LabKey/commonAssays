@@ -119,7 +119,7 @@ public class NabManager extends AbstractNabManager
         if (study == null)
             throw new IllegalArgumentException("getReadableStudyObjectIds must be passed a valid study folder.");
 
-        List<? extends DataSet> dataSets = study.getDataSets();
+        List<? extends DataSet> dataSets = study.getDatasets();
         if (dataSets == null || dataSets.isEmpty())
             return Collections.emptyMap();
 
