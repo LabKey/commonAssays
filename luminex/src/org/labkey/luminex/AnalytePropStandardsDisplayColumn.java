@@ -24,8 +24,8 @@ import org.labkey.api.util.PageFlowUtil;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by cnathe on 7/21/14.
@@ -38,10 +38,10 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     private String _protocolName;
     private boolean _errorReshow;
     private boolean _hideCell;
-    private HashSet<Titration> _standardTitrations;
+    private Set<Titration> _standardTitrations;
 
     public AnalytePropStandardsDisplayColumn(LuminexRunUploadForm form, Titration titration, String analyteName, String protocolName,
-                                             boolean errorReshow, boolean hideCell, HashSet<Titration> standardTitrations)
+                                             boolean errorReshow, boolean hideCell, Set<Titration> standardTitrations)
     {
         _form = form;
         _titration = titration;

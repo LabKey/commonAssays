@@ -61,7 +61,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                 out.write("<script type='text/javascript'>"
                         + "   LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');"
                         + "</script>");
-                out.write(_displayName);
+                out.write(PageFlowUtil.filter(_displayName));
             }
 
             @Override
@@ -82,9 +82,9 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             {
                 boolean hidden = _initNegativeControlAnalytes.contains(_analyteName);
 
-                out.write("<select name=\"" + _inputName + "\" " +
+                out.write("<select name=\"" + PageFlowUtil.filter(_inputName) + "\" " +
                         "class=\"negative-bead-input\" " + // used by NegativeBeadPopulation.js
-                        "analytename=\"" + _analyteName + "\" " + // used by NegativeBeadPopulation.js
+                        "analytename=\"" + PageFlowUtil.filter(_analyteName) + "\" " + // used by NegativeBeadPopulation.js
                         "width=\"200\" style=\"width:200px;" +
                         (hidden ? "display:none;" : "display:inline-block;") + "\">");
 
@@ -93,13 +93,13 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                     out.write("<option value=\"\"></option>");
                     for (String negControlAnalyte : _initNegativeControlAnalytes)
                     {
-                        out.write("<option value=\"" + negControlAnalyte + "\"");
+                        out.write("<option value=\"" + PageFlowUtil.filter(negControlAnalyte) + "\"");
                         if (value != null && value.equals(negControlAnalyte))
                         {
                             out.write(" SELECTED");
                         }
                         out.write(">");
-                        out.write(negControlAnalyte);
+                        out.write(PageFlowUtil.filter(negControlAnalyte));
                         out.write("</option>");
                     }
                 }

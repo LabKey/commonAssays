@@ -286,7 +286,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         final Set<String> existingSinglePointControls = getExistingSinglePointControls(form.getReRun());
 
         // get a set of which titrations are going to be pre-selected as standards (based on default value, well type, etc.)
-        final HashSet<Titration> standardTitrations = new HashSet<>();
+        final Set<Titration> standardTitrations = new HashSet<>();
         for (Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
         {
             // titrations of type unknown are not available as standards
