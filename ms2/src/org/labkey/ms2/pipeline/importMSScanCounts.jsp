@@ -17,8 +17,9 @@
 %>
 <%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-<form method="post">
+<labkey:form method="post">
     <table width="75%">
         <tr>
             <td>This upgrade will inspect all existing MS2 runs in the system. It will load MS scan counts for each fraction.
@@ -31,5 +32,5 @@
     <tr><td>&nbsp;</td></tr>
     <tr><td><%= button("Import Scan Counts").submit(true) %></td></tr>
 </table>
-</form>
+</labkey:form>
 

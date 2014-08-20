@@ -33,7 +33,7 @@
     FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
 %>
 <labkey:errors/>
-<form action="<%=form.urlFor(ScriptController.EditSettingsAction.class)%>" method="POST">
+<labkey:form action="<%=form.urlFor(ScriptController.EditSettingsAction.class)%>" method="POST">
     <table>
         <tr class="labkey-wp-header"><td>Filter FCS files by keyword:</td></tr>
         <tr><td>
@@ -124,7 +124,7 @@
 <% } else { %>
     <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
 <% } %>
-</form>
+</labkey:form>
 
 <script type="text/javascript">
     var contextPath = <%=q(contextPath)%>;

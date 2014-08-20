@@ -34,7 +34,7 @@
     decimalRatioFormat.setMaximumFractionDigits(2);
 %>
 <labkey:errors />
-<form name="elutionForm" method="post">
+<labkey:form name="elutionForm" method="post">
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr class="labkey-wp-header">
@@ -205,7 +205,7 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
 <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
 </table>
 
-</form>
+</labkey:form>
 
 <script type="text/javascript">
 var areas = new Object();

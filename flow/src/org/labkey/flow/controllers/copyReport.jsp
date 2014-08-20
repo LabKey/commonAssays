@@ -36,11 +36,11 @@
 %>
 <labkey:errors/>
 
-<form id="copyReport" action="<%=copyURL%>" method="POST">
+<labkey:form id="copyReport" action="<%=copyURL%>" method="POST">
     What would you like to name the new report?
     <p>
     <input type="text" id="reportName" name="reportName" value="<%=h(form.getReportName())%>" size="50">
     <p>
     <%= button("Copy").submit(true) %>
     <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty()? button("Cancel").href(ReportsController.BeginAction.class, getContainer()) : button("Cancel").href(form.getReturnUrl()) %>
-</form>
+</labkey:form>

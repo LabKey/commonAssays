@@ -34,7 +34,7 @@
         return ret.toString();
     }
 %>
-<form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
+<labkey:form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
     <% if (form._workspaceObject != null)
     { %>
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form._workspaceObject)%>">
@@ -112,4 +112,4 @@
     <% }} %>
 
     <input type="Submit" value="Submit"/>
-</form>
+</labkey:form>

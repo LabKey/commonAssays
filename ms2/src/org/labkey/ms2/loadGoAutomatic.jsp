@@ -18,6 +18,7 @@
 <%@ page import="org.apache.commons.lang3.SystemUtils" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
@@ -55,8 +56,8 @@ fail, in which case you should switch to the "Manual" tab and follow the instruc
 <% } %>
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
-<form action="<%=h(buildURL(MS2Controller.LoadGoAction.class))%>" method="post">
+<labkey:form action="<%=h(buildURL(MS2Controller.LoadGoAction.class))%>" method="post">
     <%= button("Continue").submit(true) %>
     <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
-</form>
+</labkey:form>
 </td></tr></table>

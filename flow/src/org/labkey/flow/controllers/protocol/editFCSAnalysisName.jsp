@@ -36,7 +36,7 @@
     optionsWithNull.put(null, "");
     optionsWithNull.putAll(options);
 %>
-<form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisNameAction.class)%>">
+<labkey:form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisNameAction.class)%>">
     <p>
         Which keywords should be used to compose the FCSAnalysis name?<br>
         <% FieldKey[] keywords = form.ff_keyword;
@@ -62,14 +62,14 @@
 
     </p>
     <labkey:button text="Set names" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
-</form>
+</labkey:form>
 <% } %>
 <hr>
-<form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisNameAction.class)%>">
+<labkey:form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisNameAction.class)%>">
     <p>Advanced users only:<br>You can also edit the expression that is used to build up the FCS analysis name.
         Use '\${' and '}' to denote substitutions.  Keyword names should be prefixed with 'Keyword'.
         <br>
         <input type="text" width="80" name="ff_rawString" value="<%=h(form.ff_rawString)%>"/>
     </p>
     <labkey:button text="Set Expression" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>" />
-</form>
+</labkey:form>

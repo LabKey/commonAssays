@@ -34,7 +34,7 @@
 
 <script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
-<form action="<%= url %>" method="get">
+<labkey:form action="<%= url %>" method="get">
     <input type="hidden" name="restrictProteins" value="true" />
     <table>
         <tr>
@@ -58,4 +58,4 @@
             <td><labkey:button text="Search" /></td>
         </tr>
     </table>
-</form>
+</labkey:form>

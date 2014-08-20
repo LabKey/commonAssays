@@ -17,12 +17,13 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     HttpView<String> me = (HttpView<String>) HttpView.currentView();
     String url = me.getModelBean();
 %>
-<form method="POST">
+<labkey:form method="POST">
     <table>
         <tr>
             <td class="labkey-form-label">Base&nbsp;URL<%= PageFlowUtil.helpPopup("Base URL", "The sequence will be appended to the end of the URL to create links to the BLAST server")%></td>
@@ -30,4 +31,4 @@
             <td><%= button("Save").submit(true) %></td>
         </tr>
     </table>
-</form>
+</labkey:form>

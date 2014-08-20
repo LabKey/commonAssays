@@ -34,7 +34,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
 
 <script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
-<form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
+<labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
     <p>This comparison view is based on ProteinProphet data so the runs must be associated with ProteinProphet data.
@@ -81,4 +81,4 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     <p style="width:100%" class="labkey-title-area-line"></p>
     <div class="labkey-indented"><input type="checkbox" name="normalizeProteinGroups"<%=checked(form.isNormalizeProteinGroups())%> value="true" /> Normalize protein groups across runs</div>
     <p><labkey:button text="Compare"/></p>
-</form>
+</labkey:form>

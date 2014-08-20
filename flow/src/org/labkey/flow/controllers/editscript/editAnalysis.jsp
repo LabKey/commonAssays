@@ -146,7 +146,7 @@
     }
 </script>
 
-<form method="post" action="<%=formAction(ScriptController.EditAnalysisAction.class)%>">
+<labkey:form method="post" action="<%=formAction(ScriptController.EditAnalysisAction.class)%>">
     <p>
         <b>Statistics</b><br>
         Which statistics do you want to calculate? Enter one statistic per line.<br>
@@ -239,4 +239,4 @@
 
     <input type="submit" value="Submit">
 
-</form>
+</labkey:form>

@@ -46,7 +46,7 @@
     value pairs <i>must</i> all match in the FCS header to be included in the analysis.
     Alternatively, you may create filters on individual analysis scripts.
 </p>
-<form action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" method="POST">
+<labkey:form action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" method="POST">
     <table>
         <tr>
             <th>&nbsp;</th>
@@ -77,4 +77,4 @@
     </table>
     <p>
     <labkey:button text="Set filter" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
-</form>
+</labkey:form>

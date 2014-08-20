@@ -27,7 +27,7 @@
 %>
 <labkey:errors />
 <br>
-<form method="post" action="<%=h(buildURL(MS2Controller.InsertAnnotsAction.class))%>" enctype="multipart/form-data">
+<labkey:form method="post" action="<%=h(buildURL(MS2Controller.InsertAnnotsAction.class))%>" enctype="multipart/form-data">
 <table>
     <tr>
       <td class="labkey-form-label">Full file path</td>
@@ -65,7 +65,7 @@
       <td><%= button("Load Annotations").submit(true) %></td>
    </tr>
 </table>
-</form>
+</labkey:form>
 <script for=window event=onload>
 try {document.getElementById("fname").focus();} catch(x){}
 </script>

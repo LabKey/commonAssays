@@ -20,7 +20,7 @@
 <%@ page extends="org.labkey.ms2.pipeline.ConfigureSequenceDB" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
-<form method="POST" name="updateClusterSequenceDB" action="<%=urlFor(PipelineController.SetupClusterSequenceDBAction.class)%>">
+<labkey:form method="POST" name="updateClusterSequenceDB" action="<%=urlFor(PipelineController.SetupClusterSequenceDBAction.class)%>">
     <labkey:errors />
     <table>
         <tr>
@@ -33,4 +33,4 @@
             <td><%= button("Save").submit(true) %> <%= button("Cancel").href(urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
         </tr>
     </table>
-</form>
+</labkey:form>

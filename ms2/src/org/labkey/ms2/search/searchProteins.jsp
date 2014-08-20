@@ -35,7 +35,7 @@
 
 <script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
-<form action="<%= url %>" method="get">
+<labkey:form action="<%= url %>" method="get">
     <table>
         <tr>
             <td class="labkey-form-label">Protein name *<%= helpPopup("Protein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
@@ -73,4 +73,4 @@
             </td>
         </tr>
     </table>
-</form>
+</labkey:form>

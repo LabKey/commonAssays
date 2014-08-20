@@ -32,12 +32,12 @@
 %>
 <labkey:errors/>
 
-<form id="confirmExecuteReport" action="<%=new ActionURL(ReportsController.ExecuteAction.class, c).addParameter("reportId", report.getReportId().toString()).addParameter("confirm", "true")%>" method="POST">
+<labkey:form id="confirmExecuteReport" action='<%=new ActionURL(ReportsController.ExecuteAction.class, c).addParameter("reportId", report.getReportId().toString()).addParameter("confirm", "true")%>' method="POST">
     The <%=h(report.getDescriptor().getReportName())%> runs in the background and will save results to the database when finished.
     <p>
     Execute the background report?
     <p>
     <%= button("Execute Report").submit(true) %>
     <%= form.getReturnUrl() == null || form.getReturnUrl().isEmpty() ? button("Cancel").href(ReportsController.BeginAction.class, getContainer()) : button("Cancel").href(form.getReturnUrl()) %>
-</form>
+</labkey:form>
 

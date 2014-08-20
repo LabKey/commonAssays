@@ -29,7 +29,7 @@
 
     MS2Run[] runs = form.getRuns();
 %>
-<form method=get action="<%=h(buildURL(ScoringController.CompareAction.class))%>">
+<labkey:form method="GET" action="<%=h(buildURL(ScoringController.CompareAction.class))%>">
 <labkey:errors/>
 <% if (runs.length > 0)
 { %>
@@ -157,4 +157,4 @@
 </tr>
 </table>
 <% } %>
-</form>
+</labkey:form>

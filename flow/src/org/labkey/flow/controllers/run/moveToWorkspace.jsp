@@ -26,8 +26,8 @@
     FlowRun run = form.getRun();
 %>
 <labkey:errors />
-<form action="<%=h(run.urlFor(RunController.MoveToWorkspaceAction.class))%>" method="POST">
+<labkey:form action="<%=h(run.urlFor(RunController.MoveToWorkspaceAction.class))%>" method="POST">
     <p>After you move this run into the workspace, you will be able to edit the gates on individual FCS files.</p>
     <labkey:button text="Move" />
     <labkey:button text="Cancel" href="<%=run.urlShow()%>" />
-</form>
+</labkey:form>

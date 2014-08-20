@@ -41,7 +41,7 @@
     String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 %>
 <script type="text/javascript" src="<%= getContextPath() %>/MS2/inlineViewDesigner.js"></script>
-<form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
+<labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
     <p>
@@ -112,4 +112,4 @@
         <%= PageFlowUtil.helpPopup("Protein Filter", "<p>Show only peptides whose sequences match against a specified protein. It need not be the protein mapped to the peptide by the search engine or ProteinProphet.</p><p>If no protein matches the name specified, or if multiple proteins match, this page will be redisplayed to correct the search.</p>", true)%>
     </p>
     <p><labkey:button text="Compare"/></p>
-</form>
+</labkey:form>

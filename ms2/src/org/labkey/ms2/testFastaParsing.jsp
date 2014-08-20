@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -23,11 +22,12 @@
 <%@ page import="org.labkey.ms2.protein.fasta.Protein" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.FastaParsingForm form = ((JspView<MS2Controller.FastaParsingForm>) HttpView.currentView()).getModelBean();
 %>
-<form method="POST">
+<labkey:form method="POST">
     <table width="100%">
         <tr>
             <td nowrap="true">FASTA header line:</td>
@@ -60,4 +60,4 @@
             <% } %>
         <% } %>
     </table>
-</form>
+</labkey:form>

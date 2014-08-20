@@ -19,13 +19,14 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.PickColumnsBean bean = ((JspView<MS2Controller.PickColumnsBean>) HttpView.currentView()).getModelBean();
     Container c = getContainer();
 %>
 <table class="labkey-data-region"><tr>
-  <td><form method="post" action=""><table class="labkey-data-region">
+  <td><labkey:form method="post" action=""><table className="labkey-data-region">
     <tr>
         <td><strong>Common:</strong></td>
         <td><%=h(bean.commonColumns)%></td>
@@ -75,7 +76,7 @@
     <tr><td colspan=2 align=center>
         <%= button("Pick Columns").submit(true).onClick("this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false) + "';")%>
         <%= button("Save As Default").submit(true).onClick("this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true) + "';")%></td></tr>
-  </table></form></td>
+  </table></labkey:form></td>
 </tr></table>
 
 <script type="text/javascript">

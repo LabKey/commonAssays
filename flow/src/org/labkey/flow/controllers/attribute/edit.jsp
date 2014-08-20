@@ -34,7 +34,7 @@
 %>
 
 <labkey:errors/>
-<form action="<%=editURL%>" method="post">
+<labkey:form action="<%=editURL%>" method="post">
     <table>
         <tr>
             <td>
@@ -52,4 +52,4 @@
             </td>
         </tr>
     </table>
-</form>
+</labkey:form>

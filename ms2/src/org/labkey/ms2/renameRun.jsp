@@ -18,11 +18,12 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.RenameBean bean = ((JspView<MS2Controller.RenameBean>) HttpView.currentView()).getModelBean();
 %>
-<form action="<%=h(buildURL(MS2Controller.RenameRunAction.class))%>" method="post">
+<labkey:form action="<%=h(buildURL(MS2Controller.RenameRunAction.class))%>" method="post">
 <%=generateReturnUrlFormField(bean.returnURL)%>
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>"/>
 <table class="labkey-data-region">
@@ -34,4 +35,4 @@
         <td colspan="2" style="padding-top: 10px;"><%= button("Rename").submit(true) %><%= button("Cancel").href(bean.returnURL) %></td>
     </tr>
 </table>
-</form>
+</labkey:form>

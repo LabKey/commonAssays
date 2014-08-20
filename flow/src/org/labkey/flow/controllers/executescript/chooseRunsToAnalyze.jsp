@@ -60,7 +60,7 @@
     }
 </style>
 <labkey:errors/>
-<form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
+<labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
     <table>
         <tr><td>Analysis script to use:</td>
             <td><select name="scriptId" onchange="this.form.submit()">
@@ -88,4 +88,4 @@
         <% } %>
     </table>
     <%include(view, out);%>
-</form>
+</labkey:form>

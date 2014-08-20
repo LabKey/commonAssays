@@ -38,11 +38,11 @@ There are no analyses to put this run in.
 
 <%
     return; } %>
-<form action="<%=h(run.urlFor(RunController.MoveToAnalysisAction.class))%>" method="POST">
+<labkey:form action="<%=h(run.urlFor(RunController.MoveToAnalysisAction.class))%>" method="POST">
     <p>When you move this run into an analysis, the statistics and graphs will be recalculated.  Which analysis do you
     want to put the results in?<br>
     <select name="experimentId"><labkey:options value="<%=form.getExperimentId()%>" map="<%=analyses%>" /></select>
     </p>
     <labkey:button text="Move Run" />
     <labkey:button text="Cancel" href="<%=run.urlShow()%>"/>
-</form>
+</labkey:form>

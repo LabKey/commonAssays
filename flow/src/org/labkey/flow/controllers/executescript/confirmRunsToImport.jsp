@@ -56,7 +56,7 @@
 
     if (paths != null && paths.size() != 0)
     {
-        %><form method="POST" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>">
+        %><labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>">
         <input type="hidden" name="path" value="<%=h(form.getPath())%>">
         <input type="hidden" name="current" value="<%=form.isCurrent()%>">
         <input type="hidden" name="confirm" value="true">
@@ -93,7 +93,7 @@
         <br />
         <labkey:button text="Import Selected Runs" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>"/>
         <labkey:button text="Cancel" href="<%=form.getReturnURLHelper()%>"/>
-        </form><%
+        </labkey:form><%
     }
     else
     {

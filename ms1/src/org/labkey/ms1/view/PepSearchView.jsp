@@ -18,8 +18,8 @@
 <%@ page import="org.labkey.ms1.model.PepSearchModel" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.protein.ProteinService" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<PepSearchModel> me = (JspView<PepSearchModel>) HttpView.currentView();
@@ -28,7 +28,7 @@
 <% if (model.hasErrorMsg()) { %>
 <p class="error"><%=model.getErrorMsg()%></p>
 <% } %>
-<form action="<%=model.getResultsUri()%>" method="get">
+<labkey:form action="<%=model.getResultsUri()%>" method="get">
     <input type="hidden" name="<%=ProteinService.PeptideSearchForm.ParamNames.runIds.name()%>" value="<%=h(model.getRunIds())%>"/>
     <table>
         <tr>
@@ -45,4 +45,4 @@
             <td><input id="cbxSubfolders" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle"<%=checked(model.includeSubfolders())%> /></td>
         </tr>
     </table>
-</form>
+</labkey:form>

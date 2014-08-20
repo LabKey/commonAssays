@@ -18,11 +18,12 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
-<form method="post" action="<%=h(buildURL(MS2Controller.SaveViewAction.class))%>" class="labkey-data-region">
+<labkey:form method="post" action="<%=h(buildURL(MS2Controller.SaveViewAction.class))%>" className="labkey-data-region">
     <table>
         <tr>
             <td>Name:</td>
@@ -42,4 +43,4 @@ if (bean.canShare)
             <td colspan=2><%= button("Save View").submit(true) %><%= button("Cancel").href(bean.returnURL) %></td>
         </tr>
     </table>
-</form>
+</labkey:form>

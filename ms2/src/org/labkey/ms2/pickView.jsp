@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.PickViewBean bean = ((JspView<MS2Controller.PickViewBean>)HttpView.currentView()).getModelBean();
@@ -32,10 +33,10 @@
     and pick a name. The next time you do a comparison, your saved view will appear in the list below and you can
     select it to apply the same filter to your comparison.
 </p>
-<form method="get" action="<%=h(bean.nextURL)%>">
+<labkey:form method="get" action="<%=h(bean.nextURL)%>">
     <input type="hidden" name="runList" value="<%=bean.runList%>">
     <%=bean.select%><br/>
     <br/><br/>
     <% out.flush(); bean.extraOptionsView.render(request, response); %><br/>
     <%= button(bean.buttonText).submit(true).attributes("name=\"submit\"") %>
-</form>
+</labkey:form>

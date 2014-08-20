@@ -23,10 +23,10 @@
 %>
 <labkey:errors/>
 
-<form method="post">
+<labkey:form method="post">
     <p>What do you want to call this analysis script?<br>
         <input type="text" id="ff_name" name="ff_name" value="<%=h(form.ff_name)%>">
     </p>
 
     <labkey:button text="Create Analysis Script" />
-</form>
+</labkey:form>

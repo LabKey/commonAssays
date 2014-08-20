@@ -28,7 +28,7 @@
     NewFolderForm form = (NewFolderForm) getModelBean();
 %>
 <labkey:errors/>
-<form method="POST" action="<%=new ActionURL(FlowController.NewFolderAction.class, c)%>">
+<labkey:form method="POST" action="<%=new ActionURL(FlowController.NewFolderAction.class, c)%>">
     <p>A new folder will be created that is a sibling of this one.
         What do you want to call the new folder?<br>
         <input type="text" id="folderName" name="folderName" value="<%=h(form.getFolderName())%>">
@@ -69,4 +69,4 @@
         <% } %>
     </p>
     <labkey:button text="Create Folder"/>
-</form>
+</labkey:form>

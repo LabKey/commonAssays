@@ -33,7 +33,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 
 <script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
-<form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
+<labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
     <p>Peptides to include in the comparison:</p>
@@ -55,4 +55,4 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
     </p>
 
     <p><labkey:button text="Compare"/></p>
-</form>
+</labkey:form>

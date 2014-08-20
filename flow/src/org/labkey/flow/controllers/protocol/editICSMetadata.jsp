@@ -61,7 +61,7 @@
 %>
 <labkey:errors />
 <br>
-<form action="<%=submitURL%>" method="POST">
+<labkey:form action="<%=submitURL%>" method="POST">
     <table class="labkey-wp">
         <tr class="labkey-wp-header"><th align="left">Sample Columns</th></tr>
         <tr><td>
@@ -159,4 +159,4 @@
 
     <br>
     <labkey:button text="Set ICS Metadata" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
-</form>
+</labkey:form>

@@ -21,12 +21,13 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
     User user = getUser();
 %>
-<form method="post" action="<%=h(bean.applyViewURL)%>">
+<labkey:form method="post" action="<%=h(bean.applyViewURL)%>">
     <table>
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
@@ -49,8 +50,8 @@
             } %>
         </tr>
     </table>
-</form>
-<form method="post" id="extraFilter" action="<%=h(bean.extraFilterURL)%>">
+</labkey:form>
+<labkey:form method="post" id="extraFilter" action="<%=h(bean.extraFilterURL)%>">
     <table>
         <tr>
             <td style="height: 100%; padding-right: 1em">
@@ -117,7 +118,7 @@
             } %>
         </tr>
     </table>
-</form>
+</labkey:form>
 <script type="text/javascript">
     var viewTypeInfo = new Object();
     var count = 0;<%

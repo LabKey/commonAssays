@@ -18,12 +18,13 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="java.util.TreeSet" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     HttpView<MS2Controller.ManageViewsBean> me = (HttpView<MS2Controller.ManageViewsBean>) HttpView.currentView();
     MS2Controller.ManageViewsBean bean = me.getModelBean();
 %>
-<form method="post" name="manageViewsForm" action="">
+<labkey:form method="post" name="manageViewsForm" action="">
     <p>
         <input type=hidden value="<%=h(bean.getReturnURL())%>">
         <% for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
@@ -54,7 +55,7 @@
         <% } %>
     </table><br/>
     <%= button("OK").submit(true) %> <%= button("Cancel").href(bean.getReturnURL()) %>
-</form>
+</labkey:form>
 
 <script type="text/javascript">
     function updateForm()

@@ -19,11 +19,12 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
 <%@ page import="org.labkey.flow.data.FlowScript"%>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.EditPage" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     FlowScript script = getScript();
     ScriptParser.Error error = scriptParseError;
 %>
-<form method="POST" action="<%=h(formAction(ScriptController.EditScriptAction.class))%>">
+<labkey:form method="POST" action="<%=h(formAction(ScriptController.EditScriptAction.class))%>">
 <% if (error != null) { %>
 <p class="labkey-error"><%=h(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
 <% if (error.getLine() != 0) { %>
@@ -70,4 +71,4 @@
     </script>
 <br>
 <input type="Submit" value="Submit">
-</form>
+</labkey:form>

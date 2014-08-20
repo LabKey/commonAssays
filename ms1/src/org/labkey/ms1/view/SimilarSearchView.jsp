@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms1.MS1Controller" %>
 <%@ page import="org.labkey.ms1.model.SimilarSearchModel" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<SimilarSearchModel> me = (JspView<SimilarSearchModel>) HttpView.currentView();
@@ -45,7 +46,7 @@
         }
     }
 </script>
-<form action="<%=model.getResultsUri()%>" method="get">
+<labkey:form action="<%=model.getResultsUri()%>" method="get">
     <% if (model.getFeatureId() != null) { %>
     <input type="hidden" name="<%=MS1Controller.SimilarSearchForm.ParamNames.featureId.name()%>"
            value="<%=h(model.getFeatureId())%>"/>
@@ -119,4 +120,4 @@
     </table>
 
 
-</form>
+</labkey:form>

@@ -40,7 +40,7 @@
 
 <labkey:errors/>
 
-<form action="uploadCustomProteinAnnotations.post" name="proteinListForm" method="POST">
+<labkey:form action="uploadCustomProteinAnnotations.post" name="proteinListForm" method="POST">
     <table>
         <tr>
             <td colspan="2">
@@ -101,7 +101,7 @@
             <td><labkey:button text="Submit" /></td>
         </tr>
     </table>
-</form>
+</labkey:form>
 
 <script type="text/javascript">
     document.forms.proteinListForm.name.focus();

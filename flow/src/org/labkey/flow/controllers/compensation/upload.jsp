@@ -22,7 +22,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% UploadCompensationForm form = (UploadCompensationForm) __form; %>
 <labkey:errors/>
-<form method="POST" action="<%=new ActionURL(UploadAction.class, getContainer())%>" enctype="multipart/form-data">
+<labkey:form method="POST" action="<%=new ActionURL(UploadAction.class, getContainer())%>" enctype="multipart/form-data">
     <p>Give your new compensation matrix a name.<br>
         <input type="text" name="ff_compensationMatrixName" value="<%=h(form.ff_compensationMatrixName)%>"/>
     </p>
@@ -31,4 +31,4 @@
         <input type="file" name="ff_compensationMatrixFile">
     </p>
     <labkey:button text="submit"/>
-</form>
+</labkey:form>

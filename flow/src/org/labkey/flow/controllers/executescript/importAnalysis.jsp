@@ -68,13 +68,13 @@
                 <span style="font-size:1.1em;font-weight:<%=text(currentStep ? "bold":"normal")%>;"><%=step.getNumber()%></span><br/>
                 <span style="font-weight:<%=text(currentStep ? "bold":"normal")%>"><%=h(step.getTitle())%></span>
                 <%--
-                <form name="step_<%=step.name()%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
+                <labkey:form name="step_<%=step.name()%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="step" value="<%=step.getNumber()-1%>">
                     <a href="javascript:void" onclick="document.step_<%=step.name()%>.submit()" style="text-decoration:none;color:inherit;">
                         <span style="font-size:2em;font-weight:<%=currentStep ? "bold":"normal"%>;<%=step.getNumber() == 0 ? "visibility:hidden;":""%>"><%=step.getNumber()%></span><br/>
                         <span style="font-weight:<%=currentStep ? "bold":"normal"%>"><%=step.getTitle()%></span>
                     </a>
-                </form>
+                </labkey:form>
                 --%>
             </td>
             <%
@@ -85,7 +85,7 @@
 
 <labkey:errors/>
 
-<form name="<%=text(ImportAnalysisForm.NAME)%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
+<labkey:form name="<%=text(ImportAnalysisForm.NAME)%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="step" value="<%=form.getStep()%>">
     <%
         Iterator i = form.getWorkspace().getHiddenFields().entrySet().iterator();
@@ -155,4 +155,4 @@
     include(view, out);
     %>
 <% } %>
-</form>
+</labkey:form>

@@ -20,7 +20,7 @@
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <labkey:errors />
-<form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>"
+<labkey:form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>"
       enctype="multipart/form-data">
     <p>
         The compensation calculation tells <%=FlowModule.getLongProductName()%> how
@@ -36,4 +36,4 @@
         the keywords that you want to.
     </p>
         <input type="submit" value="Submit">
-</form>
+</labkey:form>

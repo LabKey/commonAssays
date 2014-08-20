@@ -39,7 +39,7 @@
     Container c = getContainer();
 %>
 <labkey:errors />
-<form method="post" action="<%=urlFor(PipelineController.SetSequestDefaultsAction.class)%>">
+<labkey:form method="post" action="<%=urlFor(PipelineController.SetSequestDefaultsAction.class)%>">
     <div>
         <textarea style="width: 100%" id="configureXml" name="configureXml" cols="90" rows="20"><%=text(form.getConfigureXml())%></textarea>
     </div>
@@ -50,7 +50,7 @@
     <div>
         <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
     </div>
-</form>
+</labkey:form>
 <script for=window event=onload>
 try {document.getElementById("analysisName").focus();} catch(x){}
 Ext.EventManager.on('configureXml', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);

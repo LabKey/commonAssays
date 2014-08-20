@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.ms1.model.FeatureDetailsModel" %>
 <%@ page import="org.labkey.ms1.model.Peptide" %>
 <%@ page import="org.labkey.ms1.MS1Controller" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<FeatureDetailsModel> me = (JspView<FeatureDetailsModel>) HttpView.currentView();
@@ -394,7 +395,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" style="text-align:center">
-                        <form id="frmMzWindowFilter" action="<%=h(buildURL(MS1Controller.ShowFeatureDetailsAction.class))%>" method="GET">
+                        <labkey:form id="frmMzWindowFilter" action="<%=h(buildURL(MS1Controller.ShowFeatureDetailsAction.class))%>" method="GET">
                             <input type="hidden" name="srcUrl" value="<%=h(model.getSrcUrl())%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
@@ -406,7 +407,7 @@
                             <input type="text" id="txtMzWindowLow" name="mzWindowLow" size="4" onchange="_slider.setValueLow(this.value);" tabindex="2"/>
                             and <input type="text" id="txtMzWindowHigh" name="mzWindowHigh" size="4" onchange="_slider.setValueHigh(this.value);" tabindex="3"/>
                             <br/>of the Feature's m/z value.
-                        </form>
+                        </labkey:form>
                     </td>
                 </tr>
                 <tr>
@@ -468,7 +469,7 @@
                 </tr>
                 <tr>
                     <td style="text-align:center">
-                        <form id="frmScanWindowFilter" action="<%=h(buildURL(MS1Controller.ShowFeatureDetailsAction.class))%>" method="GET">
+                        <labkey:form id="frmScanWindowFilter" action="<%=h(buildURL(MS1Controller.ShowFeatureDetailsAction.class))%>" method="GET">
                             <input type="hidden" name="srcUrl" value="<%=h(model.getSrcUrl())%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
@@ -481,7 +482,7 @@
                             and <input type="text" id="txtScanWindowHigh" name="scanWindowHigh" size="3" onchange="_sliderScan.setValueHigh(this.value)" tabindex="103"/>
                             <br/>
                             of the feature's scan range.
-                        </form>
+                        </labkey:form>
                     </td>
                 </tr>
                 <tr>

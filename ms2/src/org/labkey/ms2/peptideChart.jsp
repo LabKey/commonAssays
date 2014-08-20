@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.ProteinDictionaryHelpers.GoTypes" %>
 <%@ page import="java.util.Map" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.GoChartBean bean = ((JspView<MS2Controller.GoChartBean>) HttpView.currentView()).getModelBean();
@@ -30,7 +31,7 @@
 <% } %>
 
 <% if (bean.foundData) { %>
-    <form name="chartForm" action="<%=h(buildURL(MS2Controller.PeptideChartsAction.class))%>">
+    <labkey:form name="chartForm" action="<%=h(buildURL(MS2Controller.PeptideChartsAction.class))%>">
     <%=bean.imageMap%>
     <table align="left">
     <tr>
@@ -57,7 +58,7 @@
         <input type="hidden" name="grouping" value="<%=h(bean.grouping)%>">
     </td></tr>
     </table>
-    </form>
+    </labkey:form>
 
 <% } else { %>
     No matching Gene Ontology annotations found. Be sure that you have loaded full gene annotations for the relevant proteins. 

@@ -104,7 +104,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 var keywordValueSubsetListMap = KV; 
 </script>
 
-<form method="POST" action="<%=h(formAction(ScriptController.EditCompensationCalculationAction.class))%>">
+<labkey:form method="POST" action="<%=h(formAction(ScriptController.EditCompensationCalculationAction.class))%>">
 
 <% if (hasAutoCompScripts) { %>
     <p/>
@@ -244,5 +244,5 @@ if (analysisNames.length > 0)
 
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
     <input type="Submit" value="Submit">
-</form>
+</labkey:form>
 
