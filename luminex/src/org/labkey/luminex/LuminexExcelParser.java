@@ -53,8 +53,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
-* User: jeckels
-* Date: Jun 8, 2011
+ * Parses the Excel Luminex files with one analyte per sheet, each sheet has header, footer, and a grid of data
+ * User: jeckels
+ * Date: Jun 8, 2011
 */
 public class LuminexExcelParser
 {

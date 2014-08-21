@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Adds analyte and titration info for transform scripts
  * User: klum
  * Date: Apr 21, 2009
  */

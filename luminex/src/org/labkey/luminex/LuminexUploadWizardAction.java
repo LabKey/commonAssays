@@ -74,8 +74,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
+ * Adds Analyte Properties as third wizard step, handles analyte and titration definition input view UI and post, saves
+ * last entered default values for analyte domain and standard properties
  * User: jeckels
-* Date: Aug 8, 2007
+ * Date: Aug 8, 2007
 */
 @RequiresPermissionClass(InsertPermission.class)
 public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUploadForm, LuminexAssayProvider>

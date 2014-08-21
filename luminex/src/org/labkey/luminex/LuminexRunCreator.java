@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Saves analyte specific properties and handles re-run
  * User: jeckels
  * Date: Feb 13, 2012
  */

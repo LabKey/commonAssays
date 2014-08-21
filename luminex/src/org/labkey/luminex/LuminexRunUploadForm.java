@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Handles HTTP POSTs from upload wizard to get analyte properties and titrations, handles gettting default
+ * values for analyte domain and standard properties.
  * User: jeckels
  * Date: Aug 8, 2007
  */

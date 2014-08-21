@@ -64,7 +64,6 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.ParticipantVisit;
-import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayProvider;
@@ -101,6 +100,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Import data from file, handles participant/visit resolver, insert/update data rows (titrations, analytes, QC flags,
+ * guide sets, curve fits), handles deletions of data on run/container delete.
  * We've made the simplifying assumption that in the case of updating an existing run, we don't have to worry about
  * deleting any data (no data rows, analytes, etc have disappeared completely).
  * User: klum

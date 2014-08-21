@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Defines the Luminex assay type, creates default batch/run/analyte domains, sets up header links.
  * User: jeckels
  * Date: Jul 13, 2007
  */

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Handles run import in the context of a pipeline job (assay design set to "import in background")
  * User: jeckels
  * Date: Feb 13, 2012
  */

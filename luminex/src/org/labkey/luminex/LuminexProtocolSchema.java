@@ -47,6 +47,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
+/**
+ * Maps to a single assay design for schema tables/queries (batch, run, data, analyte, titration, curve fit, etc.)
+ */
 public class LuminexProtocolSchema extends AssayProtocolSchema
 {
     public static final String ANALYTE_TABLE_NAME = "Analyte";

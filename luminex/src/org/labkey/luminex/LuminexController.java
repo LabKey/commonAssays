@@ -50,6 +50,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 
 /**
+ * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
  * User: jeckels
  * Date: Jul 31, 2007
  */

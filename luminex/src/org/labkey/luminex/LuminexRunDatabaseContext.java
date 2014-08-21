@@ -39,6 +39,7 @@ import java.util.Set;
 
 /**
  * Info source for running transform/validation script over a run that's already been imported into the database
+ * (including with exclusions of well groups, analytes, etc.)
  * User: jeckels
  * Date: Oct 7, 2011
  */
