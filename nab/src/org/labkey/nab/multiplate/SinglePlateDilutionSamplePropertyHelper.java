@@ -62,10 +62,7 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
         Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
         try
         {
-            List<WellGroupTemplate> sampleGroups = getSampleWellGroups();
-            Map<String, WellGroupTemplate> sampleGroupNames = new HashMap<>(sampleGroups.size());
-            for (WellGroupTemplate sampleGroup : sampleGroups)
-                sampleGroupNames.put(sampleGroup.getName(), sampleGroup);
+            Map<String, WellGroupTemplate> sampleGroupNames = getSampleWellGroupNameMap();
 
             ExcelLoader loader = new ExcelLoader(metadataFile, true);
             loader.setScanAheadLineCount(1000); // issue 19539

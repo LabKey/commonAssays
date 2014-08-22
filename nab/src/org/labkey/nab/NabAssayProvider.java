@@ -39,6 +39,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AssayDataType;
@@ -50,6 +51,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -59,7 +61,6 @@ import org.labkey.api.view.HttpView;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 import org.labkey.nab.query.NabRunCreator;
-import org.labkey.nab.query.NabVirusDomainKind;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -334,7 +335,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
             return null;
     }
 
-    public PlateSamplePropertyHelper getVirusPropertyHelper(PlateUploadForm context)
+    public PlateSamplePropertyHelper getVirusPropertyHelper(PlateUploadForm context, boolean insertView)
     {
         PlateTemplate template = getPlateTemplate(context.getContainer(), context.getProtocol());
         try
@@ -345,7 +346,17 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
                 Domain domain = ((NabAssayProvider)provider).getVirusWellGroupDomain(context.getProtocol());
 
                 if (domain != null)
-                    return new NabVirusPropertyHelper(domain.getProperties(), template);
+                {
+                    int wellGroupCount = template.getWellGroupCount(WellGroup.Type.VIRUS);
+                    boolean isFileBased = getMetadataInputFormat(context.getProtocol()) == SampleMetadataInputFormat.FILE_BASED;
+
+                    // Always use the NabVirusPropertyHelper for the upload wizard insert view, since that will be the same for manual vs file based
+                    // NabVirusFilePropertyHelper to be used for file based metadata parsing in multi-virus case only
+                    if (!insertView && isFileBased && wellGroupCount > 1)
+                        return new NabVirusFilePropertyHelper(context.getContainer(), context.getProtocol(), domain.getProperties(), template);
+                    else
+                        return new NabVirusPropertyHelper(domain.getProperties(), template, getMetadataInputFormat(context.getProtocol()));
+                }
             }
             return null;
         }
@@ -359,5 +370,11 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     public AssayRunCreator getRunCreator()
     {
         return new NabRunCreator(this);
+    }
+
+    @Override
+    public SampleMetadataInputFormat[] getSupportedMetadataInputFormats()
+    {
+        return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.FILE_BASED};
     }
 }

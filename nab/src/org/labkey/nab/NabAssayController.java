@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -504,11 +505,15 @@ public class NabAssayController extends SpringActionController
         private User _user;
         private Domain _sampleDomain;
         private List<WellGroupTemplate> _sampleGroups;
+        private Domain _virusDomain;
+        private List<WellGroupTemplate> _virusGroups;
 
-        public SampleTemplateWriter(Container container, User user, Domain sampleDomain, List<WellGroupTemplate> sampleGroups)
+        public SampleTemplateWriter(Container container, User user, Domain sampleDomain, List<WellGroupTemplate> sampleGroups, Domain virusDomain, List<WellGroupTemplate> virusGroups)
         {
             _sampleDomain = sampleDomain;
             _sampleGroups = sampleGroups;
+            _virusDomain = virusDomain;
+            _virusGroups = virusGroups;
             _container = container;
             _user = user;
         }
@@ -519,17 +524,28 @@ public class NabAssayController extends SpringActionController
             Sheet sheet = _workbook.createSheet(getSheetName(sheetNumber));
             sheet.getPrintSetup().setPaperSize(PrintSetup.LETTER_PAPERSIZE);
 
-            // Render the header row:
+            // Render the header row and collect default values for the sample/virus property columns:
             List<String> headers = new ArrayList<>();
-            headers.add(PlateSampleFilePropertyHelper.WELLGROUP_COLUMN);
+            headers.add(PlateSampleFilePropertyHelper.SAMPLE_WELLGROUP_COLUMN);
             headers.add(PlateSampleFilePropertyHelper.PLATELOCATION_COLUMN);
 
             Map<DomainProperty, Object> defaultValues = DefaultValueService.get().getDefaultValues(_container, _sampleDomain);
-            Map<Integer, Object> columnToDefaultValue = new HashMap<>();
+            Map<String, Object> columnToDefaultValue = new HashMap<>();
             for (DomainProperty property : _sampleDomain.getProperties())
             {
-                columnToDefaultValue.put(headers.size(), defaultValues.get(property));
+                columnToDefaultValue.put(property.getName(), defaultValues.get(property));
                 headers.add(property.getName());
+            }
+
+            if (_virusGroups.size() > 0)
+            {
+                headers.add(NabVirusFilePropertyHelper.VIRUS_WELLGROUP_COLUMN);
+                defaultValues = DefaultValueService.get().getDefaultValues(_container, _virusDomain);
+                for (DomainProperty property : _virusDomain.getProperties())
+                {
+                    columnToDefaultValue.put(property.getName(), defaultValues.get(property));
+                    headers.add(property.getName());
+                }
             }
 
             Row firstRow = sheet.createRow(0);
@@ -541,28 +557,49 @@ public class NabAssayController extends SpringActionController
                 cell.setCellStyle(getBoldFormat());
             }
 
-            // Render the rows, which just contain well group names:
-            for (int group = 0; group < _sampleGroups.size(); group++)
+            // Render the rows (i.e. well group names, virus group names, and default property values):
+            int rowNum = 1;
+            for (WellGroupTemplate sampleGroup : _sampleGroups)
             {
-                Row row = sheet.createRow(group + 1);
-                WellGroupTemplate sample = _sampleGroups.get(group);
-                row.createCell(0).setCellValue(sample.getName());
-                row.createCell(1).setCellValue(sample.getPositionDescription());
-                for (int column = 2; column < headers.size(); column++)
+                if (_virusGroups.size() > 0)
                 {
-                    Object defaultValue = columnToDefaultValue.get(column);
-                    if (defaultValue != null)
-                    {
-                        Cell cell = row.createCell(column);
-                        if (defaultValue instanceof Number)
-                            cell.setCellValue(((Number) defaultValue).doubleValue());
-                        else if (defaultValue instanceof Date)
-                            cell.setCellValue((Date) defaultValue);
-                        else if (defaultValue instanceof Boolean)
-                            cell.setCellValue(((Boolean) defaultValue).booleanValue());
-                        else
-                            cell.setCellValue(defaultValue.toString());
-                    }
+                    for (WellGroupTemplate virusGroup : _virusGroups)
+                        renderRow(sheet, headers, columnToDefaultValue, rowNum++, sampleGroup, virusGroup);
+                }
+                else
+                    renderRow(sheet, headers, columnToDefaultValue, rowNum++, sampleGroup, null);
+            }
+        }
+
+        private void renderRow(Sheet sheet, List<String> headers, Map<String, Object> columnToDefaultValue, int rowNum, WellGroupTemplate sample, @Nullable WellGroupTemplate virus)
+        {
+            Row row = sheet.createRow(rowNum);
+            for (int column = 0; column < headers.size(); column++)
+            {
+                Object defaultValue = columnToDefaultValue.get(headers.get(column));
+                if (PlateSampleFilePropertyHelper.SAMPLE_WELLGROUP_COLUMN.equals(headers.get(column)))
+                {
+                    row.createCell(column).setCellValue(sample.getName());
+                }
+                else if (PlateSampleFilePropertyHelper.PLATELOCATION_COLUMN.equals(headers.get(column)))
+                {
+                    row.createCell(column).setCellValue(sample.getPositionDescription());
+                }
+                else if (NabVirusFilePropertyHelper.VIRUS_WELLGROUP_COLUMN.equals(headers.get(column)) && virus != null)
+                {
+                    row.createCell(column).setCellValue(virus.getName());
+                }
+                else if (defaultValue != null)
+                {
+                    Cell cell = row.createCell(column);
+                    if (defaultValue instanceof Number)
+                        cell.setCellValue(((Number) defaultValue).doubleValue());
+                    else if (defaultValue instanceof Date)
+                        cell.setCellValue((Date) defaultValue);
+                    else if (defaultValue instanceof Boolean)
+                        cell.setCellValue(((Boolean) defaultValue).booleanValue());
+                    else
+                        cell.setCellValue(defaultValue.toString());
                 }
             }
         }
@@ -590,19 +627,24 @@ public class NabAssayController extends SpringActionController
             }
             NabAssayProvider nabProvider = ((NabAssayProvider) provider);
             Domain sampleDomain = nabProvider.getSampleWellGroupDomain(protocol);
+            Domain virusDomain = nabProvider.getVirusWellGroupDomain(protocol);
             PlateTemplate template = nabProvider.getPlateTemplate(context.getContainer(), protocol);
             if (template == null)
             {
                 throw new NotFoundException("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");
             }
+
             List<WellGroupTemplate> sampleGroups = new ArrayList<>();
+            List<WellGroupTemplate> virusGroups = new ArrayList<>();
             for (WellGroupTemplate group : template.getWellGroups())
             {
                 if (group.getType() == WellGroup.Type.SPECIMEN)
                     sampleGroups.add(group);
+                else if (group.getType() == WellGroup.Type.VIRUS)
+                    virusGroups.add(group);
             }
 
-            ExcelWriter xl = new SampleTemplateWriter(getContainer(), getUser(), sampleDomain, sampleGroups);
+            ExcelWriter xl = new SampleTemplateWriter(getContainer(), getUser(), sampleDomain, sampleGroups, virusDomain, virusGroups);
             xl.setFilenamePrefix("metadata");
             xl.write(response);
         }

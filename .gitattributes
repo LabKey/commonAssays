@@ -1770,6 +1770,7 @@ nab/src/org/labkey/nab/NabRunPropertyMap.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text
 nab/src/org/labkey/nab/NabUpgradeCode.java -text
 nab/src/org/labkey/nab/NabUploadWizardAction.java -text
+nab/src/org/labkey/nab/NabVirusFilePropertyHelper.java -text
 nab/src/org/labkey/nab/NabVirusPropertyHelper.java -text
 nab/src/org/labkey/nab/PlateParserTests.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text

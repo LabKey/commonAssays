@@ -18,21 +18,18 @@ package org.labkey.nab;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.view.InsertView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,9 +40,12 @@ import java.util.Map;
  */
 public class NabVirusPropertyHelper extends PlateSamplePropertyHelper
 {
-    public NabVirusPropertyHelper(List<? extends DomainProperty> virusDomainProperties, PlateTemplate template)
+    private SampleMetadataInputFormat _metadataInputFormat;
+
+    public NabVirusPropertyHelper(List<? extends DomainProperty> virusDomainProperties, PlateTemplate template, SampleMetadataInputFormat metadataInputFormat)
     {
         super(virusDomainProperties, template, WellGroup.Type.VIRUS);
+        _metadataInputFormat = metadataInputFormat;
     }
 
     public Map<String, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
@@ -83,9 +83,11 @@ public class NabVirusPropertyHelper extends PlateSamplePropertyHelper
     @Override
     public void addSampleColumns(InsertView view, User user, @Nullable AssayRunUploadForm defaultValueContext, boolean errorReshow) throws ExperimentException
     {
-        if (hasMultipleViruses())
+        // In the case where the virus properties will be included with the sample metadata file upload (see PlateSampleFilePropertyHelper.addSampleColumns)
+        // we only want to show the virus property input fields for a single virus
+        if (hasMultipleViruses() && SampleMetadataInputFormat.MANUAL == _metadataInputFormat)
             super.addSampleColumns(view, user, defaultValueContext, errorReshow);
-        else
+        else if (!hasMultipleViruses())
         {
             for (DomainProperty dp : getDomainProperties())
             {

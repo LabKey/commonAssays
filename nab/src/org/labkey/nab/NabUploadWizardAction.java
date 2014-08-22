@@ -60,7 +60,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         try
         {
-            PlateSamplePropertyHelper virusHelper = provider.getVirusPropertyHelper(newRunForm);
+            PlateSamplePropertyHelper virusHelper = provider.getVirusPropertyHelper(newRunForm, true);
             if (null != virusHelper)
                 virusHelper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, errorReshow);
 
@@ -104,7 +104,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
                     samplePropsValid = validatePostedProperties(entry.getValue(), errors) && samplePropsValid;
                 }
 
-                PlateSamplePropertyHelper virusHelper = provider.getVirusPropertyHelper(form);
+                PlateSamplePropertyHelper virusHelper = provider.getVirusPropertyHelper(form, false);
                 if (null != virusHelper)
                 {
                     _postedVirusProperties = virusHelper.getPostedPropertyValues(form.getRequest());

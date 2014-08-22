@@ -55,7 +55,7 @@ public class NabRunCreator extends PlateBasedRunCreator<NabAssayProvider>
         super.resolveExtraRunData(resolver, context, inputMaterials, inputDatas, outputMaterials, outputDatas);
 
         // insert virus properties
-        PlateSamplePropertyHelper helper = getProvider().getVirusPropertyHelper((PlateUploadForm) context);
+        PlateSamplePropertyHelper helper = getProvider().getVirusPropertyHelper((PlateUploadForm) context, false);
         Map<String, Map<DomainProperty, String>> virusProperties = null != helper ?
                 helper.getSampleProperties(context.getRequest())
                 : null;
