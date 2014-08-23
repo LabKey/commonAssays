@@ -21,6 +21,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.view.JspView;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
 
     public LeveyJenningsMenuView(ExpProtocol protocol)
     {
-        super("/org/labkey/luminex/leveyJenningsMenu.jsp");
+        super("/org/labkey/luminex/view/leveyJenningsMenu.jsp");
         ContainerFilter.AllFolders containerFilter = new ContainerFilter.AllFolders(getViewContext().getUser());
         SQLFragment containerSQL = containerFilter.getSQLFragment(LuminexProtocolSchema.getSchema(), new SQLFragment("r.Container"), getViewContext().getContainer());
 

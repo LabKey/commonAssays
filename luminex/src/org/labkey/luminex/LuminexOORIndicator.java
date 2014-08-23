@@ -15,6 +15,9 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.LuminexDataRow;
+
 import java.util.List;
 
 /**

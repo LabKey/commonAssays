@@ -56,6 +56,13 @@ import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
+import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
+import org.labkey.luminex.query.NegativeBeadDisplayColumnGroup;
+import org.labkey.luminex.model.SinglePointControl;
+import org.labkey.luminex.model.Titration;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -141,7 +148,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         // if there are titrations in the uploaded data, show the well role definition section
         if (form.getParser().getTitrations().size() > 0)
         {
-            JspView<LuminexRunUploadForm> top = new JspView<>("/org/labkey/luminex/titrationWellRoles.jsp", form);
+            JspView<LuminexRunUploadForm> top = new JspView<>("/org/labkey/luminex/view/titrationWellRoles.jsp", form);
             top.setTitle("Define Well Roles");
             top.setTitlePopupHelp("Define Well Roles", "Samples that are titrated across different wells can used in different ways. Standards are used to calculate a titration curve against which unknowns are fit. QC Controls also define a curve and are used to compare runs against each other. The performance of single point controls may also be tracked over time. Choose the purpose(s) for each titration or single point control.");
             vbox.addView(top);

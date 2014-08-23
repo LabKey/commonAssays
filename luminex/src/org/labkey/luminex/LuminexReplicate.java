@@ -15,6 +15,8 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.luminex.model.LuminexWell;
+
 /**
  * User: jeckels
  * Date: Sep 1, 2011

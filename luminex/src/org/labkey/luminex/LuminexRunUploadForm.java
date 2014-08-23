@@ -32,6 +32,10 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.SinglePointControl;
+import org.labkey.luminex.model.Titration;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.ArrayList;
 import java.util.HashMap;

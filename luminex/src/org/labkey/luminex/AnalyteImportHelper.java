@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.luminex.model.Analyte;
 
 import java.util.Map;
 import java.util.Collection;

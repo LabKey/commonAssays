@@ -67,6 +67,7 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;

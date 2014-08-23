@@ -19,6 +19,8 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.luminex.model.SinglePointControl;
+import org.labkey.luminex.model.Titration;
 
 import java.util.List;
 import java.util.Map;

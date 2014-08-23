@@ -79,6 +79,23 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.luminex.model.AbstractLuminexControl;
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.AnalyteSinglePointControl;
+import org.labkey.luminex.model.AnalyteSinglePointControlQCFlag;
+import org.labkey.luminex.model.AnalyteTitration;
+import org.labkey.luminex.model.AnalyteTitrationQCFlag;
+import org.labkey.luminex.model.CVQCFlag;
+import org.labkey.luminex.model.CurveFit;
+import org.labkey.luminex.model.GuideSet;
+import org.labkey.luminex.model.LuminexDataRow;
+import org.labkey.luminex.model.LuminexWell;
+import org.labkey.luminex.model.LuminexWellGroup;
+import org.labkey.luminex.model.SinglePointControl;
+import org.labkey.luminex.model.Titration;
+import org.labkey.luminex.query.GuideSetTable;
+import org.labkey.luminex.query.LuminexDataTable;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.io.File;
 import java.io.IOException;
@@ -512,7 +529,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             LuminexDataRow existingRow = BeanObjectFactory.Registry.getFactory(LuminexDataRow.class).fromMap(databaseMap);
             // Make sure an extra properties are made available
-            existingRow.setExtraProperties(new CaseInsensitiveHashMap<>(databaseMap));
+            existingRow._setExtraProperties(new CaseInsensitiveHashMap<>(databaseMap));
             existingRows.put(new DataRowKey(existingRow), existingRow);
         }
 
@@ -593,7 +610,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             _analyteId = dataRow.getAnalyte();
             _well = dataRow.getWell();
             _type = dataRow.getType();
-            _standard = dataRow.getExtraProperties().get("Standard");
+            _standard = dataRow._getExtraProperties().get("Standard");
         }
 
         @Override
@@ -643,7 +660,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         Objects.equals(statRow.getType(), dataRow.getType()) &&
                         Objects.equals(statRow.getData(), dataRow.getData()) &&
                         Objects.equals(statRow.getAnalyte(), dataRow.getAnalyte()) &&
-                        Objects.equals(statRow.getExtraProperties().get("Standard"), dataRow.getExtraProperties().get("Standard")))
+                        Objects.equals(statRow._getExtraProperties().get("Standard"), dataRow._getExtraProperties().get("Standard")))
                     {
                         fis.add(statRow.getFi());
                     }
@@ -1037,19 +1054,19 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throw new IllegalArgumentException("Unsupported fit type: " + fitType);
         }
         String suffix = fitType == StatsService.CurveFitType.FIVE_PARAMETER ? "_5pl" : "_4pl";
-        Object value = dataRow.getExtraProperties().get("Slope" + suffix);
+        Object value = dataRow._getExtraProperties().get("Slope" + suffix);
         Number slope = (value == null ? (Number)value : Double.parseDouble(value.toString()));
-        value = dataRow.getExtraProperties().get("Upper" + suffix);
+        value = dataRow._getExtraProperties().get("Upper" + suffix);
         Number upper = (value == null ? (Number)value : Double.parseDouble(value.toString()));
-        value = dataRow.getExtraProperties().get("Lower" + suffix);
+        value = dataRow._getExtraProperties().get("Lower" + suffix);
         Number lower = (value == null ? (Number)value : Double.parseDouble(value.toString()));
-        value = dataRow.getExtraProperties().get("Inflection" + suffix);
+        value = dataRow._getExtraProperties().get("Inflection" + suffix);
         Number inflection = (value == null ? (Number)value : Double.parseDouble(value.toString()));
-        value = dataRow.getExtraProperties().get("Asymmetry" + suffix);
+        value = dataRow._getExtraProperties().get("Asymmetry" + suffix);
         Number asymmetry = (value == null ? (Number)value : Double.parseDouble(value.toString()));
-        value = dataRow.getExtraProperties().get("EC50" + suffix);
+        value = dataRow._getExtraProperties().get("EC50" + suffix);
         Double ec50 = (value != null ? Double.parseDouble(value.toString()) : null);
-        value = dataRow.getExtraProperties().get("Flag" + suffix);
+        value = dataRow._getExtraProperties().get("Flag" + suffix);
         Boolean flag = (value != null ? Boolean.parseBoolean(value.toString()) : null);
 
         if ((slope != null && upper != null && lower != null && inflection != null && ec50 != null) || flag != null)
@@ -2116,7 +2133,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             row.remove("titration");
             Analyte analyte = analyteFactory.fromMap(row);
             LuminexDataRow dataRow = rowFactory.fromMap(row);
-            dataRow.setExtraProperties(row);
+            dataRow._setExtraProperties(row);
 
             // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
             if (dataRow.getLsid() == null)

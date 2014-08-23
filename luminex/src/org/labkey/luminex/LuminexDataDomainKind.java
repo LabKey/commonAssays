@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.labkey.api.exp.property.AssayDomainKind;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.Set;
 

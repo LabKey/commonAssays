@@ -46,6 +46,7 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 
@@ -255,7 +256,7 @@ public class LuminexController extends SpringActionController
             VBox result = new VBox();
             AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
             result.addView(header);
-            JspView report = new JspView<>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
+            JspView report = new JspView<>("/org/labkey/luminex/view/leveyJenningsReport.jsp", form);
             result.addView(report);
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             return result;

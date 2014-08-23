@@ -28,6 +28,8 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
+import org.labkey.luminex.model.SinglePointControl;
+import org.labkey.luminex.model.Titration;
 
 import java.io.File;
 import java.util.ArrayList;

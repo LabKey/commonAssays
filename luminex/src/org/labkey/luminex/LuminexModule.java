@@ -26,6 +26,7 @@ import org.labkey.api.study.assay.AssayQCFlagColumn;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.Collection;
 import java.util.Collections;

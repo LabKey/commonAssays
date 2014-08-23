@@ -35,6 +35,8 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.List;
 import java.util.Map;

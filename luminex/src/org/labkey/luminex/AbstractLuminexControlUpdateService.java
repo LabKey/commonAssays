@@ -29,6 +29,11 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
+import org.labkey.luminex.model.AbstractLuminexControlAnalyte;
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.GuideSet;
+import org.labkey.luminex.query.AbstractLuminexTable;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.sql.SQLException;
 import java.util.HashSet;

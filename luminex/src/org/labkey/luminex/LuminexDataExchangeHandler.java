@@ -24,6 +24,7 @@ import org.labkey.api.qc.TsvDataExchangeHandler;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.Pair;
+import org.labkey.luminex.model.Titration;
 
 import java.io.File;
 import java.util.ArrayList;

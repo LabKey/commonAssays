@@ -28,6 +28,10 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayRunDatabaseContext;
+import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.SinglePointControl;
+import org.labkey.luminex.model.Titration;
+import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
