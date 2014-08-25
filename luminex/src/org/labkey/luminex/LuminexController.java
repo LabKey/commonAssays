@@ -16,17 +16,30 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.TSVColumnWriter;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.query.AbstractQueryImportAction;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
@@ -34,8 +47,10 @@ import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.util.FileStream;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.JspView;
@@ -47,8 +62,22 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
 import org.labkey.luminex.query.LuminexProtocolSchema;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
@@ -256,7 +285,7 @@ public class LuminexController extends SpringActionController
             VBox result = new VBox();
             AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
             result.addView(header);
-            JspView report = new JspView<>("/org/labkey/luminex/view/leveyJenningsReport.jsp", form);
+            JspView report = new JspView<>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
             result.addView(report);
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             return result;
@@ -296,6 +325,201 @@ public class LuminexController extends SpringActionController
             NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
             result.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
             return result.addChild("Levey-Jennings Reports");
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class SetDefaultValuesAction extends FormViewAction<DefaultValuesForm>
+    {
+        @Override
+        public void validateCommand(DefaultValuesForm target, Errors errors)
+        {
+            // add errors to collection
+        }
+
+        @Override
+        public ModelAndView getView(DefaultValuesForm form, boolean reshow, BindException errors) throws Exception
+        {
+            ExpProtocol protocol = form.getProtocol();
+
+            List<String> analytes = LuminexDefaultValueService.getAnalyteNames(protocol);
+            List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getUser(), getContainer(), protocol);
+            List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getUser(), getContainer(), protocol);
+
+            form.setAnalytes(analytes);
+            form.setPositivityThresholds(positivityThresholds);
+            form.setNegativeBeads(negativeBeads);
+
+            return new JspView<>("/org/labkey/luminex/view/defaultValues.jsp", form, errors);
+        }
+
+        @Override
+        public boolean handlePost(DefaultValuesForm form, BindException errors) throws Exception
+        {
+            ExpProtocol protocol = form.getProtocol();
+
+            List<String> analytes = form.getAnalytes();
+            List<String> positivityThresholds = form.getPositivityThresholds();
+            List<String> negativeBeads = form.getNegativeBeads();
+
+            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getUser(), getContainer(), protocol);
+
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(DefaultValuesForm form)
+        {
+            return form.getReturnURLHelper();
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Set Protocol Default Values");
+        }
+    }
+
+    public static class DefaultValuesForm extends ProtocolIdForm
+    {
+        private List<String> analytes;
+        private List<String> positivityThresholds;
+        private List<String> negativeBeads;
+
+        public List<String> getAnalytes()
+        {
+            return analytes;
+        }
+
+        public void setAnalytes(List<String> analytes)
+        {
+            this.analytes = analytes;
+        }
+
+        public List<String> getPositivityThresholds()
+        {
+            return positivityThresholds;
+        }
+
+        public void setPositivityThresholds(List<String> positivityThresholds)
+        {
+            this.positivityThresholds = positivityThresholds;
+        }
+
+        public List<String> getNegativeBeads()
+        {
+            return negativeBeads;
+        }
+
+        public void setNegativeBeads(List<String> negativeBeads)
+        {
+            this.negativeBeads = negativeBeads;
+        }
+
+        /*public void insertDefautValues(String analyte, String positivityThreshold, String negativeBead)
+        {
+            if (this.analytes == null)
+            {
+                this.analytes = new ArrayList<>();
+                this.positivityThresholds = new ArrayList<>();
+                this.negativeBeads = new ArrayList<>();
+            }
+            this.analytes.add(analyte);
+            this.positivityThresholds.add(positivityThreshold);
+            this.negativeBeads.add(negativeBead);
+        }*/
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ImportDefaultValuesAction extends AbstractQueryImportAction<ProtocolIdForm>
+    {
+        ExpProtocol _protocol;
+
+        public ImportDefaultValuesAction()
+        {
+            super(ProtocolIdForm.class);
+        }
+
+        @Override
+        protected void initRequest(ProtocolIdForm form) throws ServletException
+        {
+            _protocol = form.getProtocol();
+            setHasColumnHeaders(false);
+            setImportMessage("Import your junk");
+            setNoTableInfo();
+            setHideTsvCsvCombo(true);
+        }
+
+        @Override
+        protected int importData(DataLoader dl, FileStream file, String originalName, BatchValidationException errors) throws IOException
+        {
+            BufferedReader in = new BufferedReader(new InputStreamReader(file.openInputStream()));
+
+            String line;
+            String[] data;
+
+            List<String> analytes = new ArrayList<>();
+            List<String> positivityThresholds = new ArrayList<>();
+            List<String> negativeBeads = new ArrayList<>();
+
+            // check for headers
+            line = in.readLine();
+            if (line.equals("Analyte\tPositivityThreshold\tNegativeBead")) line = in.readLine();
+
+            // raise error?
+            do
+            {
+                data = line.split("\t", -1);
+                analytes.add(data[0]);
+                positivityThresholds.add(data[1]);
+                negativeBeads.add(data[2]);
+            }
+            while((line = in.readLine()) != null);
+
+            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getUser(), getContainer(), _protocol);
+
+            return -1; // appears to skip any kind of message to user
+        }
+
+        @Override
+        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        {
+            initRequest(form);
+            return getDefaultImportView(form, errors);
+        }
+
+        @Override
+        protected void validatePermission(User user, BindException errors)
+        {
+            checkPermissions();
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ExportDefaultValuesAction extends ExportAction<ProtocolIdForm>
+    {
+        @Override
+        public void export(ProtocolIdForm form, HttpServletResponse response, BindException errors) throws Exception
+        {
+            ExpProtocol protocol = form.getProtocol();
+
+            final List<String> analytes = LuminexDefaultValueService.getAnalyteNames(protocol);
+            final List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getUser(), getContainer(), protocol);
+            final List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getUser(), getContainer(), protocol);
+
+            TSVWriter writer = new TSVWriter(){
+                @Override
+                protected void write()
+                {
+                    _pw.println("Analyte\tPositivityThreshold\tNegativeBead");
+                    for (int i=0; i<analytes.size(); i++)
+                    {
+                        _pw.println( String.format("%s\t%s\t%s", analytes.get(i), positivityThresholds.get(i), negativeBeads.get(i)));
+                    }
+                }
+            };
+            writer.setFilenamePrefix("LuminexDefaultValues");
+            writer.write(response);
         }
     }
 }

@@ -189,7 +189,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                     defaultAnalytePropertyValues.put(defaultValueKey,  defaultValues);
                 }
-                final String inputName = getAnalytePropertyName(analyte, analyteDP);
+                final String inputName = LuminexDefaultValueService.getAnalytePropertyName(analyte, analyteDP);
                 Object analyteDefaultValue = defaultValues != null ? defaultValues.get(analyteDP) : null;
 
                 if (analyteDP.isShownInInsertView())
@@ -241,14 +241,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             for (String analyte : analyteNames)
             {
                 ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
-                String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                String inputName = LuminexDefaultValueService.getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                 info.setName(inputName);
                 info.setDisplayColumnFactory(new NegativeBeadDisplayColumnFactory(analyte, inputName, initNegativeControlAnalytes));
                 view.setInitialValue(inputName, defaultAnalyteColumnValues.get(inputName));
                 DisplayColumn col = info.getRenderer();
                 negativeBeadCols.add(col);
             }
-            view.getDataRegion().addGroup(new NegativeBeadDisplayColumnGroup(negativeBeadCols, getAnalytePropertyName(analyteNames[0], LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME)));
+            view.getDataRegion().addGroup(new NegativeBeadDisplayColumnGroup(negativeBeadCols, LuminexDefaultValueService.getAnalytePropertyName(analyteNames[0], LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME)));
         }
 
         // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
@@ -259,7 +259,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             for (String analyte : analyteNames)
             {
                 ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
-                String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                String inputName = LuminexDefaultValueService.getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 info.setName(inputName);
                 info.setDisplayColumnFactory(createAnalytePropertyDisplayColumnFactory(inputName, LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME));
                 // use a default value of 100 if there is no last entry value to populate the initial value
@@ -573,16 +573,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return "titration_" + analyte + "_" + titration;
     }
 
-    public static String getAnalytePropertyName(String analyte, DomainProperty dp)
-    {
-        return getAnalytePropertyName(analyte, dp.getName());
-    }
-
-    public static String getAnalytePropertyName(String analyte, String property)
-    {
-        return "_analyte_" + analyte + "_" + property;
-    }
-
     private boolean setInitialTitrationInput(boolean errorReshow, String propName, String defVal, boolean typeMatch)
     {
         // return true if 1. errorReshow and previously checked, 2. has a default value that was checked, or 3. titration type matches
@@ -690,7 +680,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                     // Save default values for analytes
                     PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(
-                            getUser(), getContainer(), form.getAnatlyeColumnCategory(_protocol), true);
+                            getUser(), getContainer(), LuminexDefaultValueService.getAnalyteColumnCategory(_protocol), true);
                     for (String analyteName : form.getAnalyteNames())
                     {
                         // for analyte domain properties use the standard assay default value persistance
@@ -705,7 +695,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                             // These need to be repopulated just like the rest of the analyte domain properties,
                             // but they aren't actually part of the domain- they're hard columns on the luminex.Analyte table
-                            String inputName = getAnalytePropertyName(analyteName, colPropEntry.getKey().getName());
+                            String inputName = LuminexDefaultValueService.getAnalytePropertyName(analyteName, colPropEntry.getKey().getName());
                             if (includeDefaultAnalyteColumnValue)
                                 defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
                         }
@@ -801,7 +791,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private boolean hasAnalytePropertyInRequestParams(LuminexRunUploadForm form, String analyteName, ColumnInfo col)
     {
-        return form.getRequest().getParameterMap().containsKey(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
+        return form.getRequest().getParameterMap().containsKey(LuminexDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
     }
 
     @Override

@@ -322,6 +322,32 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
 
+        String name = protocol.getName() + " Analyte Properties";
+        boolean flag = false;
+        for (NavTree nt : result)
+        {
+            if(nt.getText().equals("manage assay design"))
+            {
+                for(NavTree child : nt.getChildren())
+                {
+                    if(child.getText().equals("set default values"))
+                    {
+                        for(NavTree grandchild : child.getChildren())
+                        {
+                            if(grandchild.getText().equals(name))
+                            {
+                                grandchild.setHref(new ActionURL(LuminexController.SetDefaultValuesAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()).toString());
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(flag) break;
+                }
+            }
+            if(flag) break;
+        }
+
         String currentRunId = viewContext.getRequest().getParameter("Data.Data/Run/RowId~eq");
 
         // add header link for the Excluded Data Report
