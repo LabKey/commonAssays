@@ -186,8 +186,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         }
         else
         {
-            String analyteColumnCategory = LuminexDefaultValueService.getAnalyteColumnCategory(protocol);
-            return PropertyManager.getProperties(getUser(), getContainer(), analyteColumnCategory);
+            return LuminexDefaultValueService.getAnalyteColumnDefaultValues(protocol, getUser(), getContainer(), isResetDefaultValues());
         }
     }
 

@@ -672,7 +672,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
             }
 
-            if (!form.isResetDefaultValues() && errors.getErrorCount() == 0)
+            boolean errorReshow = errors.getErrorCount() > 0;
+            if (!form.isResetDefaultValues() && !errorReshow)
             {
                 try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                 {
@@ -775,12 +776,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
                 }
             }
-            else
-            {
-                return getAnalytesView(form.getAnalyteNames(), form, true, errors);
-            }
 
-            return getAnalytesView(form.getAnalyteNames(), form, true, errors);
+            return getAnalytesView(form.getAnalyteNames(), form, errorReshow, errors);
         }
 
         public String getName()

@@ -332,8 +332,8 @@ public class LuminexController extends SpringActionController
             ExpProtocol protocol = form.getProtocol();
 
             List<String> analytes = LuminexDefaultValueService.getAnalyteNames(protocol);
-            List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getUser(), getContainer(), protocol);
-            List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getUser(), getContainer(), protocol);
+            List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getContainer(), protocol);
+            List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getContainer(), protocol);
 
             form.setAnalytes(analytes);
             form.setPositivityThresholds(positivityThresholds);
@@ -351,7 +351,7 @@ public class LuminexController extends SpringActionController
             List<String> positivityThresholds = form.getPositivityThresholds();
             List<String> negativeBeads = form.getNegativeBeads();
 
-            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getUser(), getContainer(), protocol);
+            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), protocol);
 
             return true;
         }
@@ -465,7 +465,7 @@ public class LuminexController extends SpringActionController
             }
             while((line = in.readLine()) != null);
 
-            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getUser(), getContainer(), _protocol);
+            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
 
             return -1; // appears to skip any kind of message to user
         }
@@ -493,8 +493,8 @@ public class LuminexController extends SpringActionController
             ExpProtocol protocol = form.getProtocol();
 
             final List<String> analytes = LuminexDefaultValueService.getAnalyteNames(protocol);
-            final List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getUser(), getContainer(), protocol);
-            final List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getUser(), getContainer(), protocol);
+            final List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getContainer(), protocol);
+            final List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getContainer(), protocol);
 
             TSVWriter writer = new TSVWriter(){
                 @Override

@@ -11,6 +11,7 @@ import org.labkey.api.security.User;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +24,9 @@ public class LuminexDefaultValueService
     // NOTE: defaults do get flushed to backend if user saves.
     private static final String[] propertyDefaults = {"100", ""};
 
-    public static Map<String, String> getLuminexDefaultValues(User user, Container container, ExpProtocol protocol)
+    public static Map<String, String> getLuminexDefaultValues(Container container, ExpProtocol protocol)
     {
-        return PropertyManager.getProperties(user, container, getAnalyteColumnCategory(protocol));
+        return PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol));
     }
 
     /*public static PropertyManager.PropertyMap getWritableLuminexDefaultValues(User user, Container container, ExpProtocol protocol)
@@ -86,9 +87,9 @@ public class LuminexDefaultValueService
         return data;
     }*/
 
-    public static List<String> getAnalytePositivityThresholds(List<String> analytes, User user, Container container, ExpProtocol protocol)
+    public static List<String> getAnalytePositivityThresholds(List<String> analytes, Container container, ExpProtocol protocol)
     {
-        Map<String, String> currentDefaults =  getLuminexDefaultValues(user, container, protocol);
+        Map<String, String> currentDefaults =  getLuminexDefaultValues(container, protocol);
         List<String> data = new ArrayList<>();
         String propKey;
         for (String analyte : analytes)
@@ -102,9 +103,9 @@ public class LuminexDefaultValueService
         return data;
     }
 
-    public static List<String> getAnalyteNegativeBeads(List<String> analytes, User user, Container container, ExpProtocol protocol)
+    public static List<String> getAnalyteNegativeBeads(List<String> analytes, Container container, ExpProtocol protocol)
     {
-        Map<String, String> currentDefaults =  getLuminexDefaultValues(user, container, protocol);
+        Map<String, String> currentDefaults =  getLuminexDefaultValues(container, protocol);
         List<String> data = new ArrayList<>();
         String propKey;
         for (String analyte : analytes)
@@ -118,10 +119,10 @@ public class LuminexDefaultValueService
         return data;
     }
 
-    public static void setAnalyteDefaultValues(List<String> analytes, List<String> positivityThresholds, List<String> negativeBeads, User user, Container container, ExpProtocol protocol)
+    public static void setAnalyteDefaultValues(List<String> analytes, List<String> positivityThresholds, List<String> negativeBeads, Container container, ExpProtocol protocol)
     {
         //PropertyManager.PropertyMap defaultAnalyteColumnValues = getWritableLuminexDefaultValues(user, container, protocol);
-        PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(user, container, LuminexDefaultValueService.getAnalyteColumnCategory(protocol), true);
+        PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(container, LuminexDefaultValueService.getAnalyteColumnCategory(protocol), true);
         for (int i = 0; i < analytes.size(); i++)
         {
             String positivityThresholdPropKey = LuminexDefaultValueService.getAnalytePropertyName(analytes.get(i), "PositivityThreshold");
@@ -157,4 +158,15 @@ public class LuminexDefaultValueService
         }
         return data;
     }*/
+
+    public static Map<String, String> getAnalyteColumnDefaultValues(ExpProtocol protocol, User user, Container container, boolean isReset)
+    {
+        // get the container level default values and then override them with any user last entered default values
+        Map<String, String> mergedDefaults = new HashMap<>();
+        mergedDefaults.putAll(PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol)));
+        if (!isReset)
+            mergedDefaults.putAll(PropertyManager.getProperties(user, container, getAnalyteColumnCategory(protocol)));
+
+        return mergedDefaults;
+    }
 }
