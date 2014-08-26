@@ -16,18 +16,12 @@
 
 package org.labkey.luminex;
 
-import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.data.PropertyManager;
-import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.TSVColumnWriter;
-import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -69,15 +63,10 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
@@ -285,7 +274,7 @@ public class LuminexController extends SpringActionController
             VBox result = new VBox();
             AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
             result.addView(header);
-            JspView report = new JspView<>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
+            JspView report = new JspView<>("/org/labkey/luminex/view/leveyJenningsReport.jsp", form);
             result.addView(report);
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             return result;
