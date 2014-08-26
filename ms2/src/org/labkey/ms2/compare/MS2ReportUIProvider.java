@@ -27,12 +27,9 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /*
  * User: Karl Lum
@@ -42,12 +39,6 @@ import java.util.Set;
 
 public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
-    private static Map<String, String> _typeToIconMap = new HashMap<>();
-    static {
-        _typeToIconMap.put(SpectraCountRReport.TYPE, "/reports/r.gif");
-        _typeToIconMap.put(SingleMS2RunRReport.TYPE, "/reports/r.gif");
-    }
-
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<>();
@@ -62,25 +53,13 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
             bean.setRedirectUrl(context.getActionURL().toString());
 
             reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report",
-                    ReportUtil.getRReportDesignerURL(context, bean), _getIconPath(SpectraCountRReport.TYPE)));
+                    ReportUtil.getRReportDesignerURL(context, bean), "/reports/r.gif"));
         }
         return reportDesigners;
     }
 
-    private String _getIconPath(String type)
-    {
-        return AppProps.getInstance().getContextPath() + _typeToIconMap.get(type);
-    }
-
     public String getIconPath(Report report)
     {
-        if (report != null)
-        {
-            if (_typeToIconMap.containsKey(report.getType()))
-            {
-                return _getIconPath(report.getType());
-            }
-        }
-        return super.getIconPath(report);
+        return "/reports/r.gif";
     }
 }

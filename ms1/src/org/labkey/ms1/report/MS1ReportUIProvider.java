@@ -35,13 +35,6 @@ import java.util.Map;
 */
 public class MS1ReportUIProvider extends DefaultReportUIProvider
 {
-    private static Map<String, String> _typeToIconMap = new HashMap<>();
-    static {
-
-        _typeToIconMap.put(FeaturesRReport.TYPE, "/reports/r.gif");
-        _typeToIconMap.put(PeaksRReport.TYPE, "/reports/r.gif");
-    }
-
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<>();
@@ -58,13 +51,6 @@ public class MS1ReportUIProvider extends DefaultReportUIProvider
 
     public String getIconPath(Report report)
     {
-        if (report != null)
-        {
-            if (_typeToIconMap.containsKey(report.getType()))
-            {
-                return AppProps.getInstance().getContextPath() + _typeToIconMap.get(report.getType());
-            }
-        }
-        return super.getIconPath(report);
+        return "/reports/r.gif";
     }
 }
