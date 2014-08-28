@@ -111,6 +111,16 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // if the user has permissions to update in this container, show them the Guide Set Edit/New buttons
         this.userCanUpdate ? items.push(this.guideSetCompositeField) : items.push(this.guideSetDisplayField);
 
+        // add a button to view run based guide set parameter details
+        this.guideSetDetailsButton = new Ext.Button({
+            hidden: true,
+            text: "Details",
+            tooltip: "View run-based guide set parameter details",
+            handler: this.viewParameterDetails,
+            scope: this
+        });
+        items.push(this.guideSetDetailsButton);
+
         this.items = items;
 
         LABKEY.LeveyJenningsGuideSetPanel.superclass.initComponent.call(this);
@@ -166,6 +176,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.currentGuideSetId = undefined;
                 this.editGuideSetButton.disable();
                 this.newGuideSetButton.enable();
+                this.guideSetDetailsButton.hide();
             }
             else
             {
@@ -184,6 +195,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.currentGuideSetId = row["RowId"];
                 this.editGuideSetButton.enable();
                 this.newGuideSetButton.enable();
+                this.guideSetDetailsButton.setVisible(!row["ValueBased"]);
             }
 
             this.guideSetCompositeField.doLayout();
@@ -260,5 +272,55 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     toggleExportBtn: function(toEnable) {
         this.exportPdftButton.setDisabled(!toEnable);
+    },
+
+    viewParameterDetails: function() {
+        if (this.currentGuideSetId)
+        {
+            var sql = "";
+            if (this.controlType == "SinglePoint")
+            {
+                sql = "SELECT 'MFI' AS Parameter,SinglePointControlFIAverage AS HistoricalMean,SinglePointControlFIStdDev AS StandardDeviation FROM GuideSet WHERE RowId="+this.currentGuideSetId
+            }
+            else
+            {
+                sql = "SELECT 'EC50 - 4PL' AS Parameter,EC50Average AS HistoricalMean,EC50StdDev AS StandardDeviation FROM GuideSetCurveFit WHERE CurveType = 'Four Parameter' AND GuideSetId.RowId="+this.currentGuideSetId
+                    + " UNION SELECT 'EC50 - 5PL Rumi' AS Parameter,EC50Average AS HistoricalMean,EC50StdDev AS StandardDeviation FROM GuideSetCurveFit WHERE CurveType = 'Five Parameter' AND GuideSetId.RowId="+this.currentGuideSetId
+                    + " UNION SELECT 'AUC' AS Parameter,AUCAverage AS HistoricalMean,AUCStdDev AS StandardDeviation FROM GuideSetCurveFit WHERE CurveType = 'Trapezoidal' AND GuideSetId.RowId="+this.currentGuideSetId
+                    + " UNION SELECT 'High MFI' AS Parameter,TitrationMaxFIAverage AS HistoricalMean,TitrationMaxFIStdDev AS StandardDeviation FROM GuideSet WHERE RowId="+this.currentGuideSetId;
+            }
+
+            var grid = Ext4.create('Ext.Component', {
+                listeners : {
+                    scope: this,
+                    render : function() {
+                        var qwp = new LABKEY.QueryWebPart({
+                            renderTo: grid.getId(),
+                            schemaName: 'assay.Luminex.' + this.assayName,
+                            sql: sql,
+                            sort: 'Parameter',
+                            frame : 'none',
+                            buttonBarPosition: 'top',
+                            allowChooseView: false,
+                            scope : this
+                        });
+                    }
+                }
+            });
+
+            var win = Ext4.create('Ext.window.Window', {
+                title: 'Guide Set Parameter Details',
+                modal: true,border: false,
+                height: 225,width: 300,
+                autoScroll: true,
+                items: [grid],
+                buttons: [{
+                    text: 'Close',
+                    scope: this,
+                    handler: function() { win.close(); }
+                }]
+            });
+            win.show();
+        }
     }
 });
