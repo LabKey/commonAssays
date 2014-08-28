@@ -18,7 +18,6 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.defaults.DefaultValueService;
@@ -129,9 +128,17 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             if (objectURI == null)
             {
                 // If we don't have one yet, do a lookup against the last uploaded set of values
-                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexProtocolSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND LOWER(a.Name) = LOWER(?))");
+                // issue 21171: last entered values should be per user/container
+                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject()
+                        + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM "
+                        + OntologyManager.getTinfoObject() + " o, "
+                        + ExperimentService.get().getTinfoData() + " d, "
+                        + LuminexProtocolSchema.getTableInfoAnalytes() + " a"
+                        + " WHERE o.ObjectURI = a.LSID AND a.DataId = d.RowId"
+                        + " AND LOWER(a.Name) = LOWER(?) AND d.CreatedBy = ?)");
                 sql.add(getContainer().getId());
                 sql.add(disambiguationId);
+                sql.add(getUser().getUserId());
                 objectURI = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(String.class);
             }
 
