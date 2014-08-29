@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2013 LabKey Corporation
+ * Copyright (c) 2008-2014 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,14 @@ import java.util.Map;
 */
 public class MS1ReportUIProvider extends DefaultReportUIProvider
 {
+    private static final Map<String, String> _typeToIconMap = new HashMap<>();
+
+    static
+    {
+        _typeToIconMap.put(FeaturesRReport.TYPE, "/reports/r.gif");
+        _typeToIconMap.put(PeaksRReport.TYPE, "/reports/r.gif");
+    }
+
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<>();
@@ -51,6 +59,6 @@ public class MS1ReportUIProvider extends DefaultReportUIProvider
 
     public String getIconPath(Report report)
     {
-        return "/reports/r.gif";
+        return report != null ? _typeToIconMap.get(report.getType()) : null;
     }
 }
