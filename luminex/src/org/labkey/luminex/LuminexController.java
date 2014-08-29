@@ -33,6 +33,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
@@ -325,7 +326,11 @@ public class LuminexController extends SpringActionController
         @Override
         public void validateCommand(DefaultValuesForm form, Errors errors)
         {
-            validateDefaultValues(form.getAnalytes(), form.getPositivityThresholds(), errors);
+            BatchValidationException e = validateDefaultValues(form.getAnalytes(), form.getPositivityThresholds());
+            for(ValidationException validationErrors: e.getRowErrors())
+            {
+                errors.reject(validationErrors.getMessage());
+            }
         }
 
         @Override
@@ -371,13 +376,13 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    private Errors validateDefaultValues(List<String> analytes, List<String> positivityThresholds, @Nullable Errors errors)
+    private BatchValidationException validateDefaultValues(List<String> analytes, List<String> positivityThresholds)
     {
-        if (errors == null) errors = new NullSafeBindException(new Object(), "form");
+        BatchValidationException errors = new BatchValidationException();
 
         //NOTE: this will also barf on an empty analyte but with the unique error
         if (analytes != null && analytes.size() != new HashSet<String>(analytes).size())
-            errors.reject(ERROR_MSG, "The analyte names are not unique.");
+            errors.addRowError(new ValidationException("The analyte names are not unique."));
 
         for (String positivityThreshold : positivityThresholds)
         {
@@ -386,7 +391,7 @@ public class LuminexController extends SpringActionController
             }
             catch (NumberFormatException e)
             {
-                errors.reject(ERROR_MSG, "The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer.");
+                errors.addRowError(new ValidationException("The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer."));
             }
         }
         return errors;
@@ -460,10 +465,12 @@ public class LuminexController extends SpringActionController
                 negativeBeads.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
             }
 
-            // TODO: these errors do not bubble back to the user (Issue 21411)
-
-            Errors newErrors = validateDefaultValues(analytes, positivityThresholds, null);
-            errors.addToErrors(newErrors);
+            // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
+            BatchValidationException newErrors = validateDefaultValues(analytes, positivityThresholds);
+            for (ValidationException validationErrors : newErrors.getRowErrors())
+            {
+                errors.addRowError(validationErrors);
+            }
 
             if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
 
