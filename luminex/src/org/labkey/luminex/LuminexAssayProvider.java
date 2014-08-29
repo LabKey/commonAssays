@@ -336,7 +336,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                         {
                             if(grandchild.getText().equals(name))
                             {
-                                grandchild.setHref(new ActionURL(LuminexController.SetDefaultValuesAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()).toString());
+                                grandchild.setHref(new ActionURL(LuminexController.SetAnalyteDefaultValuesAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()).addReturnURL(viewContext.getActionURL()).toString());
                                 flag = true;
                                 break;
                             }

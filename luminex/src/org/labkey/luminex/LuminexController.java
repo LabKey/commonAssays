@@ -16,8 +16,10 @@
 
 package org.labkey.luminex;
 
+import com.drew.lang.annotations.Nullable;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.SimpleDisplayColumn;
@@ -62,11 +64,11 @@ import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
@@ -318,12 +320,12 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class SetDefaultValuesAction extends FormViewAction<DefaultValuesForm>
+    public class SetAnalyteDefaultValuesAction extends FormViewAction<DefaultValuesForm>
     {
         @Override
-        public void validateCommand(DefaultValuesForm target, Errors errors)
+        public void validateCommand(DefaultValuesForm form, Errors errors)
         {
-            // add errors to collection
+            validateDefaultValues(form.getAnalytes(), form.getPositivityThresholds(), errors);
         }
 
         @Override
@@ -331,9 +333,9 @@ public class LuminexController extends SpringActionController
         {
             ExpProtocol protocol = form.getProtocol();
 
-            List<String> analytes = LuminexDefaultValueService.getAnalyteNames(protocol);
-            List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getContainer(), protocol);
-            List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getContainer(), protocol);
+            List<String> analytes = AnalyteDefaultValueService.getAnalyteNames(protocol, getContainer(), true);
+            List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+            List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
             form.setAnalytes(analytes);
             form.setPositivityThresholds(positivityThresholds);
@@ -351,7 +353,7 @@ public class LuminexController extends SpringActionController
             List<String> positivityThresholds = form.getPositivityThresholds();
             List<String> negativeBeads = form.getNegativeBeads();
 
-            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), protocol);
+            if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), protocol);
 
             return true;
         }
@@ -365,8 +367,29 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Set Protocol Default Values");
+            return root.addChild("Set Default Values");
         }
+    }
+
+    private Errors validateDefaultValues(List<String> analytes, List<String> positivityThresholds, @Nullable Errors errors)
+    {
+        if (errors == null) errors = new NullSafeBindException(new Object(), "form");
+
+        //NOTE: this will also barf on an empty analyte but with the unique error
+        if (analytes != null && analytes.size() != new HashSet<String>(analytes).size())
+            errors.reject(ERROR_MSG, "The analyte names are not unique.");
+
+        for (String positivityThreshold : positivityThresholds)
+        {
+            try {
+                Integer.parseInt(positivityThreshold);
+            }
+            catch (NumberFormatException e)
+            {
+                errors.reject(ERROR_MSG, "The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer.");
+            }
+        }
+        return errors;
     }
 
     public static class DefaultValuesForm extends ProtocolIdForm
@@ -404,19 +427,6 @@ public class LuminexController extends SpringActionController
         {
             this.negativeBeads = negativeBeads;
         }
-
-        /*public void insertDefautValues(String analyte, String positivityThreshold, String negativeBead)
-        {
-            if (this.analytes == null)
-            {
-                this.analytes = new ArrayList<>();
-                this.positivityThresholds = new ArrayList<>();
-                this.negativeBeads = new ArrayList<>();
-            }
-            this.analytes.add(analyte);
-            this.positivityThresholds.add(positivityThreshold);
-            this.negativeBeads.add(negativeBead);
-        }*/
     }
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -433,40 +443,31 @@ public class LuminexController extends SpringActionController
         protected void initRequest(ProtocolIdForm form) throws ServletException
         {
             _protocol = form.getProtocol();
-            setHasColumnHeaders(false);
-            setImportMessage("Import your junk");
             setNoTableInfo();
-            setHideTsvCsvCombo(true);
         }
 
         @Override
         protected int importData(DataLoader dl, FileStream file, String originalName, BatchValidationException errors) throws IOException
         {
-            BufferedReader in = new BufferedReader(new InputStreamReader(file.openInputStream()));
-
-            String line;
-            String[] data;
-
             List<String> analytes = new ArrayList<>();
             List<String> positivityThresholds = new ArrayList<>();
             List<String> negativeBeads = new ArrayList<>();
 
-            // check for headers
-            line = in.readLine();
-            if (line.equals("Analyte\tPositivityThreshold\tNegativeBead")) line = in.readLine();
-
-            // raise error?
-            do
+            for (Map<String, Object> row : dl)
             {
-                data = line.split("\t", -1);
-                analytes.add(data[0]);
-                positivityThresholds.add(data[1]);
-                negativeBeads.add(data[2]);
+                analytes.add(row.get("Analyte").toString());
+                positivityThresholds.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
+                negativeBeads.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
             }
-            while((line = in.readLine()) != null);
 
-            LuminexDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
+            // TODO: these errors do not bubble back to the user (Issue 21411)
 
+            Errors newErrors = validateDefaultValues(analytes, positivityThresholds, null);
+            errors.addToErrors(newErrors);
+
+            if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
+
+            // NOTE: consider pushing back failure types and row counts here...
             return -1; // appears to skip any kind of message to user
         }
 
@@ -492,9 +493,9 @@ public class LuminexController extends SpringActionController
         {
             ExpProtocol protocol = form.getProtocol();
 
-            final List<String> analytes = LuminexDefaultValueService.getAnalyteNames(protocol);
-            final List<String> positivityThresholds = LuminexDefaultValueService.getAnalytePositivityThresholds(analytes, getContainer(), protocol);
-            final List<String> negativeBeads = LuminexDefaultValueService.getAnalyteNegativeBeads(analytes, getContainer(), protocol);
+            final List<String> analytes = AnalyteDefaultValueService.getAnalyteNames(protocol, getContainer());
+            final List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+            final List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
             TSVWriter writer = new TSVWriter(){
                 @Override

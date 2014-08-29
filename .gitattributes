@@ -767,6 +767,7 @@ luminex/resources/transformscripts/labkey_luminex_transform.R -text
 luminex/resources/transformscripts/tomaras_luminex_transform.R -text
 luminex/resources/transformscripts/youtil.R -text
 luminex/src/org/labkey/luminex/AbstractLuminexControlUpdateService.java -text
+luminex/src/org/labkey/luminex/AnalyteDefaultValueService.java -text
 luminex/src/org/labkey/luminex/AnalyteImportHelper.java -text
 luminex/src/org/labkey/luminex/GuideSetForm.java -text
 luminex/src/org/labkey/luminex/LeveyJenningsForm.java -text
@@ -777,7 +778,6 @@ luminex/src/org/labkey/luminex/LuminexController.java -text
 luminex/src/org/labkey/luminex/LuminexDataDomainKind.java -text
 luminex/src/org/labkey/luminex/LuminexDataExchangeHandler.java -text
 luminex/src/org/labkey/luminex/LuminexDataHandler.java -text
-luminex/src/org/labkey/luminex/LuminexDefaultValueService.java -text
 luminex/src/org/labkey/luminex/LuminexExcelParser.java -text
 luminex/src/org/labkey/luminex/LuminexImportHelper.java -text
 luminex/src/org/labkey/luminex/LuminexModule.java -text

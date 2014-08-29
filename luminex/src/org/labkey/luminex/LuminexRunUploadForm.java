@@ -70,7 +70,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         Map<DomainProperty, String> properties = new LinkedHashMap<>();
         for (DomainProperty dp : columns)
         {
-            String value = getRequest().getParameter(LuminexDefaultValueService.getAnalytePropertyName(analyteName, dp));
+            String value = getRequest().getParameter(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, dp));
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
                     (value == null || value.length() == 0))
                 value = Boolean.FALSE.toString();
@@ -93,7 +93,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         for (String propName : new String[]{LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME})
         {
             ColumnInfo col = LuminexProtocolSchema.getTableInfoAnalytes().getColumn(propName);
-            String value = getRequest().getParameter(LuminexDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
+            String value = getRequest().getParameter(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
             value = StringUtils.trimToNull(value);
             properties.put(col, value);
         }
@@ -183,17 +183,17 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             Map<String, String> values = new HashMap<>();
             for (Analyte analyte : analyteRows)
             {
-                String inputName = LuminexDefaultValueService.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                String inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 values.put(inputName, analyte.getPositivityThreshold() != null ? analyte.getPositivityThreshold().toString() : null);
 
-                inputName = LuminexDefaultValueService.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyte.getName(), LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                 values.put(inputName, analyte.getNegativeBead());
             }
             return values;
         }
         else
         {
-            return LuminexDefaultValueService.getAnalyteColumnDefaultValues(protocol, getUser(), getContainer(), isResetDefaultValues());
+            return AnalyteDefaultValueService.getAnalyteColumnDefaultValues(protocol, getUser(), getContainer(), isResetDefaultValues());
         }
     }
 
