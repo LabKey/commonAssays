@@ -138,12 +138,12 @@ public class AnalyteDefaultValueService
 
     public static Map<String, String> getAnalyteColumnDefaultValues(ExpProtocol protocol, User user, Container container, boolean isReset)
     {
-        // get the container level default values and then override them with any user last entered default values
         Map<String, String> mergedDefaults = new HashMap<>();
-        mergedDefaults.putAll(PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol)));
+        // fall back on any user last entered default values, so add them to the map first
         if (!isReset)
             mergedDefaults.putAll(PropertyManager.getProperties(user, container, getAnalyteColumnCategory(protocol)));
-
+        // override map with any container level analyte default values (i.e. used as Editable Defaults)
+        mergedDefaults.putAll(PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol)));
         return mergedDefaults;
     }
 }
