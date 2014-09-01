@@ -38,7 +38,7 @@
 <labkey:errors/>
 
 <labkey:form action="<%=getViewContext().getActionURL()%>" method="post">
-    <p>Update default values:</p>
+    <p>Update default values for standard analyte properties.</p>
     <!-- cheap trick -- watch out for if this is ever nested in any other code -->
     <table id="defaultValues">
         <tr>
@@ -70,7 +70,7 @@
         <tr>
             <td><%= button("Save Defaults").submit(true) %></td>
             <td><%= button("Cancel").href(bean.getReturnURLHelper()) %></td>
-            <td><%= button("Import TSV").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnURL(getViewContext().getActionURL()))%></td>
+            <td><%= button("Import Data").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnURL(getViewContext().getActionURL()))%></td>
             <td><%= button("Export TSV").href(new ActionURL(LuminexController.ExportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()))%></td>
             <td><%= button("Add Row").onClick("addRow()")%></td>
         </tr>

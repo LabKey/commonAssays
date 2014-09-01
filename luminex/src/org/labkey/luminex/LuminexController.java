@@ -44,6 +44,7 @@ import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.FileStream;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.StringExpressionFactory;
@@ -320,7 +321,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermissionClass(DesignAssayPermission.class)
     public class SetAnalyteDefaultValuesAction extends FormViewAction<DefaultValuesForm>
     {
         @Override
@@ -434,7 +435,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermissionClass(DesignAssayPermission.class)
     public class ImportDefaultValuesAction extends AbstractQueryImportAction<ProtocolIdForm>
     {
         ExpProtocol _protocol;
@@ -449,6 +450,9 @@ public class LuminexController extends SpringActionController
         {
             _protocol = form.getProtocol();
             setNoTableInfo();
+            setImportMessage("Import default values for standard analyte properties. " +
+                "Colum headers should include: Analyte, " + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME +
+                ", and " + LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME + ".");
         }
 
         @Override
@@ -462,7 +466,7 @@ public class LuminexController extends SpringActionController
             {
                 analytes.add(row.get("Analyte").toString());
                 positivityThresholds.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
-                negativeBeads.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
+                negativeBeads.add(row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME).toString());
             }
 
             // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
@@ -474,8 +478,8 @@ public class LuminexController extends SpringActionController
 
             if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
 
-            // NOTE: consider pushing back failure types and row counts here...
-            return -1; // appears to skip any kind of message to user
+            // NOTE: consider pushing back failure types
+            return analytes.size();
         }
 
         @Override
@@ -490,9 +494,15 @@ public class LuminexController extends SpringActionController
         {
             checkPermissions();
         }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Import Default Values");
+        }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermissionClass(DesignAssayPermission.class)
     public class ExportDefaultValuesAction extends ExportAction<ProtocolIdForm>
     {
         @Override

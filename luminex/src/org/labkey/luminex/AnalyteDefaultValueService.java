@@ -120,14 +120,14 @@ public class AnalyteDefaultValueService
             String analyte = StringUtils.trimToNull(analytes.get(i));
             if (analyte != null)
             {
-                String positivityThresholdPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), propertyNames.get(0));
+                String positivityThresholdPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 // this probably won't trim to null because it defaults to 100...
                 String positivityThreshold = StringUtils.trimToNull(positivityThresholds.get(i));
 
                 if (positivityThreshold != null)
                     defaultAnalyteColumnValues.put(positivityThresholdPropKey, positivityThreshold);
 
-                String negativeBeadPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), propertyNames.get(0));
+                String negativeBeadPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                 String negativeBead = StringUtils.trimToNull(negativeBeads.get(i));
                 if (negativeBead != null)
                     defaultAnalyteColumnValues.put(negativeBeadPropKey, negativeBead);
