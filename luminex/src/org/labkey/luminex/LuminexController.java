@@ -504,15 +504,16 @@ public class LuminexController extends SpringActionController
             }
 
             // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
-            BatchValidationException newErrors = validateDefaultValues(analytes, positivityThresholds);
-            for (ValidationException validationErrors : newErrors.getRowErrors())
+            List<ValidationException> rowErrors = validateDefaultValues(analytes, positivityThresholds).getRowErrors();
+            if (rowErrors.size() > 0)
             {
-                errors.addRowError(validationErrors);
+                for (ValidationException validationErrors : rowErrors)
+                    errors.addRowError(validationErrors);
+                // NOTE: consider pushing back failure types
+                return -1;
             }
-
             if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
 
-            // NOTE: consider pushing back failure types
             return analytes.size();
         }
 
