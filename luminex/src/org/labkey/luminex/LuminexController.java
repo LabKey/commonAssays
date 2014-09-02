@@ -329,7 +329,7 @@ public class LuminexController extends SpringActionController
             BatchValidationException e = validateDefaultValues(form.getAnalytes(), form.getPositivityThresholds());
             for(ValidationException validationErrors: e.getRowErrors())
             {
-                errors.reject(validationErrors.getMessage());
+                errors.reject(ERROR_MSG, validationErrors.getMessage());
             }
         }
 
