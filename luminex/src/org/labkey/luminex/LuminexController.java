@@ -16,10 +16,8 @@
 
 package org.labkey.luminex;
 
-import com.drew.lang.annotations.Nullable;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.SimpleDisplayColumn;
@@ -34,6 +32,7 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
@@ -388,7 +387,8 @@ public class LuminexController extends SpringActionController
         for (String positivityThreshold : positivityThresholds)
         {
             try {
-                Integer.parseInt(positivityThreshold);
+                if (positivityThreshold != null)
+                    Integer.parseInt(positivityThreshold);
             }
             catch (NumberFormatException e)
             {
@@ -451,8 +451,8 @@ public class LuminexController extends SpringActionController
             _protocol = form.getProtocol();
             setNoTableInfo();
             setImportMessage("Import default values for standard analyte properties. " +
-                "Colum headers should include: Analyte, " + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME +
-                ", and " + LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME + ".");
+                    "Colum headers should include: Analyte, " + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME +
+                    ", and " + LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME + ".");
         }
 
         @Override
@@ -462,11 +462,45 @@ public class LuminexController extends SpringActionController
             List<String> positivityThresholds = new ArrayList<>();
             List<String> negativeBeads = new ArrayList<>();
 
-            for (Map<String, Object> row : dl)
+            // NOTE: consider being smarter here and intersecting the list of desired columns with dl.getColumns()
+            //       this requires a better object to work with such as a map.
+            // NOTE: consider making case-insentive
+            ColumnDescriptor[] columns = dl.getColumns();
+            Boolean err = true;
+            if (columns.length > 0)
             {
-                analytes.add(row.get("Analyte").toString());
-                positivityThresholds.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
-                negativeBeads.add(row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME).toString());
+                for (ColumnDescriptor cd : columns)
+                {
+                    if (cd.getColumnName().equals("Analyte"))
+                    {
+                        for (Map<String, Object> row : dl)
+                        {
+                            analytes.add(row.get("Analyte").toString());
+                            // NOTE: do not see a good way to do this without try catches... the Note above about using a map would fix this.
+                            try {
+                                positivityThresholds.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
+                            }
+                            catch (NullPointerException e)
+                            {
+                                positivityThresholds.add(null);
+                            }
+
+                            try {
+                                negativeBeads.add(row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME).toString());
+                            }
+                            catch (NullPointerException e)
+                            {
+                                negativeBeads.add(null);
+                            }
+                        }
+                        err = false;
+                        break;
+                    }
+                }
+                if (err)
+                {
+                    errors.addRowError(new ValidationException("The uploaded TSV file doesn't appear to have a 'Analyte' column and cannot be parsed"));
+                }
             }
 
             // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
