@@ -90,7 +90,9 @@
             defaults: {
                 labelWidth: 125
             },
-            items: [{
+            items: [
+            { xtype: 'hidden', name: 'X-LABKEY-CSRF', value: LABKEY.CSRF },
+            {
                 xtype: 'textfield',
                 width : 580,
                 labelWidth: 125,
