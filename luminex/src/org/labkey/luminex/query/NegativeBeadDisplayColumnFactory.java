@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.query;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -81,6 +82,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             @Override
             public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
             {
+                String strValue = ConvertUtils.convert(value);
                 boolean hidden = _initNegativeControlAnalytes.contains(_analyteName);
 
                 out.write("<select name=\"" + PageFlowUtil.filter(_inputName) + "\" " +
@@ -95,7 +97,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                     for (String negControlAnalyte : _initNegativeControlAnalytes)
                     {
                         out.write("<option value=\"" + PageFlowUtil.filter(negControlAnalyte) + "\"");
-                        if (value != null && value.equals(negControlAnalyte))
+                        if (strValue != null && strValue.equals(negControlAnalyte))
                         {
                             out.write(" SELECTED");
                         }

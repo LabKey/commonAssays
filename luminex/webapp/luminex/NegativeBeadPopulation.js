@@ -6,6 +6,7 @@
 
 Ext4.onReady(function(){
     attachAnalyteNegativeControlListeners();
+    updateAnalyteNegativeBeadInputs();
 });
 
 function attachAnalyteNegativeControlListeners()
