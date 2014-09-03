@@ -39,6 +39,75 @@ public class AnalyteDefaultValueService
     private static final List<String> propertyDefaults = Arrays.asList("100", "");
     private static final String PROP_NAME_PREFIX = "_analyte_";
 
+    public static class AnalyteDefaultTransformer
+    {
+        private List<String> analytes;
+        private List<String> positivityThresholds;
+        private List<String> negativeBeads;
+
+        public AnalyteDefaultTransformer(){
+            analytes = new ArrayList<>();
+            positivityThresholds = new ArrayList<>();
+            negativeBeads = new ArrayList<>();
+        }
+
+        public AnalyteDefaultTransformer(Map<String, Map<String, String>> analyteProperities)
+        {
+            this();
+            for(Map.Entry<String, Map<String, String>> entry : analyteProperities.entrySet())
+            {
+                analytes.add(entry.getKey());
+
+                for(Map.Entry<String, String> row : entry.getValue().entrySet())
+                {
+                    // NOTE: can this be prettier?
+                    if (row.getKey().equals(propertyNames.get(0))) positivityThresholds.add(row.getValue());
+                    if (row.getKey().equals(propertyNames.get(1))) negativeBeads.add(row.getValue());
+                }
+            }
+        }
+
+        public int size()
+        {
+            return analytes.size();
+        }
+
+        public List<String> getAnalytes()
+        {
+            return analytes;
+        }
+
+        private void addAnalyte(String analyte)
+        {
+            this.analytes.add(analyte);
+        }
+
+        public List<String> getPositivityThreshold()
+        {
+            return positivityThresholds;
+        }
+
+        private void setPositivityThreshold(String positivityThreshold)
+        {
+            this.positivityThresholds.add(positivityThreshold);
+        }
+
+        public List<String> getNegativeBead()
+        {
+            return negativeBeads;
+        }
+
+        private void setNegativeBead(String negativeBead)
+        {
+            this.negativeBeads.add(negativeBead);
+        }
+    }
+
+    public static List<String> getPropertyNames()
+    {
+        return propertyNames;
+    }
+
     public static Map<String, String> getLuminexDefaultValues(Container container, ExpProtocol protocol)
     {
         return PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol));
@@ -111,6 +180,33 @@ public class AnalyteDefaultValueService
         return result;
     }
 
+    public static void setAnalyteDefaultValues(Map<String, Map<String, String>> analyteProperties, Container container, ExpProtocol protocol)
+    {
+        PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
+        defaultAnalyteColumnValues.clear(); // NOTE: an empty property map would work too.
+        for(Map.Entry<String, Map<String, String>> entry : analyteProperties.entrySet())
+        {
+            String analyte = StringUtils.trimToNull(entry.getKey());
+            if (analyte != null)
+            {
+                for (String propertyName : propertyNames)
+                {
+                    if(entry.getValue().containsKey(propertyName))
+                    {
+                        String value = StringUtils.trimToNull(entry.getValue().get(propertyName));
+                        if (value != null)
+                        {
+                            String propKey = AnalyteDefaultValueService.getAnalytePropertyName(analyte, propertyName);
+                            defaultAnalyteColumnValues.put(propKey, value);
+                        }
+                    }
+                }
+            }
+        }
+        PropertyManager.saveProperties(defaultAnalyteColumnValues);
+    }
+
+    // TODO: merge with the method above
     public static void setAnalyteDefaultValues(List<String> analytes, List<String> positivityThresholds, List<String> negativeBeads, Container container, ExpProtocol protocol)
     {
         PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);

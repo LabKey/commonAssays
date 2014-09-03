@@ -59,6 +59,7 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
 import org.labkey.luminex.query.LuminexProtocolSchema;
+import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
@@ -66,7 +67,7 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -358,6 +359,9 @@ public class LuminexController extends SpringActionController
             List<String> positivityThresholds = form.getPositivityThresholds();
             List<String> negativeBeads = form.getNegativeBeads();
 
+            // TODO: consider using transformer here...
+            //AnalyteDefaultTransformer adt = AnalyteDefaultTransformer()
+
             if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), protocol);
 
             return true;
@@ -458,15 +462,11 @@ public class LuminexController extends SpringActionController
         @Override
         protected int importData(DataLoader dl, FileStream file, String originalName, BatchValidationException errors) throws IOException
         {
-            List<String> analytes = new ArrayList<>();
-            List<String> positivityThresholds = new ArrayList<>();
-            List<String> negativeBeads = new ArrayList<>();
-
             // NOTE: consider being smarter here and intersecting the list of desired columns with dl.getColumns()
-            //       this requires a better object to work with such as a map.
             // NOTE: consider making case-insentive
             ColumnDescriptor[] columns = dl.getColumns();
             Boolean err = true;
+            Map<String, Map<String, String>> analyteProperities = new HashMap();
             if (columns.length > 0)
             {
                 for (ColumnDescriptor cd : columns)
@@ -475,23 +475,13 @@ public class LuminexController extends SpringActionController
                     {
                         for (Map<String, Object> row : dl)
                         {
-                            analytes.add(row.get("Analyte").toString());
-                            // NOTE: do not see a good way to do this without try catches... the Note above about using a map would fix this.
-                            try {
-                                positivityThresholds.add(row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME).toString());
-                            }
-                            catch (NullPointerException e)
+                            Map<String, String> map = new HashMap();
+                            for (String propertyName : AnalyteDefaultValueService.getPropertyNames())
                             {
-                                positivityThresholds.add(null);
+                                Object value = row.get(propertyName);
+                                if (value != null) map.put(propertyName, value.toString());
                             }
-
-                            try {
-                                negativeBeads.add(row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME).toString());
-                            }
-                            catch (NullPointerException e)
-                            {
-                                negativeBeads.add(null);
-                            }
+                            if (map.size() > 0) analyteProperities.put(row.get("Analyte").toString(), map);
                         }
                         err = false;
                         break;
@@ -500,11 +490,19 @@ public class LuminexController extends SpringActionController
                 if (err)
                 {
                     errors.addRowError(new ValidationException("The uploaded TSV file doesn't appear to have a 'Analyte' column and cannot be parsed"));
+                    return -1;
                 }
             }
 
+            if (analyteProperities.size() == 0)
+            {
+                errors.addRowError(new ValidationException("The uploaded TSV file doesn't have any analyte properities to parse"));
+                return -1;
+            }
+
+            AnalyteDefaultTransformer adt = new AnalyteDefaultTransformer(analyteProperities);
             // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
-            List<ValidationException> rowErrors = validateDefaultValues(analytes, positivityThresholds).getRowErrors();
+            List<ValidationException> rowErrors = validateDefaultValues(adt.getAnalytes(), adt.getPositivityThreshold()).getRowErrors();
             if (rowErrors.size() > 0)
             {
                 for (ValidationException validationErrors : rowErrors)
@@ -512,9 +510,10 @@ public class LuminexController extends SpringActionController
                 // NOTE: consider pushing back failure types
                 return -1;
             }
-            if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), _protocol);
 
-            return analytes.size();
+            AnalyteDefaultValueService.setAnalyteDefaultValues(analyteProperities, getContainer(), _protocol);
+
+            return adt.size();
         }
 
         @Override
