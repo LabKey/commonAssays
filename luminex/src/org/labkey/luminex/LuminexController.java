@@ -362,7 +362,7 @@ public class LuminexController extends SpringActionController
             // TODO: consider using transformer here...
             //AnalyteDefaultTransformer adt = AnalyteDefaultTransformer()
 
-            if (analytes != null) AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), protocol);
+            AnalyteDefaultValueService.setAnalyteDefaultValues(analytes, positivityThresholds, negativeBeads, getContainer(), protocol);
 
             return true;
         }
@@ -384,19 +384,22 @@ public class LuminexController extends SpringActionController
     {
         BatchValidationException errors = new BatchValidationException();
 
-        //NOTE: this will also barf on an empty analyte but with the unique error
-        if (analytes != null && analytes.size() != new HashSet<String>(analytes).size())
-            errors.addRowError(new ValidationException("The analyte names are not unique."));
-
-        for (String positivityThreshold : positivityThresholds)
+        if (analytes != null && analytes.size() > 0)
         {
-            try {
-                if (positivityThreshold != null)
-                    Integer.parseInt(positivityThreshold);
-            }
-            catch (NumberFormatException e)
+            //NOTE: this will also barf on an empty analyte but with the unique error
+            if (analytes.size() != new HashSet<String>(analytes).size())
+                errors.addRowError(new ValidationException("The analyte names are not unique."));
+
+            for (String positivityThreshold : positivityThresholds)
             {
-                errors.addRowError(new ValidationException("The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer."));
+                try {
+                    if (positivityThreshold != null)
+                        Integer.parseInt(positivityThreshold);
+                }
+                catch (NumberFormatException e)
+                {
+                    errors.addRowError(new ValidationException("The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer."));
+                }
             }
         }
         return errors;

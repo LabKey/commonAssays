@@ -211,22 +211,25 @@ public class AnalyteDefaultValueService
     {
         PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
         defaultAnalyteColumnValues.clear(); // NOTE: an empty property map would work too.
-        for (int i = 0; i < analytes.size(); i++)
+        if (analytes != null)
         {
-            String analyte = StringUtils.trimToNull(analytes.get(i));
-            if (analyte != null)
+            for (int i = 0; i < analytes.size(); i++)
             {
-                String positivityThresholdPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
-                // this probably won't trim to null because it defaults to 100...
-                String positivityThreshold = StringUtils.trimToNull(positivityThresholds.get(i));
+                String analyte = StringUtils.trimToNull(analytes.get(i));
+                if (analyte != null)
+                {
+                    String positivityThresholdPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                    // this probably won't trim to null because it defaults to 100...
+                    String positivityThreshold = StringUtils.trimToNull(positivityThresholds.get(i));
 
-                if (positivityThreshold != null)
-                    defaultAnalyteColumnValues.put(positivityThresholdPropKey, positivityThreshold);
+                    if (positivityThreshold != null)
+                        defaultAnalyteColumnValues.put(positivityThresholdPropKey, positivityThreshold);
 
-                String negativeBeadPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
-                String negativeBead = StringUtils.trimToNull(negativeBeads.get(i));
-                if (negativeBead != null)
-                    defaultAnalyteColumnValues.put(negativeBeadPropKey, negativeBead);
+                    String negativeBeadPropKey = AnalyteDefaultValueService.getAnalytePropertyName(analytes.get(i), LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                    String negativeBead = StringUtils.trimToNull(negativeBeads.get(i));
+                    if (negativeBead != null)
+                        defaultAnalyteColumnValues.put(negativeBeadPropKey, negativeBead);
+                }
             }
         }
         PropertyManager.saveProperties(defaultAnalyteColumnValues);
