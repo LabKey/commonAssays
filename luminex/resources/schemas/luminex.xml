@@ -234,6 +234,7 @@
             <column columnName="Container"/>
             <column columnName="ProtocolID"/>
             <column columnName="TitrationID"/>
+            <column columnName="SinglePointControlID"/>
             <column columnName="WellRole"/>
             <column columnName="Summary"/>
             <column columnName="CV">

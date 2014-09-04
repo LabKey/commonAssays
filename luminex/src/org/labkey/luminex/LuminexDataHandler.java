@@ -467,6 +467,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         }
                     }
                     dataRow.setAnalyte(analyte.getRowId());
+
+                    SinglePointControl singlePointControl = singlePointControls.get(dataRow.getDescription());
+                    if (singlePointControl != null)
+                        dataRow.setSinglePointControl(singlePointControl.getRowId());
                 }
 
                 insertTitrationAnalyteMappings(user, form, expRun, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);

@@ -159,7 +159,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
         analyteTitrationColumn.setIsUnselectable(true);
-        LookupForeignKey fk = new LookupForeignKey()
+        LookupForeignKey atFK = new LookupForeignKey()
         {
             @Override
             public TableInfo getLookupTableInfo()
@@ -175,9 +175,34 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
                 return table.getColumn("Analyte");
             }
         };
-        fk.addJoin(FieldKey.fromParts("Titration"), "Titration", false);
-        analyteTitrationColumn.setFk(fk);
+        atFK.addJoin(FieldKey.fromParts("Titration"), "Titration", false);
+        analyteTitrationColumn.setFk(atFK);
         addColumn(analyteTitrationColumn);
+
+        ColumnInfo singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
+        singlePointControlCol.setHidden(true);
+        ColumnInfo analyteSinglePointControlColumn = wrapColumn("AnalyteSinglePointControl", getRealTable().getColumn("AnalyteId"));
+        analyteSinglePointControlColumn.setIsUnselectable(true);
+        LookupForeignKey aspcFK = new LookupForeignKey()
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return _userSchema.createAnalyteSinglePointControlTable(false);
+            }
+
+            @Override
+            protected ColumnInfo getPkColumn(TableInfo table)
+            {
+                // Pretend that analyte is the sole column in the PK for this table.
+                // We'll get the other key of the compound key with addJoin() below.
+                return table.getColumn("Analyte");
+            }
+        };
+        aspcFK.addJoin(FieldKey.fromParts("SinglePointControl"), "SinglePointControl", false);
+        analyteSinglePointControlColumn.setFk(aspcFK);
+        addColumn(analyteSinglePointControlColumn);
+
         addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
 
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));

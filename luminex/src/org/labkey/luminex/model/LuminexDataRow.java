@@ -73,6 +73,7 @@ public class LuminexDataRow
     private String _extraSpecimenInfo;
     private Integer _beadCount;
     private Integer _titration;
+    private Integer _singlePointControl;
     private boolean _summary;
     private Double _cv;
     private boolean _excluded;
@@ -511,6 +512,16 @@ public class LuminexDataRow
     public void setTitration(Integer titration)
     {
         _titration = titration;
+    }
+
+    public Integer getSinglePointControl()
+    {
+        return _singlePointControl;
+    }
+
+    public void setSinglePointControl(Integer singlePointControl)
+    {
+        _singlePointControl = singlePointControl;
     }
 
     public String getDataFile()
