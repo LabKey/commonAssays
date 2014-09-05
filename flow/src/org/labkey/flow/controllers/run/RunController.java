@@ -542,12 +542,18 @@ public class RunController extends BaseFlowController
         public ModelAndView getView(RunForm form, boolean reshow, BindException errors) throws Exception
         {
             run = form.getRun();
+            if (run == null)
+                throw new NotFoundException("run not found");
+
             return new JspView<>(RunController.class, "moveToWorkspace.jsp", form, errors);
         }
 
         public boolean handlePost(RunForm form, BindException errors) throws Exception
         {
             FlowRun run = form.getRun();
+            if (run == null)
+                throw new NotFoundException("run not found");
+
             if (run.getStep() != FlowProtocolStep.analysis)
             {
                 errors.reject(ERROR_MSG, "This run cannot be moved to the workspace because it is not the analysis step.");
