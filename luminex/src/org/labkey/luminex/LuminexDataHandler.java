@@ -761,7 +761,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         int count = 0;
         for (LuminexDataRow dataRow : dataRows)
         {
-            if (dataRow.getAnalyte() == analyte.getRowId() && singlePointControl.getName().equals(dataRow.getDescription()))
+            // Include in the sum for all non-null values (might be OOR) for the right analyte/single point control. See issue 21430
+            if (dataRow.getAnalyte() == analyte.getRowId() && singlePointControl.getName().equals(dataRow.getDescription()) && dataRow.getFiBackground() != null)
             {
                 sum += dataRow.getFiBackground();
                 count++;
