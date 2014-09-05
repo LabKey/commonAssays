@@ -61,7 +61,7 @@
                 <td><input name="analytes" value="" size=30></td>
                 <td><input name="positivityThresholds" value="" size=20></td>
                 <td><input name="negativeBeads" value="" size=30></td>
-                <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('insertRow0')"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('InsertRow0')"><span style="display: inline-block">&nbsp;</span></a></td>
             </tr>
         <% } %>
     </table>

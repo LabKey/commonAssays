@@ -39,37 +39,69 @@ public class AnalyteDefaultValueService
     private static final List<String> propertyDefaults = Arrays.asList("100", "");
     private static final String PROP_NAME_PREFIX = "_analyte_";
 
+
+    // NOTE: enforce ADT is created with lists...
     public static class AnalyteDefaultTransformer
     {
         private List<String> analytes;
         private List<String> positivityThresholds;
         private List<String> negativeBeads;
+        private Map<String, Map<String, String>> analyteMap;
 
-        public AnalyteDefaultTransformer(){
+        public AnalyteDefaultTransformer()
+        {
             analytes = new ArrayList<>();
             positivityThresholds = new ArrayList<>();
             negativeBeads = new ArrayList<>();
+            analyteMap = new HashMap<>();
         }
 
-        public AnalyteDefaultTransformer(Map<String, Map<String, String>> analyteProperities)
+        public AnalyteDefaultTransformer(List<String> analytes, List<String> positivityThresholds, List<String> negativeBeads)
         {
             this();
-            for(Map.Entry<String, Map<String, String>> entry : analyteProperities.entrySet())
-            {
-                analytes.add(entry.getKey());
 
-                for(Map.Entry<String, String> row : entry.getValue().entrySet())
+            // Consider making this into a stand alone method that also raises errors and is called in LuminexController before ADT
+            if (analytes != null)
+            {
+                // prune incoming lists
+                for (int i = analytes.size()-1; i >= 0; i--)
                 {
-                    // NOTE: can this be prettier?
-                    if (row.getKey().equals(propertyNames.get(0))) positivityThresholds.add(row.getValue());
-                    if (row.getKey().equals(propertyNames.get(1))) negativeBeads.add(row.getValue());
+                    // NOTE: this is kind of dangerous because where we are... no way to raise errors to user...
+                    if (StringUtils.trimToNull(analytes.get(i)) == null)
+                    {
+                        analytes.remove(i);
+                        positivityThresholds.remove(i);
+                        negativeBeads.remove(i);
+                    }
+                }
+            }
+
+            if (analytes != null)
+            {
+                this.setAnalytes(analytes);
+                // these could get nulled out if they are not truely adjacency lists...
+                this.setPositivityThresholds(positivityThresholds);
+                this.setNegativeBeads(negativeBeads);
+
+                for (int i=0; i < analytes.size(); i++)
+                {
+                    Map<String, String> map = new HashMap<>();
+                    String analyte = this.analytes.get(i);
+
+                    String positivityThreshold = StringUtils.trimToNull(this.positivityThresholds.get(i));
+                    if (positivityThreshold != null) map.put(propertyNames.get(0), positivityThreshold);
+
+                    String negativeBead = StringUtils.trimToNull(this.negativeBeads.get(i));
+                    if (negativeBead != null) map.put(propertyNames.get(0), negativeBead);
+
+                    analyteMap.put(analyte, map);
                 }
             }
         }
 
         public int size()
         {
-            return analytes.size();
+            return analyteMap.size();
         }
 
         public List<String> getAnalytes()
@@ -87,7 +119,7 @@ public class AnalyteDefaultValueService
             return positivityThresholds;
         }
 
-        private void setPositivityThreshold(String positivityThreshold)
+        private void addPositivityThreshold(String positivityThreshold)
         {
             this.positivityThresholds.add(positivityThreshold);
         }
@@ -97,9 +129,34 @@ public class AnalyteDefaultValueService
             return negativeBeads;
         }
 
-        private void setNegativeBead(String negativeBead)
+        private void addNegativeBead(String negativeBead)
         {
             this.negativeBeads.add(negativeBead);
+        }
+
+        public Map<String, Map<String, String>> getAnalyteMap()
+        {
+            return analyteMap;
+        }
+
+        public void setAnalyteMap(Map<String, Map<String, String>> analyteMap)
+        {
+            this.analyteMap = analyteMap;
+        }
+
+        public void setAnalytes(List<String> analytes)
+        {
+            this.analytes = analytes;
+        }
+
+        public void setNegativeBeads(List<String> negativeBeads)
+        {
+            this.negativeBeads = negativeBeads;
+        }
+
+        public void setPositivityThresholds(List<String> positivityThresholds)
+        {
+            this.positivityThresholds = positivityThresholds;
         }
     }
 

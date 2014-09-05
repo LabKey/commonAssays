@@ -25,6 +25,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.query.AbstractQueryImportAction;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
@@ -67,6 +68,7 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -327,7 +329,8 @@ public class LuminexController extends SpringActionController
         @Override
         public void validateCommand(DefaultValuesForm form, Errors errors)
         {
-            BatchValidationException e = validateDefaultValues(form.getAnalytes(), form.getPositivityThresholds());
+            AnalyteDefaultTransformer adt = new AnalyteDefaultTransformer(form.getAnalytes(), form.getPositivityThresholds(), form.getNegativeBeads());
+            BatchValidationException e = validateDefaultValues(adt);
             for(ValidationException validationErrors: e.getRowErrors())
             {
                 errors.reject(ERROR_MSG, validationErrors.getMessage());
@@ -380,26 +383,24 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    private BatchValidationException validateDefaultValues(List<String> analytes, List<String> positivityThresholds)
+    private BatchValidationException validateDefaultValues(AnalyteDefaultTransformer adt)
     {
         BatchValidationException errors = new BatchValidationException();
 
-        if (analytes != null && analytes.size() > 0)
-        {
-            //NOTE: this will also barf on an empty analyte but with the unique error
-            if (analytes.size() != new HashSet<String>(analytes).size())
-                errors.addRowError(new ValidationException("The analyte names are not unique."));
+        // check sizes are a match (e.g. that all analyte names are unique)
+        if (adt.getAnalyteMap().keySet().size() != adt.getAnalytes().size())
+            errors.addRowError(new ValidationException("The analyte names are not unique."));
 
-            for (String positivityThreshold : positivityThresholds)
+        for (Map<String, String> analyteProperities : adt.getAnalyteMap().values())
+        {
+            String positivityThreshold = analyteProperities.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+            try {
+                if (StringUtils.trimToNull(positivityThreshold) != null)
+                    Integer.parseInt(positivityThreshold);
+            }
+            catch (NumberFormatException e)
             {
-                try {
-                    if (positivityThreshold != null)
-                        Integer.parseInt(positivityThreshold);
-                }
-                catch (NumberFormatException e)
-                {
-                    errors.addRowError(new ValidationException("The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer."));
-                }
+                errors.addRowError(new ValidationException("The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer."));
             }
         }
         return errors;
@@ -469,27 +470,33 @@ public class LuminexController extends SpringActionController
             // NOTE: consider making case-insentive
             ColumnDescriptor[] columns = dl.getColumns();
             Boolean err = true;
-            Map<String, Map<String, String>> analyteProperities = new HashMap();
+
+            List<String> analytes = new ArrayList<>();
+            List<String> positivityThresholds = new ArrayList<>();
+            List<String> negativeBeads = new ArrayList<>();
+
             if (columns.length > 0)
             {
-                for (ColumnDescriptor cd : columns)
+                for(ColumnDescriptor cd : columns)
                 {
-                    if (cd.getColumnName().equals("Analyte"))
+                    if(cd.getColumnName().equals("Analyte"))
                     {
                         for (Map<String, Object> row : dl)
                         {
-                            Map<String, String> map = new HashMap();
-                            for (String propertyName : AnalyteDefaultValueService.getPropertyNames())
-                            {
-                                Object value = row.get(propertyName);
-                                if (value != null) map.put(propertyName, value.toString());
-                            }
-                            if (map.size() > 0) analyteProperities.put(row.get("Analyte").toString(), map);
+                            String analyte = row.get("Analyte").toString();
+                            analytes.add(analyte);
+
+                            Object positivityThreshold = row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                            positivityThresholds.add((positivityThreshold !=null) ? positivityThreshold.toString() : null);
+
+                            Object negativeBead = row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                            negativeBeads.add((negativeBead != null) ? negativeBead.toString() : null);
                         }
                         err = false;
                         break;
                     }
                 }
+
                 if (err)
                 {
                     errors.addRowError(new ValidationException("The uploaded TSV file doesn't appear to have a 'Analyte' column and cannot be parsed"));
@@ -497,15 +504,15 @@ public class LuminexController extends SpringActionController
                 }
             }
 
-            if (analyteProperities.size() == 0)
+            if (analytes.size() == 0)
             {
                 errors.addRowError(new ValidationException("The uploaded TSV file doesn't have any analyte properities to parse"));
                 return -1;
             }
 
-            AnalyteDefaultTransformer adt = new AnalyteDefaultTransformer(analyteProperities);
+            AnalyteDefaultTransformer adt = new AnalyteDefaultTransformer(analytes, positivityThresholds, negativeBeads);
             // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
-            List<ValidationException> rowErrors = validateDefaultValues(adt.getAnalytes(), adt.getPositivityThreshold()).getRowErrors();
+            List<ValidationException> rowErrors = validateDefaultValues(adt).getRowErrors();
             if (rowErrors.size() > 0)
             {
                 for (ValidationException validationErrors : rowErrors)
@@ -514,7 +521,7 @@ public class LuminexController extends SpringActionController
                 return -1;
             }
 
-            AnalyteDefaultValueService.setAnalyteDefaultValues(analyteProperities, getContainer(), _protocol);
+            AnalyteDefaultValueService.setAnalyteDefaultValues(adt.getAnalyteMap(), getContainer(), _protocol);
 
             return adt.size();
         }
