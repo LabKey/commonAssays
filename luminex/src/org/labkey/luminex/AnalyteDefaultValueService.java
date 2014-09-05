@@ -88,11 +88,15 @@ public class AnalyteDefaultValueService
                     Map<String, String> map = new HashMap<>();
                     String analyte = this.analytes.get(i);
 
-                    String positivityThreshold = StringUtils.trimToNull(this.positivityThresholds.get(i));
-                    if (positivityThreshold != null) map.put(propertyNames.get(0), positivityThreshold);
+                    String positivityThreshold = this.positivityThresholds.get(i);
+                    if (positivityThreshold != null)
+                    {
+                        if (positivityThreshold.isEmpty()) positivityThreshold = "100"; // defaulting
+                        map.put(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME, positivityThreshold);
+                    }
 
                     String negativeBead = StringUtils.trimToNull(this.negativeBeads.get(i));
-                    if (negativeBead != null) map.put(propertyNames.get(0), negativeBead);
+                    if (negativeBead != null) map.put(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME, negativeBead);
 
                     analyteMap.put(analyte, map);
                 }
@@ -232,6 +236,7 @@ public class AnalyteDefaultValueService
             if(currentDefaults.containsKey(propKey))
                 result.add(currentDefaults.get(propKey));
             else
+                // NOTE: I do not think this is the right places to enforce the default...
                 result.add(propertyDefaults.get(propertyNames.indexOf(propertyName)));
         }
         return result;
