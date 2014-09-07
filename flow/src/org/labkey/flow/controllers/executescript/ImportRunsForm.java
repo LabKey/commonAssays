@@ -16,19 +16,13 @@
 
 package org.labkey.flow.controllers.executescript;
 
-import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
-import org.labkey.api.util.ReturnURLString;
-import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.URLException;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
 public class ImportRunsForm extends PipelinePathForm
 {
-    private ReturnURLString _returnUrl;
     private boolean _current;
     private boolean _confirm;
 
@@ -85,28 +79,5 @@ public class ImportRunsForm extends PipelinePathForm
     public void setTargetStudy(String targetStudy)
     {
         _targetStudy = targetStudy;
-    }
-
-    public ReturnURLString getReturnUrl()
-    {
-        return _returnUrl;
-    }
-
-    public void setReturnUrl(ReturnURLString returnUrl)
-    {
-        _returnUrl = returnUrl;
-    }
-
-    @Nullable
-    public URLHelper getReturnURLHelper()
-    {
-        try
-        {
-            return (null == _returnUrl ? null : new URLHelper(_returnUrl));
-        }
-        catch (URISyntaxException e)
-        {
-            throw new URLException(_returnUrl.getSource(), "returnUrl parameter", e);
-        }
     }
 }
