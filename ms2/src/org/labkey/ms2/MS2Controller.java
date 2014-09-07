@@ -197,7 +197,6 @@ public class MS2Controller extends SpringActionController
     private static final String DEFAULT_VIEW_NAME = "DefaultViewName";
     private static final String SHARED_VIEW_SUFFIX = " (Shared)";
     static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
-    private static final int MAX_MATCHING_PROTEINS = 100;
 
     public MS2Controller()
     {

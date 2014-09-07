@@ -32,6 +32,7 @@ import org.labkey.ms2.pipeline.TPPTask;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -167,12 +168,15 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 writeRunParameters(pathSpectra, fileWorkParameters, fileWorkTaxonomy, fileWorkOutputXML);
 
                 String ver = getJob().getParameters().get("pipeline tandem, version");
-                String exePath = PipelineJobService.get().getExecutablePath("tandem.exe", null, "xtandem", ver, getJob().getLogger());
-                // Issue 18203 - XTandem binary no longer called "tandem.exe" in more recent TPP non-Windows builds
-                // Check if the binary exists with the original name
-                if (!NetworkDrive.exists(new File(exePath)))
+                String exePath;
+                try
                 {
-                    // If not, try it again without the file extension
+                    exePath = PipelineJobService.get().getExecutablePath("tandem.exe", null, "xtandem", ver, getJob().getLogger());
+                }
+                catch (FileNotFoundException e)
+                {
+                    // Issue 18203 - XTandem binary no longer called "tandem.exe" in more recent TPP non-Windows builds
+                    // Try it again without the file extension
                     exePath = PipelineJobService.get().getExecutablePath("tandem", null, "xtandem", ver, getJob().getLogger());
                 }
                 xTandemPB = new ProcessBuilder(exePath, INPUT_XML);
