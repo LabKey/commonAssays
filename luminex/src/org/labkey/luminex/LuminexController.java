@@ -459,7 +459,7 @@ public class LuminexController extends SpringActionController
             _protocol = form.getProtocol();
             setNoTableInfo();
             setImportMessage("Import default values for standard analyte properties. " +
-                    "Colum headers should include: Analyte, " + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME +
+                    "Column headers should include: Analyte, " + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME +
                     ", and " + LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME + ".");
         }
 
