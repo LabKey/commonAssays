@@ -42,6 +42,8 @@ import java.util.regex.Pattern;
 public class PeptideProphetSummary extends SensitivitySummary
 {
     private static final Pattern VERSION_PATTERN = Pattern.compile(".*TPP v(\\d+(\\.\\d+)?).*");
+    public static final String PEPTIDEPROPHET_SUMMARY_TAG = "peptideprophet_summary";
+    public static final String ANALYSIS_SUMMARY_TAG = "analysis_summary";
 
     private float[] _fval;
     private float[][] _modelPos;
@@ -50,7 +52,17 @@ public class PeptideProphetSummary extends SensitivitySummary
 
     public static PeptideProphetSummary load(SimpleXMLStreamReader parser) throws XMLStreamException
     {
-        parser.skipToStart("peptideprophet_summary");
+        // We're currently at a start <analysis_summary> tag for the PeptideProphet section
+        // Look for a starting <peptideprophet_summary> tag
+        while (!parser.isStartElement() || !PEPTIDEPROPHET_SUMMARY_TAG.equals(parser.getLocalName()))
+        {
+            // Bail out if we exit the current <analysis_summary> section
+            if (!parser.hasNext() || (parser.isEndElement() && ANALYSIS_SUMMARY_TAG.equals(parser.getLocalName())))
+            {
+                return null;
+            }
+            parser.next();
+        }
 
         try
         {
@@ -425,6 +437,7 @@ public class PeptideProphetSummary extends SensitivitySummary
         public void testVersionParse()
         {
             // Test some real version strings
+            assertEquals(4.7, parseTPPVersion("PeptideProphet  (TPP v4.7 POLAR VORTEX rev 1, Build 201405141849 (MinGW))"), DELTA);
             assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 200909211148 (MSVC))"), DELTA);
             assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5 RAPTURE rev 1, Build 201112210851 (linux))"), DELTA);
             assertEquals(2.9, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v2.9 GALE rev.3, Build 200611090444(Win32))"), DELTA);

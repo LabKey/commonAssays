@@ -58,7 +58,7 @@ public class PepXmlLoader extends MS2Loader
                 if (element.equals("msms_run_summary"))
                     return;
 
-                if (element.equals("analysis_summary"))
+                if (element.equals(PeptideProphetSummary.ANALYSIS_SUMMARY_TAG))
                 {
                     String analysisType = _parser.getAttributeValue(null, "analysis");
 
