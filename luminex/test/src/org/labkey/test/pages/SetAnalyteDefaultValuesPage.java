@@ -1,0 +1,174 @@
+package org.labkey.test.pages;
+
+import org.junit.Assert;
+import org.labkey.test.BaseWebDriverTest;
+import org.labkey.test.Locator;
+import org.labkey.test.Locators;
+import org.labkey.test.util.PortalHelper;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SetAnalyteDefaultValuesPage
+{
+    private BaseWebDriverTest _test;
+
+    public SetAnalyteDefaultValuesPage(BaseWebDriverTest test)
+    {
+        _test = test;
+    }
+
+    public void importDefaults(File defaultsFile)
+    {
+        importDefaultsExpectError(defaultsFile, null);
+    }
+
+    public void importDefaultsExpectError(File defaultsFile, String errorText)
+    {
+        ensureOnImportPage();
+
+        _test.click(PortalHelper.Locators.webPartTitle.containing("Copy/paste text"));
+        _test.click(PortalHelper.Locators.webPartTitle.containing("Upload file"));
+        _test.setFormElement(Locator.name("file"), defaultsFile);
+
+        submitDefaults(errorText);
+    }
+
+    public void importDefaults(String defaultsTsvContents)
+    {
+        importDefaultsExpectError(defaultsTsvContents, null);
+    }
+
+    public void importDefaultsExpectError(String defaultsTsvContents, String errorText)
+    {
+        ensureOnImportPage();
+
+        _test.click(PortalHelper.Locators.webPartTitle.containing("Upload file"));
+        _test.click(PortalHelper.Locators.webPartTitle.containing("Copy/paste text"));
+        _test.setFormElement(Locator.name("text"), defaultsTsvContents);
+
+        submitDefaults(errorText);
+    }
+
+    private void ensureOnImportPage()
+    {
+        if (!_test.isElementPresent(Locator.pageHeader("Import Default Values")))
+        {
+            _test.clickButton("Import Data");
+        }
+    }
+
+    private void submitDefaults(String errorText)
+    {
+        if (errorText != null)
+        {
+            _test.clickButton("Submit", 0);
+            _test.waitForElement(Locators.labkeyError.withText("The Positivity Threshold 'cat' does not appear to be an integer."));
+        }
+        else
+        {
+            _test.clickButton("Submit");
+        }
+    }
+
+    public List<AnalyteDefault> getAnalyteDefaults()
+    {
+        List<WebElement> defaultValueRows = Locator.id("defaultValues").append(Locator.xpath("/tbody/tr").withPredicate("preceding-sibling::tr")).findElements(_test.getDriver());
+        List<AnalyteDefault> defaultValues = new ArrayList<>();
+
+        for (WebElement row : defaultValueRows)
+        {
+            String analyteName = row.findElement(By.name("analytes")).getAttribute("value");
+            String positivityThresholdValue = row.findElement(By.name("positivityThresholds")).getAttribute("value");
+            String negativeBead = row.findElement(By.name("negativeBeads")).getAttribute("value");
+
+            Integer positivityThreshold = 0;
+
+            try
+            {
+                positivityThreshold = Integer.parseInt(positivityThresholdValue);
+            }
+            catch (NumberFormatException ex)
+            {
+                Assert.fail("Illegal positivity threshold for '" + analyteName + "': " + positivityThresholdValue);
+            }
+
+            defaultValues.add(new AnalyteDefault(analyteName, positivityThreshold, negativeBead));
+        }
+
+        return defaultValues;
+    }
+
+    public static class AnalyteDefault
+    {
+        public static final Integer DEFAULT_POSITIVITY_THRESHOLD = 100;
+
+        private String _analyteName;
+        private Integer _positivityThreshold;
+        private String _negativeBead;
+
+        public AnalyteDefault(String analyteName)
+        {
+            this(analyteName, DEFAULT_POSITIVITY_THRESHOLD);
+        }
+
+        public AnalyteDefault(String analyteName, Integer positivityThreshold)
+        {
+            this(analyteName, positivityThreshold, "");
+        }
+
+        public AnalyteDefault(String analyteName, String negativeBead)
+        {
+            this(analyteName, DEFAULT_POSITIVITY_THRESHOLD, negativeBead);
+        }
+
+        public AnalyteDefault(String analyteName, Integer positivityThreshold, String negativeBead)
+        {
+            _analyteName = analyteName;
+            _positivityThreshold = positivityThreshold;
+            _negativeBead = negativeBead;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            return obj instanceof AnalyteDefault &&
+                    _analyteName.equals(((AnalyteDefault) obj).getAnalyteName()) &&
+                    _positivityThreshold.equals(((AnalyteDefault) obj).getPositivityThreshold()) &&
+                    _negativeBead.equals(((AnalyteDefault) obj).getNegativeBead());
+        }
+
+        @Override
+        public int hashCode()
+        {
+            int result = _analyteName != null ? _analyteName.hashCode() : 0;
+            result = 31 * result + (_positivityThreshold != null ? _positivityThreshold.hashCode() : 0);
+            result = 31 * result + (_negativeBead != null ? _negativeBead.hashCode() : 0);
+            return result;
+        }
+
+        public String getAnalyteName()
+        {
+            return _analyteName;
+        }
+
+        public Integer getPositivityThreshold()
+        {
+            return _positivityThreshold;
+        }
+
+        public String getNegativeBead()
+        {
+            return _negativeBead;
+        }
+
+        @Override
+        public String toString()
+        {
+            return String.format("[%s][%d][%s]", _analyteName, _positivityThreshold, _negativeBead);
+        }
+    }
+}
