@@ -18,6 +18,7 @@ package org.labkey.ms2.reader;
 import net.systemsbiology.regisWeb.pepXML.PeptideprophetSummaryDocument;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
+import org.apache.xmlbeans.impl.values.XmlValueOutOfRangeException;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -88,9 +89,9 @@ public class PeptideProphetSummary extends SensitivitySummary
                 return new PeptideProphetSummary(summary);
             }
         }
-        catch(XmlException e)
+        catch(XmlException | XmlValueOutOfRangeException e)
         {
-            throw new XMLStreamException("Parsing peptide prophet summary", e);
+            throw new XMLStreamException("Failed to parse PeptideProphet summary data, this appears to be an invalid XML file", e);
         }
     }
 
