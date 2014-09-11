@@ -169,13 +169,27 @@ public class AnalyteDefaultValueService
         return propertyNames;
     }
 
-    public static Map<String, String> getLuminexDefaultValues(Container container, ExpProtocol protocol)
+    public static Map<String, String> getContainerDefaultValues(Container container, ExpProtocol protocol)
     {
         return PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol));
     }
 
-    //this should be private
-    public static String getAnalyteColumnCategory(ExpProtocol protocol)
+    public static PropertyManager.PropertyMap getWritableContainerDefaultValues(Container container, ExpProtocol protocol)
+    {
+        return PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
+    }
+
+    public static Map<String, String> getUserDefaultValues(User user, Container container, ExpProtocol protocol)
+    {
+        return PropertyManager.getProperties(user, container, getAnalyteColumnCategory(protocol));
+    }
+
+    public static PropertyManager.PropertyMap getWritableUserDefaultValues(User user, Container container, ExpProtocol protocol)
+    {
+        return PropertyManager.getWritableProperties(user, container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
+    }
+
+    private static String getAnalyteColumnCategory(ExpProtocol protocol)
     {
         return protocol.getName() + ": Analyte Column";
     }
@@ -192,20 +206,15 @@ public class AnalyteDefaultValueService
 
     public static List<String> getAnalyteNames(ExpProtocol protocol, Container container)
     {
-        return getAnalyteNames(protocol, container, false);
-    }
-
-    public static List<String> getAnalyteNames(ExpProtocol protocol, Container container, boolean sort)
-    {
         List<String> result = new ArrayList<>(getAnalyteDefaultValues(protocol, container).keySet());
-        if (sort) Collections.sort(result);
+        Collections.sort(result);
         return result;
     }
 
     public static Map<String, Map<String, String>> getAnalyteDefaultValues(ExpProtocol protocol, Container container)
     {
         Map<String, Map<String, String>> analyteMap = new HashMap<>();
-        for (Map.Entry<String, String> defaultValueEntry : getLuminexDefaultValues(container, protocol).entrySet())
+        for (Map.Entry<String, String> defaultValueEntry : getContainerDefaultValues(container, protocol).entrySet())
         {
             String key = defaultValueEntry.getKey().replace(PROP_NAME_PREFIX, "");
             for (String propertyName : propertyNames)
@@ -227,7 +236,7 @@ public class AnalyteDefaultValueService
     public static List<String> getAnalyteProperty(List<String> analytes, Container container, ExpProtocol protocol, String propertyName)
     {
         // TODO: catch bad propertyNames...
-        Map<String, String> currentDefaults =  getLuminexDefaultValues(container, protocol);
+        Map<String, String> currentDefaults =  getContainerDefaultValues(container, protocol);
         List<String> result = new ArrayList<>();
         String propKey;
         for (String analyte : analytes)
@@ -244,7 +253,7 @@ public class AnalyteDefaultValueService
 
     public static void setAnalyteDefaultValues(Map<String, Map<String, String>> analyteProperties, Container container, ExpProtocol protocol)
     {
-        PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
+        PropertyManager.PropertyMap defaultAnalyteColumnValues = getWritableContainerDefaultValues(container, protocol);
         defaultAnalyteColumnValues.clear(); // NOTE: an empty property map would work too.
         for(Map.Entry<String, Map<String, String>> entry : analyteProperties.entrySet())
         {
@@ -271,7 +280,7 @@ public class AnalyteDefaultValueService
     // TODO: merge with the method above
     public static void setAnalyteDefaultValues(List<String> analytes, List<String> positivityThresholds, List<String> negativeBeads, Container container, ExpProtocol protocol)
     {
-        PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
+        PropertyManager.PropertyMap defaultAnalyteColumnValues = getWritableContainerDefaultValues(container, protocol);
         defaultAnalyteColumnValues.clear(); // NOTE: an empty property map would work too.
         if (analytes != null)
         {
@@ -302,9 +311,9 @@ public class AnalyteDefaultValueService
         Map<String, String> mergedDefaults = new HashMap<>();
         // fall back on any user last entered default values, so add them to the map first
         if (!isReset)
-            mergedDefaults.putAll(PropertyManager.getProperties(user, container, getAnalyteColumnCategory(protocol)));
+            mergedDefaults.putAll(getUserDefaultValues(user, container, protocol));
         // override map with any container level analyte default values (i.e. used as Editable Defaults)
-        mergedDefaults.putAll(PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol)));
+        mergedDefaults.putAll(getContainerDefaultValues(container, protocol));
         return mergedDefaults;
     }
 }

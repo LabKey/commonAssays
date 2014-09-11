@@ -164,6 +164,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
         Set<String> initNegativeControlAnalytes = new TreeSet<>();
+        List<String> negativeBeadDefaultValues = AnalyteDefaultValueService.getAnalyteProperty(Arrays.asList(analyteNames), getContainer(), _protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
         // each analyte may have a different set of default values.  Because it may be expensive to query for the
         // entire set of values for every property, we use the following map to cache the default value sets by analyte name.
@@ -192,6 +193,17 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 final String inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyte, analyteDP);
                 Object analyteDefaultValue = defaultValues != null ? defaultValues.get(analyteDP) : null;
 
+                // track the initial set of "Negative Control" analytes for the Negative Bead select list
+                if (LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName()))
+                {
+                    // issue 21500: any analytes set as NegativeBead container defaults should be used as Negative Controls
+                    if (negativeBeadDefaultValues.contains(analyte))
+                        analyteDefaultValue = true;
+
+                    if (analyteDefaultValue != null && analyteDefaultValue.equals(true))
+                        initNegativeControlAnalytes.add(analyte);
+                }
+
                 if (analyteDP.isShownInInsertView())
                 {
                     view.setInitialValue(inputName, analyteDefaultValue);
@@ -219,12 +231,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 else if (analyteDefaultValue != null)
                 {
                     view.getDataRegion().addHiddenFormField(inputName, analyteDefaultValue.toString());
-                }
-
-                // track the initial set of "Negative Control" analytes for the Negative Bead select list
-                if (LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName()) && analyteDefaultValue != null && analyteDefaultValue.equals(true))
-                {
-                    initNegativeControlAnalytes.add(analyte);
                 }
             }
 
@@ -679,9 +685,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     ExpRun run = saveExperimentRun(form);
 
-                    // Save default values for analytes
-                    PropertyManager.PropertyMap defaultAnalyteColumnValues = PropertyManager.getWritableProperties(
-                            getUser(), getContainer(), AnalyteDefaultValueService.getAnalyteColumnCategory(_protocol), true);
+                    // Save user last entered default values for analytes
+                    PropertyManager.PropertyMap defaultAnalyteColumnValues = AnalyteDefaultValueService.getWritableUserDefaultValues(getUser(), getContainer(), _protocol);
                     for (String analyteName : form.getAnalyteNames())
                     {
                         // for analyte domain properties use the standard assay default value persistance

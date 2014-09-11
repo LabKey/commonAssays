@@ -69,8 +69,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -342,7 +340,7 @@ public class LuminexController extends SpringActionController
         {
             ExpProtocol protocol = form.getProtocol();
 
-            List<String> analytes = AnalyteDefaultValueService.getAnalyteNames(protocol, getContainer(), true);
+            List<String> analytes = AnalyteDefaultValueService.getAnalyteNames(protocol, getContainer());
             List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
             List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
@@ -483,14 +481,17 @@ public class LuminexController extends SpringActionController
                     {
                         for (Map<String, Object> row : dl)
                         {
-                            String analyte = row.get("Analyte").toString();
-                            analytes.add(analyte);
+                            if (row.get("Analyte") != null)
+                            {
+                                String analyte = row.get("Analyte").toString();
+                                analytes.add(analyte);
 
-                            Object positivityThreshold = row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
-                            positivityThresholds.add((positivityThreshold !=null) ? positivityThreshold.toString() : null);
+                                Object positivityThreshold = row.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                                positivityThresholds.add((positivityThreshold !=null) ? positivityThreshold.toString() : null);
 
-                            Object negativeBead = row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
-                            negativeBeads.add((negativeBead != null) ? negativeBead.toString() : null);
+                                Object negativeBead = row.get(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                                negativeBeads.add((negativeBead != null) ? negativeBead.toString() : null);
+                            }
                         }
                         err = false;
                         break;
@@ -562,7 +563,7 @@ public class LuminexController extends SpringActionController
                 @Override
                 protected void write()
                 {
-                    _pw.println("Analyte\tPositivityThreshold\tNegativeBead");
+                    _pw.println("Analyte\t" + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME + "\t" + LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                     for (int i=0; i<analytes.size(); i++)
                     {
                         _pw.println( String.format("%s\t%s\t%s", analytes.get(i), positivityThresholds.get(i), negativeBeads.get(i)));

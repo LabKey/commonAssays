@@ -123,11 +123,13 @@ public final class LuminexPositivityTest extends LuminexTest
         for (WebElement row : analytePropertyRows)
         {
             String analyteName = row.findElement(By.xpath("td")).getText();
-            Integer positivityThreshold = Integer.parseInt(row.findElement(By.name("_analyte_" + analyteName + "_PositivityThreshold")).getAttribute("value"));
 
+            Integer positivityThreshold = Integer.parseInt(row.findElement(By.name("_analyte_" + analyteName + "_PositivityThreshold")).getAttribute("value"));
             assertEquals(analyteDefaultMap.get(analyteName).getPositivityThreshold(), positivityThreshold);
+
+            String negativeBead = row.findElement(By.name("_analyte_" + analyteName + "_NegativeBead")).getAttribute("value");
+            assertEquals(analyteDefaultMap.get(analyteName).getNegativeBead(), negativeBead);
         }
-        // TODO: Verify negative bead settings: 21500: Luminex import doesn't respect negative bead defaults
     }
 
     private void testDefaultAnalyteProperties()
