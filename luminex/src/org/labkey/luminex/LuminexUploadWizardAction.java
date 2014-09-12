@@ -200,6 +200,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     if (negativeBeadDefaultValues.contains(analyte))
                         analyteDefaultValue = true;
 
+                    // issue 21518: in errorReshow case, use the posted values for the negative control setting
+                    if (errorReshow)
+                    {
+                        String negControlInputName = AnalyteDefaultValueService.getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME);
+                        analyteDefaultValue = getViewContext().getRequest().getParameter(negControlInputName) != null;
+                    }
+
                     if (analyteDefaultValue != null && analyteDefaultValue.equals(true))
                         initNegativeControlAnalytes.add(analyte);
                 }
@@ -353,12 +360,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 view.getDataRegion().addHiddenFormField(propertyName, value);
 
                 // field to help w/ when to store default values
-                value = "";
-                if (errorReshow && getViewContext().getRequest().getParameter(propertyName + "_showcol").equals("true"))
-                    value = "true";
-                else if (!errorReshow && standardTitrations.size() > 1 && standardTitrations.contains(titrationEntry.getValue()))
-                    value = "true";
-                view.getDataRegion().addHiddenFormField(propertyName + "_showcol", value);
+                value = toShowStandardCheckboxColumn(errorReshow, standardTitrations, titrationEntry.getValue()) ? "true" : "";
+                view.getDataRegion().addHiddenFormField(getShowStandardCheckboxColumnName(titrationEntry.getValue()), value);
 
                 propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
                 // If we have an existing titration as a baseline from the run we're replacing, use its value
@@ -407,14 +410,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 continue;
             }
 
-            String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-            final boolean hideCell;
-            if (errorReshow && getViewContext().getRequest().getParameter(titrationCheckboxName + "_showcol").equals("true"))
-                hideCell = false;
-            else if (!errorReshow && standardTitrations.contains(titrationEntry.getValue()))
-                hideCell = false;
-            else
-                hideCell = true;
+            final boolean hideCell = !toShowStandardCheckboxColumn(errorReshow, standardTitrations, titrationEntry.getValue());
 
             List<DisplayColumn> cols = new ArrayList<>();
             for (String analyte : analyteNames)
@@ -478,6 +474,18 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         vbox.addView(view);
 
         return vbox;
+    }
+
+    private String getShowStandardCheckboxColumnName(Titration standard)
+    {
+        String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, standard);
+        return titrationCheckboxName + "_showcol";
+    }
+
+    private boolean toShowStandardCheckboxColumn(boolean errorReshow, Set<Titration> standardTitrations, Titration standard)
+    {
+        String requestParamValue = getViewContext().getRequest().getParameter(getShowStandardCheckboxColumnName(standard));
+        return (errorReshow && requestParamValue.equals("true")) || (!errorReshow && standardTitrations.contains(standard));
     }
 
     private DisplayColumnFactory createAnalytePropertyDisplayColumnFactory(final String inputName, final String displayName)
@@ -740,7 +748,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         }
 
                         // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
-                        propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) + "_showcol";
+                        propertyName = getShowStandardCheckboxColumnName(titrationEntry.getValue());
                         if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
                         {
                             PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
