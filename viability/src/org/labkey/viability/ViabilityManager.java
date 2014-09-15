@@ -269,7 +269,7 @@ public class ViabilityManager
         String shortName = "VaibilitySpecimenAgg_" + protocol.getRowId();
         String tempTableName = schema.getSqlDialect().getGlobalTempTablePrefix() + shortName;
         SpecimenAggregateTempTableToken tok = new SpecimenAggregateTempTableToken(tempTableName);
-        TempTableTracker tracker = TempTableTracker.track(schema.getDbSchema(), tempTableName, tok);
+        TempTableTracker tracker = TempTableTracker.track(schema.getDbSchema(), shortName, tok);
 
         CPUTimer t = new CPUTimer("viability.updateSpecimenAggregates");
         try (DbScope.Transaction tx = scope.ensureTransaction())
