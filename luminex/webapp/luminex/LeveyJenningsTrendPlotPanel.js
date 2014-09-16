@@ -510,7 +510,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                        if (Ext.getDom(this.pdfPanel.getId()))
                        {
                            var html = Ext.getDom(this.pdfPanel.getId()).innerHTML;
-                           this.pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&amp;attachment=true'));
+                           this.pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('">PDF output file'));
+                           this.pdfHref = this.pdfHref.replace(/&amp;/g, "&");
                            this.fireEvent('togglePdfBtn', true);
                        }
                    },

@@ -228,7 +228,7 @@
                     'exportPdfBtnClicked': function() {
                         if (trendPlotPanel.getPdfHref())
                         {
-                            window.location = trendPlotPanel.getPdfHref() + "&attachment=true&deleteFile=false";
+                            window.location = trendPlotPanel.getPdfHref();
                         }
                     }
                 }
