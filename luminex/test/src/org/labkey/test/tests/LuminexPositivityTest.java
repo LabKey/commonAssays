@@ -88,6 +88,7 @@ public final class LuminexPositivityTest extends LuminexTest
         String assayName = "Luminex Analyte Default Test";
         File analyteDefaults = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues.tsv");
         File badDefaults = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues_bad.tsv");
+        File noAnalytes = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues_bad_only_analytes.tsv");
         Set<SetAnalyteDefaultValuesPage.AnalyteDefault> expectedDefaults = new HashSet<>();
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Analyte1", "Blank (3)"));
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Blank (3)", 110));
@@ -102,6 +103,8 @@ public final class LuminexPositivityTest extends LuminexTest
         _assayHelper.setDefaultValues(assayName, AbstractAssayHelper.AssayDefaultAreas.ANALYTE_PROPERTIES);
         SetAnalyteDefaultValuesPage analyteDefaultsPage = new SetAnalyteDefaultValuesPage(this);
 
+        // Issue 21413: NPE when importing analyte default values that are missing expected columns
+        analyteDefaultsPage.importDefaultsExpectError(noAnalytes, "The uploaded file only contains a column of analyte names without any analyte properities.");
         analyteDefaultsPage.importDefaultsExpectError(badDefaults, "The Positivity Threshold 'cat' does not appear to be an integer.");
         analyteDefaultsPage.importDefaults(analyteDefaults);
 

@@ -385,12 +385,18 @@ public class LuminexController extends SpringActionController
     {
         BatchValidationException errors = new BatchValidationException();
 
+        // TODO: consider placing this inside importData() (as it only effects this).
+        // Issue 21413: NPE when importing analyte default values that are missing expected columns
+        boolean only_analytes = true;
+
         // check sizes are a match (e.g. that all analyte names are unique)
         if (adt.getAnalyteMap().keySet().size() != adt.getAnalytes().size())
             errors.addRowError(new ValidationException("The analyte names are not unique."));
 
         for (Map<String, String> analyteProperities : adt.getAnalyteMap().values())
         {
+            if(analyteProperities.size() > 0) only_analytes = false;
+
             String positivityThreshold = analyteProperities.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
             try {
                 if (StringUtils.trimToNull(positivityThreshold) != null)
@@ -401,6 +407,10 @@ public class LuminexController extends SpringActionController
                 errors.addRowError(new ValidationException("The Positivity Threshold '" + positivityThreshold + "' does not appear to be an integer."));
             }
         }
+
+        if(only_analytes)
+            errors.addRowError(new ValidationException("The uploaded file only contains a column of analyte names without any analyte properities."));
+
         return errors;
     }
 

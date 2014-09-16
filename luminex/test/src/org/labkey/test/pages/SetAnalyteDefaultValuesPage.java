@@ -66,7 +66,7 @@ public class SetAnalyteDefaultValuesPage
         if (errorText != null)
         {
             _test.clickButton("Submit", 0);
-            _test.waitForElement(Locators.labkeyError.withText("The Positivity Threshold 'cat' does not appear to be an integer."));
+            _test.waitForElement(Locators.labkeyError.withText(errorText));
         }
         else
         {
