@@ -427,6 +427,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
         for (var i = 0; i < this.present.length; i++)
         {
+            // issue 21431
+            if (this.present[i] == undefined)
+                continue;
+
             if(!(this.preExcludedIds[i] == undefined && this.present[i] == 0))
             {
                 if(this.present[i] != 1)
@@ -463,7 +467,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
     insertUpdateWellExclusions: function(){
 
+        this.findParentByType('window').getEl().mask("Saving titration exclusions...", "x-mask-loading");
+
         // generage a comma delim string of the analyte Ids to exclude
+        var commands = [];
         for (var index = 0; index < this.excluded.length; index++)
         {
             var dataId = this.excludedDataIds[index];
@@ -475,54 +482,45 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
             Ext.each(analytesForExclusion, function(record){
                 analytesForExclusionStr += (analytesForExclusionStr != "" ? "," : "") + record.data.RowId;
             });
+
+            // determine if this is an insert, update, or delete
+            var command = "insert";
+            if (this.preExcludedIds[index] != undefined)
+                command = analytesForExclusionStr != "" ? "update" : "delete";
+
             // config of data to save for the given replicate group exclusion
-            var config = {
+            commands.push({
                 schemaName: "assay.Luminex." + this.queryName,
                 queryName: 'WellExclusion',
+                command: command,
                 rows: [{
+                    rowId: this.preExcludedIds[index], // this will be undefined for the insert case
                     description: analytesForExclusion.name,
                     dataId: dataId,
                     comment: this.comments[index],
                     "analyteId/RowId": (analytesForExclusionStr != "" ? analytesForExclusionStr : null)
-                }],
+                }]
+            });
+        }
+
+        if (commands.length > 0)
+        {
+            LABKEY.Query.saveRows({
+                commands: commands,
                 success: function(){
                     this.fireEvent('closeWindow');
                     window.location.reload();
                 },
                 failure: function(info, response, options){
-                    if (this.findParentByType('window').getEl().isMasked())
-                        this.findParentByType('window').getEl().unmask();
-
+                    this.findParentByType('window').getEl().unmask();
                     LABKEY.Utils.displayAjaxErrorResponse(response, options);
                 },
                 scope: this
-            };
-
-            // insert, update, or delete to/from the WellExclusions table with config information
-
-            if (typeof this.preExcludedIds[index] === 'number')
-            {
-                config.rows[0].rowId = this.preExcludedIds[index];
-                if (analytesForExclusionStr != "")
-                {
-                    LABKEY.Query.updateRows(config);
-                }
-                else
-                {
-                   LABKEY.Query.deleteRows(config);
-                }
-            }
-            else
-            {
-                if (analytesForExclusionStr != "")
-                {
-                    LABKEY.Query.insertRows(config);
-                }
-                else
-                {
-                    this.findParentByType('window').getEl().unmask();
-                }
-            }
+            });
+        }
+        else
+        {
+            this.findParentByType('window').getEl().unmask();
         }
     }
 });
