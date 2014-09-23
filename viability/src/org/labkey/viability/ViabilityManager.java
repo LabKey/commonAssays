@@ -266,7 +266,7 @@ public class ViabilityManager
             return;
 
         // Create temp table with specimen aggregate results
-        String shortName = "VaibilitySpecimenAgg_" + protocol.getRowId();
+        String shortName = "ViabilitySpecimenAgg_" + protocol.getRowId();
         String tempTableName = schema.getSqlDialect().getGlobalTempTablePrefix() + shortName;
         SpecimenAggregateTempTableToken tok = new SpecimenAggregateTempTableToken(tempTableName);
         TempTableTracker tracker = TempTableTracker.track(schema.getDbSchema(), shortName, tok);
