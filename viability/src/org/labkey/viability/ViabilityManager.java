@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ViabilityManager
 {
@@ -250,6 +251,8 @@ public class ViabilityManager
         String name;
     }
 
+    static AtomicInteger tempTableCounter = new AtomicInteger();
+
     // TODO: call when: specimens imported, editable specimens inserted/updated/deleted, target study edited (for editable assay)
     // DONE: call when: run inserted, LetvinController.CreateVialsAction
     public static void updateSpecimenAggregates(User user, Container c, @NotNull AssayProvider provider, @NotNull ExpProtocol protocol, @Nullable ExpRun run)
@@ -266,7 +269,7 @@ public class ViabilityManager
             return;
 
         // Create temp table with specimen aggregate results
-        String shortName = "ViabilitySpecimenAgg_" + protocol.getRowId();
+        String shortName = "ViabilitySpecimenAgg_" + protocol.getRowId() + "_" + tempTableCounter.incrementAndGet();
         String tempTableName = schema.getSqlDialect().getGlobalTempTablePrefix() + shortName;
         SpecimenAggregateTempTableToken tok = new SpecimenAggregateTempTableToken(tempTableName);
         TempTableTracker tracker = TempTableTracker.track(schema.getDbSchema(), shortName, tok);
