@@ -1868,17 +1868,9 @@ public class MS2Controller extends SpringActionController
     @RequiresPermissionClass(ReadPermission.class)
     public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ComparisonCrosstabView>
     {
-        private PeptideFilteringComparisonForm _form;
-
         public CompareProteinProphetQueryAction()
         {
             super(PeptideFilteringComparisonForm.class);
-        }
-
-        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
-        {
-            _form = form;
-            return super.getView(form, errors);
         }
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
@@ -1962,17 +1954,9 @@ public class MS2Controller extends SpringActionController
     @RequiresPermissionClass(ReadPermission.class)
     public class ComparePeptideQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ComparisonCrosstabView>
     {
-        private PeptideFilteringComparisonForm _form;
-
         public ComparePeptideQueryAction()
         {
             super(PeptideFilteringComparisonForm.class);
-        }
-
-        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
-        {
-            _form = form;
-            return super.getView(form, errors);
         }
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
