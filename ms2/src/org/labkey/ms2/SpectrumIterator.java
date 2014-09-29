@@ -19,6 +19,7 @@ package org.labkey.ms2;
 import java.util.Iterator;
 
 /**
+ * Iterator backed by a source of spectra data
  * User: adam
  * Date: May 10, 2006
  * Time: 10:41:26 AM
