@@ -101,6 +101,11 @@ public class CurveFitTable extends AbstractLuminexTable
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
         sql.append(" WHERE ");
         sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container"), container));
+        if (getUserSchema().getProtocol() != null)
+        {
+            sql.append(" AND r.ProtocolLSID = ?");
+            sql.add(getUserSchema().getProtocol().getLSID());
+        }
         sql.append("))");
         return sql;
 
