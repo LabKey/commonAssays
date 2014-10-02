@@ -488,6 +488,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
             if (this.preExcludedIds[index] != undefined)
                 command = analytesForExclusionStr != "" ? "update" : "delete";
 
+            // issue 21551: don't insert an exclusion w/out any analytes
+            if (command == "insert" && analytesForExclusionStr == "")
+                continue;
+
             // config of data to save for the given replicate group exclusion
             commands.push({
                 schemaName: "assay.Luminex." + this.queryName,
