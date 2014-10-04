@@ -124,7 +124,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
             @Override
             public Set<Double> load(String key, @Nullable Object argument)
             {
-                return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
+                return DilutionManager.getCutoffValues(protocol);
             }
         });
     }
