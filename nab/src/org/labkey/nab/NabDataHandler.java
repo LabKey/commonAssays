@@ -185,7 +185,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                     cutoffEntries.put("IC_5plOORIndicator", group.get(icKey));
                     NabManager.get().insertCutoffValueRow(null, cutoffEntries);
                 }
-                NabProtocolSchema.ensureCutoffValues(protocol, cutoffFormats.keySet());
+                NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
             }
         }
         catch (SQLException e)

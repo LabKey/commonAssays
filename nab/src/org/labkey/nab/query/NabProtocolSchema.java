@@ -109,11 +109,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
     public Set<Double> getCutoffValues()
     {
-        if (_cutoffValues == null)
-        {
-            _cutoffValues = Collections.unmodifiableSet(getCutoffValues(getProtocol()));
-        }
-        return _cutoffValues;
+        return getCutoffValues(getProtocol());
     }
 
     /** For databases with a lot of NAb runs, it can be expensive to get the set of unique cutoff values. */
@@ -124,7 +120,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
             @Override
             public Set<Double> load(String key, @Nullable Object argument)
             {
-                return DilutionManager.getCutoffValues(protocol);
+                return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
             }
         });
     }
