@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.run;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.DataRegionSelection;
@@ -28,6 +29,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.FileNameUniquifier;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
@@ -380,12 +382,20 @@ public class RunController extends BaseFlowController
             }
             else if (wellId != null && wellId.length > 0)
             {
+                Set<String> names = new HashSet<>();
                 List<FlowWell> wells = new ArrayList<>();
                 for (int id : wellId)
                 {
                     FlowWell well = FlowWell.fromWellId(id);
                     if (well == null)
                         throw new NotFoundException("Flow well not found");
+
+                    if (names.contains(well.getName()))
+                    {
+                        errors.rejectValue("wellId", ERROR_MSG, "Duplicate sample name '" + well.getName() + "'.  All exported sample well names must be unique.  Contact LabKey support if you see this error.");
+                        return;
+                    }
+                    names.add(well.getName());
 
                     wells.add(well);
                 }
@@ -406,6 +416,11 @@ public class RunController extends BaseFlowController
             }
             else
             {
+                if (errors.hasErrors())
+                {
+                    return new SimpleErrorView(errors);
+                }
+
                 form._renderForm = true;
                 return new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form, errors);
             }
@@ -431,6 +446,9 @@ public class RunController extends BaseFlowController
                     zipName = getBaseName(run.getName()) + ".zip";
                 }
 
+                // Uniquify run names if the same workspace has been imported twice and is now being exported.
+                // CONSIDER: Unfortunately, the original run name will be lost -- consider adding a id column to the export format containing the lsid of the run.
+                FileNameUniquifier uniquifier = new FileNameUniquifier(false);
                 ZipFile zipFile = new ZipFile(response, zipName);
                 for (FlowRun run : _runs)
                 {
@@ -440,6 +458,8 @@ public class RunController extends BaseFlowController
                     getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                     String dirName = getBaseName(run.getName());
+                    dirName = uniquifier.uniquify(dirName);
+
                     VirtualFile dir = zipFile.getDir(dirName);
                     AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
                     writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
@@ -500,9 +520,14 @@ public class RunController extends BaseFlowController
                             Map<String, CompensationMatrix> matrices,
                             boolean includeKeywords, boolean includeGraphBytes, boolean includeCompMatrices, boolean includeStatistics)
     {
+        // CONSIDER: Uniquify well names if the same well has been imported into two different runs and is now being exported.
+        // CONSIDER: Unfortunately, the original sample name will be lost -- consider adding a id column to the export format containing the lsid of the well.
+        //FileNameUniquifier uniquifier = new FileNameUniquifier(false);
         for (FlowWell well : wells)
         {
-            String name = well.getName();
+            //String name = uniquifier.uniquify(FileUtil.getBaseName(well.getName()));
+            String name = FileUtil.getBaseName(well.getName());
+
             if (well instanceof FlowFCSAnalysis && (includeStatistics || includeGraphBytes))
             {
                 FlowFCSAnalysis analysis = (FlowFCSAnalysis) well;
