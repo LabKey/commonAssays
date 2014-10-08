@@ -64,8 +64,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
     public static final String NAB_DBSCHEMA_NAME = "nab";
     public static final String NAB_VIRUS_SCHEMA_NAME = "nabvirus";
 
-    private Set<Double> _cutoffValues;
-
     public NabProtocolSchema(User user, Container container, @NotNull NabAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         super(user, container, provider, protocol, targetStudy);
@@ -123,16 +121,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
                 return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
             }
         });
-    }
-
-    /** Add potentially new cutoff values to the cache */
-    public static void ensureCutoffValues(ExpProtocol protocol, Set<? extends Number> newValues)
-    {
-        Set<Double> values = getCutoffValues(protocol);
-        for (Number newValue : newValues)
-        {
-            values.add(newValue.doubleValue());
-        }
     }
 
     public static void clearProtocolFromCutoffCache(int protocolId)
