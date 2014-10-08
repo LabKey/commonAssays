@@ -540,11 +540,14 @@ public class NabAssayController extends SpringActionController
             if (_virusGroups.size() > 0)
             {
                 headers.add(NabVirusFilePropertyHelper.VIRUS_WELLGROUP_COLUMN);
-                defaultValues = DefaultValueService.get().getDefaultValues(_container, _virusDomain);
-                for (DomainProperty property : _virusDomain.getProperties())
+                if (_virusDomain != null)
                 {
-                    columnToDefaultValue.put(property.getName(), defaultValues.get(property));
-                    headers.add(property.getName());
+                    defaultValues = DefaultValueService.get().getDefaultValues(_container, _virusDomain);
+                    for (DomainProperty property : _virusDomain.getProperties())
+                    {
+                        columnToDefaultValue.put(property.getName(), defaultValues.get(property));
+                        headers.add(property.getName());
+                    }
                 }
             }
 
