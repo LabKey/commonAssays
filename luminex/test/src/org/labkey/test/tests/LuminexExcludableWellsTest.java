@@ -15,19 +15,19 @@
  */
 package org.labkey.test.tests;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.LuminexAll;
+import org.labkey.test.pages.AssayDomainEditor;
 import org.labkey.test.util.DataRegionTable;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -37,13 +37,22 @@ import static org.junit.Assert.assertTrue;
 public final class LuminexExcludableWellsTest extends LuminexTest
 {
     private static final String EXCLUDE_SELECTED_BUTTON = "excludeselected";
+    private String excludedWellDescription = null;
+    private String excludedWellType = null;
+    private Set<String> excludedWells = null;
 
-    private final String excludedWellDescription = "Sample 2";
-    private final String excludedWellType = "X25";
-    private final Set<String> excludedWells = new HashSet<>(Arrays.asList("E1", "F1"));
+    @BeforeClass
+    public static void updateAssayDefinition()
+    {
+        LuminexExcludableWellsTest init = (LuminexExcludableWellsTest)getCurrentTest();
+        init.goToTestAssayHome();
+        AssayDomainEditor assayDesigner = init._assayHelper.clickEditAssayDesign();
+        assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
+        assayDesigner.saveAndClose();
+    }
 
     /**
-     * test of well exclusion- the ability to exclude certain wells or analytes and add ac oment as to why
+     * test of well exclusion- the ability to exclude certain wells or analytes and add a comment as to why
      * preconditions: LUMINEX project and assay list exist.  Having the Multiple Curve data will speed up execution
      * but is not required
      * postconditions:  multiple curve data will be present, certain wells will be marked excluded
@@ -64,20 +73,39 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         _customizeViewsHelper.addCustomizeViewColumn("ExclusionComment");
         _customizeViewsHelper.applyCustomView();
 
-        //"all" excludes all
-        String excludeAllWellName = "E1";
-        excludeAllAnalytesForSingleWellTest(excludeAllWellName);
+        // standard titration well group exclusion
+        excludedWellDescription = "Standard2";
+        excludedWellType = "S3";
+        excludedWells = new HashSet<>(Arrays.asList("C3", "D3"));
+        excludeAllAnalytesForSingleWellTest("Standard", "C3", false);
 
-        String excludeOneWellName = "E1";
-        excludeOneAnalyteForSingleWellTest(excludeOneWellName, analytes[0]);
+        // QC control titration well group exclusion
+        excludedWellDescription = "Standard1";
+        excludedWellType = "C2";
+        excludedWells = new HashSet<>(Arrays.asList("E2", "F2"));
+        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false);
 
-        //excluding for one well excludes for duplicate wells
+        // unknown titration well group exclusion
+        excludedWellDescription = "Sample 2";
+        excludedWellType = "X25";
+        excludedWells = new HashSet<>(Arrays.asList("E1", "F1"));
+        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true);
+        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0]);
+
+        // analyte exclusion
         excludeAnalyteForAllWellsTest(analytes[1]);
 
         // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
-        assertTextPresent("Changed for all analytes", "exclude single analyte for single well", "ENV7 (93)", "ENV6 (97)");
-        assertTextPresent("multipleCurvesTestRun", 2);
+        assertTextPresent("multipleCurvesTestRun", 4);
+        assertTextPresent("Changed for all analytes");
+        assertTextPresent("No data to show.", 1);
+        assertTextPresent("exclude all for single well", 2);
+        assertTextPresent("exclude single analyte for single well", 1);
+        assertTextPresentInThisOrder("S3", "C2", "X25");
+        assertTextPresent("ENV7 (93)", 3);
+        assertTextPresent("ENV6 (97)", 3);
+        assertTextPresentInThisOrder("C3,D3", "E2,F2", "E1,F1");
     }
 
     /**
@@ -88,102 +116,106 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      * postconditions: no change (exclusion is removed at end of test)
      * @param wellName name of well to excluse
      */
-    private void excludeAllAnalytesForSingleWellTest(String wellName)
+    private void excludeAllAnalytesForSingleWellTest(String wellRole, String wellName, boolean removeExclusion)
     {
         DataRegionTable table = new DataRegionTable("Data", this);
-        table.setFilter("WellRole", "Equals", "Unknown");
+        table.setFilter("WellRole", "Equals", wellRole);
         clickExclusionMenuIconForWell(wellName);
         String comment = "exclude all for single well";
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
         clickButton(SAVE_CHANGES_BUTTON, 2 * defaultWaitForPage);
         table.clearFilter("WellRole");
 
-        excludeForSingleWellVerify("Excluded for replicate group: " + comment, new HashSet<>(Arrays.asList(getListOfAnalytesMultipleCurveData())));
+        verifyWellGroupExclusion("Excluded for replicate group: " + comment, new HashSet<>(Arrays.asList(getListOfAnalytesMultipleCurveData())));
 
-        //remove exclusions to leave in clean state
-        table.setFilter("WellRole", "Equals", "Unknown");
-        clickExclusionMenuIconForWell(wellName);
-        click(Locator.radioButtonById("excludeselected"));
-        clickButton(SAVE_CHANGES_BUTTON, 0);
-        _extHelper.waitForExtDialog("Warning");
-        clickButton("Yes", 2 * defaultWaitForPage);
-        table.clearFilter("WellRole");
+        if (removeExclusion)
+        {
+            table.setFilter("WellRole", "Equals", wellRole);
+            clickExclusionMenuIconForWell(wellName);
+            click(Locator.radioButtonById("excludeselected"));
+            clickButton(SAVE_CHANGES_BUTTON, 0);
+            _extHelper.waitForExtDialog("Warning");
+            clickButton("Yes", 2 * defaultWaitForPage);
+            table.clearFilter("WellRole");
+        }
     }
 
-    private void excludeOneAnalyteForSingleWellTest(String wellName, String excludedAnalyte)
+    private void excludeOneAnalyteForSingleWellTest(String wellRole, String wellName, String excludedAnalyte)
     {
         waitForText("Well Role");
         DataRegionTable table = new DataRegionTable("Data", this);
-        table.setFilter("WellRole", "Equals", "Unknown");
+        table.setFilter("WellRole", "Equals", wellRole);
         clickExclusionMenuIconForWell(wellName);
         String exclusionComment = "exclude single analyte for single well";
-        setFormElement(EXCLUDE_COMMENT_FIELD, exclusionComment);
+        setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), exclusionComment);
         click(Locator.radioButtonById(EXCLUDE_SELECTED_BUTTON));
         clickExcludeAnalyteCheckBox(excludedAnalyte);
         clickButton(SAVE_CHANGES_BUTTON, 2 * defaultWaitForPage);
         table.clearFilter("WellRole");
 
-        excludeForSingleWellVerify("Excluded for replicate group: " + exclusionComment, new HashSet<>((Arrays.asList(excludedAnalyte))));
+        verifyWellGroupExclusion("Excluded for replicate group: " + exclusionComment, new HashSet<>((Arrays.asList(excludedAnalyte))));
     }
 
     /**
-     * go through every well.  If they match the hardcoded well, description, and type values, and one of the analyte values given
-     * verify that the row has the expected comment
+     * Go through every analyte/well row with an exclusion comment.
+     * Verify that the row has the expected comment, well, description, and type values
      *
      * @param expectedComment
      * @param analytes
      */
-    private void excludeForSingleWellVerify(String expectedComment, Set<String> analytes)
+    private void verifyWellGroupExclusion(String expectedComment, Set<String> analytes)
     {
-        for (String analyte : analytes)
+        DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
+        table.setFilter("Description", "Equals", excludedWellDescription);
+        table.setFilter("ExclusionComment", "Is Not Blank", null);
+
+        List<List<String>> vals = table.getFullColumnValues("Well", "Description", "Type", "Exclusion Comment", "Analyte");
+        List<String> wells = vals.get(0);
+        List<String> descriptions = vals.get(1);
+        List<String> types = vals.get(2);
+        List<String> comments = vals.get(3);
+        List<String> analytesPresent = vals.get(4);
+
+        String well;
+        String description;
+        String type;
+        String comment;
+
+        for(int i=0; i<wells.size(); i++)
         {
-            setFilter("Data", "Analyte", "Equals", analyte);
+            well = wells.get(i);
+            description = descriptions.get(i);
+            type = types.get(i);
+            comment = comments.get(i);
+            String analyteVal = analytesPresent.get(i);
 
-            List<List<String>> vals = getColumnValues(DATA_TABLE_NAME, "Well", "Description", "Type", "Exclusion Comment", "Analyte");
-            List<String> wells = vals.get(0);
-            List<String> descriptions = vals.get(1);
-            List<String> types = vals.get(2);
-            List<String> comments = vals.get(3);
-            List<String> analytesPresent = vals.get(4);
-
-            String well;
-            String description;
-            String type;
-            String comment;
-
-            for(int i=0; i<wells.size(); i++)
+            try
             {
-                well = wells.get(i);
-                description = descriptions.get(i);
-                type = types.get(i);
-                comment = comments.get(i);
-                String analyteVal = analytesPresent.get(i);
-
-                try
+                if(matchesWell(description, type, well) && analytes.contains(analyteVal))
                 {
-                    if(matchesWell(description, type, well) && analytes.contains(analyteVal))
-                    {
-                        assertEquals(expectedComment,comment);
-                    }
-
-                    if(expectedComment.equals(comment))
-                    {
-                        assertTrue(matchesWell(description, type, well));
-                        assertTrue(analytes.contains(analyteVal));
-                    }
+                    assertEquals(expectedComment,comment);
                 }
-                catch (Exception rethrow)
-                {
-                    log("well: " + well);
-                    log("description: " + description);
-                    log("type: " + type);
-                    log("Comment: "+ comment);
-                    log("Analyte: " + analyteVal);
 
-                    throw rethrow;
+                if(expectedComment.equals(comment))
+                {
+                    assertTrue(matchesWell(description, type, well));
+                    assertTrue(analytes.contains(analyteVal));
                 }
             }
+            catch (Exception rethrow)
+            {
+                log("well: " + well);
+                log("description: " + description);
+                log("type: " + type);
+                log("Comment: "+ comment);
+                log("Analyte: " + analyteVal);
+
+                throw rethrow;
+            }
         }
+
+        table.clearFilter("ExclusionComment");
+        table.clearFilter("Description");
     }
 
     //verifies if description, type, and well match the hardcoded values
@@ -202,35 +234,16 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      */
     private void excludeAnalyteForAllWellsTest(String analyte)
     {
+        String exclusionPrefix = "Excluded for analyte: ";
         String comment ="Changed for all analytes";
         excludeAnalyteForRun(analyte, true, comment);
 
-        String exclusionPrefix = "Excluded for analyte: ";
-        Map<String, Set<String>> analyteToExclusion = new HashMap<>();
-        Set<String> set = new HashSet<>();
-        set.add(exclusionPrefix + comment);
-        analyteToExclusion.put(analyte, set);
-
-        analyteToExclusion = createExclusionMap(set, analyte);
-
-        compareColumnValuesAgainstExpected("Analyte", "Exclusion Comment", analyteToExclusion);
-    }
-
-    /**
-     * return a map that, for each key, has value value
-     * @param value
-     * @param key
-     * @return
-     */
-    private Map<String, Set<String>> createExclusionMap(Set<String> value, String... key)
-    {
-        Map<String, Set<String>> m  = new HashMap<>();
-
-        for(String k: key)
-        {
-            m.put(k, value);
-        }
-
-        return m;
+        DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
+        table.setFilter("ExclusionComment", "Equals", exclusionPrefix + comment);
+        waitForElement(Locator.paginationText(72));
+        table.setFilter("Analyte", "Does Not Equal", analyte);
+        waitForText("No data to show.");
+        table.clearFilter("Analyte");
+        table.clearFilter("ExclusionComment");
     }
 }

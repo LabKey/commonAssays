@@ -383,6 +383,27 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3);
         clickButton("Next");
+        setNegativeBeads("Blank ");
+    }
+
+    private void setNegativeBeads(String negBeadPrefix)
+    {
+        String[] analytes = getListOfAnalytesMultipleCurveData();
+        String blankAnalyte = null;
+        for (String analyte : analytes)
+        {
+            if (analyte.startsWith(negBeadPrefix))
+            {
+                blankAnalyte = analyte;
+                break;
+            }
+        }
+        checkCheckbox(Locator.name("_analyte_" + blankAnalyte + "_NegativeControl"));
+        for (String analyte : analytes)
+        {
+            if (!analyte.equals(blankAnalyte))
+                selectOptionByText(Locator.name("_analyte_" + analyte + "_NegativeBead"), blankAnalyte);
+        }
     }
 
     /**several tests use this data.  Rather that clean and import for each
