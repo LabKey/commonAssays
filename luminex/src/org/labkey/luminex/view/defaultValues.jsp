@@ -54,6 +54,7 @@
                 <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
                 <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
                 <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('<%=h(analytes.get(i))%>')"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a class='labkey-file-add-icon labkey-file-add-icon-disabled' onclick="addRow()"><span style="display: inline-block">&nbsp;</span></a></td>
             </tr>
             <% } %>
         <% } else { %>
@@ -62,6 +63,7 @@
                 <td><input name="positivityThresholds" value="" size=20></td>
                 <td><input name="negativeBeads" value="" size=30></td>
                 <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('InsertRow0')"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick="addRow()"><span style="display: inline-block">&nbsp;</span></a></td>
             </tr>
         <% } %>
     </table>
@@ -72,7 +74,6 @@
             <td><%= button("Cancel").href(bean.getReturnURLHelper()) %></td>
             <td><%= button("Import Data").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnURL(getViewContext().getActionURL()))%></td>
             <td><%= button("Export TSV").href(new ActionURL(LuminexController.ExportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()))%></td>
-            <td><%= button("Add Row").onClick("addRow()")%></td>
         </tr>
     </table>
 </labkey:form>
@@ -81,6 +82,10 @@
     rowCount = 1;
     function addRow() {
         var table = document.getElementById("defaultValues");
+
+        // need to disable add button on previous row
+        getLastCell(getLastRow(table)).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-disabled'><span style=\"display: inline-block\">&nbsp;</span></a>";
+
         var row = table.insertRow(-1);
         var rowId = "InsertRow"+rowCount;
         row.id = rowId;
@@ -90,14 +95,31 @@
         var positivityCell = row.insertCell(-1);
         positivityCell.innerHTML = "<input name=\"positivityThresholds\" value=\"\" size=20>";
         var negativeBeads = row.insertCell(-1);
-        negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"\" size=30>"
+        negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"\" size=30>";
         var deleteRowButton = row.insertCell(-1);
-        deleteRowButton.innerHTML = "<a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick=deleteRow('" + rowId + "')><span style=\"display: inline-block\">&nbsp;</span></a>"
+        deleteRowButton.innerHTML = "<a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick=deleteRow('" + rowId + "')><span style=\"display: inline-block\">&nbsp;</span></a>";
+        var addRowButton = row.insertCell(-1);
+        addRowButton.innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
+
     }
 
     function deleteRow(rowId) {
         // http://stackoverflow.com/questions/4967223/javascript-delete-a-row-from-a-table-by-id
         var row = document.getElementById(rowId);
         row.parentNode.removeChild(row);
+
+        // need to insure the add button is enabled on the last row
+        row = getLastRow(document.getElementById("defaultValues"))
+        getLastCell(row).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
+    }
+
+    function getLastRow(table)
+    {
+        return table.rows[ table.rows.length - 1 ];
+    }
+
+    function getLastCell(row)
+    {
+        return row.cells[ row.cells.length - 1];
     }
 </script>
