@@ -27,6 +27,7 @@ import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
 import org.labkey.ms2.protein.ProteinManager;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -147,7 +148,7 @@ public class ProteinDictionaryHelpers
             }
             finally
             {
-                if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
+                if (ps != null) { try { ps.close(); } catch (SQLException ignored) {} }
                 if (null != conn) scope.releaseConnection(conn);
             }
 
@@ -159,13 +160,19 @@ public class ProteinDictionaryHelpers
     private static InputStream getSProtOrgMap() throws IOException
     {
         WebdavResource r = WebdavService.get().lookup(FILE);
+        InputStream is;
         if (null != r)
         {
-            InputStream is = r.getInputStream(null);
+            is = r.getInputStream(null);
             if (null != is)
                 return is;
         }
-        return ViewServlet.getViewServletContext().getResourceAsStream(FILE);
+        is = ViewServlet.getViewServletContext().getResourceAsStream(FILE);
+        if (is == null)
+        {
+            throw new FileNotFoundException("Unable to find " + FILE + "  This seems to be caused in some cases when Tomcat redeploys the webapp when running. Please try restarting Tomcat.");
+        }
+        return is;
     }
 
 
