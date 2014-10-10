@@ -21,10 +21,11 @@ import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.reader.TabLoader;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
+import org.labkey.api.webdav.ModuleStaticResolverImpl;
 import org.labkey.api.webdav.WebdavResource;
-import org.labkey.api.webdav.WebdavService;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.io.FileNotFoundException;
@@ -159,7 +160,8 @@ public class ProteinDictionaryHelpers
 
     private static InputStream getSProtOrgMap() throws IOException
     {
-        WebdavResource r = WebdavService.get().lookup(FILE);
+        // Use the static resolver directly so that we work in both production and dev builds
+        WebdavResource r = ModuleStaticResolverImpl.get().lookup(Path.parse(FILE));
         InputStream is;
         if (null != r)
         {
