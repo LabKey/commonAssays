@@ -851,6 +851,7 @@ luminex/test/src/org/labkey/test/util/LuminexGuideSetHelper.java -text
 luminex/test/test_luminex.iml -text
 luminex/webapp/luminex/AnalyteExclusionPanel.js -text
 luminex/webapp/luminex/ApplyGuideSetPanel.js -text
+luminex/webapp/luminex/BaseExclusionPanel.js -text
 luminex/webapp/luminex/Exclusion.css -text
 luminex/webapp/luminex/GuideSet.css -text
 luminex/webapp/luminex/LeveyJenningsGraphParamsPanel.js -text

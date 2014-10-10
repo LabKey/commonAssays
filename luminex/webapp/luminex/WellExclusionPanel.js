@@ -20,8 +20,7 @@ function wellExclusionWindow(assayName, runId, dataId, description, type)
         closeAction:'close',
         bodyStyle: 'background-color: white;',
         items: new LABKEY.WellExclusionPanel({
-            schemaName: 'assay',
-            queryName: assayName,
+            assayName: assayName,
             runId: runId,
             dataId: dataId,
             description: description,
@@ -39,81 +38,36 @@ function wellExclusionWindow(assayName, runId, dataId, description, type)
 
 /**
  * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
- * @params schameName = the name of the schema used to get the run's unique analyte names
- * @params queryName = the name of the query used to get the run's unique analyte names
+ * @params assayName = the assay design name
  * @params runId = runId for the selected replicate group
  * @params dataId = dataId for the selected replicate group
  * @params description = description for the selected replicate group
  * @params type = type for the selected replicate group (i.e. S1, C2, X3, etc.)
  */
-LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
+LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
     constructor : function(config){
         // check that the config properties needed are present
-        if (!config.schemaName)
-            throw "You must specify a schemaName!";
-        if (!config.queryName)
-            throw "You must specify a queryName!";
-        if (!config.runId || !config.dataId || !config.type)
-            throw "You must specify the following: runId, dataId, and type!";
+        if (!config.dataId || !config.type)
+            throw "You must specify the following: dataId, and type!";
 
-        Ext.apply(config, {
-            cls: 'extContainer',
-            autoScroll: true,
-            border: false,
-            items: [],
-            buttonAlign: 'center',
-            buttons: []
-        });
-
-        this.addEvents('closeWindow');
         LABKEY.WellExclusionPanel.superclass.constructor.call(this, config);
     },
 
     initComponent : function() {
         // query the WellExclusion table to see if there are any existing exclusions for this replicate Group
-        LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + this.queryName,
-            queryName: 'WellExclusion',
-            filterArray: [
-                LABKEY.Filter.create('description', this.description),
-                LABKEY.Filter.create('type', this.type),
-                LABKEY.Filter.create('dataId', this.dataId)
-            ],
-            columns: 'RowId,Comment,Analytes/RowId',
-            success: function(data){
-                // if there are well exclusions for the replicate group, add the info to this
-                this.exclusionsExist = false;
-                if (data.rows.length == 1)
-                {
-                    this.exclusionsExist = true;
-                    this.rowId = data.rows[0].RowId;
-                    this.comment = data.rows[0].Comment;
-                    this.analytes = data.rows[0]["Analytes/RowId"];
-                }
-
-                this.setupWindowPanelItems();
-            },
-            scope: this
-        });
+        var filterArray = [
+            LABKEY.Filter.create('description', this.description),
+            LABKEY.Filter.create('type', this.type),
+            LABKEY.Filter.create('dataId', this.dataId)
+        ];
+        this.queryExistingExclusions('WellExclusion', filterArray, 'RowId,Comment,Analytes/RowId');
 
         LABKEY.WellExclusionPanel.superclass.initComponent.call(this);
     },
 
     setupWindowPanelItems: function()
     {
-        // panel header information for replicate group
-        this.add(new Ext.form.FormPanel({
-            style: 'padding-bottom: 10px; background: #ffffff',
-            html: this.getExclusionPanelHeader(),
-            border: false
-        }));
-
-        // text to describe how run exclusions are handled
-        this.add(new Ext.form.DisplayField({
-            hideLabel: true,
-            style: 'font-style: italic; font-size: 90%',
-            value: 'Analytes excluded for a titration or at the assay level will not be re-included by changes in replicate group exclusions'
-        }));
+        this.addHeaderPanel('Analytes excluded for a titration or at the assay level will not be re-included by changes in replicate group exclusions');
 
         // radio group for selecting "exclude all" or "exclude selected"
         this.add(new Ext.form.FormPanel({
@@ -162,35 +116,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             })
         }));
 
-        var updateSaveBtn = function(sm, grid){
-            // enable the save button when changes are made to the selection or is exclusions exist
-            if (sm.getCount() > 0 || grid.exclusionsExist)
-                grid.getFooterToolbar().findById('saveBtn').enable();
-
-            // disable the save button if no exclusions exist and no selection is made
-            if(sm.getCount() == 0 && !grid.exclusionsExist)
-                grid.getFooterToolbar().findById('saveBtn').disable();
-        };
-
-        // checkbox selection model for selecting which analytes to exclude
-        var selMod = new Ext.grid.CheckboxSelectionModel();
-        selMod.on('selectionchange', function(sm){
-            updateSaveBtn(sm, this);
-        }, this, {buffer: 250});
-
-        // Issue 17974: make rowselect behave like checkbox select, i.e. keep existing other selections in the grid
-        selMod.on('beforerowselect', function(sm, rowIndex, keepExisting, record) {
-            sm.suspendEvents();
-            if (sm.isSelected(rowIndex))
-                sm.deselectRow(rowIndex);
-            else
-                sm.selectRow(rowIndex, true);
-            sm.resumeEvents();
-
-            updateSaveBtn(sm, this);
-
-            return false;
-        }, this);
+        var selMod = this.getGridCheckboxSelectionModel();
 
         // set the title for the grid panel based on previous exclusions
         var title = "Select the checkbox next to the analytes to be excluded";
@@ -210,7 +136,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                     + " FROM Data AS x "
                     + " WHERE x.Data.Run.RowId = " + this.runId + " AND x.Type = '" + this.type + "' "
                     + " AND x.Description " + (this.description ? " = '" + this.description + "'" : " IS NULL"),
-                schemaName: "assay.Luminex." + this.queryName,
+                schemaName: 'assay.Luminex.' + this.assayName,
                 autoLoad: true,
                 listeners: {
                     scope: this,
@@ -270,31 +196,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             border: false
         });
 
-        // comment textfield
-        this.add(new Ext.form.FormPanel({
-            height: 75,
-            style: 'padding-top: 20px; background: #ffffff',
-            labelAlign: 'top',
-            items: [
-                new Ext.form.TextField({
-                    id: 'comment',
-                    fieldLabel: 'Comment',
-                    value: this.comment ? this.comment : null,
-                    labelStyle: 'font-weight: bold',
-                    anchor: '100%',
-                    enableKeyEvents: true,
-                    listeners: {
-                        scope: this,
-                        'keydown': function(){
-                            // enable the save changes button when the comment is edited by the user, if exclusions exist
-                            if (this.exclusionsExist)
-                                this.getFooterToolbar().findById('saveBtn').enable();
-                        }
-                    }
-                })
-            ],
-            border: false
-        }));
+        this.addCommentPanel();
 
         // add a warning message for when exclusions of titrations will result in assay re-run
         this.add(new Ext.form.DisplayField({
@@ -307,19 +209,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             }
         }));
 
-        // add save and cancel buttons
-        this.addButton({
-            id: 'saveBtn',
-            text: 'Save',
-            disabled: true,
-            handler: this.insertUpdateWellExclusions,
-            scope: this
-        });
-        this.addButton({
-            text: 'Cancel',
-            handler: function(){this.fireEvent('closeWindow');},
-            scope: this
-        });
+        this.addStandardButtons();
 
         this.doLayout();
 
@@ -337,7 +227,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
         // query to get the wells and data id (file name) for the given replicate group
         LABKEY.Query.executeSql({
-            schemaName: 'assay.Luminex.' + this.queryName,
+            schemaName: 'assay.Luminex.' + this.assayName,
             sql: sql,
             sort: 'Well',
             success: function(data){
@@ -368,7 +258,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     {
         // query to see if there are any run level exclusions for this RunId
         LABKEY.Query.selectRows({
-            schemaName: "assay.Luminex." + this.queryName,
+            schemaName: 'assay.Luminex.' + this.assayName,
             queryName: 'RunExclusion',
             filterArray: [LABKEY.Filter.create('RunId', this.runId)],
             columns: 'Analytes/Name',
@@ -393,7 +283,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                     + "</table>";
     },
 
-    insertUpdateWellExclusions: function(){
+    insertUpdateExclusions: function(){
         // mask the window until the insert/update is complete (or if something goes wrong)
         var message = "Saving replicate group exclusion...";
         if (this.findById('reCalcDisplay').isVisible())
@@ -409,7 +299,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
         // config of data to save for the given replicate group exclusion
         var config = {
-            schemaName: "assay.Luminex." + this.queryName,
+            schemaName: 'assay.Luminex.' + this.assayName,
             queryName: 'WellExclusion',
             rows: [{
                 description: this.description,

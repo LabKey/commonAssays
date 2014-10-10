@@ -20,8 +20,7 @@ function titrationExclusionWindow(assayName, runId)
         closeAction:'close',
         bodyStyle: 'background-color: white;',
         items: new LABKEY.TitrationExclusionPanel({
-            schemaName: 'assay',
-            queryName: assayName,
+            assayName: assayName,
             runId: runId,
             listeners: {
                 scope: this,
@@ -36,75 +35,32 @@ function titrationExclusionWindow(assayName, runId)
 
 /**
  * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
- * @params schameName = the name of the schema used to get the run's unique analyte names
- * @params queryName = the name of the query used to get the run's unique analyte names
+ * @params assayName = the assay design name
  * @params runId = runId for the selected replicate group
  */
-LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
-    constructor : function(config){
-        // check that the config properties needed are present
-        if (!config.schemaName)
-            throw "You must specify a schemaName!";
-        if (!config.queryName)
-            throw "You must specify a queryName!";
-        if (!config.runId)
-            throw "You must specify a runId!";
-
-        Ext.apply(config, {
-            autoScroll: true,
-            border: false,
-            items: [],
-            buttonAlign: 'center',
-            buttons: []
-        });
-
-        this.addEvents('closeWindow');
-        LABKEY.TitrationExclusionPanel.superclass.constructor.call(this, config);
-    },
+LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
 
     initComponent : function() {
-        // query the RunExclusion table to see if there are any existing exclusions for this run
-        LABKEY.Query.selectRows({
-            schemaName: 'assay',
-            queryName: this.queryName + ' RunExclusion',
-            filterArray: [LABKEY.Filter.create('runId', this.runId)],
-            columns: 'RunId,Comment,Analytes/RowId',
-            success: function(data){
-                // if there are exclusions for this run, add the info to this
-                this.exclusionsExist = false;
-                if (data.rows.length == 1)
-                {
-                    this.exclusionsExist = true;
-                    this.comment = data.rows[0].Comment;
-                    this.analytes = data.rows[0]["Analytes/RowId"];
-                }
+        this.excluded = [];
+        this.comments = [];
+        this.excludedDataIds = [];
+        this.present = [];
+        this.preExcludedIds = [];
 
-                this.setupWindowPanelItems();
-            },
-            scope: this
-        });
+        // query the RunExclusion table to see if there are any existing exclusions for this run
+        // TODO: why are we using the RunExclusion table at all in this file?
+        this.queryExistingExclusions('RunExclusion', [LABKEY.Filter.create('runId', this.runId)], 'RunId,Comment,Analytes/RowId');
 
         LABKEY.TitrationExclusionPanel.superclass.initComponent.call(this);
     },
 
     setupWindowPanelItems: function()
     {
-        this.excluded = [];
-        this.comments = [];
-        this.excludedDataIds = [];
-        this.present = [];
-        this.preExcludedIds = [];
-        // panel header information for replicate group
-        this.add(new Ext.form.FormPanel({
-            style: 'padding-bottom: 10px; background: #ffffff',
-            html: this.getExclusionPanelHeader(),
-            timeout: Ext.Ajax.timeout,
-            border: false
-        }));
+        this.addHeaderPanel('Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions');
 
         var titrationExclusionStore = new LABKEY.ext.Store({
-            schemaName: 'assay.Luminex.' + this.queryName,
-            queryName : 'TitrationExclusion',
+            schemaName: 'assay.Luminex.' + this.assayName,
+            queryName: 'TitrationExclusion',
             columns: 'Description,Analytes/RowId,RowId,Comment, DataId/Run',
             filterArray : [
                     LABKEY.Filter.create('DataId/Run', this.runId, LABKEY.Filter.Types.EQUALS)
@@ -129,38 +85,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
             }
         });
 
-        // text to describe how run exclusions are handled
-        this.add(new Ext.form.DisplayField({
-            hideLabel: true,
-            style: 'font-style: italic; font-size: 90%',
-            value: 'Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions'
-        }));
-
-        var updateSaveBtn = function(sm, grid){
-            // enable the save button when changes are made to the selection or is exclusions exist
-            if (sm.getCount() > 0 || grid.exclusionsExist)
-                grid.getFooterToolbar().findById('saveBtn').enable();
-        };
-
-        // checkbox selection model for selecting which analytes to exclude
-        var selMod = new Ext.grid.CheckboxSelectionModel();
-        selMod.on('selectionchange', function(sm){
-            updateSaveBtn(sm, this);
-        }, this, {buffer: 250});
-
-        // Issue 17974: make rowselect behave like checkbox select, i.e. keep existing other selections in the grid
-        selMod.on('beforerowselect', function(sm, rowIndex, keepExisting, record) {
-            sm.suspendEvents();
-            if (sm.isSelected(rowIndex))
-                sm.deselectRow(rowIndex);
-            else
-                sm.selectRow(rowIndex, true);
-            sm.resumeEvents();
-
-            updateSaveBtn(sm, this);
-
-            return false;
-        }, this);
+        var selMod = this.getGridCheckboxSelectionModel();
 
         this.titrationSelMod = new Ext.grid.RowSelectionModel({
             singleSelect : true,
@@ -211,15 +136,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
         });
 
-        // set the title for the grid panel based on previous exclusions
-        var titrationTitle = "Select a titration to view a list of available analytes";
-
-        var title = "Select the checkbox next to the analytes within the selected titration to be excluded";
-
-        var gridData = [];
         // grid of avaialble/excluded titrations
+        var gridData = [];
         var titrationsGridStore = new LABKEY.ext.Store({
-            schemaName: 'assay.Luminex.' + this.queryName,
+            schemaName: 'assay.Luminex.' + this.assayName,
             sql : 'SELECT DISTINCT x.Titration.Name, x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId ' +
                     'FROM Data AS x '+
                     'WHERE x.Titration IS NOT NULL AND x.Titration.Standard != true AND x.Data.Run.RowId = ' + this.runId,
@@ -263,7 +183,6 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
             fields : ['Name', 'DataId', 'RunId', 'Present']
         });
 
-        var me = this;
         var _tpl = new Ext.XTemplate(
                 '<span>{[this.getPresentValue(values.Present)]}</span>',
                 {
@@ -282,7 +201,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         this.availableTitrationsGrid = new Ext.grid.GridPanel({
             id: 'titrationGrid',
             style: 'padding-top: 10px;',
-            title: titrationTitle,
+            title: "Select a titration to view a list of available analytes",
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store: combinedStore,
             colModel: new Ext.grid.ColumnModel({
@@ -312,13 +231,12 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
             style: 'padding-top: 10px;',
-            title: title,
+            title: "Select the checkbox next to the analytes within the selected titration to be excluded",
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                        + " FROM \"" + this.queryName + " Data\" AS x "
-                        + " WHERE x.Data.Run.RowId = " + this.runId,
-                schemaName: this.schemaName,
+                        + " FROM Data AS x  WHERE x.Data.Run.RowId = " + this.runId,
+                schemaName: 'assay.Luminex.' + this.assayName,
                 autoLoad: true,
                 sortInfo: {
                     field: 'Name',
@@ -344,81 +262,25 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         });
         this.add(availableAnalytesGrid);
 
-        // comment textfield
-        var commentPanel = new Ext.form.FormPanel({
-            height: 75,
-            style: 'padding-top: 20px; background: #ffffff',
-            timeout: Ext.Ajax.timeout,
-            labelAlign: 'top',
-            items: [
-                new Ext.form.TextField({
-                    id: 'comment',
-                    fieldLabel: 'Comment',
-                    labelStyle: 'font-weight: bold',
-                    anchor: '100%',
-                    enableKeyEvents: true,
-                    listeners: {
-                        scope: this,
-                        'keydown': function(){
-                            // enable the save changes button when the comment is edited by the user, if exclusions exist
-                            if (this.exclusionsExist)
-                                this.getFooterToolbar().findById('saveBtn').enable();
-                        }
-                    }
-                })
-            ],
-            border: false
-        });
-        this.add(commentPanel);
+        this.addCommentPanel();
 
-        // add save and cancel buttons
-        this.addButton({
-            id: 'saveBtn',
-            text: 'Save',
-            disabled: true,
-            handler: function()
-            {
-                this.titrationSelMod.fireEvent('rowdeselect', this.titrationSelMod, this.availableTitrationsGrid.getStore().indexOf(this.titrationSelMod.getSelected()), this.titrationSelMod.getSelected());
-                this.openConfirmWindow();
-            },
-            scope: this
-        });
-        this.addButton({
-            text: 'Cancel',
-            handler: function(){this.fireEvent('closeWindow');},
-            scope: this
-        });
+        this.addStandardButtons();
 
         this.doLayout();
 
         this.queryForRunAssayId();
     },
 
-    queryForRunAssayId: function()
-    {
-        // query to get the assay Id for the given run and put it into the panel header div
-        LABKEY.Query.selectRows({
-            schemaName: 'assay',
-            queryName: this.queryName + ' Runs',
-            filterArray: [LABKEY.Filter.create('RowId', this.runId)],
-            columns: 'Name',
-            success: function(data){
-                if (data.rows.length == 1)
-                {
-                    Ext.get('run_assay_id').update(data.rows[0].Name);
-                }
-            },
-            scope: this
-        });
+    toggleSaveBtn : function(sm, grid){
+        // enable the save button when changes are made to the selection or is exclusions exist
+        if (sm.getCount() > 0 || grid.exclusionsExist)
+            grid.getFooterToolbar().findById('saveBtn').enable();
     },
 
-    getExclusionPanelHeader: function()
-    {
-        // return an HTML table with the run Id and a place holder div for the assay Id
-        return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
-                + "<tr><td class='labkey-exclusion-td-label'>Run ID:</td><td class='labkey-exclusion-td-cell'>" + this.runId + "</td></tr>"
-                + "<tr><td class='labkey-exclusion-td-label'>Assay ID:</td><td class='labkey-exclusion-td-cell'><div id='run_assay_id'>...</div></td></tr>"
-                + "</table>";
+    insertUpdateExclusions: function() {
+        var index = this.availableTitrationsGrid.getStore().indexOf(this.titrationSelMod.getSelected());
+        this.titrationSelMod.fireEvent('rowdeselect', this.titrationSelMod, index, this.titrationSelMod.getSelected());
+        this.openConfirmWindow();
     },
 
     getExcludedString : function()
@@ -452,11 +314,11 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         {
             Ext.Msg.show({
                 title:'Confirm Exclusions',
-                msg: 'Would you really like to exclude analytes on the following Titrations?<br><br> ' + this.getExcludedString(),
+                msg: 'Please verify the excluded analytes for the following titrations. Continue?<br><br> ' + this.getExcludedString(),
                 buttons: Ext.Msg.YESNO,
                 fn: function(button){
                     if(button == 'yes'){
-                        this.insertUpdateWellExclusions();
+                        this.insertUpdateTitrationExclusions();
                     }
                 },
                 icon: Ext.MessageBox.QUESTION,
@@ -465,7 +327,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
         }
     },
 
-    insertUpdateWellExclusions: function(){
+    insertUpdateTitrationExclusions: function(){
 
         this.findParentByType('window').getEl().mask("Saving titration exclusions...", "x-mask-loading");
 
@@ -494,7 +356,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(Ext.Panel, {
 
             // config of data to save for the given replicate group exclusion
             commands.push({
-                schemaName: "assay.Luminex." + this.queryName,
+                schemaName: 'assay.Luminex.' + this.assayName,
                 queryName: 'WellExclusion',
                 command: command,
                 rows: [{

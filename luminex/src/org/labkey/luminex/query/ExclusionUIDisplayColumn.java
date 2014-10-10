@@ -94,7 +94,9 @@ public class ExclusionUIDisplayColumn extends DataColumn
         if (!_exclusionJSIncluded)
         {
             // add script block to include the necessary JS and CSS files for the exclusion popups
+            // TODO: there has to be a better place to put these
             out.write("<script type='text/javascript'>"
+                    + "   LABKEY.requiresScript('luminex/BaseExclusionPanel.js');"
                     + "   LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
                     + "   LABKEY.requiresScript('luminex/TitrationExclusionPanel.js');"
                     + "   LABKEY.requiresScript('luminex/WellExclusionPanel.js');"
