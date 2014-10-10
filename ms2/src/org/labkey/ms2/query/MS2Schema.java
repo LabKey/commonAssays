@@ -735,6 +735,7 @@ public class MS2Schema extends UserSchema
                 result.addWrapColumn(result.getRealTable().getColumn("SearchEnzyme"));
                 result.addWrapColumn(result.getRealTable().getColumn("Filename"));
                 result.addWrapColumn(result.getRealTable().getColumn("Status"));
+                result.addWrapColumn(result.getRealTable().getColumn("StatusId")).setHidden(true);
                 result.addWrapColumn(result.getRealTable().getColumn("Type"));
 
                 ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
