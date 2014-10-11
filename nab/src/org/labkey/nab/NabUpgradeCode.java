@@ -15,7 +15,6 @@
  */
 package org.labkey.nab;
 
-import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
@@ -42,9 +41,7 @@ import java.util.Map;
  */
 public class NabUpgradeCode implements UpgradeCode
 {
-    private static final Logger _log = Logger.getLogger(NabUpgradeCode.class);
-
-    // invoked by nab-12.21-12.22.sql
+    // invoked by nab-12.32-12.33.sql
     @SuppressWarnings({"UnusedDeclaration"})
     public void migrateToNabSpecimen(ModuleContext moduleContext)
     {
