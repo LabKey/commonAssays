@@ -134,24 +134,24 @@ public final class LuminexGuideSetTest extends LuminexTest
     {
         goToProjectHome();
         clickAndWait(Locator.linkContainingText(TEST_ASSAY_LUM));
-        excludeWellFromRun("Guide Set plate 5", "A6,B6");
+        excludeWellFromRun("Guide Set plate 5", "A6,B6", 2, 1);
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
         assertTextPresent("28040.51");
     }
 
-    private void excludeWellFromRun(String run, String well)
+    private void excludeWellFromRun(String run, String well, int jobCount, int jobInfoCount)
     {
         clickAndWait(Locator.linkContainingText(run));
 
         log("Exclude well from run");
         clickExclusionMenuIconForWell(well);
-        clickButton("Save");
-        _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
+        clickButton("Save", 0);
+        verifyExclusionPipelineJobComplete(jobCount, "INSERT replicate group exclusion", run, "", 1, jobInfoCount);
     }
 
     //re-include an excluded well
-    private void includeWellFromRun(String run, String well)
+    private void includeWellFromRun(String run, String well, int jobCount)
     {
         clickAndWait(Locator.linkContainingText(run));
 
@@ -159,8 +159,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickExclusionMenuIconForWell(well);
         click(Locator.radioButtonById("excludeselected"));
         clickButton("Save", 0);
-        _extHelper.clickExtButton("Yes");
-        _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
+        _extHelper.clickExtButton("Yes", 0);
+        verifyExclusionPipelineJobComplete(jobCount, "DELETE replicate group exclusion", run, "");
     }
 
 
@@ -458,17 +458,15 @@ public final class LuminexGuideSetTest extends LuminexTest
 
         //2. exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 for GS Analyte (2) is changed to be under the Guide Set range so new QC Flag inserted for that
-        excludeWellFromRun("Guide Set plate 5", "A4,B4");
-        goBack();
-        refresh();
+        excludeWellFromRun("Guide Set plate 5", "A4,B4", 3, 2);
+        clickAndWait(Locator.linkContainingText("view runs"));
         _extHelper.clickExtMenuButton(true, Locator.lkButton("Views"), "QC Flags View");
         assertEquals("AUC, EC50-4, EC50-5, HMFI, PCV",  drt.getDataAsText(1, "QC Flags"));
 
         //3. un-exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 QC Flag for GS Analyte (2) that was inserted in the previous step is removed
-        includeWellFromRun("Guide Set plate 5", "A4,B4");
-        goBack();
-        refresh();
+        includeWellFromRun("Guide Set plate 5", "A4,B4", 4);
+        clickAndWait(Locator.linkContainingText("view runs"));
         _extHelper.clickExtMenuButton(true, Locator.lkButton("Views"), "QC Flags View");
         assertEquals("AUC, EC50-5, HMFI, PCV",  drt.getDataAsText(1, "QC Flags"));
 

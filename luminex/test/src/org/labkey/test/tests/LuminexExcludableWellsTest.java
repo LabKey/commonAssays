@@ -77,23 +77,23 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         excludedWellDescription = "Standard2";
         excludedWellType = "S3";
         excludedWells = new HashSet<>(Arrays.asList("C3", "D3"));
-        excludeAllAnalytesForSingleWellTest("Standard", "C3", false);
+        excludeAllAnalytesForSingleWellTest("Standard", "C3", false, 2);
 
         // QC control titration well group exclusion
         excludedWellDescription = "Standard1";
         excludedWellType = "C2";
         excludedWells = new HashSet<>(Arrays.asList("E2", "F2"));
-        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false);
+        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false, 3);
 
         // unknown titration well group exclusion
         excludedWellDescription = "Sample 2";
         excludedWellType = "X25";
         excludedWells = new HashSet<>(Arrays.asList("E1", "F1"));
-        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true);
-        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0]);
+        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, 4);
+        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], 6);
 
         // analyte exclusion
-        excludeAnalyteForAllWellsTest(analytes[1]);
+        excludeAnalyteForAllWellsTest(analytes[1], 7);
 
         // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
@@ -105,7 +105,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertTextPresentInThisOrder("S3", "C2", "X25");
         assertTextPresent("ENV7 (93)", 3);
         assertTextPresent("ENV6 (97)", 3);
-        assertTextPresentInThisOrder("C3,D3", "E2,F2", "E1,F1");
+        assertTextPresentInThisOrder("C3", "E2", "E1");
     }
 
     /**
@@ -116,15 +116,16 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      * postconditions: no change (exclusion is removed at end of test)
      * @param wellName name of well to excluse
      */
-    private void excludeAllAnalytesForSingleWellTest(String wellRole, String wellName, boolean removeExclusion)
+    private void excludeAllAnalytesForSingleWellTest(String wellRole, String wellName, boolean removeExclusion, int jobCount)
     {
         DataRegionTable table = new DataRegionTable("Data", this);
         table.setFilter("WellRole", "Equals", wellRole);
         clickExclusionMenuIconForWell(wellName);
         String comment = "exclude all for single well";
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
-        clickButton(SAVE_CHANGES_BUTTON, 2 * defaultWaitForPage);
-        table.clearFilter("WellRole");
+        clickButton(SAVE_CHANGES_BUTTON, 0);
+        String expectedInfo = "INSERT replicate group exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
+        verifyExclusionPipelineJobComplete(jobCount, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, comment);
 
         verifyWellGroupExclusion("Excluded for replicate group: " + comment, new HashSet<>(Arrays.asList(getListOfAnalytesMultipleCurveData())));
 
@@ -135,12 +136,13 @@ public final class LuminexExcludableWellsTest extends LuminexTest
             click(Locator.radioButtonById("excludeselected"));
             clickButton(SAVE_CHANGES_BUTTON, 0);
             _extHelper.waitForExtDialog("Warning");
-            clickButton("Yes", 2 * defaultWaitForPage);
-            table.clearFilter("WellRole");
+            clickButton("Yes", 0);
+            expectedInfo = expectedInfo.replace("INSERT", "DELETE");
+            verifyExclusionPipelineJobComplete(jobCount + 1, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, comment);
         }
     }
 
-    private void excludeOneAnalyteForSingleWellTest(String wellRole, String wellName, String excludedAnalyte)
+    private void excludeOneAnalyteForSingleWellTest(String wellRole, String wellName, String excludedAnalyte, int jobCount)
     {
         waitForText("Well Role");
         DataRegionTable table = new DataRegionTable("Data", this);
@@ -150,8 +152,9 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), exclusionComment);
         click(Locator.radioButtonById(EXCLUDE_SELECTED_BUTTON));
         clickExcludeAnalyteCheckBox(excludedAnalyte);
-        clickButton(SAVE_CHANGES_BUTTON, 2 * defaultWaitForPage);
-        table.clearFilter("WellRole");
+        clickButton(SAVE_CHANGES_BUTTON, 0);
+        String expectedInfo = "INSERT replicate group exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
+        verifyExclusionPipelineJobComplete(jobCount, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, exclusionComment, 1, 2);
 
         verifyWellGroupExclusion("Excluded for replicate group: " + exclusionComment, new HashSet<>((Arrays.asList(excludedAnalyte))));
     }
@@ -232,11 +235,11 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      * post conditions: specified analyte excluded from all wells, with comment "Changed for all analytes"
      * @param analyte
      */
-    private void excludeAnalyteForAllWellsTest(String analyte)
+    private void excludeAnalyteForAllWellsTest(String analyte, int jobCount)
     {
         String exclusionPrefix = "Excluded for analyte: ";
         String comment ="Changed for all analytes";
-        excludeAnalyteForRun(analyte, true, comment);
+        excludeAnalyteForRun(analyte, true, comment, jobCount, MULTIPLE_CURVE_ASSAY_RUN_NAME);
 
         DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
         table.setFilter("ExclusionComment", "Equals", exclusionPrefix + comment);

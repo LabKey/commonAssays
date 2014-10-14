@@ -178,6 +178,7 @@ public final class LuminexPositivityTest extends LuminexTest
         clickButton("Cancel");
 
         // delete all but one run of data so we have the expected number of previous baseline visits rows
+        String runToKeep = RUN_ID_BASE + " 3x Fold Change";
         DataRegionTable runs = new DataRegionTable("Runs", this);
         runs.checkCheckbox(0);
         runs.checkCheckbox(1);
@@ -185,19 +186,19 @@ public final class LuminexPositivityTest extends LuminexTest
         runs.checkCheckbox(3);
         clickButton("Delete");
         assertEquals(4, getElementCount(Locator.linkContainingText("Positivity ")));
-        assertTextNotPresent("Positivity 3x Fold Change");
+        assertTextNotPresent(runToKeep);
         clickButton("Confirm Delete");
 
         // now we exclude the analytes in the remaining run to test that version of the baseline visit query
-        waitAndClickAndWait(Locator.linkWithText("Positivity 3x Fold Change"));
-        excludeAnalyteForRun(_analyteNames.get(0), true, "");
+        waitAndClickAndWait(Locator.linkWithText(runToKeep));
+        excludeAnalyteForRun(_analyteNames.get(0), true, "", 2, runToKeep);
         setPositivityThresholdParams(100, 99);
         uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 1", TEST_ASSAY_LUM_FILE12, "1", "3", false, false);
         checkPositivityValues("positive", 0, new String[0]);
         checkPositivityValues("negative", 0, new String[0]);
         clickAndWait(Locator.linkWithText("view runs"));
-        waitAndClickAndWait(Locator.linkWithText("Positivity 3x Fold Change"));
-        excludeAnalyteForRun(_analyteNames.get(0), false, "");
+        waitAndClickAndWait(Locator.linkWithText(runToKeep));
+        excludeAnalyteForRun(_analyteNames.get(0), false, "", 3, runToKeep);
 
         // now we actual test the case of getting baseline visit data from a previously uploaded run
         setPositivityThresholdParams(99, 98);

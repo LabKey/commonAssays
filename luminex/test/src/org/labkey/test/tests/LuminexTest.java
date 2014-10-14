@@ -250,26 +250,28 @@ public abstract class LuminexTest extends BaseWebDriverTest
         }
     }
 
-    public void excludeAnalyteForRun(String analyte, boolean exclude, String comment)
+    public void excludeAnalyteForRun(String analyte, boolean firstExclusion, String comment, int jobCount, String runName)
     {
         clickButtonContainingText("Exclude Analytes", 0);
         _extHelper.waitForExtDialog("Exclude Analytes from Analysis");
-        if (!exclude)
+        if (!firstExclusion)
             waitForText("Uncheck analytes to remove exclusions");
 
         clickExcludeAnalyteCheckBox(analyte);
         setFormElement(Locator.id(EXCLUDE_COMMENT_FIELD), comment);
         waitForElement(Locator.xpath("//table[@id='saveBtn' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
 
-        if (!exclude)
+        if (!firstExclusion)
         {
             clickButton(SAVE_CHANGES_BUTTON, 0);
             _extHelper.waitForExtDialog("Warning");
-            _extHelper.clickExtButton("Warning", "Yes", 2 * defaultWaitForPage);
+            _extHelper.clickExtButton("Warning", "Yes", 0);
+            verifyExclusionPipelineJobComplete(jobCount, "DELETE analyte exclusion", runName, comment);
         }
         else
         {
-            clickButton(SAVE_CHANGES_BUTTON, 2 * defaultWaitForPage);
+            clickButton(SAVE_CHANGES_BUTTON, 0);
+            verifyExclusionPipelineJobComplete(jobCount, "INSERT analyte exclusion", runName, comment);
         }
     }
 
@@ -290,6 +292,28 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         Locator l = ExtHelper.locateGridRowCheckbox(analyte);
         waitAndClick(l);
+    }
+
+    protected void verifyExclusionPipelineJobComplete(int jobCount, String expectedInfo, String runName, String exclusionComment)
+    {
+        verifyExclusionPipelineJobComplete(jobCount, expectedInfo, runName, exclusionComment, 1, 1);
+    }
+
+    protected void verifyExclusionPipelineJobComplete(int jobCount, String expectedInfo, String runName, String exclusionComment, int numCommands, int numMatchingJobs)
+    {
+        _extHelper.waitForExtDialog("Success", WAIT_FOR_JAVASCRIPT);
+        clickButtonContainingText("Yes");
+        waitForPipelineJobsToFinish(jobCount);
+        assertElementNotPresent(Locator.linkWithText("ERROR"));
+        DataRegionTable table = new DataRegionTable("StatusFiles", this);
+        table.setFilter("Info", "Starts With", expectedInfo);
+        assertElementPresent(Locator.linkWithText("COMPLETE"), numMatchingJobs);
+        clickAndWait(Locator.linkWithText("COMPLETE", 0));
+        assertTextPresent(expectedInfo);
+        assertTextPresent("Assay Id: " + runName);
+        assertTextPresent("Comment: " + exclusionComment);
+        assertTextPresent("Finished", numCommands);
+        clickButtonContainingText("Data");
     }
 
     protected String[] getListOfAnalytesMultipleCurveData()
