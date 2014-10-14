@@ -114,8 +114,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         String lsidColumn = "RowId";
         VBox vbox = new VBox();
+        ExpRun reRun = form.getReRun();
 
-        if (form.getReRun() != null)
+        if (reRun != null)
         {
             // In the case of a re-run, check if the old run has any exclusions. If so, warn the user that
             // they won't be carried over to the new run.
@@ -194,7 +195,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 Object analyteDefaultValue = defaultValues != null ? defaultValues.get(analyteDP) : null;
 
                 // track the initial set of "Negative Control" analytes for the Negative Bead select list
-                if (LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName()))
+                if (reRun == null && LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName()))
                 {
                     // issue 21500: any analytes set as NegativeBead container defaults should be used as Negative Controls
                     if (negativeBeadDefaultValues.contains(analyte))
@@ -246,6 +247,18 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         Map<String, String> defaultAnalyteColumnValues = form.getAnalyteColumnDefaultValues(_protocol);
+
+        // in the re-run case, we want to set the initial negative controls based on the re-run data
+        if (reRun != null)
+        {
+            for (String analyte : analyteNames)
+            {
+                String negativeBeadPropName = AnalyteDefaultValueService.getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+                String negativeBeadValue = defaultAnalyteColumnValues.get(negativeBeadPropName);
+                if (negativeBeadValue != null)
+                    initNegativeControlAnalytes.add(negativeBeadValue);
+            }
+        }
 
         // add the Negative Bead column for each analyte, if the assay design has a LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME analyte property
         if (analyteDomain.getPropertyByName(LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME) != null)
@@ -304,8 +317,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         Map<String, String> defaultWellRoleValues = PropertyManager.getProperties(getUser(),
             getContainer(), _protocol.getName() + ": Well Role");
 
-        final Map<String, Titration> existingTitrations = getExistingTitrations(form.getReRun());
-        final Set<String> existingSinglePointControls = getExistingSinglePointControls(form.getReRun());
+        final Map<String, Titration> existingTitrations = getExistingTitrations(reRun);
+        final Set<String> existingSinglePointControls = getExistingSinglePointControls(reRun);
 
         // get a set of which titrations are going to be pre-selected as standards (based on default value, well type, etc.)
         final Set<Titration> standardTitrations = new HashSet<>();
