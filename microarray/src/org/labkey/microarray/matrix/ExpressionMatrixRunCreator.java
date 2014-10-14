@@ -17,17 +17,24 @@ package org.labkey.microarray.matrix;
 
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.qc.DefaultTransformResult;
+import org.labkey.api.qc.TransformResult;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.microarray.MicroarrayManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +49,80 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
     public ExpressionMatrixRunCreator(ExpressionMatrixAssayProvider provider)
     {
         super(provider);
+    }
+
+    @Override
+    public TransformResult transform(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, ExpRun run) throws ValidationException
+    {
+        TransformResult result = super.transform(context, run);
+
+        try
+        {
+            result = transformFeatureSetId(context, run, result);
+        }
+        catch (ExperimentException e)
+        {
+            throw new ValidationException(e.getMessage());
+        }
+
+        return result;
+    }
+
+    protected TransformResult transformFeatureSetId(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, ExpRun run, TransformResult result) throws ValidationException, ExperimentException
+    {
+        Map<DomainProperty, String> runProps = result.getRunProperties() != null && !result.getRunProperties().isEmpty() ? result.getRunProperties() : context.getRunProperties();
+        Map.Entry<DomainProperty, String> featureSetEntry = findFeatureSetProperty(runProps);
+        if (featureSetEntry == null || featureSetEntry.getValue() == null)
+            throw new ValidationException("Feature annotation set required");
+
+        Integer updateFeatureSetId = ensureFeatureAnnotationSet(context, featureSetEntry.getValue());
+        if (updateFeatureSetId != null)
+        {
+            DefaultTransformResult ret = new DefaultTransformResult(result);
+
+            Map<DomainProperty, String> updatedRunProps = new HashMap<>(runProps);
+
+            // Set the update featureSet id string value
+            updatedRunProps.put(featureSetEntry.getKey(), String.valueOf(updateFeatureSetId));
+
+            ret.setRunProperties(updatedRunProps);
+
+            context.setTransformResult(ret);
+            result = ret;
+        }
+
+        return result;
+    }
+
+    /**
+     * Ensure the run property 'featureSet' actually exists.
+     *
+     * @return The feature annotation set id only if it needs to be saved back to the 'featureSet' property; otherwise null.
+     * @throws ValidationException
+     */
+    protected Integer ensureFeatureAnnotationSet(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, String featureSet) throws ValidationException, ExperimentException
+    {
+        Integer featureSetId = MicroarrayManager.get().ensureFeatureAnnotationSet(context.getContainer(), context.getUser(), featureSet);
+        if (featureSetId == null)
+            throw new ValidationException("Feature annotation set not found '" + featureSet + "'");
+
+        // return featureSet id only if it needs to be updated
+        if (!featureSet.equals(String.valueOf(featureSetId)))
+            return featureSetId;
+
+        return null;
+    }
+
+    private Map.Entry<DomainProperty, String> findFeatureSetProperty(Map<DomainProperty, String> runProps)
+    {
+        for (Map.Entry<DomainProperty, String> entry : runProps.entrySet())
+        {
+            DomainProperty dp = entry.getKey();
+            if (dp.getName().equals("featureSet"))
+                return entry;
+        }
+
+        return null;
     }
 
     @Override

@@ -131,7 +131,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
 
                 if (importValues)
                 {
-                    insertExpressionMatrixData(info.getContainer(), samplesMap, loader, runProps, data.getRowId());
+                    insertExpressionMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
                 }
             }
         }
@@ -149,14 +149,36 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    protected static TabLoader createTabLoader(File file) throws IOException
+    protected static TabLoader createTabLoader(File file) throws IOException, ExperimentException
     {
         TabLoader loader = new TabLoader(file, true);
+        ColumnDescriptor[] cols = loader.getColumns();
+
+        boolean found = false;
+
+        // Find the ID_REF column
+        for (ColumnDescriptor col : cols)
+        {
+            if (col.name.equals(FEATURE_ID_COLUMN_NAME))
+            {
+                found = true;
+                break;
+            }
+        }
 
         // If the 0th column is missing a name, consider it the ID_REF column
-        ColumnDescriptor[] cols = loader.getColumns();
-        if (cols[0].name.equals("column0"))
-            cols[0].name = FEATURE_ID_COLUMN_NAME;
+        if (!found)
+        {
+            if (cols[0].name.equals("column0"))
+            {
+                cols[0].name = FEATURE_ID_COLUMN_NAME;
+                found = true;
+            }
+        }
+
+        // CONSIDER: If there is no ID_REF column, assume the first column is the ID_REF column
+        if (!found)
+            throw new ExperimentException("Feature ID_REF column header must be present and cannot be blank");
 
         return loader;
     }
@@ -278,7 +300,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
         return sampleSet;
     }
 
-    private void insertExpressionMatrixData(Container c,
+    private void insertExpressionMatrixData(Container c, User user,
                                             Map<String, Integer> samplesMap, DataLoader loader,
                                             Map<String, String> runProps, Integer dataRowId) throws ExperimentException
     {

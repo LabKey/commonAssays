@@ -16,9 +16,11 @@
 package org.labkey.microarray;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
@@ -70,10 +72,10 @@ public class MicroarrayManager
 
 
     private static TableInfo getAnnotationSetQueryTableInfo(User user, Container container)
-    {
-        MicroarrayUserSchema schema = new MicroarrayUserSchema(user, container);
-        return schema.getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET);
-    }
+              {
+                  MicroarrayUserSchema schema = new MicroarrayUserSchema(user, container);
+                  return schema.getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET);
+              }
 
     private static TableInfo getAnnotationQueryTableInfo(User user, Container container)
     {
@@ -183,6 +185,83 @@ public class MicroarrayManager
 
         return -1;
     }
+
+    /**
+     * Get feature annotation set by name if it is in scope (current, project, and shared container).
+     */
+    @Nullable
+    public Integer getFeatureAnnotationSet(Container c, User user, String featureSetName)
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromParts("Name"), featureSetName);
+
+        // The container filter matches the assay's featureSet run property lookup
+        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(user);
+        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container"), c));
+
+        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
+        List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
+        // TODO: Order results by container depth
+        if (rowIds.size() > 0)
+            return rowIds.get(0);
+
+        return null;
+    }
+
+    /**
+     * Get feature annotation set by id if it is in scope (current, project, and shared container).
+     */
+    @Nullable
+    public Integer getFeatureAnnotationSet(Container c, User user, int id)
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromParts("RowId"), id);
+
+        // The container filter matches the assay's featureSet run property lookup
+        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(user);
+        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container"), c));
+
+        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
+        List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
+        // TODO: Order results by container depth
+        if (rowIds.size() > 0)
+            return rowIds.get(0);
+
+        return null;
+    }
+
+    /**
+     * Ensure the run property 'featureSet' actually exists and possibly import a new feature annotation set.
+     *
+     * If the featureSet value is an integer, we check that the feature annotation set is in scope (current, project, and shared containers).
+     * If the 'featureSet' property is a name, we try to find the feature annotation set by name in scope (current, project, and shared containers).
+     * If the 'featureSet' property is a string path, we try to find the feature annotation set by looking for a tsv file to import under the pipeline root.
+     *
+     */
+    public Integer ensureFeatureAnnotationSet(Container c, User user, String featureSet)
+    {
+        // First, try parsing the featureSet as an integer id
+        try
+        {
+            int id = Integer.parseInt(featureSet);
+            Integer resolvedId = MicroarrayManager.get().getFeatureAnnotationSet(c, user, id);
+            if (resolvedId != null)
+                return resolvedId;
+        }
+        catch (NumberFormatException ex)
+        {
+            // ok
+        }
+
+        // Next, try finding the feature annotation set by name
+        Integer id = MicroarrayManager.get().getFeatureAnnotationSet(c, user, featureSet);
+        if (id != null)
+            return id;
+
+        // UNDONE: Finally, check if the feature set is a path unter the pipline root and import it
+        throw new UnsupportedOperationException("not yet");
+    }
+
 
     public Map<String, Integer> getFeatureAnnotationSetFeatureIds(int featureSetRowId)
     {
