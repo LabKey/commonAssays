@@ -16,16 +16,24 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.client.util.StringUtils;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.query.AbstractQueryImportAction;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
@@ -38,6 +46,7 @@ import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
@@ -582,6 +591,48 @@ public class LuminexController extends SpringActionController
             };
             writer.setFilenamePrefix("LuminexDefaultValues");
             writer.write(response);
+        }
+    }
+
+    @RequiresPermissionClass(UpdatePermission.class)
+    public class SaveExclusionAction extends ApiAction<LuminexSaveExclusionsForm>
+    {
+        @Override
+        public void validateForm(LuminexSaveExclusionsForm form, Errors errors)
+        {
+            // verify the assayName provided is valid and of type LuminexAssayProvider
+            if (form.getProtocol(getContainer()) == null)
+            {
+                errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayName());
+            }
+
+            // verify that the runId is valid and matches an existing run
+            if (form.getRunId() == null || ExperimentService.get().getExpRun(form.getRunId()) == null)
+            {
+                errors.reject(ERROR_MSG, "No run found for id " + form.getRunId());
+            }
+
+            form.validate(errors);
+        }
+
+        @Override
+        public Object execute(LuminexSaveExclusionsForm form, BindException errors) throws Exception
+        {
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            try
+            {
+                PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+                PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, form);
+                PipelineService.get().queueJob(job);
+
+                response.put("success", true);
+                response.put("returnUrl", PageFlowUtil.urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.CURRENT));
+            }
+            catch (PipelineValidationException e)
+            {
+                throw new IOException(e);
+            }
+            return response;
         }
     }
 }

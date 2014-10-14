@@ -119,58 +119,50 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
     },
 
     insertUpdateExclusions: function(){
+
+        this.mask("Saving analyte exclusions...");
+
         // generage a comma delim string of the analyte Ids to exclude
         var analytesForExclusion = this.findById('availableanalytes').getSelectionModel().getSelections();
-        var analytesForExclusionStr = "";
+        var analyteRowIds = "";
+        var analyteNames = "";
+        var sep = "";
         Ext.each(analytesForExclusion, function(record){
-            analytesForExclusionStr += (analytesForExclusionStr != "" ? "," : "") + record.get("RowId");
+            analyteRowIds += sep.trim() + record.data.RowId;
+            analyteNames += sep + record.data.Name;
+            sep = ", ";
         });
 
-        // config of data to save for the given replicate group exclusion
+        // config of data to save for the given analyte exclusion
         var config = {
-            schemaName: 'assay.Luminex.' + this.assayName,
-            queryName: 'RunExclusion',
-            rows: [{
-                runId: this.runId,
-                comment: this.findById('comment').getValue(),
-                "analyteId/RowId": (analytesForExclusionStr != "" ? analytesForExclusionStr : null)
-            }],
-            success: function(){
-                this.fireEvent('closeWindow');
-                window.location.reload();
-            },
-            scope: this
+            assayName: this.assayName,
+            tableName: 'RunExclusion',
+            runId: this.runId,
+            commands: [{
+                key: this.runId,
+                analyteRowIds: (analyteRowIds != "" ? analyteRowIds : null),
+                analyteNames: (analyteNames != "" ? analyteNames : null), // for logging purposes only
+                comment: this.findById('comment').getValue()
+            }]
         };
 
-        // insert, update, or delete to/from the RunExclusion table with config information
-        if (this.exclusionsExist)
+        // if we don't have an exclusion to delete or anything to insert/update, do nothing
+        if (!this.exclusionsExist && config.commands[0].analyteRowIds == null)
         {
-            if (analytesForExclusionStr != "")
-            {
-                LABKEY.Query.updateRows(config);
-            }
-            else
-            {
-                // ask the user if they are sure they want to remove the exclusions before deleting
-                Ext.Msg.show({
-                    title:'Warning',
-                    msg: 'Are you sure you want to remove all analyte exlusions for run Id ' + this.runId + '?',
-                    buttons: Ext.Msg.YESNO,
-                    fn: function(btnId, text, opt){
-                        if (btnId == 'yes')
-                        {
-                            LABKEY.Query.deleteRows(config);
-                        }
-                    },
-                    icon: Ext.MessageBox.WARNING,
-                    scope: this
-                });
-            }
+            this.unmask();
+            return;
+        }
+
+        if (config.commands[0].analyteRowIds == null)
+        {
+            // ask the user if they are sure they want to remove the exclusions before deleting
+            config.commands[0].command = 'delete';
+            this.confirmExclusionDeletion(config, 'Are you sure you want to remove all analyte exlusions for run Id ' + this.runId + '?', 'analyte');
         }
         else
         {
-            if (analytesForExclusionStr != "")
-                LABKEY.Query.insertRows(config);
+            config.commands[0].command = this.exclusionsExist ? 'update' : 'insert';
+            this.saveExclusions(config, 'analyte');
         }
     }
 });

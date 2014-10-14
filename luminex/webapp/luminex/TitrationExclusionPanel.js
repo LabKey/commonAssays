@@ -46,6 +46,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         this.excludedDataIds = [];
         this.present = [];
         this.preExcludedIds = [];
+        this.preAnalyteRowIds = [];
 
         // query the RunExclusion table to see if there are any existing exclusions for this run
         // TODO: why are we using the RunExclusion table at all in this file?
@@ -77,6 +78,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                     for(var i = 0; i < records.length; i++)
                     {
                         id = combinedStore.findExact('Name', records[i].data.Description);
+                        this.preAnalyteRowIds[id] = records[i].get('Analytes/RowId');
                         this.preExcludedIds[id] = records[i].get('Analytes/RowId').split(",");
                         this.comments[id] = records[i].get('Comment');
                     }
@@ -103,6 +105,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                 rowselect : function(tsl, rowId, record)
                 {
                     availableAnalytesGrid.setDisabled(false);
+                    selMod.suspendEvents(false);
                     if(typeof this.preExcludedIds[rowId] === 'object')
                     {
                         selMod.clearSelections();
@@ -121,6 +124,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                     {
                         selMod.clearSelections();
                     }
+                    selMod.resumeEvents();
 
                     if(this.comments[rowId])
                     {
@@ -272,9 +276,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
     },
 
     toggleSaveBtn : function(sm, grid){
-        // enable the save button when changes are made to the selection or is exclusions exist
-        if (sm.getCount() > 0 || grid.exclusionsExist)
-            grid.getFooterToolbar().findById('saveBtn').enable();
+        grid.getFooterToolbar().findById('saveBtn').enable();
     },
 
     insertUpdateExclusions: function() {
@@ -314,7 +316,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         {
             Ext.Msg.show({
                 title:'Confirm Exclusions',
-                msg: 'Please verify the excluded analytes for the following titrations. Continue?<br><br> ' + this.getExcludedString(),
+                msg: 'Please verify the excluded analytes for the following titrations. Continue?<br><br> ' + excludedMessage,
                 buttons: Ext.Msg.YESNO,
                 fn: function(button){
                     if(button == 'yes'){
@@ -329,9 +331,8 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
 
     insertUpdateTitrationExclusions: function(){
 
-        this.findParentByType('window').getEl().mask("Saving titration exclusions...", "x-mask-loading");
+        this.mask("Saving titration exclusions...");
 
-        // generage a comma delim string of the analyte Ids to exclude
         var commands = [];
         for (var index = 0; index < this.excluded.length; index++)
         {
@@ -340,53 +341,57 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             if (analytesForExclusion == undefined)
                 continue;
 
-            var analytesForExclusionStr = "";
+            // generage a comma delim string of the analyte Ids to exclude
+            var analyteRowIds = "";
+            var analyteNames = "";
+            var sep = "";
             Ext.each(analytesForExclusion, function(record){
-                analytesForExclusionStr += (analytesForExclusionStr != "" ? "," : "") + record.data.RowId;
+                analyteRowIds += sep.trim() + record.data.RowId;
+                analyteNames += sep + record.data.Name;
+                sep = ", ";
             });
 
             // determine if this is an insert, update, or delete
             var command = "insert";
             if (this.preExcludedIds[index] != undefined)
-                command = analytesForExclusionStr != "" ? "update" : "delete";
+                command = analyteRowIds != "" ? "update" : "delete";
 
             // issue 21551: don't insert an exclusion w/out any analytes
-            if (command == "insert" && analytesForExclusionStr == "")
+            if (command == "insert" && analyteRowIds == "")
                 continue;
 
-            // config of data to save for the given replicate group exclusion
-            commands.push({
-                schemaName: 'assay.Luminex.' + this.assayName,
-                queryName: 'WellExclusion',
+            // don't call update if no change to analyte selection for a given titration
+            if (this.preAnalyteRowIds[index] == analyteRowIds)
+                continue;
+
+            // config of data to save for a single titration exclusion
+            var commandConfig = {
                 command: command,
-                rows: [{
-                    rowId: this.preExcludedIds[index], // this will be undefined for the insert case
-                    description: analytesForExclusion.name,
-                    dataId: dataId,
-                    comment: this.comments[index],
-                    "analyteId/RowId": (analytesForExclusionStr != "" ? analytesForExclusionStr : null)
-                }]
-            });
+                key: this.preExcludedIds[index], // this will be undefined for the insert case
+                dataId: dataId,
+                description: analytesForExclusion.name,
+                analyteRowIds: (analyteRowIds != "" ? analyteRowIds : null),
+                analyteNames: (analyteNames != "" ? analyteNames : null), // for logging purposes only
+                comment: this.comments[index]
+            };
+
+            commands.push(commandConfig);
         }
 
         if (commands.length > 0)
         {
-            LABKEY.Query.saveRows({
-                commands: commands,
-                success: function(){
-                    this.fireEvent('closeWindow');
-                    window.location.reload();
-                },
-                failure: function(info, response, options){
-                    this.findParentByType('window').getEl().unmask();
-                    LABKEY.Utils.displayAjaxErrorResponse(response, options);
-                },
-                scope: this
-            });
+            var config = {
+                assayName: this.assayName,
+                tableName: 'TitrationExclusion',
+                runId: this.runId,
+                commands: commands
+            };
+
+            this.saveExclusions(config, 'titration');
         }
         else
         {
-            this.findParentByType('window').getEl().unmask();
+            this.unmask();
         }
     }
 });

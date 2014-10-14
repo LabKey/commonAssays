@@ -288,79 +288,52 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         var message = "Saving replicate group exclusion...";
         if (this.findById('reCalcDisplay').isVisible())
             message = "Saving replicate group exclusion and re-calculating curve...";
-        this.findParentByType('window').getEl().mask(message, "x-mask-loading");
+        this.mask(message);
 
         // generage a comma delim string of the analyte Ids to exclude
         var analytesForExclusion = this.findById('availableanalytes').getSelectionModel().getSelections();
-        var analytesForExclusionStr = "";
+        var analyteRowIds = "";
+        var analyteNames = "";
+        var sep = "";
         Ext.each(analytesForExclusion, function(record){
-            analytesForExclusionStr += (analytesForExclusionStr != "" ? "," : "") + record.get("RowId");
+            analyteRowIds += sep.trim() + record.data.RowId;
+            analyteNames += sep + record.data.Name;
+            sep = ", ";
         });
 
         // config of data to save for the given replicate group exclusion
         var config = {
-            schemaName: 'assay.Luminex.' + this.assayName,
-            queryName: 'WellExclusion',
-            rows: [{
+            assayName: this.assayName,
+            tableName: 'WellExclusion',
+            runId: this.runId,
+            commands: [{
+                key: this.rowId ? this.rowId : undefined,
+                dataId: this.dataId,
                 description: this.description,
                 type: this.type,
-                dataId: this.dataId,
-                comment: this.findById('comment').getValue(),
-                "analyteId/RowId": (analytesForExclusionStr != "" ? analytesForExclusionStr : null)
-            }],
-            success: function(){
-                this.fireEvent('closeWindow');
-                window.location.reload();
-            },
-            failure: function(info, response, options){
-                if (this.findParentByType('window').getEl().isMasked())
-                    this.findParentByType('window').getEl().unmask();
-
-                LABKEY.Utils.displayAjaxErrorResponse(response, options);
-            },
-            scope: this
+                analyteRowIds: (analyteRowIds != "" ? analyteRowIds : null),
+                analyteNames: (analyteNames != "" ? analyteNames : null), // for logging purposes only
+                comment: this.findById('comment').getValue()
+            }]
         };
 
-        // insert, update, or delete to/from the WellExclusions table with config information
-        if (this.rowId)
+        // if we don't have an exclusion to delete or anything to insert/update, do nothing
+        if (!config.commands[0].key && config.commands[0].analyteRowIds == null)
         {
-            config.rows[0].rowId = this.rowId;
-            if (analytesForExclusionStr != "")
-            {
-                LABKEY.Query.updateRows(config);
-            }
-            else
-            {
-                // ask the user if they are sure they want to remove the exclusions before deleting
-                Ext.Msg.show({
-                    title:'Warning',
-                    msg: 'Are you sure you want to remove all analyte exlusions for the selected replicate group?',
-                    buttons: Ext.Msg.YESNO,
-                    fn: function(btnId, text, opt){
-                        if (btnId == 'yes')
-                        {
-                            LABKEY.Query.deleteRows(config);
-                        }
-                        else
-                        {
-                            this.findParentByType('window').getEl().unmask();
-                        }
-                    },
-                    icon: Ext.MessageBox.WARNING,
-                    scope: this
-                });
-            }
+            this.unmask();
+            return;
+        }
+
+        if (config.commands[0].analyteRowIds == null)
+        {
+            // ask the user if they are sure they want to remove the exclusions before deleting
+            config.commands[0].command = 'delete';
+            this.confirmExclusionDeletion(config, 'Are you sure you want to remove all analyte exlusions for the selected replicate group?', 'replicate group');
         }
         else
         {
-            if (analytesForExclusionStr != "")
-            {
-                LABKEY.Query.insertRows(config);
-            }
-            else
-            {
-                this.findParentByType('window').getEl().unmask();
-            }
+            config.commands[0].command = config.commands[0].key ? 'update' : 'insert';
+            this.saveExclusions(config, 'replicate group');
         }
     }
 });

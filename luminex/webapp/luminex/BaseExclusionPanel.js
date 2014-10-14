@@ -172,5 +172,112 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
             },
             scope: this
         });
+    },
+
+    confirmExclusionDeletion : function(config, msg, type) {
+        Ext.Msg.show({
+            width: 400,
+            title:'Warning',
+            msg: msg,
+            icon: Ext.MessageBox.WARNING,
+            buttons: Ext.Msg.YESNO,
+            fn: function(btnId, text, opt){
+                if (btnId == 'yes')
+                    this.saveExclusions(config, type);
+                else
+                    this.unmask();
+            },
+            scope: this
+        });
+    },
+
+    saveExclusions : function(config, type) {
+        if (!config.commands || !Ext.isArray(config.commands))
+            Ext.Msg.alert('Error', 'SaveExclusion API expects an array on commands.');
+
+        config.scope = this;
+
+        config.success = function(response) {
+            this.fireEvent('closeWindow');
+            this.showJobQueuedSuccess(type, response.returnUrl);
+        };
+
+        config.failure = function(response) {
+            Ext.Msg.alert('ERROR', response.exception);
+            this.unmask();
+        };
+
+        LABKEY.Luminex.saveExclusion(config);
+    },
+
+    showJobQueuedSuccess : function(type, url) {
+        Ext.Msg.show({
+            width: 400,
+            title:'Success',
+            msg: 'The ' + type + ' exclusion job(s) has been added to the pipeline.'
+                    + ' Would you like to go to the pipeline job status page now to review this exclusion?',
+            icon: Ext.MessageBox.INFO,
+            buttons: Ext.Msg.YESNO,
+            fn: function(btnId){
+                if (btnId == 'yes')
+                    window.location = url;
+            },
+            scope: this
+        });
+    },
+
+    mask : function(message) {
+        this.findParentByType('window').getEl().mask(message, "x-mask-loading");
+    },
+
+    unmask : function() {
+        var windowEl = this.findParentByType('window').getEl();
+        if (windowEl.isMasked())
+            windowEl.unmask();
     }
 });
+
+LABKEY.Luminex = new function()
+{
+    return {
+        /*
+         * Save (insert/update/delete) a single Luminex exclusion of type replicate group (well), analyte, or titration.
+         * @param {Object} config An object which contains the following configuration properties.
+         * @param {String} [config.assayName] Required. Name of the Luminex assay design
+         * @param {String} [config.tableName] Required. Either WellExclusion (i.e. replicate group), TitrationExclusion, or RunExclusion (i.e. anaalyte)
+         * @param {String} [config.runId] Required. RowId for the assay run
+         * @param {Array}  [config.commands] Required. Array of exclusion commeands to be executed
+         * @param {String} [config.commands[].command] Required. Either insert, update, or delete
+         * @param {String} [config.commands[].key] If update or delete, the RowId key for the record to be modified
+         * @param {String} [config.commands[].dataId] For well group or titration exclusions, the dataId for the run file
+         * @param {String} [config.commands[].description] The "Description" column value (i.e. standard or sample name)
+         * @param {String} [config.commands[].type] For well group exclusion, the "Type" column value (i.e. X1, S3)
+         * @param {String} [config.commands[].analyteRowIds] A comma separated list of analyte RowIds
+         * @param {String} [config.commands[].analyteNames] A comma separated list of analyte Names
+         * @param {String} [config.commands[].comment] The comment to save with the exclusion
+         * @param {Function} config.success Function called when the "saveExclusion" function executes successfully.
+         * @param {Function} [config.failure] Function called if execution of the "saveExclusion" function fails.
+         * a save.
+         */
+        saveExclusion : function(config)
+        {
+            var dataObject = {
+                assayName: config.assayName,
+                tableName: config.tableName,
+                runId: config.runId,
+                commands: config.commands
+            };
+
+            var requestConfig = {
+                url : LABKEY.ActionURL.buildURL('luminex', 'saveExclusion.api'),
+                method : 'POST',
+                jsonData : dataObject,
+                headers : { 'Content-Type' : 'application/json' },
+                success: LABKEY.Utils.getCallbackWrapper(LABKEY.Utils.getOnSuccess(config), config.scope, false),
+                failure: LABKEY.Utils.getCallbackWrapper(LABKEY.Utils.getOnFailure(config), config.scope, true)
+            };
+
+            return LABKEY.Ajax.request(requestConfig);
+        }
+    }
+};
