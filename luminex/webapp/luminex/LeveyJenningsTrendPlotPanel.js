@@ -125,38 +125,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         // Only create the network store and combobox if the Network column exists
         if (this.networkExists) {
-            // Network Data store
-            this.networkStore = new Ext.data.Store({
-                autoLoad: true,
-                reader: new Ext.data.JsonReader({
-                        root:'rows'
-                    },
-                    [{name: 'Network'}]
-                ),
-                proxy: new Ext.data.HttpProxy({
-                    method: 'GET',
-                    url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
-                        containerFilter: LABKEY.Query.containerFilter.allFolders,
-                        schemaName: 'assay',
-                        sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.Network" // x.Titration.Run.Batch.CustomProtocol AS Protocol
-                            + ' FROM "' + this.assayName + ' Analyte' + this.controlTypeColumnName + '" AS x'
-                            + ' WHERE x.' + this.controlTypeColumnName + '.Name = \'' + this.controlName.replace(/'/g, "''") + '\''
-                            + ' AND x.' + (this.controlType == "Titration" ? "MaxFI" : "AverageFiBkgd") + ' IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
-                    })
-                }),
-                listeners: {
-                    scope: this,
-                    load: function(store, records, options){
-                        // load data into the stores for each of the 2 params based on unique values from this store
-                        this.networkCombobox.getStore().loadData(this.getArrayStoreData(store, 'Network'));
-                        this.networkCombobox.setValue(this.ANY_FIELD);
-                        this.networkAny = true;
-                        this.network = null;
-                    }
-                },
-                scope: this
-            });
-
             // Add Network field for filtering
             this.networkLabel = new Ext.form.Label({text: 'Network:'});
             this.networkCombobox = new Ext.form.ComboBox({
@@ -184,6 +152,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     }
                 }
             });
+
             this.networkCombobox.getStore().on('load', function(store, records, options) {
                 if (this.network != undefined && store.findExact('value', this.network) > -1)
                 {
@@ -200,38 +169,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         // Only create the protocol if the CustomProtocol column exists
         if (this.protocolExists) {
-            // Protocol Data store
-            this.protocolStore = new Ext.data.Store({
-                autoLoad: true,
-                reader: new Ext.data.JsonReader({
-                            root:'rows'
-                        },
-                        [{name: 'CustomProtocol'}]
-                ),
-                proxy: new Ext.data.HttpProxy({
-                    method: 'GET',
-                    url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
-                        containerFilter: LABKEY.Query.containerFilter.allFolders,
-                        schemaName: 'assay',
-                        sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.CustomProtocol AS CustomProtocol"
-                                + ' FROM "' + this.assayName + ' Analyte' + this.controlTypeColumnName + '" AS x'
-                                + ' WHERE x.' + this.controlTypeColumnName + '.Name = \'' + this.controlName.replace(/'/g, "''") + '\''
-                                + ' AND x.' + (this.controlType == "Titration" ? "MaxFI" : "AverageFiBkgd") + ' IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
-                    })
-                }),
-                listeners: {
-                    scope: this,
-                    load: function(store, records, options){
-                        // load data into the stores for each of the 2 params based on unique values from this store
-                        this.protocolCombobox.getStore().loadData(this.getArrayStoreData(store, 'CustomProtocol'));
-                        this.protocolCombobox.setValue(this.ANY_FIELD);
-                        this.protocolAny = true;
-                        this.protocol = null;
-                    }
-                },
-                scope: this
-            });
-
             // Add Protocol field for filtering
             this.protocolLabel = new Ext.form.Label({text: 'Protocol:'});
             this.protocolCombobox = new Ext.form.ComboBox({
@@ -262,6 +199,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                     }
                 }
             });
+
             this.protocolCombobox.getStore().on('load', function(store, records, options) {
                 if (this.protocol != undefined && store.findExact('value', this.protocol) > -1)
                 {
@@ -280,7 +218,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.applyFilterButton = new Ext.Button({
             disabled: true,
             text: 'Apply',
-            handler: this.applyDateFilter,
+            handler: this.applyGraphFilter,
             scope: this
         });
 
@@ -288,42 +226,36 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.clearFilterButton = new Ext.Button({
             disabled: true,
             text: 'Clear',
-            handler: this.clearDateFilter,
+            handler: this.clearGraphFilter,
             scope: this
         });
 
-        var spaceWidth = 5;
+        var tbspacer = {xtype: 'tbspacer', width: 5};
+
         var items = [
-            this.scaleLabel,
-            {xtype: 'tbspacer', width: spaceWidth},
-            this.scaleCombo,
-            {xtype: 'tbspacer', width: spaceWidth},
-            {xtype: 'tbseparator'},
-            {xtype: 'tbspacer', width: spaceWidth},
-            this.startDateLabel,
-            {xtype: 'tbspacer', width: spaceWidth},
-            this.startDateField,
-            {xtype: 'tbspacer', width: spaceWidth},
-            this.endDateLabel,
-            {xtype: 'tbspacer', width: spaceWidth},
-            this.endDateField,
-            {xtype: 'tbspacer', width: spaceWidth}
+            this.scaleLabel, tbspacer,
+            this.scaleCombo, tbspacer,
+            {xtype: 'tbseparator'}, tbspacer,
+            this.startDateLabel, tbspacer,
+            this.startDateField, tbspacer,
+            this.endDateLabel, tbspacer,
+            this.endDateField, tbspacer
         ];
         if (this.networkExists) {
             items.push(this.networkLabel);
-            items.push({xtype: 'tbspacer', width: spaceWidth});
+            items.push(tbspacer);
             items.push(this.networkCombobox);
-            items.push({xtype: 'tbspacer', width: spaceWidth});
+            items.push(tbspacer);
 
         }
         if (this.protocolExists) {
             items.push(this.protocolLabel);
-            items.push({xtype: 'tbspacer', width: spaceWidth});
+            items.push(tbspacer);
             items.push(this.protocolCombobox);
-            items.push({xtype: 'tbspacer', width: spaceWidth});
+            items.push(tbspacer);
         }
         items.push(this.applyFilterButton);
-        items.push({xtype: 'tbspacer', width: spaceWidth});
+        items.push(tbspacer);
         items.push(this.clearFilterButton);
 
         this.tbar = new Ext.Toolbar({
@@ -410,18 +342,49 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.isotype = isotype;
         this.conjugate = conjugate;
 
-        // remove any previously entered values from the start and end date fields
-        this.startDate = null;
-        this.startDateField.reset();
-        this.endDate = null;
-        this.endDateField.reset();
-        this.applyFilterButton.disable();
+        // remove any previously entered values from the start date, end date, network, etc. fileds
+        this.clearGraphFilter();
+
+        // (re)load the network and protocol filter combos based on the selected params
+        this.loadNetworkAndProtocol();
 
         // show the trending tab panel and date range selection toolbar
         this.enable();
 
         this.setTabsToRender();
         this.displayTrendPlot();
+    },
+
+    loadNetworkAndProtocol: function() {
+        var sqlFragment = ' FROM "Analyte' + this.controlTypeColumnName + '" AS x'
+            + ' WHERE x.' + this.controlTypeColumnName + '.Name = \'' + this.controlName.replace(/'/g, "''") + '\''
+            + ' AND x.Analyte.Name = \'' + this.analyte.replace(/'/g, "''") + '\''
+            // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
+            + ' AND x.' + (this.controlType == "Titration" ? "MaxFI" : "AverageFiBkgd") + ' IS NOT NULL';
+
+        if (this.networkExists) {
+            LABKEY.Query.executeSql({
+                schemaName: 'assay.Luminex.' + this.assayName,
+                sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.Network" + sqlFragment,
+                success: function(data) {
+                    this.networkCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'Network'));
+                    this.networkCombobox.setValue(this.ANY_FIELD);
+                },
+                scope: this
+            });
+        }
+
+        if (this.protocolExists) {
+            LABKEY.Query.executeSql({
+                schemaName: 'assay.Luminex.' + this.assayName,
+                sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.CustomProtocol AS CustomProtocol" + sqlFragment,
+                success: function(data) {
+                    this.protocolCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'CustomProtocol'));
+                    this.protocolCombobox.setValue(this.ANY_FIELD);
+                },
+                scope: this
+            });
+        }
     },
 
     activateTrendPlotPanel: function(panel) {
@@ -522,7 +485,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
     },
 
-    applyDateFilter: function() {
+    applyGraphFilter: function() {
         // make sure that at least one filter field is not null
         if (this.startDateField.getRawValue() == '' && this.endDateField.getRawValue() == '' && this.networkCombobox.getRawValue() == '' && this.protocolCombobox.getRawValue() == '')
         {
@@ -556,7 +519,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
     },
 
-    clearDateFilter: function() {
+    clearGraphFilter: function() {
         this.startDate = null;
         this.startDateField.reset();
         this.endDate = null;
@@ -596,14 +559,11 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         return this.endDate ? this.endDate : null;
     },
 
-    getArrayStoreData: function(store, colName) {
+    getArrayStoreData: function(rows, colName) {
         var storeData = [ [this.ANY_FIELD, this.ANY_FIELD] ];
-        Ext.each(store.collect(colName, true, false).sort(), function(value){
-            if (value) {
-                storeData.push([value, value]);
-            } else {
-                storeData.push([value, '[Blank]']);
-            }
+        Ext.each(rows, function(row){
+            var value = row[colName];
+            storeData.push([value, value == null ? '[Blank]' : value]);
         });
         return storeData;
     },

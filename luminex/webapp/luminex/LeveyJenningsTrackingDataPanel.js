@@ -132,13 +132,17 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         {
             filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', endDate, LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
         }
-        if (!networkAny)
+        if (!networkAny && Ext.isDefined(network))
         {
-            filterArray.push(LABKEY.Filter.create((this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '/Run/Batch/Network', network));
+            var fieldName = (this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '/Run/Batch/Network';
+            var type = network != null ? LABKEY.Filter.Types.EQUAL : LABKEY.Filter.Types.ISBLANK;
+            filterArray.push(LABKEY.Filter.create(fieldName, network, type));
         }
-        if (!protocolAny)
+        if (!protocolAny && Ext.isDefined(protocol))
         {
-            filterArray.push(LABKEY.Filter.create((this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '/Run/Batch/CustomProtocol', protocol));
+            var fieldName = (this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '/Run/Batch/CustomProtocol';
+            var type = protocol != null ? LABKEY.Filter.Types.EQUAL : LABKEY.Filter.Types.ISBLANK;
+            filterArray.push(LABKEY.Filter.create(fieldName, protocol, type));
         }
 
         if (this.controlType == "Titration")
