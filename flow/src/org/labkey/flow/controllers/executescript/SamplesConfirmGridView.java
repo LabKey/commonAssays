@@ -364,6 +364,8 @@ public class SamplesConfirmGridView extends GridView
     // Simple lookup to list of original FlowFCSFiles
     private class FCSFilesFilesForeignKey extends AbstractForeignKey
     {
+        private static final boolean INCLUDE_ALL_FILES = false;
+
         List<FlowFCSFile> _files;
         NamedObjectList _list;
 
@@ -398,7 +400,7 @@ public class SamplesConfirmGridView extends GridView
         public NamedObjectList getSelectList(RenderContext ctx)
         {
             List<FlowFCSFile> candidates = (List<FlowFCSFile>)ctx.get(CANDIDATE_FILES_FIELD_KEY, List.class);
-            if (candidates == null)
+            if (candidates == null || candidates.isEmpty())
                 return _list;
 
             // Put most likely canidates on the top of the list
@@ -410,15 +412,20 @@ public class SamplesConfirmGridView extends GridView
                 list.put(new SimpleNamedObject(String.valueOf(candidate.getRowId()), candidate));
             }
 
-            if (list.size() < _list.size())
+            // Issue 18728: flow import: resolve step is too slow
+            // Workaround for now is to not include all files if there are better candidates -- ideally the resolve step would have an auto-complete field or something instead of this giant combo box
+            if (INCLUDE_ALL_FILES)
             {
-                // Add a divider (TODO: Disable this option item in the select list)
-                list.put(new SimpleNamedObject("--------", "--------"));
+                if (list.size() < _list.size())
+                {
+                    // Add a divider (TODO: Disable this option item in the select list)
+                    list.put(new SimpleNamedObject("--------", "--------"));
 
-                // Add the remaining FCS files (maybe add an option to not show all FCS files?)
-                for (NamedObject no : _list)
-                    if (!candidateRowIds.contains(((FlowFCSFile)no.getObject()).getRowId()))
-                        list.put(no);
+                    // Add the remaining FCS files (maybe add an option to not show all FCS files?)
+                    for (NamedObject no : _list)
+                        if (!candidateRowIds.contains(((FlowFCSFile)no.getObject()).getRowId()))
+                            list.put(no);
+                }
             }
 
             return list;
