@@ -349,13 +349,16 @@ public class LuminexController extends SpringActionController
         {
             ExpProtocol protocol = form.getProtocol();
 
-            List<String> analytes = AnalyteDefaultValueService.getAnalyteNames(protocol, getContainer());
-            List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
-            List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
+            if (!reshow)
+            {
+                List<String> analytes = AnalyteDefaultValueService.getAnalyteNames(protocol, getContainer());
+                List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
-            form.setAnalytes(analytes);
-            form.setPositivityThresholds(positivityThresholds);
-            form.setNegativeBeads(negativeBeads);
+                form.setAnalytes(analytes);
+                form.setPositivityThresholds(positivityThresholds);
+                form.setNegativeBeads(negativeBeads);
+            }
 
             return new JspView<>("/org/labkey/luminex/view/defaultValues.jsp", form, errors);
         }
