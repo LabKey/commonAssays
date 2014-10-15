@@ -62,7 +62,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _assayHelper.clickEditAssayDesign();
         AssayDomainEditor assayDesigner = new AssayDomainEditor(this);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
-        _listHelper.addField(TEST_ASSAY_LUM + " Batch Fields", 9, "CustomProtocol", "Protocol", ListHelper.ListColumnType.String);
+        _listHelper.addField(TEST_ASSAY_LUM + " Batch Fields", "CustomProtocol", "Protocol", ListHelper.ListColumnType.String);
         // save changes to assay design
         clickButton("Save & Close");
 

@@ -172,52 +172,52 @@ public abstract class LuminexTest extends BaseWebDriverTest
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
             // add batch properties for transform and Ruminex version numbers
-            _listHelper.addField("Batch Fields", 5, "Network", "Network", ListColumnType.String);
-            _listHelper.addField("Batch Fields", 6, "TransformVersion", "Transform Script Version", ListColumnType.String);
-            _listHelper.addField("Batch Fields", 7, "LabTransformVersion", "Lab Transform Script Version", ListColumnType.String);
-            _listHelper.addField("Batch Fields", 8, "RuminexVersion", "Ruminex Version", ListColumnType.String);
-            _listHelper.addField("Batch Fields", 9, "RVersion", "R Version", ListColumnType.String);
+            _listHelper.addField("Batch Fields", "Network", "Network", ListColumnType.String);
+            _listHelper.addField("Batch Fields", "TransformVersion", "Transform Script Version", ListColumnType.String);
+            _listHelper.addField("Batch Fields", "LabTransformVersion", "Lab Transform Script Version", ListColumnType.String);
+            _listHelper.addField("Batch Fields", "RuminexVersion", "Ruminex Version", ListColumnType.String);
+            _listHelper.addField("Batch Fields", "RVersion", "R Version", ListColumnType.String);
 
             // add run properties for designation of which field to use for curve fit calc in transform
-            _listHelper.addField("Run Fields", 8, "SubtNegativeFromAll", "Subtract Negative Bead from All Wells", ListColumnType.Boolean);
-            _listHelper.addField("Run Fields", 9, "StndCurveFitInput", "Input Var for Curve Fit Calc of Standards", ListColumnType.String);
-            _listHelper.addField("Run Fields", 10, "UnkCurveFitInput", "Input Var for Curve Fit Calc of Unknowns", ListColumnType.String);
-            _listHelper.addField("Run Fields", 11, "CurveFitLogTransform", "Curve Fit Log Transform", ListColumnType.Boolean);
-            _listHelper.addField("Run Fields", 12, "SkipRumiCalculation", "Skip Ruminex Calculations", ListColumnType.Boolean);
+            _listHelper.addField("Run Fields", "SubtNegativeFromAll", "Subtract Negative Bead from All Wells", ListColumnType.Boolean);
+            _listHelper.addField("Run Fields", "StndCurveFitInput", "Input Var for Curve Fit Calc of Standards", ListColumnType.String);
+            _listHelper.addField("Run Fields", "UnkCurveFitInput", "Input Var for Curve Fit Calc of Unknowns", ListColumnType.String);
+            _listHelper.addField("Run Fields", "CurveFitLogTransform", "Curve Fit Log Transform", ListColumnType.Boolean);
+            _listHelper.addField("Run Fields", "SkipRumiCalculation", "Skip Ruminex Calculations", ListColumnType.Boolean);
 
             // add run properties for use with the Guide Set test
-            _listHelper.addField("Run Fields", 13, "NotebookNo", "Notebook Number", ListColumnType.String);
-            _listHelper.addField("Run Fields", 14, "AssayType", "Assay Type", ListColumnType.String);
-            _listHelper.addField("Run Fields", 15, "ExpPerformer", "Experiment Performer", ListColumnType.String);
+            _listHelper.addField("Run Fields", "NotebookNo", "Notebook Number", ListColumnType.String);
+            _listHelper.addField("Run Fields", "AssayType", "Assay Type", ListColumnType.String);
+            _listHelper.addField("Run Fields", "ExpPerformer", "Experiment Performer", ListColumnType.String);
 
             // add run properties for use with Calculating Positivity
-            _listHelper.addField("Run Fields", 16, "CalculatePositivity", "Calculate Positivity", ListColumnType.Boolean);
-            _listHelper.addField("Run Fields", 17, "BaseVisit", "Baseline Visit", ListColumnType.Double);
-            _listHelper.addField("Run Fields", 18, "PositivityFoldChange", "Positivity Fold Change", ListColumnType.Integer);
+            _listHelper.addField("Run Fields", "CalculatePositivity", "Calculate Positivity", ListColumnType.Boolean);
+            _listHelper.addField("Run Fields", "BaseVisit", "Baseline Visit", ListColumnType.Double);
+            _listHelper.addField("Run Fields", "PositivityFoldChange", "Positivity Fold Change", ListColumnType.Integer);
 
             // add analyte property for tracking lot number
-            _listHelper.addField("Analyte Properties", 6, "LotNumber", "Lot Number", ListColumnType.String);
-            _listHelper.addField("Analyte Properties", 7, "NegativeControl", "Negative Control", ListColumnType.Boolean);
+            _listHelper.addField("Analyte Properties", "LotNumber", "Lot Number", ListColumnType.String);
+            _listHelper.addField("Analyte Properties", "NegativeControl", "Negative Control", ListColumnType.Boolean);
 
             // add the data properties for the calculated columns
-            _listHelper.addField("Data Fields", 0, "FIBackgroundNegative", "FI-Bkgd-Neg", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 1, "Standard", "Stnd for Calc", ListColumnType.String);
-            _listHelper.addField("Data Fields", 2, "EstLogConc_5pl", "Est Log Conc Rumi 5 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 3, "EstConc_5pl", "Est Conc Rumi 5 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 4, "SE_5pl", "SE Rumi 5 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 5, "EstLogConc_4pl", "Est Log Conc Rumi 4 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 6, "EstConc_4pl", "Est Conc Rumi 4 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 7, "SE_4pl", "SE Rumi 4 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 8, "Slope_4pl", "Slope_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 9, "Lower_4pl", "Lower_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 10, "Upper_4pl", "Upper_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 11, "Inflection_4pl", "Inflection_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 12, "Slope_5pl", "Slope_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 13, "Lower_5pl", "Lower_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 14, "Upper_5pl", "Upper_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 15, "Inflection_5pl", "Inflection_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 16, "Asymmetry_5pl", "Asymmetry_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", 17, "Positivity", "Positivity", ListColumnType.String);
+            _listHelper.addField("Data Fields", "FIBackgroundNegative", "FI-Bkgd-Neg", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Standard", "Stnd for Calc", ListColumnType.String);
+            _listHelper.addField("Data Fields", "EstLogConc_5pl", "Est Log Conc Rumi 5 PL", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "EstConc_5pl", "Est Conc Rumi 5 PL", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "SE_5pl", "SE Rumi 5 PL", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "EstLogConc_4pl", "Est Log Conc Rumi 4 PL", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "EstConc_4pl", "Est Conc Rumi 4 PL", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "SE_4pl", "SE Rumi 4 PL", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Slope_4pl", "Slope_4pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Lower_4pl", "Lower_4pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Upper_4pl", "Upper_4pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Inflection_4pl", "Inflection_4pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Slope_5pl", "Slope_5pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Lower_5pl", "Lower_5pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Upper_5pl", "Upper_5pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Inflection_5pl", "Inflection_5pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Asymmetry_5pl", "Asymmetry_5pl", ListColumnType.Double);
+            _listHelper.addField("Data Fields", "Positivity", "Positivity", ListColumnType.String);
 
 
             // set format to two decimal place for easier testing later
