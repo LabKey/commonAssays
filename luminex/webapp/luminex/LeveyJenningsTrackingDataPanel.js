@@ -149,7 +149,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         {
             return new LABKEY.ext.Store({
                 autoLoad: false,
-                schemaName: 'assay.Luminex.' + this.assayName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 queryName: 'AnalyteTitration',
                 columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/RowId, '
                         + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
@@ -176,7 +176,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         {
             return new LABKEY.ext.Store({
                 autoLoad: false,
-                schemaName: 'assay.Luminex.' + this.assayName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 queryName: 'AnalyteSinglePointControl',
                 columns: 'SinglePointControl, Analyte, SinglePointControl/Run/Isotype, SinglePointControl/Run/Conjugate, SinglePointControl/Run/RowId, '
                         + 'SinglePointControl/Run/Name, SinglePointControl/Run/Folder/Name, SinglePointControl/Run/Folder/EntityId, '
@@ -679,7 +679,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.getEl().mask("loading QC Flags...", "x-mask-loading");
         var prefix = this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl';
         LABKEY.Query.executeSql({
-            schemaName: "assay.Luminex." + this.assayName,
+            schemaName: "assay.Luminex." + LABKEY.QueryKey.encodePart(this.assayName),
             sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM Analyte' + prefix + 'QCFlags AS x '
                     + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.' + prefix + '.Name=\'' + this.controlName + '\' '
                     + (this.isotype == '' ? '  AND x.' + prefix + '.Run.Isotype IS NULL ' : '  AND x.' + prefix + '.Run.Isotype=\'' + this.isotype + '\' ')
@@ -759,7 +759,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         if (fieldName == "QCFlags" && value != null)
         {
             var win = new LABKEY.QCFlagToggleWindow({
-                schemaName: "assay.Luminex." + this.assayName,
+                schemaName: "assay.Luminex." + LABKEY.QueryKey.encodePart(this.assayName),
                 queryName: "Analyte" + prefix + "QCFlags",
                 runId: record.get(prefix + "/Run/RowId"),
                 analyte: this.analyte,

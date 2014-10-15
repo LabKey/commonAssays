@@ -136,7 +136,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                     + " FROM Data AS x "
                     + " WHERE x.Data.Run.RowId = " + this.runId + " AND x.Type = '" + this.type + "' "
                     + " AND x.Description " + (this.description ? " = '" + this.description + "'" : " IS NULL"),
-                schemaName: 'assay.Luminex.' + this.assayName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 autoLoad: true,
                 listeners: {
                     scope: this,
@@ -227,7 +227,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
 
         // query to get the wells and data id (file name) for the given replicate group
         LABKEY.Query.executeSql({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             sql: sql,
             sort: 'Well',
             success: function(data){
@@ -258,7 +258,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
     {
         // query to see if there are any run level exclusions for this RunId
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: 'RunExclusion',
             filterArray: [LABKEY.Filter.create('RunId', this.runId)],
             columns: 'Analytes/Name',

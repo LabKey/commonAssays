@@ -238,7 +238,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 method: 'GET',
                 url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
                     containerFilter: LABKEY.Query.containerFilter.allFolders,
-                    schemaName: 'assay.Luminex.' + this.assayName,
+                    schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                     sql: sql
                 })
             }),

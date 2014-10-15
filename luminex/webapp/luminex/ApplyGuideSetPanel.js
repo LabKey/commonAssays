@@ -72,7 +72,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // add a grid of all of the "selected" runs for the given criteria
         var selectedRunsStore = new LABKEY.ext.Store({
             storeId: 'selectedRunsStore',
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: 'Analyte' + prefix,
             columns: columns,
             filterArray: [
@@ -155,7 +155,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
         var guideSetsStore = new LABKEY.ext.Store({
             storeId: 'guideSetsStore',
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: 'GuideSet',
             columns: guideSetColumns,
             filterArray: [
@@ -316,7 +316,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {
                         this.getEl().mask('Applying guide set...', "x-mask-loading");
                         LABKEY.Query.updateRows({
-                            schemaName: 'assay.Luminex.' + this.assayName,
+                            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                             queryName: 'Analyte' + (this.controlType == 'Titration' ? 'Titration' : 'SinglePointControl'),
                             rows: nonMemberUpdateRows,
                             success: function(data) {

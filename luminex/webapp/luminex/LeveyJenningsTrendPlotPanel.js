@@ -364,7 +364,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         if (this.networkExists) {
             LABKEY.Query.executeSql({
-                schemaName: 'assay.Luminex.' + this.assayName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.Network" + sqlFragment,
                 success: function(data) {
                     this.networkCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'Network'));
@@ -376,7 +376,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         if (this.protocolExists) {
             LABKEY.Query.executeSql({
-                schemaName: 'assay.Luminex.' + this.assayName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.CustomProtocol AS CustomProtocol" + sqlFragment,
                 success: function(data) {
                     this.protocolCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'CustomProtocol'));
@@ -414,7 +414,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         {
             // build the config object of the properties that will be needed by the R report
             var config = {reportId: 'module:luminex/LeveyJenningsTrendPlot.r', showSection: 'Levey-Jennings Trend Plot'};
-            config['Protocol'] = this.assayName;
+            config['Protocol'] = LABKEY.QueryKey.encodePart(this.assayName);
             config['Titration'] = this.controlName;
             config['Analyte'] = this.analyte;
             config['Isotype'] = this.isotype;

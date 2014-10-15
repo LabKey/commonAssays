@@ -137,7 +137,7 @@
             }
             LABKEY.Query.selectRows({
                 containerFilter: LABKEY.Query.containerFilter.allFolders,
-                schemaName: 'assay.Luminex.' + _protocolName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(_protocolName),
                 queryName: queryName,
                 filterArray: filterArray,
                 columns: reqColumns.join(','),

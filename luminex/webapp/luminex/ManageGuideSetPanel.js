@@ -73,7 +73,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         {
             // query the server for the current guide set information
             LABKEY.Query.selectRows({
-                schemaName: 'assay.Luminex.' + this.assayName,
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 queryName: 'GuideSet',
                 filterArray: [LABKEY.Filter.create('RowId', this.guideSetId)],
                 columns: columns,
@@ -578,8 +578,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         if (this.disableId)
         {
             commands.push({
-                schemaName: 'assay',
-                queryName: this.assayName + ' GuideSet',
+                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+                queryName: 'GuideSet',
                 command: 'update',
                 rows: [{RowId: this.disableId, CurrentGuideSet: false}]
             });
@@ -587,7 +587,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // add a command to create the new guide set
         commands.push({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: 'GuideSet',
             command: 'insert',
             rows: [{
@@ -627,7 +627,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.getEl().mask('Saving guide set information...', "x-mask-loading");
 
         var commands = [{
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: 'GuideSet',
             command: 'update',
             rows: [{
@@ -669,7 +669,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             if (dataRows.length > 0)
             {
                 commands.push({
-                    schemaName: 'assay.Luminex.' + this.assayName,
+                    schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                     queryName: this.isTitrationControlType() ? 'AnalyteTitration' : 'AnalyteSinglePointControl',
                     command: 'update',
                     rows: dataRows
@@ -716,7 +716,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // query the server for the list of runs that meet the given criteria
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: this.isTitrationControlType() ? 'AnalyteTitration' : 'AnalyteSinglePointControl',
             columns: columns,
             filterArray: [

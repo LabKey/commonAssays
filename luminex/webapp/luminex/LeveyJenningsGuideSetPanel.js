@@ -150,7 +150,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     queryCurrentGuideSetInfo: function() {
         // query the server for the current guide set for the selected graph params
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName:  'GuideSet',
             filterArray: [LABKEY.Filter.create('ControlName', this.controlName),
                     LABKEY.Filter.create('AnalyteName', this.analyte),
@@ -296,7 +296,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     render : function() {
                         var qwp = new LABKEY.QueryWebPart({
                             renderTo: grid.getId(),
-                            schemaName: 'assay.Luminex.' + this.assayName,
+                            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                             sql: sql,
                             sort: 'Parameter',
                             frame : 'none',

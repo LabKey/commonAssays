@@ -24,7 +24,7 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
 
     queryExistingExclusions : function(queryName, filterArray, columns) {
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: queryName,
             filterArray: filterArray,
             columns: columns,
@@ -160,7 +160,7 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
     {
         // query to get the assay Id for the given run and put it into the panel header div
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + this.assayName,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName: 'Runs',
             filterArray: [LABKEY.Filter.create('RowId', this.runId)],
             columns: 'Name',
