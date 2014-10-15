@@ -48,11 +48,9 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         this.preExcludedIds = [];
         this.preAnalyteRowIds = [];
 
-        // query the RunExclusion table to see if there are any existing exclusions for this run
-        // TODO: why are we using the RunExclusion table at all in this file?
-        this.queryExistingExclusions('RunExclusion', [LABKEY.Filter.create('runId', this.runId)], 'RunId,Comment,Analytes/RowId');
-
         LABKEY.TitrationExclusionPanel.superclass.initComponent.call(this);
+
+        this.setupWindowPanelItems();
     },
 
     setupWindowPanelItems: function()
@@ -104,13 +102,18 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                 },
                 rowselect : function(tsl, rowId, record)
                 {
+                    availableAnalytesGrid.getStore().clearFilter();
+                    availableAnalytesGrid.getStore().filter({property: 'Titration', value: record.data.Name, exactMatch: true});
                     availableAnalytesGrid.setDisabled(false);
+
                     selMod.suspendEvents(false);
                     if(typeof this.preExcludedIds[rowId] === 'object')
                     {
                         selMod.clearSelections();
                         Ext.each(this.preExcludedIds[rowId], function(analyte){
-                            var index = availableAnalytesGrid.getStore().find('RowId', analyte);
+                            var index = availableAnalytesGrid.getStore().findBy(function(rec, id){
+                                return rec.get('Titration') == record.data.Name && rec.get('RowId') == analyte;
+                            });
                             availableAnalytesGrid.getSelectionModel().selectRow(index, true);
                         });
                         var id = titrationExclusionStore.findExact('Description', record.data.Name);
@@ -238,8 +241,8 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             title: "Select the checkbox next to the analytes within the selected titration to be excluded",
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store:  new LABKEY.ext.Store({
-                sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                        + " FROM Data AS x  WHERE x.Data.Run.RowId = " + this.runId,
+                sql: "SELECT DISTINCT x.Titration.Name AS Titration, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
+                        + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId,
                 schemaName: 'assay.Luminex.' + this.assayName,
                 autoLoad: true,
                 sortInfo: {
@@ -248,9 +251,14 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                 }
             }),
             colModel: new Ext.grid.ColumnModel({
+                defaults: {
+                    sortable: false,
+                    menuDisabled: true
+                },
                 columns: [
                     selMod,
-                    {header: 'Available Analytes', sortable: false, dataIndex: 'Name', menuDisabled: true}
+                    {header: 'Available Analytes', dataIndex: 'Name'},
+                    {header: 'Titration', dataIndex: 'Titration', hidden: true}
                 ]
             }),
             autoExpandColumn: 'Name',

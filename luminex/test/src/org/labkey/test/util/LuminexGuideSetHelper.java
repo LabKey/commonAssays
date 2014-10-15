@@ -193,7 +193,7 @@ public class LuminexGuideSetHelper
 
     public void waitForLeveyJenningsTrendPlot()
     {
-        _test.waitForTextToDisappear("Loading", BaseWebDriverTest.WAIT_FOR_JAVASCRIPT * 6);
+        _test.waitForTextToDisappear("Loading", BaseWebDriverTest.WAIT_FOR_PAGE * 4);
         _test.assertTextNotPresent("ScriptException");
         _test.assertElementNotPresent(Locator.tagContainingText("pre", "Error"));
         _test.waitForElement(Locator.tag("img").attributeStartsWith("id", "resultImage"));
