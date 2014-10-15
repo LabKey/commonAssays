@@ -89,7 +89,7 @@ public class AnalyteDefaultValueService
                     String analyte = this.analytes.get(i);
 
                     String positivityThreshold = this.positivityThresholds.get(i);
-                    if (positivityThreshold != null)
+                    if ( StringUtils.trimToNull(positivityThreshold) != null)
                     {
                         if (positivityThreshold.isEmpty()) positivityThreshold = "100"; // defaulting
                         map.put(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME, positivityThreshold);

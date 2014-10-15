@@ -417,7 +417,7 @@ public class LuminexController extends SpringActionController
             }
         }
 
-        if(only_analytes)
+        if(only_analytes && adt.getAnalytes().size() != 0)
             errors.addRowError(new ValidationException("The uploaded file only contains a column of analyte names without any analyte properities."));
 
         return errors;

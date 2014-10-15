@@ -48,15 +48,23 @@
         </tr>
 
         <% if (analytes.size() > 0) { %>
-            <% for (int i=0; i<analytes.size(); i++ ) { %>
+            <% int i; for (i=0; i<analytes.size()-1; i++ ) { %>
             <tr id="<%=h(analytes.get(i))%>">
                 <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
                 <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
                 <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
                 <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('<%=h(analytes.get(i))%>')"><span style="display: inline-block">&nbsp;</span></a></td>
-                <td><a class='labkey-file-add-icon labkey-file-add-icon-disabled' onclick="addRow()"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a class='labkey-file-add-icon labkey-file-add-icon-disabled'><span style="display: inline-block">&nbsp;</span></a></td>
             </tr>
             <% } %>
+            <%-- Treat last row as special case  (and yes I hate the copy pasta here too) --%>
+            <tr id="<%=h(analytes.get(i))%>">
+                <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
+                <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
+                <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
+                <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('<%=h(analytes.get(i))%>')"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick="addRow()"><span style="display: inline-block">&nbsp;</span></a></td>
+            </tr>
         <% } else { %>
             <tr id="InsertRow0">
                 <td><input name="analytes" value="" size=30></td>
@@ -79,12 +87,12 @@
 </labkey:form>
 
 <script type="text/javascript">
-    rowCount = 1;
-    function addRow() {
-        var table = document.getElementById("defaultValues");
+    var rowCount = 1;
+    var table = document.getElementById("defaultValues");
 
+    function addRow() {
         // need to disable add button on previous row
-        getLastCell(getLastRow(table)).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-disabled'><span style=\"display: inline-block\">&nbsp;</span></a>";
+        getLastCell(getLastRow()).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-disabled'><span style=\"display: inline-block\">&nbsp;</span></a>";
 
         var row = table.insertRow(-1);
         var rowId = "InsertRow"+rowCount;
@@ -100,20 +108,22 @@
         deleteRowButton.innerHTML = "<a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick=deleteRow('" + rowId + "')><span style=\"display: inline-block\">&nbsp;</span></a>";
         var addRowButton = row.insertCell(-1);
         addRowButton.innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
-
     }
 
     function deleteRow(rowId) {
-        // http://stackoverflow.com/questions/4967223/javascript-delete-a-row-from-a-table-by-id
-        var row = document.getElementById(rowId);
-        row.parentNode.removeChild(row);
+        if (table.rows.length > 2)
+        {
+            // http://stackoverflow.com/questions/4967223/javascript-delete-a-row-from-a-table-by-id
+            var row = document.getElementById(rowId);
+            row.parentNode.removeChild(row);
 
-        // need to insure the add button is enabled on the last row
-        row = getLastRow(document.getElementById("defaultValues"))
-        getLastCell(row).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
+            // need to insure the add button is enabled on the last row
+            row = getLastRow(document.getElementById("defaultValues"))
+            getLastCell(row).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
+        }
     }
 
-    function getLastRow(table)
+    function getLastRow()
     {
         return table.rows[ table.rows.length - 1 ];
     }
