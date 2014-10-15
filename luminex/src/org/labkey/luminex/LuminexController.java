@@ -519,14 +519,14 @@ public class LuminexController extends SpringActionController
 
                 if (err)
                 {
-                    errors.addRowError(new ValidationException("The uploaded TSV file doesn't appear to have a 'Analyte' column and cannot be parsed"));
+                    errors.addRowError(new ValidationException("The uploaded data doesn't appear to have an 'Analyte' column and cannot be parsed"));
                     return -1;
                 }
             }
 
             if (analytes.size() == 0)
             {
-                errors.addRowError(new ValidationException("The uploaded TSV file doesn't have any analyte properities to parse"));
+                errors.addRowError(new ValidationException("The uploaded data doesn't appear to have any analyte properities to parse"));
                 return -1;
             }
 
