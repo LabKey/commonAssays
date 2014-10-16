@@ -35,21 +35,30 @@ import org.labkey.api.etl.DataIterator;
 import org.labkey.api.etl.DataIteratorBuilder;
 import org.labkey.api.etl.DataIteratorContext;
 import org.labkey.api.etl.SimpleTranslator;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.reader.DataLoader;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.ContainerUtil;
+import org.labkey.api.util.FileType;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.matrix.ExpressionMatrixProtocolSchema;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.BindException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -258,8 +267,52 @@ public class MicroarrayManager
         if (id != null)
             return id;
 
-        // UNDONE: Finally, check if the feature set is a path unter the pipline root and import it
-        throw new UnsupportedOperationException("not yet");
+
+        // Finally, try to load a feature annotation set file
+        PipeRoot root = PipelineService.get().findPipelineRoot(c);
+        if (root == null)
+            return null;
+
+        File featureSetFile = root.resolvePath(featureSet);
+        if (featureSetFile == null)
+            return null;
+
+        // Use the feature set if we find an existing one that matches the file's base name
+        String baseName = FileUtil.getBaseName(featureSetFile.getName());
+        Integer existingSet = getFeatureAnnotationSet(c, user, baseName);
+        if (existingSet != null)
+            return existingSet;
+
+        try (DbScope.Transaction tx = MicroarrayUserSchema.getSchema().getScope().ensureTransaction())
+        {
+            BatchValidationException errors = new BatchValidationException();
+            TabLoader loader = new TabLoader(featureSetFile, true);
+            Map<String, String> comments = loader.getComments();
+            String vendor = "unknown";
+            String description = "";
+            if (comments != null && !comments.isEmpty())
+            {
+                vendor = comments.get("vendor");
+                description = comments.get("description");
+            }
+
+            Integer newSetId = insertFeatureAnnotationSet(user, c, baseName, vendor, description, errors);
+            if (!errors.hasErrors() && newSetId != null && newSetId > 0)
+            {
+                int rowsInserted = insertFeatureAnnotations(user, c, newSetId, loader, errors);
+                if (rowsInserted <= 0)
+                    throw new ExperimentException("Expression matrix file '" + featureSet + "' has no rows");
+
+                tx.commit();
+                return newSetId;
+            }
+
+            return null;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
 
