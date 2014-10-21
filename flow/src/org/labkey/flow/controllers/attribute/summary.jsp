@@ -47,19 +47,19 @@
             FlowEntry primary = entry.getKey();
             Collection<FlowEntry> aliases = entry.getValue();
 
-            Map<Integer, Long> counts = FlowManager.get().getUsageCount(primary._type, primary._rowId);
+            Map<Integer, Number> counts = FlowManager.get().getUsageCount(primary._type, primary._rowId);
             long totalCount = 0;
-            for (Long count : counts.values())
-                totalCount += count;
+            for (Number count : counts.values())
+                totalCount += count.longValue();
 
-            Long primaryUsages = counts.get(primary._rowId);
+            Number primaryUsages = counts.get(primary._rowId);
     %>
     <tr>
         <td>
             <%=h(primary._name)%>
         </td>
         <td>
-            <% if (primaryUsages != null && primaryUsages > 0) { %>
+            <% if (primaryUsages != null && primaryUsages.intValue() > 0) { %>
             <i>(<a href='<%=detailsURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId)%>'><%=primaryUsages%> usages</a>)</i>
             <% } else { %>
             <i class="labkey-error">(unused)</i>
@@ -75,14 +75,14 @@
         <%
             for (FlowEntry alias : aliases)
             {
-                Long usages = counts.get(alias._rowId);
+                Number usages = counts.get(alias._rowId);
         %>
     <tr>
         <td style="padding-left: 1.5em;">
             <%=h(alias._name)%>
         </td>
         <td>
-            <% if (usages != null && usages > 0) { %>
+            <% if (usages != null && usages.intValue() > 0) { %>
             <i>(<a href='<%=detailsURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>'><%=usages%> usages</a>)</i>
             <% } else { %>
             <i class="labkey-error">(unused)</i>

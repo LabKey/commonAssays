@@ -799,7 +799,7 @@ public class FlowManager
     /**
      * Get a usage count for an attribute and it's aliases.
      */
-    public Map<Integer, Long> getUsageCount(AttributeType type, int rowId)
+    public Map<Integer, Number> getUsageCount(AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -817,7 +817,7 @@ public class FlowManager
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
                 .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").append(entry._rowId).append("\n")
-                .append("GROUP BY OriginalAttrId\n");
+                .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
         return selector.getValueMap();
