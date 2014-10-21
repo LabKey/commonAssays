@@ -394,7 +394,7 @@ public abstract class FilterFlowReport extends FlowReport
         HttpView plot = r.renderReport(context);
         return new VBox(
                 plot,
-                new HtmlView("<div style='display:none'>" + PageFlowUtil.filter(_query, true) + "</div>")
+                new HtmlView("<textarea style='display:none;' cols=120 rows=30>" + PageFlowUtil.filter(_query) + "</textarea>")
         );
     }
 
@@ -468,6 +468,8 @@ public abstract class FilterFlowReport extends FlowReport
             // After 11.2, we need to change the edit*Report.jsp pages to use better layout that
             // doesn't require the busted 'compositefield' and use .getFieldValues() instead of basic form submit.
             CompareType compareType = fromDisplayValue(op);
+            if (compareType == null)
+                compareType = CompareType.getByURLKey(op);
             if (compareType != null)
                 this.op = compareType.getPreferredUrlKey();
         }
@@ -492,7 +494,7 @@ public abstract class FilterFlowReport extends FlowReport
         {
             return !StringUtils.isEmpty(property) &&
                     !StringUtils.isEmpty(value) &&
-                    ("keyword".equals(type) || "sample".equals(type) || "statistic".equals(type));
+                    ("keyword".equals(type) || "sample".equals(type) || "statistic".equals(type) || "fieldkey".equals(type));
         }
 
         private static CompareType fromDisplayValue(String displayValue)

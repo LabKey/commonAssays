@@ -80,7 +80,7 @@ table.reports td {
             continue;
 
         %>
-        <tr><td colspan='3' style='height:2.0em;vertical-align:bottom;padding-left:0px'><b><%=rs.get(0).getTypeDescription()%></b></td></tr>
+        <tr><td colspan='3' style='height:2.0em;vertical-align:bottom;padding-left:0px'><b><%=h(rs.get(0).getTypeDescription())%></b></td></tr>
         <%
 
         for (FlowReport r : rs)
@@ -95,7 +95,7 @@ table.reports td {
             String description = d.getReportDescription();
             %><tr>
             <td><a href="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></a></td>
-            <td style='min-width:80px'><%=description == null ? "&nbsp;" : h(description)%></td>
+            <td style='min-width:80px'><%=h(description == null ? " " : description)%></td>
             <%
             if (canEdit){
                 NavTree navtree = new NavTree("manage", (String)null);

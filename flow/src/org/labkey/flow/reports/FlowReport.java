@@ -16,6 +16,7 @@
 package org.labkey.flow.reports;
 
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -123,6 +124,7 @@ abstract public class FlowReport extends AbstractReport
         return url;
     }
 
+    @NotNull
     @Override
     public ActionURL getEditReportURL(ViewContext context)
     {

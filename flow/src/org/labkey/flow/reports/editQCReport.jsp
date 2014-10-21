@@ -34,6 +34,7 @@
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
         resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
+        resources.add(ClientDependency.fromFilePath("Flow/flowReport.js"));
         return resources;
     }
 %>
@@ -49,7 +50,7 @@
     String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
 %>
 <style>
-    .x-form-item { margin:2px;} 
+    .x-form-item { margin:2px;}
 </style>
 <div id="form"></div>
 <script type="text/javascript">
@@ -64,9 +65,11 @@ var report =
     filter :
     [<%
     String comma = "";
-    for (int i=0 ; i<10 ; i++)
+    for (int i=0 ; true ; i++)
     {
         FilterFlowReport.Filter f = new FilterFlowReport.Filter(d,i);
+        if (f.type == null)
+            break;
         %><%=text(comma)%>{
             property:<%=q(f.property)%>,
             value:<%=q(f.value)%>,
@@ -120,7 +123,7 @@ function Form_onDelete()
        url = new ActionURL(ReportsController.BeginAction.class, c);
    }
    %>
-   window.location = <%=PageFlowUtil.jsString(url.getLocalURIString())%>
+   window.location = <%=PageFlowUtil.jsString(url.getLocalURIString())%>;
 }
 
 Ext.onReady(function() {
@@ -129,9 +132,12 @@ Ext.onReady(function() {
     var keyword = [];
     var sample = [];
     var statistic = [];
+    var fieldKey = [];
+    var analysisFolder = null;
     var startDate = null;
     var endDate = null;
-    
+    var hasSampleFilters = false;
+
     for (i=0; i<report.filter.length;i++)
     {
         var f = report.filter[i];
@@ -145,101 +151,192 @@ Ext.onReady(function() {
                 keyword.push(f);
         }
         else if (f.type == 'sample')
+        {
+            if (f.property && f.value)
+                hasSampleFilters = true;
             sample.push(f);
+        }
         else if (f.type == 'statistic')
             statistic.push(f);
+        else if (f.type == 'fieldkey')
+        {
+            if (f.property == 'Run/RunGroups/Name' && f.op == 'eq')
+                analysisFolder = f.value;
+            else
+                fieldKey.push(f);
+        }
     }
-    for (i=1;i<=2;i++)
+    for (i=1;i<=1;i++)
     {
         if (keyword.length<i) keyword.push({property:null, value:null});
         if (sample.length<i) sample.push({property:null, value:null});
         if (statistic.length<i) statistic.push({property:null, value:null});
+        if (fieldKey.length<i) fieldKey.push({property:null, value:null});
     }
 
     var spacer = {xtype:'spacer', height:15};
 
+    var items = [
+        {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
+        {fieldLabel:'Description', name:'reportDescription', value:report.description, allowBlank:true},
+
+        spacer,
+        {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
+
+        spacer,
+        spacer
+    ];
+
+    var filterItems = [];
+
+    //
+    // keyword filters
+    //
+
+    var filterIdx = 0;
+    for (i = 0; i < keyword.length; i++)
+    {
+        var filterItem = createKeywordFilter(filterIdx++, keyword[i]);
+        filterItems.push(filterItem);
+    }
+
+    filterItems.push({
+        xtype: 'displayfield', id: 'add-keyword-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Keyword Filter', onClick: 'addKeywordFilter(this);'})
+    });
+
+    filterItems.push(spacer);
+
+
+    //
+    // sample filters
+    //
+
+    if (hasSampleFilters || SampleSet.properties.length > 0)
+    {
+        for (i = 0; i < sample.length; i++)
+        {
+            var filterItem = createSampleFilter(filterIdx++, sample[i]);
+            filterItems.push(filterItem);
+        }
+
+        filterItems.push({
+            xtype: 'displayfield', id: 'add-sample-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Sample Filter', onClick: 'addSampleFilter(this);'})
+        });
+
+        filterItems.push(spacer);
+    }
+
+
+    //
+    // statistic filters
+    //
+
+    for (i = 0; i < statistic.length; i++)
+    {
+        var filterItem = createStatisticFilter(filterIdx++, statistic[i]);
+        filterItems.push(filterItem);
+    }
+
+    filterItems.push({
+        xtype: 'displayfield', id: 'add-statistic-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Statistic Filter', onClick: 'addStatisticFilter(this);'})
+    });
+
+    filterItems.push(spacer);
+
+
+    //
+    // generic FieldKey filters
+    //
+
+    for (i = 0; i < fieldKey.length; i++)
+    {
+        var filterItem = createFieldKeyFilter(filterIdx++, fieldKey[i]);
+        filterItems.push(filterItem);
+    }
+
+    filterItems.push({
+        xtype: 'displayfield', id: 'add-fieldkey-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Field Filter', onClick: 'addFieldKeyFilter(this);'})
+    });
+
+    filterItems.push(spacer);
+
+
+    //
+    // Analysis Folder filter
+    //
+
+    filterIdx++;
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'fieldkey'});
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].property', value:'Run/RunGroups/Name'});
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].op', value:'eq'});
+    filterItems.push({
+        xtype: 'combo',
+        fieldLabel: 'Analysis Folder',
+        name: 'filter[' + filterIdx + '].value',
+        value: analysisFolder,
+        displayField: 'Name',
+        valueField: 'Name',
+        allowBlank: true,
+        triggerAction: 'all',
+        mode: 'local',
+        store: {
+            xtype: 'labkey-store',
+            schemaName: 'flow',
+            queryName: 'Analyses',
+            columns: ['Name'],
+            containerPath: LABKEY.container.path,
+            updatable: false,
+            autoLoad: true
+        }
+    });
+
+    filterItems.push(spacer);
+
+    //
+    // Add date filters
+    //
+
+    filterIdx++;
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'keyword'});
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].property', value:'EXPORT TIME'});
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].op', value:'gte'});
+    filterItems.push({xtype:'datefield', fieldLabel:'On or After', name:'filter[' + filterIdx + '].value', value:startDate});
+
+    filterItems.push(spacer);
+
+    filterIdx++;
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'keyword'});
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].property', value:'EXPORT TIME'});
+    filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].op', value:'lt'});
+    filterItems.push({xtype:'datefield', fieldLabel:'Before', name:'filter[' + filterIdx + '].value', value:endDate});
+
+    items.push({
+        xtype:'fieldset',
+        id:'filtersFieldSet',
+        title:'Filters',
+        padding:'10px 10px 10px 10px',
+        items: filterItems
+    });
+
     form = new LABKEY.ext.FormPanel({
+        id:'reportForm',
         url:window.location,
         defaults:{msgTarget:'side', width:700},
         border:false,
+        bodyStyle: 'background:transparent;',
+        padding:10,
+        margins:"40px",
         defaultType: 'textfield',
-        items:[
-            {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
-            {fieldLabel:'Description', name:'reportDescription', value:report.description, allowBlank:true},
-
-            spacer,
-            {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
-
-            spacer,
-            spacer,
-
-            {xtype:'compositefield', fieldLabel: 'Keyword', items: [
-                {xtype:'hidden', name:'filter[0].type', value:'keyword'},
-                {xtype:'combo', name:'filter[0].property', store:FlowPropertySet.keywords, value:keyword[0].property},
-                {xtype:'textfield', name:'filter[0].value', value:keyword[0].value}
-            ]},
-
-            spacer,
-
-            {xtype:'compositefield', fieldLabel: 'Keyword', items: [
-                {xtype:'hidden', name:'filter[1].type', value:'keyword'},
-                {xtype:'combo', name:'filter[1].property', store:FlowPropertySet.keywords, value:keyword[1].property},
-                {xtype:'textfield', name:'filter[1].value', value:keyword[1].value}
-            ]},
-
-            spacer,
-
-            {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
-                {xtype:'hidden', name:'filter[2].type', value:'sample'},
-                {xtype:'combo', name:'filter[2].property', store:SampleSet.properties, value:sample[0].property},
-                {xtype:'textfield', name:'filter[2].value', value:sample[0].value}
-            ]},
-
-            spacer,
-
-            {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
-                {xtype:'hidden', name:'filter[3].type', value:'sample'},
-                {xtype:'combo', name:'filter[3].property', store:SampleSet.properties, value:sample[1].property},
-                {xtype:'textfield', name:'filter[3].value', value:sample[1].value}
-            ]},
-
-            {xtype:'hidden', name:'filter[4].type', value:'statistic'},
-            {xtype:'statisticField', fieldLabel: 'Statistic', name:'filter[4].property', value:statistic[0].property},
-            {xtype:'compositefield', items: [
-                {xtype:'opCombo', name:'filter[4].op', value:statistic[0].op},
-                {xtype:'textfield', name:'filter[4].value', value:statistic[0].value}
-            ]},
-
-            spacer,
-
-            {xtype:'hidden', name:'filter[5].type', value:'statistic'},
-            {xtype:'statisticField', fieldLabel: 'Statistic', name:'filter[5].property', value:statistic[1].property},
-            {xtype:'compositefield', items: [
-                {xtype:'opCombo', name:'filter[5].op', value:statistic[1].op},
-                {xtype:'textfield', name:'filter[5].value', value:statistic[1].value}
-            ]},
-
-            spacer,
-            spacer,
-
-            {xtype:'hidden', name:'filter[6].type', value:'keyword'},
-            {xtype:'hidden', name:'filter[6].property', value:'EXPORT TIME'},
-            {xtype:'hidden', name:'filter[6].op', value:'gte'},
-            {xtype:'datefield', fieldLabel:'On or After', name:'filter[6].value', value:startDate},
-
-            {xtype:'hidden', name:'filter[7].type', value:'keyword'},
-            {xtype:'hidden', name:'filter[7].property', value:'EXPORT TIME'},
-            {xtype:'hidden', name:'filter[7].op', value:'lt'},
-            {xtype:'datefield', fieldLabel:'Before', name:'filter[7].value', value:endDate}
-
-        ],
-        buttons:[
+        filterCount: filterIdx,
+        items:items,
+        bbar:[
             {text:'Save', handler:Form_onSave},
             {text:'Cancel', handler:Form_onCancel},
             {text:'Delete', handler:Form_onDelete}
         ],
         buttonAlign:'left'
     });
+
     form.render('form');
 });
 </script>

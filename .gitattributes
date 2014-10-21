@@ -374,6 +374,7 @@ flow/resources/web/Flow/flagFCSAnalysis.gif -text
 flow/resources/web/Flow/flagFCSFile.gif -text
 flow/resources/web/Flow/flagSample.gif -text
 flow/resources/web/Flow/flagWait.gif -text
+flow/resources/web/Flow/flowReport.js -text
 flow/resources/web/Flow/graph.jpg -text
 flow/resources/web/Flow/graphColumn.gif -text
 flow/resources/web/Flow/graphWindow.js -text
