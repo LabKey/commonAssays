@@ -224,8 +224,9 @@ var SubsetField = Ext.extend(Ext.form.TriggerField,
             enableDD:false
         });
         var root = new Ext.tree.TreeNode({text:'-', expanded:true});
-        for (var i=0 ; i<FlowPropertySet.statsTreeData.length ; i++)
-            root.appendChild(FlowPropertySet.statsTreeData[i]);
+        var treeData = statisticsTree(FlowPropertySet.statistics);
+        for (var i=0 ; i < treeData.length ; i++)
+            root.appendChild(treeData[i]);
         this.tree.setRootNode(root);
         var sm = this.tree.getSelectionModel();
         this.relayEvents(sm, ["selectionchange"]);
@@ -409,7 +410,6 @@ FlowPropertySet.keywords = [<%
     }
 %>];
 FlowPropertySet.statistics = <%=jsonStats%>;
-FlowPropertySet.statsTreeData = statisticsTree(FlowPropertySet.statistics);
 
 var SampleSet = {};
 SampleSet.properties = [<%
