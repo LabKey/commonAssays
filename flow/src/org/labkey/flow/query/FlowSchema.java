@@ -18,6 +18,7 @@ package org.labkey.flow.query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.*;
@@ -140,10 +141,15 @@ public class FlowSchema extends UserSchema
 
     public FlowSchema(ViewContext context)
     {
-        this(context.getUser(), context.getContainer());
-        setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
-        setRun(FlowRun.fromURL(context.getActionURL()));
-//        setScript(FlowScript.fromURL(context.getActionURL(), context.getRequest()));
+        this(context.getUser(), context.getContainer(), context.getActionURL(), context.getRequest());
+    }
+
+    public FlowSchema(User user, Container container, @Nullable ActionURL url, @Nullable HttpServletRequest request)
+    {
+        this(user, container, FlowProtocol.getForContainer(container));
+        setExperiment(FlowExperiment.fromURL(url, request));
+        setRun(FlowRun.fromURL(url));
+//        setScript(FlowScript.fromURL(url, request));
     }
 
     // FlowSchema.createView()
