@@ -138,7 +138,7 @@ public class LuminexGuideSetHelper
     private void checkLeveyJenningsGuideSetHeader(String comment, String guideSetType)
     {
         _test.waitForElement(Locator.tagWithText("td", today), 2 * _test.defaultWaitForPage);
-        _test.assertElementPresent(Locator.tagWithText("td", comment));
+        _test.waitForElement(Locator.tagWithText("td", comment));
         _test.assertElementPresent(Locator.tagWithText("td", guideSetType));
     }
 
