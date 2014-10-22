@@ -109,9 +109,8 @@ public class FlowModule extends DefaultModule
 
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
-                ViewContext context = HttpView.currentContext();
-                if (context != null)
-                    return new FlowSchema(context);
+                if (HttpView.hasCurrentView())
+                    return new FlowSchema(HttpView.currentContext());
                 else
                     return new FlowSchema(schema.getUser(), schema.getContainer());
             }
