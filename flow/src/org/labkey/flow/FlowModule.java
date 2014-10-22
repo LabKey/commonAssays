@@ -37,6 +37,8 @@ import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DefaultWebPartFactory;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
@@ -107,7 +109,11 @@ public class FlowModule extends DefaultModule
 
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
-                return new FlowSchema(schema.getUser(), schema.getContainer());
+                ViewContext context = HttpView.currentContext();
+                if (context != null)
+                    return new FlowSchema(context);
+                else
+                    return new FlowSchema(schema.getUser(), schema.getContainer());
             }
         });
         addController("flow", FlowController.class);

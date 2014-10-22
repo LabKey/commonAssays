@@ -186,14 +186,25 @@ public class FlowQueryView extends QueryView
 
     protected boolean showAnalysisFolderButton()
     {
-        // Don't show the "Analysis Folder" menu for some grids (flow.Analyses, flow.Statistics, flow.Keywords, etc.)
+        // Don't show the "Analysis Folder" menu for some grids (flow.Analyses, flow.Statistics, flow.Keywords, etc.) but do show it for custom queries.
         String queryName = getSettings().getQueryName();
-        return queryName != null &&
-               (queryName.equals(FlowTableType.CompensationControls.toString()) ||
-                queryName.equals(FlowTableType.CompensationMatrices.toString()) ||
-                queryName.equals(FlowTableType.FCSAnalyses.toString()) ||
-                queryName.equals(FlowTableType.FCSFiles.toString()) ||
-                queryName.equals(FlowTableType.Runs.toString()));
+        if (queryName == null)
+            return false;
+
+        try
+        {
+            FlowTableType ftt = FlowTableType.valueOf(queryName);
+            return (ftt == FlowTableType.CompensationControls ||
+                    ftt == FlowTableType.CompensationMatrices ||
+                    ftt == FlowTableType.FCSAnalyses ||
+                    ftt == FlowTableType.FCSFiles ||
+                    ftt == FlowTableType.Runs);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            // ok, custom query
+            return true;
+        }
     }
 
     protected boolean subtractBackground()
