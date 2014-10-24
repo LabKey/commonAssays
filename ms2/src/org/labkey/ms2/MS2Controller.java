@@ -2469,7 +2469,7 @@ public class MS2Controller extends SpringActionController
             GridView compareView = new GridView(rgn, errors);
             rgn.setShowPagination(false);
             compareView.setResultSet(rgn.getResultSet());
-            compareView.getDataRegion().setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
+            compareView.getDataRegion().setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
 
             title.append(query.getComparisonDescription());
 

@@ -199,7 +199,7 @@ public class SamplesConfirmGridView extends GridView
                     "document.forms[\"" + ImportAnalysisForm.NAME + "\"].elements[\"step\"].value = " + AnalysisScriptController.ImportAnalysisStep.SELECT_FCSFILES.getNumber() + "; " +
                     "document.forms[\"" + ImportAnalysisForm.NAME + "\"].submit();", false);
             buttonBar.add(button);
-            dr.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
+            dr.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
 
             // Add MatchedFlag column
             dc = new MatchedFlagDisplayColumn();

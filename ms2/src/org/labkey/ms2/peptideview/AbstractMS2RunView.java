@@ -302,7 +302,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         rgn.setName(MS2Manager.getDataRegionNamePeptides());
         rgn.setDisplayColumns(getPeptideDisplayColumns(peptideColumnNames));
         rgn.setShowPagination(false);
-        rgn.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
+        rgn.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
         rgn.setMaxRows(maxRows);
         rgn.setOffset(offset);
 

@@ -392,7 +392,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
         wp.setRowId(-1);
         AnalysesWebPart view = new AnalysesWebPart(context, wp);
         view.setFrame(WebPartView.FrameType.NONE);
-        view.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
+        view.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
         return view;
     }
 
