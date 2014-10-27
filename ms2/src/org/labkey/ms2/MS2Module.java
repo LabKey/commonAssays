@@ -263,9 +263,10 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
-            public Set<ExperimentRunType> getExperimentRunTypes(Container container)
+            @NotNull
+            public Set<ExperimentRunType> getExperimentRunTypes(@Nullable Container container)
             {
-                if (container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
+                if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
                 {
                     return runTypes;
                 }

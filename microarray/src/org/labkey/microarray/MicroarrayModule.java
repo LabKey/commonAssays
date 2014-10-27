@@ -16,6 +16,7 @@
 
 package org.labkey.microarray;
 
+import com.drew.lang.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -176,9 +177,10 @@ public class MicroarrayModule extends SpringModule
         ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
-            public Set<ExperimentRunType> getExperimentRunTypes(Container container)
+            @NotNull
+            public Set<ExperimentRunType> getExperimentRunTypes(@Nullable Container container)
             {
-                if (container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
+                if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
                 {
                     return Collections.<ExperimentRunType>singleton(MicroarrayRunType.INSTANCE);
                 }

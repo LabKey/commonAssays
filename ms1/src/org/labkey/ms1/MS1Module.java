@@ -16,6 +16,7 @@
 
 package org.labkey.ms1;
 
+import com.drew.lang.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
@@ -158,9 +159,10 @@ public class MS1Module extends SpringModule implements ProteomicsModule
 
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
-            public Set<ExperimentRunType> getExperimentRunTypes(Container container)
+            @NotNull
+            public Set<ExperimentRunType> getExperimentRunTypes(@Nullable Container container)
             {
-                if (container.getActiveModules().contains(MS1Module.this))
+                if (container == null || container.getActiveModules().contains(MS1Module.this))
                 {
                     return Collections.singleton(EXP_RUN_TYPE);
                 }
