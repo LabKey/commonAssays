@@ -223,7 +223,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         waitForElementToDisappear(ExtHelper.locateGridRowCheckbox(colValuePrefix + "1"), WAIT_FOR_JAVASCRIPT);
         for (int i = 2; i <= 4; i++)
         {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colValuePrefix + i));
+            waitForElement(ExtHelper.locateGridRowCheckbox(colValuePrefix + i));
         }
         assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colValuePrefix + "5"));
     }
@@ -498,6 +498,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         //6. Create new Guide Set for GS Analyte (2) that includes plate 5 (but not plate 5a)
         //	- the AUC QC Flag for plate 5 is removed
         Locator.XPathLocator aucLink =  Locator.xpath("//a[contains(text(),'AUC')]");
+        waitForElement(aucLink);
         int aucCount = getElementCount(aucLink);
         _guideSetHelper.createGuideSet(false);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1"}, "Guide set includes plate 5", true);

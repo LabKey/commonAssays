@@ -39,11 +39,12 @@ import java.util.Map;
  */
 public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
 {
-    private String _assayName;
+    private Integer _assayId;
     private String _tableName;
     private Integer _runId;
     private List<LuminexSingleExclusionCommand> _commands = new ArrayList<>();
-    private ExpProtocol _protocol;
+
+    private transient ExpProtocol _protocol;
 
     @Override
     public void bindProperties(Map<String, Object> properties)
@@ -54,7 +55,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
         if (json == null)
             throw new IllegalArgumentException("Empty request");
 
-        _assayName = getStringPropIfExists(json, "assayName");
+        _assayId = getIntPropIfExists(json, "assayId");
         _tableName = getStringPropIfExists(json, "tableName");
         _runId = getIntPropIfExists(json, "runId");
 
@@ -75,9 +76,9 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
         }
     }
 
-    public String getAssayName()
+    public Integer getAssayId()
     {
-        return _assayName;
+        return _assayId;
     }
 
     public String getTableName()
@@ -122,11 +123,11 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
             List<ExpProtocol> protocols =  AssayService.get().getAssayProtocols(c, AssayService.get().getProvider(LuminexAssayProvider.NAME));
             for (ExpProtocol possibleMatch : protocols)
             {
-                if (possibleMatch.getName().equalsIgnoreCase(getAssayName()))
+                if (possibleMatch.getRowId() == getAssayId())
                 {
                     if (_protocol != null)
                     {
-                        throw new NotFoundException("More than one assay definition with the name '" + getAssayName() + "' is in scope");
+                        throw new NotFoundException("More than one assay definition with the id \"" + getAssayId() + "\" is in scope");
                     }
                     _protocol = possibleMatch;
                 }

@@ -741,7 +741,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 if (showControls() && runId != null && NumberUtils.isDigits(runId))
                 {
                     ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
-                    excludeAnalytes.setScript("analyteExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
+                    excludeAnalytes.setScript("analyteExclusionWindow(" + getProtocol().getRowId() + ", " + runId + ");");
                     excludeAnalytes.setDisplayPermission(UpdatePermission.class);
 
 
@@ -754,7 +754,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     ActionButton excludeTitration = new ActionButton("Exclude Titration");
                     if(rows == 0)
                         excludeTitration.setVisible(false);
-                    excludeTitration.setScript("titrationExclusionWindow('" + getProtocol().getName() + "', " + runId + ");");
+                    excludeTitration.setScript("titrationExclusionWindow(" + getProtocol().getRowId() + ", " + runId + ");");
                     excludeTitration.setDisplayPermission(UpdatePermission.class);
 
                     // todo: move the JS and CSS inclusion to the page level

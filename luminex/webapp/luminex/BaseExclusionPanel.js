@@ -10,8 +10,10 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
 
     constructor : function(config){
         // check that the config properties needed are present
-        if (!config.assayName)
-            throw "You must specify a assayName!";
+        if (!config.protocolSchemaName)
+            throw "You must specify a protocolSchemaName!";
+        if (!config.assayId)
+            throw "You must specify a assayId!";
         if (!config.runId)
             throw "You must specify a runId!";
 
@@ -29,7 +31,7 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
 
     queryExistingExclusions : function(queryName, filterArray, columns) {
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            schemaName: this.protocolSchemaName,
             queryName: queryName,
             filterArray: filterArray,
             columns: columns,
@@ -165,7 +167,7 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
     {
         // query to get the assay Id for the given run and put it into the panel header div
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            schemaName: this.protocolSchemaName,
             queryName: 'Runs',
             filterArray: [LABKEY.Filter.create('RowId', this.runId)],
             columns: 'Name',
@@ -248,7 +250,7 @@ LABKEY.Luminex = new function()
         /*
          * Save (insert/update/delete) a single Luminex exclusion of type replicate group (well), analyte, or titration.
          * @param {Object} config An object which contains the following configuration properties.
-         * @param {String} [config.assayName] Required. Name of the Luminex assay design
+         * @param {String} [config.assayId] Required. Assay design RowId of the Luminex assay design
          * @param {String} [config.tableName] Required. Either WellExclusion (i.e. replicate group), TitrationExclusion, or RunExclusion (i.e. anaalyte)
          * @param {String} [config.runId] Required. RowId for the assay run
          * @param {Array}  [config.commands] Required. Array of exclusion commeands to be executed
@@ -267,7 +269,7 @@ LABKEY.Luminex = new function()
         saveExclusion : function(config)
         {
             var dataObject = {
-                assayName: config.assayName,
+                assayId: config.assayId,
                 tableName: config.tableName,
                 runId: config.runId,
                 commands: config.commands

@@ -276,7 +276,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new ExclusionUIDisplayColumn(colInfo, protocol.getName(), _userSchema.getContainer(), _userSchema.getUser());
+                return new ExclusionUIDisplayColumn(colInfo, protocol.getRowId(), _userSchema.getContainer(), _userSchema.getUser());
             }
         });
         addColumn(exclusionUIColumn);

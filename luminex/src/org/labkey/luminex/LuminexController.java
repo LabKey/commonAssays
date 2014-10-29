@@ -28,6 +28,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.pipeline.PipeRoot;
@@ -606,13 +607,19 @@ public class LuminexController extends SpringActionController
             // verify the assayName provided is valid and of type LuminexAssayProvider
             if (form.getProtocol(getContainer()) == null)
             {
-                errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayName());
+                errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayId());
             }
 
             // verify that the runId is valid and matches an existing run
             if (form.getRunId() == null || ExperimentService.get().getExpRun(form.getRunId()) == null)
             {
                 errors.reject(ERROR_MSG, "No run found for id " + form.getRunId());
+            }
+
+            ExpRun run = ExperimentService.get().getExpRun(form.getRunId());
+            if (!getContainer().equals(run.getContainer()))
+            {
+                errors.reject(ERROR_MSG, "The run for id " + form.getRunId() + " does not exist in the current container");
             }
 
             form.validate(errors);
@@ -622,19 +629,13 @@ public class LuminexController extends SpringActionController
         public Object execute(LuminexSaveExclusionsForm form, BindException errors) throws Exception
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
-            try
-            {
-                PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-                PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, form);
-                PipelineService.get().queueJob(job);
 
-                response.put("success", true);
-                response.put("returnUrl", PageFlowUtil.urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.CURRENT));
-            }
-            catch (PipelineValidationException e)
-            {
-                throw new IOException(e);
-            }
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, form);
+            PipelineService.get().queueJob(job);
+
+            response.put("success", true);
+            response.put("returnUrl", PageFlowUtil.urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.CURRENT));
             return response;
         }
     }

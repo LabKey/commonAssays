@@ -45,13 +45,12 @@ import java.util.Map;
  */
 public class LuminexExclusionPipelineJob extends PipelineJob
 {
-    // TODO: make serializable?
-    private transient LuminexSaveExclusionsForm _form;
+    private LuminexSaveExclusionsForm _form;
+    private ExclusionType _exclusionType;
+    private Integer _runId;
 
-    private transient ExpProtocol _protocol;
     private transient AssayProvider _provider;
     private transient ExpRun _run;
-    private transient ExclusionType _exclusionType;
 
     public LuminexExclusionPipelineJob(ViewBackgroundInfo info, PipeRoot root, LuminexSaveExclusionsForm form)
     {
@@ -61,18 +60,16 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         setLogFile(logFile);
 
         _form = form;
-        _protocol = form.getProtocol(getContainer());
-        _provider = AssayService.get().getProvider(_protocol);
-        _run = ExperimentService.get().getExpRun(form.getRunId());
         _exclusionType = LuminexExclusionPipelineJob.ExclusionType.valueOf(form.getTableName());
+        _runId = form.getRunId();
     }
 
     @Override
     public URLHelper getStatusHref()
     {
-        if (_run != null)
+        if (getRun() != null)
         {
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _run.getProtocol(), _run.getRowId());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getRun().getContainer(), getRun().getProtocol(), getRun().getRowId());
         }
         return null;
     }
@@ -80,7 +77,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     @Override
     public String getDescription()
     {
-        return "Luminex Exclusion" + (_run != null ? ": " + _run.getName() : "");
+        return "Luminex Exclusion" + (getRun() != null ? ": " + getRun().getName() : "");
     }
 
     @Override
@@ -90,7 +87,9 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         {
             setStatus(TaskStatus.running, getJobInfo());
 
-            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), (LuminexAssayProvider)_provider, _protocol, null);
+            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(),
+                    (LuminexAssayProvider)getAssayProvider(), _form.getProtocol(getContainer()), null);
+
             TableInfo tableInfo = schema.getTable(_exclusionType.getTableName());
             if (tableInfo != null)
             {
@@ -110,20 +109,22 @@ public class LuminexExclusionPipelineJob extends PipelineJob
                         rows.add(_exclusionType.getRowMap(command, _form.getRunId(), false));
                         keys.add(_exclusionType.getRowMap(command, _form.getRunId(), true));
 
-                        if ("insert".equals(command.getCommand()))
+                        switch (command.getCommand())
                         {
-                            results = qus.insertRows(getUser(), getContainer(), rows, errors, null);
-                            getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " inserted into " + tableInfo.getName());
-                        }
-                        else if ("update".equals(command.getCommand()))
-                        {
-                            results = qus.updateRows(getUser(), getContainer(), rows, keys, null);
-                            getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " updated in " + tableInfo.getName());
-                        }
-                        else if ("delete".equals(command.getCommand()))
-                        {
-                            results = qus.deleteRows(getUser(), getContainer(), keys, null);
-                            getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " deleted from " + tableInfo.getName());
+                            case "insert":
+                                results = qus.insertRows(getUser(), getContainer(), rows, errors, null);
+                                getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " inserted into " + tableInfo.getName());
+                                break;
+                            case "update":
+                                results = qus.updateRows(getUser(), getContainer(), rows, keys, null);
+                                getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " updated in " + tableInfo.getName());
+                                break;
+                            case "delete":
+                                results = qus.deleteRows(getUser(), getContainer(), keys, null);
+                                getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " deleted from " + tableInfo.getName());
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
                         }
 
                         if (errors.hasErrors())
@@ -150,8 +151,8 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     private void logProperties(LuminexSingleExclusionCommand exclusion)
     {
         getLogger().info("----- Exclusion Properties ---------");
-        if (_run != null)
-            getLogger().info("Assay Id: " + _run.getName());
+        if (getRun() != null)
+            getLogger().info("Assay Id: " + getRun().getName());
         getLogger().info("Run Id: " + _form.getRunId());
         if (exclusion.getDataId() != null)
             getLogger().info("Data Id: " + exclusion.getDataId());
@@ -178,6 +179,24 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         }
 
         return _exclusionType.getInfo(command);
+    }
+
+    private AssayProvider getAssayProvider()
+    {
+        if (_provider == null)
+        {
+            _provider = AssayService.get().getProvider(_form.getProtocol(getContainer()));
+        }
+        return _provider;
+    }
+
+    private ExpRun getRun()
+    {
+        if (_run == null)
+        {
+            _run = ExperimentService.get().getExpRun(_runId);
+        }
+        return _run;
     }
 
     public enum ExclusionType

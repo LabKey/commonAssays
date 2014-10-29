@@ -41,12 +41,12 @@ public class ExclusionUIDisplayColumn extends DataColumn
     private final FieldKey _runFieldKey;
     private final FieldKey _wellIDKey;
     private final FieldKey _exclusionCommentKey;
-    private final String _protocolName;
+    private final Integer _protocolId;
     private boolean _exclusionJSIncluded = false;
     private final Container _container;
     private final User _user;
 
-    public ExclusionUIDisplayColumn(ColumnInfo colInfo, String protocolName, Container container, User user)
+    public ExclusionUIDisplayColumn(ColumnInfo colInfo, Integer protocolId, Container container, User user)
     {
         super(colInfo);
         _container = container;
@@ -58,7 +58,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         _exclusionCommentKey = new FieldKey(parentFK, "ExclusionComment");
         _dataFieldKey = new FieldKey(new FieldKey(parentFK, "Data"), "RowId");
         _runFieldKey = new FieldKey(new FieldKey(new FieldKey(parentFK, "Data"), "Run"), "RowId");
-        _protocolName = protocolName;
+        _protocolId = protocolId;
         _wellIDKey = new FieldKey(parentFK, "well");
     }
 
@@ -110,7 +110,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
         if (canEdit)
         {
-            out.write("<a onclick=\"wellExclusionWindow('" + _protocolName + "', " + runId + ", " + dataId + ", "
+            out.write("<a onclick=\"wellExclusionWindow(" + _protocolId + ", " + runId + ", " + dataId + ", "
                 + (description == null ? null : "'" + description + "'") + ", '" + type + "');\">");
         }
 

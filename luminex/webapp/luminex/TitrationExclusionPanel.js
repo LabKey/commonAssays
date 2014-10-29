@@ -7,35 +7,48 @@
 Ext.namespace('LABKEY');
 
 // function called onclick of 'Exclude Analytes' button to open the run exclusion window 
-function titrationExclusionWindow(assayName, runId)
+function titrationExclusionWindow(assayId, runId)
 {
-    var win = new Ext.Window({
-        cls: 'extContainer',
-        title: 'Exclude Titrations from Analysis',
-        layout:'fit',
-        width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
-        height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
-        padding: 15,
-        modal: true,
-        closeAction:'close',
-        bodyStyle: 'background-color: white;',
-        items: new LABKEY.TitrationExclusionPanel({
-            assayName: assayName,
-            runId: runId,
-            listeners: {
-                scope: this,
-                'closeWindow': function(){
-                    win.close();
-                }
+    // lookup the assay design information based on the Assay RowId
+    LABKEY.Assay.getById({
+        id: assayId,
+        success: function(assay) {
+            if (Ext.isArray(assay) && assay.length == 1) {
+                var win = new Ext.Window({
+                    cls: 'extContainer',
+                    title: 'Exclude Titrations from Analysis',
+                    layout:'fit',
+                    width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
+                    height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
+                    padding: 15,
+                    modal: true,
+                    closeAction:'close',
+                    bodyStyle: 'background-color: white;',
+                    items: new LABKEY.TitrationExclusionPanel({
+                        protocolSchemaName: assay[0].protocolSchemaName,
+                        assayId: assayId,
+                        runId: runId,
+                        listeners: {
+                            scope: this,
+                            'closeWindow': function(){
+                                win.close();
+                            }
+                        }
+                    })
+                });
+                win.show(this);
             }
-        })
+            else {
+                Ext.Msg.alert('ERROR', 'Unable to find assay design information for id ' + assayId);
+            }
+        }
     });
-    win.show(this);
 }
 
 /**
  * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
- * @params assayName = the assay design name
+ * @params protocolSchemaName = the encoded protocol schema name to use (based on the assay design name)
+ * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
  */
 LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
@@ -58,7 +71,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         this.addHeaderPanel('Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions');
 
         var titrationExclusionStore = new LABKEY.ext.Store({
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            schemaName: this.protocolSchemaName,
             queryName: 'TitrationExclusion',
             columns: 'Description,Analytes/RowId,RowId,Comment, DataId/Run',
             filterArray : [
@@ -146,7 +159,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         // grid of avaialble/excluded titrations
         var gridData = [];
         var titrationsGridStore = new LABKEY.ext.Store({
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            schemaName: this.protocolSchemaName,
             sql : 'SELECT DISTINCT x.Titration.Name, x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId ' +
                     'FROM Data AS x '+
                     'WHERE x.Titration IS NOT NULL AND x.Titration.Standard != true AND x.Data.Run.RowId = ' + this.runId,
@@ -243,7 +256,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Titration.Name AS Titration, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                         + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId,
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+                schemaName: this.protocolSchemaName,
                 autoLoad: true,
                 sortInfo: {
                     field: 'Name',
@@ -389,7 +402,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         if (commands.length > 0)
         {
             var config = {
-                assayName: this.assayName,
+                assayId: this.assayId,
                 tableName: 'TitrationExclusion',
                 runId: this.runId,
                 commands: commands

@@ -7,38 +7,51 @@
 Ext.namespace('LABKEY');
 
 // function called onclick of Exclusion Toggle to open the well exclusion window 
-function wellExclusionWindow(assayName, runId, dataId, description, type)
+function wellExclusionWindow(assayId, runId, dataId, description, type)
 {
-    var win = new Ext.Window({
-        cls: 'extContainer',
-        title: 'Exclude Replicate Group from Analysis',
-        layout:'fit',
-        width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
-        height: Ext.getBody().getViewSize().height > 595 ? 555 : Ext.getBody().getViewSize().height * .75,
-        padding: 15,
-        modal: true,
-        closeAction:'close',
-        bodyStyle: 'background-color: white;',
-        items: new LABKEY.WellExclusionPanel({
-            assayName: assayName,
-            runId: runId,
-            dataId: dataId,
-            description: description,
-            type: type,
-            listeners: {
-                scope: this,
-                'closeWindow': function(){
-                    win.close();
-                }
+    // lookup the assay design information based on the Assay RowId
+    LABKEY.Assay.getById({
+        id: assayId,
+        success: function(assay) {
+            if (Ext.isArray(assay) && assay.length == 1) {
+                var win = new Ext.Window({
+                    cls: 'extContainer',
+                    title: 'Exclude Replicate Group from Analysis',
+                    layout:'fit',
+                    width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
+                    height: Ext.getBody().getViewSize().height > 595 ? 555 : Ext.getBody().getViewSize().height * .75,
+                    padding: 15,
+                    modal: true,
+                    closeAction:'close',
+                    bodyStyle: 'background-color: white;',
+                    items: new LABKEY.WellExclusionPanel({
+                        protocolSchemaName: assay[0].protocolSchemaName,
+                        assayId: assayId,
+                        runId: runId,
+                        dataId: dataId,
+                        description: description,
+                        type: type,
+                        listeners: {
+                            scope: this,
+                            'closeWindow': function(){
+                                win.close();
+                            }
+                        }
+                    })
+                });
+                win.show(this);
             }
-        })
+            else {
+                Ext.Msg.alert('ERROR', 'Unable to find assay design information for id ' + assayId);
+            }
+        }
     });
-    win.show(this);
 }
 
 /**
  * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
- * @params assayName = the assay design name
+ * @params protocolSchemaName = the encoded protocol schema name to use (based on the assay design name)
+ * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
  * @params dataId = dataId for the selected replicate group
  * @params description = description for the selected replicate group
@@ -136,7 +149,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                     + " FROM Data AS x "
                     + " WHERE x.Data.Run.RowId = " + this.runId + " AND x.Type = '" + this.type + "' "
                     + " AND x.Description " + (this.description ? " = '" + this.description + "'" : " IS NULL"),
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+                schemaName: this.protocolSchemaName,
                 autoLoad: true,
                 listeners: {
                     scope: this,
@@ -227,7 +240,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
 
         // query to get the wells and data id (file name) for the given replicate group
         LABKEY.Query.executeSql({
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            schemaName: this.protocolSchemaName,
             sql: sql,
             sort: 'Well',
             success: function(data){
@@ -258,7 +271,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
     {
         // query to see if there are any run level exclusions for this RunId
         LABKEY.Query.selectRows({
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            schemaName: this.protocolSchemaName,
             queryName: 'RunExclusion',
             filterArray: [LABKEY.Filter.create('RunId', this.runId)],
             columns: 'Analytes/Name',
@@ -303,7 +316,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
 
         // config of data to save for the given replicate group exclusion
         var config = {
-            assayName: this.assayName,
+            assayId: this.assayId,
             tableName: 'WellExclusion',
             runId: this.runId,
             commands: [{

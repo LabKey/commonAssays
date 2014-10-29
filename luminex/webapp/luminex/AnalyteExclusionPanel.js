@@ -7,35 +7,48 @@
 Ext.namespace('LABKEY');
 
 // function called onclick of 'Exclude Analytes' button to open the run exclusion window 
-function analyteExclusionWindow(assayName, runId)
+function analyteExclusionWindow(assayId, runId)
 {
-    var win = new Ext.Window({
-        cls: 'extContainer',
-        title: 'Exclude Analytes from Analysis',
-        layout:'fit',
-        width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
-        height: Ext.getBody().getViewSize().height > 500 ? 460 : Ext.getBody().getViewSize().height * .75,
-        padding: 15,
-        modal: true,
-        closeAction:'close',
-        bodyStyle: 'background-color: white;',
-        items: new LABKEY.AnalyteExclusionPanel({
-            assayName: assayName,
-            runId: runId,
-            listeners: {
-                scope: this,
-                'closeWindow': function(){
-                    win.close();
-                }
+    // lookup the assay design information based on the Assay RowId
+    LABKEY.Assay.getById({
+        id: assayId,
+        success: function(assay) {
+            if (Ext.isArray(assay) && assay.length == 1) {
+                var win = new Ext.Window({
+                    cls: 'extContainer',
+                    title: 'Exclude Analytes from Analysis',
+                    layout:'fit',
+                    width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
+                    height: Ext.getBody().getViewSize().height > 500 ? 460 : Ext.getBody().getViewSize().height * .75,
+                    padding: 15,
+                    modal: true,
+                    closeAction:'close',
+                    bodyStyle: 'background-color: white;',
+                    items: new LABKEY.AnalyteExclusionPanel({
+                        protocolSchemaName: assay[0].protocolSchemaName,
+                        assayId: assayId,
+                        runId: runId,
+                        listeners: {
+                            scope: this,
+                            'closeWindow': function(){
+                                win.close();
+                            }
+                        }
+                    })
+                });
+                win.show(this);
             }
-        })
+            else {
+                Ext.Msg.alert('ERROR', 'Unable to find assay design information for id ' + assayId);
+            }
+        }
     });
-    win.show(this);
 }
 
 /**
  * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
- * @params assayName = the assay design name
+ * @params protocolSchemaName = the encoded protocol schema name to use (based on the assay design name)
+ * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
  */
 LABKEY.AnalyteExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
@@ -69,7 +82,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                     + " FROM Data AS x WHERE x.Data.Run.RowId = " + this.runId,
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+                schemaName: this.protocolSchemaName,
                 autoLoad: true,
                 listeners: {
                     scope: this,
@@ -135,7 +148,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
 
         // config of data to save for the given analyte exclusion
         var config = {
-            assayName: this.assayName,
+            assayId: this.assayId,
             tableName: 'RunExclusion',
             runId: this.runId,
             commands: [{
