@@ -315,7 +315,21 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
             int rowCount = 0;
 
             // Grab the probe name to rowId mapping for this run's annotation set
-            int featureSet = Integer.parseInt(runProps.get("featureSet"));
+            String featureSetString = runProps.get(ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME);
+            if (featureSetString == null)
+            {
+                throw new ExperimentException("Could not find " + ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME + " property value");
+            }
+
+            int featureSet;
+            try
+            {
+                featureSet = Integer.parseInt(featureSetString);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new ExperimentException("Illegal " + ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME + " value:" + featureSetString);
+            }
             Map<String, Integer> featureIds = MicroarrayManager.get().getFeatureAnnotationSetFeatureIds(featureSet);
 
             for (Map<String, Object> row : loader)

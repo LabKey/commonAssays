@@ -66,7 +66,9 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     public static final String LSID_PREFIX = "ExpressionMatrix";
     public static final AssayDataType DATA_TYPE = new AssayDataType(LSID_PREFIX, new FileType(".tsv"));
 
-    public static final ColumnMappingProperty FEATURE_ANNOTATION_SET_ID_COLUMN = new ColumnMappingProperty("featureSet", "Feature Annotation Set", true);
+    public static final String FEATURE_SET_PROPERTY_NAME = "featureSet";
+
+    public static final ColumnMappingProperty FEATURE_ANNOTATION_SET_ID_COLUMN = new ColumnMappingProperty(FEATURE_SET_PROPERTY_NAME, "Feature Annotation Set", true);
     public static final ColumnMappingProperty IMPORT_VALUES_COLUMN = new ColumnMappingProperty("importValues", "Import Values", false);
 
     public ExpressionMatrixAssayProvider()

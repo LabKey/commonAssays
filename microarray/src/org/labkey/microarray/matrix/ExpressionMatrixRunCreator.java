@@ -118,7 +118,7 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
         for (Map.Entry<DomainProperty, String> entry : runProps.entrySet())
         {
             DomainProperty dp = entry.getKey();
-            if (dp.getName().equals("featureSet"))
+            if (ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME.equalsIgnoreCase(dp.getName()))
                 return entry;
         }
 
