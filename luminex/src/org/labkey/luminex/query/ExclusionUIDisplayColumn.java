@@ -55,7 +55,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
 
         _typeFieldKey = new FieldKey(parentFK, "Type");
         _descriptionFieldKey = new FieldKey(parentFK, "Description");
-        _exclusionCommentKey = new FieldKey(parentFK, "ExclusionComment");
+        _exclusionCommentKey = new FieldKey(parentFK, LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME);
         _dataFieldKey = new FieldKey(new FieldKey(parentFK, "Data"), "RowId");
         _runFieldKey = new FieldKey(new FieldKey(new FieldKey(parentFK, "Data"), "Run"), "RowId");
         _protocolId = protocolId;

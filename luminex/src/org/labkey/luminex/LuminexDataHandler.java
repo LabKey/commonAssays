@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ObjectFactory;
@@ -2097,7 +2098,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         final String analyteNameAlias = cols.get(analyteFK).getAlias();
 
         SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), run.getRowId());
-        filter.addCondition(FieldKey.fromParts(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME), true);
+        filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_GROUP_COMMENT, CompareType.CONTAINS);
         new TableSelector(table, cols.values(), filter, null).forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
         {
             @Override

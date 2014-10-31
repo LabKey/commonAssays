@@ -127,7 +127,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         String expectedInfo = "INSERT replicate group exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
         verifyExclusionPipelineJobComplete(jobCount, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, comment);
 
-        verifyWellGroupExclusion("Excluded for replicate group: " + comment, new HashSet<>(Arrays.asList(getListOfAnalytesMultipleCurveData())));
+        verifyWellGroupExclusion("Excluded for well replicate group: " + comment, new HashSet<>(Arrays.asList(getListOfAnalytesMultipleCurveData())));
 
         if (removeExclusion)
         {
@@ -156,7 +156,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         String expectedInfo = "INSERT replicate group exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
         verifyExclusionPipelineJobComplete(jobCount, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, exclusionComment, 1, 2);
 
-        verifyWellGroupExclusion("Excluded for replicate group: " + exclusionComment, new HashSet<>((Arrays.asList(excludedAnalyte))));
+        verifyWellGroupExclusion("Excluded for well replicate group: " + exclusionComment, new HashSet<>((Arrays.asList(excludedAnalyte))));
     }
 
     /**
@@ -243,7 +243,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
 
         DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
         table.setFilter("ExclusionComment", "Equals", exclusionPrefix + comment);
-        waitForElement(Locator.paginationText(72));
+        waitForElement(Locator.paginationText(68)); // 4 are showing replicate group exclusion comment
         table.setFilter("Analyte", "Does Not Equal", analyte);
         waitForText("No data to show.");
         table.clearFilter("Analyte");

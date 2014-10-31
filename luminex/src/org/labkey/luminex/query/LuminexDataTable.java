@@ -67,6 +67,11 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 {
     private LuminexAssayProvider _provider;
     public static final String FLAGGED_AS_EXCLUDED_COLUMN_NAME = "FlaggedAsExcluded";
+    public static final String EXCLUSION_COMMENT_COLUMN_NAME = "ExclusionComment";
+    public static final String EXCLUSION_TOGGLE_COLUMN_NAME = "ExclusionToggle";
+    public static final String EXCLUSION_WELL_GROUP_COMMENT = "Excluded for well replicate group";
+    public static final String EXCLUSION_ANALYTE_COMMENT = "Excluded for analyte";
+    public static final String EXCLUSION_TITRATION_COMMENT = "Excluded for titration";
 
     public LuminexDataTable(LuminexProtocolSchema schema)
     {
@@ -221,7 +226,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         SQLFragment exclusionUnionSQL = new SQLFragment();
         exclusionUnionSQL.append("SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for replicate group'"), repGroupCaseStatement));
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_WELL_GROUP_COMMENT + "'"), repGroupCaseStatement));
         exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we");
         exclusionUnionSQL.append(", ");
@@ -231,8 +236,8 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         exclusionUnionSQL.append("(we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL)) AND ");
         exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
         exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
-        exclusionUnionSQL.append("UNION SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for analyte'"), analyteCaseStatement));
+        exclusionUnionSQL.append(" UNION SELECT ");
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_ANALYTE_COMMENT + "'"), analyteCaseStatement));
         exclusionUnionSQL.append(" AS Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoRunExclusion(), "re");
         exclusionUnionSQL.append(", ");
@@ -243,8 +248,8 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         exclusionUnionSQL.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
         exclusionUnionSQL.append(" WHERE re.RunId = rea.RunId AND re.RunId = pa.RunId AND pa.RowId = d.SourceApplicationId AND d.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId AND ");
         exclusionUnionSQL.append("(rea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
-        exclusionUnionSQL.append("UNION SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for Titration group'"), repGroupCaseStatement));
+        exclusionUnionSQL.append(" UNION SELECT ");
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_TITRATION_COMMENT + "'"), repGroupCaseStatement));
         exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we");
         exclusionUnionSQL.append(", ");
@@ -264,13 +269,15 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         exclusionColumn.setFormat("yes;no;");
         addColumn(exclusionColumn);
 
-        SQLFragment exclusionCommentSQL = new SQLFragment("(SELECT MIN(Comment) FROM (");
+        // Issue 21823: use the max comment, i.e. if we have a well replicate group and an analyte exclusion for a row
+        // we want to know the lowest level exclusion. Order will be Well Replicate Group, Titration, Analyte.
+        SQLFragment exclusionCommentSQL = new SQLFragment("(SELECT MAX(Comment) FROM (");
         exclusionCommentSQL.append(exclusionUnionSQL);
         exclusionCommentSQL.append(") x)");
-        ExprColumn exclusionReasonColumn = new ExprColumn(this, "ExclusionComment", exclusionCommentSQL, JdbcType.VARCHAR);
+        ExprColumn exclusionReasonColumn = new ExprColumn(this, EXCLUSION_COMMENT_COLUMN_NAME, exclusionCommentSQL, JdbcType.VARCHAR);
         addColumn(exclusionReasonColumn);
 
-        AliasedColumn exclusionUIColumn = new AliasedColumn("ExclusionToggle", exclusionColumn);
+        AliasedColumn exclusionUIColumn = new AliasedColumn(EXCLUSION_TOGGLE_COLUMN_NAME, exclusionColumn);
         exclusionUIColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
