@@ -19,6 +19,7 @@ package org.labkey.ms2.peptideview;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
@@ -257,6 +258,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
         {
             createRowIdFragment(selectedRows);
+            getSettings().setMaxRows(Table.ALL_ROWS);
             TSVGridWriter tsvWriter = getTsvWriter();
             if (form.isExportAsWebPage())
                 tsvWriter.setExportAsWebPage(true);
@@ -269,6 +271,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         public ModelAndView exportToExcel(HttpServletResponse response, List<String> selectedRows) throws IOException
         {
             createRowIdFragment(selectedRows);
+            getSettings().setMaxRows(ExcelWriter.MAX_ROWS);
             exportToExcel(response);
             return null;
         }
@@ -295,7 +298,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
                 String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
                 filter.addClause(new SimpleFilter.InClause(FieldKey.fromParts(columnName), _selectedRows));
             }
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER | ProteinManager.PROTEIN_FILTER, getUser(), _runs));
             result.getRenderContext().setBaseFilter(filter);
             return result;
         }
