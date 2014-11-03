@@ -1815,6 +1815,13 @@ public class MS2Controller extends SpringActionController
             {
                 title.append("Protein ");
                 title.append(getTargetProtein());
+                // Show both whath the user searched for, and what they resolved it to
+                if (!lookupProtein().getBestName().equals(getTargetProtein()))
+                {
+                    title.append(" (");
+                    title.append(lookupProtein().getBestName());
+                    title.append(")");
+                }
                 title.append(",  ");
             }
              if (isPeptideProphetFilter() && getPeptideProphetProbability() != null)
@@ -1976,16 +1983,6 @@ public class MS2Controller extends SpringActionController
             }
 
             Map<String, String> props = new HashMap<>();
-   /*
-            //CONSIDER:  can we support charge state filters?
-            ActionURL nextURL = getViewContext().getActionURL();
-            Map<String, String> dynamicViewMap = getViewMap(true,true);
-            if (dynamicViewMap.keySet().contains(form.getPeptideCustomViewName(getViewContext())))
-            {
-                 nextURL.setRawQuery(nextURL.getRawQuery() + '&' + dynamicViewMap.get(form.getPeptideCustomViewName(getViewContext())));
-            }
-              props.put("originalURL", nextURL.toString());
-    */
             VBox result = new VBox();
             props.put("originalURL", getViewContext().getActionURL().toString());
             props.put(PEPTIDES_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME));
