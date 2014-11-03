@@ -34,9 +34,10 @@
 #  - 8.1.20140612 : Issue 20316: Rumi estimated concentrations not calculated for unselected titrated unknowns in subclass assay case
 #  - 9.0.20140716 : Changes for LabKey server 14.3: add Other Control type for titrations
 #  - 9.1.20140718 : Allow use of alternate negative control bead on per-analyte basis (FI-Bkgd-Neg instead of FI-Bkgd-Blank)
+#  - 9.2.20141103 : Issue 21268: Add OtherControl titrations to PDF output of curves from transform script
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "9.1.20140718";
+transformVersion = "9.2.20141103";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -346,8 +347,8 @@ if (nrow(titration.data) > 0)
        for (typeIndex in 1:length(fitTypes))
        {
           # we want to create PDF plots of the curves for QC Controls
-          if (titrationDataRow$QCControl == "true") {
-              mypdf(file=paste(titrationName, "QC_Curves", toupper(fitTypes[typeIndex]), sep="_"), mfrow=c(1,1));
+          if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
+              mypdf(file=paste(titrationName, "Control_Curves", toupper(fitTypes[typeIndex]), sep="_"), mfrow=c(1,1));
           }
 
           # calculate the curve fit params for each analyte

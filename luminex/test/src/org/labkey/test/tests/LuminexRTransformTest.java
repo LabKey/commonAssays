@@ -175,7 +175,7 @@ public final class LuminexRTransformTest extends LuminexTest
     {
         assertTextPresent(TEST_ASSAY_LUM + " Runs");
         DataRegionTable table = new DataRegionTable("Runs", this);
-        assertEquals("Unexpected Transform Script Version number", "9.1.20140718", table.getDataAsText(0, "Transform Script Version"));
+        assertEquals("Unexpected Transform Script Version number", "9.2.20141103", table.getDataAsText(0, "Transform Script Version"));
         assertEquals("Unexpected Lab Transform Script Version number", "2.0.20140718", table.getDataAsText(0, "Lab Transform Script Version"));
         assertEquals("Unexpected Ruminex Version number", "0.0.9", table.getDataAsText(0, "Ruminex Version"));
         assertNotNull(table.getDataAsText(0, "R Version"));
@@ -184,8 +184,8 @@ public final class LuminexRTransformTest extends LuminexTest
     private void verifyPDFsGenerated(boolean hasStandardPDFs)
     {
         click(Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png"));
-        assertElementPresent(Locator.linkContainingText(".Standard1_QC_Curves_4PL.pdf"));
-        assertElementPresent(Locator.linkContainingText(".Standard1_QC_Curves_5PL.pdf"));
+        assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_4PL.pdf"));
+        assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_5PL.pdf"));
         if (hasStandardPDFs)
         {
             assertElementPresent(Locator.linkWithText("WithAltNegativeBead.Standard1_5PL.pdf"));
