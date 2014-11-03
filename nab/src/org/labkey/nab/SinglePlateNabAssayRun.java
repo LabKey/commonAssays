@@ -407,7 +407,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
             return super.getVirusControlMean(plate, null);
         if (ensureVirusControl(plate, virusWellGroupName))
             return _virusControls.get(virusWellGroupName).getMean();
-        return 0.0;
+        return super.getVirusControlMean(plate, null);
     }
 
     @Override
@@ -417,7 +417,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
             return super.getCellControlMean(plate, null);
         if (ensureCellControl(plate, virusWellGroupName))
             return _cellControls.get(virusWellGroupName).getMean();
-        return 0.0;
+        return super.getCellControlMean(plate, null);
     }
 
     @Override

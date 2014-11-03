@@ -142,6 +142,8 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                         if (null != cellControl)
                         {
                             addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
+                            cellControlProperties.put("VirusName", virusEntry.getValue());
+                            cellControlProperties.put("VirusLocation", virusEntry.getKey());
                             cellControls.add(cellControlProperties);
                         }
 
@@ -150,6 +152,8 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                         if (null != virusControl)
                         {
                             addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
+                            virusControlProperties.put("VirusName", virusEntry.getValue());
+                            virusControlProperties.put("VirusLocation", virusEntry.getKey());
                             virusControls.add(virusControlProperties);
                         }
                     }
