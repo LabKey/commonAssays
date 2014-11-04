@@ -234,7 +234,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         for (int col = 2; col < colCount-2; col += 2)
         {
             int specimen = (col/2);
-            template.addWellGroup("Specimen " + specimen, WellGroup.Type.SPECIMEN,
+            template.addWellGroup(String.format("Specimen %02d", specimen), WellGroup.Type.SPECIMEN,
                     plateService.createPosition(c, 1, col),
                     plateService.createPosition(c, rowCount-2, col+1));
 
@@ -324,7 +324,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         {
             for (int row = 2; row < rowCount-2; row += 2)
             {
-                template.addWellGroup("Specimen " + specimenCount, WellGroup.Type.SPECIMEN,
+                template.addWellGroup(String.format("Specimen %02d", specimenCount), WellGroup.Type.SPECIMEN,
                         plateService.createPosition(c, row, col),
                         plateService.createPosition(c, row+1, col+3));
 
@@ -373,12 +373,12 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         {
             for (int col=2; col < colCount-2; col++)
             {
-                template.addWellGroup("Specimen " + specimenCount, WellGroup.Type.SPECIMEN,
+                template.addWellGroup(String.format("Specimen %03d", specimenCount), WellGroup.Type.SPECIMEN,
                         plateService.createPosition(c, row, col),
                         plateService.createPosition(c, row, col));
 
                 // replicate
-                template.addWellGroup("Specimen " + specimenCount, WellGroup.Type.REPLICATE,
+                template.addWellGroup(String.format("Specimen %03d", specimenCount), WellGroup.Type.REPLICATE,
                         plateService.createPosition(c, row, col),
                         plateService.createPosition(c, row, col));
 
