@@ -445,7 +445,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         {
             log("multiple curve data not present, adding now");
             startCreateMultipleCurveAssayRun();
-            clickButton("Save and Finish");
+            clickButton("Save and Finish", defaultWaitForPage * 4);
         }
     }
 
@@ -573,7 +573,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public void finishUploadPositivityFile(String assayRunId, boolean isBackgroundUpload)
     {
-        clickButton("Save and Finish");
+        clickButton("Save and Finish", defaultWaitForPage * 4);
         if (!isBackgroundUpload && !isElementPresent(Locator.css(".labkey-error").containing("Error: ")))
             clickAndWait(Locator.linkWithText(assayRunId), 2 * WAIT_FOR_PAGE);
     }
