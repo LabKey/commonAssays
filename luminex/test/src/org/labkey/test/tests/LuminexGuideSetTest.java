@@ -280,8 +280,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.tagWithAttribute("img", "src", "/labkey/Experiment/images/graphIcon.gif"));
         clickAndWait(Locator.linkWithText("Text View"));
         waitForText("Protocol Applications"); // bottom section of the "Text View" tab for the run details page
-        assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".Standard1_QC_Curves_4PL.pdf"), 3);
-        assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".Standard1_QC_Curves_5PL.pdf"), 3);
+        assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_4PL.pdf"), 3);
+        assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_5PL.pdf"), 3);
         assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".xls"), 4);
         assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".labkey_luminex_transform.Rout"), 3);
 
