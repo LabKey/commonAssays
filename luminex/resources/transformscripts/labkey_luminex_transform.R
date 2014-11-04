@@ -434,7 +434,7 @@ if (nrow(titration.data) > 0)
                             }
 
                             # plot the curve fit for the QC Controls
-                            if (titrationDataRow$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
                                 plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                             }
                         },
@@ -442,7 +442,7 @@ if (nrow(titration.data) > 0)
                             print(e);
 
                             # plot the individual data points for the QC Controls
-                            if (titrationDataRow$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
                                 plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
                         }
@@ -486,7 +486,7 @@ if (nrow(titration.data) > 0)
                             }
 
                             # plot the curve fit for the QC Controls
-                            if (titrationDataRow$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
                                 plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                             }
                         },
@@ -500,7 +500,7 @@ if (nrow(titration.data) > 0)
                             } else {
                                 logAxes = "x";
                             }
-                            if (titrationDataRow$QCControl == "true") {
+                            if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
                                 plot(fi ~ dose, data = dat, log=logAxes, cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
                         }
@@ -513,7 +513,7 @@ if (nrow(titration.data) > 0)
                 }
             } else {
                 # create an empty plot indicating that there is no data available
-                if (titrationDataRow$QCControl == "true") {
+                if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
                     if (curveFitLogTransform) {
                         yLabel = paste("log(",yLabel,")", sep="");
                         logAxes = "xy"
@@ -527,7 +527,7 @@ if (nrow(titration.data) > 0)
           }
 
           # if we are creating a PDF for the QC Control, close the device
-          if (titrationDataRow$QCControl == "true") {
+          if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
             dev.off();
           }
        }
