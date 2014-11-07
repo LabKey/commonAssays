@@ -20,6 +20,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
@@ -271,9 +272,21 @@ public class WellExclusionTable extends AbstractExclusionTable
                 // See issue 17424
                 synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
-                    List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, extraScriptContext);
-                    rerunTransformScripts(errors);
-                    return result;
+                    try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
+                    {
+                        List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, extraScriptContext);
+                        rerunTransformScripts(errors);
+                        if (errors.hasErrors())
+                        {
+                            throw errors;
+                        }
+                        transaction.commit();
+                        return result;
+                    }
+                    catch(BatchValidationException e)
+                    {
+                        throw new QueryUpdateServiceException(e.getMessage(), e);
+                    }
                 }
             }
 
@@ -284,14 +297,18 @@ public class WellExclusionTable extends AbstractExclusionTable
                 // See issue 17424
                 synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
-                    List<Map<String, Object>> result = super.deleteRows(user, container, keys, extraScriptContext);
-                    BatchValidationException errors = new BatchValidationException();
-                    rerunTransformScripts(errors);
-                    if (errors.hasErrors())
+                    try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
-                        throw errors;
+                        List<Map<String, Object>> result = super.deleteRows(user, container, keys, extraScriptContext);
+                        BatchValidationException errors = new BatchValidationException();
+                        rerunTransformScripts(errors);
+                        if (errors.hasErrors())
+                        {
+                            throw errors;
+                        }
+                        transaction.commit();
+                        return result;
                     }
-                    return result;
                 }
             }
 
@@ -302,14 +319,18 @@ public class WellExclusionTable extends AbstractExclusionTable
                 // See issue 17424
                 synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
-                    List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
-                    BatchValidationException errors = new BatchValidationException();
-                    rerunTransformScripts(errors);
-                    if (errors.hasErrors())
+                    try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
-                        throw errors;
+                        List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
+                        BatchValidationException errors = new BatchValidationException();
+                        rerunTransformScripts(errors);
+                        if (errors.hasErrors())
+                        {
+                            throw errors;
+                        }
+                        transaction.commit();
+                        return result;
                     }
-                    return result;
                 }
             }
 
