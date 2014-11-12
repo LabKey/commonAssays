@@ -102,6 +102,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
+        addRunCounts();
+        
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
@@ -152,6 +154,58 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         maxFIStdDevCol.setLabel(targetColumnLabelPrefix + " FI StdDev");
         maxFIStdDevCol.setFormat("0.00");
         addColumn(maxFIStdDevCol);
+    }
+    
+    private void addRunCounts() {
+        SQLFragment runCountsBaseSQL = new SQLFragment("(SELECT COUNT(*) ");
+        runCountsBaseSQL.append("FROM ");
+        runCountsBaseSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
+
+        runCountsBaseSQL.append(" JOIN ");
+        runCountsBaseSQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
+        runCountsBaseSQL.append(" ON gs.RowId = at.GuideSetId ");
+
+        // do MaxFI counts before joining in CurveFit table
+        SQLFragment maxFIRunCountsSQL = new SQLFragment(runCountsBaseSQL);
+        maxFIRunCountsSQL.append("WHERE gs.RowId = ");
+        maxFIRunCountsSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        maxFIRunCountsSQL.append(".RowId AND at.IncludeInGuideSetCalculation = ? AND at.MaxFI IS NOT NULL)");
+        maxFIRunCountsSQL.add(Boolean.TRUE);
+
+        ExprColumn maxFIRunCounts = new ExprColumn(this, "maxFIRunCounts", maxFIRunCountsSQL, JdbcType.INTEGER);
+        maxFIRunCounts.setLabel("Max FI Run Counts");
+        addColumn(maxFIRunCounts);
+
+        // finish runCountsBaseSQL by joining in CurveFit table
+        runCountsBaseSQL.append(" JOIN ");
+        runCountsBaseSQL.append(LuminexProtocolSchema.getTableInfoCurveFit(), "cf");
+        runCountsBaseSQL.append(" ON cf.AnalyteId = at.AnalyteId AND cf.TitrationId = at.TitrationId ");
+
+        runCountsBaseSQL.append("WHERE gs.RowId = ");
+        runCountsBaseSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        runCountsBaseSQL.append(".RowId AND at.IncludeInGuideSetCalculation = ? ");
+        runCountsBaseSQL.add(Boolean.TRUE);
+
+        SQLFragment ec504plRunCountsSQL = new SQLFragment(runCountsBaseSQL);
+        ec504plRunCountsSQL.append("AND cf.CurveType='Four Parameter' AND cf.EC50 IS NOT NULL AND cf.FailureFlag IS NULL)");
+
+        ExprColumn ec504plRunCounts = new ExprColumn(this, "EC504PLRunCounts", ec504plRunCountsSQL, JdbcType.INTEGER);
+        ec504plRunCounts.setLabel("EC50 4PL Run Counts");
+        addColumn(ec504plRunCounts);
+
+        SQLFragment ec505plRunCountsSQL = new SQLFragment(runCountsBaseSQL);
+        ec505plRunCountsSQL.append("AND cf.CurveType='Five Parameter' AND cf.EC50 IS NOT NULL AND cf.FailureFlag IS NULL)");
+
+        ExprColumn ec505plRunCounts = new ExprColumn(this, "EC505PLRunCounts", ec505plRunCountsSQL, JdbcType.INTEGER);
+        ec505plRunCounts.setLabel("EC50 5PL Run Counts");
+        addColumn(ec505plRunCounts);
+
+        SQLFragment aucRunCountsSQL = new SQLFragment(runCountsBaseSQL);
+        aucRunCountsSQL.append("AND cf.CurveType='Trapezoidal' AND cf.AUC IS NOT NULL AND cf.FailureFlag IS NULL)");
+
+        ExprColumn aucRunCounts = new ExprColumn(this, "AUCRunCounts", aucRunCountsSQL, JdbcType.INTEGER);
+        aucRunCounts.setLabel("AUC Run Counts");
+        addColumn(aucRunCounts);
     }
 
     protected LookupForeignKey createCurveFitFK(final String curveType)
