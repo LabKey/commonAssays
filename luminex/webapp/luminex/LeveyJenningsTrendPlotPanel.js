@@ -366,6 +366,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             LABKEY.Query.executeSql({
                 schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.Network" + sqlFragment,
+                containerFilter: LABKEY.Query.containerFilter.allFolders,
                 success: function(data) {
                     this.networkCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'Network'));
                     this.networkCombobox.setValue(this.ANY_FIELD);
@@ -378,6 +379,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             LABKEY.Query.executeSql({
                 schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
                 sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.CustomProtocol AS CustomProtocol" + sqlFragment,
+                containerFilter: LABKEY.Query.containerFilter.allFolders,
                 success: function(data) {
                     this.protocolCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'CustomProtocol'));
                     this.protocolCombobox.setValue(this.ANY_FIELD);
