@@ -21,7 +21,6 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -70,11 +69,11 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         }
     }
 
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         File dataFile = data.getFile();
         MS2Run run = null;
-        ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(dataFile, container);
+        ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(dataFile, data.getContainer());
         if (ppFile != null)
         {
             run = MS2Manager.getRun(ppFile.getRun());

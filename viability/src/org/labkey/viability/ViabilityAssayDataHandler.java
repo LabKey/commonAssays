@@ -231,7 +231,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         return false;
     }
 
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         return null;
     }

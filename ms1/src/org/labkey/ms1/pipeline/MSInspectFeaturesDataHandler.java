@@ -611,18 +611,17 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     /**
      * Returns the content URL for files imported through this class. This is called by the Experiment module
-     * @param container     The current container
      * @param data          The experiment data object
      * @return              The URL the user should be redirected to
      */
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         ExpRun run = data.getRun();
         if (run == null)
         {
             return null;
         }
-        ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, container);
+        ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, data.getContainer());
         url.addParameter("runId", Integer.toString(run.getRowId()));
         return url;
     }

@@ -156,9 +156,9 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         MS1Manager.get().moveFileData(oldDataRowID, newData.getRowId());
     } //runMoved()
 
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
-        ActionURL url = new ActionURL(MS1Controller.ShowPeaksAction.class, container);
+        ActionURL url = new ActionURL(MS1Controller.ShowPeaksAction.class, data.getContainer());
         url.addParameter("dataRowId", Integer.toString(data.getRowId()));
         return url;
     } //getContentURL()

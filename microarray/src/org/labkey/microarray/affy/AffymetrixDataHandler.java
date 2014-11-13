@@ -187,7 +187,7 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
     }
 
     @Override
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         return null;
     }

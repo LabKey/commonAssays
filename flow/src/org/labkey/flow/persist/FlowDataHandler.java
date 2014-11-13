@@ -82,7 +82,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         if (data == null)
             return null;
@@ -93,9 +93,9 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 
         // NOTE: data.getRunId() may be null if the flow run was deleted but the exp.data was not.
         if (url.endsWith(EXT_DATA) && data.getRunId() != null)
-            return new ActionURL(RunController.ShowRunAction.class, container).addParameter("runId", data.getRunId());
+            return new ActionURL(RunController.ShowRunAction.class, data.getContainer()).addParameter("runId", data.getRunId());
         if (url.endsWith((EXT_SCRIPT)))
-            return new ActionURL(AnalysisScriptController.BeginAction.class, container).addParameter("scriptId", data.getRowId());
+            return new ActionURL(AnalysisScriptController.BeginAction.class, data.getContainer()).addParameter("scriptId", data.getRowId());
         
         return null;
         //http://localhost:8080/labkey/flow-run/DRT/Flow%20Verify%20Project/FlowTest/showRun.view?runId=15

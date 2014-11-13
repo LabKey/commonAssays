@@ -391,7 +391,7 @@ public class ExpressionMatrixDataHandler extends AbstractExperimentDataHandler
     }
 
     @Override
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         return null;
     }

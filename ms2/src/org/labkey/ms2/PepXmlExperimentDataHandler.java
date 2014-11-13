@@ -145,10 +145,10 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         return MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), c);
     }
 
-    public ActionURL getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(ExpData data)
     {
         File dataFile = data.getFile();
-        MS2Run run = getMS2Run(dataFile, container);
+        MS2Run run = getMS2Run(dataFile, data.getContainer());
         if (run == null)
         {
             return null;

@@ -118,7 +118,7 @@ public class FlowWorkspace extends FlowDataObject
     {
         if (!getData().isFileOnDisk())
             return null;
-        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer(), getData(), false);
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getData(), false);
         return url;
     }
 
