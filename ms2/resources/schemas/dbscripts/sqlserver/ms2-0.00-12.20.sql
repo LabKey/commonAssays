@@ -838,6 +838,7 @@ UPDATE exp.DataInput SET Role = 'Spectra' WHERE Role = 'mzXML';
 GO
 
 CREATE PROCEDURE prot.create_go_indexes AS
+BEGIN
     ALTER TABLE prot.goterm ADD CONSTRAINT pk_goterm PRIMARY KEY (id)
     CREATE INDEX IX_GoTerm_Name ON prot.GoTerm(name)
     CREATE INDEX IX_GoTerm_TermType ON prot.GoTerm(termtype)
@@ -863,10 +864,12 @@ CREATE PROCEDURE prot.create_go_indexes AS
     CREATE INDEX IX_GoTermSynonym_TermId ON prot.GoTermSynonym(termId)
     CREATE INDEX IX_GoTermSynonym_termSynonym ON prot.GoTermSynonym(termSynonym)
     CREATE UNIQUE INDEX UQ_GoTermSynonym_termId_termSynonym ON prot.GoTermSynonym(termId,termSynonym);
+END
 
 GO
 
 CREATE PROCEDURE prot.drop_go_indexes AS
+BEGIN
     EXEC core.fn_dropifexists 'goterm', 'prot', 'Constraint', 'PK_GoTerm'
     EXEC core.fn_dropifexists 'goterm', 'prot', 'Index', 'IX_GoTerm_Name'
     EXEC core.fn_dropifexists 'goterm', 'prot', 'Index', 'IX_GoTerm_TermType'
@@ -892,6 +895,7 @@ CREATE PROCEDURE prot.drop_go_indexes AS
     EXEC core.fn_dropifexists 'gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_TermId'
     EXEC core.fn_dropifexists 'gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_termSynonym'
     EXEC core.fn_dropifexists 'gotermsynonym', 'prot', 'Index', 'UQ_GoTermSynonym_termId_termSynonym';
+END
 
 GO
 
