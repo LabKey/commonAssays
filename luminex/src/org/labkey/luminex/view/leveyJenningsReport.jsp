@@ -39,6 +39,7 @@
         resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsTrendPlotPanel.js"));
         resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsTrackingDataPanel.js"));
         resources.add(ClientDependency.fromFilePath("luminex/ManageGuideSetPanel.js"));
+        resources.add(ClientDependency.fromFilePath("luminex/GuideSetWindow.js"));
         resources.add(ClientDependency.fromFilePath("luminex/ApplyGuideSetPanel.js"));
         resources.add(ClientDependency.fromFilePath("Experiment/QCFlagToggleWindow.js"));
         resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsReport.css"));
@@ -230,6 +231,9 @@
                         {
                             window.location = trendPlotPanel.getPdfHref();
                         }
+                    },
+                    'appliedGuideSetUpdated': function() {
+                        trackingDataPanel.fireEvent('appliedGuideSetUpdated');
                     }
                 }
             });

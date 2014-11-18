@@ -55,6 +55,10 @@ public class GuideSet
     private Timestamp _modified;
     private Integer _createdBy;
     private Integer _modifiedBy;
+    private boolean _ec504plEnabled;
+    private boolean _ec505plEnabled;
+    private boolean _aucEnabled;
+    private boolean _maxFIEnabled;
 
     public int getRowId()
     {
@@ -264,6 +268,46 @@ public class GuideSet
     public void setAucStdDev(Double aucStdDev)
     {
         _aucStdDev = aucStdDev;
+    }
+
+    public boolean isEc504plEnabled()
+    {
+        return _ec504plEnabled;
+    }
+
+    public void setEc504plEnabled(boolean ec504plEnabled)
+    {
+        _ec504plEnabled = ec504plEnabled;
+    }
+
+    public boolean isEc505plEnabled()
+    {
+        return _ec505plEnabled;
+    }
+
+    public void setEc505plEnabled(boolean ec505plEnabled)
+    {
+        _ec505plEnabled = ec505plEnabled;
+    }
+
+    public boolean isAucEnabled()
+    {
+        return _aucEnabled;
+    }
+
+    public void setAucEnabled(boolean aucEnabled)
+    {
+        _aucEnabled = aucEnabled;
+    }
+
+    public boolean isMaxFIEnabled()
+    {
+        return _maxFIEnabled;
+    }
+
+    public void setMaxFIEnabled(boolean maxFIEnabled)
+    {
+        _maxFIEnabled = maxFIEnabled;
     }
 
     public boolean hasMetricValues()

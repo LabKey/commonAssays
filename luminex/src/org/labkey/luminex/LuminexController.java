@@ -16,16 +16,27 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.collections15.MultiMap;
+import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.JavaScriptDisplayColumn;
+import org.labkey.api.data.JavaScriptDisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TSVWriter;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -34,7 +45,6 @@ import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.query.AbstractQueryImportAction;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
@@ -69,6 +79,8 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
+import org.labkey.luminex.model.AnalyteTitration;
+import org.labkey.luminex.model.GuideSetQCForm;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
 import org.springframework.validation.Errors;
@@ -78,7 +90,10 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -117,7 +132,6 @@ public class LuminexController extends SpringActionController
     public class ExcludedDataAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
-
 
         @Override
         public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
@@ -637,6 +651,91 @@ public class LuminexController extends SpringActionController
             response.put("success", true);
             response.put("returnUrl", PageFlowUtil.urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.CURRENT));
             return response;
+        }
+    }
+
+    // NOTE: does UpdatePermission restrict to editors? -- think so but need to verify.
+    @RequiresPermissionClass(UpdatePermission.class)
+    public class UpdateGuideSetQCAction extends ApiAction<GuideSetQCForm>
+    {
+        private ExpProtocol _protocol;
+
+        @Override
+        public void validateForm(GuideSetQCForm guideSetQCForm, Errors errors)
+        {
+            // any particular cases we need to handle? Nulls -- > thus are handled in the Form?
+        }
+
+        @Override
+        public Object execute(GuideSetQCForm form, BindException errors) throws Exception
+        {
+            SQLFragment updateSQL = new SQLFragment("UPDATE ");
+            updateSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), " "); // using alias to add space at end... silly object why do you not behave better.
+
+            updateSQL.append("SET EC504PLEnabled=?, EC505PLEnabled=?, MaxFIEnabled=?, AUCEnabled=? ");
+            updateSQL.add(form.isEc504plEnabled());
+            updateSQL.add(form.isEc505plEnabled());
+            updateSQL.add(form.isMfiEnabled());
+            updateSQL.add(form.isAucEnabled());
+
+            updateSQL.append("WHERE RowId=?");
+            updateSQL.add(form.getCurrentGuideSetId());
+
+            SqlExecutor executor = new SqlExecutor(LuminexProtocolSchema.getSchema());
+            executor.execute(updateSQL);
+
+            _protocol = form.getProtocol();
+            AssayProvider provider = form.getProvider();
+            if (!(provider instanceof LuminexAssayProvider))
+                throw new ProtocolIdForm.ProviderNotFoundException("Luminex assay provider not found", _protocol);
+
+            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), (LuminexAssayProvider)provider, _protocol, null);
+            // copy pasta from GuideSetTable:377
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), form.getCurrentGuideSetId());
+            TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
+            List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
+            for (AnalyteTitration titration : titrations)
+            {
+                titration.updateQCFlags(schema);
+            }
+
+            return null;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ManageGuideSetAction extends BaseAssayAction<ProtocolIdForm>
+    {
+        private ExpProtocol _protocol;
+
+        @Override
+        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        {
+            _protocol = form.getProtocol();
+
+            AssayView result = new AssayView();
+            final AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+            QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME, LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
+            // set base filter?
+            // help topic?
+
+            QueryView view = new QueryView(schema, settings, errors);
+
+            view.setShadeAlternatingRows(true);
+            view.setShowBorders(true);
+            view.setShowUpdateColumn(false);
+            view.setFrame(WebPartView.FrameType.NONE);
+            result.setupViews(view, false, form.getProvider(), form.getProtocol());
+
+            return result;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            result.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
+            return result.addChild("Manage Guide Sets");
         }
     }
 }

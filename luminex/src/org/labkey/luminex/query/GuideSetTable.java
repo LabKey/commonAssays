@@ -19,8 +19,12 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.ForeignKey;
+import org.labkey.api.data.JavaScriptDisplayColumn;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
@@ -28,6 +32,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -47,8 +52,13 @@ import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.model.GuideSet;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -97,6 +107,45 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
         });
 
+        AliasedColumn detailsCol = new AliasedColumn("Details", wrapColumn(getRealTable().getColumn(FieldKey.fromParts("RowId"))));
+        detailsCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                Collection<String> dependencies = Collections.singletonList("luminex/GuideSetWindow.js");
+                String javaScriptEvent = "onclick=\"createGuideSetWindow(${ProtocolId:jsString}, ${RowId:jsString});\"";
+                return new JavaScriptDisplayColumn(colInfo, dependencies, javaScriptEvent, "labkey-text-link")
+                {
+                    @NotNull
+                    @Override
+                    public String getFormattedValue(RenderContext ctx)
+                    {
+                        return "details";
+                    }
+
+                    @Override
+                    public void renderTitle(RenderContext ctx, Writer out) throws IOException
+                    {
+                        // no title
+                    }
+
+                    @Override
+                    public boolean isSortable()
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isFilterable()
+                    {
+                        return false;
+                    }
+                };
+            }
+        });
+        addColumn(detailsCol);
+
         addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "TitrationMax", "Titration Max", "GuideSetId");
         AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(false);
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
@@ -111,6 +160,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         getColumn("Created").setLabel("Guide Set Start Date");
 
         addCurveTypeColumns();
+
+        // fix placement of "details" column
+        List<FieldKey> defaultCols = new ArrayList<>(getDefaultVisibleColumns());
+        defaultCols.remove(detailsCol.getFieldKey());
+        defaultCols.add(0, detailsCol.getFieldKey());
+        setDefaultVisibleColumns(defaultCols);
     }
 
     /** Add a flavor of FI columns (as of this writing, used by SinglePointControls and Titrations) to the current table
@@ -252,6 +307,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     @Override
     public QueryUpdateService getUpdateService()
     {
+
         return new GuideSetTableUpdateService(this);
     }
 
@@ -360,22 +416,19 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             GuideSet updatedGuideSet = Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
 
             // if value-based guide set, updates to it might change expected ranges so QC flags needs to be updated
-            if (updatedGuideSet.isValueBased())
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
+            TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
+            List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
+            for (AnalyteSinglePointControl singlePointControl : singlePointControls)
             {
-                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
-                TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
-                List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
-                for (AnalyteSinglePointControl singlePointControl : singlePointControls)
-                {
-                    singlePointControl.updateQCFlags(_userSchema);
-                }
+                singlePointControl.updateQCFlags(_userSchema);
+            }
 
-                selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
-                List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
-                for (AnalyteTitration titration : titrations)
-                {
-                    titration.updateQCFlags(_userSchema);
-                }
+            selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
+            List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
+            for (AnalyteTitration titration : titrations)
+            {
+                titration.updateQCFlags(_userSchema);
             }
 
             return updatedGuideSet;

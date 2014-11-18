@@ -43,7 +43,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             userCanUpdate: LABKEY.user.canUpdate
         });
 
-        this.addEvents('currentGuideSetUpdated', 'exportPdfBtnClicked');
+        this.assayName = config.assayName;
+
+        this.addEvents('currentGuideSetUpdated', 'exportPdfBtnClicked', 'appliedGuideSetUpdated');
 
         LABKEY.LeveyJenningsGuideSetPanel.superclass.constructor.call(this, config);
     },
@@ -119,6 +121,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             handler: this.viewParameterDetails,
             scope: this
         });
+        // NOTE: this button sucks... go ahead and try to align it right in Ext4... I dare you.
         items.push(this.guideSetDetailsButton);
 
         this.items = items;
@@ -195,7 +198,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.currentGuideSetId = row["RowId"];
                 this.editGuideSetButton.enable();
                 this.newGuideSetButton.enable();
-                this.guideSetDetailsButton.setVisible(!row["ValueBased"]);
+                this.guideSetDetailsButton.setVisible(true);
             }
 
             this.guideSetCompositeField.doLayout();
@@ -235,7 +238,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         // if the panel was closed because of a successful save, we need to reload some stuff
                         if (saveResults)
                         {
-                            this.queryCurrentGuideSetInfo(false);
+                            this.queryCurrentGuideSetInfo();
                             this.fireEvent('currentGuideSetUpdated');
                         }
 
@@ -277,50 +280,17 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     viewParameterDetails: function() {
         if (this.currentGuideSetId)
         {
-            var sql = "";
-            if (this.controlType == "SinglePoint")
-            {
-                sql = "SELECT 'MFI' AS Parameter,SinglePointControlFIAverage AS HistoricalMean,SinglePointControlFIStdDev AS StandardDeviation FROM GuideSet WHERE RowId="+this.currentGuideSetId
-            }
-            else
-            {
-                sql = "SELECT 'EC50 - 4PL' AS Parameter,EC50Average AS HistoricalMean,EC50StdDev AS StandardDeviation FROM GuideSetCurveFit WHERE CurveType = 'Four Parameter' AND GuideSetId.RowId="+this.currentGuideSetId
-                    + " UNION SELECT 'EC50 - 5PL Rumi' AS Parameter,EC50Average AS HistoricalMean,EC50StdDev AS StandardDeviation FROM GuideSetCurveFit WHERE CurveType = 'Five Parameter' AND GuideSetId.RowId="+this.currentGuideSetId
-                    + " UNION SELECT 'AUC' AS Parameter,AUCAverage AS HistoricalMean,AUCStdDev AS StandardDeviation FROM GuideSetCurveFit WHERE CurveType = 'Trapezoidal' AND GuideSetId.RowId="+this.currentGuideSetId
-                    + " UNION SELECT 'High MFI' AS Parameter,TitrationMaxFIAverage AS HistoricalMean,TitrationMaxFIStdDev AS StandardDeviation FROM GuideSet WHERE RowId="+this.currentGuideSetId;
-            }
-
-            var grid = Ext4.create('Ext.Component', {
-                listeners : {
+            Ext4.create('Luminex.window.GuideSetWindow', {
+                assayName: this.assayName,
+                currentGuideSetId: this.currentGuideSetId,
+                listeners: {
                     scope: this,
-                    render : function() {
-                        var qwp = new LABKEY.QueryWebPart({
-                            renderTo: grid.getId(),
-                            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
-                            sql: sql,
-                            sort: 'Parameter',
-                            frame : 'none',
-                            buttonBarPosition: 'top',
-                            allowChooseView: false,
-                            scope : this
-                        });
+                    close: function() {
+                        this.fireEvent('appliedGuideSetUpdated');
+                        console.log("bang");
                     }
                 }
             });
-
-            var win = Ext4.create('Ext.window.Window', {
-                title: 'Guide Set Parameter Details',
-                modal: true,border: false,
-                height: 225,width: 300,
-                autoScroll: true,
-                items: [grid],
-                buttons: [{
-                    text: 'Close',
-                    scope: this,
-                    handler: function() { win.close(); }
-                }]
-            });
-            win.show();
         }
     }
 });

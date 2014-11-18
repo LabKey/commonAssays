@@ -818,6 +818,7 @@ luminex/src/org/labkey/luminex/model/AnalyteTitrationQCFlag.java -text
 luminex/src/org/labkey/luminex/model/CVQCFlag.java -text
 luminex/src/org/labkey/luminex/model/CurveFit.java -text
 luminex/src/org/labkey/luminex/model/GuideSet.java -text
+luminex/src/org/labkey/luminex/model/GuideSetQCForm.java -text
 luminex/src/org/labkey/luminex/model/LuminexDataRow.java -text
 luminex/src/org/labkey/luminex/model/LuminexWell.java -text
 luminex/src/org/labkey/luminex/model/LuminexWellGroup.java -text
@@ -868,6 +869,7 @@ luminex/webapp/luminex/ApplyGuideSetPanel.js -text
 luminex/webapp/luminex/BaseExclusionPanel.js -text
 luminex/webapp/luminex/Exclusion.css -text
 luminex/webapp/luminex/GuideSet.css -text
+luminex/webapp/luminex/GuideSetWindow.js -text
 luminex/webapp/luminex/LeveyJenningsGraphParamsPanel.js -text
 luminex/webapp/luminex/LeveyJenningsGuideSetPanel.js -text
 luminex/webapp/luminex/LeveyJenningsReport.css -text

@@ -399,6 +399,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         // add link to view Levey-Jenning reports
         qcReportMenu.addChild("view levey-jennings reports", new ActionURL(LuminexController.LeveyJenningsMenuAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()));
 
+        // add link to manage guide sets
+        qcReportMenu.addChild("manage guide sets", new ActionURL(LuminexController.ManageGuideSetAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()));
+
         result.add(qcReportMenu);
 
         return result;

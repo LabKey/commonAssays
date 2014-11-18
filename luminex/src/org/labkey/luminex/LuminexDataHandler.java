@@ -1492,7 +1492,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 // add QCFlag for High MFI, if out of guide set range
                 String outOfRangeType = guideSetRow.getOutOfRangeTypeForMaxFI(analyteTitration.getMaxFI(), guideSetTable, "TitrationMaxFIAverage", "TitrationMaxFIStdDev");
-                if (null != outOfRangeType)
+                if (guideSetRow.isMaxFIEnabled() && null != outOfRangeType)
                 {
                     newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), QC_FLAG_HIGH_MFI_FLAG_TYPE, descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
                 }
@@ -1502,17 +1502,17 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 {
                     String flagType = null;
 
-                    if (curveFit.getCurveType().equals(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
+                    if (guideSetRow.isEc504plEnabled() && curveFit.getCurveType().equals(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
                     {
                         outOfRangeType = guideSetRow.getOutOfRangeTypeForEC504PL(curveFit.getEC50(), guideSetTable);
                         flagType = QC_FLAG_EC50_4PL_FLAG_TYPE;
                     }
-                    else if (curveFit.getCurveType().equals(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
+                    else if (guideSetRow.isEc505plEnabled() && curveFit.getCurveType().equals(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
                     {
                         outOfRangeType = guideSetRow.getOutOfRangeTypeForEC505PL(curveFit.getEC50(), guideSetTable);
                         flagType = QC_FLAG_EC50_5PL_FLAG_TYPE;
                     }
-                    else if (curveFit.getCurveType().equals("Trapezoidal"))
+                    else if (guideSetRow.isAucEnabled() && curveFit.getCurveType().equals("Trapezoidal"))
                     {
                         outOfRangeType = guideSetRow.getOutOfRangeTypeForAUC(curveFit.getAUC(), guideSetTable);
                         flagType = QC_FLAG_AUC_FLAG_TYPE;
