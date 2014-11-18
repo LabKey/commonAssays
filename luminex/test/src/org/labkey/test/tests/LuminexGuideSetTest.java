@@ -248,7 +248,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
         // check that only 1 runs are now present
         waitForElementToDisappear(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "1"), WAIT_FOR_JAVASCRIPT);
-        assertElementPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "3"));
+        waitForElement(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "3"));
 
         assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "1"));
         assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "2"));
