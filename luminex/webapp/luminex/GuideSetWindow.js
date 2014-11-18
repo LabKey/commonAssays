@@ -57,7 +57,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
                 '<td align="center">{EC504PLRunCounts}</td>',
-                '<td><input type="checkbox" name="EC504PLCheckBox" onchange="setGuideSetWindowDirty(\'EC504PLCheckBox\');"></td>',
+                '<td><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
             '</tr><tr>',
                 '<td>EC50 5PL</td>',
@@ -65,7 +65,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
                 '<td align="center">{EC505PLRunCounts}</td>',
-                '<td><input type="checkbox" name="EC505PLCheckBox" onchange="setGuideSetWindowDirty(\'EC505PLCheckBox\');"></td>',
+                '<td><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
             '</tr><tr>',
                 '<td>MFI</td>',
@@ -73,7 +73,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.MaxFIAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
                 '<td align="center">{maxFIRunCounts}</td>',
-                '<td><input type="checkbox" name="MFICheckBox" onchange="setGuideSetWindowDirty(\'MFICheckBox\');"></td>',
+                '<td><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
             '</tr><tr>',
                 '<td>AUC</td>',
@@ -81,7 +81,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.AUCAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
                 '<td align="center">{AUCRunCounts}</td>',
-                '<td><input type="checkbox" name="AUCCheckBox" onchange="setGuideSetWindowDirty(\'AUCCheckBox\');"></td>',
+                '<td><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
             '</tr>',
             '</table>',
@@ -106,6 +106,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
 
         this.buttons = [{
             id: 'GuideSetSaveButton',
+            disabled: true,
             text: 'Save',
             scope: this,
             handler: function(btn) {
@@ -260,18 +261,21 @@ function createGuideSetWindow(protocolId, currentGuideSetId) {
     });
 }
 
-//var guideSetWindowDirtyBit = true;
-//
-//function isGuideSetWindowDirty() {
-//    return guideSetWindowDirtyBit
-//}
-//
-//NOTE to make this dirty more robust without going all extjs, then we need to bring out the store values as defaultValues
-//
-//function setGuideSetWindowDirty(name) {
-//    var form = document.forms['GuideSetForm'];
-//    guideSetWindowDirtyBit = (form.elements[name].checked != form.elements[name].initial);
-// note this doesn't work because appearently the button doesn't have a disabled field... or a setDisabled method...which means the button isn't even really a ExtJS3 button... so that's a funny in a painful kind of way.
-//    console.log(Ext4.get('GuideSetSaveButton'));
-//    Ext.get('GuideSetSaveButton').setDisabled(true);
-//}
+function checkGuideSetWindowDirty(name) {
+    var fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
+    var form = document.forms['GuideSetForm'];
+    console.log(form);
+    var guideSetWindowDirtyBit = false;
+    // Uncaught TypeError: Cannot read property 'checked' of undefined (when unchecking all the boxes... who knows why)
+    try {
+        for (var name in fields) {
+            if (form.elements[name].checked != form.elements[name].initial)
+            {
+                guideSetWindowDirtyBit = true;
+                break;
+            }
+        }
+    }
+    catch (err) {}
+    Ext4.getCmp('GuideSetSaveButton').setDisabled(!guideSetWindowDirtyBit);
+}
