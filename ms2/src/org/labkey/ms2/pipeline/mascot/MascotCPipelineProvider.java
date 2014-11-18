@@ -226,7 +226,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 //        return mock;
     }
 
-    public Map<String, String> getEnzymes() throws IOException 
+    public Map<String, List<String>> getEnzymes() throws IOException
     {
         AppProps.Interface appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
@@ -234,7 +234,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
         MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
         mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
-        Map<String,String> enzymes = mascotClient.getEnzymeMap();
+        Map<String, List<String>> enzymes = mascotClient.getEnzymeMap();
 
         if (0 == enzymes.size())
         {

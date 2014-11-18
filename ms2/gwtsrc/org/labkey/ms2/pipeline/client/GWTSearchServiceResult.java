@@ -33,7 +33,7 @@ public class GWTSearchServiceResult implements IsSerializable
     private List<String> sequenceDbPaths;
     private List<String> mascotTaxonomyList;
 
-    private Map<String, String> enzymeMap;
+    private Map<String, List<String>> enzymeMap;
 
     private Map<String, String> mod0Map;
 
@@ -176,12 +176,12 @@ public class GWTSearchServiceResult implements IsSerializable
         this.activeJobs = activeJobs;
     }
 
-    public Map<String, String> getEnzymeMap()
+    public Map<String, List<String>> getEnzymeMap()
     {
         return enzymeMap;
     }
 
-    public void setEnzymeMap(Map<String, String> enzymeMap)
+    public void setEnzymeMap(Map<String, List<String>> enzymeMap)
     {
         this.enzymeMap = enzymeMap;
     }

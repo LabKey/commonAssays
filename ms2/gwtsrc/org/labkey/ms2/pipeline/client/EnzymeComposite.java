@@ -32,8 +32,9 @@ import java.util.*;
  */
 public class EnzymeComposite extends SearchFormComposite
 {
-   protected VerticalPanel instance = new VerticalPanel();
+    protected VerticalPanel instance = new VerticalPanel();
     protected ListBox enzymeListBox = new ListBox();
+    protected Map<String, List<String>> enzymes = new HashMap<String, List<String>>();
     protected Label enzymeReadOnly = new Label();
 
     public EnzymeComposite()
@@ -44,18 +45,20 @@ public class EnzymeComposite extends SearchFormComposite
         initWidget(instance);
     }
 
-    public void update(Map<String, String> enzymeMap)
+    public void update(Map<String, List<String>> enzymeMap)
     {
         if(enzymeMap == null) return;
         Set<String> keySet =  enzymeMap.keySet();
         ArrayList<String> sorted = new ArrayList<String>(keySet);
         Collections.sort(sorted);
         enzymeListBox.clear();
+        enzymes = enzymeMap;
 
         for(String name : sorted)
         {
-            String value = enzymeMap.get(name);
-            enzymeListBox.addItem(name, value);
+            List<String> value = enzymeMap.get(name);
+            // Add just the "canonical" enzyme signature
+            enzymeListBox.addItem(name, value.get(0));
         }
         setSelectedEnzymeByName("Trypsin");
     }
@@ -120,44 +123,55 @@ public class EnzymeComposite extends SearchFormComposite
 
     public String setSelectedEnzyme(String enzymeSignature)
     {
-        Enzyme enzyme;
         try
         {
-            enzyme = new Enzyme(enzymeSignature);
+            new Enzyme(enzymeSignature);
         }
         catch(EnzymeParseException e)
         {
             return e.getMessage();
         }
-        return findEnzyme(enzyme);
+        return findEnzyme(enzymeSignature);
     }
 
-    private String findEnzyme(Enzyme origCutSite)
+    private String findEnzyme(String enzymeSignature)
     {
-        if(origCutSite == null) return "Cut site is equal to null.";
         int enzCount = enzymeListBox.getItemCount();
         boolean foundEnz = false;
 
+        String canonicalSignature = null;
+
+        for (Map.Entry<String, List<String>> entry : enzymes.entrySet())
+        {
+            if (entry.getValue().contains(enzymeSignature))
+            {
+                canonicalSignature = entry.getValue().get(0);
+                break;
+            }
+        }
+        if(canonicalSignature == null)
+            return "The enzyme '" + enzymeSignature + "' was not found.";
+
         for(int i = 0; i < enzCount; i++)
         {
-            Enzyme listCutSite;
             try
             {
                 String listBoxValue = enzymeListBox.getValue(i);
-                listCutSite = new Enzyme(listBoxValue);
+                // Create to see if it parses
+                new Enzyme(listBoxValue);
+                if(canonicalSignature.equals(listBoxValue))
+                {
+                    enzymeListBox.setSelectedIndex(i);
+                    foundEnz = true;
+                }
             }
             catch(EnzymeParseException e)
             {
                 return e.getMessage();
             }
-            if(origCutSite.equals(listCutSite))
-            {
-                enzymeListBox.setSelectedIndex(i);
-                foundEnz = true;
-            }
         }
         if(!foundEnz)
-            return "The enzyme '" + origCutSite.toString() + "' was not found.";
+            return "The enzyme '" + enzymeSignature + "' was not found.";
         return "";
     }
 

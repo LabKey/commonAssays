@@ -80,7 +80,8 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     abstract public List<String> getTaxonomyList() throws IOException;
 
-    abstract public Map<String, String> getEnzymes() throws IOException;
+    /** @return enzyme name -> cut patterns */
+    abstract public Map<String, List<String>> getEnzymes() throws IOException;
 
     abstract public Map<String, String> getResidue0Mods() throws IOException;
 

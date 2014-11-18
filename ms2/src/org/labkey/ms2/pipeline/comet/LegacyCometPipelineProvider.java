@@ -101,7 +101,7 @@ public class LegacyCometPipelineProvider extends AbstractMS2SearchPipelineProvid
         throw new UnsupportedOperationException("LegacyComet does not support Mascot style taxonomy.");
     }
 
-    public Map<String, String> getEnzymes() throws IOException {
+    public Map<String, List<String>> getEnzymes() throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }

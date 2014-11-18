@@ -49,7 +49,7 @@ public class SearchFormUtil
         tppEnzymeList.add(new Enzyme("AspN",new String[]{"aspn","asp-n"},
                 new CutSite[]{new CutSite(new char[]{'D'}, new char[]{},"[X]|[D]", true)}));
         tppEnzymeList.add(new Enzyme("Chymotrypsin", new String[]{"chymotrypsin"},
-                new CutSite[]{new CutSite( new char[]{'Y','W','F','M'}, new char[]{'P'},"[YWFM]|{P}", false)}));
+                new CutSite[]{new CutSite( new char[]{'Y','W','F','M','L'}, new char[]{'P'},"[FLMWY]|{P}", false), new CutSite(new char[]{'Y','W','F','M'}, new char[]{'P'},"[YWFM]|{P}", false)}));
         tppEnzymeList.add(new Enzyme("Clostripain", new String[]{"clostripain"},
                 new CutSite[]{new CutSite( new char[]{'R'}, new char[]{'-'},"[R]|[X]", false)}));
         tppEnzymeList.add(new Enzyme("CNBr", new String[]{"cnbr"},
@@ -102,34 +102,34 @@ public class SearchFormUtil
         return tppEnzymeList;
     }
 
-    public static Map<String, String> getDefaultEnzymeMap()
+    public static Map<String, List<String>> getDefaultEnzymeMap()
     {
-        Map<String, String> enzymeMap = new HashMap<>();
-        getDefaultEnzymeList();
-        for(Enzyme enz: tppEnzymeList)
+        Map<String, List<String>> enzymeMap = new HashMap<>();
+
+        for(Enzyme enz: getDefaultEnzymeList())
         {
             String name = enz.getDisplayName();
-            CutSite[] site = enz.getCutSite();
-            StringBuilder  sb = new StringBuilder();
-            for(int i = 0; i < site.length; i++)
+            List<String> signatures = new ArrayList<>();
+            for (CutSite site : enz.getCutSite())
             {
-                if(i > 0) sb.append(",");
-                sb.append(site[i].getSignature());
+                signatures.add(site.getSignature());
             }
-            enzymeMap.put(name,sb.toString());
+            enzymeMap.put(name, signatures);
         }
         return enzymeMap;
     }
 
-    public static Map<String, String> mascot2Tpp(List<Enzyme> mascotEnzymeList)
+    public static Map<String, List<String>> mascot2Tpp(List<Enzyme> mascotEnzymeList)
     {
-        Map<String, String> enzymeMap = new HashMap<>();
+        Map<String, List<String>> enzymeMap = new HashMap<>();
         getDefaultEnzymeList();
         for(Enzyme mascotEnz: mascotEnzymeList)
         {
             if(mascotEnz.getCutSite()[0].getSignature().equalsIgnoreCase("None"))
             {
-                enzymeMap.put("None", mascotEnz.getCutSite()[0].getSignature());
+                List<String> values = new ArrayList<>();
+                values.add(mascotEnz.getCutSite()[0].getSignature());
+                enzymeMap.put("None", values);
                 continue;
             }
             for(Enzyme tppEnz: tppEnzymeList)
@@ -137,8 +137,10 @@ public class SearchFormUtil
                 if(mascotEnz.equals(tppEnz))
                 {
                     String displayName = tppEnz.getDisplayName();
-                    String siganture = mascotEnz.getCutSite()[0].getSignature();
-                    enzymeMap.put(displayName,siganture);
+                    String signature = mascotEnz.getCutSite()[0].getSignature();
+                    List<String> values = new ArrayList<>();
+                    values.add(signature);
+                    enzymeMap.put(displayName, values);
                 }
             }
         }

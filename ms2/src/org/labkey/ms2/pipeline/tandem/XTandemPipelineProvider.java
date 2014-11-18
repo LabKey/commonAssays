@@ -132,7 +132,7 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
         return null;
     }
 
-    public Map<String, String> getEnzymes() throws IOException
+    public Map<String, List<String>> getEnzymes() throws IOException
     {
         return SearchFormUtil.getDefaultEnzymeMap();
     }

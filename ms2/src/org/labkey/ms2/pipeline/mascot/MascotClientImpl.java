@@ -785,7 +785,7 @@ public class MascotClientImpl implements SearchClient
         return mods;
     }
 
-    public Map<String, String> getEnzymeMap()
+    public Map<String, List<String>> getEnzymeMap()
     {
         errorCode = 0;
         errorString = "";
@@ -799,7 +799,7 @@ public class MascotClientImpl implements SearchClient
 
         results = request(parameters, false);
 
-        List<Enzyme> enzymes = new ArrayList();
+        List<Enzyme> enzymes = new ArrayList<>();
         String dbsString = results.getProperty("HTTPContent", "");
         String[] contentLines = dbsString.split("\n");
         String mascotName = "";
