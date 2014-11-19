@@ -55,10 +55,11 @@ public class GuideSet
     private Timestamp _modified;
     private Integer _createdBy;
     private Integer _modifiedBy;
-    private boolean _ec504plEnabled;
-    private boolean _ec505plEnabled;
-    private boolean _aucEnabled;
-    private boolean _maxFIEnabled;
+    // default values
+    private boolean _ec504plEnabled = true;
+    private boolean _ec505plEnabled = true;
+    private boolean _aucEnabled = true;
+    private boolean _maxFIEnabled = true;
 
     public int getRowId()
     {
