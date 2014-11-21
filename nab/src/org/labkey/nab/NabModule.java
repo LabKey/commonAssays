@@ -26,6 +26,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -58,7 +59,7 @@ public class NabModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.30;
+        return 14.31;
     }
 
     protected void init()
@@ -83,7 +84,14 @@ public class NabModule extends DefaultModule
     @Override
     public Set<String> getSchemaNames()
     {
-        return Collections.singleton(NabProtocolSchema.NAB_DBSCHEMA_NAME);
+        return PageFlowUtil.set(NabProtocolSchema.NAB_DBSCHEMA_NAME, NabProtocolSchema.NAB_VIRUS_SCHEMA_NAME);
+    }
+
+    @NotNull
+    @Override
+    public Collection<String> getProvisionedSchemaNames()
+    {
+        return Collections.singleton(NabProtocolSchema.NAB_VIRUS_SCHEMA_NAME);
     }
 
     public void doStartup(ModuleContext moduleContext)

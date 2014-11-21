@@ -1789,6 +1789,7 @@ nab/resources/schemas/dbscripts/sqlserver/nab-13.10-13.20.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-14.20-14.21.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-14.20-14.30.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-14.21-14.22.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-14.30-14.31.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.31-12.32.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.32-12.33.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.34-12.35.sql -text
