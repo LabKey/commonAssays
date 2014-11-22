@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2014 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 // TODO: it was a bad move to go with XTemplate here. This should be replaced with a full ExtJS implementation whenever possible.
 // issues include styling, dirtying the form, and a few other things
 
