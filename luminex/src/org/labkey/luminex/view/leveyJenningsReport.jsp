@@ -232,7 +232,7 @@
                             window.location = trendPlotPanel.getPdfHref();
                         }
                     },
-                    'appliedGuideSetUpdated': function() {
+                    'guideSetMetricsUpdated': function() {
                         trackingDataPanel.fireEvent('appliedGuideSetUpdated');
                     }
                 }

@@ -45,7 +45,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         this.assayName = config.assayName;
 
-        this.addEvents('currentGuideSetUpdated', 'exportPdfBtnClicked', 'appliedGuideSetUpdated');
+        this.addEvents('currentGuideSetUpdated', 'exportPdfBtnClicked', 'guideSetMetricsUpdated');
 
         LABKEY.LeveyJenningsGuideSetPanel.superclass.constructor.call(this, config);
     },
@@ -285,10 +285,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 currentGuideSetId: this.currentGuideSetId,
                 listeners: {
                     scope: this,
-                    close: function() {
-                        this.fireEvent('appliedGuideSetUpdated');
-                        console.log("bang");
-                    }
+                    aftersave: function() { this.fireEvent('guideSetMetricsUpdated'); }
                 }
             });
         }

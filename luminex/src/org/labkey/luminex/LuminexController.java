@@ -16,27 +16,16 @@
 
 package org.labkey.luminex;
 
-import org.apache.commons.collections15.MultiMap;
-import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.JavaScriptDisplayColumn;
-import org.labkey.api.data.JavaScriptDisplayColumnFactory;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TSVWriter;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -79,8 +68,6 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
-import org.labkey.luminex.model.AnalyteTitration;
-import org.labkey.luminex.model.GuideSetQCForm;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
 import org.springframework.validation.Errors;
@@ -90,10 +77,7 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -654,55 +638,6 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    // NOTE: does UpdatePermission restrict to editors? -- think so but need to verify.
-    @RequiresPermissionClass(UpdatePermission.class)
-    public class UpdateGuideSetQCAction extends ApiAction<GuideSetQCForm>
-    {
-        private ExpProtocol _protocol;
-
-        @Override
-        public void validateForm(GuideSetQCForm guideSetQCForm, Errors errors)
-        {
-            // any particular cases we need to handle? Nulls -- > thus are handled in the Form?
-        }
-
-        @Override
-        public Object execute(GuideSetQCForm form, BindException errors) throws Exception
-        {
-            SQLFragment updateSQL = new SQLFragment("UPDATE ");
-            updateSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), " "); // using alias to add space at end... silly object why do you not behave better.
-
-            updateSQL.append("SET EC504PLEnabled=?, EC505PLEnabled=?, MaxFIEnabled=?, AUCEnabled=? ");
-            updateSQL.add(form.isEc504plEnabled());
-            updateSQL.add(form.isEc505plEnabled());
-            updateSQL.add(form.isMfiEnabled());
-            updateSQL.add(form.isAucEnabled());
-
-            updateSQL.append("WHERE RowId=?");
-            updateSQL.add(form.getCurrentGuideSetId());
-
-            SqlExecutor executor = new SqlExecutor(LuminexProtocolSchema.getSchema());
-            executor.execute(updateSQL);
-
-            _protocol = form.getProtocol();
-            AssayProvider provider = form.getProvider();
-            if (!(provider instanceof LuminexAssayProvider))
-                throw new ProtocolIdForm.ProviderNotFoundException("Luminex assay provider not found", _protocol);
-
-            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), (LuminexAssayProvider)provider, _protocol, null);
-            // copy pasta from GuideSetTable:377
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), form.getCurrentGuideSetId());
-            TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
-            List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
-            for (AnalyteTitration titration : titrations)
-            {
-                titration.updateQCFlags(schema);
-            }
-
-            return null;
-        }
-    }
-
     @RequiresPermissionClass(ReadPermission.class)
     public class ManageGuideSetAction extends BaseAssayAction<ProtocolIdForm>
     {
@@ -724,6 +659,10 @@ public class LuminexController extends SpringActionController
             view.setShadeAlternatingRows(true);
             view.setShowBorders(true);
             view.setShowUpdateColumn(false);
+            view.setShowDeleteButton(false);
+            view.setShowRecordSelectors(false);
+            view.setShowInsertNewButton(false);
+            view.setShowImportDataButton(false);
             view.setFrame(WebPartView.FrameType.NONE);
             result.setupViews(view, false, form.getProvider(), form.getProtocol());
 

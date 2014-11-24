@@ -12,7 +12,6 @@ Ext4.define('Luminex.window.GuideSetWindow', {
     title: 'Guide Set Parameter Details',
     modal: true,
     border: false,
-    height: 325,
     width: 550,
     autoScroll: true,
 
@@ -27,10 +26,10 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             '<form id="GuideSetForm">',
             '<table width="300px" style="float: left;" class="gsDetails">',
                 '<tr><th>Guide Set Id:</th><td>{RowId}</td></tr>',
-                '<tr><th>Created:</th><td>{Created}</td></tr>',
-                '<tr><th>Titration:</th><td>{ControlName}</td></tr>',
-                '<tr><th>Analyte:</th><td>{AnalyteName}</td></tr>',
-                '<tr><th>Comment:</th><td>{Comment}</td></tr>',
+                '<tr><th>Created:</th><td>{[this.dateRenderer(values.Created)]}</td></tr>',
+                '<tr><th>Titration:</th><td>{ControlName:htmlEncode}</td></tr>',
+                '<tr><th>Analyte:</th><td>{AnalyteName:htmlEncode}</td></tr>',
+                '<tr><th>Comment:</th><td>{Comment:htmlEncode}</td></tr>',
             '</table>',
             '<table width="200px" style="display: inline-block;" class="gsDetails">',
                 '<tr>',
@@ -41,9 +40,8 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     '<td>Run-based</td>',
                     '</tpl>',
                 '</tr>',
-                '<tr><th>Created By:</th><td>{CreatedBy}</td></tr>',
-                '<tr><th>Isotype:</th><td>{Isotype}</td></tr>',
-                '<tr><th>Conjugate:</th><td>{Conjugate}</td></tr>',
+                '<tr><th>Isotype:</th><td>{[this.formatNone(values.Isotype)]}</td></tr>',
+                '<tr><th>Conjugate:</th><td>{[this.formatNone(values.Conjugate)]}</td></tr>',
             '</table>',
             // TODO: come back to styling here...
             '<table width="100%" class="gsDetails" style="border:1px solid black;margin-top:30px;">',
@@ -77,7 +75,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.MaxFIStdDev)]}</td>',
                 '<td align="right">{[this.formatNumber(values.MaxFIAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
-                '<td align="center">{maxFIRunCounts}</td>',
+                '<td align="center">{MaxFIRunCounts}</td>',
                 '<td><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
             '</tr><tr>',
@@ -93,9 +91,9 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             '</form>',
             '</tpl>',
             {
-                formatNumber: function(value) {
-                    return value != 0 ? value.toFixed(3) : "N/A";
-                }
+                formatNumber: function(value) { return value != 0 ? value.toFixed(3) : "N/A"; },
+                formatNone: function(value) { return value == "" ? '[None]' : Ext.util.Format.htmlDecode(value); },
+                dateRenderer: function(val) { return val ? new Date(val).format("Y-m-d") : null; }
             }
         )
     },
@@ -106,7 +104,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             xtype: 'dataview',
             tpl: Luminex.window.GuideSetWindow.viewTpl,
             padding: 10,
-            store: this.getGuideSetStore(),
+            store: this.getGuideSetStore()
         }];
 
         this.buttons = [{
@@ -115,10 +113,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             text: 'Save',
             scope: this,
             handler: function(btn) {
-                // NOTE: could check if dirty...
                 var form = document.forms['GuideSetForm'];
-
-                // NOTE: need to check that these fields are set (e.g. check that not value-based)
                 LABKEY.Query.updateRows({
                     schemaName: 'assay.Luminex.'+LABKEY.QueryKey.encodePart(this.assayName),
                     queryName: 'GuideSet',
@@ -130,7 +125,10 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                         aucEnabled: form.elements['AUCCheckBox'].checked
                     }],
                     scope: this,
-                    success: function() { this.close(); }
+                    success: function() {
+                        this.fireEvent('aftersave');
+                        this.close();
+                    }
                 });
             }
         },{
@@ -145,6 +143,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
     constructor: function(config) {
         this.currentGuideSetId = config['currentGuideSetId'];
         this.assayName = config['assayName'];
+        this.addEvents('aftersave');
         this.callParent([config]);
         // wait till after constructed so that currentGuideSetId is set and assayName
         this.guideSetStore.load();
@@ -166,7 +165,6 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     {name: 'Conjugate'},
                     {name: 'Isotype'},
                     {name: 'Comment'},
-                    {name: 'CreatedBy'},
                     {name: 'Created'},
                     {name: 'ValueBased', type: 'boolean'},
                     {name: 'EC504PLEnabled', type: 'boolean'},
@@ -181,7 +179,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     {name: 'MaxFIStdDev', type: 'float'},
                     {name: 'AUCAverage', type: 'float'},
                     {name: 'AUCStdDev', type: 'float'},
-                    {name: 'maxFIRunCounts', type: 'int'},
+                    {name: 'MaxFIRunCounts', type: 'int'},
                     {name: 'EC504PLRunCounts', type: 'int'},
                     {name: 'EC505PLRunCounts', type: 'int'},
                     {name: 'AUCRunCounts', type: 'int'}
@@ -202,9 +200,9 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     LABKEY.Query.executeSql({
                         schemaName: 'assay.Luminex.'+LABKEY.QueryKey.encodePart(assayName),
                         success: this.handleCounts, scope: this,
-                        sql: 'SELECT RowId, AnalyteName, Conjugate, Isotype, Comment, CreatedBy, Created, ValueBased, ' +
+                        sql: 'SELECT RowId, AnalyteName, Conjugate, Isotype, Comment, Created, ValueBased, ' +
                              'ControlName, EC504PLEnabled, EC505PLEnabled, AUCEnabled, MaxFIEnabled, ' +
-                             'maxFIRunCounts, EC504PLRunCounts, EC505PLRunCounts, AUCRunCounts, ' +
+                             'MaxFIRunCounts, EC504PLRunCounts, EC505PLRunCounts, AUCRunCounts, ' +
                              // handle value-based vs run-based
                              'CASE ValueBased WHEN true THEN EC504PLAverage ELSE "Four ParameterCurveFit".EC50Average END "EC504PLAverage", ' +
                              'CASE ValueBased WHEN true THEN EC504PLStdDev ELSE "Four ParameterCurveFit".EC50StdDev END "EC504PLStdDev", ' +
@@ -219,27 +217,31 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     });
                 },
                 handleCounts: function(response) {
-                    var responseRows = response.rows;
-                    var rows = [];
-                    for (var i = 0; i < responseRows.length; i++)
-                        rows.push(Ext4.create('Luminex.model.GuideSet', responseRows[i]));
+                    if (response.rows.length > 1)
+                    {
+                        Ext.Msg.alert("Error", "There is an issue with the request as the returned rows should be length 1 and is " + response.rows.length);
+                        return;
+                    }
 
                     this.removeAll();
-                    this.add(rows);
-                    // Now that store is loaded, set combos
-                    var form = document.forms['GuideSetForm'];
-                    var record = this.getAt(0);
-                    // note: this will sometimes create a javascript error... (when value-based)
-                    form.elements['EC504PLCheckBox'].checked = record.get("EC504PLEnabled");
-                    form.elements['EC505PLCheckBox'].checked = record.get("EC505PLEnabled");
-                    form.elements['MFICheckBox'].checked = record.get("MaxFIEnabled");
-                    form.elements['AUCCheckBox'].checked = record.get("AUCEnabled");
+                    var record = Ext4.create('Luminex.model.GuideSet', response.rows[0]);
+                    this.add(record);
 
-                    // NOTE: using this for dirty bit logic.
-                    form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
-                    form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
-                    form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
-                    form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
+                    // Now that store is loaded, set combos (if not value based)
+                    var form = document.forms['GuideSetForm'];
+                    if (!record.get("ValueBased"))
+                    {
+                        form.elements['EC504PLCheckBox'].checked = record.get("EC504PLEnabled");
+                        form.elements['EC505PLCheckBox'].checked = record.get("EC505PLEnabled");
+                        form.elements['MFICheckBox'].checked = record.get("MaxFIEnabled");
+                        form.elements['AUCCheckBox'].checked = record.get("AUCEnabled");
+
+                        // NOTE: using this for dirty bit logic.
+                        form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
+                        form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
+                        form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
+                        form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
+                    }
                 }
             });
 
@@ -269,7 +271,6 @@ function createGuideSetWindow(protocolId, currentGuideSetId) {
 function checkGuideSetWindowDirty(name) {
     var fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
     var form = document.forms['GuideSetForm'];
-    console.log(form);
     var guideSetWindowDirtyBit = false;
     // Uncaught TypeError: Cannot read property 'checked' of undefined (when unchecking all the boxes... who knows why)
     try {

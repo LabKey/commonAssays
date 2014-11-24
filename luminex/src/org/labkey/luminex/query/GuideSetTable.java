@@ -227,7 +227,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         maxFIRunCountsSQL.append(".RowId AND at.IncludeInGuideSetCalculation = ? AND at.MaxFI IS NOT NULL)");
         maxFIRunCountsSQL.add(Boolean.TRUE);
 
-        ExprColumn maxFIRunCounts = new ExprColumn(this, "maxFIRunCounts", maxFIRunCountsSQL, JdbcType.INTEGER);
+        ExprColumn maxFIRunCounts = new ExprColumn(this, "MaxFIRunCounts", maxFIRunCountsSQL, JdbcType.INTEGER);
         maxFIRunCounts.setLabel("Max FI Run Counts");
         addColumn(maxFIRunCounts);
 

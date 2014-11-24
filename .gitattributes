@@ -818,7 +818,6 @@ luminex/src/org/labkey/luminex/model/AnalyteTitrationQCFlag.java -text
 luminex/src/org/labkey/luminex/model/CVQCFlag.java -text
 luminex/src/org/labkey/luminex/model/CurveFit.java -text
 luminex/src/org/labkey/luminex/model/GuideSet.java -text
-luminex/src/org/labkey/luminex/model/GuideSetQCForm.java -text
 luminex/src/org/labkey/luminex/model/LuminexDataRow.java -text
 luminex/src/org/labkey/luminex/model/LuminexWell.java -text
 luminex/src/org/labkey/luminex/model/LuminexWellGroup.java -text
