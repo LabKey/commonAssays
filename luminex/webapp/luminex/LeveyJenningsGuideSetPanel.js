@@ -36,7 +36,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             header: false,
             bodyStyle: 'background-color:#EEEEEE',
             labelWidth: 150,
-            width: 850,
+            width: 865,
             border: true,
             cls: 'extContainer',
             disabled: true,

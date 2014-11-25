@@ -33,7 +33,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             header: false,
             bodyStyle: 'background-color:#EEEEEE',
             labelAlign: 'left',
-            width: 850,
+            width: 865,
             height: 370,
             border: false,
             cls: 'extContainer',
