@@ -255,7 +255,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         try
         {
             List<RecordedAction> actions = new ArrayList<>();
-            Map<String, String> params = getJob().getParameters();
+            // Copy so that we can add our own values
+            Map<String, String> params = new HashMap<>(getJob().getParameters());
             params.put("list path, sequest parameters", SEQUEST_PARAMS);
             params.put("search, useremail", params.get(PipelineJob.PIPELINE_USERNAME_PARAM));
             params.put("search, username", "CPAS User");

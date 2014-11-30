@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -246,7 +247,8 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         try
         {
             List<RecordedAction> actions = new ArrayList<>();
-            Map<String, String> params = getJob().getParameters();
+            // Copy so that we can add our own values
+            Map<String, String> params = new HashMap<>(getJob().getParameters());
             params.put("list path, sequest parameters", SEQUEST_PARAMS);
             params.put("search, useremail", params.get(PipelineJob.PIPELINE_EMAIL_ADDRESS_PARAM));
             params.put("search, username", "CPAS User");

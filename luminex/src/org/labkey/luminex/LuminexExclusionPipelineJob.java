@@ -62,6 +62,12 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         _form = form;
         _exclusionType = LuminexExclusionPipelineJob.ExclusionType.valueOf(form.getTableName());
         _runId = form.getRunId();
+
+        // Issue 22015: log exclusion command properties on job creation instead of when it starts to run
+        for (LuminexSingleExclusionCommand command : _form.getCommands())
+        {
+            logProperties(command);
+        }
     }
 
     @Override
@@ -103,7 +109,6 @@ public class LuminexExclusionPipelineJob extends PipelineJob
                         BatchValidationException errors = new BatchValidationException();
                         List<Map<String, Object>> results;
 
-                        logProperties(command);
                         getLogger().info("Starting " + command.getCommand() + " " +  _exclusionType.getDescription().toLowerCase());
 
                         rows.add(_exclusionType.getRowMap(command, _form.getRunId(), false));
@@ -151,6 +156,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     private void logProperties(LuminexSingleExclusionCommand exclusion)
     {
         getLogger().info("----- Exclusion Properties ---------");
+        getLogger().info("Type: " + _exclusionType.getDescription());
         if (getRun() != null)
             getLogger().info("Assay Id: " + getRun().getName());
         getLogger().info("Run Id: " + _form.getRunId());
