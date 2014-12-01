@@ -89,7 +89,7 @@
                 <description>True to designate this guide set as value-based. False indicates a run-based guide set.</description>
             </column>
             <column columnName="EC504PLEnabled">
-                <description>4PL EC50 metric run-based flag for enabling/disabling</description>
+                <description>4PL EC50 metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="EC504PLAverage">
                 <description>4PL EC50 metric average value for value-based guide set</description>
@@ -98,7 +98,7 @@
                 <description>4PL EC50 metric standard deviation value for value-based guide set</description>
             </column>
             <column columnName="EC505PLEnabled">
-                <description>5PL EC50 metric run-based flag for enabling/disabling</description>
+                <description>5PL EC50 metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="EC505PLAverage">
                 <description>5PL EC50 metric average value for value-based guide set</description>
@@ -107,7 +107,7 @@
                 <description>5PL EC50 metric standard deviation value for value-based guide set</description>
             </column>
             <column columnName="AUCEnabled">
-                <description>AUC metric run-based flag for enabling/disabling</description>
+                <description>AUC metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="AUCAverage">
                 <description>AUC metric average value for value-based guide set</description>
@@ -116,7 +116,7 @@
                 <description>AUC metric standard deviation value for value-based guide set</description>
             </column>
             <column columnName="MaxFIEnabled">
-                <description>MFI metric run-based flag for enabling/disabling</description>
+                <description>MFI metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="MaxFIAverage">
                 <description>MFI metric average value for value-based guide set</description>

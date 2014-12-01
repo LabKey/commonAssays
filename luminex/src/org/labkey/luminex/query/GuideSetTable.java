@@ -307,7 +307,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-
         return new GuideSetTableUpdateService(this);
     }
 
@@ -415,7 +414,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
             GuideSet updatedGuideSet = Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
 
-            // if value-based guide set, updates to it might change expected ranges so QC flags needs to be updated
+            // value-based guide set updates might change expected ranges so QC flags needs to be updated,
+            // run-based guide sets can enable/disabled specific metrics (EC50, AUC, etc.) for QC flagging
             SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
             TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
             List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
