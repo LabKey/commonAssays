@@ -855,6 +855,7 @@ luminex/test/src/org/labkey/test/tests/LuminexAsyncImportTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexEC50Test.java -text
 luminex/test/src/org/labkey/test/tests/LuminexExcludableWellsTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexExcludedTitrationTest.java -text
+luminex/test/src/org/labkey/test/tests/LuminexGuideSetDisablingTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexGuideSetTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexJavaTransformTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexMultipleCurvesTest.java -text

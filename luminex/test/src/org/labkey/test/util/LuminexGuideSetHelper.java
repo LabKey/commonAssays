@@ -166,6 +166,12 @@ public class LuminexGuideSetHelper
         _test.waitForText("To begin, choose an Antigen, Isotype, and Conjugate from the panel to the left and click the Apply button.");
     }
 
+    public void goToManageGuideSetsPage(String assayName)
+    {
+        _test.goToQCAnalysisPage(assayName, "manage guide sets");
+        _test.waitForText("Description for Luminex assay");
+    }
+
     @LogMethod
     public void applyGuideSetToRun(String network, String comment, boolean useCurrent)
     {

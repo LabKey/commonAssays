@@ -114,9 +114,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     @BeforeClass
     public static void initTest()
     {
-        LuminexTest init = (LuminexTest)getCurrentTest();
-
-        init.doInit();
+        ((LuminexTest)getCurrentTest()).doInit();
     }
 
     @LogMethod

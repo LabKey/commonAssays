@@ -332,6 +332,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         verifyGuideSetThresholds(guideSetIds, analytes, rowCounts2, aucAverages2, aucStdDevs2, "Trapezoidal", "AUCAverage", "AUCStd Dev");
     }
 
+    // NOTE: is this necessary? (What's this checking that applying the threshold wouldn't fail on already...)
     @LogMethod
     private void verifyGuideSetToRun(String network, String comment)
     {
@@ -432,16 +433,6 @@ public final class LuminexGuideSetTest extends LuminexTest
 
         clickButton("Close", 0);
     }
-
-//    private void goToQCAnalysisPage(String submenuText)
-//    {
-//        goToProjectHome();
-//        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
-//
-//        clickAndWait(Locator.linkWithText("view results"));
-//        _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), submenuText);
-//
-//    }
 
     @LogMethod
     private void verifyQCFlagUpdatesAfterWellChange()

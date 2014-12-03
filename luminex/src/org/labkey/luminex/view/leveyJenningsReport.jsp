@@ -60,7 +60,6 @@
         <td><div id="rPlotPanel"></div></td>
     </tr>
 </table>
-<div id="trackingDataPanelTitle" style="margin-left:15px"></div>
 <div id="trackingDataPanel" style="margin-left:15px"></div>
 
 <script type="text/javascript">
