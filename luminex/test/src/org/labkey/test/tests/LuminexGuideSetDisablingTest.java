@@ -206,7 +206,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         waitForElement(Locator.checkboxByName("AUCCheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
         click(SAVE_BTN);
-        _ext4Helper.clickWindowButton(GUIDE_SET_WINDOW_NAME, "Save", WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
+        clickAndWait(Ext4Helper.ext4WindowButton(GUIDE_SET_WINDOW_NAME, "Save"), WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
 
         validateRedText(true, "8.08", "2.66");
         validateRedText(false, "61889.88", "64608.73");
@@ -217,7 +217,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
-        _ext4Helper.clickWindowButton(GUIDE_SET_WINDOW_NAME, "Save", WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
+        clickAndWait(Ext4Helper.ext4WindowButton(GUIDE_SET_WINDOW_NAME, "Save"), WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
 
         validateRedText(false, "8.08", "61889.88", "2.66", "64608.73");
 
@@ -228,7 +228,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
-        _ext4Helper.clickWindowButton(GUIDE_SET_WINDOW_NAME, "Save", WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
+        clickAndWait(Ext4Helper.ext4WindowButton(GUIDE_SET_WINDOW_NAME, "Save"), WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
 
         validateRedText(true, "8.08", "61889.88", "2.66", "64608.73");
     }
