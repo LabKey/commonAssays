@@ -170,6 +170,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 //        like: validateRedText(true, "8.08", "61889.88", "2.66", "64608.73");
 
         clickButtonContainingText("Details", 0);
+        waitForElement(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
@@ -234,10 +235,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     {
         if (present)
             for (String text : texts)
-                waitForElement(Locator.xpath("//div[text()='"+text+"' and contains(@style,'red')]"));
+                waitForElement(Locator.xpath("//div[text()='"+text+"' and contains(@style,'red')]"), 30000);
         else
             for (String text : texts)
-                waitForElementToDisappear(Locator.xpath("//div[text()='" + text + "' and contains(@style,'red')]"));
+                waitForElementToDisappear(Locator.xpath("//div[text()='" + text + "' and contains(@style,'red')]"), 30000);
     }
 
     @Test
