@@ -66,6 +66,7 @@ import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -1860,6 +1861,7 @@ public class FlowSchema extends UserSchema
     private Map<String, TempTableToken> instanceCache = new HashMap<>();
     private static final Cache<String, TempTableToken> staticCache = CacheManager.getSharedCache();
 
+    // Returns fully qualified "schema.table" name
     String getFastFlowObjectTableName(Container c, int typeid)
     {
         boolean tx = FlowManager.get().getSchema().getScope().isTransactionActive();
@@ -1880,9 +1882,11 @@ public class FlowSchema extends UserSchema
             tok = staticCache.get(attr);
         if (tok == null)
         {
-            String name = createFastFlowObjectTableName(c, typeid);
-            tok = new TempTableToken(name);
-            TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
+            Pair<String, String> pair = createFastFlowObjectTableName(c, typeid);
+            String fullName = pair.first;
+            String tableName = pair.second;
+            tok = new TempTableToken(fullName);
+            TempTableTracker.track(tableName, tok);
             if (!tx)
                 staticCache.put(attr, tok, 30 * CacheManager.MINUTE);
         }
@@ -1894,11 +1898,11 @@ public class FlowSchema extends UserSchema
 
 
     /** CONSIDER JOIN ObjectId from exp.Objects */
-    String createFastFlowObjectTableName(Container c, int typeid)
+    Pair<String, String> createFastFlowObjectTableName(Container c, int typeid)
     {
         DbSchema flow = FlowManager.get().getSchema();
         SqlExecutor executor = new SqlExecutor(flow);
-        String shortName = "flowObject" + GUID.makeHash();
+        String shortName = "flowObject$" + GUID.makeHash();
         String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
 
         executor.execute(
@@ -1933,10 +1937,11 @@ public class FlowSchema extends UserSchema
                 "CREATE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
         executor.execute(create);
 
-        return name;
+        return Pair.of(name, shortName);
     }
 
 
+    // Returns fully qualified "schema.table" name
     String getBackgroundJunctionTableName(Container c)
     {
         TempTableToken tok = null;
@@ -1958,11 +1963,13 @@ public class FlowSchema extends UserSchema
             tok = staticCache.get(attr);
         if (tok == null)
         {
-            String name = createBackgroundJunctionTableName(c);
-            if (null == name)
+            Pair<String, String> pair = createBackgroundJunctionTableName(c);
+            if (null == pair)
                 return null;
-            tok = new TempTableToken(name);
-            TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
+            String fullName = pair.first;
+            String tableName = pair.second;
+            tok = new TempTableToken(fullName);
+            TempTableTracker.track(tableName, tok);
             if (!tx)
                 staticCache.put(attr, tok, 10 * CacheManager.MINUTE);
         }
@@ -1973,11 +1980,11 @@ public class FlowSchema extends UserSchema
     }
 
 
-    String createBackgroundJunctionTableName(Container c)
+    Pair<String, String> createBackgroundJunctionTableName(Container c)
     {
         long begin = System.currentTimeMillis();
         DbSchema flow = FlowManager.get().getSchema();
-        String shortName = "flowJunction" + GUID.makeHash();
+        String shortName = "flowJunction$" + GUID.makeHash();
         String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
 
         ICSMetadata ics = _protocol.getICSMetadata();
@@ -2048,6 +2055,6 @@ public class FlowSchema extends UserSchema
         new SqlExecutor(flow).execute(create);
 
         long end = System.currentTimeMillis();
-        return name;
+        return Pair.of(name, shortName);
     }
 }

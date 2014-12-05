@@ -1134,7 +1134,7 @@ public class MS2Schema extends UserSchema
             String tempTableName = getDbSchema().getSqlDialect().getGlobalTempTablePrefix() + shortName;
 
             NormalizedProteinGroupsTracker tracker = new NormalizedProteinGroupsTracker(tempTableName);
-            TempTableTracker.track(MS2Manager.getSchema(), tempTableName, tracker);
+            TempTableTracker.track(shortName, tracker);
             try
             {
                 // Working with a temp table, so use the same connection for all inserts/updates
