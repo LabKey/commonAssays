@@ -153,6 +153,7 @@ public class LuminexGuideSetHelper
 
     public void waitForGuideSetExtMaskToDisappear()
     {
+        _test._ext4Helper.waitForMaskToDisappear();
         _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
         waitForLeveyJenningsTrendPlot();
     }

@@ -16,6 +16,7 @@
 package org.labkey.test.tests;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.collections.Bag;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,24 +31,21 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ListHelper;
 import org.labkey.test.util.LuminexGuideSetHelper;
+import org.openqa.selenium.WebElement;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-
-/**
- * Created by aaronr on 11/24/14.
- */
-
-// TODO: follow cory's example with filter vs iterate over DRT... (?)
-
-// NOTE: luminex tests overwrite each others project...
 
 @Category({DailyA.class, LuminexAll.class, Assays.class})
 public final class LuminexGuideSetDisablingTest extends LuminexTest
@@ -184,7 +182,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         _guideSetHelper.setUpLeveyJenningsGraphParams(analyte);
         _guideSetHelper.applyGuideSetToRun(NETWORKS, comment, true);
 
-        validateRedText(false, "22798.96", "29916.07", "75573.07", "31984.00");
+        validateFlaggedForQC();
 
         // no clean-up needed as test shouldn't collide with others...
     }
@@ -197,17 +195,21 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         // simular to verifyHighlightUpdatesAfterQCFlagChange (but not quite the same... not sure how this other place works)
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, CONTROL_NAME);
         _guideSetHelper.setUpLeveyJenningsGraphParams(RUN_BASED_ANALYTE);
-        validateRedText(true, "8.08", "61889.88", "2.66", "64608.73");
+        final String plate1_AUC = "64608.73";
+        final String plate2_AUC = "61889.88";
+        final String plate1_EC50_5PL = "2.66";
+        final String plate2_EC50_5PL = "5.67";
+
+        validateFlaggedForQC(plate1_EC50_5PL, plate1_AUC, plate2_AUC);
 
         clickButtonContainingText("Details", 0);
         // toggle off the AUC QC flag and then validate errors
         waitForElement(Locator.checkboxByName("AUCCheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
-        click(SAVE_BTN);
-        clickAndWait(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"), WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
+        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
+        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
 
-        validateRedText(true, "8.08", "2.66");
-        validateRedText(false, "61889.88", "64608.73");
+        validateFlaggedForQC(plate1_EC50_5PL);
 
         // toggle off the rest of the QC flags and then validate errors
         clickButtonContainingText("Details", 0);
@@ -215,9 +217,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
-        clickAndWait(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"), WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
+        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
+        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
 
-        validateRedText(false, "8.08", "61889.88", "2.66", "64608.73");
+        validateFlaggedForQC();
 
         // clean-up/revert
         clickButtonContainingText("Details", 0);
@@ -226,19 +229,28 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
-        clickAndWait(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"), WAIT_FOR_EXT_MASK_TO_DISSAPEAR);
+        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
+        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
 
-        validateRedText(true, "8.08", "61889.88", "2.66", "64608.73");
+        validateFlaggedForQC(plate2_AUC, plate1_EC50_5PL, plate1_AUC);
     }
 
-    private void validateRedText(boolean present, String... texts)
+    private void validateFlaggedForQC(String... texts)
     {
-        if (present)
-            for (String text : texts)
-                waitForElement(Locator.xpath("//div[text()='"+text+"' and contains(@style,'red')]"), 30000);
-        else
-            for (String text : texts)
-                waitForElementToDisappear(Locator.xpath("//div[text()='" + text + "' and contains(@style,'red')]"), 30000);
+        Locator redCellLoc = Locator.tagWithId("div", "trackingDataPanel").append(Locator.tagWithClass("div", "x-grid3-cell-inner").withPredicate("contains(@style,'red')"));
+        List<WebElement> qcFlaggedCells = redCellLoc.findElements(getDriver());
+
+        List<String> expectedQcFlaggedValues = new ArrayList<>(Arrays.asList(texts));
+        List<String> qcFlaggedValues = new ArrayList<>();
+        for (WebElement el : qcFlaggedCells)
+        {
+            qcFlaggedValues.add(el.getText());
+        }
+
+        Collections.sort(expectedQcFlaggedValues);
+        Collections.sort(qcFlaggedValues);
+
+        Assert.assertEquals("Wrong values flagged for QC", expectedQcFlaggedValues, qcFlaggedValues);
     }
 
     @Test
