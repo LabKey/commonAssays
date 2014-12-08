@@ -67,7 +67,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -279,9 +278,10 @@ public class RunController extends BaseFlowController
                 }
                 else
                 {
-                    ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip");
-                    exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
-                    zipFile.close();
+                    try (ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip"))
+                    {
+                        exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
+                    }
                 }
 
                 return null;
@@ -449,27 +449,29 @@ public class RunController extends BaseFlowController
                 // Uniquify run names if the same workspace has been imported twice and is now being exported.
                 // CONSIDER: Unfortunately, the original run name will be lost -- consider adding a id column to the export format containing the lsid of the run.
                 FileNameUniquifier uniquifier = new FileNameUniquifier(false);
-                ZipFile zipFile = new ZipFile(response, zipName);
-                for (FlowRun run : _runs)
+
+                try (ZipFile zipFile = new ZipFile(response, zipName))
                 {
-                    Map<String, AttributeSet> keywords = new TreeMap<>();
-                    Map<String, AttributeSet> analysis = new TreeMap<>();
-                    Map<String, CompensationMatrix> matrices = new TreeMap<>();
-                    getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
-
-                    String dirName = getBaseName(run.getName());
-                    dirName = uniquifier.uniquify(dirName);
-
-                    VirtualFile dir = zipFile.getDir(dirName);
-                    AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
-                    writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
-
-                    if (form.isIncludeFCSFiles())
+                    for (FlowRun run : _runs)
                     {
-                        exportFCSFiles(dir.getDir(fcsDirName), run, 0);
+                        Map<String, AttributeSet> keywords = new TreeMap<>();
+                        Map<String, AttributeSet> analysis = new TreeMap<>();
+                        Map<String, CompensationMatrix> matrices = new TreeMap<>();
+                        getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
+
+                        String dirName = getBaseName(run.getName());
+                        dirName = uniquifier.uniquify(dirName);
+
+                        VirtualFile dir = zipFile.getDir(dirName);
+                        AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
+                        writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
+
+                        if (form.isIncludeFCSFiles())
+                        {
+                            exportFCSFiles(dir.getDir(fcsDirName), run, 0);
+                        }
                     }
                 }
-                zipFile.close();
             }
             else if (_wells != null && _wells.size() > 0)
             {
@@ -485,16 +487,16 @@ public class RunController extends BaseFlowController
                 Map<String, CompensationMatrix> matrices = new TreeMap<>();
                 getAnalysis(_wells, keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
-                ZipFile zipFile = new ZipFile(response, zipName);
-                AnalysisSerializer writer = new AnalysisSerializer(_log, zipFile);
-                writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
-
-                if (form.isIncludeFCSFiles())
+                try (ZipFile zipFile = new ZipFile(response, zipName))
                 {
-                    exportFCSFiles(zipFile.getDir(fcsDirName), _wells, 0);
-                }
+                    AnalysisSerializer writer = new AnalysisSerializer(_log, zipFile);
+                    writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
 
-                zipFile.close();
+                    if (form.isIncludeFCSFiles())
+                    {
+                        exportFCSFiles(zipFile.getDir(fcsDirName), _wells, 0);
+                    }
+                }
             }
 
             return _success = true;
