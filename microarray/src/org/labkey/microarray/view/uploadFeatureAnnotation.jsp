@@ -25,6 +25,11 @@
 <%@ page import="org.springframework.validation.ObjectError" %>
 <%@ page import="java.util.LinkedHashSet" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
+<%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     public LinkedHashSet<ClientDependency> getClientDependencies()
@@ -41,6 +46,15 @@
     String description = me.getModelBean().getDescription();
     Errors errors = me.getErrors();
     String returnUrl = me.getModelBean().getReturnActionURL(new ActionURL(FeatureAnnotationSetController.ManageAction.class, getContainer())).toString();
+
+    Map<String, Integer> containers = new LinkedHashMap<>();
+    Container project = getContainer().getProject();
+    if (project != null && project.hasPermission(getUser(), InsertPermission.class))
+        containers.put("Project (" + h(project.getName() + ")"), project.getRowId());
+    containers.put("Current Folder (" + h(getContainer().getName()) + ")", getContainer().getRowId());
+    Container shared = ContainerManager.getSharedContainer();
+    if (shared != null && shared.hasPermission(getUser(), InsertPermission.class))
+        containers.put("Shared Folder", shared.getRowId());
 %>
 
 <%
@@ -110,12 +124,25 @@
                 allowBlank: false
             }, {
                 xtype: 'textarea',
-                width : 580,
+                width: 580,
                 labelWidth: 125,
                 name: 'description',
                 value: "<%=text(description) == null ? "" : text(description)%>",
                 fieldLabel: 'Description',
                 allowBlank: true
+            }, {
+                xtype: 'combobox',
+                name: 'targetContainer',
+                fieldLabel: 'Folder',
+                labelWidth: 125,
+                width: 580,
+                allowBlank: false,
+                value: <%=project != null ? project.getRowId() : getContainer().getRowId()%>,
+                store: [
+                    <% for (Map.Entry<String, Integer> entry : containers.entrySet()) { %>
+                        [ <%= entry.getValue() %>, <%= q(entry.getKey()) %> ],
+                    <% } %>
+                ]
             }, {
                 xtype: 'filefield',
                 name: 'annotationFile',

@@ -32,7 +32,7 @@
     </ns:columns>
   </ns:table>
 
-  <ns:table tableName="FeatureAnnotationSet" tableDbType="TABLE">
+  <ns:table tableName="FeatureAnnotationSet" tableDbType="TABLE" useColumnOrder="true">
       <ns:pkColumnName>RowId</ns:pkColumnName>
       <ns:titleColumn>Name</ns:titleColumn>
       <ns:insertUrl>/feature-annotationset/upload.view</ns:insertUrl>
@@ -43,11 +43,6 @@
           <ns:column columnName="RowId">
               <ns:isHidden>true</ns:isHidden>
               <ns:isKeyField>true</ns:isKeyField>
-          </ns:column>
-          <ns:column columnName="Container">
-              <ns:isUserEditable>false</ns:isUserEditable>
-              <ns:datatype>entityid</ns:datatype>
-              <ns:isHidden>true</ns:isHidden>
           </ns:column>
           <ns:column columnName="Name"/>
           <ns:column columnName="Vendor"/>
@@ -67,6 +62,10 @@
           <ns:column columnName="ModifiedBy">
               <ns:description>Contains the user that last modified this data</ns:description>
               <ns:isHidden>true</ns:isHidden>
+          </ns:column>
+          <ns:column columnName="Container">
+              <ns:isUserEditable>false</ns:isUserEditable>
+              <ns:datatype>entityid</ns:datatype>
           </ns:column>
       </ns:columns>
   </ns:table>

@@ -23,6 +23,8 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.DbSchema;
@@ -50,6 +52,7 @@ import org.labkey.api.view.DetailsView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.WebPartView;
@@ -191,6 +194,17 @@ public class FeatureAnnotationSetController extends SpringActionController
                 errors.reject(ERROR_MSG, "The annotation file cannot be blank");
             }
 
+            Container targetContainer = ContainerManager.getForRowId(form.getTargetContainer());
+            if (targetContainer == null)
+            {
+                errors.reject(ERROR_MSG, "Target folder doesn't exist.");
+            }
+
+            if (targetContainer != null && !targetContainer.hasPermission(getUser(), InsertPermission.class))
+            {
+                errors.reject(ERROR_MSG, "You do not have insert permissions to the target folder.");
+            }
+
             // TODO check if feature set with name already exists.
         }
 
@@ -207,12 +221,16 @@ public class FeatureAnnotationSetController extends SpringActionController
             MultipartFile annotationFile = fileMap.get("annotationFile");
             DataLoader loader = DataLoader.get().createLoader(annotationFile, true, null, null);
 
+            Container targetContainer = ContainerManager.getForRowId(form.getTargetContainer());
+            if (targetContainer == null || !targetContainer.hasPermission(getUser(), InsertPermission.class))
+                throw new UnauthorizedException();
+
             DbScope scope = MicroarrayUserSchema.getSchema().getScope();
 
             try (DbScope.Transaction transaction = scope.ensureTransaction())
             {
                 BatchValidationException batchErrors = new BatchValidationException();
-                Integer rowsInserted = MicroarrayManager.get().createFeatureAnnotationSet(getUser(), getContainer(), form, loader, batchErrors);
+                Integer rowsInserted = MicroarrayManager.get().createFeatureAnnotationSet(getUser(), targetContainer, form, loader, batchErrors);
 
                 if (batchErrors.hasErrors())
                 {
@@ -389,6 +407,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         private String _vendor;
         private String _description;
         private Integer _rowId;
+        private int _targetContainer;
 
         public String getName()
         {
@@ -428,6 +447,16 @@ public class FeatureAnnotationSetController extends SpringActionController
         public void setRowId(Integer rowId)
         {
             _rowId = rowId;
+        }
+
+        public int getTargetContainer()
+        {
+            return _targetContainer;
+        }
+
+        public void setTargetContainer(int container)
+        {
+            _targetContainer = container;
         }
     }
 
