@@ -94,17 +94,34 @@
                 return;
             }
 
-            var getByName, selectRows;
+            var getByNameQueryComplete = false, executeSqlQueryComplete = false;
             var loader = function() {
-                if (getByName && selectRows) {
+                if (getByNameQueryComplete && executeSqlQueryComplete) {
                     initializeReportPanels();
                 }
             };
 
-            // Perform an initial query to check for the Network and Protocol columns
+            // Query the assay design to check for the required columns for the L-J report and the existance of Network and Protocol columns
             LABKEY.Assay.getByName({
                 name: _protocolName,
                 success: function(data) {
+
+                    var missingColumns = ['isotype', 'conjugate', 'acquisitiondate'];
+                    var runFields = data[0].domains[_protocolName + ' Run Fields'];
+                    runFields = runFields.concat(data[0].domains[_protocolName + ' Excel File Run Properties']);
+                    for (var i=0; i<runFields.length; i++)
+                    {
+                        var index = missingColumns.indexOf(runFields[i].name.toLowerCase());
+                        if (index != -1) {
+                            missingColumns.splice(index, 1);
+                        }
+                    }
+                    if (missingColumns.length > 0)
+                    {
+                        Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns.join(',') + ") for the report do not exist in '" + $h(_protocolName) + "'.");
+                        return;
+                    }
+
                     var batchFields = data[0].domains[_protocolName + ' Batch Fields'];
                     for (var i=0; i<batchFields.length; i++) {
                         if (batchFields[i].fieldKey.toLowerCase() == "network") {
@@ -114,57 +131,32 @@
                             _protocolExists = true;
                         }
                     }
-                    getByName = true;
+
+                    getByNameQueryComplete = true;
                     loader();
                 }
             });
 
-            // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
-            var reqColumns;
-            var queryName;
-            var filterArray;
-            if ('Titration' == _controlType)
-            {
-                reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
-                queryName = 'AnalyteTitration';
-                filterArray = [LABKEY.Filter.create('Titration/Name', _controlName), LABKEY.Filter.create('Titration/IncludeInQcReport', true)];
+            // verify that the given titration/singlepointcontrol exists and has run's associated with it as a Standard or QC Control
+            var sql;
+            if ('Titration' == _controlType) {
+                sql = "SELECT COUNT(*) AS RunCount FROM Titration WHERE Name='" + _controlName + "' AND IncludeInQcReport=true";
             }
-            else
-            {
-                reqColumns = ['SinglePointControl/Name', 'SinglePointControl/Run/Isotype', 'SinglePointControl/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
-                queryName = 'AnalyteSinglePointControl';
-                filterArray = [LABKEY.Filter.create('SinglePointControl/Name', _controlName)];
+            else {
+                sql = "SELECT COUNT(*) AS RunCount FROM SinglePointControl WHERE Name='" + _controlName + "'";
             }
-            LABKEY.Query.selectRows({
+            LABKEY.Query.executeSql({
                 containerFilter: LABKEY.Query.containerFilter.allFolders,
                 schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(_protocolName),
-                queryName: queryName,
-                filterArray: filterArray,
-                columns: reqColumns.join(','),
-                maxRows: 1,
+                sql: sql,
                 success: function(data) {
-                    if (data.rows.length == 0)
+                    if (data.rows.length == 0 || data.rows[0]['RunCount'] == 0)
+                    {
                         Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_controlName) + "'.");
+                    }
                     else
                     {
-                        var missingColumns = '';
-                        var separator = '';
-                        // check that all of the required properties for the report exist
-                        for (var i = 0; i < reqColumns.length; i++)
-                        {
-                            if (!(reqColumns[i] in data.rows[0]))
-                            {
-                                missingColumns += separator + reqColumns[i];
-                                separator = ", ";
-                            }
-                        }
-                        if (missingColumns.length > 0)
-                        {
-                            Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns + ") for the report do not exist in '" + $h(_protocolName) + "'.");
-                            return;
-                        }
-
-                        selectRows = true;
+                        executeSqlQueryComplete = true;
                         loader();
                     }
                 },

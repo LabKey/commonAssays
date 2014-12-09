@@ -13,6 +13,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
     modal: true,
     border: false,
     width: 550,
+    minHeight: 200,
     autoScroll: true,
 
     // NOTE: these are required fields (any way to enforce?)
@@ -113,6 +114,8 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             text: 'Save',
             scope: this,
             handler: function(btn) {
+                this.getEl().mask("Saving QC flag changes...");
+
                 var form = document.forms['GuideSetForm'];
                 LABKEY.Query.updateRows({
                     schemaName: 'assay.Luminex.'+LABKEY.QueryKey.encodePart(this.assayName),
@@ -126,8 +129,13 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     }],
                     scope: this,
                     success: function() {
+                        this.getEl().unmask();
                         this.fireEvent('aftersave');
                         this.close();
+                    },
+                    failure: function(response) {
+                        Ext4.Msg.alert("Error", response.exception);
+                        this.getEl().unmask();
                     }
                 });
             }
