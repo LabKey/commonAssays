@@ -22,31 +22,28 @@ Ext4.define('Luminex.window.GuideSetWindow', {
 
     statics: {
         viewTpl: new Ext4.XTemplate(
-            '<style>table.gsDetails th {background-color:#d3d3d3;font-weight:normal;text-align:left;}</style>',
+            '<style>table.gsDetails th {background-color:#EEEEEE;font-weight:bold;padding:3px;text-align:left;}</style>',
             '<tpl for=".">',
             '<form id="GuideSetForm">',
-            '<table width="300px" style="float: left;" class="gsDetails">',
-                '<tr><th>Guide Set Id:</th><td>{RowId}</td></tr>',
-                '<tr><th>Created:</th><td>{[this.dateRenderer(values.Created)]}</td></tr>',
-                '<tr><th>Titration:</th><td>{ControlName:htmlEncode}</td></tr>',
-                '<tr><th>Analyte:</th><td>{AnalyteName:htmlEncode}</td></tr>',
-                '<tr><th>Comment:</th><td>{Comment:htmlEncode}</td></tr>',
-            '</table>',
-            '<table width="200px" style="display: inline-block;" class="gsDetails">',
-                '<tr>',
-                    '<th>Type:</th>',
+            '<table width="100%" class="gsDetails" style="margin-bottom:10px;">',
+                '<tr><th width="120px">Guide Set ID:</th><td>{RowId}</td>',
+                    '<th width="120px">Type:</th>',
                     '<tpl if="ValueBased &gt; 0">',
                     '<td>Value-based</td>',
                     '<tpl else>',
                     '<td>Run-based</td>',
                     '</tpl>',
                 '</tr>',
-                '<tr><th>Isotype:</th><td>{[this.formatNone(values.Isotype)]}</td></tr>',
-                '<tr><th>Conjugate:</th><td>{[this.formatNone(values.Conjugate)]}</td></tr>',
+                '<tr><th>Created:</th><td>{[this.dateRenderer(values.Created)]}</td>',
+                    '<th>Isotype:</th><td>{[this.formatNone(values.Isotype)]}</td></tr>',
+                '<tr><th>Titration:</th><td>{ControlName:htmlEncode}</td>',
+                    '<th>Conjugate:</th><td>{[this.formatNone(values.Conjugate)]}</td></tr>',
+                '<tr><th>Analyte:</th><td colspan="3">{AnalyteName:htmlEncode}</td></tr>',
+                '<tr><th>Comment:</th><td colspan="3">{Comment:htmlEncode}</td></tr>',
             '</table>',
             // TODO: come back to styling here...
-            '<table width="100%" class="gsDetails" style="border:1px solid black;margin-top:30px;">',
-            '<caption style="background-color:#d3d3d3;text-align:left;font-weight:bold;font-size:16px;padding:2px;">Guide Set Metrics</caption>',
+            '<table width="100%" class="gsDetails" style="border:1px solid black;">',
+            '<caption style="text-align:left;font-weight:bold;font-size:14px;padding:3px;">Guide Set Metrics</caption>',
             '<tr>',
                 '<th>Metric</th>',
                 '<th>Std Dev</th>',
@@ -93,7 +90,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             '</tpl>',
             {
                 formatNumber: function(value) { return value != 0 ? value.toFixed(3) : "N/A"; },
-                formatNone: function(value) { return value == "" ? '[None]' : Ext.util.Format.htmlDecode(value); },
+                formatNone: function(value) { return value == "" ? '[None]' : Ext.util.Format.htmlEncode(value); },
                 dateRenderer: function(val) { return val ? new Date(val).format("Y-m-d") : null; }
             }
         )

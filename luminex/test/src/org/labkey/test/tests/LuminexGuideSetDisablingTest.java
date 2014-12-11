@@ -328,16 +328,14 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         assertEquals(CONTROL_NAME, getTableCellText(table, 2, 1));
         assertEquals(analyte, getTableCellText(table, 3, 1));
         assertEquals(comment, getTableCellText(table, 4, 1));
-
         // check top right table
-        table = TABLE_LOCATOR.append("[2]");
-        assertEquals(type, getTableCellText(table,0, 1));
-        assertEquals("IgG >", getTableCellText(table,1, 1));
-        assertEquals("PE >", getTableCellText(table,2, 1));
+        assertEquals(type, getTableCellText(table,0, 3));
+        assertEquals(isotype, getTableCellText(table,1, 3));
+        assertEquals(conjugate, getTableCellText(table,2, 3));
     }
 
     private void validateGuideSetMetricsDetails(String[][] metricsData) {
-        Locator.XPathLocator table = Locator.xpath("//table").withClass("gsDetails").append("[3]");
+        Locator.XPathLocator table = Locator.xpath("//table").withClass("gsDetails").append("[2]");
 
         for(int i=1; i < 4; i++) // iterate rows
         {
