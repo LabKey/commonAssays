@@ -34,118 +34,129 @@ if (!is.null(isTitration)) {
     plotTypes = c("MFI");
 }
 
-# create a list of filters to apply to the selectRows call
-if (!is.null(isTitration)) {
-    colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
-    colFilter=rbind(colFilter,makeFilter(c("Titration/Name","EQUAL",labkey.url.params$Titration)));
-    colFilter=rbind(colFilter,makeFilter(c("Titration/IncludeInQcReport","EQUAL",TRUE)));
-    if (labkey.url.params$Conjugate == "") {
-        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","MISSING",labkey.url.params$Conjugate)));
-    } else {
-        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","EQUAL",labkey.url.params$Conjugate)));
-    }
-    if (labkey.url.params$Isotype == "") {
-        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","MISSING",labkey.url.params$Isotype)));
-    } else {
-        colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","EQUAL",labkey.url.params$Isotype)));
-    }
-} else {
-    colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
-    colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Name","EQUAL",labkey.url.params$Titration)));
-    if (labkey.url.params$Conjugate == "") {
-        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Conjugate","MISSING",labkey.url.params$Conjugate)));
-    } else {
-        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Conjugate","EQUAL",labkey.url.params$Conjugate)));
-    }
-    if (labkey.url.params$Isotype == "") {
-        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Isotype","MISSING",labkey.url.params$Isotype)));
-    } else {
-        colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Isotype","EQUAL",labkey.url.params$Isotype)));
-    }
-}
-
 # create a list of the columns that are needed for the trending plot
-colSelect = paste("Analyte/Name", "Analyte/Properties/LotNumber", "Analyte/Data/AcquisitionDate", "GuideSet/Created", "GuideSet/ValueBased", sep=",");
+sql = paste("SELECT Analyte.Name AS AnalyteName", "Analyte.Properties.LotNumber", "GuideSet.ValueBased", sep=",");
 if (!is.null(isTitration)) {
-    colSelect = paste(colSelect, "Titration/Name", "Titration/Run/Isotype", "Titration/Run/Conjugate", "Titration/Run/NotebookNo", sep=",");
+    sql = paste(sql, "Titration.Run.NotebookNo", sep=",");
+    sql = paste(sql, "\"Four ParameterCurveFit\".EC50 AS EC504PL", sep=",");
+    sql = paste(sql, "\"Five ParameterCurveFit\".EC50 AS EC505PL", sep=",");
+    sql = paste(sql, "MaxFI", sep=",");
+    sql = paste(sql, "TrapezoidalCurveFit.AUC", sep=",");
 } else {
-    colSelect = paste(colSelect, "SinglePointControl/Name", "SinglePointControl/Run/Isotype", "SinglePointControl/Run/Conjugate", "SinglePointControl/Run/NotebookNo", sep=",");
+    sql = paste(sql, "SinglePointControl.Run.NotebookNo", sep=",");
+    sql = paste(sql, "AverageFiBkgd", sep=",");
 }
-
-
-# get the columns needed for each of the 5 plot types
-colSelect = paste(colSelect, "Four ParameterCurveFit/EC50", sep=",");
-colSelect = paste(colSelect, "Five ParameterCurveFit/EC50", sep=",");
-colSelect = paste(colSelect, "MaxFI", sep=",");
-colSelect = paste(colSelect, "TrapezoidalCurveFit/AUC", sep=",");
-colSelect = paste(colSelect, "AverageFiBkgd", sep=",");
 
 # get the columns needed for run-based guide set ranges
-colSelect = paste(colSelect, "GuideSet/Four ParameterCurveFit/EC50Average", "GuideSet/Four ParameterCurveFit/EC50StdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/Five ParameterCurveFit/EC50Average", "GuideSet/Five ParameterCurveFit/EC50StdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/TitrationMaxFIAverage", "GuideSet/TitrationMaxFIStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/TrapezoidalCurveFit/AUCAverage", "GuideSet/TrapezoidalCurveFit/AUCStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/SinglePointControlFIAverage", "GuideSet/SinglePointControlFIStdDev", sep=",");
+sql = paste(sql, "GuideSet.\"Four ParameterCurveFit\".EC50Average AS EC504PLrbAverage", "GuideSet.\"Four ParameterCurveFit\".EC50StdDev AS EC504PLrbStdDev", sep=",");
+sql = paste(sql, "GuideSet.\"Five ParameterCurveFit\".EC50Average AS EC505PLrbAverage", "GuideSet.\"Five ParameterCurveFit\".EC50StdDev AS EC505PLrbStdDev", sep=",");
+sql = paste(sql, "GuideSet.TitrationMaxFIAverage", "GuideSet.TitrationMaxFIStdDev", sep=",");
+sql = paste(sql, "GuideSet.TrapezoidalCurveFit.AUCAverage AS AUCrbAverage", "GuideSet.TrapezoidalCurveFit.AUCStdDev AS AUCrbStdDev", sep=",");
+sql = paste(sql, "GuideSet.SinglePointControlFIAverage", "GuideSet.SinglePointControlFIStdDev", sep=",");
 
 # get the columns needed for value-based guide set ranges
-colSelect = paste(colSelect, "GuideSet/EC504PLAverage", "GuideSet/EC504PLStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/EC505PLAverage", "GuideSet/EC505PLStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/MaxFIAverage", "GuideSet/MaxFIStdDev", sep=",");
-colSelect = paste(colSelect, "GuideSet/AUCAverage", "GuideSet/AUCStdDev", sep=",");
+sql = paste(sql, "GuideSet.EC504PLAverage AS EC504PLvbAverage", "GuideSet.EC504PLStdDev AS EC504PLvbStdDev", sep=",");
+sql = paste(sql, "GuideSet.EC505PLAverage AS EC505PLvbAverage", "GuideSet.EC505PLStdDev AS EC505PLvbStdDev", sep=",");
+sql = paste(sql, "GuideSet.MaxFIAverage", "GuideSet.MaxFIStdDev", sep=",");
+sql = paste(sql, "GuideSet.AUCAverage AS AUCvbAverage", "GuideSet.AUCStdDev AS AUCvbStdDev", sep=",");
 
-# either filter on start and end date or on max number of rows
-maxRows = NA;
-if (!is.null(labkey.url.params$MaxRows)) {
-	maxRows = labkey.url.params$MaxRows;
+if (!is.null(isTitration)) {
+    sql = paste(sql, " FROM AnalyteTitration", sep="");
 } else {
+    sql = paste(sql, " FROM AnalyteSinglePointControl", sep="");
+}
+
+# create a list of filters to apply to the selectRows call
+sql = paste(sql, " WHERE Analyte.Name='", gsub("'","''",labkey.url.params$Analyte), "'", sep="");
+if (!is.null(isTitration)) {
+    sql = paste(sql, " AND Titration.Name='", gsub("'","''",labkey.url.params$Titration), "'", sep="");
+    sql = paste(sql, " AND Titration.IncludeInQcReport=TRUE", sep="");
+
+    if (labkey.url.params$Conjugate == "") {
+        sql = paste(sql, " AND Titration.Run.Conjugate IS NULL", sep="");
+    } else {
+        sql = paste(sql, " AND Titration.Run.Conjugate='", gsub("'","''",labkey.url.params$Conjugate), "'", sep="");
+    }
+    if (labkey.url.params$Isotype == "") {
+        sql = paste(sql, " AND Titration.Run.Isotype IS NULL");
+    } else {
+        sql = paste(sql, " AND Titration.Run.Isotype='", gsub("'","''",labkey.url.params$Isotype), "'", sep="");
+    }
+} else {
+    sql = paste(sql, " AND SinglePointControl.Name='", gsub("'","''",labkey.url.params$Titration), "'", sep="");
+
+    if (labkey.url.params$Conjugate == "") {
+        sql = paste(sql, " AND SinglePointControl.Run.Conjugate IS NULL", sep="");
+    } else {
+        sql = paste(sql, " AND SinglePointControl.Run.Conjugate='", gsub("'","''",labkey.url.params$Conjugate), "'", sep="");
+    }
+    if (labkey.url.params$Isotype == "") {
+        sql = paste(sql, " AND SinglePointControl.Run.Isotype IS NULL", sep="");
+    } else {
+        sql = paste(sql, " AND SinglePointControl.Run.Isotype='", gsub("'","''",labkey.url.params$Isotype), "'", sep="");
+    }
+}
+
+# filter on start and end date (i.e. no max number of rows)
+if (is.null(labkey.url.params$MaxRows)) {
     if (!is.null(labkey.url.params$StartDate)) {
-	    colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_GREATER_THAN_OR_EQUAL",labkey.url.params$StartDate)));
+        sql = paste(sql, " AND CAST(Analyte.Data.AcquisitionDate AS DATE)>='", labkey.url.params$StartDate, "'", sep="");
     }
     if (!is.null(labkey.url.params$EndDate)) {
-	    colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_LESS_THAN_OR_EQUAL",labkey.url.params$EndDate)));
+        sql = paste(sql, " AND CAST(Analyte.Data.AcquisitionDate AS DATE)<='", labkey.url.params$EndDate, "'", sep="");
     }
     # Add the filter for Network
     if (!is.null(labkey.url.params$NetworkFilter)) {
         if (!is.null(isTitration)) {
-            colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
+            if (labkey.url.params$Network == "") {
+                sql = paste(sql, " AND Titration.Run.Batch.Network IS NULL", "'", sep="");
+            } else {
+                sql = paste(sql, " AND Titration.Run.Batch.Network='", gsub("'","''",labkey.url.params$Network), "'", sep="");
+            }
         } else {
-            colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Batch/Network","EQUALS",labkey.url.params$Network)));
+            if (labkey.url.params$Network == "") {
+                sql = paste(sql, " AND SinglePointControl.Run.Batch.Network IS NULL", "'", sep="");
+            } else {
+                sql = paste(sql, " AND SinglePointControl.Run.Batch.Network='", gsub("'","''",labkey.url.params$Network), "'", sep="");
+            }
         }
     }
     # Add the filter for Protocol
     if (!is.null(labkey.url.params$CustomProtocolFilter)) {
         if (!is.null(isTitration)) {
-            colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
+            if (labkey.url.params$CustomProtocol == "") {
+                sql = paste(sql, " AND Titration.Run.Batch.CustomProtocol IS NULL", sep="");
+            } else {
+                sql = paste(sql, " AND Titration.Run.Batch.CustomProtocol='", gsub("'","''",labkey.url.params$CustomProtocol), "'", sep="");
+            }
         } else {
-            colFilter=rbind(colFilter,makeFilter(c("SinglePointControl/Run/Batch/CustomProtocol","EQUALS",labkey.url.params$CustomProtocol)));
+            if (labkey.url.params$CustomProtocol == "") {
+                sql = paste(sql, " AND SinglePointControl.Run.Batch.CustomProtocol IS NULL", sep="");
+            } else {
+                sql = paste(sql, " AND SinglePointControl.Run.Batch.CustomProtocol='", gsub("'","''",labkey.url.params$CustomProtocol), "'", sep="");
+            }
         }
     }
 }
 
-# call the selectRows function to get the data from the server
 if (!is.null(isTitration)) {
-    labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
-                                folderPath=labkey.url.path,
-                                schemaName=paste("assay.Luminex.", labkey.url.params$Protocol, sep=""),
-                                queryName="AnalyteTitration",
-                                colSelect=colSelect,
-                                colFilter=colFilter,
-                                colSort="-Analyte/Data/AcquisitionDate,-Titration/Run/Created",
-                                containerFilter="AllFolders",
-                                colNameOpt="rname",
-                                maxRows=maxRows);
+    sql = paste(sql, " ORDER BY Analyte.Data.AcquisitionDate DESC, Titration.Run.Created DESC", sep="");
 } else {
-    labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
-                                folderPath=labkey.url.path,
-                                schemaName=paste("assay.Luminex.", labkey.url.params$Protocol, sep=""),
-                                queryName="AnalyteSinglePointControl",
-                                colSelect=colSelect,
-                                colFilter=colFilter,
-                                colSort="-Analyte/Data/AcquisitionDate,-SinglePointControl/Run/Created",
-                                containerFilter="AllFolders",
-                                colNameOpt="rname",
-                                maxRows=maxRows);
+    sql = paste(sql, " ORDER BY Analyte.Data.AcquisitionDate DESC, SinglePointControl.Run.Created DESC", sep="");
 }
+
+# add LIMIT on max number of rows (i.e. no start and end date filter)
+if (!is.null(labkey.url.params$MaxRows)) {
+    sql = paste(sql, " LIMIT ", labkey.url.params$MaxRows, sep="");
+}
+
+# call the selectRows function to get the data from the server
+labkey.data <- labkey.executeSql(baseUrl=labkey.url.base,
+                            folderPath=labkey.url.path,
+                            schemaName=paste("assay.Luminex.", labkey.url.params$Protocol, sep=""),
+                            sql=sql,
+                            containerFilter="AllFolders",
+                            colNameOpt="rname");
 
 # setup the png or pdf for the plot
 if (!is.null(labkey.url.params$PdfOut)) {
@@ -156,8 +167,7 @@ if (!is.null(labkey.url.params$PdfOut)) {
     par(cex=1);
 }
 
-for (typeIndex in 1:length(plotTypes))
-{
+for (typeIndex in 1:length(plotTypes)) {
 	plotType = plotTypes[typeIndex];
 	dat = labkey.data;
 
@@ -175,25 +185,25 @@ for (typeIndex in 1:length(plotTypes))
 
 	# setup the data frame based on the selected plot type
 	if (plotType == "EC50 4PL") {
-	    dat$plottype_value = dat$four_parametercurvefit_ec50;
-	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_ec504plaverage, dat$guideset_four_parametercurvefit_ec50average);
-	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_ec504plstddev, dat$guideset_four_parametercurvefit_ec50stddev);
+	    dat$plottype_value = dat$ec504pl;
+	    dat$guideset_average = ifelse(dat$valuebased, dat$ec504plvbaverage, dat$ec504plrbaverage);
+	    dat$guideset_stddev = ifelse(dat$valuebased, dat$ec504plvbstddev, dat$ec504plrbstddev);
 	} else if (plotType == "EC50 5PL") {
-	    dat$plottype_value = dat$five_parametercurvefit_ec50;
-        dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_ec505plaverage, dat$guideset_five_parametercurvefit_ec50average);
-        dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_ec505plstddev, dat$guideset_five_parametercurvefit_ec50stddev);
+	    dat$plottype_value = dat$ec505pl;
+        dat$guideset_average = ifelse(dat$valuebased, dat$ec505plvbaverage, dat$ec505plrbaverage);
+        dat$guideset_stddev = ifelse(dat$valuebased, dat$ec505plvbstddev, dat$ec505plrbstddev);
 	} else if (plotType == "High MFI") {
 	    dat$plottype_value = dat$maxfi;
-	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_maxfiaverage, dat$guideset_titrationmaxfiaverage);
-	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_maxfistddev, dat$guideset_titrationmaxfistddev);
+	    dat$guideset_average = ifelse(dat$valuebased, dat$maxfiaverage, dat$titrationmaxfiaverage);
+	    dat$guideset_stddev = ifelse(dat$valuebased, dat$maxfistddev, dat$titrationmaxfistddev);
 	} else if (plotType == "AUC") {
-	    dat$plottype_value = dat$trapezoidalcurvefit_auc;
-	    dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_aucaverage, dat$guideset_trapezoidalcurvefit_aucaverage);
-	    dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_aucstddev, dat$guideset_trapezoidalcurvefit_aucstddev);
+	    dat$plottype_value = dat$auc;
+	    dat$guideset_average = ifelse(dat$valuebased, dat$aucvbaverage, dat$aucrbaverage);
+	    dat$guideset_stddev = ifelse(dat$valuebased, dat$aucvbstddev, dat$aucrbstddev);
 	} else if (plotType == "MFI") {
 	    dat$plottype_value = dat$averagefibkgd;
-        dat$guideset_average = ifelse(dat$guideset_valuebased, dat$guideset_maxfiaverage, dat$guideset_singlepointcontrolfiaverage);
-        dat$guideset_stddev = ifelse(dat$guideset_valuebased, dat$guideset_maxfistddev, dat$guideset_singlepointcontrolfistddev);
+        dat$guideset_average = ifelse(dat$valuebased, dat$maxfiaverage, dat$singlepointcontrolfiaverage);
+        dat$guideset_stddev = ifelse(dat$valuebased, dat$maxfistddev, dat$singlepointcontrolfistddev);
 	}
 
 	# determine if the request is for log scale or not
@@ -205,8 +215,7 @@ for (typeIndex in 1:length(plotTypes))
 	}
 
 	# if there is no data for the selection, display a blank plot
-	if(length(dat$analyte_name) > 0)
-	{
+	if (length(dat$analytename) > 0) {
 	  # calculate the guide set ranges for each of the data points
 	  dat$guidesetplus1stddev = dat$guideset_average + (1 * dat$guideset_stddev);
 	  dat$guidesetplus2stddev = dat$guideset_average + (2 * dat$guideset_stddev);
@@ -242,44 +251,37 @@ for (typeIndex in 1:length(plotTypes))
 	  }
 
 	  # set the sequence value for the records (in reverse order since they are sorted in DESC order)
-	  dat$seq = length(dat$analyte_name):1;
+	  dat$seq = length(dat$analytename):1;
 	  dat = dat[order(dat$seq),];
 
 	  # determine the x-axis max
 	  xmax= 10;
-	  if(length(dat$analyte_name) > xmax)
-	     xmax = length(dat$analyte_name);
+	  if (length(dat$analytename) > xmax) {
+	     xmax = length(dat$analytename);
+	  }
 
 	  # get the scaling factor to determine how many tick marks to show
 	  tckFactor = ceiling(xmax/30);
 	  # setup the tick marks and labels based on the scaling factor
 	  xtcks = seq(1, xmax, by = tckFactor);
 
-      # set the column labels to 'NotebookNo': Titration/Run/NotebookNo or SinglePointControl/Run/NotebookNo
-	  if (!is.null(isTitration)) {
-          if ("titration_run_notebookno" %in% colnames(dat)) {
-            xlabels = as.character(dat$titration_run_notebookno[xtcks])
-          } else {
-            xlabels = rep(NA, length(xtcks));
-          }
+      # set the column labels to 'NotebookNo'
+      if ("notebookno" %in% colnames(dat)) {
+        xlabels = as.character(dat$notebookno[xtcks])
       } else {
-          if ("singlepointcontrol_run_notebookno" %in% colnames(dat)) {
-            xlabels = as.character(dat$singlepointcontrol_run_notebookno[xtcks])
-          } else {
-            xlabels = rep(NA, length(xtcks));
-          }
+        xlabels = rep(NA, length(xtcks));
       }
 
 	  # set the point colors, giving each unique lot numer (if more than one) a different color
 	  dat$ptcolor = 1;
-	  lotnums = unique(as.character(dat$analyte_properties_lotnumber));
+	  lotnums = unique(as.character(dat$lotnumber));
 	  showLegend = length(lotnums) > 1;
 	  if (length(lotnums) > 1) {
 	    for (i in 1:length(lotnums)) {
 	        if (is.na(lotnums[i])) {
-	            dat$ptcolor[is.na(dat$analyte_properties_lotnumber)] = i+1;
+	            dat$ptcolor[is.na(dat$lotnumber)] = i+1;
 	        } else {
-	            dat$ptcolor[as.character(dat$analyte_properties_lotnumber) == lotnums[i]] = i+1;
+	            dat$ptcolor[as.character(dat$lotnumber) == lotnums[i]] = i+1;
             }
         }
 	  }
@@ -304,7 +306,7 @@ for (typeIndex in 1:length(plotTypes))
 	  }
 
 	  # draw the guide set ranges for each of the records
-	  for (i in 1:length(dat$analyte_name))
+	  for (i in 1:length(dat$analytename))
 	  {
 		# draw a vertial line to connect the min and max of the range
 		lines(c(dat$seq[i], dat$seq[i]), c(dat$guidesetplus3stddev[i], dat$guidesetminus3stddev[i]), col='grey60', lty='solid');

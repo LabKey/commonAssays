@@ -226,7 +226,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.clearFilterButton = new Ext.Button({
             disabled: true,
             text: 'Clear',
-            handler: this.clearGraphFilter,
+            handler: function() {
+                this.clearGraphFilter(false);
+            },
             scope: this
         });
 
@@ -343,10 +345,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.conjugate = conjugate;
 
         // remove any previously entered values from the start date, end date, network, etc. fileds
-        this.clearGraphFilter();
-
-        // (re)load the network and protocol filter combos based on the selected params
-        this.loadNetworkAndProtocol();
+        this.clearGraphFilter(true);
 
         // show the trending tab panel and date range selection toolbar
         this.enable();
@@ -355,37 +354,13 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.displayTrendPlot();
     },
 
-    loadNetworkAndProtocol: function() {
-        var sqlFragment = ' FROM "Analyte' + this.controlTypeColumnName + '" AS x'
-            + ' WHERE x.' + this.controlTypeColumnName + '.Name = \'' + this.controlName.replace(/'/g, "''") + '\''
-            + ' AND x.Analyte.Name = \'' + this.analyte.replace(/'/g, "''") + '\''
-            // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
-            + ' AND x.' + (this.controlType == "Titration" ? "MaxFI" : "AverageFiBkgd") + ' IS NOT NULL';
-
+    loadNetworkAndProtocol: function(networks, protocols) {
         if (this.networkExists) {
-            LABKEY.Query.executeSql({
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
-                sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.Network" + sqlFragment,
-                containerFilter: LABKEY.Query.containerFilter.allFolders,
-                success: function(data) {
-                    this.networkCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'Network'));
-                    this.networkCombobox.setValue(this.ANY_FIELD);
-                },
-                scope: this
-            });
+            this.networkCombobox.getStore().loadData(this.getArrayStoreData(networks, this.networkCombobox.getValue()));
         }
 
         if (this.protocolExists) {
-            LABKEY.Query.executeSql({
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
-                sql: "SELECT DISTINCT x." + this.controlTypeColumnName + ".Run.Batch.CustomProtocol AS CustomProtocol" + sqlFragment,
-                containerFilter: LABKEY.Query.containerFilter.allFolders,
-                success: function(data) {
-                    this.protocolCombobox.getStore().loadData(this.getArrayStoreData(data.rows, 'CustomProtocol'));
-                    this.protocolCombobox.setValue(this.ANY_FIELD);
-                },
-                scope: this
-            });
+            this.protocolCombobox.getStore().loadData(this.getArrayStoreData(protocols, this.protocolCombobox.getValue()));
         }
     },
 
@@ -521,7 +496,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
     },
 
-    clearGraphFilter: function() {
+    clearGraphFilter: function(clearOnly) {
         this.startDate = null;
         this.startDateField.reset();
         this.endDate = null;
@@ -543,6 +518,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.protocol = null;
         }
 
+        if (clearOnly)
+            return;
 
         this.setTabsToRender();
         this.displayTrendPlot();
@@ -561,10 +538,14 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         return this.endDate ? this.endDate : null;
     },
 
-    getArrayStoreData: function(rows, colName) {
+    getArrayStoreData: function(arr, prevVal) {
+        // if there is a previously selected combo value, make sure it exists in the array data
+        if (prevVal && prevVal != '[ANY]' && arr.indexOf(prevVal) == -1){
+            arr.push(prevVal);
+        }
+
         var storeData = [ [this.ANY_FIELD, this.ANY_FIELD] ];
-        Ext.each(rows, function(row){
-            var value = row[colName];
+        Ext.each(arr.sort(), function(value){
             storeData.push([value, value == null ? '[Blank]' : value]);
         });
         return storeData;

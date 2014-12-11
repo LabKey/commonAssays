@@ -265,6 +265,9 @@
                         trendPlotPanel.displayTrendPlot();
                         trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
                                 trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
+                    },
+                    'loadNetworkAndProtocol': function(networks, protocols) {
+                        trendPlotPanel.loadNetworkAndProtocol(networks, protocols);
                     }
                 }
             });
