@@ -365,7 +365,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         {
             if (_singleObjectRowId != null)
             {
-                return new int[] { _singleObjectRowId.intValue() };
+                return new int[] {_singleObjectRowId};
             }
             return PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), clear));
         }

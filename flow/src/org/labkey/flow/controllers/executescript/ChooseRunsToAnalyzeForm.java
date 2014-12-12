@@ -197,8 +197,6 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
     public int[] getSelectedRunIds()
     {
         Set<String> values = DataRegionSelection.getSelected(getViewContext(), false);
-        if (values == null)
-            return new int[0];
         return PageFlowUtil.toInts(values);
     }
 

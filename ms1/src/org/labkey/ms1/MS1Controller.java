@@ -921,7 +921,7 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getView(CompareRunsSetupForm compareRunsSetupForm, BindException errors) throws Exception
         {
             Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), true);
-            if(null == selectedRuns || selectedRuns.size() < 1)
+            if (selectedRuns.size() < 1)
                 return HttpView.redirect(new BeginAction(getViewContext()).getUrl().getLocalURIString());
 
             ActionURL url = new ActionURL(CompareRunsAction.class, getContainer());

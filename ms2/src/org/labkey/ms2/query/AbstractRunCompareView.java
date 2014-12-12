@@ -137,8 +137,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
         StringBuilder sb = new StringBuilder();
 
-        TSVGridWriter tsvWriter = getTsvWriter();
-        try
+        try (TSVGridWriter tsvWriter = getTsvWriter())
         {
             tsvWriter.setHeaderRowVisible(false);
             tsvWriter.write(sb);
@@ -158,13 +157,13 @@ public abstract class AbstractRunCompareView extends QueryView
             {
                 String line = lines.nextToken();
                 String[] values = line.split("\\t");
-                for (int i = 0; i < _runs.size() && i + 1 < values.length ; i++)
+                for (int i = 0; i < _runs.size() && i + 1 < values.length; i++)
                 {
                     hits[i][index] = !"".equals(values[i + 1].trim());
                 }
                 index++;
             }
-            
+
             for (int runIndex = 0; runIndex < _runs.size(); runIndex++)
             {
                 MS2Run run = _runs.get(runIndex);
@@ -192,14 +191,10 @@ public abstract class AbstractRunCompareView extends QueryView
                         comparisonGroup.addMember(gwtRun);
                     }
                 }
-                gwtRuns[runIndex] = gwtRun; 
+                gwtRuns[runIndex] = gwtRun;
             }
 
             return new GWTComparisonResult(gwtRuns, runGroups.values().toArray(new GWTComparisonGroup[runGroups.size()]), proteinCount, "Runs");
-        }
-        finally
-        {
-            tsvWriter.close();
         }
     }
     

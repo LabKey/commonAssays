@@ -294,19 +294,19 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         List<DisplayColumn> displayColumns = getPeptideDisplayColumns(columnNames);
         changePeptideCaptionsForTsv(displayColumns);
 
-        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
-        if (form.isExportAsWebPage())
+        try (ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded()))
+        {
+            if (form.isExportAsWebPage())
                 tw.setExportAsWebPage(true);
-        tw.prepare(response);
-        tw.setFileHeader(headers);
-        tw.setFilenamePrefix("MS2Runs");
-        tw.writeFileHeader();
-        tw.writeColumnHeaders();
+            tw.prepare(response);
+            tw.setFileHeader(headers);
+            tw.setFilenamePrefix("MS2Runs");
+            tw.writeFileHeader();
+            tw.writeColumnHeaders();
 
-        for (MS2Run run : _runs)
-            exportTSVProteinGrid(tw, form.getColumns(), run, where);
-
-        tw.close();
+            for (MS2Run run : _runs)
+                exportTSVProteinGrid(tw, form.getColumns(), run, where);
+        }
         return null;
     }
 
