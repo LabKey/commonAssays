@@ -136,6 +136,8 @@ elisa/src/org/labkey/elisa/view/runDetailsView.jsp -text
 elisa/webapp/elisa/runDataPanel.js -text
 elisa/webapp/elisa/runDetailsPanel.js -text
 elispotassay/module.properties -text
+elispotassay/resources/schemas/dbscripts/postgresql/elispotassay-14.30-14.31.sql -text
+elispotassay/resources/schemas/dbscripts/sqlserver/elispotassay-14.30-14.31.sql -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text
@@ -149,6 +151,7 @@ elispotassay/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
 elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/pipeline/BackgroundSubtractionJob.java -text
 elispotassay/src/org/labkey/elispot/pipeline/ElispotPipelineProvider.java -text
+elispotassay/src/org/labkey/elispot/plate/AIDPlateReader.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunAntigenTable.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text

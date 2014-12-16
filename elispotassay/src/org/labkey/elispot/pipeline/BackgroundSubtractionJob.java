@@ -16,6 +16,7 @@
 package org.labkey.elispot.pipeline;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
@@ -113,7 +114,8 @@ public class BackgroundSubtractionJob extends PipelineJob
                     for (DomainProperty column : provider.getRunDomain(run.getProtocol()).getProperties())
                         runPropMap.put(column.getName(), column);
 
-                    Plate plate = initializePlate((PlateBasedAssayProvider)provider, run, runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
+                    PlateReader reader = getPlateReader((PlateBasedAssayProvider)provider, run, runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
+                    Plate plate = initializePlate((PlateBasedAssayProvider)provider, run, reader);
 
                     if (plate != null)
                     {
@@ -145,7 +147,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                                 propMap.put(UploadWizardAction.getInputName(antigenNameProp, group.getName()), o.getStringValue());
                             }
                         }
-                        ElispotDataHandler.populateAntigenRunProperties(run, plate, propMap, true, true);
+                        ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, propMap, true, true);
 
                         // set the run property for background subtraction
                         DomainProperty subtractBackground = runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME);
@@ -166,20 +168,29 @@ public class BackgroundSubtractionJob extends PipelineJob
         }
     }
 
-    private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, DomainProperty plateReaderProp) throws ExperimentException
+    @Nullable
+    private PlateReader getPlateReader(PlateBasedAssayProvider provider, ExpRun run, DomainProperty plateReaderProp)
+    {
+        Object plateReader = run.getProperty(plateReaderProp);
+        if (plateReader != null)
+        {
+            return PlateReaderService.getPlateReaderFromName(plateReader.toString(), getUser(), getContainer(), provider);
+        }
+        return null;
+    }
+
+    private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, PlateReader reader) throws ExperimentException
     {
         PlateTemplate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
         List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         Plate plate = null;
 
-        Object plateReader = run.getProperty(plateReaderProp);
-        if (plateReader != null)
+        if (reader != null)
         {
             File dataFile = data.get(0).getFile();
 
             if (dataFile.exists())
             {
-                PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReader.toString(), getUser(), getContainer(), provider);
                 plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
             }
             else

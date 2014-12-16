@@ -201,7 +201,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     /**
      * Adds antigen wellgroup properties to the elispot data table.
      */
-    public static void populateAntigenDataProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
+    public static void populateAntigenDataProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap,
+                                                     boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
@@ -266,7 +267,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
                         double normalizedSpotCnt = o.getFloatValue();
 
-                        if (isSpotCountValid(normalizedSpotCnt))
+                        if (reader.isWellValueValid(normalizedSpotCnt))
                         {
                             String cellWellKey = UploadWizardAction.getInputName(cellWellProp, group.getName());
                             int cellsPerWell = 0;
@@ -306,7 +307,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     /**
      * Adds antigen wellgroup statistics to the antigen runs table (one row per sample)
      */
-    public static void populateAntigenRunProperties(ExpRun run, Plate plate, Map<String, Object> propMap, boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
+    public static void populateAntigenRunProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap,
+                                                    boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
@@ -334,7 +336,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             Map<String, Map<String, Double>> backgroundValueMap = Collections.emptyMap();
 
             if (subtractBackground)
-                backgroundValueMap = ElispotPlateTypeHandler.getBackgroundValues(container, plate);
+                backgroundValueMap = ElispotPlateTypeHandler.getBackgroundValues(container, plate, reader);
 
             for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
             {
@@ -386,7 +388,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
                                     double value = o.getFloatValue();
 
-                                    if (isSpotCountValid(value))
+                                    if (reader.isWellValueValid(value))
                                     {
                                         statsData[i++] = value;
                                     }

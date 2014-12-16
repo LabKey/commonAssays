@@ -17,6 +17,10 @@
 package org.labkey.elispot.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -33,8 +37,12 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
+import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotProtocolSchema;
 
@@ -56,6 +64,20 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         _protocol = protocol;
 
         setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
+
+        // display column for spot counts
+        ColumnInfo col = getColumn(FieldKey.fromParts(ElispotDataHandler.SFU_PROPERTY_NAME));
+        if (col != null)
+        {
+            col.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    return new SpotCountDisplayColumn(colInfo, schema);
+                }
+            });
+        }
     }
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
@@ -174,5 +196,45 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         }
 
         return result;
+    }
+
+    public static class SpotCountDisplayColumn extends DataColumn
+    {
+        private PlateReader _reader;
+        private AssaySchema _schema;
+
+        public SpotCountDisplayColumn(ColumnInfo col, AssaySchema schema)
+        {
+            super(col);
+            _schema = schema;
+        }
+
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            String value = super.getFormattedValue(ctx);
+            PlateReader reader = getReader(ctx);
+
+            if (reader != null)
+                return reader.getWellDisplayValue(value);
+            else
+                return value;
+        }
+
+        private PlateReader getReader(RenderContext ctx)
+        {
+            if (_reader == null)
+            {
+                String readerAlias = ctx.getFieldMap().get(FieldKey.fromParts("Run", "PlateReader")).getAlias();
+                Object readerName = ctx.getRow().get(readerAlias);
+
+                if (readerName != null)
+                {
+                    ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(ElispotAssayProvider.NAME);
+                    _reader = PlateReaderService.getPlateReaderFromName(String.valueOf(readerName), _schema.getUser(), _schema.getContainer(), provider);
+                }
+            }
+            return _reader;
+        }
     }
 }

@@ -42,6 +42,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.study.assay.plate.ExcelPlateReader;
 import org.labkey.api.study.assay.plate.TextPlateReader;
+import org.labkey.elispot.plate.AIDPlateReader;
 
 import java.util.*;
 
@@ -189,7 +190,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             {
                 List<ListItem> items = new ArrayList<>();
                 items.add(getItem(readerList, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty));
-                items.add(getItem(readerList, "AID", nameProperty, TextPlateReader.TYPE, typeProperty));
+                items.add(getItem(readerList, "AID", nameProperty, AIDPlateReader.TYPE, typeProperty));
                 items.add(getItem(readerList, "Zeiss", nameProperty, TextPlateReader.TYPE, typeProperty));
                 readerList.insertListItems(user, c, items);
             }

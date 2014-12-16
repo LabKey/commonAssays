@@ -338,6 +338,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
                 Plate plate = null;
+                PlateReader reader = null;
 
                 // populate property name to value map
                 Map<String, String> runPropMap = new HashMap<>();
@@ -346,7 +347,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
-                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getUser(), form.getContainer(), provider);
+                    reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getUser(), form.getContainer(), provider);
                     plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
                 }
 
@@ -363,8 +364,8 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (plate != null)
                 {
-                    ElispotDataHandler.populateAntigenDataProperties(run, plate, postedPropMap, false, subtractBackground);
-                    ElispotDataHandler.populateAntigenRunProperties(run, plate, postedPropMap, false, subtractBackground);
+                    ElispotDataHandler.populateAntigenDataProperties(run, plate, reader, postedPropMap, false, subtractBackground);
+                    ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, postedPropMap, false, subtractBackground);
                 }
                 transaction.commit();
 

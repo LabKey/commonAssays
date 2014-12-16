@@ -30,6 +30,7 @@ import org.labkey.api.study.Position;
 import org.labkey.api.study.Well;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
+import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.Stats;
 
@@ -152,7 +153,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
      * specimen wellgroup. Background wells are specified on the plate template control type using the
      * background well wellgroup.
      */
-    public static Map<String, Map<String, Double>> getBackgroundValues(Container container, Plate plate)
+    public static Map<String, Map<String, Double>> getBackgroundValues(Container container, Plate plate, PlateReader reader)
     {
         Map<String, Map<String, Double>> backgroundMap = new HashMap<>();
         WellGroup backgroundGroup = null;
@@ -180,7 +181,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
                     if (backgroundGroup.contains(pos))
                     {
                         Well well = plate.getWell(pos.getRow(), pos.getColumn());
-                        if (ElispotDataHandler.isSpotCountValid(well.getValue()))
+                        if (reader.isWellValueValid(well.getValue()))
                             statsData[i++] = well.getValue();
                     }
                 }

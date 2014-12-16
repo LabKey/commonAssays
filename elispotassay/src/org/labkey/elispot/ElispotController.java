@@ -57,6 +57,8 @@ import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -207,7 +209,7 @@ public class ElispotController extends SpringActionController
     }
 
     private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
-                                                      PlateTemplate template) throws SQLException
+                                                      PlateTemplate template, PlateReader reader) throws SQLException
     {
         Map<Position, WellInfo> map = new HashMap<>();
 
@@ -233,15 +235,18 @@ public class ElispotController extends SpringActionController
 
                 for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
                 {
-                    wellInfo.addWellProperty(prop);
                     if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
                     {
                         specimenGroup = String.valueOf(prop.value());
+                        wellInfo.addWellProperty(prop);
                     }
                     else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
                     {
-                        wellInfo.setTitle(String.valueOf(prop.value()));
+                        wellInfo.setTitle(reader.getWellDisplayValue(prop.value()));
                     }
+                    else
+                        wellInfo.addWellProperty(prop);
+
                 }
 
                 // get the specimen wellgroup info
@@ -327,20 +332,33 @@ public class ElispotController extends SpringActionController
             ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(protocol);
             PlateTemplate template = provider.getPlateTemplate(getContainer(), protocol);
 
-            Map<Position, WellInfo> wellInfoMap = createWellInfoMap(run, protocol, provider, template);
-
-            JSONArray rows = new JSONArray();
-            for (Map.Entry<Position, WellInfo> entry : wellInfoMap.entrySet())
+            String plateReaderName = null;
+            for (ObjectProperty prop : run.getObjectProperties().values())
             {
-                JSONObject row = entry.getValue().toJSON();
-
-                row.put("position", entry.getKey().toString());
-
-                rows.put(row);
+                if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(prop.getName()))
+                {
+                    plateReaderName = prop.getStringValue();
+                    break;
+                }
             }
-            response.put("summary", rows);
-            response.put("success", true);
 
+            if (plateReaderName != null)
+            {
+                PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReaderName, getUser(), getContainer(), provider);
+                Map<Position, WellInfo> wellInfoMap = createWellInfoMap(run, protocol, provider, template, reader);
+
+                JSONArray rows = new JSONArray();
+                for (Map.Entry<Position, WellInfo> entry : wellInfoMap.entrySet())
+                {
+                    JSONObject row = entry.getValue().toJSON();
+
+                    row.put("position", entry.getKey().toString());
+
+                    rows.put(row);
+                }
+                response.put("summary", rows);
+                response.put("success", true);
+            }
             return response;
         }
     }
