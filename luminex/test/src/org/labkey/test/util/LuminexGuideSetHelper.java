@@ -57,7 +57,7 @@ public class LuminexGuideSetHelper
         _test.uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         _test.checkCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
         _test.clickButton("Save and Finish");
-        
+        _test.assertElementNotPresent(Locator.css(".labkey-error"));
         return _runNumber++;
     }
 
