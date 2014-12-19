@@ -68,9 +68,9 @@
     public LinkedHashSet<ClientDependency> getClientDependencies()
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("Ext3"));
-        resources.add(ClientDependency.fromFilePath("Flow/util.js"));
-        resources.add(ClientDependency.fromFilePath("TreeGrid.js"));
+        resources.add(ClientDependency.fromPath("Ext3"));
+        resources.add(ClientDependency.fromPath("Flow/util.js"));
+        resources.add(ClientDependency.fromPath("TreeGrid.js"));
         return resources;
     }
 %>

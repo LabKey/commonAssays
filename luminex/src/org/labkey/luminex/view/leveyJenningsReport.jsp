@@ -33,16 +33,16 @@
     public LinkedHashSet<ClientDependency> getClientDependencies()
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
-        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsGraphParamsPanel.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsGuideSetPanel.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsTrendPlotPanel.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsTrackingDataPanel.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/ManageGuideSetPanel.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/GuideSetWindow.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/ApplyGuideSetPanel.js"));
-        resources.add(ClientDependency.fromFilePath("Experiment/QCFlagToggleWindow.js"));
-        resources.add(ClientDependency.fromFilePath("luminex/LeveyJenningsReport.css"));
+        resources.add(ClientDependency.fromPath("clientapi/ext3"));
+        resources.add(ClientDependency.fromPath("luminex/LeveyJenningsGraphParamsPanel.js"));
+        resources.add(ClientDependency.fromPath("luminex/LeveyJenningsGuideSetPanel.js"));
+        resources.add(ClientDependency.fromPath("luminex/LeveyJenningsTrendPlotPanel.js"));
+        resources.add(ClientDependency.fromPath("luminex/LeveyJenningsTrackingDataPanel.js"));
+        resources.add(ClientDependency.fromPath("luminex/ManageGuideSetPanel.js"));
+        resources.add(ClientDependency.fromPath("luminex/GuideSetWindow.js"));
+        resources.add(ClientDependency.fromPath("luminex/ApplyGuideSetPanel.js"));
+        resources.add(ClientDependency.fromPath("Experiment/QCFlagToggleWindow.js"));
+        resources.add(ClientDependency.fromPath("luminex/LeveyJenningsReport.css"));
         return resources;
     }
 %>

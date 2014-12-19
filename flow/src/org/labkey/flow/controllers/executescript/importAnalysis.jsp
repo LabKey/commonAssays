@@ -32,10 +32,10 @@
     {
         // TODO: --Ext3-- This should be declared as part of the included views
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("clientapi/ext3"));
-        resources.add(ClientDependency.fromFilePath("File"));
-        resources.add(ClientDependency.fromFilePath("FileUploadField.js"));
-        resources.add(ClientDependency.fromFilePath("Ext4ClientApi"));
+        resources.add(ClientDependency.fromPath("clientapi/ext3"));
+        resources.add(ClientDependency.fromPath("File"));
+        resources.add(ClientDependency.fromPath("FileUploadField.js"));
+        resources.add(ClientDependency.fromPath("Ext4ClientApi"));
         return resources;
     }
 %>

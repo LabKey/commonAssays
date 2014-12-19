@@ -23,7 +23,7 @@
     public LinkedHashSet<ClientDependency> getClientDependencies()
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("microarray"));
+        resources.add(ClientDependency.fromPath("microarray"));
         return resources;
     }
 %>

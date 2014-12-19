@@ -39,10 +39,10 @@
     public LinkedHashSet<ClientDependency> getClientDependencies()
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromFilePath("clientapi/ext4"));
-        resources.add(ClientDependency.fromFilePath("vischart"));
-        resources.add(ClientDependency.fromFilePath("/elisa/runDetailsPanel.js"));
-        resources.add(ClientDependency.fromFilePath("/elisa/runDataPanel.js"));
+        resources.add(ClientDependency.fromPath("clientapi/ext4"));
+        resources.add(ClientDependency.fromPath("vischart"));
+        resources.add(ClientDependency.fromPath("/elisa/runDetailsPanel.js"));
+        resources.add(ClientDependency.fromPath("/elisa/runDataPanel.js"));
         return resources;
     }
 %>
