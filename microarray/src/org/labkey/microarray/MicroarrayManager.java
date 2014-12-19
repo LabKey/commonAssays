@@ -49,7 +49,6 @@ import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.ContainerUtil;
-import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
@@ -57,8 +56,6 @@ import org.labkey.microarray.matrix.ExpressionMatrixProtocolSchema;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.BindException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -149,7 +146,7 @@ public class MicroarrayManager
             row.put("Description", description);
             row.put("Container", container);
 
-            List<Map<String, Object>> results = featureSetUpdateService.insertRows(user, container, Collections.singletonList(row), errors, null);
+            List<Map<String, Object>> results = featureSetUpdateService.insertRows(user, container, Collections.singletonList(row), errors, null, null);
             return (Integer) results.get(0).get("RowId");
         }
 
@@ -177,7 +174,7 @@ public class MicroarrayManager
 
             translator.addConstantColumn("featureannotationsetid", JdbcType.INTEGER, featureSetRowId);
 
-            return queryUpdateService.importRows(user, container, new DataIteratorBuilder.Wrapper(translator), errors, null);
+            return queryUpdateService.importRows(user, container, new DataIteratorBuilder.Wrapper(translator), errors, null, null);
         }
 
         return -1;

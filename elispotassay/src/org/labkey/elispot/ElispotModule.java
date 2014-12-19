@@ -138,7 +138,7 @@ public class ElispotModule extends DefaultModule
                         {
                             // need to change the reader types to map to the new reader instances
                             rows.get(0).put(PlateReaderService.READER_TYPE_PROPERTY, AIDPlateReader.TYPE);
-                            qus.updateRows(context.getUpgradeUser(), container, rows, null, null);
+                            qus.updateRows(context.getUpgradeUser(), container, rows, null, null, null);
                         }
                     }
                 }

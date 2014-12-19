@@ -17,7 +17,6 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
@@ -102,6 +101,9 @@ public class LuminexExclusionPipelineJob extends PipelineJob
                 QueryUpdateService qus = tableInfo.getUpdateService();
                 if (qus != null)
                 {
+                    Map<Enum, Object> options = new HashMap<>();
+                    options.put(QueryUpdateService.ConfigParameters.Logger, getLogger());
+
                     for (LuminexSingleExclusionCommand command : _form.getCommands())
                     {
                         List<Map<String, Object>> rows = new ArrayList<>();
@@ -117,15 +119,15 @@ public class LuminexExclusionPipelineJob extends PipelineJob
                         switch (command.getCommand())
                         {
                             case "insert":
-                                results = qus.insertRows(getUser(), getContainer(), rows, errors, null);
+                                results = qus.insertRows(getUser(), getContainer(), rows, errors, options, null);
                                 getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " inserted into " + tableInfo.getName());
                                 break;
                             case "update":
-                                results = qus.updateRows(getUser(), getContainer(), rows, keys, null);
+                                results = qus.updateRows(getUser(), getContainer(), rows, keys, options, null);
                                 getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " updated in " + tableInfo.getName());
                                 break;
                             case "delete":
-                                results = qus.deleteRows(getUser(), getContainer(), keys, null);
+                                results = qus.deleteRows(getUser(), getContainer(), keys, options, null);
                                 getLogger().info(StringUtilsLabKey.pluralize(results.size(), "record") + " deleted from " + tableInfo.getName());
                                 break;
                             default:

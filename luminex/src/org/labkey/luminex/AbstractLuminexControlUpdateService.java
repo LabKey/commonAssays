@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
@@ -60,9 +61,9 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
     }
 
     @Override
-    public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, @Nullable Map<Enum, Object> configParameters, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
     {
-        List<Map<String, Object>> results = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
+        List<Map<String, Object>> results = super.updateRows(user, container, rows, oldKeys, configParameters, extraScriptContext);
 
         // If any of the updated rows includes a change to the guide set calculation (i.e. has IncludeInGuideSetCalculation as an updated value)
         // then we need to update the QC Flags for all rows that are associated with the given guide set(s)
