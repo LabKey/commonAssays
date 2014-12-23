@@ -1923,11 +1923,11 @@ public class MS2Controller extends SpringActionController
             schema.setRuns(runs);
             if (form.isNormalizeProteinGroups())
             {
-                return new NormalizedProteinProphetCrosstabView(schema, form, getViewContext().getActionURL());
+                return new NormalizedProteinProphetCrosstabView(schema, form, getViewContext());
             }
             else
             {
-                return new ProteinProphetCrosstabView(schema, form, getViewContext().getActionURL());
+                return new ProteinProphetCrosstabView(schema, form, getViewContext());
             }
         }
 
@@ -2008,7 +2008,7 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
             schema.setRuns(runs);
-            return new PeptideCrosstabView(schema, form, getViewContext().getActionURL(), true);
+            return new PeptideCrosstabView(schema, form, getViewContext(), true);
         }
 
         public NavTree appendNavTrail(NavTree root)

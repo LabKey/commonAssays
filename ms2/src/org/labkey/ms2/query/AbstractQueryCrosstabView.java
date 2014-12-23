@@ -30,6 +30,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 
@@ -46,15 +47,15 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
     protected final MS2Schema _schema;
     protected final MS2Controller.PeptideFilteringComparisonForm _form;
 
-    public AbstractQueryCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url, MS2Schema.HiddenTableType tableType)
+    public AbstractQueryCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext, MS2Schema.HiddenTableType tableType)
     {
         super(schema);
         _schema = schema;
         _form = form;
 
-        getViewContext().setActionURL(url);
+        setViewContext(viewContext);
 
-        QuerySettings settings = schema.getSettings(url.getPropertyValues(), QueryView.DATAREGIONNAME_DEFAULT);
+        QuerySettings settings = schema.getSettings(viewContext.getBindPropertyValues(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(tableType.toString());
         settings.setAllowChooseView(true);
         setSettings(settings);

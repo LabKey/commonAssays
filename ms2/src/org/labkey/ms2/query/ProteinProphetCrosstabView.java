@@ -16,12 +16,12 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.CrosstabTable;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.Sort;
 import org.labkey.api.data.AggregateColumnInfo;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.data.CrosstabTable;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
 /**
@@ -30,9 +30,9 @@ import org.labkey.ms2.MS2Controller;
  */
 public class ProteinProphetCrosstabView extends AbstractQueryCrosstabView
 {
-    public ProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url)
+    public ProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext)
     {
-        super(schema, form, url, MS2Schema.HiddenTableType.ProteinProphetCrosstab);
+        super(schema, form, viewContext, MS2Schema.HiddenTableType.ProteinProphetCrosstab);
     }
 
     protected TableInfo createTable()

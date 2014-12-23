@@ -26,6 +26,7 @@ import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
 /**
@@ -37,15 +38,15 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
     private MS2Controller.PeptideFilteringComparisonForm _form;
     private boolean _addExportProteinCoverage = false;
 
-    public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url, boolean addExportProteinCoverage)
+    public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext, boolean addExportProteinCoverage)
     {
-        this(schema, form, url);
+        this(schema, form, viewContext);
         _addExportProteinCoverage = addExportProteinCoverage;
     }
 
-    public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url)
+    public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext)
     {
-        super(schema, form, url, MS2Schema.HiddenTableType.PeptideCrosstab);
+        super(schema, form, viewContext, MS2Schema.HiddenTableType.PeptideCrosstab);
         _form = form;
     }
 

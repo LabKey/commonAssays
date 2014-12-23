@@ -21,7 +21,7 @@ import org.labkey.api.data.CrosstabTable;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
 import java.sql.SQLException;
@@ -32,9 +32,9 @@ import java.sql.SQLException;
  */
 public class NormalizedProteinProphetCrosstabView extends AbstractQueryCrosstabView
 {
-    public NormalizedProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url) throws SQLException
+    public NormalizedProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext) throws SQLException
     {
-        super(schema, form, url, MS2Schema.HiddenTableType.ProteinProphetNormalizedCrosstab);
+        super(schema, form, viewContext, MS2Schema.HiddenTableType.ProteinProphetNormalizedCrosstab);
     }
 
     protected TableInfo createTable()

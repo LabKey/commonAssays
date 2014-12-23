@@ -106,7 +106,8 @@ public class PlateParserTests
             Pair.of("sampledata/Nab/m0902055;4001.xlsx", "sampledata/Nab/m0902055;4001.expected.tsv"),
             Pair.of("sampledata/Nab/Luc5Samples02NotLocked1.xls", "sampledata/Nab/Luc5Samples02NotLocked1.expected.tsv"),
             Pair.of("sampledata/Nab/16AUG11 KK CD3-1-1.8.xls", "sampledata/Nab/16AUG11 KK CD3-1-1.8.expected.tsv"),
-            Pair.of("sampledata/Nab/seaman/MS010407.xls", "sampledata/Nab/seaman/MS010407.expected.tsv"),
+            // Issue 22153: detect xls file without extension
+            Pair.of("sampledata/Nab/seaman/MS010407", "sampledata/Nab/seaman/MS010407.expected.tsv"),
             // TODO: contains multiple plates
             //Pair.of("sampledata/Nab/seaman/RC121306.xls", "sampledata/Nab/seaman/RC121306.expected.tsv")
             Pair.of("sampledata/Nab/SpectraMax/20140612_0588.txt", "sampledata/Nab/SpectraMax/20140612_0588.expected.tsv"),

@@ -18,16 +18,18 @@ package org.labkey.nab;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.tika.detect.DefaultDetector;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeTypes;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
-import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -40,7 +42,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
@@ -65,7 +66,6 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.FileType;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabVirusDomainKind;
 
@@ -88,6 +88,8 @@ import java.util.Set;
 public class SinglePlateNabDataHandler extends NabDataHandler implements TransformDataHandler
 {
     public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+
+    private static final Detector DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
     @Override
     protected String getPreferredDataFileExtension()
@@ -115,6 +117,38 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
     }
 
+    // Issue 22153: excel detection placed here temporarily.  Move file type detection to FileType.isType().
+    private static boolean isExcel(final File dataFile)
+    {
+        final String fileName = dataFile.getName();
+        if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
+            return true;
+
+        if (fileName.endsWith(".tsv") || fileName.endsWith(".csv"))
+            return false;
+
+        final Metadata metadata = new Metadata();
+        final List<String> contentTypes = Arrays.asList("application/" + ExcelFactory.SUB_TYPE_BIFF8, "application/" + ExcelFactory.SUB_TYPE_XSSF);
+        try (TikaInputStream is = TikaInputStream.get(dataFile))
+        {
+            MediaType mediaType = DETECTOR.detect(is, metadata);
+            if (mediaType != null)
+            {
+                for (String contentType : contentTypes)
+                {
+                    if (mediaType.compareTo(MediaType.parse(contentType)) == 0)
+                        return true;
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        return false;
+    }
+
     protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate) throws ExperimentException
     {
         final int expectedRows = nabTemplate.getRows();
@@ -123,8 +157,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         try
         {
             // Special case for excel - The ExcelLoader only returns data for a single sheet so we need to create a new ExcelLoader for each sheet
-            final String fileName = dataFile.getName();
-            if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
+            if (isExcel(dataFile))
             {
                 final Workbook workbook = ExcelFactory.create(dataFile);
                 for (int i = 0, len = workbook.getNumberOfSheets(); i < len; i++)

@@ -28,8 +28,9 @@ import org.labkey.ms2.client.CompareService;
 import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.NormalizedProteinProphetCrosstabView;
-import org.labkey.ms2.query.ProteinProphetCrosstabView;
 import org.labkey.ms2.query.PeptideCrosstabView;
+import org.labkey.ms2.query.ProteinProphetCrosstabView;
+import org.springframework.beans.MutablePropertyValues;
 
 import java.util.List;
 
@@ -88,7 +89,16 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             form.setPivotType(url.getParameter(MS2Controller.PeptideFilteringFormElements.pivotType));
 
             ViewContext queryContext = new ViewContext(_context);
+            // Don't limit row counts
+            url.replaceParameter("query.showRows", "ALL");
             queryContext.setActionURL(url);
+            // Translate from the URL parameters to a PropertyValues object that can be used for the QuerySettings
+            MutablePropertyValues propertyValues = new MutablePropertyValues();
+            for (String propName : url.getParameterMap().keySet())
+            {
+                propertyValues.addPropertyValue(propName, url.getParameter(propName));
+            }
+            queryContext.setBindPropertyValues(propertyValues);
 
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, queryContext);
 
@@ -100,12 +110,12 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
                 form.setProteinProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.proteinProphetProbability));
                 form.setProteinGroupFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType));
                 form.setNormalizeProteinGroups(Boolean.parseBoolean(url.getParameter(MS2Controller.NORMALIZE_PROTEIN_GROUPS_NAME)));
-                view = form.isNormalizeProteinGroups() ? new NormalizedProteinProphetCrosstabView(schema, form, url) :
-                    new ProteinProphetCrosstabView(schema, form, url);
+                view = form.isNormalizeProteinGroups() ? new NormalizedProteinProphetCrosstabView(schema, form, queryContext) :
+                    new ProteinProphetCrosstabView(schema, form, queryContext);
             }
             else
             {
-               view = new PeptideCrosstabView(schema, form, url);
+               view = new PeptideCrosstabView(schema, form, queryContext);
             }
 
             return view.createComparisonResult();
