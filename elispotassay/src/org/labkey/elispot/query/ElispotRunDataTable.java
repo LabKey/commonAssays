@@ -40,7 +40,6 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
@@ -231,7 +230,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                 if (readerName != null)
                 {
                     ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(ElispotAssayProvider.NAME);
-                    _reader = PlateReaderService.getPlateReaderFromName(String.valueOf(readerName), _schema.getUser(), _schema.getContainer(), provider);
+                    _reader = provider.getPlateReader(String.valueOf(readerName));
                 }
             }
             return _reader;

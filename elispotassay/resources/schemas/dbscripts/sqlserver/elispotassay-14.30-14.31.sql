@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-EXEC core.executeJavaUpgradeCode 'upgradePlateReaderList';
+--EXEC core.executeJavaUpgradeCode 'upgradePlateReaderList';

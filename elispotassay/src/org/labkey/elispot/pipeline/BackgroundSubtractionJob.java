@@ -40,7 +40,6 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PlateBasedAssayProvider;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -174,7 +173,7 @@ public class BackgroundSubtractionJob extends PipelineJob
         Object plateReader = run.getProperty(plateReaderProp);
         if (plateReader != null)
         {
-            return PlateReaderService.getPlateReaderFromName(plateReader.toString(), getUser(), getContainer(), provider);
+            return provider.getPlateReader(plateReader.toString());
         }
         return null;
     }

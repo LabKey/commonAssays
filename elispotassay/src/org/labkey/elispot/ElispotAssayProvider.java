@@ -18,33 +18,46 @@ package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.list.ListDefinition;
-import org.labkey.api.exp.list.ListItem;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.*;
-import org.labkey.api.study.assay.plate.PlateReaderService;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
-import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.api.util.Pair;
-import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProviderSchema;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayTableMetadata;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.study.assay.plate.ExcelPlateReader;
+import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.study.assay.plate.TextPlateReader;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
 import org.labkey.elispot.plate.AIDPlateReader;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: Karl Lum
@@ -73,6 +86,48 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String ANTIGENNAME_PROPERTY_NAME = "AntigenName";
     public static final String ANTIGENNAME_PROPERTY_CAPTION = "Antigen Name";
 
+    enum PlateReaderType
+    {
+        CTL("Cellular Technology Ltd. (CTL)", ExcelPlateReader.class),
+        AID("AID", AIDPlateReader.class),
+        ZEISS("Zeiss", TextPlateReader.class);
+
+        private String _label;
+        private Class _class;
+
+        private PlateReaderType(String label, Class cls)
+        {
+            _label = label;
+            _class = cls;
+        }
+
+        public String getLabel()
+        {
+            return _label;
+        }
+
+        public PlateReader getInstance()
+        {
+            try
+            {
+                return (PlateReader)_class.newInstance();
+            }
+            catch (InstantiationException | IllegalAccessException x)
+            {
+                throw new RuntimeException(x);
+            }
+        }
+
+        public static PlateReaderType fromLabel(String label)
+        {
+            for (PlateReaderType type : values())
+            {
+                if (type.getLabel().equals(label))
+                    return type;
+            }
+            return null;
+        }
+    }
 
     public ElispotAssayProvider()
     {
@@ -168,49 +223,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(runDomain, "ExperimentDate", "Experiment Date", PropertyType.DATE_TIME);
         addProperty(runDomain, BACKGROUND_WELL_PROPERTY_NAME, BACKGROUND_WELL_PROPERTY_CAPTION, PropertyType.BOOLEAN);
 
-        ListDefinition plateReaderList = createPlateReaderList(c, user);
+        Container lookupContainer = c.getProject();
         DomainProperty reader = addProperty(runDomain, READER_PROPERTY_NAME, READER_PROPERTY_CAPTION, PropertyType.STRING);
-        reader.setLookup(new Lookup(c.getProject(), "lists", plateReaderList.getName()));
+        reader.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElispotProviderSchema.ELISPOT_PLATE_READER_TABLE));
         reader.setRequired(true);
+        reader.setShownInUpdateView(false);
 
         return result;
-    }
-
-    private ListDefinition createPlateReaderList(Container c, User user)
-    {
-        ListDefinition readerList = PlateReaderService.getPlateReaderList(this, c);
-        if (readerList == null)
-        {
-            readerList = PlateReaderService.createPlateReaderList(c, user, this);
-
-            DomainProperty nameProperty = readerList.getDomain().getPropertyByName(PlateReaderService.PLATE_READER_PROPERTY);
-            DomainProperty typeProperty = readerList.getDomain().getPropertyByName(PlateReaderService.READER_TYPE_PROPERTY);
-
-            try
-            {
-                List<ListItem> items = new ArrayList<>();
-                items.add(getItem(readerList, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty));
-                items.add(getItem(readerList, "AID", nameProperty, AIDPlateReader.TYPE, typeProperty));
-                items.add(getItem(readerList, "Zeiss", nameProperty, TextPlateReader.TYPE, typeProperty));
-                readerList.insertListItems(user, c, items);
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-        return readerList;
-    }
-
-    private ListItem getItem(ListDefinition list, String name, DomainProperty nameProperty,
-                         String fileType, DomainProperty fileTypeProperty) throws Exception
-    {
-        ListItem reader = list.createListItem();
-        reader.setKey(name);
-        reader.setProperty(nameProperty, name);
-        reader.setProperty(fileTypeProperty, fileType);
-
-        return reader;
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
@@ -240,6 +259,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
+    public AssayProviderSchema createProviderSchema(User user, Container container, Container targetStudy)
+    {
+        return new ElispotProviderSchema(user, container, this, targetStudy);
+    }
+
+    @Override
     public ElispotProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new ElispotProtocolSchema(user, container, this, protocol, targetStudy);
@@ -254,8 +279,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public String getPlateReaderListName()
+    public PlateReader getPlateReader(String readerName)
     {
-        return "ElispotPlateReader";
+        PlateReaderType type = PlateReaderType.fromLabel(readerName);
+        if (type != null)
+            return type.getInstance();
+        else
+            return super.getPlateReader(readerName);
     }
 }

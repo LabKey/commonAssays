@@ -24,9 +24,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.elisa.plate.BioTekPlateReader;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -73,7 +71,6 @@ public class ElisaModule extends DefaultModule
         AbstractPlateBasedAssayProvider provider = new ElisaAssayProvider();
 
         AssayService.get().registerAssayProvider(provider);
-        PlateReaderService.registerPlateReader(provider, new BioTekPlateReader());
     }
 
     @NotNull

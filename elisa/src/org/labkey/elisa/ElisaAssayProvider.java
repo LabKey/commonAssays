@@ -48,6 +48,9 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.study.assay.ThawListResolverType;
+import org.labkey.api.study.assay.plate.ExcelPlateReader;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.study.assay.plate.TextPlateReader;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UniqueID;
@@ -60,6 +63,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.visualization.GenericChartReport;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
+import org.labkey.elisa.plate.BioTekPlateReader;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
@@ -96,6 +100,47 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public static final String CURVE_FIT_PARAMETERS = "CurveFitParams";
     public static final String CURVE_FIT_PARAMETERS_CAPTION = "Fit Parameters";
+
+    enum PlateReaderType
+    {
+        BIOTEK(BioTekPlateReader.LABEL, BioTekPlateReader.class);
+
+        private String _label;
+        private Class _class;
+
+        private PlateReaderType(String label, Class cls)
+        {
+            _label = label;
+            _class = cls;
+        }
+
+        public String getLabel()
+        {
+            return _label;
+        }
+
+        public PlateReader getInstance()
+        {
+            try
+            {
+                return (PlateReader)_class.newInstance();
+            }
+            catch (InstantiationException | IllegalAccessException x)
+            {
+                throw new RuntimeException(x);
+            }
+        }
+
+        public static PlateReaderType fromLabel(String label)
+        {
+            for (PlateReaderType type : values())
+            {
+                if (type.getLabel().equals(label))
+                    return type;
+            }
+            return null;
+        }
+    }
 
     public ElisaAssayProvider()
     {
@@ -317,5 +362,15 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public Domain getConcentrationWellGroupDomain(ExpProtocol protocol)
     {
         return getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
+    }
+
+    @Override
+    public PlateReader getPlateReader(String readerName)
+    {
+        PlateReaderType type = PlateReaderType.fromLabel(readerName);
+        if (type != null)
+            return type.getInstance();
+        else
+            return super.getPlateReader(readerName);
     }
 }

@@ -55,12 +55,10 @@ import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -122,7 +120,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                 if (_context instanceof AssayUploadXarContext)
                 {
                     Map<DomainProperty, String> runPropValues = ((AssayUploadXarContext)_context).getContext().getRunProperties();
-                    PlateReader reader = PlateReaderService.getPlateReaderFromName(runPropValues.get(readerProp), _info.getUser(), _info.getContainer(), provider);
+                    PlateReader reader = provider.getPlateReader(runPropValues.get(readerProp));
                     Plate plate = initializePlate(_dataFile, template, reader);
 
                     List<Map<String, Object>> results = new ArrayList<>();

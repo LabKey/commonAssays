@@ -44,7 +44,6 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.springframework.validation.BindException;
@@ -347,7 +346,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
-                    reader = PlateReaderService.getPlateReaderFromName(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME), form.getUser(), form.getContainer(), provider);
+                    reader = provider.getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
                     plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
                 }
 

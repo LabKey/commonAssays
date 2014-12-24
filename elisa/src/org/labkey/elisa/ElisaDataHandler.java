@@ -21,7 +21,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -46,7 +45,6 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.study.assay.PlateBasedAssayProvider;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elisa.actions.ElisaRunUploadForm;
@@ -121,7 +119,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
                 runProperties.put(column.getName(), column);
 
-            PlateReader reader = PlateReaderService.getPlateReader((PlateBasedAssayProvider) provider, BioTekPlateReader.TYPE);
+            PlateReader reader = ((PlateBasedAssayProvider)provider).getPlateReader(BioTekPlateReader.LABEL);
             if (reader != null)
             {
                 PlateTemplate template = ((PlateBasedAssayProvider)provider).getPlateTemplate(container, protocol);

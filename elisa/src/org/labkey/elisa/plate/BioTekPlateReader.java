@@ -27,6 +27,8 @@ import org.labkey.api.study.assay.plate.ExcelPlateReader;
  */
 public class BioTekPlateReader extends ExcelPlateReader
 {
+    public static final String LABEL = "BioTek";
+
     @Override
     protected boolean isValidStartRow(Sheet sheet, int row)
     {

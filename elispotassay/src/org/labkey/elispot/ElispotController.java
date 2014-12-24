@@ -58,7 +58,6 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.assay.plate.PlateReaderService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -344,7 +343,7 @@ public class ElispotController extends SpringActionController
 
             if (plateReaderName != null)
             {
-                PlateReader reader = PlateReaderService.getPlateReaderFromName(plateReaderName, getUser(), getContainer(), provider);
+                PlateReader reader = provider.getPlateReader(plateReaderName);
                 Map<Position, WellInfo> wellInfoMap = createWellInfoMap(run, protocol, provider, template, reader);
 
                 JSONArray rows = new JSONArray();
