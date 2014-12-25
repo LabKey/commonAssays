@@ -18,6 +18,7 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.HString;
 import org.labkey.api.util.UnexpectedException;
@@ -62,7 +63,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
     private FlowRun _run;
 
     @Override
-    public void setViewContext(ViewContext context)
+    public void setViewContext(@NotNull ViewContext context)
     {
         super.setViewContext(context);
         reset();
