@@ -65,7 +65,7 @@ public class LuminexEC50Test extends LuminexTest
         createNewAssayRun(TEST_ASSAY_LUM, EC50_RUN_NAME);
         checkCheckbox(Locator.name("curveFitLogTransform"));
         uploadMultipleCurveData();
-        clickButton("Save and Finish", 2 * WAIT_FOR_PAGE);
+        clickButton("Save and Finish", LONG_PAGE_WAIT);
 
         //add transform script
         goToSchemaBrowser();

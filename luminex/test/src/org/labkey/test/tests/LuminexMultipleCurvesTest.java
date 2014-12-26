@@ -59,7 +59,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         Map<String, Set<String>> analytesAndStandardsConfig = generateAnalytesAndStandardsConfig(possibleAnalytes, possibleStandards);
         configureStandardsForAnalytes(analytesAndStandardsConfig, possibleStandards);
 
-        clickButton("Save and Finish", 2*WAIT_FOR_PAGE);
+        clickButton("Save and Finish", LONG_PAGE_WAIT);
         clickAndWait(Locator.linkWithText(name));
 
         //edit view to show Analyte Standard

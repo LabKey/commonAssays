@@ -88,6 +88,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final String isotype = "IgG ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
     public static final String conjugate = "PE ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
 
+    public static final int LONG_PAGE_WAIT = 5 * WAIT_FOR_PAGE;
+
 
     public List<String> getAssociatedModules()
     {
@@ -571,9 +573,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public void finishUploadPositivityFile(String assayRunId, boolean isBackgroundUpload)
     {
-        clickButton("Save and Finish", defaultWaitForPage * 4);
+        clickButton("Save and Finish", LONG_PAGE_WAIT);
         if (!isBackgroundUpload && !isElementPresent(Locator.css(".labkey-error").containing("Error: ")))
-            clickAndWait(Locator.linkWithText(assayRunId), 2 * WAIT_FOR_PAGE);
+            clickAndWait(Locator.linkWithText(assayRunId), LONG_PAGE_WAIT);
     }
 
     public void selectPositivityFile(File file, boolean expectDuplicateFile)

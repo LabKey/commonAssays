@@ -24,7 +24,6 @@ import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.Luminex;
 import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.LogMethod;
 
 import java.io.File;
 
@@ -176,7 +175,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Save and Finish");
 
         log("Check that upload worked");
-        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), 2 * WAIT_FOR_PAGE);
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), LONG_PAGE_WAIT);
         assertTextPresent("Hu IL-1b (32)");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
@@ -232,7 +231,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Next", 60000);
         clickButton("Save and Finish");
 
-        clickAndWait(Locator.linkWithText("raw and summary"), 2 * WAIT_FOR_PAGE);
+        clickAndWait(Locator.linkWithText("raw and summary"), LONG_PAGE_WAIT);
         // make sure the Summary, StdDev, and DV columns are visible
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addCustomizeViewColumn("Summary");
