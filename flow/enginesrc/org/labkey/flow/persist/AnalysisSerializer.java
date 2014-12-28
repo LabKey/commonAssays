@@ -1280,11 +1280,9 @@ public class AnalysisSerializer
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(STATISTICS_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(results.first, results.second))
             {
-                TSVWriter writer = new TSVMapWriter(results.first, results.second);
                 writer.write(pw);
-                pw.flush();
             }
         }
     }
@@ -1386,11 +1384,9 @@ public class AnalysisSerializer
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(KEYWORDS_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(results.first, results.second))
             {
-                TSVWriter writer = new TSVMapWriter(results.first, results.second);
                 writer.write(pw);
-                pw.flush();
             }
         }
     }
@@ -1431,11 +1427,9 @@ public class AnalysisSerializer
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(COMPENSATION_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(columns, rows))
             {
-                TSVWriter writer = new TSVMapWriter(columns, rows);
                 writer.write(pw);
-                pw.flush();
             }
         }
     }
@@ -1536,11 +1530,9 @@ public class AnalysisSerializer
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(GRAPHS_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile))
+            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(columns, rows))
             {
-                TSVWriter writer = new TSVMapWriter(columns, rows);
                 writer.write(pw);
-                pw.flush();
             }
         }
     }

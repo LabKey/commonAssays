@@ -581,7 +581,7 @@ public class LuminexController extends SpringActionController
             final List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
             final List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
-            TSVWriter writer = new TSVWriter(){
+            try (TSVWriter writer = new TSVWriter(){
                 @Override
                 protected void write()
                 {
@@ -591,9 +591,11 @@ public class LuminexController extends SpringActionController
                         _pw.println( String.format("%s\t%s\t%s", analytes.get(i), positivityThresholds.get(i), negativeBeads.get(i)));
                     }
                 }
-            };
-            writer.setFilenamePrefix("LuminexDefaultValues");
-            writer.write(response);
+            })
+            {
+                writer.setFilenamePrefix("LuminexDefaultValues");
+                writer.write(response);
+            }
         }
     }
 
