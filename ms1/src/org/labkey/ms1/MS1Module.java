@@ -105,7 +105,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
     {
         return new ArrayList<WebPartFactory>(Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_TYPE);
                     view.setTitle("MS1 Runs");
@@ -117,7 +117,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
             },
             new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
                     JspView<PepSearchModel> view = new JspView<>("/org/labkey/ms1/view/PepSearchView.jsp", model);
@@ -127,7 +127,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
             },
             new BaseWebPartFactory(WEBPART_FEATURE_SEARCH)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     SimilarSearchModel searchModel = new SimilarSearchModel(portalCtx.getContainer(), false);
                     JspView<SimilarSearchModel> searchView = new JspView<>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);

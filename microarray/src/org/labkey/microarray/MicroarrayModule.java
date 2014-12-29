@@ -20,9 +20,9 @@ import com.drew.lang.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.ExperimentRunType;
+import org.labkey.api.exp.ExperimentRunTypeSource;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
@@ -30,10 +30,14 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.FileType;
-import org.labkey.api.view.*;
+import org.labkey.api.view.BaseWebPartFactory;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.affy.AffymetrixAssayProvider;
 import org.labkey.microarray.affy.AffymetrixDataHandler;
 import org.labkey.microarray.assay.MageMLDataHandler;
@@ -46,8 +50,12 @@ import org.labkey.microarray.matrix.ExpressionMatrixMaterialListener;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class MicroarrayModule extends SpringModule
 {
@@ -102,7 +110,7 @@ public class MicroarrayModule extends SpringModule
         return new ArrayList<WebPartFactory>(Arrays.asList(
             new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunType.INSTANCE);
                     view.setShowExportButtons(true);
@@ -113,7 +121,7 @@ public class MicroarrayModule extends SpringModule
             },
             new BaseWebPartFactory(WEBPART_PENDING_FILES)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     QueryView view = new PendingMageMLFilesView(portalCtx);
                     view.setTitle("Pending MageML Files");
@@ -123,7 +131,7 @@ public class MicroarrayModule extends SpringModule
             },
             new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     WebPartView view = new MicroarrayStatisticsView(portalCtx);
                     view.setTitle(WEBPART_MICROARRAY_STATISTICS);
@@ -133,7 +141,7 @@ public class MicroarrayModule extends SpringModule
             },
             new BaseWebPartFactory(WEBPART_FEATURE_ANNOTATION_SET)
             {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
+                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     String dataRegionName = MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET + webPart.getIndex();
                     MicroarrayUserSchema schema = new MicroarrayUserSchema(portalCtx.getUser(), portalCtx.getContainer());
