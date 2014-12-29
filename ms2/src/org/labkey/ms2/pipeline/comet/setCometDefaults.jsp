@@ -48,7 +48,7 @@
             <a href="http://comet-ms.sourceforge.net/" target="_blank">Comet documentation</a> and <%= helpLink("pipelineComet", "LabKey Server Comet documentation")%> on-line.
     </div>
     <div>
-        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
+        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlSetup(c)%>"/>
     </div>
 </labkey:form>
 <script for=window event=onload>

@@ -74,7 +74,6 @@ import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowJob;
-import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.script.ImportResultsJob;
 import org.labkey.flow.script.KeywordsJob;
 import org.labkey.flow.script.RScriptJob;
@@ -414,8 +413,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(),
-                FlowPipelineProvider.NAME);
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }
 
         public boolean doAction(Object o, BindException errors) throws Exception

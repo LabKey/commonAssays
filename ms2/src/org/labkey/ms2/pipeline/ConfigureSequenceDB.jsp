@@ -27,7 +27,7 @@
             <td>Path on the web server for FASTA files to be used for MS2 searches:</td>
         </tr>
         <tr>
-            <td><input type="text" name="localPathRoot" size="40" value="<%= h(getLocalPathRoot()) %>"></td>
+            <td><input type="text" name="localPathRoot" size="80" value="<%= h(getLocalPathRoot()) %>"></td>
         </tr>
         <tr>
             <td><%= button("Save").submit(true) %> <%= button("Cancel").href(urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>

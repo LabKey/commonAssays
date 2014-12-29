@@ -20,6 +20,7 @@ import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -563,7 +564,7 @@ public class PipelineController extends SpringActionController
 
              //get help topic
             String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicHref();
-            ActionURL returnURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlReferer(getContainer());
+            ActionURL returnURL = form.getReturnActionURL(getContainer().getStartURL(getUser()));
            
             //properties to send to GWT page
             Map<String, String> props = new HashMap<>();

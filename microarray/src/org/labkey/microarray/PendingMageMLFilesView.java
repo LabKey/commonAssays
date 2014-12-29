@@ -123,7 +123,7 @@ public class PendingMageMLFilesView extends QueryView
                         menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", '" + url.getLocalURIString() + "', 'POST', 'files')) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
                     }
                 }
-                ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getReturnURL().toString());
+                ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getReturnURL());
                 ActionButton browseButton = new ActionButton(browseURL, "Browse for MageML Files");
                 browseButton.setDisplayPermission(InsertPermission.class);
                 bar.add(browseButton);

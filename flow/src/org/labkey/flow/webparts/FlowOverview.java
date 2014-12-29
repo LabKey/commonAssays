@@ -31,7 +31,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
 import org.labkey.flow.FlowModule;
-import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -42,8 +41,8 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.script.FlowPipelineProvider;
 
 public class FlowOverview extends Overview
 {
@@ -181,7 +180,7 @@ public class FlowOverview extends Overview
     private Action getBrowseForFCSFilesAction()
     {
         if (!_hasPipelineRoot || !_canInsert) return null;
-        ActionURL urlImportFCSFiles = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), FlowPipelineProvider.NAME);
+        ActionURL urlImportFCSFiles = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be imported" : "Browse for more FCS files to be imported", urlImportFCSFiles);
     }
 

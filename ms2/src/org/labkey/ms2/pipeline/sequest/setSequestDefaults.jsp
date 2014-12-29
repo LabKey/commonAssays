@@ -48,7 +48,7 @@
         <a href="http://fields.scripps.edu/sequest/index.html">Sequest Documentation</a> and <%= helpLink("pipelineSequest", "LabKey Server Sequest documentation")%> on-line.
     </div>
     <div>
-        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
+        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlSetup(c)%>"/>
     </div>
 </labkey:form>
 <script for=window event=onload>

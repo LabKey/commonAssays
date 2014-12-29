@@ -48,7 +48,7 @@
         <a href="http://www.thegpm.org/TANDEM/api/index.html" target="_blank">X!Tandem API Documentation</a> and <%= helpLink("pipelineXTandem", "LabKey Server X!Tandem documentation")%> on-line.
     </div>
     <div>
-        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
+        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlSetup(c)%>"/>
     </div>
 </labkey:form>
 <script for=window event=onload>

@@ -420,7 +420,7 @@
             }
             else
             {
-                %><div><%=textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getActionURL().getLocalURIString()))%></div><%
+                %><div><%=textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getActionURL()))%></div><%
             }
 
             if (_fcsRealRunCount > 0)

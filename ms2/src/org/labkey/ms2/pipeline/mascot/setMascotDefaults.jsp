@@ -48,7 +48,7 @@
         <a href="http://www.matrixscience.com/help_index.html" target="_api">Mascot API Documentation</a> and <%= helpLink("pipelineMascot", "LabKey Server Mascot documentation")%> on-line.
     </div>
     <div>
-        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/>
+        <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlSetup(c)%>"/>
     </div>
 </labkey:form>
 <script for=window event=onload>
