@@ -174,14 +174,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     return new MS2StatsWebPart();
                 }
             },
-            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT)
-            {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                {
-                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
-                }
-            },
-            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME)
+            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT, WebPartFactory.LOCATION_RIGHT)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
@@ -234,12 +227,12 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         final ModuleContext finalModuleContext = moduleContext;
-        SearchService ss = ServiceRegistry.get().getService(SearchService.class);
-        if (null != ss)
-        {
+//        SearchService ss = ServiceRegistry.get().getService(SearchService.class);
+//        if (null != ss)
+//        {
 //            ss.addSearchCategory(ProteinManager.proteinCategory);
 //            ss.addDocumentProvider(this);
-        }
+//        }
 
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
