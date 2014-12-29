@@ -198,7 +198,7 @@
             </xs:enumeration>
             <xs:enumeration value="in">
                 <xs:annotation>
-                    <xs:documentation>Equals One Of (e.g. 'a;b;c')</xs:documentation>
+                    <xs:documentation>Equals One Of (example usage: a;b;c)</xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
         </xs:restriction>

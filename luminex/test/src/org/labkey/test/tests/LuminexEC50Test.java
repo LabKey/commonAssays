@@ -33,7 +33,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @Category({DailyA.class, LuminexAll.class, Assays.class, Luminex.class})
 public class LuminexEC50Test extends LuminexTest
@@ -92,7 +91,7 @@ public class LuminexEC50Test extends LuminexTest
         _customizeViewsHelper.applyCustomView();
 
         DataRegionTable table = new DataRegionTable("query", this, false);
-        table.setFilter("TitrationId/Name", "Equals One Of (e.g. \"a;b;c\")", "Standard1;Standard2");
+        table.setFilter("TitrationId/Name", "Equals One Of (example usage: a;b;c)", "Standard1;Standard2");
 
         List<String> analyte = table.getColumnDataAsText("Analyte");
         List<String> formula = table.getColumnDataAsText("Curve Type");
