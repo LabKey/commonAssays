@@ -36,7 +36,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '</tr>',
                 '<tr><th>Created:</th><td>{[this.dateRenderer(values.Created)]}</td>',
                     '<th>Isotype:</th><td>{[this.formatNone(values.Isotype)]}</td></tr>',
-                '<tr><th>Titration:</th><td>{ControlName:htmlEncode}</td>',
+                '<tr><th>{ControlType:htmlEncode}:</th><td>{ControlName:htmlEncode}</td>',
                     '<th>Conjugate:</th><td>{[this.formatNone(values.Conjugate)]}</td></tr>',
                 '<tr><th>Analyte:</th><td colspan="3">{AnalyteName:htmlEncode}</td></tr>',
                 '<tr><th>Comment:</th><td colspan="3">{Comment:htmlEncode}</td></tr>',
@@ -52,23 +52,28 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<th>Num Runs</th>',
                 '<th>Use for QC</th>',
                 '</tpl>',
-            '</tr><tr>',
-                '<td>EC50 4PL</td>',
-                '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
-                '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
-                '<tpl if="ValueBased &lt; 1">',
-                '<td align="center">{EC504PLRunCounts}</td>',
-                '<td><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
-                '</tpl>',
-            '</tr><tr>',
-                '<td>EC50 5PL</td>',
-                '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
-                '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
-                '<tpl if="ValueBased &lt; 1">',
-                '<td align="center">{EC505PLRunCounts}</td>',
-                '<td><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
-                '</tpl>',
-            '</tr><tr>',
+            '</tr>',
+            '<tpl if="ControlType ==\'Titration\'">',
+                '<tr>',
+                    '<td>EC50 4PL</td>',
+                    '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
+                    '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
+                    '<tpl if="ValueBased &lt; 1">',
+                    '<td align="center">{EC504PLRunCounts}</td>',
+                    '<td><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                    '</tpl>',
+                '</tr>',
+                '<tr>',
+                    '<td>EC50 5PL</td>',
+                    '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
+                    '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
+                    '<tpl if="ValueBased &lt; 1">',
+                    '<td align="center">{EC505PLRunCounts}</td>',
+                    '<td><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                    '</tpl>',
+                '</tr>',
+            '</tpl>',
+            '<tr>',
                 '<td>MFI</td>',
                 '<td align="right">{[this.formatNumber(values.MaxFIStdDev)]}</td>',
                 '<td align="right">{[this.formatNumber(values.MaxFIAverage)]}</td>',
@@ -76,15 +81,18 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="center">{MaxFIRunCounts}</td>',
                 '<td><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
-            '</tr><tr>',
-                '<td>AUC</td>',
-                '<td align="right">{[this.formatNumber(values.AUCStdDev)]}</td>',
-                '<td align="right">{[this.formatNumber(values.AUCAverage)]}</td>',
-                '<tpl if="ValueBased &lt; 1">',
-                '<td align="center">{AUCRunCounts}</td>',
-                '<td><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
-                '</tpl>',
             '</tr>',
+            '<tpl if="ControlType ==\'Titration\'">',
+                '<tr>',
+                    '<td>AUC</td>',
+                    '<td align="right">{[this.formatNumber(values.AUCStdDev)]}</td>',
+                    '<td align="right">{[this.formatNumber(values.AUCAverage)]}</td>',
+                    '<tpl if="ValueBased &lt; 1">',
+                    '<td align="center">{AUCRunCounts}</td>',
+                    '<td><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                    '</tpl>',
+                '</tr>',
+            '</tpl>',
             '</table>',
             '</form>',
             '</tpl>',
@@ -119,10 +127,10 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     queryName: 'GuideSet',
                     rows: [{
                         rowId: this.currentGuideSetId,
-                        ec504plEnabled: form.elements['EC504PLCheckBox'].checked,
-                        ec505plEnabled: form.elements['EC505PLCheckBox'].checked,
+                        ec504plEnabled: form.elements['EC504PLCheckBox'] ? form.elements['EC504PLCheckBox'].checked : false,
+                        ec505plEnabled: form.elements['EC505PLCheckBox'] ? form.elements['EC505PLCheckBox'].checked : false,
                         MaxFIEnabled: form.elements['MFICheckBox'].checked,
-                        aucEnabled: form.elements['AUCCheckBox'].checked
+                        aucEnabled: form.elements['AUCCheckBox'] ? form.elements['AUCCheckBox'].checked : false
                     }],
                     scope: this,
                     success: function() {
@@ -151,7 +159,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
         this.addEvents('aftersave');
         this.callParent([config]);
         // wait till after constructed so that currentGuideSetId is set and assayName
-        this.guideSetStore.load();
+        this.getGuideSetStore().load();
         this.show();
     },
 
@@ -187,7 +195,8 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     {name: 'MaxFIRunCounts', type: 'int'},
                     {name: 'EC504PLRunCounts', type: 'int'},
                     {name: 'EC505PLRunCounts', type: 'int'},
-                    {name: 'AUCRunCounts', type: 'int'}
+                    {name: 'AUCRunCounts', type: 'int'},
+                    {name: 'ControlType'}
                 ]
             });
 
@@ -204,24 +213,31 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     // NOTE: need to error here if assayName not set...
                     LABKEY.Query.executeSql({
                         schemaName: 'assay.Luminex.'+LABKEY.QueryKey.encodePart(assayName),
-                        success: this.handleCounts, scope: this,
+                        success: this.handleResponse, scope: this,
                         sql: 'SELECT RowId, AnalyteName, Conjugate, Isotype, Comment, Created, ValueBased, ' +
                              'ControlName, EC504PLEnabled, EC505PLEnabled, AUCEnabled, MaxFIEnabled, ' +
-                             'MaxFIRunCounts, EC504PLRunCounts, EC505PLRunCounts, AUCRunCounts, ' +
+                             'MaxFIRunCounts, EC504PLRunCounts, EC505PLRunCounts, AUCRunCounts, ControlType, ' +
                              // handle value-based vs run-based
                              'CASE ValueBased WHEN true THEN EC504PLAverage ELSE "Four ParameterCurveFit".EC50Average END "EC504PLAverage", ' +
                              'CASE ValueBased WHEN true THEN EC504PLStdDev ELSE "Four ParameterCurveFit".EC50StdDev END "EC504PLStdDev", ' +
                              'CASE ValueBased WHEN true THEN EC505PLAverage ELSE "Five ParameterCurveFit".EC50Average END "EC505PLAverage", ' +
                              'CASE ValueBased WHEN true THEN EC505PLStdDev ELSE "Five ParameterCurveFit".EC50StdDev END "EC505PLStdDev", ' +
-                             'CASE ValueBased WHEN true THEN MaxFIAverage ELSE TitrationMaxFIAverage END "MaxFIAverage", ' +
-                             'CASE ValueBased WHEN true THEN MaxFIStdDev ELSE TitrationMaxFIStdDev END "MaxFIStdDev", ' +
+
+                             'CASE ValueBased WHEN true THEN MaxFIAverage ELSE ' +
+                                'CASE ControlType WHEN \'Titration\' THEN TitrationMaxFIAverage ELSE SinglePointControlFIAverage END ' +
+                             'END "MaxFIAverage", ' +
+
+                             'CASE ValueBased WHEN true THEN MaxFIStdDev ELSE ' +
+                                'CASE ControlType WHEN \'Titration\' THEN TitrationMaxFIStdDev ELSE SinglePointControlFIStdDev END ' +
+                             'END "MaxFIStdDev", ' +
+
                              'CASE ValueBased WHEN true THEN AUCAverage ELSE TrapezoidalCurveFit.AUCAverage  END "AUCAverage", ' +
                              'CASE ValueBased WHEN true THEN AUCStdDev ELSE TrapezoidalCurveFit.AUCStdDev END "AUCStdDev" ' +
                              'FROM GuideSet WHERE RowId = ' + currentGuideSetId
 
                     });
                 },
-                handleCounts: function(response) {
+                handleResponse: function(response) {
                     if (response.rows.length > 1)
                     {
                         Ext.Msg.alert("Error", "There is an issue with the request as the returned rows should be length 1 and is " + response.rows.length);
@@ -236,16 +252,21 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     var form = document.forms['GuideSetForm'];
                     if (!record.get("ValueBased"))
                     {
-                        form.elements['EC504PLCheckBox'].checked = record.get("EC504PLEnabled");
-                        form.elements['EC505PLCheckBox'].checked = record.get("EC505PLEnabled");
                         form.elements['MFICheckBox'].checked = record.get("MaxFIEnabled");
-                        form.elements['AUCCheckBox'].checked = record.get("AUCEnabled");
 
                         // NOTE: using this for dirty bit logic.
-                        form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
-                        form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
                         form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
-                        form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
+
+                        if(record.get("ControlType") == "Titration")
+                        {
+                            form.elements['EC504PLCheckBox'].checked = record.get("EC504PLEnabled");
+                            form.elements['EC505PLCheckBox'].checked = record.get("EC505PLEnabled");
+                            form.elements['AUCCheckBox'].checked = record.get("AUCEnabled");
+
+                            form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
+                            form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
+                            form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
+                        }
                     }
                 }
             });

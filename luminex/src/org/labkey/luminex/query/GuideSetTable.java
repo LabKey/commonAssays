@@ -151,8 +151,21 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
-        addRunCounts();
-        
+        SQLFragment controlTypeSql = new SQLFragment("(SELECT CASE WHEN COUNT(*) > 0 THEN 'SinglePoint' ELSE 'Titration' END FROM ");
+        controlTypeSql.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
+        controlTypeSql.append(" JOIN ");
+        controlTypeSql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");
+        controlTypeSql.append(" ON gs.ControlName = spc.Name WHERE gs.RowId = ");
+
+        controlTypeSql.append(ExprColumn.STR_TABLE_ALIAS);
+        controlTypeSql.append(".RowId)");
+
+        ExprColumn controlTypeCol = new ExprColumn(this, "ControlType", controlTypeSql, JdbcType.VARCHAR);
+        controlTypeCol.setLabel("Control Type");
+        addColumn(controlTypeCol);
+
+        addRunCounts(controlTypeSql);
+
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
@@ -211,7 +224,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addColumn(maxFIStdDevCol);
     }
     
-    private void addRunCounts() {
+    private void addRunCounts(SQLFragment controlTypeSql) {
         SQLFragment runCountsBaseSQL = new SQLFragment("(SELECT COUNT(*) ");
         runCountsBaseSQL.append("FROM ");
         runCountsBaseSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
@@ -221,11 +234,38 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         runCountsBaseSQL.append(" ON gs.RowId = at.GuideSetId ");
 
         // do MaxFI counts before joining in CurveFit table
-        SQLFragment maxFIRunCountsSQL = new SQLFragment(runCountsBaseSQL);
+        SQLFragment maxFIRunCountsSQL = new SQLFragment("(SELECT CASE ControlType ");
+        maxFIRunCountsSQL.append("WHEN 'Titration' THEN (SELECT COUNT(*) FROM ");
+
+        maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
+        maxFIRunCountsSQL.append(" JOIN ");
+        maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
+        maxFIRunCountsSQL.append(" ON gs.RowId = at.GuideSetId ");
         maxFIRunCountsSQL.append("WHERE gs.RowId = ");
         maxFIRunCountsSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        maxFIRunCountsSQL.append(".RowId AND at.IncludeInGuideSetCalculation = ? AND at.MaxFI IS NOT NULL)");
+        maxFIRunCountsSQL.append(".RowId AND at.IncludeInGuideSetCalculation = ? AND at.MaxFI IS NOT NULL) ");
         maxFIRunCountsSQL.add(Boolean.TRUE);
+
+        maxFIRunCountsSQL.append("ELSE (SELECT COUNT(*) FROM ");
+
+        maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
+        maxFIRunCountsSQL.append(" JOIN ");
+        maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "aspc");
+        maxFIRunCountsSQL.append(" ON gs.RowId = aspc.GuideSetId ");
+        maxFIRunCountsSQL.append("WHERE gs.RowId = ");
+        maxFIRunCountsSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        maxFIRunCountsSQL.append(".RowId AND aspc.IncludeInGuideSetCalculation = ?) ");
+        maxFIRunCountsSQL.add(Boolean.TRUE);
+
+        maxFIRunCountsSQL.append("END FROM ");
+        maxFIRunCountsSQL.append("(SELECT ");
+        maxFIRunCountsSQL.append(controlTypeSql);
+        maxFIRunCountsSQL.append(" as ControlType, gs.* FROM ");
+        maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
+
+        maxFIRunCountsSQL.append(" WHERE gs.RowId = ");
+        maxFIRunCountsSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        maxFIRunCountsSQL.append(".RowId) AS t)"); // needs some name
 
         ExprColumn maxFIRunCounts = new ExprColumn(this, "MaxFIRunCounts", maxFIRunCountsSQL, JdbcType.INTEGER);
         maxFIRunCounts.setLabel("Max FI Run Counts");
@@ -261,6 +301,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         ExprColumn aucRunCounts = new ExprColumn(this, "AUCRunCounts", aucRunCountsSQL, JdbcType.INTEGER);
         aucRunCounts.setLabel("AUC Run Counts");
         addColumn(aucRunCounts);
+    }
+
+    // handles special case for this metric on single point controls
+    private void addMFIRunCounts()
+    {
+
     }
 
     protected LookupForeignKey createCurveFitFK(final String curveType)

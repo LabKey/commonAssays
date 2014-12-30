@@ -838,7 +838,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 // add QCFlag for MFI, if out of guide set range
                 String outOfRangeType = guideSetRow.getOutOfRangeTypeForMaxFI(averageFI, guideSetTable, "SinglePointControlFIAverage", "SinglePointControlFIStdDev");
-                if (null != outOfRangeType)
+                if (null != outOfRangeType && guideSetRow.isMaxFIEnabled())
                 {
                     String descriptionPrefix = singlePointControl.getName() + " " + analyte.getName() + " - "
                             + (isotype == null ? "[None]" : isotype) + " "
