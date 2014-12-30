@@ -174,7 +174,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     return new MS2StatsWebPart();
                 }
             },
-            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT, WebPartFactory.LOCATION_RIGHT)
+            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_BODY, WebPartFactory.LOCATION_RIGHT)
             {
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
