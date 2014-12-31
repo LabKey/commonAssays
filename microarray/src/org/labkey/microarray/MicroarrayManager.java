@@ -16,6 +16,8 @@
 package org.labkey.microarray;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
@@ -65,6 +67,7 @@ import java.util.Map;
 public class MicroarrayManager
 {
     private static final MicroarrayManager _instance = new MicroarrayManager();
+    private static final Logger LOG = Logger.getLogger(MicroarrayManager.class);
 
     private MicroarrayManager()
     {
@@ -241,18 +244,24 @@ public class MicroarrayManager
      *
      * If the featureSet value is an integer, we check that the feature annotation set is in scope (current, project, and shared containers).
      * If the 'featureSet' property is a name, we try to find the feature annotation set by name in scope (current, project, and shared containers).
-     * If the 'featureSet' property is a string path, we try to find the feature annotation set by looking for a tsv file to import under the pipeline root.
+     * If the 'featureSet' property is a string path, we try to find the feature annotation set by looking for a tsv file to import relative to current directory or relative to the pipeline root.
      *
      */
-    public Integer ensureFeatureAnnotationSet(Container c, User user, String featureSet)
+    public Integer ensureFeatureAnnotationSet(@Nullable Logger logger, @NotNull Container c, @NotNull User user, @Nullable File runDir, @NotNull String featureSet)
     {
+        if (logger == null)
+            logger = LOG;
+
         // First, try parsing the featureSet as an integer id
         try
         {
             int id = Integer.parseInt(featureSet);
             Integer resolvedId = MicroarrayManager.get().getFeatureAnnotationSet(c, user, id);
             if (resolvedId != null)
+            {
+                logger.info("Resolved featureSet by id: " + resolvedId);
                 return resolvedId;
+            }
         }
         catch (NumberFormatException ex)
         {
@@ -262,15 +271,13 @@ public class MicroarrayManager
         // Next, try finding the feature annotation set by name
         Integer id = MicroarrayManager.get().getFeatureAnnotationSet(c, user, featureSet);
         if (id != null)
+        {
+            logger.info("Resolved featureSet by name: " + featureSet + " -> " + id);
             return id;
+        }
 
-
-        // Finally, try to load a feature annotation set file
-        PipeRoot root = PipelineService.get().findPipelineRoot(c);
-        if (root == null)
-            return null;
-
-        File featureSetFile = root.resolvePath(featureSet);
+        // Finally, try to load a feature annotation set file from either the runDir or the pipeline root.
+        File featureSetFile = getPipelineFile(logger, c, runDir, featureSet);
         if (featureSetFile == null)
             return null;
 
@@ -278,7 +285,10 @@ public class MicroarrayManager
         String baseName = FileUtil.getBaseName(featureSetFile.getName());
         Integer existingSet = getFeatureAnnotationSet(c, user, baseName);
         if (existingSet != null)
+        {
+            logger.info("Found existing feature annotation set by name: " + baseName);
             return existingSet;
+        }
 
         try (DbScope.Transaction tx = MicroarrayUserSchema.getSchema().getScope().ensureTransaction())
         {
@@ -293,6 +303,7 @@ public class MicroarrayManager
                 description = comments.get("description");
             }
 
+            // CONSIDER: Insert feature annotation set into same container as assay definition
             Integer newSetId = insertFeatureAnnotationSet(user, c, baseName, vendor, description, errors);
             if (!errors.hasErrors() && newSetId != null && newSetId > 0)
             {
@@ -301,6 +312,7 @@ public class MicroarrayManager
                     throw new ExperimentException("Expression matrix file '" + featureSet + "' has no rows");
 
                 tx.commit();
+                logger.info("Created new feature annotation set '" + baseName + "' in current container");
                 return newSetId;
             }
 
@@ -310,6 +322,39 @@ public class MicroarrayManager
         {
             throw new RuntimeException(e);
         }
+    }
+
+    @Nullable
+    private static File getPipelineFile(@NotNull Logger logger, @NotNull Container c, @Nullable File runDir, @NotNull String featureSet)
+    {
+        PipeRoot root = PipelineService.get().findPipelineRoot(c);
+        if (root == null)
+            return null;
+
+        // First, look for a feature annotation set file relative to the runPath
+        if (runDir != null)
+        {
+            String runPath = root.relativePath(runDir);
+            if (runPath != null)
+            {
+                File file = root.resolvePath(runPath + File.separator + featureSet);
+                if (file != null && file.canRead())
+                {
+                    logger.info("Resolved featureSet as file relative to runDir: " + root.relativePath(file));
+                    return file;
+                }
+            }
+        }
+
+        // Next, look for a feature annotation set file relative to the pipeline root
+        File file = root.resolvePath(featureSet);
+        if (file != null && file.canRead())
+        {
+            logger.info("Resolved featureSet as file relative to pipeline root: " + root.relativePath(file));
+            return file;
+        }
+
+        return null;
     }
 
 

@@ -15,6 +15,8 @@
  */
 package org.labkey.microarray.matrix;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
@@ -75,7 +77,7 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
         if (featureSetEntry == null || featureSetEntry.getValue() == null)
             throw new ValidationException("Feature annotation set required");
 
-        Integer updateFeatureSetId = ensureFeatureAnnotationSet(context, featureSetEntry.getValue());
+        Integer updateFeatureSetId = ensureFeatureAnnotationSet(context, run.getFilePathRoot(), featureSetEntry.getValue());
         if (updateFeatureSetId != null)
         {
             DefaultTransformResult ret = new DefaultTransformResult(result);
@@ -97,12 +99,15 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
     /**
      * Ensure the run property 'featureSet' actually exists.
      *
+     * @param context AssayRunUploadContext
+     * @param runPath Path under the pipeline root to look for the featureSet, when featureSet is a path.
+     * @param featureSet The feature set id, name, or file path.
      * @return The feature annotation set id only if it needs to be saved back to the 'featureSet' property; otherwise null.
      * @throws ValidationException
      */
-    protected Integer ensureFeatureAnnotationSet(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, String featureSet) throws ValidationException, ExperimentException
+    protected Integer ensureFeatureAnnotationSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException, ExperimentException
     {
-        Integer featureSetId = MicroarrayManager.get().ensureFeatureAnnotationSet(context.getContainer(), context.getUser(), featureSet);
+        Integer featureSetId = MicroarrayManager.get().ensureFeatureAnnotationSet(context.getLogger(), context.getContainer(), context.getUser(), runPath, featureSet);
         if (featureSetId == null)
             throw new ValidationException("Feature annotation set not found '" + featureSet + "'");
 
