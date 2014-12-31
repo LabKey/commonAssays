@@ -31,6 +31,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.DuplicateKeyException;
@@ -174,10 +175,45 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
         addCurveTypeColumns();
 
-        // fix placement of "details" column
-        List<FieldKey> defaultCols = new ArrayList<>(getDefaultVisibleColumns());
-        defaultCols.remove(detailsCol.getFieldKey());
-        defaultCols.add(0, detailsCol.getFieldKey());
+        // set the default columns for this table to be those used for the Manage Guide Set page
+        List<FieldKey> defaultCols = new ArrayList<>();
+        defaultCols.add(detailsCol.getFieldKey());
+        defaultCols.add(FieldKey.fromParts("ControlName"));
+        defaultCols.add(FieldKey.fromParts("AnalyteName"));
+        defaultCols.add(FieldKey.fromParts("Isotype"));
+        defaultCols.add(FieldKey.fromParts("Conjugate"));
+        defaultCols.add(FieldKey.fromParts("ValueBased"));
+        defaultCols.add(FieldKey.fromParts("Created"));
+        defaultCols.add(FieldKey.fromParts("CurrentGuideSet"));
+        defaultCols.add(FieldKey.fromParts("Comment"));
+        // Run-based guide set related fields
+        defaultCols.add(FieldKey.fromParts("TitrationMaxFIAverage")); // titration
+        defaultCols.add(FieldKey.fromParts("TitrationMaxFIStdDev")); // titration
+        defaultCols.add(FieldKey.fromParts("SinglePointControlFIAverage")); // single point control
+        defaultCols.add(FieldKey.fromParts("SinglePointControlFIStdDev")); // single point control
+        defaultCols.add(FieldKey.fromParts("MaxFIRunCounts"));
+        defaultCols.add(FieldKey.fromParts("MaxFIEnabled"));
+        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average"));
+        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev"));
+        defaultCols.add(FieldKey.fromParts("EC504PLRunCounts"));
+        defaultCols.add(FieldKey.fromParts("EC504PLEnabled"));
+        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average"));
+        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev"));
+        defaultCols.add(FieldKey.fromParts("EC505PLRunCounts"));
+        defaultCols.add(FieldKey.fromParts("EC505PLEnabled"));
+        defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage"));
+        defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev"));
+        defaultCols.add(FieldKey.fromParts("AUCRunCounts"));
+        defaultCols.add(FieldKey.fromParts("AUCEnabled"));
+        // Value-based guide set related fields
+        defaultCols.add(FieldKey.fromParts("MaxFIAverage"));
+        defaultCols.add(FieldKey.fromParts("MaxFIStdDev"));
+        defaultCols.add(FieldKey.fromParts("EC504PLAverage"));
+        defaultCols.add(FieldKey.fromParts("EC504PLStdDev"));
+        defaultCols.add(FieldKey.fromParts("EC505PLAverage"));
+        defaultCols.add(FieldKey.fromParts("EC505PLStdDev"));
+        defaultCols.add(FieldKey.fromParts("AUCAverage"));
+        defaultCols.add(FieldKey.fromParts("AUCStdDev"));
         setDefaultVisibleColumns(defaultCols);
     }
 

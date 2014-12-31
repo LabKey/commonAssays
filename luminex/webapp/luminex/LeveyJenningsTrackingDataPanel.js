@@ -523,8 +523,12 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     if (Ext.getDom(divId))
                     {
                         var html = Ext.getDom(divId).innerHTML;
-                        var pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&amp;attachment=true'));
-                        window.location = pdfHref + "&attachment=true&deleteFile=false";
+                        html = html.replace(/&amp;/g, "&");
+                        var pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&attachment=true'));
+                        if (pdfHref.indexOf("deleteFile") == -1) {
+                            pdfHref = pdfHref + "&deleteFile=false";
+                        }
+                        window.location = pdfHref + "&attachment=true";
                     }
 
                 }

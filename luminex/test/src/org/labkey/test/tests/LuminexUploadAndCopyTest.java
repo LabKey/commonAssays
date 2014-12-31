@@ -175,7 +175,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Save and Finish");
 
         log("Check that upload worked");
-        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), LONG_PAGE_WAIT);
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), longWaitForPage);
         assertTextPresent("Hu IL-1b (32)");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
@@ -202,7 +202,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         assertTextPresent("1001.2");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
-        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME2));
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME2), longWaitForPage);
         assertTextPresent("IL-1b (1)");
         assertTextPresent("9011-04");
 
@@ -231,7 +231,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Next", 60000);
         clickButton("Save and Finish");
 
-        clickAndWait(Locator.linkWithText("raw and summary"), LONG_PAGE_WAIT);
+        clickAndWait(Locator.linkWithText("raw and summary"), longWaitForPage);
         // make sure the Summary, StdDev, and DV columns are visible
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addCustomizeViewColumn("Summary");

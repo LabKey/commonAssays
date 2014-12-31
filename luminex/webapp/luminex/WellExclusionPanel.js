@@ -233,7 +233,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
     queryForReplicateGroupWellsAndFileName: function()
     {
         var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name, "
-                + "CASE WHEN (x.Titration IS NOT NULL AND (x.Titration.Standard = TRUE OR x.Titration.QCControl = TRUE OR x.Titration.Unknown = TRUE)) THEN TRUE ELSE FALSE END AS IsTitration "
+                + "CASE WHEN (x.Titration IS NOT NULL) THEN TRUE ELSE FALSE END AS IsTitration "
                 + "FROM Data AS x WHERE ";
         sql += (this.description != null ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
         sql += " AND x.Type = '" + this.type + "' AND x.Data.RowId = " + this.dataId;

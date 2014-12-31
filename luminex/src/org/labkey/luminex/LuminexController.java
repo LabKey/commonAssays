@@ -185,7 +185,7 @@ public class LuminexController extends SpringActionController
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             settings.setBaseFilter(new SimpleFilter(FieldKey.fromParts("Titration", "IncludeInQcReport"), true));
-            setHelpTopic(new HelpTopic("applyGuideSets"));
+            setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             QueryView view = new QueryView(schema, settings, errors)
             {
                 @Override
@@ -234,7 +234,7 @@ public class LuminexController extends SpringActionController
             AssayView result = new AssayView();
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME, LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
-            setHelpTopic(new HelpTopic("applyGuideSets"));
+            setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             QueryView view = new QueryView(schema, settings, errors)
             {
                 @Override
@@ -654,10 +654,25 @@ public class LuminexController extends SpringActionController
             AssayView result = new AssayView();
             final AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME, LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
-            // set base filter?
-            // help topic?
+            setHelpTopic(new HelpTopic("applyGuideSets"));
 
-            QueryView view = new QueryView(schema, settings, errors);
+            QueryView view = new QueryView(schema, settings, errors)
+            {
+                @Override
+                protected void setupDataView(DataView ret)
+                {
+                    super.setupDataView(ret);
+
+                    ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
+                    graph.addParameter("controlName", "${ControlName}");
+                    //graph.addParameter("controlType", "Titration");
+                    graph.addParameter("analyte", "${AnalyteName}");
+                    graph.addParameter("isotype", "${Isotype}");
+                    graph.addParameter("conjugate", "${Conjugate}");
+                    SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
+                    ret.getDataRegion().addDisplayColumn(0, graphDetails);
+                }
+            };
 
             view.setShadeAlternatingRows(true);
             view.setShowBorders(true);
