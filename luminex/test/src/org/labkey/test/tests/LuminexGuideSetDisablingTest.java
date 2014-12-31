@@ -296,7 +296,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         for (int i=0; i < drt.getDataRowCount(); i++)
             if (drt.getDataAsText(i, "Comment").equals(comment))
             {
-                click(drt.link(i,-1));
+                click(drt.link(i,0));
                 found = true;
             }
 

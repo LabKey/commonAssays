@@ -36,7 +36,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '</tr>',
                 '<tr><th>Created:</th><td>{[this.dateRenderer(values.Created)]}</td>',
                     '<th>Isotype:</th><td>{[this.formatNone(values.Isotype)]}</td></tr>',
-                '<tr><th>{ControlType:htmlEncode}:</th><td>{ControlName:htmlEncode}</td>',
+                '<tr><th>Control Name:</th><td>{ControlName:htmlEncode}</td>',
                     '<th>Conjugate:</th><td>{[this.formatNone(values.Conjugate)]}</td></tr>',
                 '<tr><th>Analyte:</th><td colspan="3">{AnalyteName:htmlEncode}</td></tr>',
                 '<tr><th>Comment:</th><td colspan="3">{Comment:htmlEncode}</td></tr>',
