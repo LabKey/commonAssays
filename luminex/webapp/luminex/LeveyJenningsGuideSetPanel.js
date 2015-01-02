@@ -137,7 +137,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.conjugate = conjugate;
 
         this.enable();
-        this.exportPdftButton.enable();
 
         // update the display field to show the selected params
         this.paramsDisplayField.setValue($h(this.analyte)

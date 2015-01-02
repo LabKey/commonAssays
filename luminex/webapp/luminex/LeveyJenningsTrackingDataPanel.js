@@ -11,7 +11,6 @@ Ext.namespace('LABKEY');
  * Date: Sept 21, 2011
  */
 
-LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 Ext.QuickTips.init();
 
 /**
@@ -34,7 +33,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             width: 1375,
             autoHeight: true,
             title: $h(config.controlName) + ' Tracking Data',
-            loadMask: {msg: "loading tracking data..."},
+            loadMask: {msg: "Loading data..."},
             columnLines: true,
             stripeRows: true,
             viewConfig: {
@@ -48,7 +47,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             userCanUpdate: LABKEY.user.canUpdate
         });
 
-        this.addEvents('appliedGuideSetUpdated', 'loadNetworkAndProtocol');
+        this.addEvents('appliedGuideSetUpdated', 'trackingDataLoaded');
 
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.constructor.call(this, config);
     },
@@ -146,82 +145,81 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             hasReportFilter = true;
         }
 
+        // generate sql for the data store (columns depend on the control type)
+        var controlTypeColName = this.controlType == "SinglePoint" ? "SinglePointControl" : this.controlType;
+        var sql = "SELECT Analyte"
+                + ", Analyte.Data.AcquisitionDate"
+                + ", Analyte.Properties.LotNumber"
+                + ", " + controlTypeColName
+                + ", " + controlTypeColName + ".Run.Isotype"
+                + ", " + controlTypeColName + ".Run.Conjugate"
+                + ", " + controlTypeColName + ".Run.RowId AS RunRowId"
+                + ", " + controlTypeColName + ".Run.Name AS RunName"
+                + ", " + controlTypeColName + ".Run.Folder.Name AS FolderName"
+                + ", " + controlTypeColName + ".Run.Folder.EntityId"
+                + (this.networkExists ? ", " + controlTypeColName + ".Run.Batch.Network" : "")
+                + (this.protocolExists ? ", " + controlTypeColName + ".Run.Batch.CustomProtocol" : "")
+                + ", " + controlTypeColName + ".Run.NotebookNo"
+                + ", " + controlTypeColName + ".Run.AssayType"
+                + ", " + controlTypeColName + ".Run.ExpPerformer"
+                + ", GuideSet.Created AS GuideSetCreated"
+                + ", IncludeInGuideSetCalculation"
+                + ", GuideSet.ValueBased AS GuideSetValueBased";
         if (this.controlType == "Titration")
         {
-            var sql = "SELECT "
-                    + " Titration, Analyte, Titration.Run.Isotype, Titration.Run.Conjugate, Titration.Run.RowId AS RunRowId, "
-                    + " Titration.Run.Name AS RunName, Titration.Run.Folder.Name AS FolderName, Titration.Run.Folder.EntityId, "
-                    + (this.networkExists ? " Titration.Run.Batch.Network, " : "")
-                    + (this.protocolExists ? " Titration.Run.Batch.CustomProtocol, " : "")
-                    + " Titration.Run.NotebookNo, Titration.Run.AssayType, "
-                    + " Titration.Run.ExpPerformer, Analyte.Data.AcquisitionDate, Analyte.Properties.LotNumber, "
-                    + " GuideSet.Created AS GuideSetCreated, IncludeInGuideSetCalculation, "
-                    + " \"Four ParameterCurveFit\".EC50 AS EC504PL, \"Four ParameterCurveFit\".EC50QCFlagsEnabled AS EC504PLQCFlagsEnabled, "
-                    + " \"Five ParameterCurveFit\".EC50 AS EC505PL, \"Five ParameterCurveFit\".EC50QCFlagsEnabled AS EC505PLQCFlagsEnabled, "
-                    + " TrapezoidalCurveFit.AUC, TrapezoidalCurveFit.AUCQCFlagsEnabled, "
-                    + " MaxFI, MaxFIQCFlagsEnabled "
-                    + " FROM AnalyteTitration "
-                    + whereClause
-                    + " ORDER BY Analyte.Data.AcquisitionDate DESC, Titration.Run.Created DESC"
-                    + (hasReportFilter ? "" : " LIMIT " + this.defaultRowSize);
-
-            return new LABKEY.ext.Store({
-                autoLoad: false,
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
-                sql: sql,
-                containerFilter: LABKEY.Query.containerFilter.allFolders,
-                listeners: {
-                    scope: this,
-                    load: this.storeLoaded
-                },
-                scope: this
-            });
+            sql += ", \"Four ParameterCurveFit\".EC50 AS EC504PL, \"Four ParameterCurveFit\".EC50QCFlagsEnabled AS EC504PLQCFlagsEnabled"
+                + ", \"Five ParameterCurveFit\".EC50 AS EC505PL, \"Five ParameterCurveFit\".EC50QCFlagsEnabled AS EC505PLQCFlagsEnabled"
+                + ", TrapezoidalCurveFit.AUC, TrapezoidalCurveFit.AUCQCFlagsEnabled"
+                + ", MaxFI AS HighMFI, MaxFIQCFlagsEnabled AS HighMFIQCFlagsEnabled"
+                //columns needed for guide set ranges (value based or run based)
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLAverage ELSE GuideSet.\"Four ParameterCurveFit\".EC50Average END AS GuideSetEC504PLAverage"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLAverage ELSE GuideSet.\"Four ParameterCurveFit\".EC50StdDev END AS GuideSetEC504PLStdDev"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLAverage ELSE GuideSet.\"Five ParameterCurveFit\".EC50Average END AS GuideSetEC505PLAverage"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLStdDev ELSE GuideSet.\"Five ParameterCurveFit\".EC50StdDev END AS GuideSetEC505PLStdDev"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCAverage ELSE GuideSet.TrapezoidalCurveFit.AUCAverage END AS GuideSetAUCAverage"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCStdDev ELSE GuideSet.TrapezoidalCurveFit.AUCStdDev END AS GuideSetAUCStdDev"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.TitrationMaxFIAverage END AS GuideSetHighMFIAverage"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.TitrationMaxFIStdDev END AS GuideSetHighMFIStdDev"
+                + " FROM AnalyteTitration "
+                + whereClause;
         }
         else if (this.controlType == "SinglePoint")
         {
-            var sql = "SELECT "
-                    + " SinglePointControl, Analyte, SinglePointControl.Run.Isotype, SinglePointControl.Run.Conjugate, SinglePointControl.Run.RowId AS RunRowId, "
-                    + " SinglePointControl.Run.Name AS RunName, SinglePointControl.Run.Folder.Name AS FolderName, SinglePointControl.Run.Folder.EntityId, "
-                    + (this.networkExists ? " SinglePointControl.Run.Batch.Network, " : "")
-                    + (this.protocolExists ? " SinglePointControl.Run.Batch.CustomProtocol, " : "")
-                    + " SinglePointControl.Run.NotebookNo, SinglePointControl.Run.AssayType, "
-                    + " SinglePointControl.Run.ExpPerformer, Analyte.Data.AcquisitionDate, Analyte.Properties.LotNumber, "
-                    + " GuideSet.Created AS GuideSetCreated, IncludeInGuideSetCalculation, "
-                    + " AverageFiBkgd, AverageFiBkgdQCFlagsEnabled "
-                    + " FROM AnalyteSinglePointControl "
-                    + whereClause
-                    + " ORDER BY Analyte.Data.AcquisitionDate DESC, SinglePointControl.Run.Created DESC"
-                    + (hasReportFilter ? "" : " LIMIT " + this.defaultRowSize);
-
-            return new LABKEY.ext.Store({
-                autoLoad: false,
-                schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
-                sql: sql,
-                containerFilter: LABKEY.Query.containerFilter.allFolders,
-                listeners: {
-                    scope: this,
-                    load: this.storeLoaded
-                },
-                scope: this
-            });
+            sql += ", AverageFiBkgd AS MFI, AverageFiBkgdQCFlagsEnabled AS MFIQCFlagsEnabled"
+                //columns needed for guide set ranges (value based or run based)
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.SinglePointControlFIAverage END AS GuideSetMFIAverage"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.SinglePointControlFIStdDev END AS GuideSetMFIStdDev"
+                + " FROM AnalyteSinglePointControl "
+                + whereClause;
         }
+        sql += " ORDER BY Analyte.Data.AcquisitionDate DESC"
+                + ", " + controlTypeColName + ".Run.Created DESC"
+                + (hasReportFilter ? "" : " LIMIT " + this.defaultRowSize);
+
+        return new LABKEY.ext.Store({
+            autoLoad: false,
+            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
+            sql: sql,
+            containerFilter: LABKEY.Query.containerFilter.allFolders,
+            listeners: {
+                scope: this,
+                load: this.storeLoaded
+            },
+            scope: this
+        });
     },
 
     getBaseWhereClause: function() {
-        var whereClause = " WHERE Analyte.Name='" + this.analyte.replace(/'/g, "''") + "'";
+        var controlTypeColName = this.controlType == "SinglePoint" ? "SinglePointControl" : this.controlType;
+        var whereClause = " WHERE Analyte.Name='" + this.analyte.replace(/'/g, "''") + "'"
+                + " AND " + controlTypeColName + ".Name='" + this.controlName.replace(/'/g, "''") + "'"
+                + (this.isotype != '' ? " AND " + controlTypeColName + ".Run.Isotype='" + this.isotype.replace(/'/g, "''") + "'"
+                        : " AND " + controlTypeColName + ".Run.Isotype IS NULL")
+                + (this.conjugate != '' ? " AND " + controlTypeColName + ".Run.Conjugate='" + this.conjugate.replace(/'/g, "''") + "'"
+                        : " AND " + controlTypeColName + ".Run.Conjugate IS NULL");
 
-        if (this.controlType == "Titration")
-        {
-            whereClause += " AND Titration.Name='" + this.controlName.replace(/'/g, "''") + "'"
-                + " AND Titration.IncludeInQcReport=true"
-                + (this.isotype != '' ? " AND Titration.Run.Isotype='" + this.isotype.replace(/'/g, "''") + "'" : " AND Titration.Run.Isotype IS NULL")
-                + (this.conjugate != '' ? " AND Titration.Run.Conjugate='" + this.conjugate.replace(/'/g, "''") + "'" : " AND Titration.Run.Conjugate IS NULL");
-        }
-        else if (this.controlType == "SinglePoint")
-        {
-            whereClause += " AND  SinglePointControl.Name='" + this.controlName.replace(/'/g, "''") + "'"
-                    + (this.isotype != '' ? " AND SinglePointControl.Run.Isotype='" + this.isotype.replace(/'/g, "''") + "'" : " AND SinglePointControl.Run.Isotype IS NULL")
-                    + (this.conjugate != '' ? " AND SinglePointControl.Run.Conjugate='" + this.conjugate.replace(/'/g, "''") + "'" : " AND SinglePointControl.Run.Conjugate IS NULL");
+        if (this.controlType == "Titration") {
+            whereClause += " AND Titration.IncludeInQcReport=true";
         }
 
         return whereClause;
@@ -238,10 +236,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     storeLoaded: function(store, records, options) {
-        var networks = this.networkExists ? store.collect("Network", true) : [];
-        var protocols = this.protocolExists ? store.collect("CustomProtocol", true) : [];
-        this.fireEvent('loadNetworkAndProtocol', networks, protocols);
-
+        this.fireEvent('trackingDataLoaded', store);
         this.loadQCFlags(store, records, options);
     },
 
@@ -306,14 +301,14 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             cols.push({header: 'EC50 5PL QC Flags Enabled', dataIndex: 'EC505PLQCFlagsEnabled', hidden: true});
             cols.push({header: 'AUC', dataIndex: 'AUC', width: 75, renderer: this.outOfRangeRenderer("AUCQCFlagsEnabled"), scope: this, align: 'right'});
             cols.push({header: 'AUC  QC Flags Enabled', dataIndex: 'AUCQCFlagsEnabled', hidden: true});
-            cols.push({header: 'High MFI', dataIndex: 'MaxFI', width: 75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'});
-            cols.push({header: 'High  QC Flags Enabled', dataIndex: 'MaxFIQCFlagsEnabled', hidden: true});
+            cols.push({header: 'High MFI', dataIndex: 'HighMFI', width: 75, renderer: this.outOfRangeRenderer("HighMFIQCFlagsEnabled"), scope: this, align: 'right'});
+            cols.push({header: 'High  QC Flags Enabled', dataIndex: 'HighMFIQCFlagsEnabled', hidden: true});
         }
         else if (this.controlType == "SinglePoint")
         {
             cols.splice(2, 0, {header: 'SinglePointControl', dataIndex: 'SinglePointControl', hidden: true, renderer: this.encodingRenderer});
-            cols.push({header: 'MFI', dataIndex: 'AverageFiBkgd', width: 75, renderer: this.outOfRangeRenderer("AverageFiBkgdQCFlagsEnabled"), scope: this, align: 'right'});
-            cols.push({header: 'MFI QC Flags Enabled', dataIndex: 'AverageFiBkgdQCFlagsEnabled', hidden: true});
+            cols.push({header: 'MFI', dataIndex: 'MFI', width: 75, renderer: this.outOfRangeRenderer("MFIQCFlagsEnabled"), scope: this, align: 'right'});
+            cols.push({header: 'MFI QC Flags Enabled', dataIndex: 'MFIQCFlagsEnabled', hidden: true});
         }
 
         return cols;

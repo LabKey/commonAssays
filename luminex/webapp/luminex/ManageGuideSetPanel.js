@@ -11,7 +11,6 @@ Ext.namespace('LABKEY');
 * Date: Sept 7, 2011
 */
 
-LABKEY.requiresCss("fileAddRemoveIcon.css");
 Ext.QuickTips.init();
 
 /**
@@ -119,7 +118,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     defaults:{xtype: 'label', labelStyle: this.labelStyleStr},
                     items: [
                         {fieldLabel: 'Guide Set ID', text: this.guideSetId ? this.guideSetId : "TBD", id: 'guideSetIdLabel'},
-                        {fieldLabel: this.isTitrationControlType() ? 'Titration' : 'Single Point Control', text: this.controlName},
+                        {fieldLabel: 'Control Name', text: this.controlName},
                         {fieldLabel: 'Analyte', text: this.analyte, id: 'analyteLabel'}
                     ]
                 },{

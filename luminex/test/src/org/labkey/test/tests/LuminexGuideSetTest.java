@@ -106,8 +106,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         // verify that the newly uploaded runs got the correct guide set applied to them
         _guideSetHelper.verifyGuideSetsApplied(TEST_ASSAY_LUM, guideSetIds, LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES, 5);
 
-        //verify Levey-Jennings report R plots are displayed without errors
-        verifyLeveyJenningsRplots();
+        //verify Levey-Jennings report plots are displayed without errors
+        verifyLeveyJenningsPlots();
 
         verifyQCFlags(TEST_ASSAY_LUM, LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[0], INITIAL_EXPECTED_FLAGS);
         verifyQCReport();
@@ -382,30 +382,32 @@ public final class LuminexGuideSetTest extends LuminexTest
     }
 
     @LogMethod
-    private void verifyLeveyJenningsRplots()
+    private void verifyLeveyJenningsPlots()
     {
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
 
-        // check 4PL ec50 trending R plot
+        // check 4PL ec50 trending plot
         click(Locator.tagWithText("span", "EC50 - 4PL"));
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        assertElementPresent( Locator.id("EC50 4PLTrendPlotDiv"));
+        assertElementPresent(Locator.id("EC504PLTrendPlotDiv"));
 
-        // check5PL  ec50 trending R plot
+        // check5PL  ec50 trending plot
         click(Locator.tagWithText("span", "EC50 - 5PL Rumi"));
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        assertElementPresent( Locator.id("EC50 5PLTrendPlotDiv"));
+        assertElementPresent(Locator.id("EC505PLTrendPlotDiv"));
 
-        // check auc trending R plot
+        // check auc trending plot
         click(Locator.tagWithText("span", "AUC"));
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        assertElementPresent( Locator.id("AUCTrendPlotDiv"));
+        assertElementPresent(Locator.id("AUCTrendPlotDiv"));
 
-        // check high mfi trending R plot
+        // check high mfi trending plot
         click(Locator.tagWithText("span", "High MFI"));
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        assertElementPresent( Locator.id("High MFITrendPlotDiv"));
+        assertElementPresent(Locator.id("HighMFITrendPlotDiv"));
+
+        // TODO: add more validation of the plot SVG
 
         //verify QC flags
         //this locator finds an EC50 flag, then makes sure there's red text outlining

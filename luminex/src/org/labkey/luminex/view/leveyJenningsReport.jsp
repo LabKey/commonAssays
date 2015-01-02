@@ -34,6 +34,7 @@
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
         resources.add(ClientDependency.fromPath("clientapi/ext3"));
+        resources.add(ClientDependency.fromPath("vis/vis"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsGraphParamsPanel.js"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsGuideSetPanel.js"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsTrendPlotPanel.js"));
@@ -43,6 +44,8 @@
         resources.add(ClientDependency.fromPath("luminex/ApplyGuideSetPanel.js"));
         resources.add(ClientDependency.fromPath("Experiment/QCFlagToggleWindow.js"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsReport.css"));
+        resources.add(ClientDependency.fromPath("luminex/GuideSet.css"));
+        resources.add(ClientDependency.fromPath("fileAddRemoveIcon.css"));
         return resources;
     }
 %>
@@ -213,15 +216,12 @@
                 protocolExists: _protocolExists,
                 listeners: {
                     'currentGuideSetUpdated': function() {
-                        trendPlotPanel.setTabsToRender();
-                        trendPlotPanel.displayTrendPlot();
+                        guideSetPanel.toggleExportBtn(false);
+                        trendPlotPanel.setTrendPlotLoading();
                         trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
                     },
                     'exportPdfBtnClicked': function() {
-                        if (trendPlotPanel.getPdfHref())
-                        {
-                            window.location = trendPlotPanel.getPdfHref();
-                        }
+                        trendPlotPanel.exportToPdf();
                     },
                     'guideSetMetricsUpdated': function() {
                         trackingDataPanel.fireEvent('appliedGuideSetUpdated');
@@ -241,6 +241,7 @@
                 protocolExists: _protocolExists,
                 listeners: {
                     'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
+                        trendPlotPanel.setTrendPlotLoading();
                         trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, networkAny, protocol, protocolAny);
                     },
                     'togglePdfBtn': function(toEnable) {
@@ -261,13 +262,13 @@
                 protocolExists: _protocolExists,
                 listeners: {
                     'appliedGuideSetUpdated': function() {
-                        trendPlotPanel.setTabsToRender();
-                        trendPlotPanel.displayTrendPlot();
+                        guideSetPanel.toggleExportBtn(false);
+                        trendPlotPanel.setTrendPlotLoading();
                         trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
                                 trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
                     },
-                    'loadNetworkAndProtocol': function(networks, protocols) {
-                        trendPlotPanel.loadNetworkAndProtocol(networks, protocols);
+                    'trackingDataLoaded': function(store) {
+                        trendPlotPanel.trackingDataLoaded(store);
                     }
                 }
             });

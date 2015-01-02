@@ -11,8 +11,6 @@ Ext.namespace('LABKEY');
 * Date: Sept 20, 2011
 */
 
-LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
-
 /**
  * Class to create a tab panel for displaying the R plot for the trending of EC50, AUC, and High MFI values for the selected graph parameters.
  *
@@ -49,8 +47,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
         this.ANY_FIELD = '[ANY]';  // constant value used for turning filtering off
 
-        this.plotRenderedHtml = null;
-        this.pdfHref = null;
         this.startDate = null;
         this.endDate = null;
         this.network = null;
@@ -78,18 +74,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 'select': function(cmp, newVal, oldVal) {
                     this.yAxisScale = cmp.getValue();
-                    this.setTabsToRender();
-                    this.displayTrendPlot();
+                    this.updateTrendPlot();
                 }
             }
         });
-
-        // setup variable switching between Titration and SinglePointControl column names
-        if (this.controlType == 'Titration') {
-            this.controlTypeColumnName = "Titration";
-        } else {
-            this.controlTypeColumnName = "SinglePointControl";
-        }
 
         // initialize the date range selection fields for the top toolbar
         this.startDateLabel = new Ext.form.Label({text: 'Start Date:'});
@@ -268,9 +256,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         // initialize the tab panel that will show the trend plots
         this.ec504plPanel = new Ext.Panel({
-            itemId: "EC50 4PL",
+            itemId: "EC504PL",
             title: "EC50 - 4PL",
-            html: "<div id='EC50 4PLTrendPlotDiv' class='ec504plTrendPlot'>To begin, choose an Antigen, Isotype, and Conjugate from the panel to the left and click the Apply button.</div>",
+            html: "<div id='EC504PLTrendPlotDiv' class='ljTrendPlot'>To begin, choose an Antigen, Isotype, and Conjugate from the panel to the left and click the Apply button.</div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -278,9 +266,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         this.ec505plPanel = new Ext.Panel({
-            itemId: "EC50 5PL",
+            itemId: "EC505PL",
             title: "EC50 - 5PL Rumi",
-            html: "<div id='EC50 5PLTrendPlotDiv' class='ec505plTrendPlot'></div>",
+            html: "<div id='EC505PLTrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -290,7 +278,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.aucPanel = new Ext.Panel({
             itemId: "AUC",
             title: "AUC",
-            html: "<div id='AUCTrendPlotDiv' class='aucTrendPlot'></div>",
+            html: "<div id='AUCTrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -298,9 +286,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         this.mfiPanel = new Ext.Panel({
-            itemId: "High MFI",
+            itemId: "HighMFI",
             title: "High MFI",
-            html: "<div id='High MFITrendPlotDiv' class='mfiTrendPlot'></div>",
+            html: "<div id='HighMFITrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -310,7 +298,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.singlePointControlPanel = new Ext.Panel({
             itemId: "MFI",
             title: "MFI",
-            html: "<div id='MFITrendPlotDiv' class='spcTrendPlot'></div>",
+            html: "<div id='MFITrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -330,10 +318,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.items.push(this.trendTabPanel);
 
-        // add an additional panel to render the PDF export link HTML to (this will always be hidden)
-        this.pdfPanel = new Ext.Panel({hidden: true});
-        this.items.push(this.pdfPanel);
-
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.initComponent.call(this);
     },
 
@@ -350,115 +334,112 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // show the trending tab panel and date range selection toolbar
         this.enable();
 
-        this.setTabsToRender();
-        this.displayTrendPlot();
+        this.setTrendPlotLoading();
     },
 
-    loadNetworkAndProtocol: function(networks, protocols) {
-        if (this.networkExists) {
-            this.networkCombobox.getStore().loadData(this.getArrayStoreData(networks, this.networkCombobox.getValue()));
+    trackingDataLoaded: function(store)
+    {
+        if (this.networkExists)
+        {
+            this.networkCombobox.getStore().loadData(this.getArrayStoreData(store.collect("Network", true), this.networkCombobox.getValue()));
         }
 
-        if (this.protocolExists) {
-            this.protocolCombobox.getStore().loadData(this.getArrayStoreData(protocols, this.protocolCombobox.getValue()));
+        if (this.protocolExists)
+        {
+            this.protocolCombobox.getStore().loadData(this.getArrayStoreData(store.collect("CustomProtocol", true), this.protocolCombobox.getValue()));
         }
+
+        this.updateTrendPlot(store);
+    },
+
+    setTrendPlotLoading: function() {
+        var plotType = this.trendTabPanel.getActiveTab().itemId;
+        var trendDiv = plotType + 'TrendPlotDiv';
+        Ext.get(trendDiv).update('Loading plot...');
+        this.togglePDFExportBtn(false);
+    },
+
+    updateTrendPlot: function(store)
+    {
+        this.togglePDFExportBtn(false);
+
+        // stash the store's records so that they can be re-used on tab change
+        if (store) {
+            this.trendDataStore = store;
+        }
+
+        var plotData = [];
+        var records = this.trendDataStore.getRange();
+        var plotType = this.trendTabPanel.getActiveTab().itemId;
+        var trendDiv = plotType + 'TrendPlotDiv';
+        Ext.get(trendDiv).update('');
+
+        // iterate backwards through the store records so that plot goes left to right
+        for (var i = records.length-1; i >=0; i--)
+        {
+            var record = records[i];
+            plotData.push({
+                xLabel: record.get('NotebookNo'),
+                pointColor: record.get('LotNumber'),
+                value: record.get(plotType),
+                gsMean: record.get('GuideSet' + plotType + 'Average'),
+                gsStdDev: record.get('GuideSet' + plotType + 'StdDev')
+            });
+        }
+
+        var plot = LABKEY.vis.LeveyJenningsPlot({
+            renderTo: trendDiv,
+            rendererType: Ext.isIE8 ? 'raphael' : 'd3',
+            width: 810,
+            height: 295,
+            data: plotData,
+            properties: {
+                value: 'value',
+                mean: 'gsMean',
+                stdDev: 'gsStdDev',
+                xTickLabel: 'xLabel',
+                yAxisScale: this.yAxisScale,
+                color: 'pointColor',
+                colorRange: ['red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown', 'black'],
+                hoverTextFn: function(row){
+                    return 'Notebook: ' + row.xLabel
+                        + '\nLot Number: ' + row.pointColor
+                        + '\n' + plotType + ': ' + row.value;
+                }
+            },
+            gridLineColor: 'white',
+            labels: {
+                main: {value: this.controlName + ' ' + plotType + ' for ' + this.analyte + ' - '
+                                + (this.isotype ? this.isotype : '[None]') + ' '
+                                + (this.conjugate ? this.conjugate : '[None]')},
+                y: {value: this.trendTabPanel.getActiveTab().title + (this.yAxisScale == 'log' ? ' (log)' : '')},
+                x: {value: 'Assay'}
+            }
+        });
+        plot.render();
+
+        // export to PDF doesn't work for IE<9
+        this.togglePDFExportBtn(!Ext.isIE8);
     },
 
     activateTrendPlotPanel: function(panel) {
-        // if the graph params have been selected and the trend plot for this panel hasn't been loaded, then call displayTrendPlot
+        // only update plot if the graph params have been selected
         if (this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined)
-            this.displayTrendPlot();
+            this.updateTrendPlot();
     },
 
-    setTabsToRender: function() {
-        // something about the report has changed and the plot needs to be set to re-render
-        this.plotRenderedHtml = null;
-        this.pdfHref = null;
-        this.fireEvent('togglePdfBtn', false);
+    togglePDFExportBtn: function(enable) {
+        this.fireEvent('togglePdfBtn', enable);
     },
 
-    displayTrendPlot: function() {
-        // determine which tab is selected to know which div to update
+    exportToPdf: function() {
         var plotType = this.trendTabPanel.getActiveTab().itemId;
         var trendDiv = plotType + 'TrendPlotDiv';
-        Ext.get(trendDiv).update('Loading...');
-
-        if (this.plotRenderedHtml)
+        var svgEls = Ext.get(trendDiv).select('svg');
+        if (svgEls.elements.length > 0)
         {
-            Ext.get(trendDiv).update(this.plotRenderedHtml);
-        }
-        else
-        {
-            // build the config object of the properties that will be needed by the R report
-            var config = {reportId: 'module:luminex/LeveyJenningsTrendPlot.r', showSection: 'Levey-Jennings Trend Plot'};
-            config['Protocol'] = LABKEY.QueryKey.encodePart(this.assayName);
-            config['Titration'] = this.controlName;
-            config['Analyte'] = this.analyte;
-            config['Isotype'] = this.isotype;
-            config['Conjugate'] = this.conjugate;
-            // provide either a start and end date or the max number of rows to display
-            if (!this.startDate && !this.endDate && this.networkAny && this.protocolAny){
-                config['MaxRows'] = this.defaultRowSize;
-            } else {
-                if (this.startDate) {
-                    config['StartDate'] = this.startDate;
-                }
-                if (this.endDate) {
-                    config['EndDate'] = this.endDate;
-                }
-                if (this.networkExists && !this.networkAny) { // networkAny turns off the filter in R
-                    config['NetworkFilter'] = true;
-                    config['Network'] = this.network;
-                }
-                if (this.protocolExists && !this.protocolAny) { // protocolAny turns off the filter in R
-                    config['CustomProtocolFilter'] = true;
-                    config['CustomProtocol'] = this.protocol;
-                }
-            }
-            // add config for plotting in log scale
-            if (this.yAxisScale == 'log')
-                config['AsLog'] =  true;
-            if (this.controlType == "Titration") {
-                config['isTitration'] = true;
-            }
-
-            // call and display the Report webpart
-            new LABKEY.WebPart({
-                   partName: 'Report',
-                   renderTo: trendDiv,
-                   frame: 'none',
-                   partConfig: config,
-                   success: function() {
-                       // store the HTML for the src plot image (image will be shifted to the relevant plot for other plot types)
-                       this.plotRenderedHtml = Ext.getDom(trendDiv).innerHTML;
-                   },
-                   failure: function(response) {
-                        Ext.get(trendDiv).update("Error: " + response.statusText);
-                   },
-                   scope: this
-            }).render();
-
-            // call the R plot code again to get a PDF output version of the plot
-            config['PdfOut'] = true;
-            new LABKEY.WebPart({
-                   partName: 'Report',
-                   renderTo: this.pdfPanel.getId(),
-                   frame: 'none',
-                   partConfig: config,
-                   success: function() {
-                       // ugly way of getting the href for the pdf file (to be used when the user clicks the export pdf button)
-                       if (Ext.getDom(this.pdfPanel.getId()))
-                       {
-                           var html = Ext.getDom(this.pdfPanel.getId()).innerHTML;
-                           this.pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('">PDF output file'));
-                           this.pdfHref = this.pdfHref.replace(/&amp;/g, "&");
-                           this.fireEvent('togglePdfBtn', true);
-                       }
-                   },
-                   failure: function(response){},
-                   scope: this
-            }).render();
-            
+            var title = 'Levey-Jennings ' + this.trendTabPanel.getActiveTab().title + ' Trend Plot';
+            LABKEY.vis.SVGConverter.convert(svgEls.elements[0], LABKEY.vis.SVGConverter.FORMAT_PDF, title);
         }
     },
 
@@ -490,8 +471,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.endDate = this.endDateField.getRawValue();
             this.clearFilterButton.enable();
 
-            this.setTabsToRender();
-            this.displayTrendPlot();
             this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.networkAny, this.protocol, this.protocolAny);
         }
     },
@@ -521,13 +500,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         if (clearOnly)
             return;
 
-        this.setTabsToRender();
-        this.displayTrendPlot();
         this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.networkAny, this.protocol, this.protocolAny);
-    },
-
-    getPdfHref: function() {
-        return this.pdfHref ? this.pdfHref : null;
     },
 
     getStartDate: function() {

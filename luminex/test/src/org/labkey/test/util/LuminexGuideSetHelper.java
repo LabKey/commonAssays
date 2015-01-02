@@ -201,10 +201,8 @@ public class LuminexGuideSetHelper
 
     public void waitForLeveyJenningsTrendPlot()
     {
-        _test.waitForTextToDisappear("Loading", BaseWebDriverTest.WAIT_FOR_PAGE * 4);
-        _test.assertTextNotPresent("ScriptException");
-        _test.assertElementNotPresent(Locator.tagContainingText("pre", "Error"));
-        _test.waitForElement(Locator.tag("img").attributeStartsWith("id", "resultImage"));
+        _test.waitForTextToDisappear("Loading plot...", BaseWebDriverTest.WAIT_FOR_PAGE * 2);
+        _test.waitForElement(Locator.tagWithClass("div", "ljTrendPlot").withDescendant(Locator.xpath("//*[local-name() = 'svg']")));
     }
 
     public void createGuideSet(boolean initialGuideSet)
@@ -244,7 +242,6 @@ public class LuminexGuideSetHelper
         _test.waitForText(analyte + " - " + LuminexTest.isotype + " " + LuminexTest.conjugate);
         _test.waitForText("Standard1 Tracking Data for " + analyte + " - " + LuminexTest.isotype + " " + LuminexTest.conjugate);
         waitForLeveyJenningsTrendPlot();
-        _test.waitForElement(Locator.xpath("//img[starts-with(@id,'resultImage')]"));
     }
 
     @LogMethod

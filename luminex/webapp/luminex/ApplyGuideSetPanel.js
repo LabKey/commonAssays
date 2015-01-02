@@ -11,8 +11,6 @@ Ext.namespace('LABKEY');
 * Date: Sept 8, 2011
 */
 
-LABKEY.requiresCss("luminex/GuideSet.css");
-LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 Ext.QuickTips.init();
 
 /**
@@ -260,9 +258,9 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }),
             new Ext.Spacer({height: 20}),
             new Ext.Panel({
-                title: 'Guide Sets for ' + this.controlName + ' : ' + this.analyte + ' '
+                title: Ext.util.Format.htmlEncode('Guide Sets for ' + this.controlName + ' : ' + this.analyte + ' '
                         + (this.isotype == '' ? '[None]' : this.isotype) + ' '
-                        + (this.conjugate == '' ? '[None]' : this.conjugate),
+                        + (this.conjugate == '' ? '[None]' : this.conjugate)),
                 width:1075,
                 items: [
                     {xtype: 'displayfield', value: 'Choose the guide set that you would like to apply to the selected runs in the list above.'},
