@@ -18,6 +18,8 @@ package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
@@ -106,9 +108,12 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
             factory.setNamespaceAware(false);
             factory.setValidating(false);
             SAXParser parser = factory.newSAXParser();
-            PeaksFileImporter importer = new PeaksFileImporter(data, getMzXmlFilePath(data), info.getUser(), log);
-
-            parser.parse(dataFile, importer);
+            try (DbScope.Transaction transaction = DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().beginTransaction())
+            {
+                PeaksFileImporter importer = new PeaksFileImporter(data, getMzXmlFilePath(data), info.getUser(), log, transaction);
+                parser.parse(dataFile, importer);
+                transaction.commit();
+            }
         }
         catch(IOException | ParserConfigurationException | SAXException e)
         {

@@ -17,7 +17,7 @@
 package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
@@ -42,29 +42,13 @@ import java.util.Map;
  */
 public class PeaksFileImporter extends DefaultHandler
 {
-    public PeaksFileImporter(ExpData expData, String mzXmlUrl, User user, Logger log)
+    public PeaksFileImporter(ExpData expData, String mzXmlUrl, User user, Logger log, DbScope.Transaction transaction)
     {
         _log = log;
         _expData = expData;
         _mzXmlUrl = mzXmlUrl;
         _user = user;
-    }
-
-    protected void beginTransaction()
-    {
-        DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().beginTransaction();
-    }
-
-    @Deprecated
-    protected void commitTransaction()
-    {
-        DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().commitTransaction();
-    }
-
-    @Deprecated
-    protected void closeConnection()
-    {
-        DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().closeConnection();
+        _transaction = transaction;
     }
 
     public void startDocument() throws SAXException
@@ -74,9 +58,6 @@ public class PeaksFileImporter extends DefaultHandler
 
         //parsing state initialization
         clear();
-
-        //begin a transaction--we will commit in chunks for better performance
-        beginTransaction();
     }
 
     public void endDocument() throws SAXException
@@ -87,12 +68,9 @@ public class PeaksFileImporter extends DefaultHandler
             HashMap<String,Object> map = new HashMap<>();
             map.put("Imported", Boolean.TRUE);
             Table.update(_user, MS1Manager.get().getTable(MS1Manager.TABLE_FILES), map, _idFile);
-
-            commitTransaction();
         }
         catch(RuntimeSQLException e)
         {
-            closeConnection();
             throw new SAXException(MS1Manager.get().getAllErrors(e.getSQLException()));
         }
 
@@ -125,7 +103,6 @@ public class PeaksFileImporter extends DefaultHandler
         }
         catch(SQLException e)
         {
-            closeConnection();
             throw new SAXException(MS1Manager.get().getAllErrors(e));
         }
     }
@@ -227,8 +204,7 @@ public class PeaksFileImporter extends DefaultHandler
 
         if(_numPeaks % 1000 == 0)
         {
-            commitTransaction();
-            beginTransaction();
+            _transaction.commitAndKeepConnection();
         }
 
         if((_numPeaks % 5000) == 0)
@@ -309,6 +285,7 @@ public class PeaksFileImporter extends DefaultHandler
     protected String _mzXmlUrl;         //URI to the mzXML file
     protected ExpData _expData;         //the experiment data file id
     protected User _user;               //the current user
+    private final DbScope.Transaction _transaction;
     protected long _msStart;            //milliseconds at start of doc
 
     protected int _numPeakFamilies;     //the number of peak families imported

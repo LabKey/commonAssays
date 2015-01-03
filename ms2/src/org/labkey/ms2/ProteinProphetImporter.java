@@ -18,6 +18,7 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
@@ -95,8 +96,6 @@ public class ProteinProphetImporter
         String peptidesTempTableName = _dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
         String proteinsTempTableName = _dialect.getTempTablePrefix() +  "ProteinGroupMembershipsTemp" + suffix;
 
-        Connection connection = MS2Manager.getSchema().getScope().beginTransaction().getConnection();
-
         Statement stmt = null;
         PreparedStatement mergePeptideStmt = null;
         PreparedStatement mergeProteinStmt = null;
@@ -112,172 +111,176 @@ public class ProteinProphetImporter
         boolean createdTempTables = false;
         int proteinGroupIndex = 0;
 
-        try
+        try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().beginTransaction())
         {
-            int fastaId = run.getFastaId();
-
-            String createPeptidesTempTableSQL =
-                "CREATE " + _dialect.getTempTableKeyword() +  " TABLE " + peptidesTempTableName + " ( " +
-                    "\tTrimmedPeptide VARCHAR(200) NOT NULL,\n" +
-                    "\tCharge INT NOT NULL,\n" +
-                    "\tProteinGroupId INT NOT NULL,\n" +
-                    "\tNSPAdjustedProbability REAL NOT NULL,\n" +
-                    "\tWeight REAL NOT NULL,\n" +
-                    "\tNondegenerateEvidence " + _dialect.getBooleanDataType() + " NOT NULL,\n" +
-                    "\tEnzymaticTermini INT NOT NULL,\n" +
-                    "\tSiblingPeptides REAL NOT NULL,\n" +
-                    "\tSiblingPeptidesBin INT NOT NULL,\n" +
-                    "\tInstances INT NOT NULL,\n" +
-                    "\tContributingEvidence " + _dialect.getBooleanDataType() + " NOT NULL,\n" +
-                    "\tCalcNeutralPepMass REAL NOT NULL" +
-                    ")";
-
-            stmt = connection.createStatement();
-            stmt.execute(createPeptidesTempTableSQL);
-
-            String createProteinsTempTableSQL =
-                "CREATE " + _dialect.getTempTableKeyword() +  " TABLE " + proteinsTempTableName + " ( " +
-                    "\tProteinGroupId INT NOT NULL,\n" +
-                    "\tProbability REAL NOT NULL,\n" +
-                    "\tLookupString VARCHAR(200)\n" +
-                    ")";
-
-            stmt = connection.createStatement();
-            stmt.execute(createProteinsTempTableSQL);
-
-            connection.commit();
-            createdTempTables = true;
-
-            ProtXmlReader reader = new ProtXmlReader(_file, run);
-
-            peptideStmt = connection.prepareStatement("INSERT INTO " + peptidesTempTableName + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            proteinStmt = connection.prepareStatement("INSERT INTO " + proteinsTempTableName + " (ProteinGroupId, Probability, LookupString) VALUES (?, ?, ?)");
-
-            StringBuilder groupString = new StringBuilder("INSERT INTO " + MS2Manager.getTableInfoProteinGroups() + " (groupnumber, groupprobability, proteinprobability, indistinguishablecollectionid, proteinprophetfileid, uniquepeptidescount, totalnumberpeptides, pctspectrumids,  percentcoverage, errorrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            _dialect.appendSelectAutoIncrement(groupString, "RowId");
-            groupStmt = connection.prepareStatement(groupString.toString());
-
-            iterator = reader.iterator();
-
-            ProteinProphetFile file = insertProteinProphetFile(info, run, iterator.getReader());
-
-            while (iterator.hasNext())
+            Connection connection = transaction.getConnection();
+            try
             {
-                proteinGroupIndex++;
-                ProteinGroup group = iterator.next();
-                float groupProbability = group.getProbability();
-                int groupNumber = group.getGroupNumber();
+                int fastaId = run.getFastaId();
 
-                List<ProtXmlReader.Protein> proteins = group.getProteins();
+                String createPeptidesTempTableSQL =
+                        "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + peptidesTempTableName + " ( " +
+                                "\tTrimmedPeptide VARCHAR(200) NOT NULL,\n" +
+                                "\tCharge INT NOT NULL,\n" +
+                                "\tProteinGroupId INT NOT NULL,\n" +
+                                "\tNSPAdjustedProbability REAL NOT NULL,\n" +
+                                "\tWeight REAL NOT NULL,\n" +
+                                "\tNondegenerateEvidence " + _dialect.getBooleanDataType() + " NOT NULL,\n" +
+                                "\tEnzymaticTermini INT NOT NULL,\n" +
+                                "\tSiblingPeptides REAL NOT NULL,\n" +
+                                "\tSiblingPeptidesBin INT NOT NULL,\n" +
+                                "\tInstances INT NOT NULL,\n" +
+                                "\tContributingEvidence " + _dialect.getBooleanDataType() + " NOT NULL,\n" +
+                                "\tCalcNeutralPepMass REAL NOT NULL" +
+                                ")";
 
-                // collectionId 0 means it's the only collection in the group
-                int collectionId = proteins.size() == 1 ? 0 : 1;
-                for (ProtXmlReader.Protein protein : proteins)
+                stmt = connection.createStatement();
+                stmt.execute(createPeptidesTempTableSQL);
+
+                String createProteinsTempTableSQL =
+                        "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + proteinsTempTableName + " ( " +
+                                "\tProteinGroupId INT NOT NULL,\n" +
+                                "\tProbability REAL NOT NULL,\n" +
+                                "\tLookupString VARCHAR(200)\n" +
+                                ")";
+
+                stmt = connection.createStatement();
+                stmt.execute(createProteinsTempTableSQL);
+
+                connection.commit();
+                createdTempTables = true;
+
+                ProtXmlReader reader = new ProtXmlReader(_file, run);
+
+                peptideStmt = connection.prepareStatement("INSERT INTO " + peptidesTempTableName + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                proteinStmt = connection.prepareStatement("INSERT INTO " + proteinsTempTableName + " (ProteinGroupId, Probability, LookupString) VALUES (?, ?, ?)");
+
+                StringBuilder groupString = new StringBuilder("INSERT INTO " + MS2Manager.getTableInfoProteinGroups() + " (groupnumber, groupprobability, proteinprobability, indistinguishablecollectionid, proteinprophetfileid, uniquepeptidescount, totalnumberpeptides, pctspectrumids,  percentcoverage, errorrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                _dialect.appendSelectAutoIncrement(groupString, "RowId");
+                groupStmt = connection.prepareStatement(groupString.toString());
+
+                iterator = reader.iterator();
+
+                ProteinProphetFile file = insertProteinProphetFile(info, run, iterator.getReader());
+
+                while (iterator.hasNext())
                 {
-                    loadProtein(protein, groupNumber, groupProbability, collectionId++, file, info, groupStmt, peptideStmt, proteinStmt);
+                    proteinGroupIndex++;
+                    ProteinGroup group = iterator.next();
+                    float groupProbability = group.getProbability();
+                    int groupNumber = group.getGroupNumber();
+
+                    List<ProtXmlReader.Protein> proteins = group.getProteins();
+
+                    // collectionId 0 means it's the only collection in the group
+                    int collectionId = proteins.size() == 1 ? 0 : 1;
+                    for (ProtXmlReader.Protein protein : proteins)
+                    {
+                        loadProtein(protein, groupNumber, groupProbability, collectionId++, file, info, groupStmt, peptideStmt, proteinStmt);
+                    }
+                    if (proteinGroupIndex % 50 == 0)
+                    {
+                        // Don't leave too big of a transaction pending
+                        // Commit directly on the connection so that we don't lose the underlying connection
+                        peptideStmt.executeBatch();
+                        connection.commit();
+                    }
+                    if (proteinGroupIndex % 10000 == 0)
+                    {
+                        log.info("Loaded " + proteinGroupIndex + " protein groups...");
+                    }
                 }
-                if (proteinGroupIndex % 50 == 0)
-                {
-                    // Don't leave too big of a transaction pending
-                    // Commit directly on the connection so that we don't lose the underlying connection
-                    peptideStmt.executeBatch();
-                    connection.commit();
-                }
-                if (proteinGroupIndex % 10000 == 0)
-                {
-                    log.info("Loaded " + proteinGroupIndex + " protein groups...");
-                }
+
+                peptideStmt.executeBatch();
+
+                long insertStartTime = System.currentTimeMillis();
+                log.info("Starting to move data into ms2.PeptidesMemberships");
+
+                peptideIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + peptidesTempTableName + " ON " + peptidesTempTableName + "(TrimmedPeptide, Charge)");
+                peptideIndexStmt.execute();
+
+                // Move the peptide information of the temp table into the real table
+                String mergePeptideSQL = "INSERT INTO " + MS2Manager.getTableInfoPeptideMemberships() + " (" +
+                        "\tPeptideId, ProteinGroupId, NSPAdjustedProbability, Weight, NondegenerateEvidence,\n" +
+                        "\tEnzymaticTermini, SiblingPeptides, SiblingPeptidesBin, Instances, ContributingEvidence, CalcNeutralPepMass ) \n" +
+                        "\tSELECT p.RowId, t.ProteinGroupId, t.NSPAdjustedProbability, t.Weight, t.NondegenerateEvidence,\n" +
+                        "\tt.EnzymaticTermini, t.SiblingPeptides, t.SiblingPeptidesBin, t.Instances, t.ContributingEvidence, t.CalcNeutralPepMass\n" +
+                        "FROM " + MS2Manager.getTableInfoPeptides() + " p, " + peptidesTempTableName + " t\n" +
+                        "WHERE p.TrimmedPeptide = t.TrimmedPeptide AND p.Charge = t.Charge AND p.Run = ?";
+
+                mergePeptideStmt = connection.prepareStatement(mergePeptideSQL);
+                mergePeptideStmt.setInt(1, run.getRun());
+                mergePeptideStmt.executeUpdate();
+                log.info("Finished with moving data into ms2.PeptidesMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
+
+                insertStartTime = System.currentTimeMillis();
+                log.info("Starting to move data into ms2.ProteinGroupMemberships");
+
+                // Create an index to use for the join with prot.fastasequences
+                proteinIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + " ON " + proteinsTempTableName + "(LookupString)");
+                proteinIndexStmt.execute();
+
+                // Create an index to use for the GROUP BY
+                proteinIndex2Stmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + "2 ON " + proteinsTempTableName + "(ProteinGroupId, Probability)");
+                proteinIndex2Stmt.execute();
+
+                String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
+                        "(ProteinGroupId, Probability, SeqId) " +
+                        "SELECT p.ProteinGroupId, p.Probability, s.SeqId " +
+                        "   FROM " + ProteinManager.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
+                        "   WHERE s.FastaId = ? AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
+
+                mergeProteinStmt = connection.prepareStatement(mergeProteinSQL);
+                mergeProteinStmt.setInt(1, fastaId);
+                mergeProteinStmt.executeUpdate();
+                log.info("Finished with moving data into ms2.ProteinGroupMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
+
+                file.setUploadCompleted(true);
+                Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId());
+
+                success = true;
+
+                log.info("ProteinProphet file import finished successfully, " + proteinGroupIndex + " protein groups loaded");
             }
-
-            peptideStmt.executeBatch();
-
-            long insertStartTime = System.currentTimeMillis();
-            log.info("Starting to move data into ms2.PeptidesMemberships");
-
-            peptideIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + peptidesTempTableName + " ON " + peptidesTempTableName + "(TrimmedPeptide, Charge)");
-            peptideIndexStmt.execute();
-
-            // Move the peptide information of the temp table into the real table
-            String mergePeptideSQL = "INSERT INTO " + MS2Manager.getTableInfoPeptideMemberships() + " (" +
-                    "\tPeptideId, ProteinGroupId, NSPAdjustedProbability, Weight, NondegenerateEvidence,\n" +
-                    "\tEnzymaticTermini, SiblingPeptides, SiblingPeptidesBin, Instances, ContributingEvidence, CalcNeutralPepMass ) \n" +
-                    "\tSELECT p.RowId, t.ProteinGroupId, t.NSPAdjustedProbability, t.Weight, t.NondegenerateEvidence,\n" +
-                    "\tt.EnzymaticTermini, t.SiblingPeptides, t.SiblingPeptidesBin, t.Instances, t.ContributingEvidence, t.CalcNeutralPepMass\n" +
-                    "FROM " + MS2Manager.getTableInfoPeptides() + " p, " + peptidesTempTableName + " t\n" +
-                    "WHERE p.TrimmedPeptide = t.TrimmedPeptide AND p.Charge = t.Charge AND p.Run = ?";
-
-            mergePeptideStmt = connection.prepareStatement(mergePeptideSQL);
-            mergePeptideStmt.setInt(1, run.getRun());
-            mergePeptideStmt.executeUpdate();
-            log.info("Finished with moving data into ms2.PeptidesMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
-
-            insertStartTime = System.currentTimeMillis();
-            log.info("Starting to move data into ms2.ProteinGroupMemberships");
-
-            // Create an index to use for the join with prot.fastasequences
-            proteinIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + " ON " + proteinsTempTableName + "(LookupString)");
-            proteinIndexStmt.execute();
-
-            // Create an index to use for the GROUP BY
-            proteinIndex2Stmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + "2 ON " + proteinsTempTableName + "(ProteinGroupId, Probability)");
-            proteinIndex2Stmt.execute();
-
-            String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
-                    "(ProteinGroupId, Probability, SeqId) " +
-                    "SELECT p.ProteinGroupId, p.Probability, s.SeqId " +
-                    "   FROM " + ProteinManager.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
-                    "   WHERE s.FastaId = ? AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
-
-            mergeProteinStmt = connection.prepareStatement(mergeProteinSQL);
-            mergeProteinStmt.setInt(1, fastaId);
-            mergeProteinStmt.executeUpdate();
-            log.info("Finished with moving data into ms2.ProteinGroupMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
-
-            file.setUploadCompleted(true);
-            Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId());
-
-            success = true;
-            connection.commit();
-
-            log.info("ProteinProphet file import finished successfully, " + proteinGroupIndex + " protein groups loaded");
-        }
-        finally
-        {
-            if (iterator != null)
+            finally
             {
-                iterator.close();
-            }
-            if (connection != null)
-            {
-                try
+                if (iterator != null)
                 {
-                    connection.rollback();
+                    iterator.close();
                 }
-                catch (SQLException e) { log.error("Failed to rollback to clear any potential error state", e); }
-            }
-            if (stmt != null && createdTempTables)
-            {
-                try
+                if (!success && connection != null)
                 {
-                    stmt.execute("DROP TABLE " + peptidesTempTableName);
+                    try
+                    {
+                        connection.rollback();
+                    }
+                    catch (SQLException e) { log.error("Failed to rollback to clear any potential error state", e); }
                 }
-                catch (SQLException e) { log.error("Failed to drop temporary peptides table", e); }
-                try
+                if (stmt != null && createdTempTables)
                 {
-                    stmt.execute("DROP TABLE " + proteinsTempTableName);
+                    try
+                    {
+                        stmt.execute("DROP TABLE " + peptidesTempTableName);
+                    }
+                    catch (SQLException e) { log.error("Failed to drop temporary peptides table", e); }
+                    try
+                    {
+                        stmt.execute("DROP TABLE " + proteinsTempTableName);
+                    }
+                    catch (SQLException e) { log.error("Failed to drop temporary proteins table", e); }
+                    try { stmt.close(); } catch (SQLException ignored) {}
                 }
-                catch (SQLException e) { log.error("Failed to drop temporary proteins table", e); }
-                try { stmt.close(); } catch (SQLException e) {}
+                if (mergePeptideStmt != null) { try { mergePeptideStmt.close(); } catch (SQLException ignored) {} }
+                if (mergeProteinStmt != null) { try { mergeProteinStmt.close(); } catch (SQLException ignored) {} }
+                if (peptideStmt != null) { try { peptideStmt.close(); } catch (SQLException ignored) {} }
+                if (groupStmt != null) { try { groupStmt.close(); } catch (SQLException ignored) {} }
+                if (proteinStmt != null) { try { proteinStmt.close(); } catch (SQLException ignored) {} }
+                if (proteinIndexStmt != null) { try { proteinIndexStmt.close(); } catch (SQLException ignored) {} }
+                if (proteinIndex2Stmt != null) { try { proteinIndex2Stmt.close(); } catch (SQLException ignored) {} }
+                if (peptideIndexStmt != null) { try { peptideIndexStmt.close(); } catch (SQLException ignored) {} }
+
+                transaction.commit();
             }
-            if (mergePeptideStmt != null) { try { mergePeptideStmt.close(); } catch (SQLException e) {} }
-            if (mergeProteinStmt != null) { try { mergeProteinStmt.close(); } catch (SQLException e) {} }
-            if (peptideStmt != null) { try { peptideStmt.close(); } catch (SQLException e) {} }
-            if (groupStmt != null) { try { groupStmt.close(); } catch (SQLException e) {} }
-            if (proteinStmt != null) { try { proteinStmt.close(); } catch (SQLException e) {} }
-            if (proteinIndexStmt != null) { try { proteinIndexStmt.close(); } catch (SQLException e) {} }
-            if (proteinIndex2Stmt != null) { try { proteinIndex2Stmt.close(); } catch (SQLException e) {} }
-            if (peptideIndexStmt != null) { try { peptideIndexStmt.close(); } catch (SQLException e) {} }
-            MS2Manager.getSchema().getScope().closeConnection();
 
             if (!success)
             {
@@ -323,7 +326,7 @@ public class ProteinProphetImporter
         throws IOException, XMLStreamException, SQLException, ExperimentException
     {
         String pepXMLFileNameOriginal = getPepXMLFileName();
-        File pepXMLFile=null;
+        File pepXMLFile = null;
 
         for (int attempts=0;attempts++<2;) // try it straight up, then try finding .gz version
         {
