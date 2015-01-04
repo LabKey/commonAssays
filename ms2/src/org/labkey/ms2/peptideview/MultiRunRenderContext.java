@@ -77,8 +77,8 @@ public class MultiRunRenderContext extends RenderContext
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
             // XXX: we're ignoring offset for now
             //msi: We are using a scrollable resultset here for reasons I am not sure of...
-            LegacyTableSelector selector = new LegacyTableSelector(_table, _columns, _filter, _sort).setForDisplay(true);
-            selector.setMaxRows(_maxRows).setNamedParamters(_parameters);
+            TableSelector selector = new TableSelector(_table, _columns, _filter, _sort).setForDisplay(true);
+            selector.setMaxRows(_maxRows).setNamedParameters(_parameters);
 
             return selector.getResults(_cache, true);
         }
