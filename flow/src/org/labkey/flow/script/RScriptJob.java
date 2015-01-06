@@ -21,7 +21,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.reports.ExternalScriptEngine;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.services.ServiceRegistry;
@@ -69,7 +68,7 @@ public class RScriptJob extends FlowExperimentJob
     private static final String NORMALIZATION = "perform-normalization";
     private static final String NORM_REFERENCE = "normalization-reference";
     private static final String NORM_SUBSETS = "normalization-subsets";
-    private static final String NORM_PARAMTERS = "normalization-parameters";
+    private static final String NORM_PARAMETERS = "normalization-parameters";
 
     private final FlowExperiment _experiment;
     private final File _workspaceFile;
@@ -201,7 +200,7 @@ public class RScriptJob extends FlowExperimentJob
             sep = ", ";
         }
         normParams.append(")");
-        replacements.put(NORM_PARAMTERS, normParams.toString());
+        replacements.put(NORM_PARAMETERS, normParams.toString());
 
         // UNDONE: add protocol filter to script
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();

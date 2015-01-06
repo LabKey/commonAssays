@@ -244,7 +244,7 @@ public abstract class SequestParamsBuilder
     /** The first 3 parameters of that line are integers (0 or 1) that represents whether or not neutral losses (NH3 and H2))
     for a-ions, b-ions and y-ions are considered (0=no, 1=yes) in the correlation analysis. The last 9 parameters are
     floating point values representing a, b, c, d, v, w, x, y, and z ions respectively. The values entered for these
-    paramters should range from 0.0 (don't use the ion series) to 1.0. The value entered represents the weighting that
+    parameters should range from 0.0 (don't use the ion series) to 1.0. The value entered represents the weighting that
     each ion series has (relative to the others). So an ion series with 0.5 contains half the weighting or relevance of
     an ion series with a 1.0 parameter. */
     protected List<String> initIonScoring()

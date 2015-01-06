@@ -80,7 +80,7 @@
 	<note type="input" label="protein, N-terminal residue modification mass">0.0</note>
 	<note type="input" label="protein, C-terminal residue modification mass">0.0</note>
 
-<note>model refinement paramters</note>
+<note>model refinement parameters</note>
   <note type="input" label="refine">no</note>
   <note type="input" label="refine, spectrum synthesis">yes</note>
   <note type="input" label="refine, maximum valid expectation value">0.1</note>
