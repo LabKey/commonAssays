@@ -173,7 +173,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 + ", MaxFI AS HighMFI, MaxFIQCFlagsEnabled AS HighMFIQCFlagsEnabled"
                 //columns needed for guide set ranges (value based or run based)
                 + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLAverage ELSE GuideSet.\"Four ParameterCurveFit\".EC50Average END AS GuideSetEC504PLAverage"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLAverage ELSE GuideSet.\"Four ParameterCurveFit\".EC50StdDev END AS GuideSetEC504PLStdDev"
+                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLStdDev ELSE GuideSet.\"Four ParameterCurveFit\".EC50StdDev END AS GuideSetEC504PLStdDev"
                 + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLAverage ELSE GuideSet.\"Five ParameterCurveFit\".EC50Average END AS GuideSetEC505PLAverage"
                 + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLStdDev ELSE GuideSet.\"Five ParameterCurveFit\".EC50StdDev END AS GuideSetEC505PLStdDev"
                 + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCAverage ELSE GuideSet.TrapezoidalCurveFit.AUCAverage END AS GuideSetAUCAverage"

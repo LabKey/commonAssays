@@ -154,7 +154,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
             queryName:  'GuideSet',
-            filterArray: [LABKEY.Filter.create('ControlName', this.controlName),
+            filterArray: [
+                    LABKEY.Filter.create('ControlType', this.controlType),
+                    LABKEY.Filter.create('ControlName', this.controlName),
                     LABKEY.Filter.create('AnalyteName', this.analyte),
                     LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),

@@ -261,7 +261,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         _guideSetHelper.goToManageGuideSetsPage(TEST_ASSAY_LUM);
 
         clickGuideSetDetailsByComment(RUN_BASED_COMMENT);
-        validateGuideSetRunDetails("Run-based");
+        validateGuideSetRunDetails("Run-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
             {"0.323", "5.284", "2" },
             {"0.540", "5.339", "2" },
@@ -275,7 +275,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(closeBtn);
 
         clickGuideSetDetailsByComment(VALUE_BASED_COMMENT);
-        validateGuideSetRunDetails("Value-based");
+        validateGuideSetRunDetails("Value-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
             {"4833.760", "42158.220"},
             {"4280.840", "40987.310"},
@@ -307,7 +307,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 
     }
 
-    private void validateGuideSetRunDetails(String type)
+    private void validateGuideSetRunDetails(String type, String controlType)
     {
         String analyte, comment;
         if (type.equals("Run-based"))
@@ -321,17 +321,17 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
             comment = VALUE_BASED_COMMENT;
         }
 
-        // check top left table
+        // check guide set details at top of window
         Locator.XPathLocator table = TABLE_LOCATOR.append("[1]");
         assertNotEquals("", getTableCellText(table, 0, 1)); // find better check
-        assertNotEquals("", getTableCellText(table, 1, 1)); // find better check...
-        assertEquals(CONTROL_NAME, getTableCellText(table, 2, 1));
+        assertNotEquals("", getTableCellText(table, 1, 3)); // find better check...
+        assertEquals(CONTROL_NAME, getTableCellText(table, 1, 1));
+        assertEquals(controlType, getTableCellText(table, 2, 1));
         assertEquals(analyte, getTableCellText(table, 3, 1));
         assertEquals(comment, getTableCellText(table, 4, 1));
-        // check top right table
         assertEquals(type, getTableCellText(table,0, 3));
-        assertEquals(isotype, getTableCellText(table,1, 3));
-        assertEquals(conjugate, getTableCellText(table,2, 3));
+        assertEquals(isotype, getTableCellText(table,2, 3));
+        assertEquals(conjugate, getTableCellText(table,3, 3));
     }
 
     private void validateGuideSetMetricsDetails(String[][] metricsData) {

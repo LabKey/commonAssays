@@ -590,6 +590,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             queryName: 'GuideSet',
             command: 'insert',
             rows: [{
+                IsTitration: this.isTitrationControlType(),
                 ControlName: this.controlName,
                 AnalyteName: this.analyte,
                 Isotype: this.isotype,

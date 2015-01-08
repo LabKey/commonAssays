@@ -152,20 +152,11 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
-        SQLFragment controlTypeSql = new SQLFragment("(SELECT CASE WHEN COUNT(*) > 0 THEN 'SinglePoint' ELSE 'Titration' END FROM ");
-        controlTypeSql.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
-        controlTypeSql.append(" JOIN ");
-        controlTypeSql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");
-        controlTypeSql.append(" ON gs.ControlName = spc.Name WHERE gs.RowId = ");
-
-        controlTypeSql.append(ExprColumn.STR_TABLE_ALIAS);
-        controlTypeSql.append(".RowId)");
-
+        SQLFragment controlTypeSql = new SQLFragment("(SELECT CASE WHEN IsTitration=" + this.getSqlDialect().getBooleanTRUE() +" THEN 'Titration' ELSE 'SinglePoint' END)");
         ExprColumn controlTypeCol = new ExprColumn(this, "ControlType", controlTypeSql, JdbcType.VARCHAR);
-        controlTypeCol.setLabel("Control Type");
         addColumn(controlTypeCol);
 
-        addRunCounts(controlTypeSql);
+        addRunCounts();
 
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
         getColumn("ModifiedBy").setFk(userIdForeignKey);
@@ -260,7 +251,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addColumn(maxFIStdDevCol);
     }
     
-    private void addRunCounts(SQLFragment controlTypeSql) {
+    private void addRunCounts() {
         SQLFragment runCountsBaseSQL = new SQLFragment("(SELECT COUNT(*) ");
         runCountsBaseSQL.append("FROM ");
         runCountsBaseSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
@@ -270,8 +261,9 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         runCountsBaseSQL.append(" ON gs.RowId = at.GuideSetId ");
 
         // do MaxFI counts before joining in CurveFit table
-        SQLFragment maxFIRunCountsSQL = new SQLFragment("(SELECT CASE ControlType ");
-        maxFIRunCountsSQL.append("WHEN 'Titration' THEN (SELECT COUNT(*) FROM ");
+        SQLFragment maxFIRunCountsSQL = new SQLFragment("(SELECT CASE IsTitration ");
+        maxFIRunCountsSQL.append("WHEN ? THEN (SELECT COUNT(*) FROM ");
+        maxFIRunCountsSQL.add(Boolean.TRUE);
 
         maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
         maxFIRunCountsSQL.append(" JOIN ");
@@ -294,9 +286,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         maxFIRunCountsSQL.add(Boolean.TRUE);
 
         maxFIRunCountsSQL.append("END FROM ");
-        maxFIRunCountsSQL.append("(SELECT ");
-        maxFIRunCountsSQL.append(controlTypeSql);
-        maxFIRunCountsSQL.append(" as ControlType, gs.* FROM ");
+        maxFIRunCountsSQL.append("(SELECT gs.* FROM ");
         maxFIRunCountsSQL.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
 
         maxFIRunCountsSQL.append(" WHERE gs.RowId = ");
@@ -404,7 +394,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             _protocol = guideSetTable._userSchema.getProtocol();
         }
 
-        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
+        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String controlName, String conjugate, String isotype, Boolean isTitration)
         {
             SQLFragment sql = new SQLFragment("SELECT * FROM ");
             sql.append(LuminexProtocolSchema.getTableInfoGuideSet(), "gs");
@@ -413,13 +403,15 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             sql.append(" AND AnalyteName");
             appendNullableString(sql, analyteName);
             sql.append(" AND ControlName");
-            appendNullableString(sql, titrationName);
+            appendNullableString(sql, controlName);
             sql.append(" AND Conjugate");
             appendNullableString(sql, conjugate);
             sql.append(" AND Isotype");
             appendNullableString(sql, isotype);
             sql.append(" AND CurrentGuideSet = ?");
             sql.add(true);
+            sql.append(" AND IsTitration = ?");
+            sql.add(isTitration);
 
             GuideSet[] matches = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArray(GuideSet.class);
             if (matches.length == 1)
@@ -471,7 +463,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             validateProtocol(bean);
             validateGuideSetValues(bean);
             boolean current = bean.isCurrentGuideSet();
-            if (current && getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype()) != null)
+            if (current && getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype(), bean.getIsTitration()) != null)
             {
                 throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
             }
@@ -488,7 +480,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             validateGuideSetValues(bean);
             if (bean.isCurrentGuideSet())
             {
-                GuideSet currentGuideSet = getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype());
+                GuideSet currentGuideSet = getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getControlName(), bean.getConjugate(), bean.getIsotype(), bean.getIsTitration());
                 if (currentGuideSet != null && currentGuideSet.getRowId() != oldKey.intValue())
                 {
                     throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/ControlName/Conjugate/Isotype combination");

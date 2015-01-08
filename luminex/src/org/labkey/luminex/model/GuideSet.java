@@ -41,6 +41,7 @@ public class GuideSet
     private String _isotype;
     private boolean _currentGuideSet;
     private boolean _valueBased;
+    private boolean _isTitration;
     private Double _ec504plAverage;
     private Double _ec504plStdDev;
     private Double _ec505plAverage;
@@ -414,5 +415,15 @@ public class GuideSet
                 return "under";
         }
         return null;
+    }
+
+    public boolean getIsTitration()
+    {
+        return _isTitration;
+    }
+
+    public void setIsTitration(boolean isTitration)
+    {
+        _isTitration = isTitration;
     }
 }

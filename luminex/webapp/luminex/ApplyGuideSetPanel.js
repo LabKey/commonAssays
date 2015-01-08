@@ -157,6 +157,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             queryName: 'GuideSet',
             columns: guideSetColumns,
             filterArray: [
+                LABKEY.Filter.create('ControlType', this.controlType),
                 LABKEY.Filter.create('ControlName', this.controlName),
                 LABKEY.Filter.create('AnalyteName', this.analyte),
                 LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),

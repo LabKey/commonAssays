@@ -146,8 +146,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
         }
 
-        // if there are titrations in the uploaded data, show the well role definition section
-        if (form.getParser().getTitrations().size() > 0)
+        // if there are titrations or single point controls in the uploaded data, show the well role definition section
+        LuminexExcelParser parser = form.getParser();
+        if (parser.getTitrations().size() > 0 || parser.getSinglePointControls().size() > 0)
         {
             JspView<LuminexRunUploadForm> top = new JspView<>("/org/labkey/luminex/view/titrationWellRoles.jsp", form);
             top.setTitle("Define Well Roles");

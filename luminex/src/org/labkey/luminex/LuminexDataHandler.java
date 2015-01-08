@@ -712,9 +712,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private GuideSet determineGuideSet(Analyte analyte, AbstractLuminexControl control, String conjugate, String isotype, ExpProtocol protocol)
+    private GuideSet determineGuideSet(Analyte analyte, AbstractLuminexControl control, String conjugate, String isotype, ExpProtocol protocol, Boolean isTitration)
     {
-        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype);
+        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype, isTitration);
         if (guideSet != null)
         {
             return guideSet;
@@ -787,7 +787,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             if (newRow)
             {
                 // Check if we have a guide set for this combo
-                GuideSet currentGuideSet = determineGuideSet(analyte, singlePointControl, conjugate, isotype, protocol);
+                GuideSet currentGuideSet = determineGuideSet(analyte, singlePointControl, conjugate, isotype, protocol, false);
                 if (currentGuideSet != null)
                 {
                     analyteSinglePointControl.setGuideSetId(currentGuideSet.getRowId());
@@ -900,7 +900,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         if (newRow)
         {
             // Check if we have a guide set for this combo
-            GuideSet currentGuideSet = determineGuideSet(analyte, titration, conjugate, isotype, protocol);
+            GuideSet currentGuideSet = determineGuideSet(analyte, titration, conjugate, isotype, protocol, true);
             if (currentGuideSet != null)
             {
                 analyteTitration.setGuideSetId(currentGuideSet.getRowId());

@@ -84,6 +84,9 @@
             <column columnName="CurrentGuideSet" />
             <column columnName="Conjugate" />
             <column columnName="Isotype" />
+            <column columnName="IsTitration">
+                <description>Determines the control type for this guide set (i.e. Titration vs SinglePoint)</description>
+            </column>
             <column columnName="ControlName" />
             <column columnName="ValueBased">
                 <description>True to designate this guide set as value-based. False indicates a run-based guide set.</description>

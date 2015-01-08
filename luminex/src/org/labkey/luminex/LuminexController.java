@@ -665,7 +665,7 @@ public class LuminexController extends SpringActionController
 
                     ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
                     graph.addParameter("controlName", "${ControlName}");
-                    //graph.addParameter("controlType", "Titration");
+                    graph.addParameter("controlType", "${ControlType}");
                     graph.addParameter("analyte", "${AnalyteName}");
                     graph.addParameter("isotype", "${Isotype}");
                     graph.addParameter("conjugate", "${Conjugate}");
