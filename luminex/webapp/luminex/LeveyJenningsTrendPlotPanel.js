@@ -387,11 +387,13 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             });
         }
 
+        var renderType = Ext.isIE8 ? 'raphael' : 'd3';
+
         var plot = LABKEY.vis.LeveyJenningsPlot({
             renderTo: trendDiv,
-            rendererType: Ext.isIE8 ? 'raphael' : 'd3',
-            width: 810,
-            height: 295,
+            rendererType: renderType,
+            width: 850,
+            height: 300,
             data: plotData,
             properties: {
                 value: 'value',
@@ -400,7 +402,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 xTickLabel: 'xLabel',
                 yAxisScale: this.yAxisScale,
                 color: 'pointColor',
-                colorRange: ['red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown', 'black'],
+                colorRange: ['black', 'red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown'],
                 hoverTextFn: function(row){
                     return 'Notebook: ' + row.xLabel
                         + '\nLot Number: ' + row.pointColor
@@ -411,15 +413,45 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             labels: {
                 main: {value: this.controlName + ' ' + plotType + ' for ' + this.analyte + ' - '
                                 + (this.isotype ? this.isotype : '[None]') + ' '
-                                + (this.conjugate ? this.conjugate : '[None]')},
+                                + (this.conjugate ? this.conjugate : '[None]'),
+                    fontSize: 16,
+                    position: 20
+                },
                 y: {value: this.trendTabPanel.getActiveTab().title + (this.yAxisScale == 'log' ? ' (log)' : '')},
                 x: {value: 'Assay'}
             }
         });
         plot.render();
 
-        // export to PDF doesn't work for IE<9
-        this.togglePDFExportBtn(!Ext.isIE8);
+        if (renderType == 'd3')
+        {
+            // add some mouseover effects for fun
+            var mouseOn = function (pt, strokeWidth)
+            {
+                d3.select(pt).transition().duration(800).attr("stroke-width", strokeWidth).ease("elastic");
+            };
+            var mouseOff = function (pt)
+            {
+                d3.select(pt).transition().duration(800).attr("stroke-width", 1).ease("elastic");
+            };
+            var points = d3.select('#' + plot.renderTo + ' svg').selectAll("a.point path");
+            points.on("mouseover", function ()
+            {
+                return mouseOn(this, 5);
+            });
+            points.on("mouseout", function ()
+            {
+                return mouseOff(this);
+            });
+
+            // export to PDF doesn't work for IE<9
+            this.togglePDFExportBtn(true);
+        }
+        else
+        {
+            // export to PDF doesn't work for IE<9
+            this.togglePDFExportBtn(false);
+        }
     },
 
     activateTrendPlotPanel: function(panel) {
