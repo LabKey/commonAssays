@@ -18,6 +18,8 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.module.MultiPortalFolderType;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
@@ -58,9 +60,11 @@ public class MS2FolderType extends MultiPortalFolderType
     }
 
     @Override
-    public void addManageLinks(NavTree adminNavTree, Container container)
+    public void addManageLinks(NavTree adminNavTree, Container container, User user)
     {
-        super.addManageLinks(adminNavTree, container);
-        adminNavTree.addChild(new NavTree("Manage Custom Protein Lists", ProteinController.getBeginURL(container)));
+        super.addManageLinks(adminNavTree, container, user);
+
+        if (container.hasPermission(user, ReadPermission.class))
+            adminNavTree.addChild(new NavTree("Manage Custom Protein Lists", ProteinController.getBeginURL(container)));
     }
 }
