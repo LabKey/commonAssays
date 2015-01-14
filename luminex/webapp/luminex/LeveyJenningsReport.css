@@ -30,3 +30,8 @@
     position:relative;
     top:-900px;
 }
+
+.xticktag {
+    fill: #FF0000 !important;
+    font-weight: bold !important;
+}

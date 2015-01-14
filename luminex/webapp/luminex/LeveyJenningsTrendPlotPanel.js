@@ -368,60 +368,20 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.trendDataStore = store;
         }
 
-        var plotData = [];
-        var records = this.trendDataStore.getRange();
         var plotType = this.trendTabPanel.getActiveTab().itemId;
         var trendDiv = plotType + 'TrendPlotDiv';
-        Ext.get(trendDiv).update('');
+        var plotConfig = {
+            store: this.trendDataStore,
+            plotType: plotType,
+            renderDiv: trendDiv,
+            assayName: this.assayName,
+            controlName: this.controlName,
+            analyte: this.analyte,
+            isotype: this.isotype,
+            conjugate: this.conjugate
+        };
 
-        // iterate backwards through the store records so that plot goes left to right
-        for (var i = records.length-1; i >=0; i--)
-        {
-            var record = records[i];
-            plotData.push({
-                xLabel: record.get('NotebookNo'),
-                pointColor: record.get('LotNumber'),
-                value: record.get(plotType),
-                gsMean: record.get('GuideSet' + plotType + 'Average'),
-                gsStdDev: record.get('GuideSet' + plotType + 'StdDev')
-            });
-        }
-
-        var renderType = Ext.isIE8 ? 'raphael' : 'd3';
-
-        var plot = LABKEY.vis.LeveyJenningsPlot({
-            renderTo: trendDiv,
-            rendererType: renderType,
-            width: 850,
-            height: 300,
-            data: plotData,
-            properties: {
-                value: 'value',
-                mean: 'gsMean',
-                stdDev: 'gsStdDev',
-                xTickLabel: 'xLabel',
-                yAxisScale: this.yAxisScale,
-                color: 'pointColor',
-                colorRange: ['black', 'red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown'],
-                hoverTextFn: function(row){
-                    return 'Notebook: ' + row.xLabel
-                        + '\nLot Number: ' + row.pointColor
-                        + '\n' + plotType + ': ' + row.value;
-                }
-            },
-            gridLineColor: 'white',
-            labels: {
-                main: {value: this.controlName + ' ' + plotType + ' for ' + this.analyte + ' - '
-                                + (this.isotype ? this.isotype : '[None]') + ' '
-                                + (this.conjugate ? this.conjugate : '[None]'),
-                    fontSize: 16,
-                    position: 20
-                },
-                y: {value: this.trendTabPanel.getActiveTab().title + (this.yAxisScale == 'log' ? ' (log)' : '')},
-                x: {value: 'Assay'}
-            }
-        });
-        plot.render();
+        var renderType = LABKEY.LeveyJenningsPlotHelper.renderPlot(plotConfig);
 
         if (renderType == 'd3')
         {
@@ -434,7 +394,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             {
                 d3.select(pt).transition().duration(800).attr("stroke-width", 1).ease("elastic");
             };
-            var points = d3.select('#' + plot.renderTo + ' svg').selectAll("a.point path");
+            var points = d3.select('#' + trendDiv + ' svg').selectAll("a.point path");
             points.on("mouseover", function ()
             {
                 return mouseOn(this, 5);

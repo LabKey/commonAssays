@@ -882,6 +882,7 @@ luminex/webapp/luminex/GuideSet.css -text
 luminex/webapp/luminex/GuideSetWindow.js -text
 luminex/webapp/luminex/LeveyJenningsGraphParamsPanel.js -text
 luminex/webapp/luminex/LeveyJenningsGuideSetPanel.js -text
+luminex/webapp/luminex/LeveyJenningsPlotHelpers.js -text
 luminex/webapp/luminex/LeveyJenningsReport.css -text
 luminex/webapp/luminex/LeveyJenningsTrackingDataPanel.js -text
 luminex/webapp/luminex/LeveyJenningsTrendPlotPanel.js -text

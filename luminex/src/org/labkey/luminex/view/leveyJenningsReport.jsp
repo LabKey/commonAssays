@@ -34,11 +34,13 @@
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
         resources.add(ClientDependency.fromPath("clientapi/ext3"));
+        resources.add(ClientDependency.fromPath("Ext4"));
         resources.add(ClientDependency.fromPath("vis/vis"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsGraphParamsPanel.js"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsGuideSetPanel.js"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsTrendPlotPanel.js"));
         resources.add(ClientDependency.fromPath("luminex/LeveyJenningsTrackingDataPanel.js"));
+        resources.add(ClientDependency.fromPath("luminex/LeveyJenningsPlotHelpers.js"));
         resources.add(ClientDependency.fromPath("luminex/ManageGuideSetPanel.js"));
         resources.add(ClientDependency.fromPath("luminex/GuideSetWindow.js"));
         resources.add(ClientDependency.fromPath("luminex/ApplyGuideSetPanel.js"));

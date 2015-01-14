@@ -21,7 +21,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JavaScriptDisplayColumn;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
@@ -41,7 +43,10 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.PopupMenu;
 import org.labkey.luminex.AbstractLuminexControlUpdateService;
 import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.LuminexDataHandler;
@@ -49,7 +54,12 @@ import org.labkey.luminex.model.Titration;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.GuideSet;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +70,7 @@ import java.util.Objects;
  */
 public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 {
-    public AnalyteTitrationTable(LuminexProtocolSchema schema, boolean filter)
+    public AnalyteTitrationTable(final LuminexProtocolSchema schema, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, filter, "AnalyteId");
         setName(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
@@ -111,9 +121,56 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
         addCurveTypeColumns();
 
+        ColumnInfo ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("TitrationId")));
+        ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                Collection<String> dependencies = Collections.unmodifiableList(Arrays.asList("luminex/LeveyJenningsPlotHelpers.js", "vis/vis", "luminex/LeveyJenningsReport.css"));
+                // using JavaScriptDisplayColumn for dependencies
+                return new JavaScriptDisplayColumn(colInfo, dependencies, "")
+                {
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        String dataRegionName = ctx.getCurrentRegion() == null ? null : ctx.getCurrentRegion().getName();
+                        int protocolId = schema.getProtocol().getRowId();
+                        int analyte = (int)ctx.get("analyte");
+                        int titration = (int)ctx.get("titration");
+
+                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s')";
+
+                        NavTree ljPlotsNav = new NavTree("LJ Plots Menu");
+                        ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png", 16, 16);
+                        ljPlotsNav.addChild("HMFI", String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI"));
+                        ljPlotsNav.addChild("AUC", String.format(jsFuncCall, protocolId, analyte, titration, "AUC"));
+                        ljPlotsNav.addChild("4PL EC50", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
+                        ljPlotsNav.addChild("5PL EC50", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
+
+                        PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
+                        ljPlotsMenu.renderMenuButton(out, dataRegionName, false);
+                        ljPlotsMenu.renderMenuScript(out);
+                    }
+
+                    @Override
+                    public boolean isSortable()
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isFilterable()
+                    {
+                        return false;
+                    }
+                };
+            }
+        });
+
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Name"));
+        defaultCols.add(FieldKey.fromParts("LJPlots"));
         defaultCols.add(FieldKey.fromParts("Titration"));
         defaultCols.add(FieldKey.fromParts("Titration", "Standard"));
         defaultCols.add(FieldKey.fromParts("Titration", "QCControl"));

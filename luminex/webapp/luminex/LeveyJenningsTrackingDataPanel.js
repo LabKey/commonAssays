@@ -119,112 +119,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.initComponent.call(this);
     },
 
-    getTrackingDataStore: function(startDate, endDate, network, networkAny, protocol, protocolAny)
-    {
-        // build the array of filters to be applied to the store
-        var whereClause = this.getBaseWhereClause();
-        var hasReportFilter = false;
-        if (startDate)
-        {
-            whereClause += " AND CAST(Analyte.Data.AcquisitionDate AS DATE) >= '" + startDate + "'";
-            hasReportFilter = true;
-        }
-        if (endDate)
-        {
-            whereClause += " AND CAST(Analyte.Data.AcquisitionDate AS DATE) <= '" + endDate + "'";
-            hasReportFilter = true;
-        }
-        if (Ext.isDefined(network) && !networkAny)
-        {
-            whereClause += this.getNeworkProtocolFilter("Network", network);
-            hasReportFilter = true;
-        }
-        if (Ext.isDefined(protocol) && !protocolAny)
-        {
-            whereClause += this.getNeworkProtocolFilter("CustomProtocol", protocol);
-            hasReportFilter = true;
-        }
-
-        // generate sql for the data store (columns depend on the control type)
-        var controlTypeColName = this.controlType == "SinglePoint" ? "SinglePointControl" : this.controlType;
-        var sql = "SELECT Analyte"
-                + ", Analyte.Data.AcquisitionDate"
-                + ", Analyte.Properties.LotNumber"
-                + ", " + controlTypeColName
-                + ", " + controlTypeColName + ".Run.Isotype"
-                + ", " + controlTypeColName + ".Run.Conjugate"
-                + ", " + controlTypeColName + ".Run.RowId AS RunRowId"
-                + ", " + controlTypeColName + ".Run.Name AS RunName"
-                + ", " + controlTypeColName + ".Run.Folder.Name AS FolderName"
-                + ", " + controlTypeColName + ".Run.Folder.EntityId"
-                + (this.networkExists ? ", " + controlTypeColName + ".Run.Batch.Network" : "")
-                + (this.protocolExists ? ", " + controlTypeColName + ".Run.Batch.CustomProtocol" : "")
-                + ", " + controlTypeColName + ".Run.NotebookNo"
-                + ", " + controlTypeColName + ".Run.AssayType"
-                + ", " + controlTypeColName + ".Run.ExpPerformer"
-                + ", GuideSet.Created AS GuideSetCreated"
-                + ", IncludeInGuideSetCalculation"
-                + ", GuideSet.ValueBased AS GuideSetValueBased";
-        if (this.controlType == "Titration")
-        {
-            sql += ", \"Four ParameterCurveFit\".EC50 AS EC504PL, \"Four ParameterCurveFit\".EC50QCFlagsEnabled AS EC504PLQCFlagsEnabled"
-                + ", \"Five ParameterCurveFit\".EC50 AS EC505PL, \"Five ParameterCurveFit\".EC50QCFlagsEnabled AS EC505PLQCFlagsEnabled"
-                + ", TrapezoidalCurveFit.AUC, TrapezoidalCurveFit.AUCQCFlagsEnabled"
-                + ", MaxFI AS HighMFI, MaxFIQCFlagsEnabled AS HighMFIQCFlagsEnabled"
-                //columns needed for guide set ranges (value based or run based)
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLAverage ELSE GuideSet.\"Four ParameterCurveFit\".EC50Average END AS GuideSetEC504PLAverage"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLStdDev ELSE GuideSet.\"Four ParameterCurveFit\".EC50StdDev END AS GuideSetEC504PLStdDev"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLAverage ELSE GuideSet.\"Five ParameterCurveFit\".EC50Average END AS GuideSetEC505PLAverage"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLStdDev ELSE GuideSet.\"Five ParameterCurveFit\".EC50StdDev END AS GuideSetEC505PLStdDev"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCAverage ELSE GuideSet.TrapezoidalCurveFit.AUCAverage END AS GuideSetAUCAverage"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCStdDev ELSE GuideSet.TrapezoidalCurveFit.AUCStdDev END AS GuideSetAUCStdDev"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.TitrationMaxFIAverage END AS GuideSetHighMFIAverage"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.TitrationMaxFIStdDev END AS GuideSetHighMFIStdDev"
-                + " FROM AnalyteTitration "
-                + whereClause;
-        }
-        else if (this.controlType == "SinglePoint")
-        {
-            sql += ", AverageFiBkgd AS MFI, AverageFiBkgdQCFlagsEnabled AS MFIQCFlagsEnabled"
-                //columns needed for guide set ranges (value based or run based)
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.SinglePointControlFIAverage END AS GuideSetMFIAverage"
-                + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.SinglePointControlFIStdDev END AS GuideSetMFIStdDev"
-                + " FROM AnalyteSinglePointControl "
-                + whereClause;
-        }
-        sql += " ORDER BY Analyte.Data.AcquisitionDate DESC"
-                + ", " + controlTypeColName + ".Run.Created DESC"
-                + (hasReportFilter ? "" : " LIMIT " + this.defaultRowSize);
-
-        return new LABKEY.ext.Store({
-            autoLoad: false,
-            schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(this.assayName),
-            sql: sql,
-            containerFilter: LABKEY.Query.containerFilter.allFolders,
-            listeners: {
-                scope: this,
-                load: this.storeLoaded
-            },
-            scope: this
-        });
-    },
-
-    getBaseWhereClause: function() {
-        var controlTypeColName = this.controlType == "SinglePoint" ? "SinglePointControl" : this.controlType;
-        var whereClause = " WHERE Analyte.Name='" + this.analyte.replace(/'/g, "''") + "'"
-                + " AND " + controlTypeColName + ".Name='" + this.controlName.replace(/'/g, "''") + "'"
-                + (this.isotype != '' ? " AND " + controlTypeColName + ".Run.Isotype='" + this.isotype.replace(/'/g, "''") + "'"
-                        : " AND " + controlTypeColName + ".Run.Isotype IS NULL")
-                + (this.conjugate != '' ? " AND " + controlTypeColName + ".Run.Conjugate='" + this.conjugate.replace(/'/g, "''") + "'"
-                        : " AND " + controlTypeColName + ".Run.Conjugate IS NULL");
-
-        if (this.controlType == "Titration") {
-            whereClause += " AND Titration.IncludeInQcReport=true";
-        }
-
-        return whereClause;
-    },
-
     getNeworkProtocolFilter: function(name, value) {
         var fieldName = (this.controlType == "Titration" ? "Titration" : "SinglePointControl") + '.Run.Batch.' + name;
         if (value != null) {
@@ -327,8 +221,56 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate));
 
+        var whereClause = "";
+        var hasReportFilter = false;
+        if (startDate)
+        {
+            hasReportFilter = true;
+            whereClause += " AND CAST(Analyte.Data.AcquisitionDate AS DATE) >= '" + startDate + "'";
+        }
+        if (endDate)
+        {
+            hasReportFilter = true;
+            whereClause += " AND CAST(Analyte.Data.AcquisitionDate AS DATE) <= '" + endDate + "'";
+        }
+        if (Ext.isDefined(network) && !networkAny)
+        {
+            hasReportFilter = true;
+            whereClause += this.getNeworkProtocolFilter("Network", network);
+        }
+        if (Ext.isDefined(protocol) && !protocolAny)
+        {
+            hasReportFilter = true;
+            whereClause += this.getNeworkProtocolFilter("CustomProtocol", protocol);
+        }
+
         // create a new store now that the graph params are selected and bind it to the grid
-        this.store = this.getTrackingDataStore(startDate, endDate, network, networkAny, protocol, protocolAny);
+        var controlTypeColName = this.controlType == "SinglePoint" ? "SinglePointControl" : this.controlType;
+        var orderByClause = " ORDER BY Analyte.Data.AcquisitionDate DESC, " + controlTypeColName + ".Run.Created DESC"
+                            + (hasReportFilter ? "" : " LIMIT " + this.defaultRowSize);
+
+        var storeConfig = {
+            assayName: this.assayName,
+            controlName: this.controlName,
+            controlType: this.controlType,
+            analyte: this.analyte,
+            isotype: this.isotype,
+            conjugate: this.conjugate,
+            scope: this,
+            loadListener: this.storeLoaded,
+            networkExists: this.networkExists,
+            protocolExists: this.protocolExists,
+            orderBy: orderByClause
+        };
+
+        if (whereClause != "")
+        {
+            plotConfig['whereClause'] = whereClause;
+        }
+
+        this.store = LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore(storeConfig);
+
+        //this.store = getLeveyJenningsTrackingDataStore()
         var newColModel = this.getTrackingDataColModel();
         this.reconfigure(this.store, newColModel);
         this.store.load();
