@@ -21,7 +21,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JavaScriptDisplayColumn;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
@@ -40,7 +42,10 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.PopupMenu;
 import org.labkey.luminex.AbstractLuminexControlUpdateService;
 import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.LuminexDataHandler;
@@ -48,8 +53,12 @@ import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.GuideSet;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +69,7 @@ import java.util.Objects;
  */
 public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 {
-    public AnalyteSinglePointControlTable(LuminexProtocolSchema schema, boolean filterTable)
+    public AnalyteSinglePointControlTable(final LuminexProtocolSchema schema, boolean filterTable)
     {
         // expose the actual columns in the table
         super(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), schema, filterTable);
@@ -113,9 +122,54 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         averageFiBkgdFlagEnabledColumn.setHidden(true);
         addColumn(averageFiBkgdFlagEnabledColumn);
 
+        // add LJ plot column
+        ColumnInfo ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("SinglePointControlId")));
+        ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                Collection<String> dependencies = Collections.unmodifiableList(Arrays.asList("luminex/LeveyJenningsPlotHelpers.js", "vis/vis", "luminex/LeveyJenningsReport.css"));
+                // using JavaScriptDisplayColumn for dependencies
+                return new JavaScriptDisplayColumn(colInfo, dependencies, "")
+                {
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        String dataRegionName = ctx.getCurrentRegion() == null ? null : ctx.getCurrentRegion().getName();
+                        int protocolId = schema.getProtocol().getRowId();
+                        int analyte = (int)ctx.get("analyte");
+                        int singlePointControl = (int)ctx.get("singlePointControl");
+
+                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePointControl')";
+
+                        NavTree ljPlotsNav = new NavTree("LJ Plots Menu");
+                        ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png", 16, 16);
+                        ljPlotsNav.addChild("MFI", String.format(jsFuncCall, protocolId, analyte, singlePointControl, "MFI"));
+
+                        PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
+                        ljPlotsMenu.renderMenuButton(out, dataRegionName, false);
+                        ljPlotsMenu.renderMenuScript(out);
+                    }
+
+                    @Override
+                    public boolean isSortable()
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isFilterable()
+                    {
+                        return false;
+                    }
+                };
+            }
+        });
+
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Name"));
+        defaultCols.add(FieldKey.fromParts("LJPlots"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Name"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "Network"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "CustomProtocol"));

@@ -33,7 +33,7 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
     // generate sql for the data store (columns depend on the control type)
     var controlTypeColName = config.controlType == "SinglePoint" ? "SinglePointControl" : config.controlType;
     var sql = "SELECT Analyte"
-            + ", Titration.Run.Created" // NOTE necessary for union case
+            + ", " + controlTypeColName + ".Run.Created" // NOTE: necessary for union case
             + ", Analyte.Data.AcquisitionDate"
             + ", Analyte.Properties.LotNumber"
             + ", " + controlTypeColName
@@ -89,14 +89,10 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
         finalSql += " AND Analyte.Data.AcquisitionDate >= CAST('" + config.centerDate + "' AS DATE)";
         finalSql += " UNION " + sql;
         finalSql += " AND Analyte.Data.AcquisitionDate < CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, Titration.Run.Created DESC LIMIT 30 ";
+        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 ";
 
         sql = finalSql; // swap back
     }
-    //if (!config.orderBy)
-    //    throw "You must specify an orderBy clause!";
-    //else
-    //    sql += config.orderBy;
 
     var store = new LABKEY.ext.Store({
         autoLoad: false,
@@ -118,7 +114,8 @@ LABKEY.LeveyJenningsPlotHelper.PlotTypeMap = Object.freeze({
     EC504PL: 'EC50 - 4PL',
     EC505PL: 'EC50 - 5PL',
     AUC: 'AUC',
-    HighMFI: 'MFI'
+    HighMFI: 'MFI',
+    MFI: 'MFI' // not sure why we cannot get these named right.
 });
 
 LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
@@ -254,9 +251,11 @@ Luminex.panel.LeveyJenningsPlotPanel = Ext.extend(Ext.Panel, {
     }
 });
 
-LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId, analyteId, titrationId, plotType)
+// plotType: EC504PL, EC505PL, AUC, HighMFI
+LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId, analyteId, typeId, plotType, controlType)
 {
-    // plotType: EC504PL, EC505PL, AUC, HighMFI
+    if (controlType == null)
+        controlType = 'Titration';
 
     LABKEY.Assay.getById({
         id: protocolId,
@@ -272,24 +271,25 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
 
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
-            queryName: 'AnalyteTitration',
-            columns: ['Titration/Name', 'Analyte/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Titration/Run/NotebookNo', 'Analyte/Data/AcquisitionDate'],
+            //queryName: 'AnalyteTitration',
+            queryName: 'Analyte'+controlType,
+            columns: [controlType+'/Name', 'Analyte/Name', controlType+'/Run/Isotype', controlType+'/Run/Conjugate', controlType+'/Run/NotebookNo', 'Analyte/Data/AcquisitionDate'],
             filterArray: [
                 LABKEY.Filter.create('Analyte', analyteId),
-                LABKEY.Filter.create('Titration', titrationId)
+                LABKEY.Filter.create(controlType, typeId)
             ],
             success: function(data) {
                 var row = data.rows[0];
                 var config = {
                     assayName: assayName,
-                    controlName: row['Titration/Name'],
-                    controlType: 'Titration',
+                    controlName: row[controlType+'/Name'],
+                    controlType: controlType == "SinglePointControl" ? "SinglePoint" : "Titration",
                     analyte: row['Analyte/Name'],
-                    isotype: row['Titration/Run/Isotype'],
-                    conjugate: row['Titration/Run/Conjugate'],
+                    isotype: row[controlType+'/Run/Isotype'],
+                    conjugate: row[controlType+'/Run/Conjugate'],
                     scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
-                    notebook: row['Titration/Run/NotebookNo'],
+                    notebook: row[controlType+'/Run/NotebookNo'],
                     centerDate: row['Analyte/Data/AcquisitionDate']
                 };
 
