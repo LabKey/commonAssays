@@ -7,12 +7,13 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 {
     // NOTE: leaving this method in it's abstracted form
     function getBaseWhereClause(controlType, analyte, controlName, isotype, conjugate) {
+        console.log(controlType, analyte, controlName, isotype, conjugate);
         var controlTypeColName = controlType == "SinglePoint" ? "SinglePointControl" : controlType;
         var whereClause = " WHERE Analyte.Name='" + analyte.replace(/'/g, "''") + "'"
                 + " AND " + controlTypeColName + ".Name='" + controlName.replace(/'/g, "''") + "'"
-                + (isotype != '' ? " AND " + controlTypeColName + ".Run.Isotype='" + isotype.replace(/'/g, "''") + "'"
+                + (isotype ? " AND " + controlTypeColName + ".Run.Isotype='" + isotype.replace(/'/g, "''") + "'"
                         : " AND " + controlTypeColName + ".Run.Isotype IS NULL")
-                + (conjugate != '' ? " AND " + controlTypeColName + ".Run.Conjugate='" + conjugate.replace(/'/g, "''") + "'"
+                + (conjugate ? " AND " + controlTypeColName + ".Run.Conjugate='" + conjugate.replace(/'/g, "''") + "'"
                         : " AND " + controlTypeColName + ".Run.Conjugate IS NULL");
 
         if (controlType == "Titration") {
