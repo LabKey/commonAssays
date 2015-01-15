@@ -56,6 +56,7 @@
     LeveyJenningsForm bean = me.getModelBean();
 %>
 
+<div class="leveljenningsreport">
 <table cellpadding="0" cellspacing="15">
     <tr>
         <td rowspan="2"><div id="graphParamsPanel"></div></td>
@@ -66,6 +67,7 @@
     </tr>
 </table>
 <div id="trackingDataPanel" style="margin-left:15px"></div>
+</div>
 
 <script type="text/javascript">
 
@@ -85,17 +87,17 @@
 
             if ("" == _controlType || "" == _controlName)
             {
-                Ext.get('graphParamsPanel').update("Error: no control name specified.");
+                Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: no control name specified.</span>");
                 return;
             }
             if ('SinglePoint' != _controlType && 'Titration' != _controlType)
             {
-                Ext.get('graphParamsPanel').update("Error: unsupported control type: '" + _controlType + "'");
+                Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: unsupported control type: '" + _controlType + "'</span>");
                 return;
             }
             if ("" == _protocolName)
             {
-                Ext.get('graphParamsPanel').update("Error: no protocol specified.");
+                Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: no protocol specified.</span>");
                 return;
             }
 
@@ -123,7 +125,8 @@
                     }
                     if (missingColumns.length > 0)
                     {
-                        Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns.join(',') + ") for the report do not exist in '" + $h(_protocolName) + "'.");
+                        Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: one or more of the required properties ("
+                            + missingColumns.join(',') + ") for the report do not exist in '" + $h(_protocolName) + "'.<span>");
                         return;
                     }
 
@@ -157,7 +160,8 @@
                 success: function(data) {
                     if (data.rows.length == 0 || data.rows[0]['RunCount'] == 0)
                     {
-                        Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_controlName) + "'.");
+                        Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: there were no records found in '"
+                            + $h(_protocolName) + "' for '" + $h(_controlName) + "'.</span>");
                     }
                     else
                     {
@@ -166,7 +170,7 @@
                     }
                 },
                 failure: function(response) {
-                    Ext.get('graphParamsPanel').update("Error: " + response.exception);
+                    Ext.get('graphParamsPanel').update("<span class='labkey-error'>" + response.exception + "</span>");
                 }
             });
         }

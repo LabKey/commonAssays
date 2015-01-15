@@ -31,23 +31,24 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
     }
 
     // generate sql for the data store (columns depend on the control type)
+    // issue 22267 : add IFDEFINED to "optional" assay design fields
     var controlTypeColName = config.controlType == "SinglePoint" ? "SinglePointControl" : config.controlType;
     var sql = "SELECT Analyte"
             + ", " + controlTypeColName + ".Run.Created" // NOTE: necessary for union case
             + ", Analyte.Data.AcquisitionDate"
-            + ", Analyte.Properties.LotNumber"
+            + ", IFDEFINED(Analyte.Properties.LotNumber)"
             + ", " + controlTypeColName
-            + ", " + controlTypeColName + ".Run.Isotype"
-            + ", " + controlTypeColName + ".Run.Conjugate"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.Isotype)"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.Conjugate)"
             + ", " + controlTypeColName + ".Run.RowId AS RunRowId"
             + ", " + controlTypeColName + ".Run.Name AS RunName"
             + ", " + controlTypeColName + ".Run.Folder.Name AS FolderName"
             + ", " + controlTypeColName + ".Run.Folder.EntityId"
-            + (config.networkExists ? ", " + controlTypeColName + ".Run.Batch.Network" : "")
-            + (config.protocolExists ? ", " + controlTypeColName + ".Run.Batch.CustomProtocol" : "")
-            + ", " + controlTypeColName + ".Run.NotebookNo"
-            + ", " + controlTypeColName + ".Run.AssayType"
-            + ", " + controlTypeColName + ".Run.ExpPerformer"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.Batch.Network)"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.Batch.CustomProtocol)"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.NotebookNo)"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.AssayType)"
+            + ", IFDEFINED(" + controlTypeColName + ".Run.ExpPerformer)"
             + ", GuideSet.Created AS GuideSetCreated"
             + ", IncludeInGuideSetCalculation"
             + ", GuideSet.ValueBased AS GuideSetValueBased";

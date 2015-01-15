@@ -258,8 +258,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             conjugate: this.conjugate,
             scope: this,
             loadListener: this.storeLoaded,
-            networkExists: this.networkExists,
-            protocolExists: this.protocolExists,
             orderBy: orderByClause
         };
 
@@ -269,6 +267,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }
 
         this.store = LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore(storeConfig);
+
+        this.store.on('exception', function(store, type, action, options, response){
+            var errorJson = Ext.util.JSON.decode(response.responseText);
+            if (errorJson.exception) {
+                Ext.get('EC504PLTrendPlotDiv').update("<span class='labkey-error'>" + errorJson.exception + "</span>");
+            }
+        });
 
         //this.store = getLeveyJenningsTrackingDataStore()
         var newColModel = this.getTrackingDataColModel();
@@ -308,7 +313,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             closeAction: 'close',
             modal: true,
             padding: 15,
-            cls: 'extContainer',
+            cls: 'extContainer leveljenningsreport',
             bodyStyle: 'background-color: white;',
             title: 'Apply Guide Set...',
             items: [new LABKEY.ApplyGuideSetPanel({
