@@ -24,6 +24,7 @@ import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.persist.AnalysisSerializer;
@@ -112,9 +113,9 @@ public class WorkspaceData implements Serializable
         {
             validate(container);
         }
-        catch (WorkspaceValidationException wve)
+        catch (FlowException | WorkspaceValidationException ex)
         {
-            errors.reject(null, wve.getMessage());
+            errors.reject(null, ex.getMessage());
         }
         catch (Exception ex)
         {

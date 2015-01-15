@@ -84,6 +84,10 @@ public abstract class Workspace implements IWorkspace, Serializable
             is = new FileInputStream(file);
             return readWorkspace(file.getName(), file.getPath(), is);
         }
+        catch (FlowException e)
+        {
+            throw e;
+        }
         catch (Exception e)
         {
             throw new RuntimeException(e);
@@ -99,6 +103,12 @@ public abstract class Workspace implements IWorkspace, Serializable
         Document doc = WorkspaceParser.parseXml(stream);
         Element elDoc = doc.getDocumentElement();
 //        System.err.println("DOCUMENT SIZE: " + debugComputeSize(elDoc));
+
+        // Issue 20074: provide better error message when attempting to import a diva xml file
+        String tag = elDoc.getTagName();
+        if (tag != null && tag.equals("bdfacs"))
+            throw new FlowException("BD FACSDiva XML files not yet supported; please contact support@labkey.com for assistance.");
+
         String versionString = elDoc.getAttribute("version");
         double version = 0;
         try
