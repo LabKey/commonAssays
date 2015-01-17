@@ -56,8 +56,11 @@ import org.labkey.elispot.plate.AIDPlateReader;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: Karl Lum
@@ -230,6 +233,21 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         reader.setShownInUpdateView(false);
 
         return result;
+    }
+
+    protected Map<String, Set<String>> getRequiredDomainProperties()
+    {
+        Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
+        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
+        if (runProperties == null)
+        {
+            runProperties = new HashSet<>();
+            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, runProperties);
+        }
+        runProperties.add(BACKGROUND_WELL_PROPERTY_NAME);
+        runProperties.add(READER_PROPERTY_NAME);
+
+        return domainMap;
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
