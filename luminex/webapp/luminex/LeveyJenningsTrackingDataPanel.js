@@ -263,7 +263,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
         if (whereClause != "")
         {
-            plotConfig['whereClause'] = whereClause;
+            storeConfig['whereClause'] = whereClause;
         }
 
         this.store = LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore(storeConfig);
