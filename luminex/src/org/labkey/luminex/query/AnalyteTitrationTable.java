@@ -122,6 +122,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         addCurveTypeColumns();
 
         ColumnInfo ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("TitrationId")));
+        ljPlots.setTextAlign("left");
         ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -142,10 +143,10 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                         NavTree ljPlotsNav = new NavTree("LJ Plots Menu");
                         ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png", 16, 16);
-                        ljPlotsNav.addChild("HMFI", String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI"));
+                        ljPlotsNav.addChild("EC50 - 4PL", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
+                        ljPlotsNav.addChild("EC50 - 5PL Rumi", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
                         ljPlotsNav.addChild("AUC", String.format(jsFuncCall, protocolId, analyte, titration, "AUC"));
-                        ljPlotsNav.addChild("4PL EC50", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
-                        ljPlotsNav.addChild("5PL EC50", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
+                        ljPlotsNav.addChild("High MFI", String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI"));
 
                         PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
                         ljPlotsMenu.renderMenuButton(out, dataRegionName, false);

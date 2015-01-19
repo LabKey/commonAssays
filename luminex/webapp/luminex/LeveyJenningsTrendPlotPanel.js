@@ -257,7 +257,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // initialize the tab panel that will show the trend plots
         this.ec504plPanel = new Ext.Panel({
             itemId: "EC504PL",
-            title: "EC50 - 4PL",
+            title: LABKEY.LeveyJenningsPlotHelper.PlotTypeMap["EC504PL"],
             html: "<div id='EC504PLTrendPlotDiv' class='ljTrendPlot'>To begin, choose an Antigen, Isotype, and Conjugate from the panel to the left and click the Apply button.</div>",
             deferredRender: false,
             listeners: {
@@ -267,7 +267,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.ec505plPanel = new Ext.Panel({
             itemId: "EC505PL",
-            title: "EC50 - 5PL Rumi",
+            title: LABKEY.LeveyJenningsPlotHelper.PlotTypeMap["EC505PL"],
             html: "<div id='EC505PLTrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {
@@ -277,7 +277,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.aucPanel = new Ext.Panel({
             itemId: "AUC",
-            title: "AUC",
+            title: LABKEY.LeveyJenningsPlotHelper.PlotTypeMap["AUC"],
             html: "<div id='AUCTrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {
@@ -287,7 +287,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.mfiPanel = new Ext.Panel({
             itemId: "HighMFI",
-            title: "High MFI",
+            title: LABKEY.LeveyJenningsPlotHelper.PlotTypeMap["HighMFI"],
             html: "<div id='HighMFITrendPlotDiv' class='ljTrendPlot'></div>",
             deferredRender: false,
             listeners: {

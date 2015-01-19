@@ -10,25 +10,17 @@ LABKEY.LeveyJenningsPlotHelper = {};
 // NOTE: consider setting this up to be config based... potential defaulting values here...
 LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 {
-    // NOTE: leaving this method in it's abstracted form
-    function getBaseWhereClause(controlType, analyte, controlName, isotype, conjugate) {
-        var controlTypeColName = controlType == "SinglePoint" ? "SinglePointControl" : controlType;
-        var whereClause = " WHERE Analyte.Name='" + analyte.replace(/'/g, "''") + "'"
-                + " AND " + controlTypeColName + ".Name='" + controlName.replace(/'/g, "''") + "'"
-                + (isotype ? " AND " + controlTypeColName + ".Run.Isotype='" + isotype.replace(/'/g, "''") + "'"
-                        : " AND " + controlTypeColName + ".Run.Isotype IS NULL")
-                + (conjugate ? " AND " + controlTypeColName + ".Run.Conjugate='" + conjugate.replace(/'/g, "''") + "'"
-                        : " AND " + controlTypeColName + ".Run.Conjugate IS NULL");
+    var controlTypeColName = config.controlType == "SinglePoint" ? "SinglePointControl" : config.controlType;
+    var whereClause = " WHERE Analyte.Name='" + config.analyte.replace(/'/g, "''") + "'"
+            + " AND " + controlTypeColName + ".Name='" + config.controlName.replace(/'/g, "''") + "'"
+            + (config.isotype ? " AND " + controlTypeColName + ".Run.Isotype='" + config.isotype.replace(/'/g, "''") + "'"
+                    : " AND " + controlTypeColName + ".Run.Isotype IS NULL")
+            + (config.conjugate ? " AND " + controlTypeColName + ".Run.Conjugate='" + config.conjugate.replace(/'/g, "''") + "'"
+                    : " AND " + controlTypeColName + ".Run.Conjugate IS NULL");
 
-        if (controlType == "Titration") {
-            whereClause += " AND Titration.IncludeInQcReport=true";
-        }
-
-        return whereClause;
+    if (config.controlType == "Titration") {
+        whereClause += " AND Titration.IncludeInQcReport=true";
     }
-
-    // build the array of filters to be applied to the store
-    var whereClause = getBaseWhereClause(config.controlType, config.analyte, config.controlName, config.isotype, config.conjugate);
 
     // add on any filtering (from LeveyJenningsTrackingDataPanel.js)
     if (config.whereClause) {
@@ -37,7 +29,6 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 
     // generate sql for the data store (columns depend on the control type)
     // issue 22267 : add IFDEFINED to "optional" assay design fields
-    var controlTypeColName = config.controlType == "SinglePoint" ? "SinglePointControl" : config.controlType;
     var sql = "SELECT Analyte"
             + ", " + controlTypeColName + ".Run.Created" // NOTE: necessary for union case
             + ", Analyte.Data.AcquisitionDate"
@@ -118,9 +109,9 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 // consider reducing scope of this object...?
 LABKEY.LeveyJenningsPlotHelper.PlotTypeMap = Object.freeze({
     EC504PL: 'EC50 - 4PL',
-    EC505PL: 'EC50 - 5PL',
+    EC505PL: 'EC50 - 5PL Rumi',
     AUC: 'AUC',
-    HighMFI: 'MFI',
+    HighMFI: 'High MFI',
     MFI: 'MFI' // not sure why we cannot get these named right.
 });
 
@@ -142,12 +133,12 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 
     // find center point and trim
     var xTickTagIndex;
-    if (config.notebook)
+    if (config.runId)
     {
         var index;
         for (var i = 0; i < records.length; i++)
         {
-            if (records[i].get('NotebookNo') == config.notebook)
+            if (records[i].get('RunRowId') == config.runId)
             {
                 index = i;
                 break;
@@ -156,13 +147,19 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 
         // this logic finds the range of the store we want to use for populating our graph with center on the current selected notebook
         var maxIndex = records.length-1;
-        var start = index-15;
-        var end = index+15;
+
+        var windowRadius = 15;
+        // check if test is passing in new window radius
+        var param = LABKEY.ActionURL.getParameter("_testLJQueryLimit");
+        if (param) windowRadius = parseInt(param);
+
+        var start = index-windowRadius;
+        var end = index+windowRadius;
 
         if ( start < 0)
             end += -start;
-        else if ( ending > maxIndex )
-            start -= ending - maxIndex;
+        else if ( end > maxIndex )
+            start -= end - maxIndex;
 
         start = start < 0 ? 0 : start;
         end = end > maxIndex ? maxIndex : end;
@@ -171,8 +168,8 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         for (var i = end; i >=start; i--)
             _pushData(records[i]);
 
-        // get tick tag location and reverse it
-        xTickTagIndex = end - (index - start);
+        // get tick tag location in the reversed, truncated list of records
+        xTickTagIndex = end - index;
     }
     else
     {
@@ -185,16 +182,16 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
     // clear div
     Ext.get(config.renderDiv).update('');
 
-    var renderType = Ext.isIE8 ? 'raphael' : 'd3';
-    var title = config.controlName + ' ' + config.plotType + ' for ' + config.analyte + ' - '
-              + (config.isotype ? config.isotype : '[None]') + ' '
-              + (config.conjugate ? config.conjugate : '[None]');
-
     // note consider enum/map here
     if (config.plotType in LABKEY.LeveyJenningsPlotHelper.PlotTypeMap)
         var ytitle = LABKEY.LeveyJenningsPlotHelper.PlotTypeMap[config.plotType];
     else
         throw "You specified an invalid plotType! Check valid values in LABKEY.LeveyJenningsPlotHelper.PlotTypeMap.";
+
+    var renderType = Ext.isIE8 ? 'raphael' : 'd3';
+    var title = config.controlName + ' ' + ytitle + ' for ' + config.analyte + ' - '
+              + (config.isotype ? config.isotype : '[None]') + ' '
+              + (config.conjugate ? config.conjugate : '[None]');
 
     var plotProperities = {
         value: 'value',
@@ -233,30 +230,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
     return renderType;
 };
 
-Luminex.panel.LeveyJenningsPlotPanel = Ext.extend(Ext.Panel, {
-
-    initComponent : function() {
-
-        var config = this.config;
-
-        this.items = [{
-            xtype: 'box',
-            autoEl: {
-                tag: 'div',
-                id: 'leveyJennigsPlotDiv',
-                html: ''
-            },
-            listeners: {
-                afterrender: function() {
-                    LABKEY.LeveyJenningsPlotHelper.renderPlot(config);
-                }
-            }
-        }];
-
-        Luminex.window.LeveyJenningsPlotPanel.superclass.initComponent.call(this);
-    }
-});
-
 // plotType: EC504PL, EC505PL, AUC, HighMFI
 LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId, analyteId, typeId, plotType, controlType)
 {
@@ -279,7 +252,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
             //queryName: 'AnalyteTitration',
             queryName: 'Analyte'+controlType,
-            columns: [controlType+'/Name', 'Analyte/Name', controlType+'/Run/Isotype', controlType+'/Run/Conjugate', controlType+'/Run/NotebookNo', 'Analyte/Data/AcquisitionDate'],
+            columns: [controlType+'/Name', 'Analyte/Name', controlType+'/Run/Isotype', controlType+'/Run/Conjugate', controlType+'/Run', 'Analyte/Data/AcquisitionDate'],
             filterArray: [
                 LABKEY.Filter.create('Analyte', analyteId),
                 LABKEY.Filter.create(controlType, typeId)
@@ -295,7 +268,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                     conjugate: row[controlType+'/Run/Conjugate'],
                     scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
-                    notebook: row[controlType+'/Run/NotebookNo'],
+                    runId: row[controlType+'/Run'],
                     centerDate: row['Analyte/Data/AcquisitionDate']
                 };
 
@@ -312,6 +285,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
             title: 'Levey-Jennings Plot',
             width: 855,
             height: 325,
+            modal: true,
             bodyStyle: {
                 "background-color": "white"
             },

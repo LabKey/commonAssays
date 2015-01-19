@@ -135,20 +135,15 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                     @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
-                        String dataRegionName = ctx.getCurrentRegion() == null ? null : ctx.getCurrentRegion().getName();
                         int protocolId = schema.getProtocol().getRowId();
                         int analyte = (int)ctx.get("analyte");
                         int singlePointControl = (int)ctx.get("singlePointControl");
 
-                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePointControl')";
+                        String linkTag = "<a href='javscript:void(0)' onclick=\"LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePointControl')\">";
 
-                        NavTree ljPlotsNav = new NavTree("LJ Plots Menu");
-                        ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png", 16, 16);
-                        ljPlotsNav.addChild("MFI", String.format(jsFuncCall, protocolId, analyte, singlePointControl, "MFI"));
-
-                        PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
-                        ljPlotsMenu.renderMenuButton(out, dataRegionName, false);
-                        ljPlotsMenu.renderMenuScript(out);
+                        out.write( String.format(linkTag, protocolId, analyte, singlePointControl, "MFI") );
+                        out.write( String.format("<img src='%s'>", AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png") );
+                        out.write( "</a>" );
                     }
 
                     @Override
