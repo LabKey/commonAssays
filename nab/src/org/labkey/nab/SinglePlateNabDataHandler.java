@@ -89,8 +89,6 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 {
     public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
 
-    private static final Detector DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
-
     @Override
     protected String getPreferredDataFileExtension()
     {
@@ -117,38 +115,6 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
     }
 
-    // Issue 22153: excel detection placed here temporarily.  Move file type detection to FileType.isType().
-    private static boolean isExcel(final File dataFile)
-    {
-        final String fileName = dataFile.getName();
-        if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
-            return true;
-
-        if (fileName.endsWith(".tsv") || fileName.endsWith(".csv"))
-            return false;
-
-        final Metadata metadata = new Metadata();
-        final List<String> contentTypes = Arrays.asList("application/" + ExcelFactory.SUB_TYPE_BIFF8, "application/" + ExcelFactory.SUB_TYPE_XSSF);
-        try (TikaInputStream is = TikaInputStream.get(dataFile))
-        {
-            MediaType mediaType = DETECTOR.detect(is, metadata);
-            if (mediaType != null)
-            {
-                for (String contentType : contentTypes)
-                {
-                    if (mediaType.compareTo(MediaType.parse(contentType)) == 0)
-                        return true;
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-
-        return false;
-    }
-
     protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate) throws ExperimentException
     {
         final int expectedRows = nabTemplate.getRows();
@@ -157,7 +123,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         try
         {
             // Special case for excel - The ExcelLoader only returns data for a single sheet so we need to create a new ExcelLoader for each sheet
-            if (isExcel(dataFile))
+            if (ExcelLoader.isExcel(dataFile))
             {
                 final Workbook workbook = ExcelFactory.create(dataFile);
                 for (int i = 0, len = workbook.getNumberOfSheets(); i < len; i++)
