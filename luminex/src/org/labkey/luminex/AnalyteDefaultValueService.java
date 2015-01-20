@@ -274,7 +274,7 @@ public class AnalyteDefaultValueService
                 }
             }
         }
-        PropertyManager.saveProperties(defaultAnalyteColumnValues);
+        defaultAnalyteColumnValues.save();
     }
 
     // TODO: merge with the method above
@@ -303,7 +303,7 @@ public class AnalyteDefaultValueService
                 }
             }
         }
-        PropertyManager.saveProperties(defaultAnalyteColumnValues);
+        defaultAnalyteColumnValues.save();
     }
 
     public static Map<String, String> getAnalyteColumnDefaultValues(ExpProtocol protocol, User user, Container container, boolean isReset)

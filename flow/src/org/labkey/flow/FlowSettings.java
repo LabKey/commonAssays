@@ -81,7 +81,7 @@ public class FlowSettings
             return;
         }
         map.put(PROPNAME_WORKINGDIRECTORY, path);
-        PropertyManager.saveProperties(map);
+        map.save();
     }
 
     static public boolean isNormalizationEnabled()
@@ -108,7 +108,7 @@ public class FlowSettings
             map.remove(PROPNAME_NORMALIZATION_ENABLED);
         else
             map.put(PROPNAME_NORMALIZATION_ENABLED, String.valueOf(enabled));
-        PropertyManager.saveProperties(map);
+        map.save();
     }
 
     public static void setDeleteFiles(boolean deleteFiles)
@@ -122,7 +122,7 @@ public class FlowSettings
             map.remove(PROPNAME_DELETE_FILES);
         else
             map.put(PROPNAME_DELETE_FILES, "false");
-        PropertyManager.saveProperties(map);
+        map.save();
     }
 
     /** Defaults to 'true' if no value has been set. */

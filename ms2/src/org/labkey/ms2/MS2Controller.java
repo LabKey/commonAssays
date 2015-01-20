@@ -1259,7 +1259,7 @@ public class MS2Controller extends SpringActionController
                 for (String viewName : viewNames)
                     m.remove(viewName);
 
-                PropertyManager.saveProperties(m);
+                m.save();
 
                 // NOTE: If names collide between shared and user-specific view names (unlikely since we append "(Shared)" to
                 // project views) only the shared names will be seen and deleted. Local names ending in "(Shared)" are shadowed
@@ -1275,7 +1275,7 @@ public class MS2Controller extends SpringActionController
                         m.remove(name);
                     }
 
-                    PropertyManager.saveProperties(m);
+                    m.save();
                 }
             }
 
@@ -1293,7 +1293,7 @@ public class MS2Controller extends SpringActionController
 
             PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser(), ContainerManager.getRoot(), MS2_DEFAULT_VIEW_CATEGORY, true);
             m.put(DEFAULT_VIEW_NAME, viewName);
-            PropertyManager.saveProperties(m);
+            m.save();
 
             return true;
         }
@@ -1894,11 +1894,7 @@ public class MS2Controller extends SpringActionController
             prefs.put(NORMALIZE_PROTEIN_GROUPS_NAME, Boolean.toString(form.isNormalizeProteinGroups()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.proteinProphetProbability.name(), form.getProteinProphetProbability() == null ? null : form.getProteinProphetProbability().toString());
-            if (!getUser().isGuest())
-            {
-                // Non-guests are stored in the database, guests get it stored in their session
-                PropertyManager.saveProperties(prefs);
-            }
+            savePreferences(prefs);
 
             Map<String, String> props = new HashMap<>();
             props.put("originalURL", getViewContext().getActionURL().toString());
@@ -1976,11 +1972,7 @@ public class MS2Controller extends SpringActionController
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein() == null ? null : form.getTargetProtein());
 
-            if (!getUser().isGuest())
-            {
-                // Non-guests are stored in the database, guests get it stored in their session
-                PropertyManager.saveProperties(prefs);
-            }
+            savePreferences(prefs);
 
             Map<String, String> props = new HashMap<>();
             VBox result = new VBox();
@@ -2223,6 +2215,15 @@ public class MS2Controller extends SpringActionController
         protected abstract ModelAndView getView(FormType form, BindException errors, int runListId);
     }
 
+    private void savePreferences(Map<String, String> prefs)
+    {
+        if (prefs instanceof PropertyManager.PropertyMap)
+        {
+            // Non-guests are stored in the database, guests get it stored in their session
+            ((PropertyManager.PropertyMap)prefs).save();
+        }
+    }
+
     private Map<String, String> getPreferences(Class<? extends AbstractRunListCreationAction> setupActionClass)
     {
         if (getUser().isGuest())
@@ -2337,11 +2338,7 @@ public class MS2Controller extends SpringActionController
             prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein() == null ? null : form.getTargetProtein());
-            if (!getUser().isGuest())
-            {
-                // Real users have their preferences stored in the database, guests keep it in session
-                PropertyManager.saveProperties(prefs);
-            }
+            savePreferences(prefs);
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             schema.setRuns(_runs);
@@ -3906,7 +3903,7 @@ public class MS2Controller extends SpringActionController
                 m = PropertyManager.getWritableProperties(getUser(), ContainerManager.getRoot(), MS2_VIEWS_CATEGORY, true);
 
             m.put(name, viewParams);
-            PropertyManager.saveProperties(m);
+            m.save();
 
             return true;
         }

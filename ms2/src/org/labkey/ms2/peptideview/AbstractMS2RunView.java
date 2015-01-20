@@ -189,14 +189,14 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     {
         PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user, ContainerManager.getRoot(), "ColumnNames", true);
         defaultColumnLists.put(type + _columnPropertyName, columnNames);
-        PropertyManager.saveProperties(defaultColumnLists);
+        defaultColumnLists.save();
     }
 
     public void saveProteinColumnNames(String type, String columnNames)
     {
         PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user, ContainerManager.getRoot(), "ProteinColumnNames", true);
         defaultColumnLists.put(type + "Protein", columnNames);
-        PropertyManager.saveProperties(defaultColumnLists);
+        defaultColumnLists.save();
     }
 
     private @Nullable String getSavedPeptideColumnNames()

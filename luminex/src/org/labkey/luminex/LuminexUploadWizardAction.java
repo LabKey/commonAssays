@@ -728,7 +728,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                                 defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
                         }
                     }
-                    PropertyManager.saveProperties(defaultAnalyteColumnValues);
+                    defaultAnalyteColumnValues.save();
 
                     // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
                     PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
@@ -774,7 +774,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                                 value = getViewContext().getRequest().getParameter(propertyName) != null;
                                 defaultTitrationValues.put(propertyName, Boolean.toString(value));
                             }
-                            PropertyManager.saveProperties(defaultTitrationValues);
+                            defaultTitrationValues.save();
                         }
                     }
                     // save default values for SinglePointControls
@@ -786,7 +786,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                     }
 
-                    PropertyManager.saveProperties(defaultWellRoleValues);
+                    defaultWellRoleValues.save();
 
                     transaction.commit();
                     getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
