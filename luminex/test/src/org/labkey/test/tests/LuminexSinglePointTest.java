@@ -25,12 +25,13 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.LeveyJenningsPlotWindow;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LuminexGuideSetHelper;
-import org.labkey.test.util.PerlHelper;
 import org.testng.Assert;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.TreeMap;
@@ -72,6 +73,23 @@ public class LuminexSinglePointTest extends LuminexTest
         tbl.setSort("SinglePointControl/Run/Name", SortDirection.ASC);
         Assert.assertEquals(tbl.getDataAsText(0, "Average Fi Bkgd"), "27.0");
         Assert.assertEquals(tbl.getDataAsText(1, "Average Fi Bkgd"), "30.0");
+
+        LeveyJenningsPlotWindow ljp = new LeveyJenningsPlotWindow(this);
+
+        // check LJ plots column
+        click(tbl.link(0, 1));
+        ljp.waitTillReady();
+        Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
+        Assert.assertEquals(ljp.getXAxis(), Arrays.asList("Notebook1", "Notebook2") );
+        ljp.closeWindow();
+
+        addUrlParameter("_testLJQueryLimit=0");
+        click(tbl.link(0, 1));
+        ljp.waitTillReady();
+        Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
+        Assert.assertEquals(ljp.getXAxis(), Arrays.asList("Notebook1") );
+        ljp.closeWindow();
+
         clickAndWait(Locator.linkContainingText("graph"));
         assertTextNotPresent("ERROR");
 

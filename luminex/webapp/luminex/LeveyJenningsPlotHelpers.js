@@ -293,6 +293,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                 xtype: 'box',
                 autoEl: {
                     tag: 'div',
+                    cls: 'ljplotdiv',
                     id: config.renderDiv
                 },
                 listeners : {
