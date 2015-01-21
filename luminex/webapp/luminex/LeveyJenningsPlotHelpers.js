@@ -79,14 +79,16 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
     if (config.orderBy)
         sql += config.orderBy;
 
-    // NOTE: watch out for this case. mixing with other params might end badly (consider orderby)
+    // NOTE: watch out for this case. mixing with other params might end badly (consider override)
+    // used in LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow
     if (config.centerDate)
     {
-        var finalSql = sql;
+        var finalSql = "( " + sql;
         finalSql += " AND Analyte.Data.AcquisitionDate >= CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " UNION " + sql;
+        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 )";
+        finalSql += " UNION ( " + sql;
         finalSql += " AND Analyte.Data.AcquisitionDate < CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 ";
+        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 )";
 
         sql = finalSql; // swap back
     }
@@ -153,7 +155,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         var param = LABKEY.ActionURL.getParameter("_testLJQueryLimit");
         if (param) windowRadius = parseInt(param);
 
-        var start = index-windowRadius;
+        var start = index-windowRadius+1;
         var end = index+windowRadius;
 
         if ( start < 0)
@@ -165,11 +167,11 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         end = end > maxIndex ? maxIndex : end;
 
         // iterate backwards through the store records so that plot goes left to right
-        for (var i = end; i >=start; i--)
+        for (var i = start; i <= end; i++)
             _pushData(records[i]);
 
         // get tick tag location in the reversed, truncated list of records
-        xTickTagIndex = end - index;
+        xTickTagIndex = index - start;
     }
     else
     {
@@ -250,7 +252,6 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
 
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
-            //queryName: 'AnalyteTitration',
             queryName: 'Analyte'+controlType,
             columns: [controlType+'/Name', 'Analyte/Name', controlType+'/Run/Isotype', controlType+'/Run/Conjugate', controlType+'/Run', 'Analyte/Data/AcquisitionDate'],
             filterArray: [
