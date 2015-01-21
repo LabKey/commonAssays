@@ -66,7 +66,11 @@ public class LeveyJenningsPlotWindow
     {
         List<String> labels = new ArrayList<>();
         for ( WebElement element : getAxisTextElements(1) )
-            labels.add(element.getText());
+        {
+            String text = element.getText();
+            if (!text.equals(""))
+                labels.add(text);
+        }
 
         return labels;
     }
@@ -75,7 +79,11 @@ public class LeveyJenningsPlotWindow
     {
         List<String> labels = new ArrayList<>();
         for ( WebElement element : getAxisTextElements(2) )
-            labels.add(element.getText());
+        {
+            String text = element.getText();
+            if (!text.equals(""))
+                labels.add(text);
+        }
 
         return labels;
     }
@@ -93,7 +101,7 @@ public class LeveyJenningsPlotWindow
 
     public void closeWindow()
     {
-        _test.click( Locator.xpath("//div[contains(@class, 'x-tool-close')]") );
+        _test.click(Locator.xpath("//div[contains(@class, 'x-tool-close')]"));
     }
 
 }
