@@ -138,6 +138,9 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
     if (config.runId)
     {
         var index;
+
+        console.log(records);
+
         for (var i = 0; i < records.length; i++)
         {
             if (records[i].get('RunRowId') == config.runId)
@@ -150,13 +153,17 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         // this logic finds the range of the store we want to use for populating our graph with center on the current selected notebook
         var maxIndex = records.length-1;
 
+        console.log(index);
+
         var windowRadius = 15;
         // check if test is passing in new window radius
         var param = LABKEY.ActionURL.getParameter("_testLJQueryLimit");
         if (param) windowRadius = parseInt(param);
 
-        var start = index-windowRadius+1;
+        var start = index-windowRadius;
         var end = index+windowRadius;
+
+        console.log(maxIndex, start, end);
 
         if ( start < 0)
             end += -start;
@@ -169,6 +176,8 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         // iterate backwards through the store records so that plot goes left to right
         for (var i = start; i <= end; i++)
             _pushData(records[i]);
+
+        console.log(maxIndex, start, end);
 
         // get tick tag location in the reversed, truncated list of records
         xTickTagIndex = index - start;
