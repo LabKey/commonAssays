@@ -494,7 +494,13 @@ abstract public class FlowJoWorkspace extends Workspace
             else
             {
                 if (warnOnMissingStats)
-                    warning(sampleId, analysis.getName(), subset, stat.getLongName() + " statistic value missing");
+                {
+                    // Issue 22348: ignore missing statistic values for populations that have 0 cells
+                    Map<StatisticSpec, Double> stats = results.getStatistics();
+                    Double count = stats.get(new StatisticSpec(subset, StatisticSpec.STAT.Count, null));
+                    if (count != null && count > 0)
+                        warning(sampleId, analysis.getName(), subset, stat.getLongName() + " statistic value missing");
+                }
             }
         }
     }
