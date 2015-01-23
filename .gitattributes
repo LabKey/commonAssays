@@ -16,6 +16,9 @@ authentication/src/org/labkey/authentication/opensso/OpenSSOManager.java -text
 authentication/src/org/labkey/authentication/opensso/OpenSSOProvider.java -text
 authentication/src/org/labkey/authentication/opensso/view/currentSettings.jsp -text
 authentication/src/org/labkey/authentication/opensso/view/referrerPrefix.jsp -text
+authentication/src/org/labkey/authentication/saml/SamlController.java -text
+authentication/src/org/labkey/authentication/saml/SamlManager.java -text
+authentication/src/org/labkey/authentication/saml/SamlProvider.java -text
 authentication/webapp/authentication/openid_google.png -text
 cbcassay/CBCAssay.iml -text
 cbcassay/data/ex_20081016_131859.small.dat -text
