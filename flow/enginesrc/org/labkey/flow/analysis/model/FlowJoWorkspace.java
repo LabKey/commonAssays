@@ -864,16 +864,9 @@ abstract public class FlowJoWorkspace extends Workspace
             // warnings
             if ("10.0.5".equals(version))
             {
-                assertEquals(11, workspace.getWarnings().size());
+                assertEquals(5, workspace.getWarnings().size());
                 assertTrue(workspace.getWarnings().get(0).contains("Coefficient of Variation statistic value missing"));
                 assertTrue(workspace.getWarnings().get(1).contains("Mode statistic not yet supported"));
-            }
-            else if ("10.0.7".equals(version))
-            {
-                // Median values for some of the samples aren't present (the populations have 0 count)
-                assertEquals(StringUtils.join(workspace.getWarnings(), "\n"), 5, workspace.getWarnings().size());
-                assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
-                assertTrue(workspace.getWarnings().get(1).contains("Median statistic value missing"));
             }
             else
             {
