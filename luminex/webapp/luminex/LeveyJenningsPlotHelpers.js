@@ -85,7 +85,7 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
     {
         var finalSql = "( " + sql;
         finalSql += " AND Analyte.Data.AcquisitionDate >= CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 )";
+        finalSql += " ORDER BY Analyte.Data.AcquisitionDate ASC, "+controlTypeColName+".Run.Created ASC LIMIT 30 )";
         finalSql += " UNION ( " + sql;
         finalSql += " AND Analyte.Data.AcquisitionDate < CAST('" + config.centerDate + "' AS DATE)";
         finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 )";
@@ -139,8 +139,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
     {
         var index;
 
-        console.log(records);
-
         for (var i = 0; i < records.length; i++)
         {
             if (records[i].get('RunRowId') == config.runId)
@@ -153,8 +151,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         // this logic finds the range of the store we want to use for populating our graph with center on the current selected notebook
         var maxIndex = records.length-1;
 
-        console.log(index);
-
         var windowRadius = 15;
         // check if test is passing in new window radius
         var param = LABKEY.ActionURL.getParameter("_testLJQueryLimit");
@@ -162,8 +158,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 
         var start = index-windowRadius;
         var end = index+windowRadius;
-
-        console.log(maxIndex, start, end);
 
         if ( start < 0)
             end += -start;
@@ -173,13 +167,10 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         start = start < 0 ? 0 : start;
         end = end > maxIndex ? maxIndex : end;
 
-        // iterate backwards through the store records so that plot goes left to right
         for (var i = start; i <= end; i++)
             _pushData(records[i]);
 
-        console.log(maxIndex, start, end);
-
-        // get tick tag location in the reversed, truncated list of records
+        // get tick tag location in the truncated list of records
         xTickTagIndex = index - start;
     }
     else
