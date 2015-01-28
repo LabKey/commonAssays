@@ -857,6 +857,7 @@ luminex/src/org/labkey/luminex/query/SinglePointControlTable.java -text
 luminex/src/org/labkey/luminex/query/TitrationTable.java -text
 luminex/src/org/labkey/luminex/query/WellExclusionTable.java -text
 luminex/src/org/labkey/luminex/view/defaultValues.jsp -text
+luminex/src/org/labkey/luminex/view/guideSetConfirmDelete.jsp -text
 luminex/src/org/labkey/luminex/view/leveyJenningsMenu.jsp -text
 luminex/src/org/labkey/luminex/view/leveyJenningsReport.jsp -text
 luminex/src/org/labkey/luminex/view/titrationWellRoles.jsp -text

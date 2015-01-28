@@ -16,15 +16,18 @@
 package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JavaScriptDisplayColumn;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
@@ -61,6 +64,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -448,7 +452,46 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         @Override
         public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
         {
-            throw new UnsupportedOperationException();
+            DbScope scope = LuminexProtocolSchema.getSchema().getScope();
+
+            try (DbScope.Transaction tx = scope.ensureTransaction())
+            {
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), key);
+
+                // NOTE: room to be smart here and only clean up ASPC or AT because a single GS should not be split across these tables.
+
+                // update rows in AnalayteSinglePointControl table
+                try ( Results results = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getResults() )
+                {
+                    for (Map<String, Object> result : results)
+                    {
+                        Map<String, Object> keys = new CaseInsensitiveHashMap<>();
+                        keys.put("AnalyteId", result.get("AnalyteId") );
+                        keys.put("TitrationId", result.get("TitrationId") );
+                        result.put("GuideSetId", null);
+                        result.put("IncludeInGuideSetCalculation", false);
+                        Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), result, keys);
+                    }
+                }
+
+                // update rows in AnalayteTitration table
+                try ( Results results = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getResults() )
+                {
+                    for (Map<String, Object> result : results )
+                    {
+                        Map<String, Object> keys = new CaseInsensitiveHashMap<>();
+                        keys.put("AnalyteId", result.get("AnalyteId") );
+                        keys.put("TitrationId", result.get("TitrationId") );
+                        result.put("GuideSetId", null);
+                        result.put("IncludeInGuideSetCalculation", false);
+                        Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), result, keys);
+                    }
+                }
+
+                // delete the guide set row
+                Table.delete(LuminexProtocolSchema.getTableInfoGuideSet(), key);
+                tx.commit();
+            }
         }
 
         @Override

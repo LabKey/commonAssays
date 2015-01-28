@@ -22,14 +22,21 @@ import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TSVWriter;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.form.DeleteForm;
 import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -37,7 +44,11 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.AbstractQueryImportAction;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
@@ -45,17 +56,21 @@ import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.FileStream;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -68,6 +83,7 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
+import org.labkey.luminex.query.GuideSetTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
 import org.springframework.validation.Errors;
@@ -77,9 +93,13 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
@@ -641,6 +661,203 @@ public class LuminexController extends SpringActionController
         }
     }
 
+    // NOTE: following example of AbstractDeleteAction in ExperimentController
+    @RequiresPermissionClass(DeletePermission.class)
+    public class DeleteGuideSetAction extends FormViewAction<DeleteForm>
+    {
+
+        @Override
+        public ActionURL getSuccessURL(DeleteForm form)
+        {
+            return form.getReturnActionURL();
+        }
+
+        protected void deleteObjects(DeleteForm form) throws SQLException, ExperimentException, ServletException
+        {
+            List<Map<String, Object>> keys = new ArrayList<>();
+            Set<String> selections = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), false, false);
+
+            for (String selection : selections)
+            {
+                Map<String, Object> entry = new HashMap<>();
+                entry.put("RowId", selection);
+                keys.add(entry);
+            }
+
+            LuminexAssayProvider provider = new LuminexAssayProvider();
+            LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), provider, form.getProtocol(), getContainer());
+            QueryUpdateService queryUpdateService = schema.getTable(LuminexProtocolSchema.GUIDE_SET_TABLE_NAME).getUpdateService();
+            try {
+                queryUpdateService.deleteRows(getUser(), getContainer(), keys, null, null);
+            }
+            catch(InvalidKeyException|BatchValidationException|QueryUpdateServiceException e)
+            {
+
+            }
+        }
+
+        @Override
+        public void validateCommand(DeleteForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public ModelAndView getView(DeleteForm form, boolean reshow, BindException errors) throws Exception
+        {
+            return new GuideSetConfirmDeleteView(form);
+        }
+
+        @Override
+        public boolean handlePost(DeleteForm deleteForm, BindException errors) throws Exception
+        {
+            if (!deleteForm.isForceDelete())
+            {
+                return false;
+            }
+            else
+            {
+                deleteObjects(deleteForm);
+                return true;
+            }
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+    public class GuideSetConfirmDeleteView extends JspView<GuideSetsDeleteBean>
+    {
+        public GuideSetConfirmDeleteView(DeleteForm form)
+        {
+            super("/org/labkey/luminex/view/guideSetConfirmDelete.jsp");
+
+            GuideSetsDeleteBean bean = new GuideSetsDeleteBean(form.getReturnUrl(), form.getDataRegionSelectionKey(), form.getProtocol().getRowId(), getContainer(), form.getProtocol().getName());
+
+            Set<String> selections = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), false, false);
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addInClause(FieldKey.fromParts("RowId"), selections);
+
+            try ( Results guideSetResults  = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet(), filter, null).getResults())
+            {
+                for (Map<String, Object> guideSetResult : guideSetResults)
+                {
+                    int rowId = (int) guideSetResult.get("rowId");
+
+                    boolean isTitration = (boolean) guideSetResult.get("isTitration");
+                    String sql;
+                    if (isTitration)
+                        sql = "SELECT Titration.Run.Name FROM AnalyteTitration WHERE GuideSet="+rowId;
+                    else
+                        sql = "SELECT SinglePointControl.Run.Name FROM AnalyteSinglePointControl WHERE GuideSet="+rowId;
+
+                    AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
+                    AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+
+                    ResultSet rs = QueryService.get().select(schema, sql);
+                    List<String> runs = new ArrayList<>();
+                    while(rs.next())
+                        runs.add(rs.getString("name"));
+
+                    String comment = (String) guideSetResult.get("comment");
+                    Boolean current = (boolean) guideSetResult.get("currentGuideSet");
+                    GuideSetsDeleteBean.GuideSet gs = new GuideSetsDeleteBean.GuideSet(rowId, comment, current, runs);
+                    bean.add(gs);
+                }
+            }
+            catch(SQLException e)
+            {
+            }
+
+            setModelBean(bean);
+        }
+    }
+
+    public static class GuideSetsDeleteBean extends DeleteForm
+    {
+        public static class GuideSet
+        {
+            private int _guideSetId;
+            private String _comment;
+            private boolean _current;
+            private List<String> _runs;
+
+            public GuideSet(int guideSetId, String comment, Boolean current, List<String> runs)
+            {
+                _guideSetId = guideSetId;
+                _comment = comment;
+                _current = current;
+                _runs = runs;
+            }
+
+            public int getGuideSetId()
+            {
+                return _guideSetId;
+            }
+
+            public void setGuideSetId(int guideSetId)
+            {
+                _guideSetId = guideSetId;
+            }
+
+            public String getComment()
+            {
+                return _comment;
+            }
+
+            public void setComment(String comment)
+            {
+                _comment = comment;
+            }
+
+            public Boolean getCurrent()
+            {
+                return _current;
+            }
+
+            public void setCurrent(boolean current)
+            {
+                _current = current;
+            }
+
+            public List<String> getRuns()
+            {
+                return _runs;
+            }
+
+            public void setRuns(List<String> runs)
+            {
+                _runs = runs;
+            }
+        }
+
+        private List<GuideSet> _guideSets;
+
+        public GuideSetsDeleteBean(ReturnURLString returnUrl, String selectionKey, int protocolId, Container container, String assayName)
+        {
+            _guideSets = new ArrayList<>();
+            setReturnUrl(returnUrl);
+            setDataRegionSelectionKey(selectionKey);
+            setRowId(protocolId); // fixes getProtocol in view
+            setContainer(container);
+            setAssayName(assayName);
+        }
+
+        public void add(GuideSet gs)
+        {
+            _guideSets.add(gs);
+        }
+
+        public List<GuideSet> getGuideSets()
+        {
+            return _guideSets;
+        }
+    }
+
+
     @RequiresPermissionClass(ReadPermission.class)
     public class ManageGuideSetAction extends BaseAssayAction<ProtocolIdForm>
     {
@@ -659,6 +876,12 @@ public class LuminexController extends SpringActionController
             QueryView view = new QueryView(schema, settings, errors)
             {
                 @Override
+                public ActionButton createDeleteButton()
+                {
+                    return super.createDeleteButton();
+                }
+
+                @Override
                 protected void setupDataView(DataView ret)
                 {
                     super.setupDataView(ret);
@@ -674,10 +897,12 @@ public class LuminexController extends SpringActionController
                 }
             };
 
+//            view.setDeleteURL("org.labkey.luminex.LuminexController$DeleteGuideSetAction.class?rowId=${RowId}");
+            view.setDeleteURL("org.labkey.luminex.LuminexController$DeleteGuideSetAction.class?rowId="+form.getProtocol().getRowId());
+
             view.setShadeAlternatingRows(true);
             view.setShowBorders(true);
             view.setShowUpdateColumn(false);
-            view.setShowDeleteButton(false);
             view.setShowRecordSelectors(false);
             view.setShowInsertNewButton(false);
             view.setShowImportDataButton(false);

@@ -105,15 +105,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             scope: this
         });
 
-        // add the guide set elements as a composite field for layout reasons
-        this.guideSetCompositeField = new Ext.form.CompositeField({
-            items: [this.guideSetDisplayField, this.editGuideSetButton, this.newGuideSetButton]
-        });
-
-        // if the user has permissions to update in this container, show them the Guide Set Edit/New buttons
-        this.userCanUpdate ? items.push(this.guideSetCompositeField) : items.push(this.guideSetDisplayField);
-
-        // add a button to view run based guide set parameter details
         this.guideSetDetailsButton = new Ext.Button({
             hidden: true,
             text: "Details",
@@ -121,8 +112,41 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             handler: this.viewParameterDetails,
             scope: this
         });
-        // NOTE: this button sucks... go ahead and try to align it right in Ext4... I dare you.
-        items.push(this.guideSetDetailsButton);
+
+        // add the guide set elements as a composite field for layout reasons
+        this.guideSetCompositeField = new Ext.form.CompositeField({
+            items: [
+
+                this.guideSetDisplayField,
+                {
+                    xtype: 'panel',
+                    //width: 200,
+                    height: 150,
+                    border: false,
+                    bodyStyle: 'background-color:#EEEEEE;',
+                    layout:  'vbox',
+                    defaults: {
+                        xtype: 'panel',
+                        border: false,
+                        layout: 'hbox',
+                        bodyStyle: 'background-color:#EEEEEE;',
+                        padding: 2,
+                        width: 200
+                    },
+                    items: [
+                        {
+                            items: [ new Ext.form.CompositeField({items:[this.editGuideSetButton, this.newGuideSetButton]}) ]
+                        },
+                        {
+                            items: [this.guideSetDetailsButton]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        // if the user has permissions to update in this container, show them the Guide Set Edit/New buttons
+        this.userCanUpdate ? items.push(this.guideSetCompositeField) : items.push(this.guideSetDisplayField);
 
         this.items = items;
 
