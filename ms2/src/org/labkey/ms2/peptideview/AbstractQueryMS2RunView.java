@@ -100,7 +100,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         FieldKey desiredFK;
         if (queryView.getSelectedNestingOption() != null)
         {
-            desiredFK = FieldKey.fromString(queryView.getSelectedNestingOption().getRowIdColumnName());
+            desiredFK = queryView.getSelectedNestingOption().getRowIdFieldKey();
         }
         else
         {
@@ -194,7 +194,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             if (nestingOption != null)
             {
                 // We're nested, so the selection key is going to be at the protein or protein group level
-                selectionFK = FieldKey.fromString(nestingOption.getAggregateRowIdColumnName());
+                selectionFK = nestingOption.getAggregateRowIdFieldKey();
             }
             else
             {
@@ -295,8 +295,8 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());
             if (_selectedRows != null)
             {
-                String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
-                filter.addClause(new SimpleFilter.InClause(FieldKey.fromParts(columnName), _selectedRows));
+                FieldKey column = _selectedNestingOption == null ? FieldKey.fromParts("RowId") : _selectedNestingOption.getRowIdFieldKey();
+                filter.addClause(new SimpleFilter.InClause(column, _selectedRows));
             }
             filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER | ProteinManager.PROTEIN_FILTER, getUser(), _runs));
             result.getRenderContext().setBaseFilter(filter);

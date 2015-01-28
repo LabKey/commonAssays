@@ -21,16 +21,17 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.exp.Handler;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.pipeline.UnknownMS2Run;
 import org.labkey.ms2.pipeline.comet.CometRun;
 import org.labkey.ms2.pipeline.comet.LegacyCometRun;
-import org.labkey.ms2.pipeline.tandem.XCometRun;
-import org.labkey.ms2.pipeline.tandem.XTandemcometRun;
-import org.labkey.ms2.pipeline.tandem.XTandemRun;
-import org.labkey.ms2.pipeline.phenyx.PhenyxRun;
 import org.labkey.ms2.pipeline.mascot.MascotRun;
+import org.labkey.ms2.pipeline.phenyx.PhenyxRun;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
-import org.labkey.ms2.pipeline.UnknownMS2Run;
+import org.labkey.ms2.pipeline.tandem.XCometRun;
+import org.labkey.ms2.pipeline.tandem.XTandemRun;
+import org.labkey.ms2.pipeline.tandem.XTandemcometRun;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,8 +127,8 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
 
     private final Class<? extends MS2Run> _runClass;
     private final String _scoreColumnNames;
-    private final List<String> _scoreColumnList = new ArrayList<>();
-    private final List<String> _pepXmlScoreNames = new ArrayList<>();
+    private final List<FieldKey> _scoreColumnList = new ArrayList<>();
+    private final List<FieldKey> _pepXmlScoreNames = new ArrayList<>();
 
     private MS2RunType(Class<? extends MS2Run> runClass, Pair<String, String>... scoreNames)
     {
@@ -141,8 +142,8 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
             sb.append(separator);
             separator = ", ";
             sb.append(scoreColumnName);
-            _scoreColumnList.add(scoreColumnName);
-            _pepXmlScoreNames.add(pepXmlName);
+            _scoreColumnList.add(FieldKey.fromParts(scoreColumnName));
+            _pepXmlScoreNames.add(FieldKey.fromParts(pepXmlName));
         }
         _scoreColumnNames = sb.toString();
     }
@@ -157,7 +158,7 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
         return _scoreColumnNames;
     }
 
-    public List<String> getScoreColumnList()
+    public List<FieldKey> getScoreColumnList()
     {
         return _scoreColumnList;
     }
@@ -173,7 +174,7 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
     }
 
     /** The scores to read from pepXML files, specified in the order they appear in the prepared statement that inserts rows into MS2PeptidesData */
-    public List<String> getPepXmlScoreNames()
+    public List<FieldKey> getPepXmlScoreNames()
     {
         return _pepXmlScoreNames;
     }

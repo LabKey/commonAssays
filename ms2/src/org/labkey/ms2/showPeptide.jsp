@@ -72,26 +72,26 @@
             <table width="100%">
                 <tr>
                     <td class="labkey-form-label" width="85px">Scan</td><td width="95px"><%=p.getScan()%></td>
-                    <td class="labkey-form-label" width="110px">Delta Mass</td><td width="95px"><%= Formats.signf4.format(p.getDeltaMass()) %></td>
+                    <td class="labkey-form-label" width="110px">Delta Mass</td><td width="95px"><%= h(Formats.signf4.format(p.getDeltaMass())) %></td>
                     <td class="labkey-form-label" width="85px">Protein</td><td><%= h(p.getProtein()) %></td>
                 </tr>
                 <tr>
-                    <td class="labkey-form-label">Mass</td><td><%= Formats.f4.format(p.getMass()) %></td>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(1)) %></td><td><%= p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore()) %></td>
+                    <td class="labkey-form-label">Mass</td><td><%= h(Formats.f4.format(p.getMass())) %></td>
+                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(1)) %></td><td><%= h(p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())) %></td>
                     <td class="labkey-form-label">Fraction</td><td><%= h(fraction.getFileName()) %></td>
                 </tr>
                 <tr>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore()) %></td>
-                    <td class="labkey-form-label">PeptideProphet</td><td><%= Formats.f2.format(p.getPeptideProphet()) %></td>
+                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
+                    <td class="labkey-form-label">PeptideProphet</td><td><%= h(Formats.f2.format(p.getPeptideProphet())) %></td>
                     <td class="labkey-form-label" rowspan="2">Run</td><td rowspan="2"><%= h(run.getDescription()) %></td>
                 </tr>
                 <tr>
                     <td class="labkey-form-label">Protein Hits</td><td><%= p.getProteinHits() %></td>
-                    <td class="labkey-form-label">Ion Percent</td><td><%= Formats.percent.format(p.getIonPercent()) %></td>
+                    <td class="labkey-form-label">Ion Percent</td><td><%= h(Formats.percent.format(p.getIonPercent())) %></td>
                 </tr>
                 <tr>
                     <td class="labkey-form-label">Charge</td><td><%=p.getCharge()%>+</td>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= p.getZScore() == null ? "" : Formats.f3.format(p.getZScore()) %></td>
+                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= h(p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())) %></td>
                 </tr>
             </table>
 

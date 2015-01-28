@@ -18,7 +18,6 @@ package org.labkey.ms2.query;
 
 import org.apache.commons.collections15.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
@@ -385,13 +384,13 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     private void addScoreColumns()
     {
-        Map<String, List<Pair<MS2RunType, Integer>>> columnMap = new HashMap<>();
+        Map<FieldKey, List<Pair<MS2RunType, Integer>>> columnMap = new HashMap<>();
         for (MS2RunType runType : getRunTypes())
         {
             int index = 1;
             // Since some search engines have the same names for different scores, build a list of all of the
             // possible intepretations for a given score name based on the run type
-            for (String name : runType.getScoreColumnList())
+            for (FieldKey name : runType.getScoreColumnList())
             {
                 List<Pair<MS2RunType, Integer>> l = columnMap.get(name);
                 if (l == null)
@@ -405,7 +404,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
         ColumnInfo realScoreCol = MS2Manager.getTableInfoPeptidesData().getColumn("Score2");
 
-        for (Map.Entry<String, List<Pair<MS2RunType, Integer>>> entry : columnMap.entrySet())
+        for (Map.Entry<FieldKey, List<Pair<MS2RunType, Integer>>> entry : columnMap.entrySet())
         {
             SQLFragment sql = new SQLFragment("CASE (SELECT r.Type FROM ");
             sql.append(MS2Manager.getTableInfoRuns(), "r");
@@ -505,12 +504,12 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         result.add(FieldKey.fromParts("Charge"));
         for (MS2RunType runType : getRunTypes())
         {
-            Set<String> scoreCols = new CaseInsensitiveHashSet();
-            for (String name : runType.getScoreColumnList())
+            Set<FieldKey> scoreCols = new HashSet<>();
+            for (FieldKey name : runType.getScoreColumnList())
             {
                 if (scoreCols.add(name))
                 {
-                    result.add(FieldKey.fromParts(name));
+                    result.add(name);
                 }
             }
         }

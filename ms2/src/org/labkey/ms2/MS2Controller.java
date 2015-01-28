@@ -4339,9 +4339,9 @@ public class MS2Controller extends SpringActionController
         for (SimpleFilter.FilterClause filterClause : filter.getClauses())
         {
             boolean legit = true;
-            for (String columnName : filterClause.getColumnNames())
+            for (FieldKey columnFieldKey : filterClause.getFieldKeys())
             {
-                if (QueryService.get().getColumns(peptidesTable, Collections.singleton(FieldKey.fromString(columnName))).isEmpty())
+                if (QueryService.get().getColumns(peptidesTable, Collections.singleton(columnFieldKey)).isEmpty())
                 {
                     legit = false;
                     break;

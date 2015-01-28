@@ -21,7 +21,6 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
@@ -72,9 +71,9 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         {
             super(schema, settings, expanded, allowNesting, new QueryNestingOption(FieldKey.fromParts("RowId"), FieldKey.fromParts("RowId"), getAJAXNestedGridURL())
             {
-                public boolean isOuter(String columnName)
+                public boolean isOuter(FieldKey fieldKey)
                 {
-                    return columnName.indexOf("/") < 0;
+                    return fieldKey.getParts().size() > 1;
                 }
             });
         }
@@ -133,7 +132,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         try
         {
             int groupId = Integer.parseInt(proteinGroupingId);
-            filter.addCondition(peptideView.getSelectedNestingOption().getRowIdColumnName(), groupId);
+            filter.addCondition(peptideView.getSelectedNestingOption().getRowIdFieldKey(), groupId);
             result.getRenderContext().setBaseFilter(filter);
         }
         catch (NumberFormatException e)

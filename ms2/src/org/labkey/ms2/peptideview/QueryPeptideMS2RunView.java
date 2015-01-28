@@ -239,7 +239,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
         filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
-        filter.addCondition(view.getSelectedNestingOption().getRowIdColumnName(), groupId.intValue());
+        filter.addCondition(view.getSelectedNestingOption().getRowIdFieldKey(), groupId.intValue());
         result.getRenderContext().setBaseFilter(filter);
 
         return result;

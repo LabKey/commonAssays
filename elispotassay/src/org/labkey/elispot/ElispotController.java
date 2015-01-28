@@ -183,7 +183,7 @@ public class ElispotController extends SpringActionController
 
                 for (SimpleFilter.FilterClause clause : clauses)
                 {
-                    if (clause.getColumnNames().contains(column.toString()))
+                    if (clause.getFieldKeys().contains(column))
                         return true;
                 }
             }

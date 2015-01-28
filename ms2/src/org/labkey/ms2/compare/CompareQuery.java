@@ -17,23 +17,34 @@
 package org.labkey.ms2.compare;
 
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.data.*;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.action.LabkeyError;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.action.LabkeyError;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
-import org.labkey.ms2.MS2Controller;
 import org.springframework.validation.BindException;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -204,15 +215,15 @@ public abstract class CompareQuery extends SQLFragment
         }
         if (!sameType)
         {
-            Set<String> engineScores = new CaseInsensitiveHashSet();
+            Set<FieldKey> engineScores = new HashSet<>();
             for (MS2RunType type : MS2RunType.values())
             {
                 engineScores.addAll(type.getScoreColumnList());
             }
-            Set<String> illegalColumns = new CaseInsensitiveHashSet();
+            Set<FieldKey> illegalColumns = new HashSet<>();
             for (SimpleFilter.FilterClause clause : filter.getClauses())
             {
-                for (String colName : clause.getColumnNames())
+                for (FieldKey colName : clause.getFieldKeys())
                 {
                     if (engineScores.contains(colName))
                     {

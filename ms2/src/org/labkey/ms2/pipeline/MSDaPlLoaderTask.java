@@ -33,6 +33,7 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.file.PathMapper;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.pipeline.client.ParameterNames;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
@@ -343,7 +344,7 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         {
             changePermissions(dir);
 
-            String localURI = getJob().getLogFile().getParentFile().getCanonicalFile().toURI().toString();
+            String localURI = FileUtil.getAbsoluteCaseSensitiveFile(getJob().getLogFile().getParentFile()).toURI().toString();
             PathMapper pathMapper = _factory.getPathMapper();
             String linuxURI = pathMapper == null ? localURI : pathMapper.remoteToLocal(localURI);
             postBody.put("dataDirectory", linuxURI.substring("file:".length()));

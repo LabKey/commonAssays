@@ -71,7 +71,7 @@ public class ScriptSettings implements Serializable
         for (FilterInfo filter : _filters.values())
         {
             if (filter.getField() != null && filter.getValue() != null)
-                ret.addCondition(filter.getField().toString(), filter.getValue(), filter.getOp());
+                ret.addCondition(filter.getField(), filter.getValue(), filter.getOp());
         }
         return ret;
     }
