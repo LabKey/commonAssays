@@ -20,11 +20,16 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.MemTracker;
 
 import java.io.Serializable;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class MS2Run implements Serializable
 {
@@ -217,7 +222,7 @@ public abstract class MS2Run implements Serializable
         public abstract String[] getGZFileExtensions();
 
     // PepXml score names in the order they get written to the database
-    public Collection<String> getPepXmlScoreColumnNames()
+    public Collection<FieldKey> getPepXmlScoreColumnNames()
     {
         return getRunType().getPepXmlScoreNames();
     }

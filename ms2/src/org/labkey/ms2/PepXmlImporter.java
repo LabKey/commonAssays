@@ -24,6 +24,7 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -58,7 +59,7 @@ import java.util.Map;
 public class PepXmlImporter extends MS2Importer
 {
     protected String _gzFileName = null;
-    private Collection<String> _scoreColumnNames;
+    private Collection<FieldKey> _scoreColumnNames;
     private List<RelativeQuantAnalysisSummary> _quantSummaries;
     private boolean _scoringAnalysis;
     private MS2Run _run = null;
@@ -486,9 +487,9 @@ public class PepXmlImporter extends MS2Importer
         Map<String, String> scores = peptide.getScores();
         _run.adjustScores(scores);
 
-        for (String scoreColumnName : _scoreColumnNames)
+        for (FieldKey scoreColumnName : _scoreColumnNames)
         {
-            String value = scores.get(scoreColumnName);  // Get value from the scores parsed from XML
+            String value = scores.get(scoreColumnName.toString());  // Get value from the scores parsed from XML
             setAsFloat(stmt, n++, value);
         }
     }
