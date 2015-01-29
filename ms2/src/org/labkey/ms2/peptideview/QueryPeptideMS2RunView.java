@@ -37,6 +37,7 @@ import org.labkey.api.view.GridView;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
@@ -155,7 +156,8 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         protected DataRegion createDataRegion()
         {
             DataRegion rgn = super.createDataRegion();
-
+            // Need to use a custom action to handle selection, since we need to scope to the current run, etc
+            rgn.setSelectAllURL(getViewContext().cloneActionURL().setAction(MS2Controller.SelectAllAction.class));
             setPeptideUrls(rgn, null);
 
             rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns

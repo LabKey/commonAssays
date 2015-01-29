@@ -19,6 +19,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
@@ -81,6 +82,8 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         protected DataRegion createDataRegion()
         {
             DataRegion rgn = super.createDataRegion();
+            // Need to use a custom action to handle selection, since we need to scope to the current run, etc
+            rgn.setSelectAllURL(getViewContext().cloneActionURL().setAction(MS2Controller.SelectAllAction.class));
             rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
 
             return rgn;

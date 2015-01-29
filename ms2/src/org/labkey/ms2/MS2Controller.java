@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
+import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.ExportException;
 import org.labkey.api.action.FormHandlerAction;
@@ -28,6 +29,7 @@ import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.LabkeyError;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.ReturnUrlForm;
@@ -3169,6 +3171,23 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @RequiresPermissionClass(ReadPermission.class)
+    public class SelectAllAction extends MutatingApiAction<ExportForm>
+    {
+        public ApiResponse execute(final ExportForm form, BindException errors) throws Exception
+        {
+            MS2Run run = form.validateRun();
+            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
+            WebPartView gridView = peptideView.createGridView(form);
+            if (gridView instanceof QueryView)
+            {
+                QueryView queryView = (QueryView)gridView;
+                int count = DataRegionSelection.selectAll(queryView, queryView.getSettings().getSelectionKey());
+                return new DataRegionSelection.SelectionResponse(count);
+            }
+            throw new NotFoundException("Cannot select all for a non-query view");
+        }
+    }
 
     private void exportPeptides(ExportForm form, HttpServletResponse response, boolean selected) throws Exception
     {
