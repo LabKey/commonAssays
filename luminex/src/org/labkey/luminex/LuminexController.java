@@ -873,12 +873,20 @@ public class LuminexController extends SpringActionController
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME, LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
             setHelpTopic(new HelpTopic("applyGuideSets"));
 
+            final int protocolId = _protocol.getRowId();
             QueryView view = new QueryView(schema, settings, errors)
             {
                 @Override
                 public ActionButton createDeleteButton()
                 {
-                    return super.createDeleteButton();
+                    ActionURL urlDelete = new ActionURL(LuminexController.DeleteGuideSetAction.class, getContainer());
+                    urlDelete.addReturnURL(getReturnURL());
+                    urlDelete.addParameter("rowId", protocolId);
+                    ActionButton btnDelete = new ActionButton(urlDelete, "Delete");
+                    btnDelete.setActionType(ActionButton.Action.POST);
+                    btnDelete.setDisplayPermission(DeletePermission.class);
+                    btnDelete.setRequiresSelection(true);
+                    return btnDelete;
                 }
 
                 @Override
@@ -896,9 +904,6 @@ public class LuminexController extends SpringActionController
                     ret.getDataRegion().addDisplayColumn(0, graphDetails);
                 }
             };
-
-//            view.setDeleteURL("org.labkey.luminex.LuminexController$DeleteGuideSetAction.class?rowId=${RowId}");
-            view.setDeleteURL("org.labkey.luminex.LuminexController$DeleteGuideSetAction.class?rowId="+form.getProtocol().getRowId());
 
             view.setShadeAlternatingRows(true);
             view.setShowBorders(true);
