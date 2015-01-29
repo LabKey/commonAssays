@@ -78,7 +78,7 @@ public class ChooseRunsRegion extends DataRegion
         if (showRecordSelectors)
         {
             visibleCount++;
-            renderRecordSelector(ctx, out);
+            renderRecordSelector(ctx, out, rowIndex);
         }
 
         int nameColumn = 0;
