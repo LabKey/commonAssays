@@ -16,7 +16,6 @@
 package org.labkey.test.tests;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.collections.Bag;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

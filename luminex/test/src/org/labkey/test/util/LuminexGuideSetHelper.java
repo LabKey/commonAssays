@@ -85,7 +85,7 @@ public class LuminexGuideSetHelper
         }
         else
         {
-            _test.waitForText("Manage Guide Set...");
+            _test.waitForText("Manage guide Set...");
             _test.waitForText("Guide Set ID:");
             _test.assertTextPresentInThisOrder("Created:", today);
         }
@@ -169,7 +169,7 @@ public class LuminexGuideSetHelper
 
     public void goToManageGuideSetsPage(String assayName)
     {
-        _test.goToQCAnalysisPage(assayName, "manage guide sets");
+        _test.goToQCAnalysisPage(assayName, "view guide sets");
         _test.waitForElement(Locator.tagWithClass("span", "labkey-nav-page-header").withText("Manage Guide Sets"));
     }
 
