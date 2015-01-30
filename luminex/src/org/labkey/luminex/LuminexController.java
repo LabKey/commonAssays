@@ -16,6 +16,8 @@
 
 package org.labkey.luminex;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -736,7 +738,14 @@ public class LuminexController extends SpringActionController
 
             GuideSetsDeleteBean bean = new GuideSetsDeleteBean(form.getReturnUrl(), form.getDataRegionSelectionKey(), form.getProtocol().getRowId(), getContainer(), form.getProtocol().getName());
 
-            Set<String> selections = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), false, false);
+            List<String> dataRegionSelection = new ArrayList<>(DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), false, false));
+            List<Integer> selections = Lists.transform(dataRegionSelection, new Function<String, Integer>()
+            {
+                public Integer apply(String s)
+                {
+                    return Integer.parseInt(s);
+                }
+            });
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(FieldKey.fromParts("RowId"), selections);
