@@ -508,7 +508,7 @@ public class ScriptController extends BaseFlowController
         {
             try
             {
-                return Workspace.readWorkspace(file.getInputStream());
+                return Workspace.readWorkspace(file.getName(), null, file.getInputStream());
             }
             catch (Exception e)
             {
