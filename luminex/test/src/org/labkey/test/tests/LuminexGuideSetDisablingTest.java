@@ -292,15 +292,15 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(closeBtn);
     }
 
-    private void clickGuideSetDetailsByComment(String comment)//, @Nullable DataRegionTable drt)
+    private void clickGuideSetDetailsByComment(String comment)
     {
         boolean found = false;
-//        if(drt == null)
         DataRegionTable drt = new DataRegionTable("GuideSet", this);
         for (int i=0; i < drt.getDataRowCount(); i++)
             if (drt.getDataAsText(i, "Comment").equals(comment))
             {
-                click(drt.link(i,0));
+                // NOTE: cannot use column name here because it works on column labels and there is no label here
+                click(drt.link(i,1));
                 found = true;
             }
 
