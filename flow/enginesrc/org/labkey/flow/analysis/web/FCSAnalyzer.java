@@ -16,32 +16,36 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.statistics.MathStat;
-import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.chart.DensityPlot;
-import org.labkey.flow.analysis.chart.PlotFactory;
-import org.labkey.flow.analysis.chart.HistPlot;
-import org.labkey.flow.analysis.model.CompensationCalculation;
-import org.labkey.flow.analysis.model.Polygon;
-
-import java.net.URI;
-import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.awt.image.BufferedImage;
-import java.awt.*;
-
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
-import org.jfree.ui.RectangleInsets;
 import org.jfree.data.Range;
-import org.apache.log4j.Logger;
-import org.labkey.api.view.Stats;
+import org.jfree.ui.RectangleInsets;
+import org.labkey.api.data.statistics.MathStat;
+import org.labkey.flow.analysis.chart.DensityPlot;
+import org.labkey.flow.analysis.chart.HistPlot;
+import org.labkey.flow.analysis.chart.PlotFactory;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Polygon;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FCSAnalyzer
 {
@@ -602,7 +606,7 @@ public class FCSAnalyzer
         return FCS.isFCSFile(file);
     }
 
-    public byte[] getFCSBytes(URI uri, int maxEventCount) throws Exception
+    public byte[] getFCSBytes(URI uri, int maxEventCount) throws IOException
     {
         FCS fcs = _cache.readFCS(uri);
         return fcs.getFCSBytes(new File(uri), maxEventCount);

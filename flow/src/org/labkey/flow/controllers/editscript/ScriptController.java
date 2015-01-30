@@ -43,6 +43,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GWTView;
 import org.labkey.api.view.HttpView;
@@ -148,7 +149,7 @@ public class ScriptController extends BaseFlowController
             if (!filename.endsWith(".xml"))
                 filename = filename + ".xml";
 
-            byte[] bytes = script.getAnalysisScript().getBytes(Charset.forName("UTF-8"));
+            byte[] bytes = script.getAnalysisScript().getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
             PageFlowUtil.streamFileBytes(getViewContext().getResponse(), filename, bytes, true);
             return null;
         }

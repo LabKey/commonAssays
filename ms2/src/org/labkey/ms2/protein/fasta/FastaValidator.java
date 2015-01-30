@@ -17,10 +17,9 @@ package org.labkey.ms2.protein.fasta;
 
 import org.ardverk.collection.ByteArrayKeyAnalyzer;
 import org.ardverk.collection.PatriciaTrie;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.StringUtilsLabKey;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.ArrayList;
@@ -51,36 +50,29 @@ public class FastaValidator
         Format lineFormat = DecimalFormat.getIntegerInstance();
         ProteinFastaLoader curLoader = new ProteinFastaLoader(_fastaFile);
 
-        try
+        //noinspection ForLoopReplaceableByForEach
+        for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
-            //noinspection ForLoopReplaceableByForEach
-            for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
+            Protein protein = (Protein)proteinIterator.next();
+
+            // Use UTF-8 encoding so that we only use a single byte for ASCII characters
+            String lookupString = protein.getLookup().toLowerCase();
+            byte[] lookup = lookupString.getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
+
+            if (proteinNames.containsKey(lookup))
             {
-                Protein protein = (Protein)proteinIterator.next();
+                errors.add("Line " + lineFormat.format(proteinIterator.getLastHeaderLineNum()) + ": " + lookupString + " is a duplicate protein name");
 
-                // Use UTF-8 encoding so that we only use a single byte for ASCII characters
-                String lookupString = protein.getLookup().toLowerCase();
-                byte[] lookup = lookupString.getBytes("UTF-8");
-
-                if (proteinNames.containsKey(lookup))
+                if (errors.size() > 999)
                 {
-                    errors.add("Line " + lineFormat.format(proteinIterator.getLastHeaderLineNum()) + ": " + lookupString + " is a duplicate protein name");
-
-                    if (errors.size() > 999)
-                    {
-                        errors.add("Stopped validating after 1,000 errors");
-                        break;
-                    }
-                }
-                else
-                {
-                    proteinNames.put(lookup, null);
+                    errors.add("Stopped validating after 1,000 errors");
+                    break;
                 }
             }
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new UnexpectedException(e);
+            else
+            {
+                proteinNames.put(lookup, null);
+            }
         }
 
         return errors;

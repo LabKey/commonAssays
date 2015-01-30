@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSKeywordData;
@@ -394,7 +395,7 @@ public class AttributeSet implements Serializable
     public void save(OutputStream os) throws Exception
     {
         String str = toXML().toString();
-        os.write(str.getBytes("UTF-8")); 
+        os.write(str.getBytes(StringUtilsLabKey.DEFAULT_CHARSET));
     }
 
     /** Get keywords and values.  Does not include keyword aliases. */

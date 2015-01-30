@@ -33,7 +33,7 @@ import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.FastaCheckTask;
 import org.labkey.ms2.pipeline.client.ParameterNames;
@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,14 +162,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 
     private static byte[] toBytes(String s)
     {
-        try
-        {
-            return s == null ? new byte[] { 0 } : s.getBytes("UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new UnexpectedException(e);
-        }
+        return s == null ? new byte[] { 0 } : s.getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
     }
 
     private boolean usesIndex()

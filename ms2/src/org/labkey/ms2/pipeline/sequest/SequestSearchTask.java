@@ -28,7 +28,7 @@ import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
@@ -47,7 +47,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -171,14 +170,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     private static byte[] toBytes(String s)
     {
-        try
-        {
-            return s == null ? new byte[] { 0 } : s.getBytes("UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new UnexpectedException(e);
-        }
+        return s == null ? new byte[] { 0 } : s.getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
     }
 
     private boolean usesIndex()

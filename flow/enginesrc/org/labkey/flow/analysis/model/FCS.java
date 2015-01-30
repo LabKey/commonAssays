@@ -18,6 +18,7 @@ package org.labkey.flow.analysis.model;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.util.StringUtilsLabKey;
 
 import java.io.*;
 import java.util.Arrays;
@@ -432,7 +433,7 @@ public class FCS extends FCSHeader
         return indexOf(buf, new byte[]{key}, start, end);
     }
 
-    public byte[] getFCSBytes(File file, int maxEventCount) throws Exception
+    public byte[] getFCSBytes(File file, int maxEventCount) throws IOException
     {
         int oldEventCount = rawData.getRowCount();
         int newEventCount = Math.min(maxEventCount, oldEventCount);
@@ -443,7 +444,7 @@ public class FCS extends FCSHeader
         is.read(bytes);
         int newDataLast = newSize - 1;
         String strDataLast = Integer.toString(newDataLast);
-        byte[] rgbDataLast = strDataLast.getBytes("UTF-8");
+        byte[] rgbDataLast = strDataLast.getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
         // fill the dataLast with spaces
         Arrays.fill(bytes, 34, 42, (byte) 32);
         System.arraycopy(rgbDataLast, 0, bytes, 34 + 8 - rgbDataLast.length, rgbDataLast.length);
@@ -488,7 +489,7 @@ public class FCS extends FCSHeader
             if (ibNumberEnd > 0)
             {
                 Arrays.fill(bytes, ibNumberStart, ibNumberEnd, (byte) 32);
-                byte[] rgbNewNextData = "0".getBytes("UTF-8");
+                byte[] rgbNewNextData = "0".getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
                 System.arraycopy(rgbNewNextData, 0, bytes, ibNumberStart, rgbNewNextData.length);
             }
         }
