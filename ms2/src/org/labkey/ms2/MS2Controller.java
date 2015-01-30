@@ -3157,7 +3157,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            exportPeptides(form, response, false);
+            exportPeptides(form, false);
         }
     }
 
@@ -3167,7 +3167,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            exportPeptides(form, response, true);
+            exportPeptides(form, true);
         }
     }
 
@@ -3189,7 +3189,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private void exportPeptides(ExportForm form, HttpServletResponse response, boolean selected) throws Exception
+    private void exportPeptides(ExportForm form, boolean selected) throws Exception
     {
         MS2Run run = form.validateRun();
 
