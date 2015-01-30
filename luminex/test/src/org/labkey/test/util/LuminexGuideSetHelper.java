@@ -85,7 +85,7 @@ public class LuminexGuideSetHelper
         }
         else
         {
-            _test.waitForText("Manage guide Set...");
+            _test.waitForText("Manage Guide Set...");
             _test.waitForText("Guide Set ID:");
             _test.assertTextPresentInThisOrder("Created:", today);
         }
