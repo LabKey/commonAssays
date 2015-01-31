@@ -120,8 +120,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.guideSetDisplayField,
                 {
                     xtype: 'panel',
-                    //width: 200,
-                    height: 150,
+                    height: 60,
                     border: false,
                     bodyStyle: 'background-color:#EEEEEE;',
                     layout:  'vbox',

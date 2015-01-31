@@ -726,7 +726,7 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;
+            return root.addChild("Confirm Deletion");
         }
     }
 
@@ -766,10 +766,12 @@ public class LuminexController extends SpringActionController
                     AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
                     AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
 
-                    ResultSet rs = QueryService.get().select(schema, sql);
                     List<String> runs = new ArrayList<>();
-                    while(rs.next())
-                        runs.add(rs.getString("name"));
+                    try ( ResultSet rs = QueryService.get().select(schema, sql) )
+                    {
+                        while(rs.next())
+                            runs.add(rs.getString("name"));
+                    }
 
                     String comment = (String) guideSetResult.get("comment");
                     Boolean current = (boolean) guideSetResult.get("currentGuideSet");
