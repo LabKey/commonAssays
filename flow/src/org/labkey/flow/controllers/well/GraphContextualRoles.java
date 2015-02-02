@@ -24,7 +24,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.HasContextualRoles;
 import org.labkey.api.security.roles.Role;
-import org.labkey.api.study.assay.RunDataSetContextualRoles;
+import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowDataObject;
@@ -79,7 +79,7 @@ public class GraphContextualRoles implements HasContextualRoles
 
             ExpRun expRun = run.getExperimentRun();
             FieldKey runIdFieldKey = FieldKey.fromParts("run");
-            return RunDataSetContextualRoles.getContextualRolesForRun(context.getContainer(), context.getUser(), expRun, runIdFieldKey);
+            return RunDatasetContextualRoles.getContextualRolesForRun(context.getContainer(), context.getUser(), expRun, runIdFieldKey);
         }
 
         return null;

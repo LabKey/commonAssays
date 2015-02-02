@@ -71,7 +71,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
-import org.labkey.api.study.assay.RunDataSetContextualRoles;
+import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -305,7 +305,7 @@ public class NabAssayController extends SpringActionController
     private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
 
     @RequiresPermissionClass(ReadPermission.class)
-    @ContextualRoles(RunDataSetContextualRoles.class)
+    @ContextualRoles(RunDatasetContextualRoles.class)
     public class DetailsAction extends RunDetailsAction<RenderAssayBean>
     {
         @Override
@@ -448,13 +448,13 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    @ContextualRoles(RunDataSetContextualRoles.class)
+    @ContextualRoles(RunDatasetContextualRoles.class)
     public class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
     {
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    @ContextualRoles(RunDataSetContextualRoles.class)
+    @ContextualRoles(RunDatasetContextualRoles.class)
     public class GraphAction extends DilutionGraphAction
     {
         @Override

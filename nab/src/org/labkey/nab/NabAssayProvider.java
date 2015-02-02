@@ -145,7 +145,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
 //                if (run == null)
 //                    return false;
 //                Container c = run.getContainer();
-//                return c.hasPermission(user, perm, RunDataSetContextualRoles.getContextualRolesForRun(c, user, run));
+//                return c.hasPermission(user, perm, RunDatasetContextualRoles.getContextualRolesForRun(c, user, run));
             }
         });
     }

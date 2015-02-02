@@ -216,7 +216,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
             }
         }
         // Here we go through the hell necessary to put seqids associated with
-        // the "Other" category into the appropriate parts of the CPASPieDataSet
+        // the "Other" category into the appropriate parts of the ProteinPieDataset
         // for the image map
         if (otherCount > 0)
         {

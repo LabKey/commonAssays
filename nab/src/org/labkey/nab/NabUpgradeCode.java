@@ -27,7 +27,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DataSet;
+import org.labkey.api.study.Dataset;
 import org.labkey.api.study.StudyService;
 
 import java.util.ArrayList;
@@ -58,8 +58,8 @@ public class NabUpgradeCode implements UpgradeCode
             for (Integer protocolId : protocolIds)
             {
                 ExpProtocol protocol = ExperimentService.get().getExpProtocol(protocolId);
-                Map<? extends DataSet, String> dataSets = StudyService.get().getDatasetsAndSelectNameForAssayProtocol(protocol);
-                for (Map.Entry<? extends DataSet, String> entry : dataSets.entrySet())
+                Map<? extends Dataset, String> datasets = StudyService.get().getDatasetsAndSelectNameForAssayProtocol(protocol);
+                for (Map.Entry<? extends Dataset, String> entry : datasets.entrySet())
                 {
                     // Add RowId column
                     String tableName = entry.getValue();

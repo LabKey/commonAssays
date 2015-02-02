@@ -34,7 +34,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DataSet;
+import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AssayService;
@@ -119,15 +119,15 @@ public class NabManager extends AbstractNabManager
         if (study == null)
             throw new IllegalArgumentException("getReadableStudyObjectIds must be passed a valid study folder.");
 
-        List<? extends DataSet> dataSets = study.getDatasets();
-        if (dataSets == null || dataSets.isEmpty())
+        List<? extends Dataset> datasets = study.getDatasets();
+        if (datasets == null || datasets.isEmpty())
             return Collections.emptyMap();
 
         // Gather a list of readable study dataset TableInfos associated with NAb protocols (these are created when NAb data
         // is copied to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
         // can only be one dataset/tableinfo per protocol.
         Map<TableInfo, ExpProtocol> dataTables = new HashMap<>();
-        for (DataSet dataset : dataSets)
+        for (Dataset dataset : datasets)
         {
             if (dataset.isAssayData() && dataset.canRead(user))
             {
