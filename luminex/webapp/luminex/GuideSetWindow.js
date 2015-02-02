@@ -99,7 +99,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             '</tpl>',
             {
                 formatNumber: function(value) { return value != null ? value.toFixed(3) : "N/A"; },
-                formatNone: function(value) { return value ? Ext.util.Format.htmlEncode(value) : '[None]'; },
+                formatNone: function(value) { return value ? Ext4.util.Format.htmlEncode(value) : '[None]'; },
                 dateRenderer: function(val) { return val ? new Date(val).format("Y-m-d") : null; }
             }
         )
@@ -241,7 +241,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 handleResponse: function(response) {
                     if (response.rows.length > 1)
                     {
-                        Ext.Msg.alert("Error", "There is an issue with the request as the returned rows should be length 1 and is " + response.rows.length);
+                        Ext4.Msg.alert("Error", "There is an issue with the request as the returned rows should be length 1 and is " + response.rows.length);
                         return;
                     }
 
@@ -283,7 +283,7 @@ function createGuideSetWindow(protocolId, currentGuideSetId) {
     LABKEY.Assay.getById({
         id: protocolId,
         success: function(assay){
-            if (Ext.isArray(assay) && assay.length == 1)
+            if (Ext4.isArray(assay) && assay.length == 1)
             {
                 // could use either full name or base name here...
                 Ext4.create('Luminex.window.GuideSetWindow', {

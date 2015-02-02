@@ -16,8 +16,6 @@
 
 package org.labkey.luminex;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -28,7 +26,6 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegionSelection;
-import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TSVWriter;
@@ -85,7 +82,7 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
-import org.labkey.luminex.query.GuideSetTable;
+import org.labkey.luminex.model.GuideSet;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
 import org.springframework.validation.Errors;
@@ -738,49 +735,37 @@ public class LuminexController extends SpringActionController
 
             GuideSetsDeleteBean bean = new GuideSetsDeleteBean(form.getReturnUrl(), form.getDataRegionSelectionKey(), form.getProtocol().getRowId(), getContainer(), form.getProtocol().getName());
 
-            List<String> dataRegionSelection = new ArrayList<>(DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), false, false));
-            List<Integer> selections = Lists.transform(dataRegionSelection, new Function<String, Integer>()
-            {
-                public Integer apply(String s)
-                {
-                    return Integer.parseInt(s);
-                }
-            });
+            Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(FieldKey.fromParts("RowId"), selections);
 
-            try ( Results guideSetResults  = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet(), filter, null).getResults())
+            List<GuideSet> guideSets = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet(), filter, null).getArrayList(GuideSet.class);
+            for (GuideSet gs : guideSets)
             {
-                for (Map<String, Object> guideSetResult : guideSetResults)
+                int rowId = gs.getRowId();
+
+                String sql;
+                if (gs.getIsTitration())
+                    sql = "SELECT Titration.Run.Name FROM AnalyteTitration WHERE GuideSet="+rowId;
+                else
+                    sql = "SELECT SinglePointControl.Run.Name FROM AnalyteSinglePointControl WHERE GuideSet="+rowId;
+
+                AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
+                AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+
+                List<String> runs = new ArrayList<>();
+                try ( ResultSet rs = QueryService.get().select(schema, sql) )
                 {
-                    int rowId = (int) guideSetResult.get("rowId");
-
-                    boolean isTitration = (boolean) guideSetResult.get("isTitration");
-                    String sql;
-                    if (isTitration)
-                        sql = "SELECT Titration.Run.Name FROM AnalyteTitration WHERE GuideSet="+rowId;
-                    else
-                        sql = "SELECT SinglePointControl.Run.Name FROM AnalyteSinglePointControl WHERE GuideSet="+rowId;
-
-                    AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
-                    AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
-
-                    List<String> runs = new ArrayList<>();
-                    try ( ResultSet rs = QueryService.get().select(schema, sql) )
-                    {
-                        while(rs.next())
-                            runs.add(rs.getString("name"));
-                    }
-
-                    String comment = (String) guideSetResult.get("comment");
-                    Boolean current = (boolean) guideSetResult.get("currentGuideSet");
-                    GuideSetsDeleteBean.GuideSet gs = new GuideSetsDeleteBean.GuideSet(rowId, comment, current, runs);
-                    bean.add(gs);
+                    while(rs.next())
+                        runs.add(rs.getString("name"));
                 }
-            }
-            catch(SQLException e)
-            {
+                catch (SQLException e)
+                {
+
+                }
+
+                bean.add(new GuideSetsDeleteBean.GuideSet(rowId, gs.getComment(), gs.isCurrentGuideSet(), runs));
             }
 
             setModelBean(bean);

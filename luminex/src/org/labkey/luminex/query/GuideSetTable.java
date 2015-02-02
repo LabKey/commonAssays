@@ -461,31 +461,29 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 // NOTE: room to be smart here and only clean up ASPC or AT because a single GS should not be split across these tables.
 
                 // update rows in AnalayteSinglePointControl table
-                try ( Results results = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getResults() )
+                List<AnalyteSinglePointControl> aspcResults = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getArrayList(AnalyteSinglePointControl.class);
+                for (AnalyteSinglePointControl aspc : aspcResults)
                 {
-                    for (Map<String, Object> result : results)
-                    {
-                        Map<String, Object> keys = new CaseInsensitiveHashMap<>();
-                        keys.put("AnalyteId", result.get("AnalyteId") );
-                        keys.put("TitrationId", result.get("TitrationId") );
-                        result.put("GuideSetId", null);
-                        result.put("IncludeInGuideSetCalculation", false);
-                        Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), result, keys);
-                    }
+                    Map<String, Object> keys = new CaseInsensitiveHashMap<>();
+                    keys.put("AnalyteId", aspc.getAnalyteId());
+                    keys.put("SinglePointControlId", aspc.getSinglePointControlId());
+
+                    aspc.setGuideSetId(null);
+                    aspc.setIncludeInGuideSetCalculation(false);
+                    Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), aspc, keys);
                 }
 
                 // update rows in AnalayteTitration table
-                try ( Results results = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getResults() )
+                List<AnalyteTitration> atResults = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null).getArrayList(AnalyteTitration.class);
+                for (AnalyteTitration at : atResults )
                 {
-                    for (Map<String, Object> result : results )
-                    {
-                        Map<String, Object> keys = new CaseInsensitiveHashMap<>();
-                        keys.put("AnalyteId", result.get("AnalyteId") );
-                        keys.put("TitrationId", result.get("TitrationId") );
-                        result.put("GuideSetId", null);
-                        result.put("IncludeInGuideSetCalculation", false);
-                        Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), result, keys);
-                    }
+                    Map<String, Object> keys = new CaseInsensitiveHashMap<>();
+                    keys.put("AnalyteId", at.getAnalyteId() );
+                    keys.put("TitrationId", at.getTitrationId() );
+
+                    at.setGuideSetId(null);
+                    at.setIncludeInGuideSetCalculation(false);
+                    Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), at, keys);
                 }
 
                 // delete the guide set row
