@@ -44,7 +44,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
 
     public ProteinTSVGridWriter(List<DisplayColumn> proteinDisplayColumns, List<DisplayColumn> peptideDisplayColumns)
     {
-        super(proteinDisplayColumns);
+        super(null, proteinDisplayColumns);
         _peptideDisplayColumns = peptideDisplayColumns;
     }
 
