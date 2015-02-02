@@ -453,11 +453,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
         {
             DbScope scope = LuminexProtocolSchema.getSchema().getScope();
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), key);
 
             try (DbScope.Transaction tx = scope.ensureTransaction())
             {
-                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), key);
-
                 // NOTE: room to be smart here and only clean up ASPC or AT because a single GS should not be split across these tables.
 
                 // update rows in AnalayteSinglePointControl table
@@ -471,6 +470,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                     aspc.setGuideSetId(null);
                     aspc.setIncludeInGuideSetCalculation(false);
                     Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), aspc, keys);
+
+                    aspc.updateQCFlags(_userSchema);
                 }
 
                 // update rows in AnalayteTitration table
@@ -484,6 +485,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                     at.setGuideSetId(null);
                     at.setIncludeInGuideSetCalculation(false);
                     Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), at, keys);
+
+                    at.updateQCFlags(_userSchema);
                 }
 
                 // delete the guide set row

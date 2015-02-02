@@ -26,8 +26,10 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
@@ -44,7 +46,6 @@ import org.labkey.api.query.AbstractQueryImportAction;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
@@ -61,9 +62,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
-import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.permissions.DesignAssayPermission;
@@ -92,7 +91,6 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -745,24 +743,34 @@ public class LuminexController extends SpringActionController
             {
                 int rowId = gs.getRowId();
 
-                String sql;
+                SQLFragment sql = new SQLFragment("SELECT r.name FROM ");
+                sql.append(ExperimentService.get().getTinfoExperimentRun(), "r ");
+                sql.append("JOIN ");
                 if (gs.getIsTitration())
-                    sql = "SELECT Titration.Run.Name FROM AnalyteTitration WHERE GuideSet="+rowId;
+                {
+                    sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t ");
+                    sql.append("ON r.RowId = t.RunId ");
+                    sql.append("JOIN ");
+                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at ");
+                    sql.append("ON t.RowId = at.TitrationId ");
+                    sql.append("WHERE at.GuideSetId = ?");
+                    sql.add(rowId);
+                }
                 else
-                    sql = "SELECT SinglePointControl.Run.Name FROM AnalyteSinglePointControl WHERE GuideSet="+rowId;
-
-                AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
-                AssayProtocolSchema schema = provider.createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
+                {
+                    sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc ");
+                    sql.append("ON r.RowId = spc.RunId ");
+                    sql.append("JOIN ");
+                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "aspc ");
+                    sql.append("ON spc.RowId = aspc.SinglePointControlId ");
+                    sql.append("WHERE aspc.GuideSetId = ?");
+                    sql.add(rowId);
+                }
 
                 List<String> runs = new ArrayList<>();
-                try ( ResultSet rs = QueryService.get().select(schema, sql) )
+                for (String runName : new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(String.class))
                 {
-                    while(rs.next())
-                        runs.add(rs.getString("name"));
-                }
-                catch (SQLException e)
-                {
-
+                    runs.add(runName);
                 }
 
                 bean.add(new GuideSetsDeleteBean.GuideSet(rowId, gs.getComment(), gs.isCurrentGuideSet(), runs));
