@@ -378,7 +378,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             controlName: this.controlName,
             analyte: this.analyte,
             isotype: this.isotype,
-            conjugate: this.conjugate
+            conjugate: this.conjugate,
+            yAxisScale: this.yAxisScale
         };
 
         var renderType = LABKEY.LeveyJenningsPlotHelper.renderPlot(plotConfig);

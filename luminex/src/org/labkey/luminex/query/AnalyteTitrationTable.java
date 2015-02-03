@@ -142,7 +142,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                         String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s')";
 
                         NavTree ljPlotsNav = new NavTree("LJ Plots Menu");
-                        ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png", 16, 16);
+                        ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);
                         ljPlotsNav.addChild("EC50 - 4PL", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
                         ljPlotsNav.addChild("EC50 - 5PL Rumi", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
                         ljPlotsNav.addChild("AUC", String.format(jsFuncCall, protocolId, analyte, titration, "AUC"));

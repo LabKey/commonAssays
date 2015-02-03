@@ -200,7 +200,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         mean: 'gsMean',
         stdDev: 'gsStdDev',
         xTickLabel: 'xLabel',
-        yAxisScale: this.yAxisScale,
+        yAxisScale: config.yAxisScale,
         color: 'pointColor',
         colorRange: ['black', 'red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown'],
         hoverTextFn: function(row){
@@ -223,7 +223,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         gridLineColor: 'white',
         labels: {
             main: { value: title, fontSize: 16, position: 20 },
-            y: {value: ytitle + (this.yAxisScale == 'log' ? ' (log)' : '')},
+            y: {value: ytitle + (config.yAxisScale == 'log' ? ' (log)' : '')},
             x: {value: 'Assay'}
         }
     });
@@ -267,6 +267,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                     analyte: row['Analyte/Name'],
                     isotype: row[controlType+'/Run/Isotype'],
                     conjugate: row[controlType+'/Run/Conjugate'],
+                    yAxisScale: 'linear',
                     scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
                     runId: row[controlType+'/Run'],

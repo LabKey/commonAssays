@@ -142,7 +142,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                         String linkTag = "<a href=\"javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePointControl')\">";
 
                         out.write( String.format(linkTag, protocolId, analyte, singlePointControl, "MFI") );
-                        out.write( String.format("<img src='%s'>", AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png") );
+                        out.write( String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png") );
                         out.write( "</a>" );
                     }
 
