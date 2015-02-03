@@ -669,12 +669,12 @@ public class LuminexController extends SpringActionController
             return form.getReturnActionURL();
         }
 
-        protected void deleteObjects(DeleteForm form) throws SQLException, ExperimentException, ServletException
+        protected void deleteObjects(DeleteForm form) throws SQLException, ExperimentException, ServletException, InvalidKeyException, BatchValidationException, QueryUpdateServiceException
         {
             List<Map<String, Object>> keys = new ArrayList<>();
-            Set<String> selections = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), false, false);
+            Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
 
-            for (String selection : selections)
+            for (Integer selection : selections)
             {
                 Map<String, Object> entry = new HashMap<>();
                 entry.put("RowId", selection);
@@ -684,13 +684,7 @@ public class LuminexController extends SpringActionController
             LuminexAssayProvider provider = new LuminexAssayProvider();
             LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), provider, form.getProtocol(), getContainer());
             QueryUpdateService queryUpdateService = schema.getTable(LuminexProtocolSchema.GUIDE_SET_TABLE_NAME).getUpdateService();
-            try {
-                queryUpdateService.deleteRows(getUser(), getContainer(), keys, null, null);
-            }
-            catch(InvalidKeyException|BatchValidationException|QueryUpdateServiceException e)
-            {
-
-            }
+            queryUpdateService.deleteRows(getUser(), getContainer(), keys, null, null);
         }
 
         @Override
