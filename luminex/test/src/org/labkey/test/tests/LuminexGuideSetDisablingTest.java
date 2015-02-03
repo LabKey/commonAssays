@@ -354,4 +354,36 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 
     }
 
+    @Test
+    public void verifyDeleteGuideSet()
+    {
+        clickDeleteOnGuideSetWithComment(RUN_BASED_COMMENT);
+
+        assertTextPresent("LuminexGuideSetDisablingTest ENV1 (31)");
+        assertTextPresent("Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
+
+        clickButton("Confirm Delete");
+
+        clickDeleteOnGuideSetWithComment(VALUE_BASED_COMMENT);
+
+        assertTextPresent("LuminexGuideSetDisablingTest ENV2 (41)");
+        assertTextPresent("Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
+
+        clickButton("Confirm Delete");
+
+        // clean up by recreating the guide sets (this is a multi-test so could fire before other tests)
+        createRunBasedGuideSet();
+        createValueBasedGuideSet();
+    }
+
+    private void clickDeleteOnGuideSetWithComment(String comment)
+    {
+        _guideSetHelper.goToManageGuideSetsPage(TEST_ASSAY_LUM);
+        DataRegionTable drt = new DataRegionTable("GuideSet", this);
+        // check checkbox by given guideset
+        for (int i=0; i < drt.getDataRowCount(); i++)
+            if (drt.getDataAsText(i, "Comment").equals(comment))
+                drt.checkCheckbox(i);
+        drt.clickHeaderButtonByText("Delete");
+    }
 }
