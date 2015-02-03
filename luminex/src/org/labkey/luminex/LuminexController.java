@@ -727,7 +727,7 @@ public class LuminexController extends SpringActionController
 
             GuideSetsDeleteBean bean = new GuideSetsDeleteBean(form.getReturnUrl(), form.getDataRegionSelectionKey(), form.getProtocol().getRowId(), getContainer(), form.getProtocol().getName());
 
-            Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
+            Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), false);
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(FieldKey.fromParts("RowId"), selections);
