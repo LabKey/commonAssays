@@ -644,6 +644,7 @@ freezerpro/src/org/labkey/freezerpro/export/GetFreezerSamplesCommand.java -text
 freezerpro/src/org/labkey/freezerpro/export/GetFreezerSamplesResponse.java -text
 freezerpro/src/org/labkey/freezerpro/export/GetFreezersCommand.java -text
 freezerpro/src/org/labkey/freezerpro/export/GetFreezersResponse.java -text
+freezerpro/src/org/labkey/freezerpro/export/GetVialSamplesCommand.java -text
 freezerpro/src/org/labkey/freezerpro/view/configure.jsp -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
