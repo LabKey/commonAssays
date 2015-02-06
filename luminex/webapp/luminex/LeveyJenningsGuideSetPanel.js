@@ -134,7 +134,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     },
                     items: [
                         {
-                            items: [ new Ext.form.CompositeField({items:[this.editGuideSetButton, this.newGuideSetButton]}) ]
+                            xtype: 'compositefield',
+                            items:[this.editGuideSetButton, this.newGuideSetButton]
                         },
                         {
                             items: [this.guideSetDetailsButton]
