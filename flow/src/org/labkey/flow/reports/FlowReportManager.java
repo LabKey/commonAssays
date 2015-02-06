@@ -214,6 +214,7 @@ public class FlowReportManager
                 pd.setPropertyURI(uri);
             }
 
+            domain = PropertyService.get().getDomain(domain.getTypeId());
             domain.save(user);
 
             transaction.commit();
