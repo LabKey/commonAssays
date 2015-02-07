@@ -45,6 +45,7 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -313,6 +314,7 @@ public class FeatureAnnotationSetController extends SpringActionController
 
             ActionButton edit = new ActionButton(editURL, "Edit", DataRegion.MODE_DETAILS);
             edit.setActionType(ActionButton.Action.LINK);
+            edit.setDisplayPermission(UpdatePermission.class);
             bb.add(edit);
             bb.setStyle(ButtonBar.Style.separateButtons);
             dr.setButtonBar(bb);
