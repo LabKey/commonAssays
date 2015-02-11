@@ -56,12 +56,26 @@
     <ul>
         <% for (LuminexController.GuideSetsDeleteBean.GuideSet gs : guideSets) { %>
             <li><a href="#" tabindex="-1" onclick="createGuideSetWindow('<%=h(bean.getProtocol().getRowId())%>','<%=h(gs.getGuideSetId())%>')">Guide Set <%= h(gs.getGuideSetId()) %>: <%= h(gs.getComment()) %></a></li>
-            <% if (gs.getRuns().size() > 0 ) { %>
+            <br>
+            Type: <% if(gs.isValueBased()) out.print("Value-based"); else out.print("Run-based"); %>
+            <br><br>
+            Current Guide Set: <%=gs.getCurrent()%>
+            <br>
+            <% if (gs.getMemberRuns().size() > 0 ) { %>
                 <br>
-                Associated Runs:
+                Member Runs:
                 <ul>
-                    <% for (String run : gs.getRuns()) { %>
+                    <% for (String run : gs.getMemberRuns()) { %>
                         <li><%=h(run)%></li>
+                    <% } %>
+                </ul>
+            <% } %>
+            <% if (gs.getUserRuns().size() > 0 ) { %>
+                <br>
+                User Runs:
+                <ul>
+                    <% for (String run : gs.getUserRuns()) { %>
+                    <li><%=h(run)%></li>
                     <% } %>
                 </ul>
             <% } %>

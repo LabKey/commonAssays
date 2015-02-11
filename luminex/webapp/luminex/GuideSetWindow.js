@@ -15,6 +15,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
     width: 550,
     minHeight: 200,
     autoScroll: true,
+    resizable: false,
 
     // NOTE: these are required fields (any way to enforce?)
     assayName: null,

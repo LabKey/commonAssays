@@ -737,7 +737,7 @@ public class LuminexController extends SpringActionController
             {
                 int rowId = gs.getRowId();
 
-                SQLFragment sql = new SQLFragment("SELECT r.name FROM ");
+                SQLFragment sql = new SQLFragment("SELECT r.name, a.includeInGuideSetCalculation FROM ");
                 sql.append(ExperimentService.get().getTinfoExperimentRun(), "r ");
                 sql.append("JOIN ");
                 if (gs.getIsTitration())
@@ -745,9 +745,9 @@ public class LuminexController extends SpringActionController
                     sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t ");
                     sql.append("ON r.RowId = t.RunId ");
                     sql.append("JOIN ");
-                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at ");
-                    sql.append("ON t.RowId = at.TitrationId ");
-                    sql.append("WHERE at.GuideSetId = ?");
+                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "a ");
+                    sql.append("ON t.RowId = a.TitrationId ");
+                    sql.append("WHERE a.GuideSetId = ?");
                     sql.add(rowId);
                 }
                 else
@@ -755,19 +755,23 @@ public class LuminexController extends SpringActionController
                     sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc ");
                     sql.append("ON r.RowId = spc.RunId ");
                     sql.append("JOIN ");
-                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "aspc ");
+                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "a ");
                     sql.append("ON spc.RowId = aspc.SinglePointControlId ");
-                    sql.append("WHERE aspc.GuideSetId = ?");
+                    sql.append("WHERE a.GuideSetId = ?");
                     sql.add(rowId);
                 }
 
-                List<String> runs = new ArrayList<>();
-                for (String runName : new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(String.class))
+                List<String> memberRuns = new ArrayList<>();
+                List<String> userRuns = new ArrayList<>();
+                for (Map<String, Object> data : new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getResultSet() )
                 {
-                    runs.add(runName);
+                    if ( (Boolean)data.get("includeInGuideSetCalculation") == true )
+                        memberRuns.add((String)data.get("name"));
+                    else
+                        userRuns.add((String)data.get("name"));
                 }
 
-                bean.add(new GuideSetsDeleteBean.GuideSet(rowId, gs.getComment(), gs.isCurrentGuideSet(), runs));
+                bean.add(new GuideSetsDeleteBean.GuideSet(rowId, gs.getComment(), gs.isCurrentGuideSet(), memberRuns, userRuns, gs.isValueBased()));
             }
 
             setModelBean(bean);
@@ -781,14 +785,48 @@ public class LuminexController extends SpringActionController
             private int _guideSetId;
             private String _comment;
             private boolean _current;
-            private List<String> _runs;
+            private List<String> _memberRuns;
+            private List<String> _userRuns;
+            private boolean _valueBased;
 
-            public GuideSet(int guideSetId, String comment, Boolean current, List<String> runs)
+            public GuideSet(int guideSetId, String comment, Boolean current, List<String> memberRuns, List<String> userRuns, Boolean valueBased)
             {
                 _guideSetId = guideSetId;
                 _comment = comment;
                 _current = current;
-                _runs = runs;
+                _valueBased = valueBased;
+                _memberRuns = memberRuns;
+                _userRuns = userRuns;
+            }
+
+            public boolean isValueBased()
+            {
+                return _valueBased;
+            }
+
+            public void setValueBased(boolean valueBased)
+            {
+                _valueBased = valueBased;
+            }
+
+            public List<String> getMemberRuns()
+            {
+                return _memberRuns;
+            }
+
+            public void setMemberRuns(List<String> memberRuns)
+            {
+                _memberRuns = memberRuns;
+            }
+
+            public List<String> getUserRuns()
+            {
+                return _userRuns;
+            }
+
+            public void setUserRuns(List<String> userRuns)
+            {
+                _userRuns = userRuns;
             }
 
             public int getGuideSetId()
@@ -819,16 +857,6 @@ public class LuminexController extends SpringActionController
             public void setCurrent(boolean current)
             {
                 _current = current;
-            }
-
-            public List<String> getRuns()
-            {
-                return _runs;
-            }
-
-            public void setRuns(List<String> runs)
-            {
-                _runs = runs;
             }
         }
 
