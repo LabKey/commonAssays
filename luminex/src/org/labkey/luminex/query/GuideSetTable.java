@@ -20,6 +20,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -27,7 +28,6 @@ import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JavaScriptDisplayColumn;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.Results;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
@@ -151,6 +151,25 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         });
         addColumn(detailsCol);
 
+        AliasedColumn valueBasedCol = new AliasedColumn("Type", wrapColumn(getRealTable().getColumn(FieldKey.fromParts("ValueBased"))));
+        valueBasedCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DataColumn(colInfo){
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        if ( (Boolean)ctx.get(this.getColumnInfo().getFieldKey()) )
+                            out.write("Value-based");
+                        else
+                            out.write("Run-based");
+                    }
+                };
+            }
+        });
+        addColumn(valueBasedCol);
+
         addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "TitrationMax", "Titration Max", "GuideSetId");
         AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(false);
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
@@ -177,7 +196,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         defaultCols.add(FieldKey.fromParts("AnalyteName"));
         defaultCols.add(FieldKey.fromParts("Isotype"));
         defaultCols.add(FieldKey.fromParts("Conjugate"));
-        defaultCols.add(FieldKey.fromParts("ValueBased"));
+
+        //defaultCols.add(FieldKey.fromParts("ValueBased"));
+        defaultCols.add(valueBasedCol.getFieldKey());
+
         defaultCols.add(FieldKey.fromParts("Created"));
         defaultCols.add(FieldKey.fromParts("CurrentGuideSet"));
         defaultCols.add(FieldKey.fromParts("Comment"));
