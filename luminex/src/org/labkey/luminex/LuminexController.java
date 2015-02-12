@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -91,6 +92,7 @@ import org.springframework.validation.BindException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,6 +107,8 @@ import java.util.Set;
  */
 public class LuminexController extends SpringActionController
 {
+    private static final Logger _log = Logger.getLogger(LuminexController.class);
+
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class,
             LuminexUploadWizardAction.class
     );
@@ -763,12 +767,20 @@ public class LuminexController extends SpringActionController
 
                 List<String> memberRuns = new ArrayList<>();
                 List<String> userRuns = new ArrayList<>();
-                for (Map<String, Object> data : new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getResultSet() )
+                try (ResultSet rs = new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getResultSet())
                 {
-                    if ( (Boolean)data.get("includeInGuideSetCalculation") == true )
-                        memberRuns.add((String)data.get("name"));
-                    else
-                        userRuns.add((String)data.get("name"));
+                    while (rs.next())
+                    {
+                        if (rs.getBoolean("includeInGuideSetCalculation") == true)
+                            memberRuns.add(rs.getString("name"));
+                        else
+                            userRuns.add(rs.getString("name"));
+                    }
+                }
+                catch (SQLException e)
+                {
+                    _log.error("Failed to get ResultSet for analytes", e);
+
                 }
 
                 bean.add(new GuideSetsDeleteBean.GuideSet(rowId, gs.getComment(), gs.isCurrentGuideSet(), memberRuns, userRuns, gs.isValueBased()));
