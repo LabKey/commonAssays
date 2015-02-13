@@ -204,6 +204,8 @@ public class FlowReportManager
             domain.setDescription("Domain for " + report.getDescriptor().getDescriptorType() + " reports on flow table " + tableType);
             domain.save(user);
 
+            domain = PropertyService.get().getDomain(domain.getTypeId());
+
             for (PropertyDescriptor prop : properties)
             {
                 DomainProperty dp = domain.addProperty();
@@ -214,7 +216,6 @@ public class FlowReportManager
                 pd.setPropertyURI(uri);
             }
 
-            domain = PropertyService.get().getDomain(domain.getTypeId());
             domain.save(user);
 
             transaction.commit();
