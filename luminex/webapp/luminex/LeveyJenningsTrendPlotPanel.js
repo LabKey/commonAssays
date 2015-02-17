@@ -384,35 +384,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         var renderType = LABKEY.LeveyJenningsPlotHelper.renderPlot(plotConfig);
 
-        if (renderType == 'd3')
-        {
-            // add some mouseover effects for fun
-            var mouseOn = function (pt, strokeWidth)
-            {
-                d3.select(pt).transition().duration(800).attr("stroke-width", strokeWidth).ease("elastic");
-            };
-            var mouseOff = function (pt)
-            {
-                d3.select(pt).transition().duration(800).attr("stroke-width", 1).ease("elastic");
-            };
-            var points = d3.select('#' + trendDiv + ' svg').selectAll("a.point path");
-            points.on("mouseover", function ()
-            {
-                return mouseOn(this, 5);
-            });
-            points.on("mouseout", function ()
-            {
-                return mouseOff(this);
-            });
-
-            // export to PDF doesn't work for IE<9
-            this.togglePDFExportBtn(true);
-        }
-        else
-        {
-            // export to PDF doesn't work for IE<9
-            this.togglePDFExportBtn(false);
-        }
+        // export to PDF doesn't work for IE<9
+        this.togglePDFExportBtn(renderType == 'd3');
     },
 
     activateTrendPlotPanel: function(panel) {

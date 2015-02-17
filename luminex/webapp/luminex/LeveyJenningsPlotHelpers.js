@@ -109,13 +109,13 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 };
 
 // consider reducing scope of this object...?
-LABKEY.LeveyJenningsPlotHelper.PlotTypeMap = Object.freeze({
+LABKEY.LeveyJenningsPlotHelper.PlotTypeMap = {
     EC504PL: 'EC50 - 4PL',
     EC505PL: 'EC50 - 5PL Rumi',
     AUC: 'AUC',
     HighMFI: 'High MFI',
     MFI: 'MFI' // not sure why we cannot get these named right.
-});
+};
 
 LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 {
