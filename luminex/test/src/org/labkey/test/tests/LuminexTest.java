@@ -88,6 +88,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final String isotype = "IgG ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
     public static final String conjugate = "PE ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
 
+    public LuminexTest()
+    {
+        setDefaultWaitForPage(60000);
+    }
 
     public List<String> getAssociatedModules()
     {

@@ -217,8 +217,8 @@ public final class LuminexExcludableWellsTest extends LuminexTest
             }
         }
 
-        table.clearFilter("ExclusionComment");
         table.clearFilter("Description");
+        table.clearFilter("ExclusionComment");
     }
 
     //verifies if description, type, and well match the hardcoded values
