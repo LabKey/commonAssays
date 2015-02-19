@@ -119,8 +119,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         goToTestAssayHome();
         checkDataRegionCheckbox("Runs", 1);
         clickButton("Re-import run");
-        // verify that all old values from the first imported run are present
-        assert(getFormElement(Locator.name("network")).equals("NETWORK1"));
+        Assert.assertEquals("Form did not remember values from first import", "NETWORK1", getFormElement(Locator.name("network")));
         clickButton("Next");
         testDate.add(Calendar.DATE, 1);
         reimportLuminexRunPageTwo("Guide Set plate " + (i+1), isotype, conjugate, "", "", "Notebook" + (i+1),
