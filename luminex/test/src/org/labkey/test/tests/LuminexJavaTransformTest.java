@@ -92,22 +92,22 @@ public final class LuminexJavaTransformTest extends LuminexTest
         createNewAssayRun(TEST_ASSAY_LUM, assayRunIds[1]);
         addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3);
         // verify that conflict error message is present
-        waitForText(ERROR_TEXT, WAIT_FOR_JAVASCRIPT);
+        waitForText(WAIT_FOR_JAVASCRIPT, ERROR_TEXT);
         clickButton("Next");
         clickButton("Cancel", longWaitForPage);
 
         // Delete the first run, files should be archived
         checkCheckbox(Locator.checkboxByName(".select"));
         clickButton("Delete");
-        waitForText("Confirm Deletion", WAIT_FOR_JAVASCRIPT);
+        waitForText(WAIT_FOR_JAVASCRIPT, "Confirm Deletion");
         clickButton("Confirm Delete");
-        waitForText("Description for Luminex assay", WAIT_FOR_JAVASCRIPT);
+        waitForText(WAIT_FOR_JAVASCRIPT, "Description for Luminex assay");
 
         // Create a run with a duplicate file within the set of files
         createNewAssayRun(TEST_ASSAY_LUM, assayRunIds[2]);
         addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3, TEST_ASSAY_MULTIPLE_STANDARDS_3);
         // verify that the error message for duplicate entries pops up, and that the first remove button is enabled (checks prior bug)
-        waitForText("duplicate", WAIT_FOR_JAVASCRIPT);
+        waitForText(WAIT_FOR_JAVASCRIPT, "duplicate");
         clickButton("OK", 0);
     }
 }
