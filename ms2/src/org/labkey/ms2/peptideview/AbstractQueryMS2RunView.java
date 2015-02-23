@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.NestableQueryView;
@@ -262,7 +263,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             TSVGridWriter tsvWriter = getTsvWriter();
             if (form.isExportAsWebPage())
                 tsvWriter.setExportAsWebPage(true);
-            tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+            tsvWriter.setColumnHeaderType(ColumnHeaderType.Caption);
             tsvWriter.setFileHeader(headers);
             tsvWriter.write(response);
             return null;

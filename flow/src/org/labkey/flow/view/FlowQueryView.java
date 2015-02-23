@@ -18,6 +18,7 @@ package org.labkey.flow.view;
 
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.MenuButton;
@@ -383,8 +384,8 @@ public class FlowQueryView extends QueryView
         return ntc;
     }
 
-    protected TSVGridWriter.ColumnHeaderType getColumnHeaderType()
+    protected ColumnHeaderType getColumnHeaderType()
     {
-        return TSVGridWriter.ColumnHeaderType.queryColumnName;
+        return ColumnHeaderType.FieldKey;
     }
 }
