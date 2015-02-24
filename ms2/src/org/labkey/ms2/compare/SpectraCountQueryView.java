@@ -17,6 +17,7 @@
 package org.labkey.ms2.compare;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TSVGridWriter;
@@ -78,9 +79,10 @@ public class SpectraCountQueryView extends QueryView
         return result;
     }
 
-    public TSVGridWriter getTsvWriter() throws IOException
+    @Override
+    protected TSVGridWriter getTsvWriter(ColumnHeaderType headerType) throws IOException
     {
-        TSVGridWriter result = super.getTsvWriter();
+        TSVGridWriter result = super.getTsvWriter(headerType);
         String header = getExportHeader();
         if (header != null)
         {
