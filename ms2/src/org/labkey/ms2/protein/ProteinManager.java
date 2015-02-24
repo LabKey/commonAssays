@@ -1407,7 +1407,7 @@ public class ProteinManager
                 if (fieldKeyParts.size() > 2 && "ProteinProphetData".equalsIgnoreCase(fieldKeyParts.get(0)) && "ProteinGroupId".equalsIgnoreCase(fieldKeyParts.get(1)))
                 {
                     Object value = compareClause.getParamVals().length > 0 ? compareClause.getParamVals()[0] : null;
-                    proteinFilter.addClause(new CompareType.CompareClause(FieldKey.fromParts(fieldKeyParts.subList(2, fieldKeyParts.size())), compareClause.getComparison(), value));
+                    proteinFilter.addClause(new CompareType.CompareClause(FieldKey.fromParts(fieldKeyParts.subList(2, fieldKeyParts.size())), compareClause.getCompareType(), value));
                 }
             }
         }
