@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 public class LuminexGuideSetHelper
 {
     public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte (1)", "GS Analyte (2)"};
-    protected String today = null;
+    private static Map<Integer, String> timestamps = new HashMap<>();
     LuminexTest _test;
     
     public Calendar TESTDATE = Calendar.getInstance();
@@ -39,7 +39,6 @@ public class LuminexGuideSetHelper
     {
         _test = test;
         _runNumber = 1;
-        today = LuminexTest.df.format(Calendar.getInstance().getTime());
     }
 
     public int importGuideSetRun(String assayName, File guideSetFile)
@@ -87,7 +86,8 @@ public class LuminexGuideSetHelper
         {
             _test.waitForText("Manage Guide Set...");
             _test.waitForText("Guide Set ID:");
-            _test.assertTextPresentInThisOrder("Created:", today);
+            Integer id = Integer.parseInt(Locator.id("guideSetIdLabel").waitForElement(_test.getDriver(), _test.shortWait()).getText());
+            _test.assertTextPresentInThisOrder("Created:", timestamps.get(id));
         }
     }
 
@@ -124,7 +124,6 @@ public class LuminexGuideSetHelper
             _test.assertElementNotPresent(Locator.button("Save"));
             _test.assertElementPresent(Locator.button("Create"));
             _test.clickButton("Create", 0);
-            today = LuminexTest.df.format(Calendar.getInstance().getTime());
         }
         else
         {
@@ -133,11 +132,14 @@ public class LuminexGuideSetHelper
             _test.clickButton("Save", 0);
         }
         waitForGuideSetExtMaskToDisappear();
+        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.getDriver(), _test.shortWait()).getAttribute("guide-set-id"));
+        timestamps.put(id, LuminexTest.df.format(Calendar.getInstance().getTime()));
     }
 
     private void checkLeveyJenningsGuideSetHeader(String comment, String guideSetType)
     {
-        _test.waitForElement(Locator.tagWithText("td", today), 2 * _test.defaultWaitForPage);
+        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.getDriver(), _test.shortWait()).getAttribute("guide-set-id"));
+        _test.waitForElement(Locator.tagWithText("td", timestamps.get(id)), 2 * _test.defaultWaitForPage);
         _test.waitForElement(Locator.tagWithText("td", comment));
         _test.assertElementPresent(Locator.tagWithText("td", guideSetType));
     }

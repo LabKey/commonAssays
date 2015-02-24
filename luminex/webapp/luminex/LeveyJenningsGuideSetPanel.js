@@ -211,7 +211,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 // there can only be one current guide set for any given set of graph params
                 var row = data.rows[0];
 
-                var html = '<table class="guideset-tbl">'
+                var html = '<table class="guideset-tbl" guide-set-id="' + row["RowId"] + '">'
                         + '<tr><td class="guideset-hdr">Created:</td><td width="200">' + this.formatDate(row["Created"]) + '</td>'
                         + '<td class="guideset-hdr">Type: </td><td>' + (row["ValueBased"] ? 'Value-based' : 'Run-based') + '</td></tr>'
                         + '<tr><td class="guideset-hdr">Comment:</td><td colspan="3">' + (row["Comment"] == null ? "&nbsp;" : $h(row["Comment"])) + '</td></tr>'
