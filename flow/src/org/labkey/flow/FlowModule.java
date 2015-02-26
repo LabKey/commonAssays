@@ -83,7 +83,6 @@ import java.util.Set;
 
 public class FlowModule extends DefaultModule
 {
-//    static final private Logger _log = Logger.getLogger(FlowModule.class);
     public static final String NAME = "Flow";
 
     public String getName()
@@ -93,7 +92,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.30;
+        return 15.10;
     }
 
     protected void init()

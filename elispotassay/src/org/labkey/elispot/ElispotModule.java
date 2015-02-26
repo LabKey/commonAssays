@@ -39,7 +39,7 @@ public class ElispotModule extends DefaultModule
 
     public double getVersion()
     {
-        return 14.31;
+        return 15.10;
     }
 
     protected void init()
@@ -55,14 +55,7 @@ public class ElispotModule extends DefaultModule
 
     public boolean hasScripts()
     {
-        return true;
-    }
-
-    @NotNull
-    @Override
-    public Collection<String> getSchemaNames()
-    {
-        return Collections.singleton("elispotassay");
+        return false;
     }
 
     public void doStartup(ModuleContext moduleContext)

@@ -139,8 +139,6 @@ elisa/src/org/labkey/elisa/view/runDetailsView.jsp -text
 elisa/webapp/elisa/runDataPanel.js -text
 elisa/webapp/elisa/runDetailsPanel.js -text
 elispotassay/module.properties -text
-elispotassay/resources/schemas/dbscripts/postgresql/elispotassay-14.30-14.31.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/elispotassay-14.30-14.31.sql -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text
@@ -656,6 +654,7 @@ luminex/resources/schemas/dbscripts/postgresql/luminex-14.20-14.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.21-14.22.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.22-14.23.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.30-14.31.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-14.30-15.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.31-14.32.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.32-14.33.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.33-14.34.sql -text
@@ -725,6 +724,7 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-14.20-14.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.21-14.22.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.22-14.23.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.30-14.31.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-14.30-15.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.31-14.32.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.32-14.33.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-14.33-14.34.sql -text
@@ -1808,6 +1808,7 @@ nab/resources/schemas/dbscripts/sqlserver/nab-14.20-14.21.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-14.20-14.30.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-14.21-14.22.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-14.30-14.31.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-14.30-15.10.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.31-12.32.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.32-12.33.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-12.34-12.35.sql -text

@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
---EXEC core.executeJavaUpgradeCode 'upgradePlateReaderList';
+/* nab-14.30-14.31.sql */
+
+-- Rename NAb schema to nab. See #21853.
+CREATE SCHEMA nab_xxx;
+GO
+ALTER SCHEMA nab_xxx TRANSFER NAb.CutoffValue;
+ALTER SCHEMA nab_xxx TRANSFER NAb.NAbSpecimen;
+DROP SCHEMA NAb;
+GO
+
+CREATE SCHEMA nab;
+GO
+ALTER SCHEMA nab TRANSFER nab_xxx.CutoffValue;
+ALTER SCHEMA nab TRANSFER nab_xxx.NAbSpecimen;
+DROP SCHEMA nab_xxx;
+GO
