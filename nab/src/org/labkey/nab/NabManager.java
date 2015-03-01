@@ -151,7 +151,12 @@ public class NabManager extends AbstractNabManager
             ExpProtocol protocol = entry.getValue();
             List<Integer> rowIds = new TableSelector(dataTable.getColumn("RowId"), filter, null).getArrayList(Integer.class);
             if (rowIds.size() > 0)
-                readableObjectIds.put(rowIds.get(0), protocol);
+            {
+                for (Integer rowId : rowIds)
+                {
+                    readableObjectIds.put(rowId, protocol);
+                }
+            }
         }
         return readableObjectIds;
     }
