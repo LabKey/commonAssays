@@ -261,6 +261,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             if (++wellCount == wellsPerPlate)
             {
                 plates.add(wellValues);
+                wellValues = new double[expectedRows][expectedCols];
                 plateCount++;
                 wellCount = 0;
             }
