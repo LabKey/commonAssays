@@ -359,15 +359,15 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     {
         clickDeleteOnGuideSetWithComment(RUN_BASED_COMMENT);
 
-        assertTextPresent("LuminexGuideSetDisablingTest ENV1 (31)");
-        assertTextPresent("Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
+        assertTextPresent("LuminexGuideSetDisablingTest ENV1 (31)",
+                "Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
 
         clickButton("Confirm Delete");
 
         clickDeleteOnGuideSetWithComment(VALUE_BASED_COMMENT);
 
-        assertTextPresent("LuminexGuideSetDisablingTest ENV2 (41)");
-        assertTextPresent("Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
+        assertTextPresent("LuminexGuideSetDisablingTest ENV2 (41)",
+                "Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
 
         clickButton("Confirm Delete");
 

@@ -49,12 +49,12 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         checkQCControlCheckBoxesExist(standardsNames);
         checkOtherControlCheckboxesExist(standardsNames);
 
-        WellRole[] std1Roles={WellRole.OTHER_CONTROL};
+        WellRole[] std1Roles = {WellRole.OTHER_CONTROL};
         //selectRoleCheckboxesForStandard("Standard1", std1Roles);
 
         String[] possibleAnalytes = getListOfAnalytesMultipleCurveData();
-        String[] possibleStandards = new String[] {"Standard2", "Standard1"};
-        String[] possibleRoles = new String[] {"Standard","QC Control", "Other Control"};
+        String[] possibleStandards = new String[]{"Standard2", "Standard1"};
+        String[] possibleRoles = new String[]{"Standard", "QC Control", "Other Control"};
 
         Map<String, Set<String>> analytesAndStandardsConfig = generateAnalytesAndStandardsConfig(possibleAnalytes, possibleStandards);
         configureStandardsForAnalytes(analytesAndStandardsConfig, possibleStandards);
@@ -112,8 +112,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         reImportData(testRoles);
         goToQCAnalysisPage(TEST_ASSAY_LUM, "view titration qc report");
         //both roles should be present in qc report
-        assertTextPresent("Standard1");
-        assertTextPresent("Standard2");
+        assertTextPresent("Standard1", "Standard2");
 
     }
 

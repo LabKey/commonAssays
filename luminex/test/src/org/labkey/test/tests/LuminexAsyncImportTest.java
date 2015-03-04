@@ -158,8 +158,8 @@ public final class LuminexAsyncImportTest extends LuminexTest
 
         //Check for Analyte Properties
         assertTextPresentInThisOrder("----- Start Analyte Properties -----", "----- Stop Analyte Properties -----");
-        assertTextPresent("Properties for GS Analyte (2)", "Properties for GS Analyte (1)");
-        assertTextPresent("*LotNumber:", "*NegativeControl:", "*PositivityThreshold:");
+        assertTextPresent("Properties for GS Analyte (2)", "Properties for GS Analyte (1)", "*LotNumber:",
+                "*NegativeControl:", "*PositivityThreshold:");
 
         //Check for Well Role Properties
         assertTextPresentInThisOrder("----- Start Well Role Properties -----", "----- Stop Well Role Properties -----");

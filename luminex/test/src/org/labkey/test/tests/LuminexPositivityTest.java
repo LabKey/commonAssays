@@ -172,9 +172,10 @@ public final class LuminexPositivityTest extends LuminexTest
         setPositivityThresholdParams(100, 100);
         setNegativeControlParams(true, false);
         uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run Error", TEST_ASSAY_LUM_FILE12, "1", "3", false, false);
-        assertTextPresent("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400001, Visit=1.");
-        assertTextPresent("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400002, Visit=1.");
-        assertTextPresent("Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400003, Visit=1.");
+        assertTextPresent(
+                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400001, Visit=1.",
+                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400002, Visit=1.",
+                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400003, Visit=1.");
         clickButton("Cancel");
 
         // delete all but one run of data so we have the expected number of previous baseline visits rows
@@ -203,9 +204,9 @@ public final class LuminexPositivityTest extends LuminexTest
         // now we actual test the case of getting baseline visit data from a previously uploaded run
         setPositivityThresholdParams(99, 98);
         uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 2", TEST_ASSAY_LUM_FILE12, "1", "3", false, true);
-        String[] posWells = new String[] {"A2", "B2", "A6", "B6", "A9", "B9", "A10", "B10"};
+        String[] posWells = new String[]{"A2", "B2", "A6", "B6", "A9", "B9", "A10", "B10"};
         checkPositivityValues("positive", posWells.length, posWells);
-        String[] negWells = new String[] {"A3", "B3", "A5", "B5"};
+        String[] negWells = new String[]{"A3", "B3", "A5", "B5"};
         checkPositivityValues("negative", negWells.length, negWells);
     }
 

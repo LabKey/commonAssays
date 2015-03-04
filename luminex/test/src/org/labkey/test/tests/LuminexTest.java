@@ -311,9 +311,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
         table.setFilter("Info", "Starts With", expectedInfo);
         assertElementPresent(Locator.linkWithText("COMPLETE"), numMatchingJobs);
         clickAndWait(Locator.linkWithText("COMPLETE", 0));
-        assertTextPresent(expectedInfo);
-        assertTextPresent("Assay Id: " + runName);
-        assertTextPresent("Comment: " + exclusionComment);
+        assertTextPresent(
+                expectedInfo,
+                "Assay Id: " + runName,
+                "Comment: " + exclusionComment);
         assertTextPresent("Finished", numCommands);
         clickButtonContainingText("Data");
     }

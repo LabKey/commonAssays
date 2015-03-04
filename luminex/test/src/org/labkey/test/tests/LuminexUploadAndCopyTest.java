@@ -180,10 +180,11 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME3));
-        assertTextPresent("IL-1b (1)");
-        assertTextPresent("ListParticipant1");
-        assertTextPresent("ListParticipant2");
-        assertTextPresent("ListParticipant3");
+        assertTextPresent(
+                "IL-1b (1)",
+                "ListParticipant1",
+                "ListParticipant2",
+                "ListParticipant3");
         setFilter("Data", "ParticipantID", "Equals", "ListParticipant1");
         assertTextPresent("1.1");
         setFilter("Data", "ParticipantID", "Equals", "ListParticipant2");
@@ -191,11 +192,12 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME4));
-        assertTextPresent("IL-1b (1)");
-        assertTextPresent("ListParticipant1");
-        assertTextPresent("ListParticipant2");
-        assertTextPresent("ListParticipant3");
-        assertTextPresent("ListParticipant4");
+        assertTextPresent(
+                "IL-1b (1)",
+                "ListParticipant1",
+                "ListParticipant2",
+                "ListParticipant3",
+                "ListParticipant4");
         setFilter("Data", "ParticipantID", "Equals", "ListParticipant1");
         assertTextPresent("1001.1");
         setFilter("Data", "ParticipantID", "Equals", "ListParticipant2");
@@ -203,8 +205,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME2), longWaitForPage);
-        assertTextPresent("IL-1b (1)");
-        assertTextPresent("9011-04");
+        assertTextPresent("IL-1b (1)", "9011-04");
 
         setFilter("Data", "FI", "Equals", "20");
         click(Locator.name(".toggle"));
@@ -216,10 +217,11 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Copy to Study");
 
         log("Verify that the data was published");
-        assertTextPresent("ParticipantID");
-        assertTextPresent("100.1");
-        assertTextPresent(TEST_ASSAY_LUM_RUN_NAME2);
-        assertTextPresent("LX10005314302");
+        assertTextPresent(
+                "ParticipantID",
+                "100.1",
+                TEST_ASSAY_LUM_RUN_NAME2,
+                "LX10005314302");
 
         // Upload another run that has both Raw and Summary data in the same excel file
         clickProject(TEST_ASSAY_PRJ_LUMINEX);
