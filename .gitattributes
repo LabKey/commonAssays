@@ -23,6 +23,11 @@ authentication/src/org/labkey/authentication/opensso/view/referrerPrefix.jsp -te
 authentication/src/org/labkey/authentication/saml/SamlController.java -text
 authentication/src/org/labkey/authentication/saml/SamlManager.java -text
 authentication/src/org/labkey/authentication/saml/SamlProvider.java -text
+authentication/webapp/authentication/duo/Duo-Web-v1.bundled.js -text
+authentication/webapp/authentication/duo/Duo-Web-v1.bundled.min.js -text
+authentication/webapp/authentication/duo/Duo-Web-v1.js -text
+authentication/webapp/authentication/duo/Duo-Web-v1.min.js -text
+authentication/webapp/authentication/duo/LICENSE -text
 authentication/webapp/authentication/openid_google.png -text
 cbcassay/CBCAssay.iml -text
 cbcassay/data/ex_20081016_131859.small.dat -text
