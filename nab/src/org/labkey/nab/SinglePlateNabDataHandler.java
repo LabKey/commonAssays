@@ -65,6 +65,7 @@ import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.plate.PlateUtils;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabVirusDomainKind;
@@ -219,7 +220,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         // Next, attempt to parse grid-style data without column headers.
         loader = load.createGrid();
         rows = loader.load();
-        double[][] matrix = parseGrid(dataFile, rows, expectedRows, expectedCols);
+        double[][] matrix = PlateUtils.parseGrid(dataFile, rows, expectedRows, expectedCols);
         if (matrix != null)
             return matrix;
 
