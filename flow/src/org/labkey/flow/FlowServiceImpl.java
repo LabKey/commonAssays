@@ -41,7 +41,7 @@ public class FlowServiceImpl implements FlowService
     public List<ExpData> getExpDataByURL(String canonicalURL, @Nullable Container container)
     {
         List<ExpData> ret = new LinkedList<>();
-        SQLFragment sql = new SQLFragment("SELECT dataid FROM " + FlowManager.get().getTinfoObject().getFromSQL("O") + " WHERE uri=?");
+        SQLFragment sql = new SQLFragment("SELECT dataid FROM ").append(FlowManager.get().getTinfoObject().getFromSQL("O")).append(" WHERE uri=?");
         sql.add(canonicalURL);
 
         if (null != container)

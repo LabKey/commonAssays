@@ -662,9 +662,10 @@ public class MS2Schema extends UserSchema
         notDeletedSQL.add(false);
         result.addCondition(notDeletedSQL, FieldKey.fromParts("Run"));
 
-        SQLFragment fractionNameSQL = new SQLFragment("CASE WHEN ");
-        fractionNameSQL.append(dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName")));
-        fractionNameSQL.append(" > 0 THEN " + dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName")) + "- 1") + " ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
+        SQLFragment fractionNameSQL = new SQLFragment("CASE")
+                .append(" WHEN ").append(dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName"))).append(" > 0")
+                .append(" THEN ").append(dialect.getSubstringFunction(new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName"), new SQLFragment("1"), dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName")).append("- 1")))
+                .append(" ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
 
         ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, JdbcType.VARCHAR);
         fractionName.setLabel("Name");

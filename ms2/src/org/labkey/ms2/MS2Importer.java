@@ -404,7 +404,7 @@ public abstract class MS2Importer
         _updateSeqIdSql = sql.toString();
     }
 
-    private static String _updateSequencePositionSql;
+    private static SQLFragment _updateSequencePositionSql;
 
     static
     {
@@ -412,23 +412,24 @@ public abstract class MS2Importer
                 new SQLFragment("TrimmedPeptide"), new SQLFragment("CASE WHEN (NextAA = ' ' OR NextAA = '-') THEN '' ELSE CAST(NextAA AS VARCHAR) END"));
         SQLFragment positionSQL = MS2Manager.getSqlDialect().getStringIndexOfFunction(searchSQL, new SQLFragment("ProtSequence"));
 
-        _updateSequencePositionSql = "UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SequencePosition = COALESCE(\n" +
+        _updateSequencePositionSql = new SQLFragment("UPDATE ").append(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(" SET SequencePosition = COALESCE(\n" +
                 "       CASE WHEN PrevAA = ' ' OR PrevAA = '-' THEN\n" +
                 "           CASE WHEN NextAA = ' ' OR NextAA = '-' THEN\n" +
-                "               CASE WHEN " + positionSQL + " = 1 AND " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) = " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN 1 END\n" +
+                "               CASE WHEN ").append(positionSQL).append(" = 1 AND " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) = " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN 1 END\n" +
                 "           ELSE\n" +
-                "               CASE WHEN " + positionSQL + " = 1 THEN 1 END\n" +
+                "               CASE WHEN ").append(positionSQL).append(" = 1 THEN 1 END\n" +
                 "           END\n" +
                 "       ELSE\n" +
                 "           CASE WHEN NextAA = ' ' OR NextAA = '-' THEN\n" +
-                "               CASE WHEN " + positionSQL + " = " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) - " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN " + positionSQL + " + 1 END\n" +
+                "               CASE WHEN ").append(positionSQL).append(" = " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) - " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN ").append(positionSQL).append(" + 1 END\n" +
                 "           ELSE\n" +
-                "               CASE WHEN " + positionSQL + " > 0 THEN " + positionSQL + " + 1 END\n" +
+                "               CASE WHEN ").append(positionSQL).append(" > 0 THEN ").append(positionSQL).append(" + 1 END\n" +
                 "           END\n" +
                 "       END\n" +
                 ", 0)\n" +
-                "FROM " + ProteinManager.getTableInfoSequences() + " ps\n" +
-                "WHERE " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = ps.SeqId AND " + MS2Manager.getTableInfoPeptidesData() + ".Fraction = ?";
+                "FROM ").append(ProteinManager.getTableInfoSequences().getSelectName()).append(" ps\n" +
+                "WHERE ").append(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(".SeqId = ps.SeqId AND ").append(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(".Fraction = ?");
+        _updateSequencePositionSql.add(null); // fractionid
     }
 
 
@@ -461,7 +462,11 @@ public abstract class MS2Importer
 
         for (MS2Fraction fraction : fractions)
         {
-            int rowCount = executor.execute(_updateSequencePositionSql, fraction.getFraction());
+            // the last parameter is the factionid
+            // consider SQLfragment with named parameters???
+            SQLFragment sqlf = new SQLFragment(_updateSequencePositionSql);
+            sqlf.set(sqlf.getParams().size()-1,fraction.getFraction());
+            int rowCount = executor.execute(sqlf);
             _log.info("Set SequencePosition values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
         }
     }
