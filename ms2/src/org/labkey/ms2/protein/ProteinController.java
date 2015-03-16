@@ -311,9 +311,8 @@ public class ProteinController extends SpringActionController
                 {
                     ColumnDescriptor cd = columns[i];
                     PropertyDescriptor pd = new PropertyDescriptor();
-                    DomainDescriptor dd = new DomainDescriptor();
-                    dd.setDomainURI(annotationSet.getLsid());
-                    dd.setContainer(getContainer());
+                    DomainDescriptor dd = new DomainDescriptor.Builder(annotationSet.getLsid(), getContainer()).build();
+
                     //todo :  name for domain?
                     pd.setName(cd.name);
                     String legalName = ColumnInfo.legalNameFromName(cd.name);
