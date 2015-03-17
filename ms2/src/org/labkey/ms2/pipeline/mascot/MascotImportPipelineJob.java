@@ -142,31 +142,34 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                     workFile.getParentFile());
 
             PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
-            fileOutputXML = new File(pepxft.getName(dirWork.getAbsolutePath(), _baseName));
+            fileOutputXML = new File(dirWork.getAbsolutePath(), pepxft.getName(dirWork.getAbsolutePath(), _baseName));
             // three possible output names: basename.xml, basename.pep.xml, basename.pep.xml.gz
             String pepXMLFileName = _baseName + "." + pepxft.getDefaultRole() + (fileOutputXML.getName().endsWith(".gz")?".gz":"");
             filePepXML = new File(_dirAnalysis, pepXMLFileName);
 
             // we let any error fall thru' to super.run() so that
             // MS2Run's status get updated correctly
-            if (!fileOutputTGZ.exists() || !fileOutputXML.exists())
+            if (!fileOutputTGZ.exists())
             {
-                getLogger().error("Failed running Mascot2XML.");
+                getLogger().error("Failed running Mascot2XML - expected output file " + fileOutputTGZ + " was not created");
                 return;
             }
-            else
+            if (!fileOutputXML.exists())
             {
-                // let's rename the file to the appropriate extension
-                if (!fileOutputTGZ.renameTo (filePepXMLTGZ))
-                {
-                    getLogger().error("Failed move "+fileOutputTGZ.getName()+" to "+filePepXMLTGZ.getAbsolutePath());
-                    return;
-                }
-                if (!fileOutputXML.renameTo (filePepXML))
-                {
-                    getLogger().error("Failed move "+fileOutputXML.getName()+" to "+filePepXML.getAbsolutePath());
-                    return;
-                }
+                getLogger().error("Failed running Mascot2XML - expected output file " + fileOutputXML + " was not created");
+                return;
+            }
+
+            // let's rename the file to the appropriate extension
+            if (!fileOutputTGZ.renameTo (filePepXMLTGZ))
+            {
+                getLogger().error("Failed moving "+fileOutputTGZ.getName()+" to "+filePepXMLTGZ.getAbsolutePath());
+                return;
+            }
+            if (!fileOutputXML.renameTo (filePepXML))
+            {
+                getLogger().error("Failed moving "+fileOutputXML.getName()+" to "+filePepXML.getAbsolutePath());
+                return;
             }
 
             // let's import the .pep.xml file
