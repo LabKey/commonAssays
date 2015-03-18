@@ -29,7 +29,7 @@ function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
         };
     }
 
-    LABKEY.initializeViewDesigner(function ()
+    LABKEY.initializeExt3ViewDesigner(function ()
     {
         var viewName = viewSelectId == null || viewSelectId == '' ? null : document.getElementById(viewSelectId).value;
         LABKEY.Query.getQueryDetails(
