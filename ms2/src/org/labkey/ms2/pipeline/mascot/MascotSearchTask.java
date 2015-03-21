@@ -162,7 +162,8 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
     {
         try
         {
-            Map<String, String> params = getJob().getParameters();
+            // Make a copy so that we can modify the map
+            Map<String, String> params = new HashMap<>(getJob().getParameters());
 
             RecordedAction mzxml2SearchAction = new RecordedAction(MZXML2SEARCH_ACTION_NAME);
             RecordedAction mascotAction = new RecordedAction(MASCOT_ACTION_NAME);
