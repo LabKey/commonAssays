@@ -19,6 +19,7 @@ package org.labkey.elispot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
@@ -42,6 +43,7 @@ import org.labkey.api.study.assay.AssayProviderSchema;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.DetectionMethodAssayProvider;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.study.assay.plate.ExcelPlateReader;
@@ -66,7 +68,7 @@ import java.util.Set;
  * User: Karl Lum
  * Date: Jan 7, 2008
  */
-public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
+public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implements DetectionMethodAssayProvider
 {
     public static final String NAME = "ELISpot";
     public static final String ASSAY_DOMAIN_ANTIGEN_WELLGROUP = ExpProtocol.ASSAY_DOMAIN_PREFIX + "AntigenWellGroup";
@@ -304,5 +306,29 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             return type.getInstance();
         else
             return super.getPlateReader(readerName);
+    }
+
+    @Override
+    public void setSelectedDetectionMethod(Container container, ExpProtocol protocol, String method)
+    {
+        // consider a detectionMethod bit (look at AbstractPlateBasedASsayProvider setPlateTemplate)
+        Map<String, ObjectProperty> props = new HashMap<>(protocol.getObjectProperties());
+        ObjectProperty prop = new ObjectProperty(protocol.getLSID(), protocol.getContainer(),
+                protocol.getLSID() + "#SelectedDetectionMethod", method);
+        props.put(prop.getPropertyURI(), prop);
+        protocol.setObjectProperties(props);
+    }
+
+    @Override
+    public String getSelectedDetectionMethod(Container container, ExpProtocol protocol)
+    {
+        ObjectProperty prop = protocol.getObjectProperties().get(protocol.getLSID() + "#SelectedDetectionMethod");
+        return prop != null ? prop.getStringValue() : null;
+    }
+
+    @Override
+    public List<String> getAvailableDetectionMethods()
+    {
+        return Arrays.asList("colormetric", "fluroescent");
     }
 }
