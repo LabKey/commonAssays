@@ -56,6 +56,7 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.elispot.plate.AIDPlateReader;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -126,6 +127,34 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         public static PlateReaderType fromLabel(String label)
         {
             for (PlateReaderType type : values())
+            {
+                if (type.getLabel().equals(label))
+                    return type;
+            }
+            return null;
+        }
+    }
+
+    public enum DetectionMethodType
+    {
+        COLORIMETRIC("colorimetric"),
+        FLUORESCENT("fluorescent");
+
+        private String _label;
+
+        private DetectionMethodType(String label)
+        {
+            _label = label;
+        }
+
+        public String getLabel()
+        {
+            return _label;
+        }
+
+        public static DetectionMethodType fromLabel(String label)
+        {
+            for (DetectionMethodType type : values())
             {
                 if (type.getLabel().equals(label))
                     return type;
@@ -326,9 +355,25 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return prop != null ? prop.getStringValue() : null;
     }
 
+    @Nullable
+    public DetectionMethodType getDetectionMethod(Container container, ExpProtocol protocol)
+    {
+        String method = getSelectedDetectionMethod(container, protocol);
+        if (method != null)
+        {
+            return DetectionMethodType.fromLabel(method);
+        }
+        return null;
+    }
+
     @Override
     public List<String> getAvailableDetectionMethods()
     {
-        return Arrays.asList("colormetric", "fluroescent");
+        List<String> methods = new ArrayList<>();
+        for (DetectionMethodType type : DetectionMethodType.values())
+        {
+            methods.add(type.getLabel());
+        }
+        return methods;
     }
 }

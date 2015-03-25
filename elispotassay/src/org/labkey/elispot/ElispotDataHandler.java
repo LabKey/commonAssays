@@ -51,12 +51,16 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.elispot.plate.ColorimetricPlateInfo;
+import org.labkey.elispot.plate.FluorescentPlateInfo;
+import org.labkey.elispot.plate.PlateInfo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -78,6 +82,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     public static final String NAMESPACE = "ElispotAssayData";
     private static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".txt", ".xls", ".xlsx"), ".txt"));
     private static final DataType ELISPOT_TRANSFORMED_DATA_TYPE = new DataType("ElispotTransformedData"); // a marker data type
+
+    public static final String ACTIVITY_PROPERTY_NAME = "Activity";
+    public static final String INTENSITY_PROPERTY_NAME = "Intensity";
 
     @Override
     public DataType getDataType()
@@ -121,31 +128,38 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                 {
                     Map<DomainProperty, String> runPropValues = ((AssayUploadXarContext)_context).getContext().getRunProperties();
                     PlateReader reader = provider.getPlateReader(runPropValues.get(readerProp));
-                    Plate plate = initializePlate(_dataFile, template, reader);
+                    Map<PlateInfo, Plate> plates = initializePlates(protocol, _dataFile, template, reader);
 
                     List<Map<String, Object>> results = new ArrayList<>();
                     Map<String, ExpMaterial> materialMap = new HashMap<>();
                     for (ExpMaterial material : run.getMaterialInputs().keySet())
                         materialMap.put(material.getName(), material);
 
-                    for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
+                    for (Map.Entry<PlateInfo, Plate> entry : plates.entrySet())
                     {
-                        ExpMaterial material = materialMap.get(group.getName());
-                        if (material != null)
+                        // TODO : remove this assert when populating fluorospot data is working
+                        assert (plates.size() == 1) : "fluorospot run data population not yet implemented";
+
+                        Plate plate = entry.getValue();
+                        for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                         {
-                            for (Position pos : group.getPositions())
+                            ExpMaterial material = materialMap.get(group.getName());
+                            if (material != null)
                             {
-                                Well well = plate.getWell(pos.getRow(), pos.getColumn());
-                                Map<String, Object> row = new LinkedHashMap<>();
+                                for (Position pos : group.getPositions())
+                                {
+                                    Well well = plate.getWell(pos.getRow(), pos.getColumn());
+                                    Map<String, Object> row = new LinkedHashMap<>();
 
-                                row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-                                row.put(SFU_PROPERTY_NAME, well.getValue());
-                                row.put(WELLGROUP_PROPERTY_NAME, group.getName());
-                                row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());
-                                row.put(WELL_ROW_PROPERTY, pos.getRow());
-                                row.put(WELL_COLUMN_PROPERTY, pos.getColumn());
+                                    row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
+                                    row.put(SFU_PROPERTY_NAME, well.getValue());
+                                    row.put(WELLGROUP_PROPERTY_NAME, group.getName());
+                                    row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());
+                                    row.put(WELL_ROW_PROPERTY, pos.getRow());
+                                    row.put(WELL_COLUMN_PROPERTY, pos.getColumn());
 
-                                results.add(row);
+                                    results.add(row);
+                                }
                             }
                         }
                     }
@@ -176,14 +190,38 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return datas;
     }
 
-    public static Plate initializePlate(File dataFile, PlateTemplate template, PlateReader reader) throws ExperimentException
+    public static Map<PlateInfo, Plate> initializePlates(ExpProtocol protocol, File dataFile, PlateTemplate template, PlateReader reader) throws ExperimentException
     {
-        if (reader != null)
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        Map<PlateInfo, Plate> plateMap = new HashMap<>();
+
+        if (reader != null && provider instanceof ElispotAssayProvider)
         {
-            double[][] cellValues = reader.loadFile(template, dataFile);
-            return PlateService.get().createPlate(template, cellValues);
+            ElispotAssayProvider.DetectionMethodType method = ((ElispotAssayProvider) provider).getDetectionMethod(protocol.getContainer(), protocol);
+
+            if (method == ElispotAssayProvider.DetectionMethodType.COLORIMETRIC)
+            {
+                double[][] cellValues = reader.loadFile(template, dataFile);
+                plateMap.put(new ColorimetricPlateInfo(), PlateService.get().createPlate(template, cellValues));
+            }
+            else if (method == ElispotAssayProvider.DetectionMethodType.FLUORESCENT)
+            {
+                for (Map.Entry<String, double[][]> entry : reader.loadMultiGridFile(template, dataFile).entrySet())
+                {
+                    // attempt to parse the plate grid annotation into a PlateInfo object
+                    FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(entry.getKey());
+                    if (plateInfo != null)
+                    {
+                        plateMap.put(plateInfo, PlateService.get().createPlate(template, entry.getValue()));
+                    }
+                }
+            }
+            else
+            {
+                throw new UnsupportedOperationException("ELISpot detection method " + method + " not supported");
+            }
         }
-        return null;
+        return plateMap;
     }
     
     public Priority getPriority(ExpData data)

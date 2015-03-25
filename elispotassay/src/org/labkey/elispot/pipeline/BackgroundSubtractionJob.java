@@ -45,6 +45,7 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
+import org.labkey.elispot.plate.PlateInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -182,7 +183,6 @@ public class BackgroundSubtractionJob extends PipelineJob
     {
         PlateTemplate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
         List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
-        Plate plate = null;
 
         if (reader != null)
         {
@@ -190,11 +190,18 @@ public class BackgroundSubtractionJob extends PipelineJob
 
             if (dataFile.exists())
             {
-                plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
+                // TODO: how to handle background subtraction for fluorospot scans
+                for (Map.Entry<PlateInfo, Plate> entry : ElispotDataHandler.initializePlates(run.getProtocol(), data.get(0).getFile(), template, reader).entrySet())
+                {
+                    if (entry.getKey().getMeasurement().equals(ElispotDataHandler.SFU_PROPERTY_NAME))
+                    {
+                        return entry.getValue();
+                    }
+                }
             }
             else
                 error("The original run data file does not exist: " + dataFile.getName());
         }
-        return plate;
+        return null;
     }
 }

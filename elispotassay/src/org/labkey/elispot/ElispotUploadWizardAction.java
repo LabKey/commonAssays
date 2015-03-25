@@ -46,6 +46,7 @@ import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
+import org.labkey.elispot.plate.PlateInfo;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
@@ -336,7 +337,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     throw new ExperimentException("Elispot should only upload a single file per run.");
 
                 PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
-                Plate plate = null;
+                Map<PlateInfo, Plate> plates = Collections.EMPTY_MAP;
                 PlateReader reader = null;
 
                 // populate property name to value map
@@ -347,7 +348,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
                     reader = provider.getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
-                    plate = ElispotDataHandler.initializePlate(data.get(0).getFile(), template, reader);
+                    plates = ElispotDataHandler.initializePlates(form.getProtocol(), data.get(0).getFile(), template, reader);
                 }
 
                 boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;
@@ -361,10 +362,14 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                         postedPropMap.put(getInputName(propEntry.getKey(), groupName), propEntry.getValue());
                 }
 
-                if (plate != null)
+                for (Map.Entry<PlateInfo, Plate> entry : plates.entrySet())
                 {
-                    ElispotDataHandler.populateAntigenDataProperties(run, plate, reader, postedPropMap, false, subtractBackground);
-                    ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, postedPropMap, false, subtractBackground);
+                    Plate plate = entry.getValue();
+                    if (plate != null)
+                    {
+                        ElispotDataHandler.populateAntigenDataProperties(run, plate, reader, postedPropMap, false, subtractBackground);
+                        ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, postedPropMap, false, subtractBackground);
+                    }
                 }
                 transaction.commit();
 

@@ -165,6 +165,9 @@ elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/pipeline/BackgroundSubtractionJob.java -text
 elispotassay/src/org/labkey/elispot/pipeline/ElispotPipelineProvider.java -text
 elispotassay/src/org/labkey/elispot/plate/AIDPlateReader.java -text
+elispotassay/src/org/labkey/elispot/plate/ColorimetricPlateInfo.java -text
+elispotassay/src/org/labkey/elispot/plate/FluorescentPlateInfo.java -text
+elispotassay/src/org/labkey/elispot/plate/PlateInfo.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunAntigenTable.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
