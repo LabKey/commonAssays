@@ -30,6 +30,7 @@ import java.util.Map;
 public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvider> implements PlateUploadForm<ElispotAssayProvider>
 {
     private Map<String, Map<DomainProperty, String>> _antigenProperties;
+    private Map<String, Map<DomainProperty, String>> _analyteProperties;
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
     private PlateSamplePropertyHelper _samplePropertyHelper;
 
@@ -61,5 +62,15 @@ public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvide
     public void setAntigenProperties(Map<String, Map<DomainProperty, String>> antigenProperties)
     {
         _antigenProperties = antigenProperties;
+    }
+
+    public Map<String, Map<DomainProperty, String>> getAnalyteProperties()
+    {
+        return _analyteProperties;
+    }
+
+    public void setAnalyteProperties(Map<String, Map<DomainProperty, String>> analyteProperties)
+    {
+        _analyteProperties = analyteProperties;
     }
 }

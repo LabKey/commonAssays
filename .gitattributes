@@ -161,6 +161,7 @@ elispotassay/src/org/labkey/elispot/ElispotProtocolSchema.java -text
 elispotassay/src/org/labkey/elispot/ElispotProviderSchema.java -text
 elispotassay/src/org/labkey/elispot/ElispotRunUploadForm.java -text
 elispotassay/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
+elispotassay/src/org/labkey/elispot/PlateAnalytePropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/pipeline/BackgroundSubtractionJob.java -text
 elispotassay/src/org/labkey/elispot/pipeline/ElispotPipelineProvider.java -text

@@ -70,6 +70,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     {
         super(ElispotRunUploadForm.class);
         addStepHandler(new AntigenStepHandler());
+        addStepHandler(new AnalyteStepHandler());
     }
 
     protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
@@ -146,6 +147,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return new PlateAntigenPropertyHelper(provider.getAntigenWellGroupDomain(protocol).getProperties(), template);
     }
 
+    public PlateAnalytePropertyHelper createAnalytePropertyHelper(Container container, ExpProtocol protocol, ElispotAssayProvider provider)
+    {
+        return new PlateAnalytePropertyHelper(provider.getAnalyteDomain(protocol).getProperties());
+    }
+
     protected void addRunActionButtons(ElispotRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
@@ -161,7 +167,53 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
     }
 
-    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
+    private ModelAndView getAnalyteView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
+    {
+        InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
+                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, AnalyteStepHandler.NAME, form, errors);
+
+        // NOTE: not quite sure this is required...
+        PlateAnalytePropertyHelper analyteHelper = createAnalytePropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
+        analyteHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
+
+        // TODO: remove hardcoding here
+        Map<String, Object> propNameToValue = new HashMap<>();
+        propNameToValue.put("Analyte 1", "Analyte 1");
+        propNameToValue.put("Analyte 2", "Analyte 2");
+        propNameToValue.put("Analyte 3", "Analyte 3");
+
+        addDefaultValues(view, analyteHelper, ElispotAssayProvider.ANALYTE_PROPERTY_NAME, propNameToValue);
+
+        // add existing page properties
+        addHiddenBatchProperties(form, view);
+        addHiddenRunProperties(form, view);
+
+        ElispotAssayProvider provider = form.getProvider();
+        PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
+        for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
+            addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
+
+        PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
+        collector.addHiddenFormFields(view, form);
+
+        ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
+        resolverType.addHiddenFormFields(form, view);
+
+        ButtonBar bbar = new ButtonBar();
+        addFinishButtons(form, view, bbar);
+        addResetButton(form, view, bbar);
+
+        ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
+        bbar.add(cancelButton);
+
+        _stepDescription = "Analyte Properties";
+
+        view.getDataRegion().setHorizontalGroups(false);
+        view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
+        return view;
+    }
+
+    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors, boolean isLastView) throws ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
                 "lsid", Collections.<DomainProperty>emptyList(), errorReshow, AntigenStepHandler.NAME, form, errors);
@@ -191,9 +243,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         resolverType.addHiddenFormFields(form, view);
 
         ButtonBar bbar = new ButtonBar();
-        addFinishButtons(form, view, bbar);
+        if (isLastView)
+            addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
-        //addNextButton(bbar);
+        if (!isLastView)
+            addNextButton(bbar);
 
         ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
         bbar.add(cancelButton);
@@ -273,14 +327,14 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             {
                 return super.handleSuccessfulPost(form, errors);
             }
-            else
-            {
-                return getAntigenView(form, false, errors);
-            }
+            // NOTE: is there ever the case that we need to go past antigen view to analyte view???
+
+            String detectionMethod = form.getProvider().getSelectedDetectionMethod(form.getContainer(), form.getProtocol());
+            return getAntigenView(form, false, errors, (detectionMethod == null || detectionMethod.equals(ElispotAssayProvider.DetectionMethodType.COLORIMETRIC.getLabel())) );
         }
     }
 
-    public class AntigenStepHandler extends RunStepHandler
+    public class AntigenStepHandler extends ElispotStepHandler
     {
         public static final String NAME = "ANTIGEN";
         private Map<String, Map<DomainProperty, String>> _postedAntigenProperties = null;
@@ -289,10 +343,9 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             if (!form.isResetDefaultValues() && validatePost(form, errors))
                 return handleSuccessfulPost(form, errors);
-            else
-                return getAntigenView(form, true, errors);
 
-            //return getPlateSummary(form, false);
+            String detectionMethod = form.getProvider().getSelectedDetectionMethod(form.getContainer(), form.getProtocol());
+            return getAntigenView(form, true, errors, (detectionMethod == null || detectionMethod.equals(ElispotAssayProvider.DetectionMethodType.COLORIMETRIC.getLabel())) );
         }
 
         protected boolean validatePost(ElispotRunUploadForm form, BindException errors)
@@ -319,18 +372,116 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
+            form.setAntigenProperties(_postedAntigenProperties);
+
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
+                form.saveDefaultValues(entry.getValue(), entry.getKey());
+
+
+
+            String detectionMethod = form.getProvider().getSelectedDetectionMethod(form.getContainer(), form.getProtocol());
+            if (detectionMethod == null || detectionMethod.equals(ElispotAssayProvider.DetectionMethodType.COLORIMETRIC.getLabel()))
+            {
+                PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form,
+                        getSelectedParticipantVisitResolverType(form.getProvider(), form));
+                form.setSampleProperties(helper.getPostedPropertyValues(form.getRequest()));
+
+                ExpRun run = handlePost(form, errors);
+                if (run != null)
+                    return afterRunCreation(form, run, errors);
+                // else
+                return getAntigenView(form, true, errors, true);
+
+            }
+            // else case (in this case we have one more step to handle)
+
+            // NOTE: not sure if we are handling this case appropriately... when does it happen that there are no analyteColumns?
+            Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANALYTE);
+            List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
+
+            // TODO: this case needs more investigation (i think this should actually call ElispotStepHandler.handlePost)
+            if (analyteColumns.isEmpty())
+                return super.handleSuccessfulPost(form, errors);
+
+            return getAnalyteView(form, false, errors);
+        }
+
+        public String getName()
+        {
+            return NAME;
+        }
+    }
+
+    public class AnalyteStepHandler extends ElispotStepHandler
+    {
+        public static final String NAME = "ANALYTE";
+        private Map<String, Map<DomainProperty, String>> _postedAnalyteProperties = null;
+
+        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            if (!form.isResetDefaultValues() && validatePost(form, errors))
+                return handleSuccessfulPost(form, errors);
+
+            return getAnalyteView(form, true, errors);
+        }
+
+        @Override
+        protected boolean validatePost(ElispotRunUploadForm form, BindException errors) throws ExperimentException
+        {
+            PlateAnalytePropertyHelper helper = createAnalytePropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
+
+            boolean analytePropsValid = true;
+            try
+            {
+                _postedAnalyteProperties = helper.getPostedPropertyValues(form.getRequest());
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+            }
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAnalyteProperties.entrySet())
+            {
+                analytePropsValid = validatePostedProperties(entry.getValue(), errors) && analytePropsValid;
+            }
+            return analytePropsValid;
+        }
+
+        @Override
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws ExperimentException
+        {
             PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form,
                     getSelectedParticipantVisitResolverType(form.getProvider(), form));
             form.setSampleProperties(helper.getPostedPropertyValues(form.getRequest()));
 
-            form.setAntigenProperties(_postedAntigenProperties);
+            PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
+            form.setAntigenProperties(antigenHelper.getPostedPropertyValues(form.getRequest()));
+
+            form.setAnalyteProperties(_postedAnalyteProperties);
+
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAnalyteProperties.entrySet())
+                form.saveDefaultValues(entry.getValue(), entry.getKey());
+
+            ExpRun run = handlePost(form, errors);
+            if (run != null)
+                return afterRunCreation(form, run, errors);
+
+            return getAnalyteView(form, true, errors);
+        }
+
+        public String getName()
+        {
+            return NAME;
+        }
+    }
+
+    private class ElispotStepHandler extends RunStepHandler
+    {
+        protected ExpRun handlePost(ElispotRunUploadForm form, BindException errors)
+        {
             ElispotAssayProvider provider = form.getProvider();
             try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
             {
                 ExpRun run = saveExperimentRun(form);
-
-                for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
-                form.saveDefaultValues(entry.getValue(), entry.getKey());
 
                 List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
                 if (data.size() != 1)
@@ -354,7 +505,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;
                 Map<String, Object> postedPropMap = new HashMap<>();
 
-                for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : _postedAntigenProperties.entrySet())
+                for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : form.getAntigenProperties().entrySet())
                 {
                     String groupName = groupEntry.getKey();
                     Map<DomainProperty, String> properties = groupEntry.getValue();
@@ -375,7 +526,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                 if (!errors.hasErrors())
                 {
-                    return afterRunCreation(form, run, errors);
+                    return run;
                 }
             }
             catch (ValidationException ve)
@@ -388,12 +539,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
             }
 
-            return getAntigenView(form, true, errors);
-        }
-
-        public String getName()
-        {
-            return NAME;
+            return null;
         }
     }
 

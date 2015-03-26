@@ -73,6 +73,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
 {
     public static final String NAME = "ELISpot";
     public static final String ASSAY_DOMAIN_ANTIGEN_WELLGROUP = ExpProtocol.ASSAY_DOMAIN_PREFIX + "AntigenWellGroup";
+    public static final String ASSAY_DOMAIN_ANALYTE = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Analyte";
 
     // run properties
     public static final String READER_PROPERTY_NAME = "PlateReader";
@@ -91,6 +92,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     public static final String ANTIGENID_PROPERTY_CAPTION = "Antigen ID";
     public static final String ANTIGENNAME_PROPERTY_NAME = "AntigenName";
     public static final String ANTIGENNAME_PROPERTY_CAPTION = "Antigen Name";
+
+    // analytes
+    public static final String ANALYTE_PROPERTY_NAME = "AnalyteName";
+    public static final String ANALYTE_PROPERTY_CAPTION = "Analyte Name";
+    public static final String CYTOKINE_PROPERTY_NAME = "CytokineName";
+    public static final String CYTOKINE_PROPERTY_CAPTION = "Cytokine Name";
 
     enum PlateReaderType
     {
@@ -206,7 +213,8 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
-        result.add(createAntigenWellGroupDomain(c, user));
+        result.add(createAntigenWellGroupDomain(c));
+        result.add(createAnalyteDomain(c));
         return result;
     }
     
@@ -231,7 +239,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return result;
     }
 
-    protected Pair<Domain, Map<DomainProperty, Object>> createAntigenWellGroupDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createAntigenWellGroupDomain(Container c)
     {
         String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
         Domain antigenWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Antigen Fields");
@@ -243,6 +251,18 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         //addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
 
         return new Pair<>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
+    }
+
+    protected Pair<Domain, Map<DomainProperty, Object>> createAnalyteDomain(Container c)
+    {
+        String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_ANALYTE);
+        Domain analyteWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Analyte Fields");
+
+        analyteWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the analyte well groups");
+        addProperty(analyteWellGroupDomain, ANALYTE_PROPERTY_NAME, ANALYTE_PROPERTY_CAPTION, PropertyType.STRING);
+        addProperty(analyteWellGroupDomain, CYTOKINE_PROPERTY_NAME, CYTOKINE_PROPERTY_CAPTION, PropertyType.STRING);
+
+        return new Pair<>(analyteWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
     }
 
     protected Pair<Domain,Map<DomainProperty,Object>> createRunDomain(Container c, User user)
@@ -294,6 +314,11 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     public Domain getAntigenWellGroupDomain(ExpProtocol protocol)
     {
         return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+    }
+
+    public Domain getAnalyteDomain(ExpProtocol protocol)
+    {
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANALYTE);
     }
 
     public String getDescription()
