@@ -61,4 +61,33 @@ function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
             }
         }, this);
     });
+
+    //LABKEY.DataRegion2.loadViewDesigner(function() {
+    //
+    //    var viewName = viewSelectId == null || viewSelectId == '' ? null : document.getElementById(viewSelectId).value;
+    //    LABKEY.Query.getQueryDetails({
+    //        schemaName: 'ms2',
+    //        queryName: queryName,
+    //        viewName: viewName,
+    //        success: function(json) {
+    //            viewDesigners[viewSelectId] = Ext4.create('LABKEY.ext4.designer.ViewDesigner', {
+    //                renderTo: renderTo,
+    //                schemaName: 'ms2',
+    //                queryName: queryName,
+    //                viewName: viewName,
+    //                query: json,
+    //                allowableContainerFilters: [['Current', 'Current Folder'], ['CurrentAndSubfolders', 'Current folder and subfolders']],
+    //                includeRevert: false,
+    //                includeViewGrid: false,
+    //                //dataRegion: null
+    //                width: 700,
+    //                activeGroup: 1,
+    //                listeners: {
+    //                    viewsave: saveCallback,
+    //                    scope: this
+    //                }
+    //            });
+    //        }
+    //    });
+    //}, this);
 }
