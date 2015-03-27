@@ -388,7 +388,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         {
             return DetectionMethodType.fromLabel(method);
         }
-        return null;
+        return DetectionMethodType.COLORIMETRIC;
     }
 
     @Override
