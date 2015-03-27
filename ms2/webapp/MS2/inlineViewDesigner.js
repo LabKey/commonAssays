@@ -70,7 +70,7 @@ function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
     //        queryName: queryName,
     //        viewName: viewName,
     //        success: function(json) {
-    //            viewDesigners[viewSelectId] = Ext4.create('LABKEY.ext4.designer.ViewDesigner', {
+    //            viewDesigners[viewSelectId] = Ext4.create('LABKEY.internal.ViewDesigner.Designer', {
     //                renderTo: renderTo,
     //                schemaName: 'ms2',
     //                queryName: queryName,
@@ -81,7 +81,7 @@ function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
     //                includeViewGrid: false,
     //                //dataRegion: null
     //                width: 700,
-    //                activeGroup: 1,
+    //                activeTab: 1,
     //                listeners: {
     //                    viewsave: saveCallback,
     //                    scope: this
