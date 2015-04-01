@@ -53,6 +53,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -144,7 +145,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     public PlateAntigenPropertyHelper createAntigenPropertyHelper(Container container, ExpProtocol protocol, ElispotAssayProvider provider)
     {
         PlateTemplate template = provider.getPlateTemplate(container, protocol);
-        return new PlateAntigenPropertyHelper(provider.getAntigenWellGroupDomain(protocol).getProperties(), template);
+        List<DomainProperty> domainProperties = new ArrayList<>();
+        for (DomainProperty domainProperty : provider.getAntigenWellGroupDomain(protocol).getProperties())
+            if (!domainProperty.isHidden())
+                domainProperties.add(domainProperty);
+        return new PlateAntigenPropertyHelper(domainProperties, template);
     }
 
     public PlateAnalytePropertyHelper createAnalytePropertyHelper(ElispotRunUploadForm form) throws ExperimentException
@@ -497,8 +502,9 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     Plate plate = entry.getValue();
                     if (plate != null)
                     {
-                        ElispotDataHandler.populateAntigenDataProperties(run, plate, reader, postedPropMap, false, subtractBackground);
-                        ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, postedPropMap, false, subtractBackground);
+                        ElispotDataHandler.populateAntigenDataProperties(run, plate, reader, postedPropMap);
+                        ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, postedPropMap, false, subtractBackground, false);
+                        break;      // Only need to call these for 1 plate
                     }
                 }
                 transaction.commit();

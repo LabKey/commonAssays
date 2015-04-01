@@ -37,6 +37,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.RunListDetailsQueryView;
 import org.labkey.api.study.query.ResultsQueryView;
@@ -44,6 +45,7 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.elispot.query.ElispotAntigenCrosstabTable;
 import org.labkey.elispot.query.ElispotRunAntigenTable;
 import org.labkey.elispot.query.ElispotRunDataTable;
 import org.springframework.validation.BindException;
@@ -52,7 +54,10 @@ import java.util.Set;
 
 public class ElispotProtocolSchema extends AssayProtocolSchema
 {
-    public static final String ANTIGEN_STATS_TABLE_NAME = "AntigenStats";
+    public static final String ELISPOT_DBSCHEMA_NAME = "elispot";
+    public static final String ELISPOT_ANTIGEN_SCHEMA_NAME = "elispotantigen";
+    public static final String ANTIGEN_STATS_TABLE_NAME = "AntigenStats";   // table as CrossTab
+    public static final String ANTIGEN_TABLE_NAME = "Antigen";      // raw table
 
     public ElispotProtocolSchema(User user, Container container, @NotNull ElispotAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
@@ -69,47 +74,25 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
     public Set<String> getTableNames()
     {
         Set<String> names = super.getTableNames();
+        names.add(ANTIGEN_TABLE_NAME);
         names.add(ANTIGEN_STATS_TABLE_NAME);
         return names;
     }
 
     public TableInfo createProviderTable(String name)
     {
-        TableInfo table = super.createProviderTable(name);
-        if (table != null)
-            return table;
-        
-        if (name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))
-            return new ElispotRunAntigenTable(this, getProtocol());
+        if (name.equalsIgnoreCase(ANTIGEN_TABLE_NAME))
+        {
+            Domain domain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            if (null != domain)
+                return new ElispotRunAntigenTable(this, domain, getProtocol());
+        }
+        else if (name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))
+        {
+            return ElispotAntigenCrosstabTable.create((ElispotRunAntigenTable) createProviderTable(ANTIGEN_TABLE_NAME), getProtocol());
+        }
 
         return super.createProviderTable(name);
-    }
-
-    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix)
-    {
-        String propPrefix = new Lsid(propertyPrefix, protocol.getName(), "").toString();
-        SimpleFilter propertyFilter = new SimpleFilter();
-        propertyFilter.addCondition(FieldKey.fromParts("PropertyURI"), propPrefix, CompareType.STARTS_WITH);
-
-        PropertyDescriptor[] result = new TableSelector(OntologyManager.getTinfoPropertyDescriptor(),
-                propertyFilter, null).getArray(PropertyDescriptor.class);
-
-        // Merge measure/dimension properties from well group domain into ElispotProperties domain
-        // This needs to be removed and instead base the properties on a single PropertyDescriptor/DomainProperty
-        Domain domain = PropertyService.get().getDomain(protocol.getContainer(), new Lsid(ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString());
-        if (domain != null)
-        {
-            for (PropertyDescriptor dataProperty : result)
-            {
-                DomainProperty domainProp = domain.getPropertyByName(dataProperty.getName());
-                if (domainProp != null)
-                {
-                    dataProperty.setMeasure(domainProp.isMeasure());
-                    dataProperty.setDimension(domainProp.isDimension());
-                }
-            }
-        }
-        return result;
     }
 
     @Override

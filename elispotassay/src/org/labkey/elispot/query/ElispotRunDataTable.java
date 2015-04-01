@@ -22,32 +22,25 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.PropertyColumn;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.api.study.assay.plate.PlateReader;
-import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
-import org.labkey.elispot.ElispotProtocolSchema;
+import org.labkey.elispot.ElispotManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * User: Karl Lum
@@ -55,12 +48,14 @@ import java.util.Set;
  */
 public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 {
-    protected ExpProtocol _protocol;
-
     public ElispotRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
     {
-        super(schema, protocol);
-        _protocol = protocol;
+        this(schema, ElispotManager.getTableInfoElispotRunData(), protocol);
+    }
+
+    public ElispotRunDataTable(final AssaySchema schema, TableInfo table, final ExpProtocol protocol)
+    {
+        super(schema, table, protocol);
 
         setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
 
@@ -79,96 +74,42 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         }
     }
 
-    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
-    {
-        return ElispotProtocolSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX);
-    }
-
-    public String getInputMaterialPropertyName()
-    {
-        return ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY;
-    }
-
-    public String getDataRowLsidPrefix()
-    {
-        return ElispotDataHandler.ELISPOT_DATA_ROW_LSID_PREFIX;
-    }
-
     protected void addPropertyColumns(final AssaySchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
     {
         // get all the properties from this plated-based protocol:
-        List<PropertyDescriptor> properties = new ArrayList<>();
-        PropertyDescriptor materialProperty = null;
-        Set<String> hiddenCols = getHiddenColumns(protocol);
-
-        for (PropertyDescriptor pd : getExistingDataProperties(protocol))
+        for (ColumnInfo column : _rootTable.getColumns())
         {
-            if (getInputMaterialPropertyName().equals(pd.getName()))
-                materialProperty = pd;
-            else
-                properties.add(pd);
-        }
-
-        // add object ID to this tableinfo and set it as a key field:
-        ColumnInfo objectIdColumn = addWrapColumn(_rootTable.getColumn("ObjectId"));
-        objectIdColumn.setKeyField(true);
-
-        ColumnInfo objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
-        objectUriColumn.setHidden(true);
-
-        if (materialProperty != null)
-        {
-            // add material lookup columns to the view first, so they appear at the left:
-            String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-            final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
-            if (sampleSet != null)
+            if ("RunId".equalsIgnoreCase(column.getName()))
             {
-                for (DomainProperty pd : sampleSet.getType().getProperties())
-                {
-                    visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
-                }
+                continue;   // already added or added below
             }
-
-            ColumnInfo materialColumn = new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), true);
-            materialColumn.setLabel("Specimen");
-            materialColumn.setFk(new LookupForeignKey("LSID")
-            {
-                public TableInfo getLookupTableInfo()
-                {
-                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema);
-                    // Make sure we are filtering to the same set of containers
-                    materials.setContainerFilter(getContainerFilter());
-                    if (sampleSet != null)
-                    {
-                        materials.setSampleSet(sampleSet, true);
-                    }
-                    ColumnInfo propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
-                    if (propertyCol.getFk() instanceof PropertyForeignKey)
-                    {
-                        ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(provider, protocol, schema));
-                    }
-                    propertyCol.setHidden(false);
-                    materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
-                    return materials;
-                }
-            });
-            addColumn(materialColumn);
-            hiddenCols.add(getInputMaterialPropertyName());
+            ColumnInfo wrapColumn = addWrapColumn(column);
+            if ("ObjectUri".equalsIgnoreCase(column.getName()) || "RowId".equalsIgnoreCase(column.getName()))
+                wrapColumn.setHidden(true);
         }
 
-        // run through the property columns, setting all to be visible by default:
-        for (PropertyDescriptor pd : properties)
+        // add material lookup columns to the view first, so they appear at the left:
+        String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
+        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        if (sampleSet != null)
         {
-            ColumnInfo propColumn = new PropertyColumn(pd, objectUriColumn, getContainer(), schema.getUser(), true);
-            if (getColumn(propColumn.getName()) == null)
-                addColumn(propColumn);
-
-            if (!hiddenCols.contains(pd.getName()))
+            for (DomainProperty pd : sampleSet.getType().getProperties())
             {
-                if (!ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME.equals(pd.getName()))
-                    visibleColumns.add(FieldKey.fromParts(pd.getName()));
+                visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }
         }
+
+        ColumnInfo antigenLsidColumn = getColumn("AntigenLsid");
+        antigenLsidColumn.setLabel("Antigen");
+        antigenLsidColumn.setFk(new LookupForeignKey(null, "AntigenName")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return ElispotManager.getTableInfoElispotAntigen(_protocol);
+            }
+        });
+
     }
 
     @Override
@@ -195,6 +136,30 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         }
 
         return result;
+    }
+
+    @Override
+    public List<FieldKey> getDefaultVisibleColumns()
+    {
+        List<FieldKey> fieldKeys = new ArrayList<>();
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.WELLGROUP_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromParts("AntigenLsid", ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromParts("AntigenLsid", ElispotAssayProvider.CELLWELL_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.WELLGROUP_LOCATION_PROPERTY));
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.SFU_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME));
+        FieldKey specimenPropFieldKey = FieldKey.fromParts("SpecimenLsid", "Property");
+        fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("SpecimenId")));
+        fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("ParticipantId")));
+        fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("VisitId")));
+        fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("Date")));
+        fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("SampleDescription")));
+        FieldKey runPropFieldKey = FieldKey.fromParts("Run");
+        fieldKeys.add(FieldKey.fromParts(runPropFieldKey, FieldKey.fromString("ProtocolName")));
+        fieldKeys.add(FieldKey.fromParts(runPropFieldKey, FieldKey.fromString("PlateReader")));
+        fieldKeys.add(FieldKey.fromParts(runPropFieldKey,  FieldKey.fromString("Batch"), FieldKey.fromString("TargetStudy")));
+        return fieldKeys;
     }
 
     public static class SpotCountDisplayColumn extends DataColumn
@@ -224,16 +189,26 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         {
             if (_reader == null)
             {
-                String readerAlias = ctx.getFieldMap().get(FieldKey.fromParts("Run", "PlateReader")).getAlias();
-                Object readerName = ctx.getRow().get(readerAlias);
-
-                if (readerName != null)
+                ColumnInfo plateReaderColumn = ctx.getFieldMap().get(FieldKey.fromParts("Run", "PlateReader"));
+                if (null != plateReaderColumn)
                 {
-                    ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(ElispotAssayProvider.NAME);
-                    _reader = provider.getPlateReader(String.valueOf(readerName));
+                    String readerAlias = plateReaderColumn.getAlias();
+                    Object readerName = ctx.getRow().get(readerAlias);
+
+                    if (readerName != null)
+                    {
+                        ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(ElispotAssayProvider.NAME);
+                        _reader = provider.getPlateReader(String.valueOf(readerName));
+                    }
                 }
             }
             return _reader;
         }
+    }
+
+    @Override
+    protected boolean hasMaterialSpecimenPropertyColumnDecorator()
+    {
+        return true;
     }
 }

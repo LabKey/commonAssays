@@ -31,6 +31,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
@@ -43,6 +44,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.query.CrosstabView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
@@ -144,7 +146,8 @@ public class ElispotController extends SpringActionController
             QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
             settings.setAllowChooseView(true);
 
-            QueryView queryView = new QueryView(new ElispotProtocolSchema(getUser(), getContainer(), (ElispotAssayProvider)AssayService.get().getProvider(_protocol), _protocol, null), settings, errors);
+            CrosstabView queryView = new CrosstabView(new ElispotProtocolSchema(getUser(), getContainer(),
+                    (ElispotAssayProvider)AssayService.get().getProvider(_protocol), _protocol, null), settings, errors);
             queryView.setShadeAlternatingRows(true);
             queryView.setShowBorders(true);
             queryView.setShowDetailsColumn(false);
@@ -208,15 +211,12 @@ public class ElispotController extends SpringActionController
     }
 
     private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
-                                                      PlateTemplate template, PlateReader reader) throws SQLException
+                                                      PlateTemplate template, PlateReader reader) throws SQLException, ExperimentException
     {
         Map<Position, WellInfo> map = new HashMap<>();
 
         List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         assert(data.size() == 1);
-
-        Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
-        List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
 
         Map<String, ExpMaterial> inputs = new HashMap<>();
         for (ExpMaterial material : run.getMaterialInputs().keySet())
@@ -227,21 +227,24 @@ public class ElispotController extends SpringActionController
             for (int col=0; col < template.getColumns(); col++)
             {
                 Position position = template.getPosition(row, col);
-                WellInfo wellInfo = new WellInfo();
 
                 Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data.get(0).getLSID(), position);
-                String specimenGroup = "";
+                RunDataRow runDataRow = ElispotManager.get().getRunDataRow(dataRowLsid.toString(), run.getContainer());
+                if (null == runDataRow)
+                    throw new ExperimentException("Unable to find run data.");
+                WellInfo wellInfo = new WellInfo(runDataRow);
+                wellInfo.setTitle(reader.getWellDisplayValue(runDataRow.getSpotCount()));
 
                 for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
                 {
                     if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
                     {
-                        specimenGroup = String.valueOf(prop.value());
-                        wellInfo.addWellProperty(prop);
+//                        specimenGroup = String.valueOf(prop.value());                 // TODO: probably remove all of loop
+//                        wellInfo.addWellProperty(prop);
                     }
                     else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
                     {
-                        wellInfo.setTitle(reader.getWellDisplayValue(prop.value()));
+//                        wellInfo.setTitle(reader.getWellDisplayValue(prop.value()));
                     }
                     else
                         wellInfo.addWellProperty(prop);
@@ -249,6 +252,9 @@ public class ElispotController extends SpringActionController
                 }
 
                 // get the specimen wellgroup info
+/*
+                Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
+                List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
                 if (!StringUtils.isEmpty(specimenGroup))
                 {
                     ExpMaterial material = inputs.get(specimenGroup);
@@ -261,6 +267,7 @@ public class ElispotController extends SpringActionController
                         }
                     }
                 }
+*/
                 map.put(position, wellInfo);
             }
         }
@@ -382,7 +389,12 @@ public class ElispotController extends SpringActionController
         private String _dataRowLsid;
         private String _title = "";
         private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
-        private Map<DomainProperty, String> _specimenProperties = new LinkedHashMap<>();
+        private final RunDataRow _runDataRow;
+
+        public WellInfo(RunDataRow runDataRow)
+        {
+            _runDataRow = runDataRow;
+        }
 
         public String getDataRowLsid()
         {
@@ -399,19 +411,9 @@ public class ElispotController extends SpringActionController
             _wellProperties.put(prop.getName(), prop);
         }
 
-        public void addSpecimenProperty(DomainProperty pd, String value)
-        {
-            _specimenProperties.put(pd, value);
-        }
-
         public Map<String, ObjectProperty> getWellProperties()
         {
             return _wellProperties;
-        }
-
-        public Map<DomainProperty, String> getSpecimenProperties()
-        {
-            return _specimenProperties;
         }
 
         public String getTitle()
@@ -452,6 +454,19 @@ public class ElispotController extends SpringActionController
                 if (!ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY.equals(prop.getName()))
                     wellProps.put(prop.getName(), String.valueOf(prop.value()));
             }
+
+            wellProps.put("SpotCount", _runDataRow.getSpotCount());
+            wellProps.put("AntigenWellgroupName", _runDataRow.getAntigenWellgroupName());
+            wellProps.put("WellgroupName", _runDataRow.getWellgroupName());
+            wellProps.put("WellgroupLocation", _runDataRow.getWellgroupLocation());
+            if (null != _runDataRow.getNormalizedSpotCount())
+                wellProps.put("NormalizedSpotCount", _runDataRow.getNormalizedSpotCount());
+            if (null != _runDataRow.getActivity())
+                wellProps.put("Activity", _runDataRow.getActivity());
+            if (null != _runDataRow.getAnalyte())
+                wellProps.put("Analyte", _runDataRow.getAnalyte());
+            if (null != _runDataRow.getIntensity())
+                wellProps.put("Intensity", _runDataRow.getIntensity());
 
             well.put("wellProperties", wellProps);
 

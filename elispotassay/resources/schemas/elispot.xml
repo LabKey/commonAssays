@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ * Copyright (c) 2015 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+
+ -->
+<tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\..\schemas\tableInfo.xsd" xmlns="http://labkey.org/data/xml">
+    <table tableName="RunData" tableDbType="TABLE">
+        <columns>
+            <column columnName="RowId">
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+            </column>
+            <column columnName="RunId"/>
+            <column columnName="SpecimenLsid"/>
+            <column columnName="AntigenLsid"/>
+            <column columnName="SpotCount"/>
+            <column columnName="WellgroupName"/>
+            <column columnName="WellgroupLocation"/>
+            <column columnName="NormalizedSpotCount"/>
+            <column columnName="AntigenWellgroupName"/>
+            <column columnName="Analyte"/>
+            <column columnName="Activity"/>
+            <column columnName="Intensity"/>
+            <column columnName="ObjectUri"/>
+            <column columnName="ObjectId"/>
+        </columns>
+    </table>
+    <table tableName="Antigen" tableDbType="NOT_IN_DB">
+        <columns>
+            <column columnName="AntigenLsid">
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+            </column>
+            <column columnName="SpecimenLsid">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="RunId"/>
+            <column columnName="Mean">
+                <formatString>####.0#</formatString>
+            </column>
+            <column columnName="Median">
+                <formatString>####.0#</formatString>
+            </column>
+            <column columnName="AntigenId"/>
+            <column columnName="AntigenName">
+                <isDisplayColumn>true</isDisplayColumn>
+            </column>
+            <column columnName="AntigenWellgroupName"/>
+            <column columnName="ObjectUri"/>
+        </columns>
+    </table>
+</tables>

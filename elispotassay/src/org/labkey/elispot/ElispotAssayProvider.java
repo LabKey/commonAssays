@@ -19,6 +19,7 @@ package org.labkey.elispot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
@@ -27,6 +28,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainKind;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
@@ -55,6 +57,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.elispot.plate.AIDPlateReader;
+import org.labkey.elispot.query.ElispotAntigenDomainKind;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -242,10 +245,23 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     {
         String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
         Domain antigenWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Antigen Fields");
-
         antigenWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the antigen well groups in their chosen plate template.");
+
+        // Add properties for all required fields
+        DomainKind domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
+        for (PropertyStorageSpec propSpec : domainKind.getBaseProperties())
+        {
+            DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec);
+            prop.setShownInInsertView(false);
+            prop.setShownInUpdateView(false);
+            prop.setShownInDetailsView(false);
+            prop.setHidden(true);
+        }
+
+        DomainProperty antigenNameProperty = addProperty(antigenWellGroupDomain, ANTIGENNAME_PROPERTY_NAME, ANTIGENNAME_PROPERTY_CAPTION, PropertyType.STRING);
+        antigenNameProperty.setRequired(true);
+        antigenNameProperty.setDimension(true);
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
-        addProperty(antigenWellGroupDomain, ANTIGENNAME_PROPERTY_NAME, ANTIGENNAME_PROPERTY_CAPTION, PropertyType.STRING).setDimension(true);
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
 
         return new Pair<>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
@@ -295,6 +311,10 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         runProperties.add(BACKGROUND_WELL_PROPERTY_NAME);
         runProperties.add(READER_PROPERTY_NAME);
 
+        Set<String> requiredAntigenProps = new HashSet<>();
+        for (PropertyStorageSpec propSpec : PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME).getBaseProperties())
+            requiredAntigenProps.add(propSpec.getName());
+        domainMap.put(ASSAY_DOMAIN_ANTIGEN_WELLGROUP, requiredAntigenProps);
         return domainMap;
     }
 

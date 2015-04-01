@@ -17,18 +17,23 @@
 package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.elispot.pipeline.ElispotPipelineProvider;
+import org.labkey.elispot.query.ElispotAntigenDomainKind;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 public class ElispotModule extends DefaultModule
 {
@@ -39,12 +44,13 @@ public class ElispotModule extends DefaultModule
 
     public double getVersion()
     {
-        return 15.10;
+        return 15.11;
     }
 
     protected void init()
     {
         addController("elispot-assay", ElispotController.class);
+        PropertyService.get().registerDomainKind(new ElispotAntigenDomainKind());
     }
 
     @NotNull
@@ -55,7 +61,14 @@ public class ElispotModule extends DefaultModule
 
     public boolean hasScripts()
     {
-        return false;
+        return true;
+    }
+
+    @NotNull
+    @Override
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME);
     }
 
     public void doStartup(ModuleContext moduleContext)
@@ -67,5 +80,11 @@ public class ElispotModule extends DefaultModule
         AssayService.get().registerAssayProvider(provider);
 
         PipelineService.get().registerPipelineProvider(new ElispotPipelineProvider(this));
+    }
+
+    @Override
+    public UpgradeCode getUpgradeCode()
+    {
+        return new ElispotUpgradeCode();
     }
 }

@@ -39,7 +39,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,12 +49,12 @@ import java.util.Map;
  */
 public abstract class AbstractElispotDataHandler extends AbstractExperimentDataHandler
 {
-    public static final String ELISPOT_DATA_LSID_PREFIX = "ElispotAssayData";
     public static final String ELISPOT_DATA_ROW_LSID_PREFIX = "ElispotAssayDataRow";
     public static final String ELISPOT_PROPERTY_LSID_PREFIX = "ElispotProperty";
     public static final String ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX = "ElispotAntigenProperty";
     public static final String ELISPOT_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
     public static final String ELISPOT_ANTIGEN_ROW_LSID_PREFIX = "ElispotAssayAntigenRow";
+    public static final String ELISPOT_ANTIGEN_LSID_PREFIX = "ElispotAssayAntigen";
 
     public static final String SFU_PROPERTY_NAME = "SpotCount";
     public static final String NORMALIZED_SFU_PROPERTY_NAME = "NormalizedSpotCount";
@@ -64,6 +64,11 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String WELL_COLUMN_PROPERTY = "WellColumn";
     public static final String ANTIGEN_WELLGROUP_PROPERTY_NAME = "AntigenWellgroupName";
     public static final String BACKGROUND_WELL_PROPERTY = "Background";
+
+    public static final String ANALYTE_PROPERTY_NAME = "Analyte";
+    public static final String ACTIVITY_PROPERTY_NAME = "Activity";
+    public static final String INTENSITY_PROPERTY_NAME = "Intensity";
+
 
     public interface ElispotDataFileParser
     {
@@ -84,8 +89,6 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     protected void importData(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> inputData) throws ExperimentException
     {
         try {
-            Container container = data.getContainer();
-
             List<? extends ExpData> runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
             assert(runData.size() == 1);
 
@@ -98,21 +101,22 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                 int colPos = ConvertHelper.convert(row.get(WELL_COLUMN_PROPERTY), Integer.class);
                 String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData.get(0).getLSID(), rowPos, colPos).toString();
 
-                OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
-                List<ObjectProperty> results = new ArrayList<>();
+                Map<String, Object> runDataFields = new HashMap<>();
+                runDataFields.put("ObjectId", 0);
+                runDataFields.put("ObjectUri", dataRowLsid);
+                runDataFields.put("RunId", run.getRowId());
+                runDataFields.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, row.get(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY));
+                runDataFields.put(WELLGROUP_PROPERTY_NAME, row.get(WELLGROUP_PROPERTY_NAME));
+                runDataFields.put(WELLGROUP_LOCATION_PROPERTY, row.get(WELLGROUP_LOCATION_PROPERTY));
+                runDataFields.put(ANALYTE_PROPERTY_NAME, row.get(ANALYTE_PROPERTY_NAME));
+                runDataFields.put(SFU_PROPERTY_NAME, row.get(SFU_PROPERTY_NAME));
+                runDataFields.put(INTENSITY_PROPERTY_NAME, row.get(INTENSITY_PROPERTY_NAME));
+                runDataFields.put(ACTIVITY_PROPERTY_NAME, row.get(ACTIVITY_PROPERTY_NAME));
 
-                for (Map.Entry<String, Object> prop : row.entrySet())
-                {
-                    if (prop.getKey().equals(WELL_ROW_PROPERTY))
-                        continue;
-                    if (prop.getKey().equals(WELL_COLUMN_PROPERTY))
-                        continue;
-                    results.add(getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue()));
-                }
-                OntologyManager.insertProperties(container, dataRowLsid, results.toArray(new ObjectProperty[results.size()]));
+                ElispotManager.get().insertRunDataRow(null, runDataFields);
             }
         }
-        catch (ValidationException ve)
+        catch (Exception ve)
         {
             throw new ExperimentException(ve.getMessage(), ve);
         }
@@ -141,6 +145,15 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + sampleName);
 
         return dataRowLsid;
+    }
+
+    public static Lsid getAntigenLsid(String antigenWellgroupName, String sampleName, int runId, String assayName, String analyte)
+    {
+        assert (antigenWellgroupName != null);
+        assert (sampleName != null);
+        Lsid lsid = new Lsid(ELISPOT_ANTIGEN_LSID_PREFIX, assayName, "Run" + runId + "-" + antigenWellgroupName + "-" +
+                             sampleName + "-" + (null != analyte ? analyte : ""));
+        return lsid;
     }
 
     protected static ObjectProperty getObjectProperty(Container container, ExpProtocol protocol, String objectURI, String propertyName, Object value)
@@ -197,6 +210,13 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         return null;
     }
 
+    @Override
+    public void beforeDeleteData(List<ExpData> expDatas)
+    {
+        ElispotManager.get().deleteRunData(expDatas);
+    }
+
+    @Override
     public void deleteData(ExpData data, Container container, User user)
     {
         OntologyManager.deleteOntologyObject(data.getLSID(), container, true);

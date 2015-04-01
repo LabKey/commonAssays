@@ -147,7 +147,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                                 propMap.put(UploadWizardAction.getInputName(antigenNameProp, group.getName()), o.getStringValue());
                             }
                         }
-                        ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, propMap, true, true);
+                        ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, propMap, true, true, true);
 
                         // set the run property for background subtraction
                         DomainProperty subtractBackground = runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME);

@@ -17,39 +17,46 @@ package org.labkey.elispot.query;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.StorageProvisioner;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
-import org.labkey.elispot.ElispotProtocolSchema;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: klum
  * Date: Jan 27, 2011
  * Time: 1:45:11 PM
  */
-public class ElispotRunAntigenTable extends ElispotRunDataTable
+public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
 {
-    public ElispotRunAntigenTable(final AssaySchema schema, final ExpProtocol protocol)
+    public ElispotRunAntigenTable(final AssaySchema schema, final Domain domain, ExpProtocol protocol)
     {
-        super(schema, protocol);
+        super(schema, StorageProvisioner.createTableInfo(domain), protocol);
         setDescription("Contains one row per well for the \"" + protocol.getName() + "\" ELISpot assay design.");
+        setTitle("Antigen");
+        this.setPublic(false);
     }
 
-    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
+    @Override
+    public List<FieldKey> getDefaultVisibleColumns()
     {
-        return ElispotProtocolSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX);
-    }
-
-    public String getInputMaterialPropertyName()
-    {
-        return ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY;
-    }
-
-    public String getDataRowLsidPrefix()
-    {
-        return ElispotDataHandler.ELISPOT_ANTIGEN_ROW_LSID_PREFIX;  
+        List<FieldKey> fieldKeys = new ArrayList<>();
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.WELLGROUP_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromString(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME));
+        fieldKeys.add(FieldKey.fromString("Mean"));
+        fieldKeys.add(FieldKey.fromString("Median"));
+        fieldKeys.add(FieldKey.fromParts("RunId"));
+        fieldKeys.add(FieldKey.fromParts("SpecimenLsid", "Property", "ParticipantId"));
+        return fieldKeys;
     }
 
     @Override
@@ -68,7 +75,8 @@ public class ElispotRunAntigenTable extends ElispotRunDataTable
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ElispotRunAntigenTable(_userSchema, _protocol);
+                    Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+                    return new ElispotRunAntigenTable(_userSchema, domain, _protocol);
                 }
             };
             fk.setPrefixColumnCaption(false);
@@ -76,5 +84,28 @@ public class ElispotRunAntigenTable extends ElispotRunDataTable
         }
 
         return result;
+    }
+
+    @Override
+    protected void addPropertyColumns(final AssaySchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
+    {
+        for (ColumnInfo column : _rootTable.getColumns())
+        {
+            if ("RunId".equalsIgnoreCase(column.getName()))
+            {
+                continue;
+            }
+            ColumnInfo wrapColumn = addWrapColumn(column);
+            if ("AntigenLsid".equalsIgnoreCase(column.getName()) || "SpecimenLsid".equalsIgnoreCase(column.getName()))
+                wrapColumn.setHidden(true);
+            else if ("Mean".equalsIgnoreCase(column.getName()) || "Median".equalsIgnoreCase(column.getName()))
+                wrapColumn.setFormat("###0.0");
+        }
+    }
+
+    @Override
+    protected boolean hasMaterialSpecimenPropertyColumnDecorator()
+    {
+        return false;
     }
 }

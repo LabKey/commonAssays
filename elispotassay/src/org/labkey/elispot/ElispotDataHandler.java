@@ -28,7 +28,6 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -83,9 +82,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     private static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".txt", ".xls", ".xlsx"), ".txt"));
     private static final DataType ELISPOT_TRANSFORMED_DATA_TYPE = new DataType("ElispotTransformedData"); // a marker data type
 
-    public static final String ACTIVITY_PROPERTY_NAME = "Activity";
-    public static final String INTENSITY_PROPERTY_NAME = "Intensity";
-
     @Override
     public DataType getDataType()
     {
@@ -130,7 +126,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     PlateReader reader = provider.getPlateReader(runPropValues.get(readerProp));
                     Map<PlateInfo, Plate> plates = initializePlates(protocol, _dataFile, template, reader);
 
-                    List<Map<String, Object>> results = new ArrayList<>();
                     Map<String, ExpMaterial> materialMap = new HashMap<>();
                     for (ExpMaterial material : run.getMaterialInputs().keySet())
                         materialMap.put(material.getName(), material);
@@ -158,12 +153,14 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                         }
                     }
 
+                    // With multiple plates, different plates can contribute to the same result row (1 filling spotcount, another activity, intensity)
+                    // so map them with key <WellLocation>-<WellGroup>-<Analyte> as we fill in, then make a list for the results
+                    Map<String, Map<String, Object>> rowMapMap = new HashMap<>();
                     for (Map.Entry<PlateInfo, Plate> entry : plates.entrySet())
                     {
-                        // TODO : remove this assert when populating fluorospot data is working
-                        assert (plates.size() == 1) : "fluorospot run data population not yet implemented";
-
                         Plate plate = entry.getValue();
+                        String measurement = entry.getKey().getMeasurement();
+                        String analyte = entry.getKey().getAnalyte();
                         for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                         {
                             ExpMaterial material = materialMap.get(group.getName());
@@ -171,21 +168,33 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             {
                                 for (Position pos : group.getPositions())
                                 {
+                                    String mapMapKey = pos.toString() + "-" + group.getName() + "-" + (null != analyte ? analyte : "");
                                     Well well = plate.getWell(pos.getRow(), pos.getColumn());
                                     Map<String, Object> row = new LinkedHashMap<>();
 
-                                    row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-                                    row.put(SFU_PROPERTY_NAME, well.getValue());
+                                    if (SFU_PROPERTY_NAME.equalsIgnoreCase(measurement))
+                                        row.put(SFU_PROPERTY_NAME, well.getValue());
+                                    else if (INTENSITY_PROPERTY_NAME.equalsIgnoreCase(measurement))
+                                        row.put(INTENSITY_PROPERTY_NAME, well.getValue());
+                                    else if (ACTIVITY_PROPERTY_NAME.equalsIgnoreCase(measurement))
+                                        row.put(ACTIVITY_PROPERTY_NAME, well.getValue());
+
                                     row.put(WELLGROUP_PROPERTY_NAME, group.getName());
                                     row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());
                                     row.put(WELL_ROW_PROPERTY, pos.getRow());
                                     row.put(WELL_COLUMN_PROPERTY, pos.getColumn());
+                                    row.put(ANALYTE_PROPERTY_NAME, analyte);
+                                    row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
 
-                                    results.add(row);
+                                    rowMapMap.put(mapMapKey, row);
                                 }
                             }
                         }
                     }
+
+                    List<Map<String, Object>> results = new ArrayList<>();
+                    for (Map<String, Object> row : rowMapMap.values())
+                        results.add(row);
                     return results;
                 }
             }
@@ -260,19 +269,14 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     /**
      * Adds antigen wellgroup properties to the elispot data table.
      */
-    public static void populateAntigenDataProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap,
-                                                     boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
+    public static void populateAntigenDataProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap) throws ValidationException, ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
             Container container = run.getContainer();
 
-            // get the URI for the spot count
-            String spotCountURI = createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, ElispotDataHandler.SFU_PROPERTY_NAME).toString();
-
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
-            List<? extends DomainProperty> antigenProps = antigenDomain.getProperties();
 
             List<? extends ExpData> data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
             if (data.size() != 1)
@@ -289,44 +293,19 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     results.clear();
                     Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, pos);
 
-                    // get the current row map for assay data
-                    Map<String, ObjectProperty> dataRow = OntologyManager.getPropertyObjects(container, dataRowLsid.toString());
-
-                    for (DomainProperty dp : antigenProps)
+                    for (RunDataRow runDataRow : ElispotManager.get().getRunDataRows(dataRowLsid.toString(), container))
                     {
-                        String key = UploadWizardAction.getInputName(dp, group.getName());
-                        if (propMap.containsKey(key) && !dataRow.containsKey(createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, dp).toString()))
-                        {
-                            ObjectProperty op = ElispotDataHandler.getResultObjectProperty(container,
-                                    run.getProtocol(),
-                                    dataRowLsid.toString(),
-                                    dp.getName(),
-                                    propMap.get(key),
-                                    dp.getPropertyDescriptor().getPropertyType(),
-                                    dp.getPropertyDescriptor().getFormat());
+                        Map<String, Object> fieldsToUpdate = new HashMap<>();
+                        fieldsToUpdate.put("RowId", runDataRow.getRowId());
 
-                            results.add(op);
-                        }
-                    }
+                        Lsid antigenLsid = getAntigenLsid(group.getName(), runDataRow.getWellgroupName(), run.getRowId(),
+                                run.getProtocol().getName(), runDataRow.getAnalyte());
+                        fieldsToUpdate.put("AntigenLsid", antigenLsid);
+                        fieldsToUpdate.put(ANTIGEN_WELLGROUP_PROPERTY_NAME, group.getName());
 
-                    if (!results.isEmpty() && !dataRow.containsKey(createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME).toString()))
-                    {
-                        // include the antigen wellgroup name
-                        ObjectProperty op = ElispotDataHandler.getResultObjectProperty(container,
-                                run.getProtocol(), dataRowLsid.toString(),
-                                ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME,
-                                group.getName(), PropertyType.STRING);
-                        results.add(op);
-                    }
-
-                    // calculate a column for normalized spot count
-                    if (dataRow.containsKey(spotCountURI) && !dataRow.containsKey(createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME).toString()))
-                    {
-                        ObjectProperty o = dataRow.get(spotCountURI);
-
-                        double normalizedSpotCnt = o.getFloatValue();
-
-                        if (reader.isWellValueValid(normalizedSpotCnt))
+                        // calculate a column for normalized spot count
+                        Double normalizedSpotCnt = runDataRow.getSpotCount();
+                        if (null != normalizedSpotCnt && reader.isWellValueValid(normalizedSpotCnt))
                         {
                             String cellWellKey = UploadWizardAction.getInputName(cellWellProp, group.getName());
                             int cellsPerWell = 0;
@@ -336,26 +315,10 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             if (cellsPerWell > 0)
                                 normalizedSpotCnt = (normalizedSpotCnt * 1000000) / cellsPerWell;
 
-                            ObjectProperty sfuOp = ElispotDataHandler.getResultObjectProperty(container,
-                                    run.getProtocol(), dataRowLsid.toString(),
-                                    ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME,
-                                    normalizedSpotCnt, PropertyType.DOUBLE);
-
-                            results.add(sfuOp);
+                            fieldsToUpdate.put(NORMALIZED_SFU_PROPERTY_NAME, normalizedSpotCnt);
                         }
-                    }
 
-                    if (!results.isEmpty())
-                    {
-                        OntologyManager.ensureObject(container, dataRowLsid.toString(),  dataLsid);
-
-                        if (isUpgrade)
-                        {
-                            // remove any previous properties
-                            for (ObjectProperty prop : results)
-                                OntologyManager.deleteProperty(prop.getObjectURI(), prop.getPropertyURI(), container, container);
-                        }
-                        OntologyManager.insertProperties(container, dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
+                        ElispotManager.get().updateRunDataRow(null, fieldsToUpdate);
                     }
                 }
             }
@@ -367,16 +330,14 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
      * Adds antigen wellgroup statistics to the antigen runs table (one row per sample)
      */
     public static void populateAntigenRunProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap,
-                                                    boolean isUpgrade, boolean subtractBackground) throws ValidationException, ExperimentException
+                                                    boolean isUpgrade, boolean subtractBackground, boolean updateBackground) throws ValidationException, ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
             Container container = run.getContainer();
 
-            // get the URI for the spot count
-            String spotCountURI = createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, ElispotDataHandler.SFU_PROPERTY_NAME).toString();
-
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            List<? extends DomainProperty> antigenProps = antigenDomain.getProperties();
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
 
             List<? extends ExpData> data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
@@ -400,18 +361,18 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
             {
                 ExpMaterial material = materialMap.get(group.getName());
-
                 if (material != null)
                 {
-                    List<ObjectProperty> antigenResults = new ArrayList<>();
+                    List<Map<String, Object>> antigenRows = new ArrayList<>();
+
                     Set<String> antigenNames = new HashSet<>();
                     Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(dataLsid, material.getName());
-                    Map<String, ObjectProperty> dataRow = OntologyManager.getPropertyObjects(container, rowLsid.toString());
 
                     // background mean/median values on a per specimen basis
                     double bkMeanValue = 0;
                     double bkMedianValue = 0;
 
+                    // TODO: background subtraction not support for multi-plate yet
                     if (backgroundValueMap.containsKey(group.getName()))
                     {
                         Map<String, Double> values = backgroundValueMap.get(group.getName());
@@ -423,11 +384,11 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             bkMedianValue = values.get(ElispotPlateTypeHandler.MEDIAN_STAT);
                     }
 
+                    Set<String> analyteNames = new HashSet<>();
                     for (WellGroup antigenGroup : group.getOverlappingGroups(WellGroup.Type.ANTIGEN))
                     {
                         List<Position> positions = antigenGroup.getPositions();
-                        double[] statsData = new double[positions.size()];
-                        int i = 0;
+                        Map<String, List<Double>> statsDataMap = new HashMap<>();       // One per analyte
 
                         String cellWellKey = UploadWizardAction.getInputName(cellWellProp, antigenGroup.getName());
                         int cellsPerWell = 0;
@@ -439,97 +400,96 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             if (group.contains(pos))
                             {
                                 Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, pos);
-                                Map<String, ObjectProperty> props = OntologyManager.getPropertyObjects(container, dataRowLsid.toString());
-
-                                if (props.containsKey(spotCountURI))
+                                for (RunDataRow runDataRow : ElispotManager.get().getRunDataRows(dataRowLsid.toString(), container))
                                 {
-                                    ObjectProperty o = props.get(spotCountURI);
+                                    assert material.getName().equals(runDataRow.getWellgroupName());
+                                    if (!statsDataMap.containsKey(runDataRow.getAnalyte()))
+                                        statsDataMap.put(runDataRow.getAnalyte(), new ArrayList<Double>());
+                                    List<Double> statsData = statsDataMap.get(runDataRow.getAnalyte());
 
-                                    double value = o.getFloatValue();
-
-                                    if (reader.isWellValueValid(value))
+                                    Double value = runDataRow.getSpotCount();
+                                    if (null != value && reader.isWellValueValid(value))
                                     {
-                                        statsData[i++] = value;
+                                        statsData.add(value);
                                     }
                                 }
                             }
                         }
-                        statsData = Arrays.copyOf(statsData, i);
-                        StatsService service = ServiceRegistry.get().getService(StatsService.class);
-                        MathStat stats = service.getStats(statsData);
 
-                        String key = UploadWizardAction.getInputName(antigenNameProp, antigenGroup.getName());
-                        if (propMap.containsKey(key))
+                        for (Map.Entry<String, List<Double>> statsMapEntry : statsDataMap.entrySet())
                         {
-                            // for each antigen group, create two columns for mean and median values
-                            String antigenName = StringUtils.defaultString(ConvertUtils.convert(propMap.get(key)), "");
-                            String groupName = antigenGroup.getName();
+                            analyteNames.add(statsMapEntry.getKey());
+                            double[] statsData = new double[statsMapEntry.getValue().size()];
+                            int i = 0;
+                            for (Double doub : statsMapEntry.getValue())
+                                statsData[i++] = doub;
+                            StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                            MathStat stats = service.getStats(statsData);
 
-                            if (StringUtils.isEmpty(antigenName))
-                                antigenName = groupName;
-
-                            if (antigenNames.contains(antigenName))
-                                antigenName = antigenName + "_" + groupName;
-
-                            if (!antigenNames.contains(antigenName))
+                            String key = UploadWizardAction.getInputName(antigenNameProp, antigenGroup.getName());
+                            if (propMap.containsKey(key))
                             {
-                                antigenNames.add(antigenName);
-                                if (!Double.isNaN(stats.getMean()))
+                                // for each antigen group, create two columns for mean and median values
+                                String antigenName = StringUtils.defaultString(ConvertUtils.convert(propMap.get(key)), "");
+                                String groupName = antigenGroup.getName();
+
+                                if (StringUtils.isEmpty(antigenName))
+                                    antigenName = groupName;
+
+                                if (antigenNames.contains(antigenName))
+                                    antigenName = antigenName + "_" + groupName;
+
+                                if (!antigenNames.contains(antigenName))
                                 {
-                                    // subtract off the background value, and normalize by 10^6/cellPerWell
-                                    double meanValue = stats.getMean() - bkMeanValue;
-                                    meanValue = Math.max(meanValue, 0);
+                                    Double mean = null;
+                                    Double median = null;
+                                    antigenNames.add(antigenName);
+                                    if (!Double.isNaN(stats.getMean()))
+                                    {
+                                        // subtract off the background value, and normalize by 10^6/cellPerWell
+                                        double meanValue = stats.getMean() - bkMeanValue;
+                                        meanValue = Math.max(meanValue, 0);
+                                        if (cellsPerWell > 0)
+                                            meanValue = (meanValue * 1000000) / cellsPerWell;
+                                        mean = meanValue;
+                                    }
 
-                                    if (cellsPerWell > 0)
-                                        meanValue = (meanValue * 1000000) / cellsPerWell;
+                                    if (!Double.isNaN(stats.getMedian()))
+                                    {
+                                        double medianValue = stats.getMedian() - bkMedianValue;
+                                        medianValue = Math.max(medianValue, 0);
+                                        if (cellsPerWell > 0)
+                                            medianValue = (medianValue * 1000000) / cellsPerWell;
+                                        median = medianValue;
+                                    }
 
-                                    ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(container,
-                                            run.getProtocol(),
-                                            rowLsid.toString(),
-                                            antigenName + "_Mean",
-                                            meanValue,
-                                            PropertyType.DOUBLE, "0.0");
-                                    antigenResults.add(mean);
-                                }
-
-                                if (!Double.isNaN(stats.getMedian()))
-                                {
-                                    double medianValue = stats.getMedian() - bkMedianValue;
-                                    medianValue = Math.max(medianValue, 0);
-
-                                    if (cellsPerWell > 0)
-                                        medianValue = (medianValue * 1000000) / cellsPerWell;
-
-                                    ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(container,
-                                            run.getProtocol(),
-                                            rowLsid.toString(),
-                                            antigenName + "_Median",
-                                            medianValue,
-                                            PropertyType.DOUBLE, "0.0");
-                                    antigenResults.add(median);
+                                    Map<String, Object> fields = makeAntigenRow(run.getRowId(), material.getLSID(), material.getName(),
+                                            (String) propMap.get(key), mean, median, rowLsid.toString(),
+                                            run.getProtocol().getName(), groupName, statsMapEntry.getKey());
+                                    if (propMap.containsKey(cellWellKey))
+                                        fields.put(ElispotAssayProvider.CELLWELL_PROPERTY_NAME, propMap.get(cellWellKey));
+                                    for (DomainProperty antigenProp : antigenProps)
+                                    {
+                                        String antigenPropKey = UploadWizardAction.getInputName(antigenProp, antigenGroup.getName());
+                                        if (propMap.containsKey(antigenPropKey))
+                                            fields.put(antigenProp.getName(), propMap.get(antigenPropKey));
+                                    }
+                                    antigenRows.add(fields);
                                 }
                             }
                         }
                     }
 
-                    // add the background well values (not normalized)
-                    ObjectProperty backgroundMeanValue = ElispotDataHandler.getAntigenResultObjectProperty(container,
-                            run.getProtocol(),
-                            rowLsid.toString(),
-                            ElispotDataHandler.BACKGROUND_WELL_PROPERTY + "_Mean",
-                            bkMeanValue,
-                            PropertyType.DOUBLE, "0.0");
+                    for (String analyteName : analyteNames)
+                    {
+                        // add the background well values (not normalized)
+                        Map<String, Object> fields = makeAntigenRow(run.getRowId(), material.getLSID(), material.getName(),
+                                BACKGROUND_WELL_PROPERTY, bkMeanValue, bkMedianValue,
+                                rowLsid.toString(), run.getProtocol().getName(), BACKGROUND_WELL_PROPERTY, analyteName);
+                        antigenRows.add(fields);
+                    }
 
-                    ObjectProperty backgroundMedianValue = ElispotDataHandler.getAntigenResultObjectProperty(container,
-                            run.getProtocol(),
-                            rowLsid.toString(),
-                            ElispotDataHandler.BACKGROUND_WELL_PROPERTY + "_Median",
-                            bkMedianValue,
-                            PropertyType.DOUBLE, "0.0");
-
-                    antigenResults.add(backgroundMeanValue);
-                    antigenResults.add(backgroundMedianValue);
-
+/*
                     if (!antigenResults.isEmpty())
                     {
                         if (!dataRow.containsKey(createPropertyLsid(ElispotDataHandler.ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX, run,ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY).toString()))
@@ -551,21 +511,35 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                         OntologyManager.ensureObject(container, rowLsid.toString(),  dataLsid);
                         OntologyManager.insertProperties(container, rowLsid.toString(), antigenResults.toArray(new ObjectProperty[antigenResults.size()]));
                     }
+*/
+                    for (Map<String, Object> antigenRow : antigenRows)
+                    {
+                        if (updateBackground)
+                            ElispotManager.get().updateAntigenRow(null, antigenRow, run.getProtocol());
+                        else
+                            ElispotManager.get().insertAntigenRow(null, antigenRow, run.getProtocol());
+                    }
                 }
             }
             transaction.commit();
         }
     }
 
-    public static boolean isSpotCountValid(double value)
+    private static Map<String, Object> makeAntigenRow(int runId, String specimenLsid, String wellgroupName, String antigenName,
+                                                      Double mean, Double median, String objectUri, String protocolName,
+                                                      String antigenWellgroupName, String analyte)
     {
-        // negative sfu values are error codes
-        return value >= 0;
-    }
-
-    public static Lsid createPropertyLsid(String prefix, ExpRun run, DomainProperty prop)
-    {
-        return new Lsid(prefix, run.getProtocol().getName(), prop.getName());
+        Map<String, Object> fields = new HashMap<>();
+        fields.put(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME, antigenName);
+        fields.put("Mean", mean);
+        fields.put("Median", median);
+        fields.put("RunId", runId);
+        fields.put("SpecimenLsid", specimenLsid);
+        fields.put(ElispotDataHandler.WELLGROUP_PROPERTY_NAME, wellgroupName);
+        fields.put(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME, antigenWellgroupName);
+        fields.put("AntigenLsid", getAntigenLsid(antigenWellgroupName, wellgroupName, runId, protocolName, analyte));
+        fields.put("ObjectUri", objectUri);
+        return fields;
     }
 
     public static Lsid createPropertyLsid(String prefix, ExpRun run, String propName)
