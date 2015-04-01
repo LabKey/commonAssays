@@ -57,12 +57,13 @@ public class ElispotManager
         return getSchema().getTable(ELISPOT_RUNDATA_TABLE_NAME);
     }
 
+    @NotNull
     public static TableInfo getTableInfoElispotAntigen(ExpProtocol protocol)
     {
         Domain domain = AbstractAssayProvider.getDomainByPrefix(protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
         if (null != domain)
             return StorageProvisioner.createTableInfo(domain);
-        return null;
+        throw new IllegalStateException("Domain not found for protocol: " + protocol.getName());
     }
 
     public int insertRunDataRow(User user, Map<String, Object> fields)
@@ -135,6 +136,11 @@ public class ElispotManager
         sort.appendSortColumn(new Sort.SortField(FieldKey.fromString("WellgroupName"), Sort.SortDirection.ASC));
         return new TableSelector(getTableInfoElispotAntigen(protocol), Collections.singleton("AntigenWellgroupName"),
                                  makeRunDataContainerClause(container), sort).getArrayList(String.class);
+    }
+
+    public Map<String, Object> getAntigenRow(String antigenLsid, ExpProtocol protocol)
+    {
+        return new TableSelector(getTableInfoElispotAntigen(protocol), new SimpleFilter(FieldKey.fromString("AntigenLsid"), antigenLsid), null).getMap();
     }
 
     protected SimpleFilter makeRunDataContainerClause(Container container)

@@ -45,6 +45,8 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
+import org.labkey.elispot.ElispotManager;
+import org.labkey.elispot.RunDataRow;
 import org.labkey.elispot.plate.PlateInfo;
 
 import java.io.File;
@@ -126,25 +128,21 @@ public class BackgroundSubtractionJob extends PipelineJob
                         DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
                         DomainProperty antigenNameProp = antigenDomain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME);
 
-                        String cellWellURI = ElispotDataHandler.createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, ElispotAssayProvider.CELLWELL_PROPERTY_NAME).toString();
-                        String antigenNameURI = ElispotDataHandler.createPropertyLsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, run, ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME).toString();
-
                         // populate the property maps with cells per well and antigen name information (to simulate data upload)
                         for (WellGroup group : plate.getWellGroups(WellGroup.Type.ANTIGEN))
                         {
                             Position groupPos = group.getPositions().get(0);
                             Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, groupPos);
-                            Map<String, ObjectProperty> dataRow = OntologyManager.getPropertyObjects(run.getContainer(), dataRowLsid.toString());
+                            RunDataRow runDataRow = ElispotManager.get().getRunDataRow(dataRowLsid.toString(), run.getContainer());
+                            if (null != runDataRow && null != cellWellProp && null != antigenNameProp)
+                            {
+                                Integer cellWell = runDataRow.getCellWell(run.getProtocol());
+                                if (null != cellWell)
+                                    propMap.put(UploadWizardAction.getInputName(cellWellProp, group.getName()), cellWell);
 
-                            if (dataRow.containsKey(cellWellURI))
-                            {
-                                ObjectProperty o = dataRow.get(cellWellURI);
-                                propMap.put(UploadWizardAction.getInputName(cellWellProp, group.getName()), o.getFloatValue().intValue());
-                            }
-                            if (dataRow.containsKey(antigenNameURI))
-                            {
-                                ObjectProperty o = dataRow.get(antigenNameURI);
-                                propMap.put(UploadWizardAction.getInputName(antigenNameProp, group.getName()), o.getStringValue());
+                                String antigenName = runDataRow.getAntigenName(run.getProtocol());
+                                if (null != antigenName)
+                                    propMap.put(UploadWizardAction.getInputName(antigenNameProp, group.getName()), antigenName);
                             }
                         }
                         ElispotDataHandler.populateAntigenRunProperties(run, plate, reader, propMap, true, true, true);

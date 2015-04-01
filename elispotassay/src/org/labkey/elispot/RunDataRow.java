@@ -1,5 +1,9 @@
 package org.labkey.elispot;
 
+import org.labkey.api.exp.api.ExpProtocol;
+
+import java.util.Map;
+
 /**
  * Created by davebradlee on 3/20/15.
  */
@@ -8,19 +12,19 @@ public class RunDataRow
     private int _rowId;
     private int _runId;
     private String _specimenLsid;
+    private String _antigenLsid;
     private Double _spotCount;
     private String _wellgroupName;
     private String _wellgroupLocation;
     private Double _normalizedSpotCount;
-    private Integer _antigenId;
-    private String _antigenName;
     private String _antigenWellgroupName;
-    private Integer _cellWell;
     private String _analyte;
     private Double _activity;
     private Double _intensity;
     private String _objectUri;
     private int _objectId;          // TODO: remove when we remove use of exp.Object
+
+    private Map<String, Object> _antigenRow = null;
 
     public int getRowId()
     {
@@ -92,24 +96,18 @@ public class RunDataRow
         _normalizedSpotCount = normalizedSpotCount;
     }
 
-    public Integer getAntigenId()
+    public Integer getAntigenId(ExpProtocol protocol)
     {
-        return _antigenId;
+        if (null == _antigenRow)
+            _antigenRow = ElispotManager.get().getAntigenRow(_antigenLsid, protocol);
+        return (Integer)_antigenRow.get("AntigenId");
     }
 
-    public void setAntigenId(Integer antigenId)
+    public String getAntigenName(ExpProtocol protocol)
     {
-        _antigenId = antigenId;
-    }
-
-    public String getAntigenName()
-    {
-        return _antigenName;
-    }
-
-    public void setAntigenName(String antigenName)
-    {
-        _antigenName = antigenName;
+        if (null == _antigenRow)
+            _antigenRow = ElispotManager.get().getAntigenRow(_antigenLsid, protocol);
+        return (String)_antigenRow.get("AntigenName");
     }
 
     public String getAntigenWellgroupName()
@@ -122,14 +120,11 @@ public class RunDataRow
         _antigenWellgroupName = antigenWellgroupName;
     }
 
-    public Integer getCellWell()
+    public Integer getCellWell(ExpProtocol protocol)
     {
-        return _cellWell;
-    }
-
-    public void setCellWell(Integer cellWell)
-    {
-        _cellWell = cellWell;
+        if (null == _antigenRow)
+            _antigenRow = ElispotManager.get().getAntigenRow(_antigenLsid, protocol);
+        return (Integer)_antigenRow.get("CellWell");
     }
 
     public String getAnalyte()
@@ -180,5 +175,15 @@ public class RunDataRow
     public void setObjectId(int objectId)
     {
         _objectId = objectId;
+    }
+
+    public String getAntigenLsid()
+    {
+        return _antigenLsid;
+    }
+
+    public void setAntigenLsid(String antigenLsid)
+    {
+        _antigenLsid = antigenLsid;
     }
 }
