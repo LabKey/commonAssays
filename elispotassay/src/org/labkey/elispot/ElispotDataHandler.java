@@ -170,7 +170,12 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 {
                                     String mapMapKey = pos.toString() + "-" + group.getName() + "-" + (null != analyte ? analyte : "");
                                     Well well = plate.getWell(pos.getRow(), pos.getColumn());
-                                    Map<String, Object> row = new LinkedHashMap<>();
+                                    Map<String, Object> row;
+                                    if (!rowMapMap.containsKey(mapMapKey))
+                                    {
+                                        rowMapMap.put(mapMapKey, new LinkedHashMap<String, Object>());
+                                    }
+                                    row = rowMapMap.get(mapMapKey);
 
                                     if (SFU_PROPERTY_NAME.equalsIgnoreCase(measurement))
                                         row.put(SFU_PROPERTY_NAME, well.getValue());
@@ -185,8 +190,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                     row.put(WELL_COLUMN_PROPERTY, pos.getColumn());
                                     row.put(ANALYTE_PROPERTY_NAME, analyte);
                                     row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-
-                                    rowMapMap.put(mapMapKey, row);
                                 }
                             }
                         }
