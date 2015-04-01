@@ -135,6 +135,29 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     for (ExpMaterial material : run.getMaterialInputs().keySet())
                         materialMap.put(material.getName(), material);
 
+                    // create a map of analyte to cytokine names (third step of the upload wizard)
+                    Map<String, Object> analyteToCytokine = new HashMap<>();
+
+                    if (_context instanceof AssayUploadXarContext)
+                    {
+                        AssayRunUploadContext assayContext = ((AssayUploadXarContext) _context).getContext();
+                        Map<String, Map<DomainProperty, String>> analyteProperties = ((ElispotRunUploadForm)assayContext).getAnalyteProperties();
+
+                        if (analyteProperties != null)
+                        {
+                            for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : analyteProperties.entrySet())
+                            {
+                                String analyteName = groupEntry.getKey();
+                                Map<DomainProperty, String> properties = groupEntry.getValue();
+                                for (String value : properties.values())
+                                {
+                                    assert !analyteToCytokine.containsKey(analyteName) : "only cytokine to analyte mapping supported";
+                                    analyteToCytokine.put(analyteName, value);
+                                }
+                            }
+                        }
+                    }
+
                     for (Map.Entry<PlateInfo, Plate> entry : plates.entrySet())
                     {
                         // TODO : remove this assert when populating fluorospot data is working

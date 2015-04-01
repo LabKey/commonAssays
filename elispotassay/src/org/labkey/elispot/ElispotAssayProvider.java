@@ -215,6 +215,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
         result.add(createAntigenWellGroupDomain(c));
         result.add(createAnalyteDomain(c));
+
         return result;
     }
     
@@ -233,8 +234,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         addProperty(domain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
         addProperty(domain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
         addProperty(domain, SAMPLE_DESCRIPTION_PROPERTY_NAME, SAMPLE_DESCRIPTION_PROPERTY_CAPTION, PropertyType.STRING);
-        //addProperty(sampleWellGroupDomain, EFFECTOR_PROPERTY_NAME, EFFECTOR_PROPERTY_CAPTION, PropertyType.STRING);
-        //addProperty(sampleWellGroupDomain, STCL_PROPERTY_NAME, STCL_PROPERTY_CAPTION, PropertyType.STRING);
 
         return result;
     }
@@ -248,7 +247,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
         addProperty(antigenWellGroupDomain, ANTIGENNAME_PROPERTY_NAME, ANTIGENNAME_PROPERTY_CAPTION, PropertyType.STRING).setDimension(true);
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
-        //addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
 
         return new Pair<>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
     }
@@ -259,7 +257,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         Domain analyteWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Analyte Fields");
 
         analyteWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the analyte well groups");
-        addProperty(analyteWellGroupDomain, ANALYTE_PROPERTY_NAME, ANALYTE_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(analyteWellGroupDomain, CYTOKINE_PROPERTY_NAME, CYTOKINE_PROPERTY_CAPTION, PropertyType.STRING);
 
         return new Pair<>(analyteWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());

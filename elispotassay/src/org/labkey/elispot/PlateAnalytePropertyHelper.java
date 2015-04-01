@@ -1,12 +1,17 @@
 package org.labkey.elispot;
 
 import org.labkey.api.exp.DuplicateMaterialException;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.elispot.plate.FluorescentPlateInfo;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,25 +23,40 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
 {
     private List<String> _analyteNames;
 
-    public PlateAnalytePropertyHelper(List<? extends DomainProperty> antigenDomainProperties)
+    public PlateAnalytePropertyHelper(ElispotRunUploadForm form, List<? extends DomainProperty> antigenDomainProperties) throws ExperimentException
     {
         super(antigenDomainProperties);
         _analyteNames = new ArrayList<>();
 
-        // TODO: figure out defaulting/loading analyteNames
-        _analyteNames = Arrays.asList("Analyte 1", "Analyte 2", "Analyte 3");
-        /*
-        if (template != null)
+        Map<String, File> dataFiles = form.getUploadedData();
+        if (dataFiles.containsKey(AssayDataCollector.PRIMARY_FILE))
         {
-            for (WellGroupTemplate wellgroup : template.getWellGroups())
+            File file = dataFiles.get(AssayDataCollector.PRIMARY_FILE);
+            PlateReader reader;
+            PlateTemplate template = form.getProvider().getPlateTemplate(form.getContainer(), form.getProtocol());
+
+            // populate property name to value map
+            Map<String, String> runPropMap = new HashMap<>();
+            for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
+                runPropMap.put(entry.getKey().getName(), entry.getValue());
+
+            if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
             {
-                if (wellgroup.getType() == WellGroup.Type.ANTIGEN)
+                reader = form.getProvider().getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
+                for (Map.Entry<String, double[][]> entry : reader.loadMultiGridFile(template, file).entrySet())
                 {
-                    _analyteNames.add(wellgroup.getName());
+                    // attempt to parse the plate grid annotation into a PlateInfo object
+                    FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(entry.getKey());
+                    if (plateInfo != null)
+                    {
+                        if (plateInfo.getMeasurement().equals(ElispotDataHandler.SFU_PROPERTY_NAME))
+                        {
+                            _analyteNames.add(plateInfo.getAnalyte());
+                        }
+                    }
                 }
             }
         }
-        */
     }
 
     @Override
@@ -52,27 +72,12 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
         if (analyteName != null)
             return analyteName;
 
-        /*
-        int i = 0;
-        for (WellGroupTemplate wellgroup : _template.getWellGroups())
-        {
-            if (wellgroup.getType() == WellGroup.Type.ANTIGEN)
-            {
-                if (i == index)
-                {
-                    return wellgroup.getName();
-                }
-                i++;
-            }
-        }
-        */
-        // todo clean up this message
         throw new IndexOutOfBoundsException("Requested #" + index + " but there were only " + _analyteNames.size() + " well group templates");
     }
 
     @Override
     protected boolean isCopyable(DomainProperty pd)
     {
-        return !AbstractAssayProvider.SPECIMENID_PROPERTY_NAME.equals(pd.getName()) && !AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME.equals(pd.getName());
+        return false;
     }
 }
