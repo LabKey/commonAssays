@@ -552,23 +552,32 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                     throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/ControlName/Conjugate/Isotype combination");
                 }
             }
-            GuideSet updatedGuideSet = Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
 
-            // value-based guide set updates might change expected ranges so QC flags needs to be updated,
-            // run-based guide sets can enable/disabled specific metrics (EC50, AUC, etc.) for QC flagging
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
-            TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
-            List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
-            for (AnalyteSinglePointControl singlePointControl : singlePointControls)
+            GuideSet oldBean = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet(), new SimpleFilter(FieldKey.fromParts("RowId"), oldKey), null).getObject(GuideSet.class);
+            boolean toUpdateQCFlags = bean.hasQCRelatedPropertyChanged(oldBean);
+            if (bean.hasUneditablePropertyChanged(oldBean))
             {
-                singlePointControl.updateQCFlags(_userSchema);
+                throw new ValidationException("The following properties should not be updated for an existing guide set: " + bean.getUneditablePropertyNames());
             }
 
-            selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
-            List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
-            for (AnalyteTitration titration : titrations)
+            GuideSet updatedGuideSet = Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
+
+            if (toUpdateQCFlags)
             {
-                titration.updateQCFlags(_userSchema);
+                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
+                TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
+                List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
+                for (AnalyteSinglePointControl singlePointControl : singlePointControls)
+                {
+                    singlePointControl.updateQCFlags(_userSchema);
+                }
+
+                selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
+                List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
+                for (AnalyteTitration titration : titrations)
+                {
+                    titration.updateQCFlags(_userSchema);
+                }
             }
 
             return updatedGuideSet;

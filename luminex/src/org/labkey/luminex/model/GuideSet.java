@@ -27,6 +27,7 @@ import org.labkey.luminex.query.GuideSetTable;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * User: jeckels
@@ -35,13 +36,25 @@ import java.util.Map;
 public class GuideSet
 {
     private int _rowId;
+    private Timestamp _created;
+    private Timestamp _modified;
+    private Integer _createdBy;
+    private Integer _modifiedBy;
+
+    // uneditable properties
     private int _protocolId;
+    private boolean _valueBased;
+    private boolean _isTitration;
+    private String _controlName;
     private String _analyteName;
     private String _conjugate;
     private String _isotype;
+
+    // editable non-qc related properties
     private boolean _currentGuideSet;
-    private boolean _valueBased;
-    private boolean _isTitration;
+    private String _comment;
+
+    // editable qc related properties
     private Double _ec504plAverage;
     private Double _ec504plStdDev;
     private Double _ec505plAverage;
@@ -50,13 +63,6 @@ public class GuideSet
     private Double _aucStdDev;
     private Double _maxFIAverage;
     private Double _maxFIStdDev;
-    private String _controlName;
-    private String _comment;
-    private Timestamp _created;
-    private Timestamp _modified;
-    private Integer _createdBy;
-    private Integer _modifiedBy;
-    // default values
     private boolean _ec504plEnabled = true;
     private boolean _ec505plEnabled = true;
     private boolean _aucEnabled = true;
@@ -425,5 +431,33 @@ public class GuideSet
     public void setIsTitration(boolean isTitration)
     {
         _isTitration = isTitration;
+    }
+
+    public boolean hasQCRelatedPropertyChanged(GuideSet orig)
+    {
+        // value-based guide set updates might change expected ranges so QC flags needs to be updated,
+        return !Objects.equals(this.getEc504plAverage(), orig.getEc504plAverage()) || !Objects.equals(this.getEc504plStdDev(), orig.getEc504plStdDev())
+                || !Objects.equals(this.getEc505plAverage(), orig.getEc505plAverage()) || !Objects.equals(this.getEc505plStdDev(), orig.getEc505plStdDev())
+                || !Objects.equals(this.getAucAverage(), orig.getAucAverage()) || !Objects.equals(this.getAucStdDev(), orig.getAucStdDev())
+                || !Objects.equals(this.getMaxFIAverage(), orig.getMaxFIAverage()) || !Objects.equals(this.getMaxFIStdDev(), orig.getMaxFIStdDev())
+                // run-based guide sets can enable/disabled specific metrics (EC50, AUC, etc.) for QC flagging
+                || this.isEc504plEnabled() != orig.isEc504plEnabled() || this.isEc505plEnabled() != orig.isEc505plEnabled()
+                || this.isAucEnabled() != orig.isAucEnabled() || this.isMaxFIEnabled() != orig.isMaxFIEnabled();
+    }
+
+    public String getUneditablePropertyNames()
+    {
+        return "protocolId, valueBased, isTitration, controlName, analyteName, conjugate, and isotype";
+    }
+
+    public boolean hasUneditablePropertyChanged(GuideSet orig)
+    {
+        return this.getProtocolId() != orig.getProtocolId()
+                || this.isValueBased() != orig.isValueBased()
+                || this.getIsTitration() != orig.getIsTitration()
+                || !Objects.equals(this.getControlName(), orig.getControlName())
+                || !Objects.equals(this.getAnalyteName(), orig.getAnalyteName())
+                || !Objects.equals(this.getConjugate(), orig.getConjugate())
+                || !Objects.equals(this.getIsotype(), orig.getIsotype());
     }
 }

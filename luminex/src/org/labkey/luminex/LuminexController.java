@@ -760,7 +760,7 @@ public class LuminexController extends SpringActionController
                     sql.append("ON r.RowId = spc.RunId ");
                     sql.append("JOIN ");
                     sql.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "a ");
-                    sql.append("ON spc.RowId = aspc.SinglePointControlId ");
+                    sql.append("ON spc.RowId = a.SinglePointControlId ");
                     sql.append("WHERE a.GuideSetId = ?");
                     sql.add(rowId);
                 }
