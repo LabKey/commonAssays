@@ -141,6 +141,9 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
     @Override
     public List<FieldKey> getDefaultVisibleColumns()
     {
+        ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(ElispotAssayProvider.NAME);
+        ElispotAssayProvider.DetectionMethodType method = provider.getDetectionMethod(_protocol.getContainer(), _protocol);
+
         List<FieldKey> fieldKeys = new ArrayList<>();
         fieldKeys.add(FieldKey.fromString(ElispotDataHandler.WELLGROUP_PROPERTY_NAME));
         fieldKeys.add(FieldKey.fromString(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME));
@@ -149,6 +152,11 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         fieldKeys.add(FieldKey.fromString(ElispotDataHandler.WELLGROUP_LOCATION_PROPERTY));
         fieldKeys.add(FieldKey.fromString(ElispotDataHandler.SFU_PROPERTY_NAME));
         fieldKeys.add(FieldKey.fromString(ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME));
+        if (ElispotAssayProvider.DetectionMethodType.FLUORESCENT == method)
+        {
+            fieldKeys.add(FieldKey.fromString(ElispotDataHandler.ACTIVITY_PROPERTY_NAME));
+            fieldKeys.add(FieldKey.fromString(ElispotDataHandler.INTENSITY_PROPERTY_NAME));
+        }
         FieldKey specimenPropFieldKey = FieldKey.fromParts("SpecimenLsid", "Property");
         fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("SpecimenId")));
         fieldKeys.add(FieldKey.fromParts(specimenPropFieldKey, FieldKey.fromString("ParticipantId")));
