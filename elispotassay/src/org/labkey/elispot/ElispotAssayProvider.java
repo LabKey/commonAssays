@@ -224,7 +224,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The Elispot data file is the output file from the plate reader that has been selected.");
+        return new HtmlView("The data file is the output file from the plate reader that has been selected.");
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
