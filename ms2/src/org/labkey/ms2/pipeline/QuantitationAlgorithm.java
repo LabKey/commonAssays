@@ -65,7 +65,7 @@ public enum QuantitationAlgorithm
             String ver = params.get("pipeline, msinspect ver");
 
             // NOTE: The java command-line for msInspect gets passed as a
-            // single argument to xinteract, and it the path to the java executable cannot contain spaces.
+            // single argument to xinteract, and the path to the java executable cannot contain spaces.
             // If it does contains spaces, then just use "java", and rely on it being on the path.
             String javaPath = PipelineJobService.get().getJavaPath();
             if (javaPath.indexOf(' ') >= 0)
@@ -84,8 +84,7 @@ public enum QuantitationAlgorithm
                 "-C1" + javaPath + " " +
                     (factory.getJavaVMOptions() == null ? "-Xmx1024M" : factory.getJavaVMOptions())
                     + " -jar " + viewerAppPath
-                    + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
-                    ,
+                    + " --q3 " + StringUtils.join(quantOpts.iterator(), ' '),
                     "-C2Q3ProteinRatioParser"
             };
         }
