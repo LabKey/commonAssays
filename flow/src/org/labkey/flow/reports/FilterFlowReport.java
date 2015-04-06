@@ -17,6 +17,7 @@ package org.labkey.flow.reports;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.CachedResultSet;
 import org.labkey.api.data.CachedResultSets;
 import org.labkey.api.data.ColumnInfo;
@@ -591,12 +592,12 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         @Override
-        public File getReportDir()
+        public File getReportDir(@NotNull String executingContainerId)
         {
             // Workaround for Issue 12625: Create unique directory for the background report job
             File tempRoot = getTempRoot(getDescriptor());
             String name = FileUtil.makeLegalName(getDescriptor().getReportId().toString() + "_" + GUID.makeHash()).replaceAll(" ", "_");
-            File file = new File(tempRoot, "Report_" + name);
+            File file = new File(tempRoot, executingContainerId + File.separator + "Report_" + name);
             file.mkdirs();
             return file;
         }

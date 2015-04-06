@@ -58,7 +58,7 @@ public class FlowReportJob extends RReportJob
     {
         super(FlowPipelineProvider.NAME, info, report.getReportId(), root);
         _report = report;
-        init();
+        init(this.getContainerId());
     }
 
     @Override
