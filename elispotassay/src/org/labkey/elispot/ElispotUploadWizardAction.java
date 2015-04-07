@@ -195,6 +195,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
         resolverType.addHiddenFormFields(form, view);
 
+        // add any existing antigen properties
+        PlateAntigenPropertyHelper antigenPropertyHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
+        for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : antigenPropertyHelper.getPostedPropertyValues(form.getRequest()).entrySet())
+            addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
+
         ButtonBar bbar = new ButtonBar();
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
