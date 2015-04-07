@@ -590,6 +590,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             queryName: 'GuideSet',
             command: 'insert',
             rows: [{
+                ValueBased: this.valueBased != undefined ? this.valueBased : false,
                 IsTitration: this.isTitrationControlType(),
                 ControlName: this.controlName,
                 AnalyteName: this.analyte,
@@ -640,7 +641,6 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // otherwise get the information from the run grids
         if (this.valueBased)
         {
-            commands[0].rows[0].ValueBased = true;
             Ext.apply(commands[0].rows[0], this.getMetricValues());
         }
         else
