@@ -30,6 +30,7 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.TableSelector;
@@ -909,6 +910,7 @@ public class LuminexController extends SpringActionController
             AssayView result = new AssayView();
             final AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME, LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
+            settings.setBaseSort(new Sort("-RowId")); // Issue 22935
             setHelpTopic(new HelpTopic("applyGuideSets"));
 
             final int protocolId = _protocol.getRowId();

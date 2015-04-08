@@ -42,10 +42,9 @@
     List<LuminexController.GuideSetsDeleteBean.GuideSet> guideSets = bean.getGuideSets();
 %>
 
-<% if (bean.getDataRegionSelectionKey().length() == 0) { %>
-    <%--NOTE: is this case even possible--%>
+<% if (bean.getGuideSets() == null || bean.getGuideSets().isEmpty()) { %>
 
-    <p>There are no selected objects to delete.</p>
+    <p>There are no selected guide sets to delete.</p>
     <%= text(bean.getReturnUrl() == null || bean.getReturnUrl().isEmpty() ? button("OK").href(buildURL(LuminexController.ManageGuideSetAction.class)).toString() : button("OK").href(bean.getReturnUrl()).toString())%>
 
 <% } else { %>
@@ -74,9 +73,20 @@
                 <br>
                 User Runs:
                 <ul>
-                    <% for (String run : gs.getUserRuns()) { %>
-                    <li><%=h(run)%></li>
-                    <% } %>
+                    <%
+                        int len = Math.min(gs.getUserRuns().size(), 20);
+                        for (int i = 0; i < len; i++)
+                        {
+                    %>
+                            <li><%=h(gs.getUserRuns().get(i))%></li>
+                    <%
+                        }
+
+                        if (len < gs.getUserRuns().size())
+                        {
+                    %>
+                            <li>... [Showing first <%=len%> runs, <%=gs.getUserRuns().size()%> total]</li>
+                    <%  } %>
                 </ul>
             <% } %>
             <br>
