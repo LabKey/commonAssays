@@ -205,7 +205,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
                 protocol,
                 FieldKey.fromParts(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
-                FieldKey.fromParts("ObjectId"));
+                FieldKey.fromParts("RowId"));
     }
 
     public Domain getResultsDomain(ExpProtocol protocol)

@@ -142,6 +142,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
     public List<FieldKey> getDefaultVisibleColumns()
     {
         ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(ElispotAssayProvider.NAME);
+        assert null != provider;
         ElispotAssayProvider.DetectionMethodType method = provider.getDetectionMethod(_protocol.getContainer(), _protocol);
 
         List<FieldKey> fieldKeys = new ArrayList<>();
