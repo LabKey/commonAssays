@@ -16,26 +16,36 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.query.ExpDataTable;
-import org.labkey.api.view.*;
-import org.labkey.api.data.*;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
-import org.labkey.api.security.permissions.*;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.permissions.DesignAssayPermission;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.SimpleTextDisplayElement;
+import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * User: jeckels
@@ -92,12 +102,11 @@ public class PendingMageMLFilesView extends QueryView
         {
             if (microarrayProtocols.size() == 0)
             {
-                StringBuilder message = new StringBuilder("To import MAGE-ML files, <a href=\"");
-                message.append(PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(getContainer(), MicroarrayAssayProvider.NAME, getViewContext().getActionURL()));
-                message.append("\">create a microarray microarray assay definition</a>.");
-                SimpleTextDisplayElement element = new SimpleTextDisplayElement(message.toString(), true);
-                element.setDisplayPermission(InsertPermission.class);
-                bar.add(element);
+                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(getContainer(), MicroarrayAssayProvider.NAME, getViewContext().getActionURL());
+                ActionButton button = new ActionButton(url, "Create New Microarray Assay Design");
+                button.setActionType(ActionButton.Action.LINK);
+                button.setDisplayPermission(DesignAssayPermission.class);
+                bar.add(button);
             }
             else
             {
