@@ -123,7 +123,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         public DataView createDataView()
         {
             DataView view = super.createDataView();
-            view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+            view.getDataRegion().setRecordSelectorValueColumns("RowId");
             return view;
         }
     }
