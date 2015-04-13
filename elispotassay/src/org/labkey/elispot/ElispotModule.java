@@ -44,7 +44,7 @@ public class ElispotModule extends DefaultModule
 
     public double getVersion()
     {
-        return 15.11;
+        return 15.12;
     }
 
     protected void init()

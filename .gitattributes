@@ -156,9 +156,11 @@ elisa/src/org/labkey/elisa/view/runDetailsView.jsp -text
 elisa/webapp/elisa/runDataPanel.js -text
 elisa/webapp/elisa/runDetailsPanel.js -text
 elispotassay/module.properties -text
-elispotassay/resources/schemas/dbscripts/postgresql/elispot-15.10-15.11.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/elispot-15.10-15.11.sql -text
-elispotassay/resources/schemas/elispot.xml -text
+elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.10-15.12.sql -text
+elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.11-15.12.sql -text
+elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.10-15.12.sql -text
+elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.11-15.12.sql -text
+elispotassay/resources/schemas/elispotlk.xml -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text

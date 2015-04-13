@@ -54,7 +54,7 @@ import java.util.Set;
 
 public class ElispotProtocolSchema extends AssayProtocolSchema
 {
-    public static final String ELISPOT_DBSCHEMA_NAME = "elispot";
+    public static final String ELISPOT_DBSCHEMA_NAME = "elispotlk";
     public static final String ELISPOT_ANTIGEN_SCHEMA_NAME = "elispotantigen";
     public static final String ANTIGEN_STATS_TABLE_NAME = "AntigenStats";   // table as CrossTab
     public static final String ANTIGEN_TABLE_NAME = "Antigen";      // raw table

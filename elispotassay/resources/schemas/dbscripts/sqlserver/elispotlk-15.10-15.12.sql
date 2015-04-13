@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-CREATE SCHEMA elispot;
+CREATE SCHEMA elispotlk;
 GO
 CREATE SCHEMA elispotantigen;
 GO
 
-CREATE TABLE elispot.rundata
+CREATE TABLE elispotlk.rundata
 (
     RowId INT IDENTITY (1, 1) NOT NULL,
     RunId INT NOT NULL,
@@ -46,10 +46,10 @@ CREATE TABLE elispot.rundata
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
-CREATE INDEX idx_elispotrundata_runid ON elispot.rundata(RunId);
+CREATE INDEX idx_elispotrundata_runid ON elispotlk.rundata(RunId);
 
 
-INSERT INTO elispot.rundata (RunId, Specimenlsid, SpotCount, WellgroupName, WellgroupLocation, NormalizedSpotCount, AntigenWellgroupName, ObjectUri, ObjectId)
+INSERT INTO elispotlk.rundata (RunId, Specimenlsid, SpotCount, WellgroupName, WellgroupLocation, NormalizedSpotCount, AntigenWellgroupName, ObjectUri, ObjectId)
 SELECT * FROM (
 	SELECT
 		(SELECT RunId FROM exp.Data d, exp.Object parent WHERE d.LSID = parent.ObjectURI and parent.ObjectId = o.OwnerObjectId) AS RunId,
