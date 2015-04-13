@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableSelector;
@@ -22,10 +23,13 @@ import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.query.GuideSetTable;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -433,16 +437,41 @@ public class GuideSet
         _isTitration = isTitration;
     }
 
-    public boolean hasQCRelatedPropertyChanged(GuideSet orig)
+    public boolean hasValueBasedQCRelatedPropertyChanged(GuideSet orig)
     {
         // value-based guide set updates might change expected ranges so QC flags needs to be updated,
         return !Objects.equals(this.getEc504plAverage(), orig.getEc504plAverage()) || !Objects.equals(this.getEc504plStdDev(), orig.getEc504plStdDev())
                 || !Objects.equals(this.getEc505plAverage(), orig.getEc505plAverage()) || !Objects.equals(this.getEc505plStdDev(), orig.getEc505plStdDev())
                 || !Objects.equals(this.getAucAverage(), orig.getAucAverage()) || !Objects.equals(this.getAucStdDev(), orig.getAucStdDev())
-                || !Objects.equals(this.getMaxFIAverage(), orig.getMaxFIAverage()) || !Objects.equals(this.getMaxFIStdDev(), orig.getMaxFIStdDev())
-                // run-based guide sets can enable/disabled specific metrics (EC50, AUC, etc.) for QC flagging
-                || this.isEc504plEnabled() != orig.isEc504plEnabled() || this.isEc505plEnabled() != orig.isEc505plEnabled()
-                || this.isAucEnabled() != orig.isAucEnabled() || this.isMaxFIEnabled() != orig.isMaxFIEnabled();
+                || !Objects.equals(this.getMaxFIAverage(), orig.getMaxFIAverage()) || !Objects.equals(this.getMaxFIStdDev(), orig.getMaxFIStdDev());
+    }
+
+    /*
+     * Return the list of QC Flag Types for the run-based metric QC flag states that have changed from
+     * either enabled -> disabled or from disabled -> enabled.
+     */
+    public @NotNull List<String> getQCFlagTypesForChanged(GuideSet orig, boolean enabled)
+    {
+        List<String> flagTypes = new ArrayList<>();
+        if (this.isEc504plEnabled() == enabled && orig.isEc504plEnabled() != enabled)
+        {
+            flagTypes.add(LuminexDataHandler.QC_FLAG_EC50_4PL_FLAG_TYPE);
+        }
+        if (this.isEc505plEnabled() == enabled && orig.isEc505plEnabled() != enabled)
+        {
+            flagTypes.add(LuminexDataHandler.QC_FLAG_EC50_5PL_FLAG_TYPE);
+        }
+        if (this.isAucEnabled() == enabled && orig.isAucEnabled() != enabled)
+        {
+            flagTypes.add(LuminexDataHandler.QC_FLAG_AUC_FLAG_TYPE);
+        }
+        if (this.isMaxFIEnabled() == enabled && orig.isMaxFIEnabled() != enabled)
+        {
+            flagTypes.add(LuminexDataHandler.QC_FLAG_HIGH_MFI_FLAG_TYPE); // for Titrations
+            flagTypes.add(LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE); // for SinglePointControls
+        }
+
+        return flagTypes;
     }
 
     public String getUneditablePropertyNames()

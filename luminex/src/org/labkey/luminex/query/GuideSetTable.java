@@ -36,6 +36,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
@@ -52,6 +53,7 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.model.GuideSet;
@@ -481,6 +483,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 // NOTE: room to be smart here and only clean up ASPC or AT because a single GS should not be split across these tables.
 
+                // Issue 22980: when deleting a guide set, we can bulk delete QC Flags instead of using the updateQCFlags method
+                for (String flagType : LuminexDataHandler.getAllGuideSetFlagTypes())
+                {
+                    removeGuideSetQCFlagsByFlagType(key, flagType);
+                }
+
                 // update rows in AnalayteSinglePointControl table
                 List<AnalyteSinglePointControl> aspcResults = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getArrayList(AnalyteSinglePointControl.class);
                 for (AnalyteSinglePointControl aspc : aspcResults)
@@ -492,8 +500,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                     aspc.setGuideSetId(null);
                     aspc.setIncludeInGuideSetCalculation(false);
                     Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), aspc, keys);
-
-                    aspc.updateQCFlags(_userSchema);
                 }
 
                 // update rows in AnalayteTitration table
@@ -507,8 +513,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                     at.setGuideSetId(null);
                     at.setIncludeInGuideSetCalculation(false);
                     Table.update(user, LuminexProtocolSchema.getTableInfoAnalyteTitration(), at, keys);
-
-                    at.updateQCFlags(_userSchema);
                 }
 
                 // delete the guide set row
@@ -554,7 +558,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
 
             GuideSet oldBean = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet(), new SimpleFilter(FieldKey.fromParts("RowId"), oldKey), null).getObject(GuideSet.class);
-            boolean toUpdateQCFlags = bean.hasQCRelatedPropertyChanged(oldBean);
             if (bean.hasUneditablePropertyChanged(oldBean))
             {
                 throw new ValidationException("The following properties should not be updated for an existing guide set: " + bean.getUneditablePropertyNames());
@@ -562,21 +565,38 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
             GuideSet updatedGuideSet = Table.update(user, LuminexProtocolSchema.getTableInfoGuideSet(), bean, oldKey);
 
-            if (toUpdateQCFlags)
+            // we will need to update QC Flags if one of the value-based or run-based QC flag properties has changed
+            List<String> qcFlagTypesNowEnabled = bean.getQCFlagTypesForChanged(oldBean, true);
+            List<String> qcFlagTypesNowDisabled = bean.getQCFlagTypesForChanged(oldBean, false);
+            boolean hasValueBasedQCRelatedPropertyChanged = bean.hasValueBasedQCRelatedPropertyChanged(oldBean);
+            if (hasValueBasedQCRelatedPropertyChanged || !qcFlagTypesNowEnabled.isEmpty() || !qcFlagTypesNowDisabled.isEmpty())
             {
-                SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
-                TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
-                List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
-                for (AnalyteSinglePointControl singlePointControl : singlePointControls)
+                // Issue 22980: bulk delete of QC flags by guide set and type for perf improvement
+                if (!qcFlagTypesNowDisabled.isEmpty())
                 {
-                    singlePointControl.updateQCFlags(_userSchema);
+                    for (String flagType : qcFlagTypesNowDisabled)
+                    {
+                        removeGuideSetQCFlagsByFlagType(updatedGuideSet.getRowId(), flagType);
+                    }
                 }
 
-                selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
-                List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
-                for (AnalyteTitration titration : titrations)
+                // Only need to call the updateQCFlags method if we have QC flags to insert/update
+                if (hasValueBasedQCRelatedPropertyChanged || !qcFlagTypesNowEnabled.isEmpty())
                 {
-                    titration.updateQCFlags(_userSchema);
+                    SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), updatedGuideSet.getRowId());
+                    TableSelector selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null);
+                    List<AnalyteSinglePointControl> singlePointControls = selector.getArrayList(AnalyteSinglePointControl.class);
+                    for (AnalyteSinglePointControl singlePointControl : singlePointControls)
+                    {
+                        singlePointControl.updateQCFlags(_userSchema);
+                    }
+
+                    selector = new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteTitration(), filter, null);
+                    List<AnalyteTitration> titrations = selector.getArrayList(AnalyteTitration.class);
+                    for (AnalyteTitration titration : titrations)
+                    {
+                        titration.updateQCFlags(_userSchema);
+                    }
                 }
             }
 
@@ -626,6 +646,34 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 throw new ValidationException("Metric values should only be provided for value-based guide sets.");
             }
+        }
+
+        /*
+         * Remove all QC Flags associated with the guide set and metric being disabled.
+         * Return the number of QC Flag records that were deleted.
+         */
+        private void removeGuideSetQCFlagsByFlagType(int guideSetRowId, String flagType)
+        {
+            TableInfo ti = LuminexProtocolSchema.getTableInfoAnalyteTitration();
+            String colName = LuminexDataHandler.QC_FLAG_TITRATION_ID;
+            if (LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE.equals(flagType))
+            {
+                ti = LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl();
+                colName = LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_ID;
+            }
+
+            // SQL IN clause to get the RowIDs of the QCFlag records associated with this guide set
+            SQLFragment inClauseSql = new SQLFragment("RowId IN (SELECT qc.RowId FROM ");
+            inClauseSql.append(ti, "a");
+            inClauseSql.append(" LEFT JOIN ");
+            inClauseSql.append(ExperimentService.get().getTinfoAssayQCFlag(), "qc");
+            inClauseSql.append(" ON a.AnalyteId = qc.IntKey1 AND a.").append(colName).append(" = qc.IntKey2 ");
+            inClauseSql.append(" WHERE a.GuideSetId = ? AND qc.FlagType = ?)");
+            Object[] params = new Object[]{guideSetRowId, flagType};
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addWhereClause(inClauseSql.getSQL(), params, FieldKey.fromParts("RowId"));
+            Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), filter);
         }
     }
 

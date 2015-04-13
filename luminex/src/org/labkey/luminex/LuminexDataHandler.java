@@ -1545,6 +1545,17 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
+    public static List<String> getAllGuideSetFlagTypes()
+    {
+        List<String> flagTypes = new ArrayList<>();
+        flagTypes.add(QC_FLAG_EC50_4PL_FLAG_TYPE);
+        flagTypes.add(QC_FLAG_EC50_5PL_FLAG_TYPE);
+        flagTypes.add(QC_FLAG_AUC_FLAG_TYPE);
+        flagTypes.add(QC_FLAG_HIGH_MFI_FLAG_TYPE);
+        flagTypes.add(QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE);
+        return flagTypes;
+    }
+
     private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)
             throws ExperimentException
     {
