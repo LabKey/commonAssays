@@ -103,12 +103,6 @@ public class NabModule extends DefaultModule
         PropertyService.get().registerDomainKind(new NabVirusDomainKind());
     }
 
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new NabUpgradeCode();
-    }
-
     @NotNull
     @Override
     public Set<Class> getUnitTests()
