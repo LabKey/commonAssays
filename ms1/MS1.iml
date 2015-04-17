@@ -16,6 +16,7 @@
     <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="Internal" />
     <orderEntry type="module" module-name="MS1GWT" />
+    <orderEntry type="module" module-name="MS2-API" />
+    <orderEntry type="module" module-name="MS1-API" />
   </component>
 </module>
-

@@ -35,11 +35,6 @@ import org.apache.log4j.Logger;
  */
 public class MS2ServiceImpl implements MS2Service.Service
 {
-    public String getRunsTableName()
-    {
-        return MS2Manager.getTableInfoRuns().toString();
-    }
-
     public SearchClient createSearchClient(String server, String url, Logger instanceLogger, String userAccount, String userPassword)
     {
         if(server.equalsIgnoreCase("mascot"))

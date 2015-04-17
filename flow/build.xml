@@ -20,6 +20,15 @@
         </ant>
     </target>
 
+    <!-- Called by the main build.xml with inheritall = true; other callers (e.g., top-level build target)
+         must define all the properties used below. -->
+    <target name="build_module_api">
+        <ant antfile="${basedir}/build.xml"
+             target="sub_build_module_api"
+             inheritall="true">
+        </ant>
+    </target>
+
     <target name="flow-schemas">
         <!-- flow-engine depends on lib/schemas.jar -->
         <ant antfile="${basedir}/build.xml" target="sub_compile_module_schemas" inheritall="false">
