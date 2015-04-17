@@ -28,7 +28,7 @@
 %>
 
 <script type="text/javascript">
-    LABKEY.requiresExt4Sandbox(true);
+    LABKEY.requiresExt4Sandbox();
     LABKEY.requiresScript("elispot/PlateSummary.js");
 </script>
 
