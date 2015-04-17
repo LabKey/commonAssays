@@ -65,7 +65,7 @@
 
 <textarea id="scriptTextArea" wrap="off" rows="20" cols="80" name="script"><%=h(script.getAnalysisScript())%></textarea>
     <script type="text/javascript">
-        LABKEY.requiresExt3ClientAPI(function() {
+        LABKEY.requiresExt3ClientAPI(true, function() {
             Ext.EventManager.on('scriptTextArea', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
         });
     </script>
