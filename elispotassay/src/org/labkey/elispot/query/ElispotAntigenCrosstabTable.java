@@ -15,7 +15,10 @@
  */
 package org.labkey.elispot.query;
 
-import org.labkey.api.collections.ConcurrentCaseInsensitiveSortedSet;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.AggregateColumnInfo;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.CrosstabDimension;
 import org.labkey.api.data.CrosstabMeasure;
@@ -23,16 +26,19 @@ import org.labkey.api.data.CrosstabMember;
 import org.labkey.api.data.CrosstabSettings;
 import org.labkey.api.data.CrosstabTable;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotManager;
+import org.labkey.elispot.ElispotProtocolSchema;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,7 +48,7 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
 {
     private final Set<String> _nonBasePropertyNames;
 
-    public static ElispotAntigenCrosstabTable create(ElispotRunAntigenTable elispotRunAntigenTable, ExpProtocol protocol)
+    public static ElispotAntigenCrosstabTable create(ElispotRunAntigenTable elispotRunAntigenTable, ExpProtocol protocol, ElispotProtocolSchema protocolSchema)
     {
         CrosstabSettings crosstabSettings = new CrosstabSettings(elispotRunAntigenTable);
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromParts("Run", "Container"));
@@ -52,20 +58,24 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("WellgroupName"));
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("SpecimenLsid"));
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromParts("SpecimenLsid", "Property", "ParticipantId"));
-        CrosstabDimension colDim = crosstabSettings.getColumnAxis().addDimension(FieldKey.fromString("AntigenWellgroupName"));
+        CrosstabDimension colDim = crosstabSettings.getColumnAxis().addDimension(FieldKey.fromString("AntigenHeading"));
+
         crosstabSettings.addMeasure(FieldKey.fromParts("Mean"), CrosstabMeasure.AggregateFunction.AVG, "Mean");
         crosstabSettings.addMeasure(FieldKey.fromParts("Median"), CrosstabMeasure.AggregateFunction.AVG, "Median");
 
-        Set<String> antigenHeadings = new ConcurrentCaseInsensitiveSortedSet();
-        for (String antigenWellgroupName: ElispotManager.get().getAntigenWellgoupNames(elispotRunAntigenTable.getContainer(), protocol))
-        {
-            if (null != antigenWellgroupName)
-                antigenHeadings.add(antigenWellgroupName);
-        }
-
+        TableInfo runAntigenTable = protocolSchema.createProviderTable(ElispotProtocolSchema.ANTIGEN_TABLE_NAME);
         ArrayList<CrosstabMember> members = new ArrayList<>();
-        for (String antigenHeading : antigenHeadings)
-            members.add(new CrosstabMember(antigenHeading, FieldKey.fromString("AntigenWellgroupName"), antigenHeading));
+        for (Map.Entry<String, Set<Integer>> antigenHeadingEntry :
+                ElispotManager.get().getAntigenHeadings(elispotRunAntigenTable.getContainer(), runAntigenTable).entrySet())
+        {
+            String antigenHeading = antigenHeadingEntry.getKey();
+            if (null != antigenHeading)
+            {
+                members.add(new ElispotAntigenCrosstabMember(antigenHeading, colDim, antigenHeading, antigenHeadingEntry.getValue()));
+            }
+            else
+                throw new IllegalStateException("Expected non-null AntigenHeading");
+        }
 
         Set<String> nonBasePropertyNames = new HashSet<>();
         ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
@@ -125,4 +135,27 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         return new Sort("+" + "RunId" + ",+" + "WellgroupName");
     }
 
+    @Override
+    protected ColumnInfo createMemberMeasureCol(@Nullable CrosstabMember member, CrosstabMeasure measure)
+    {
+        AggregateColumnInfo column = (AggregateColumnInfo)super.createMemberMeasureCol(member, measure);
+        column.setCrosstabColumnDimension(measure.getSourceColumn().getFieldKey());
+        return column;
+    }
+
+    public static class ElispotAntigenCrosstabMember extends CrosstabMember
+    {
+        private final Set<Integer> _runIds;
+        public ElispotAntigenCrosstabMember(@Nullable Object value, @NotNull CrosstabDimension dimension,
+                                            @Nullable String caption, Set<Integer> runIds)
+        {
+            super(value, dimension, caption);
+            _runIds = runIds;
+        }
+
+        public Set<Integer> getRunIds()
+        {
+            return _runIds;
+        }
+    }
 }

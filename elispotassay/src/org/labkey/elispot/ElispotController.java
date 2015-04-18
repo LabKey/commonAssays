@@ -129,6 +129,8 @@ public class ElispotController extends SpringActionController
             _hasRunFilter = hasRunFilter(_protocol, getViewContext().getActionURL());
 
             ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(_protocol);
+            if (null == provider)
+                throw new IllegalStateException("ElispotAssayProvider no found.");
 
             PlateSummaryBean bean = new PlateSummaryBean();
             bean.setRun(form.getRowId());
@@ -146,14 +148,8 @@ public class ElispotController extends SpringActionController
             QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
             settings.setAllowChooseView(true);
 
-            CrosstabView queryView = new CrosstabView(new ElispotProtocolSchema(getUser(), getContainer(),
-                    (ElispotAssayProvider)AssayService.get().getProvider(_protocol), _protocol, null), settings, errors);
-            queryView.setShadeAlternatingRows(true);
-            queryView.setShowBorders(true);
-            queryView.setShowDetailsColumn(false);
-            queryView.setFrame(WebPartView.FrameType.NONE);
-            queryView.disableContainerFilterSelection();
-            queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
+            CrosstabView queryView = new ElispotProtocolSchema(getUser(), getContainer(), provider, _protocol, null)
+                    .createAntigenStatsQueryView(settings, errors, _hasRunFilter ? form.getRowId() : null);
 
             ElispotDetailsHeaderView header = new ElispotDetailsHeaderView(_protocol, provider, null);
             ActionURL url = new ActionURL(RunDetailsAction.class, getContainer()).addParameter("rowId", form.getRowId());

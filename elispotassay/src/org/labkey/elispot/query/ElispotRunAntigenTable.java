@@ -16,10 +16,13 @@
 package org.labkey.elispot.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
@@ -44,6 +47,15 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
         setDescription("Contains one row per well for the \"" + protocol.getName() + "\" ELISpot assay design.");
         setTitle("Antigen");
         this.setPublic(false);
+
+        // Add column for AntigenStats heading
+        SQLFragment sql = new SQLFragment("CASE WHEN AntigenName IS NULL OR AntigenName = AntigenWellgroupName THEN AntigenWellgroupName " +
+                "ELSE AntigenName || ' (' || " +
+                (getSqlDialect().isPostgreSQL() ? "SUBSTRING(AntigenWellgroupName, 9)" : "REPLACE(AntigenWellgroupName, 'Antigen ', '')")  +
+                " || ')' END");
+        ColumnInfo antigenHeading = new ExprColumn(this, "AntigenHeading", sql, JdbcType.VARCHAR, getColumn("AntigenWellgroupName"), getColumn("AntigenName"));
+        antigenHeading.setHidden(true);
+        addColumn(antigenHeading);
     }
 
     @Override

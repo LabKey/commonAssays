@@ -18,12 +18,13 @@ package org.labkey.elispot;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.ConcurrentCaseInsensitiveSortedMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Filter;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -37,7 +38,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
-import java.util.Collections;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -145,12 +146,25 @@ public class ElispotManager
         Table.update(user, getTableInfoElispotAntigen(protocol), fields, antigenLsid);
     }
 
-    public List<String> getAntigenWellgoupNames(Container container, ExpProtocol protocol)
+    public Map<String, Set<Integer>> getAntigenHeadings(Container container, TableInfo antigenRunTable)
     {
-        Sort sort = new Sort("AntigenWellgroupName");
-        sort.appendSortColumn(new Sort.SortField(FieldKey.fromString("WellgroupName"), Sort.SortDirection.ASC));
-        return new TableSelector(getTableInfoElispotAntigen(protocol), Collections.singleton("AntigenWellgroupName"),
-                                 makeRunDataContainerClause(container), sort).getArrayList(String.class);
+        final Map<String, Set<Integer>> antigenHeadingMap = new ConcurrentCaseInsensitiveSortedMap<>();
+        Set<String> columns = new HashSet<>();
+        columns.add("AntigenHeading");
+        columns.add("RunId");
+        new TableSelector(antigenRunTable, columns, makeRunDataContainerClause(container), null).
+                forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
+        {
+            @Override
+            public void exec(Map<String, Object> object) throws SQLException
+            {
+                String antigenHeading = (String)object.get("AntigenHeading");
+                if (!antigenHeadingMap.containsKey(antigenHeading))
+                    antigenHeadingMap.put(antigenHeading, new HashSet<Integer>());
+                antigenHeadingMap.get(antigenHeading).add((Integer)object.get("RunId"));
+            }
+        });
+        return antigenHeadingMap;
     }
 
     public Map<String, Object> getAntigenRow(String antigenLsid, ExpProtocol protocol)

@@ -20,21 +20,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.CrosstabMember;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TableSelector;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.CrosstabView;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.assay.AbstractAssayProvider;
@@ -45,6 +40,7 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.elispot.query.ElispotAntigenCrosstabTable;
 import org.labkey.elispot.query.ElispotRunAntigenTable;
 import org.labkey.elispot.query.ElispotRunDataTable;
@@ -89,7 +85,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         }
         else if (name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))
         {
-            return ElispotAntigenCrosstabTable.create((ElispotRunAntigenTable) createProviderTable(ANTIGEN_TABLE_NAME), getProtocol());
+            return ElispotAntigenCrosstabTable.create((ElispotRunAntigenTable) createProviderTable(ANTIGEN_TABLE_NAME), getProtocol(), this);
         }
 
         return super.createProviderTable(name);
@@ -150,5 +146,51 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
                 bar.add(btn);
             }
         };
+    }
+
+    @Override
+    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
+    {
+        String name = settings.getQueryName();
+        if (null != name && name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))
+        {
+            // TODO: with a bit more work we could determine if we have a RunId filter here and pass that in.
+            return createAntigenStatsQueryView(settings, errors, null);
+        }
+        return super.createView(context, settings, errors);
+    }
+
+    public CrosstabView createAntigenStatsQueryView(QuerySettings settings, BindException errors, @Nullable final Integer runId)
+    {
+        CrosstabView queryView = new CrosstabView(this, settings, errors)
+        {
+            @Override
+            public boolean isMemberIncluded(CrosstabMember member)
+            {
+                if (null != runId && member instanceof ElispotAntigenCrosstabTable.ElispotAntigenCrosstabMember)
+                {
+                    if (!((ElispotAntigenCrosstabTable.ElispotAntigenCrosstabMember)member).getRunIds().contains(runId))
+                        return false;
+                }
+                return true;
+            }
+        };
+
+// TODO: if we want to limit view actions we can do this
+//        queryView.setViewItemFilter(new ReportService.ItemFilter()
+//        {
+//            @Override
+//            public boolean accept(String type, String label)
+//            {
+//                return false;
+//            }
+//        });
+        queryView.setShadeAlternatingRows(true);
+        queryView.setShowBorders(true);
+        queryView.setShowDetailsColumn(false);
+        queryView.setFrame(WebPartView.FrameType.NONE);
+        queryView.disableContainerFilterSelection();
+        queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
+        return queryView;
     }
 }
