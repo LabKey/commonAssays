@@ -17,8 +17,8 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.io.FileUtils;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
@@ -44,6 +44,9 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 {
     private final File _file;
 
+    private static final String DB_PREFIX = "DB=";
+    private static final String FASTAFILE_PREFIX = "fastafile=";
+
     public MascotImportPipelineJob(ViewBackgroundInfo info, File file, String description,
                                 MS2Importer.RunInfo runInfo, PipeRoot root)
     {
@@ -51,7 +54,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         _file = file;
     }
 
-    private String getSequenceDatabase () throws IOException
+    private File getSequenceDatabase () throws IOException
     {
         // return the sequence database queried against in this search
         final File dat = new File(_file.getAbsolutePath());
@@ -62,28 +65,65 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         InputStream datIn = new FileInputStream(dat);
         BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn));
         boolean skipParameter = true;
-        String sequenceDatabaseTag = "DB=";
-        String sequenceDatabase = null;
-        while (true)
+        String dbValue = null;
+        String fastaFileValue = null;
+        String line;
+        while ((line = datReader.readLine()) != null)
         {
-            String line = datReader.readLine();
-            if (null == line) break;
-
             // TODO: check for actual MIME boundary
             if (line.startsWith("Content-Type: "))
             {
-                skipParameter = !line.endsWith("; name=\"parameters\"");
+                skipParameter = !line.endsWith("; name=\"parameters\"") && !line.endsWith("; name=\"header\"");
             }
-            else
+            else if (!skipParameter)
             {
-                if (!skipParameter && line.startsWith(sequenceDatabaseTag))
+                if (line.startsWith(DB_PREFIX))
                 {
-                    sequenceDatabase = line.substring(sequenceDatabaseTag.length());
-                    break;
+                    dbValue = line.substring(DB_PREFIX.length());
+                }
+                else if (line.startsWith(FASTAFILE_PREFIX))
+                {
+                    fastaFileValue = line.substring(FASTAFILE_PREFIX.length());
                 }
             }
+
+            if (dbValue != null && fastaFileValue != null)
+                break;
         }
-        return sequenceDatabase;
+
+        Container pipeRootContainer = getPipeRoot().getContainer();
+
+        // Try looking for the "DB" value under the FASTA root
+        if (dbValue != null)
+        {
+            File file = new File(MS2PipelineManager.getSequenceDatabaseRoot(pipeRootContainer).getPath(), dbValue);
+            if (file.isFile())
+            {
+                return file;
+            }
+        }
+
+        if (fastaFileValue != null)
+        {
+            // Try using the full path and see if it resolves
+            File file = new File(fastaFileValue);
+            if (file.isFile())
+            {
+                return file;
+            }
+
+            // Finally, try looking for the file name in our FASTA directory
+            String[] fileNameParts = fastaFileValue.split("[\\\\/]");
+            String fileName = fileNameParts[fileNameParts.length - 1];
+            file = new File(MS2PipelineManager.getSequenceDatabaseRoot(pipeRootContainer).getPath(), fileName);
+
+            if (file.isFile())
+            {
+                return file;
+            }
+        }
+
+        throw new FileNotFoundException("Could not find FASTA file. " + (dbValue == null ? "" : (DB_PREFIX + dbValue)) + " " + (fastaFileValue == null ? "" : (FASTAFILE_PREFIX + fastaFileValue)));
     }
 
     public void run()
@@ -108,10 +148,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         boolean completeStatus = false;
         try
         {
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            String sequenceDB = getSequenceDatabase ();
-            File fileSequenceDatabase = new File(
-                    MS2PipelineManager.getSequenceDatabaseRoot(root.getContainer()).getPath(), sequenceDB);
+            File fileSequenceDatabase = getSequenceDatabase();
 
             if (!dirWork.exists() && !dirWork.mkdir())
             {
