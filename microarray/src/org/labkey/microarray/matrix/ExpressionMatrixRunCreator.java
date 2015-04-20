@@ -82,7 +82,7 @@ public class ExpressionMatrixRunCreator extends AbstractMatrixRunCreator<Express
     @Override
     public Integer ensureSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException, ExperimentException
     {
-        return ensureFeatureAnnotationSet (context, runPath, featureSet);
+        return ensureFeatureAnnotationSet(context, runPath, featureSet);
     }
 
     protected Integer ensureFeatureAnnotationSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException, ExperimentException

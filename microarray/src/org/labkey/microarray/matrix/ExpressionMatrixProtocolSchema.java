@@ -56,7 +56,7 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     @Override
     public TableInfo createTable(String name)
     {
-        return super.createTable(name, FEATURE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE);
+        return super.createTable(name, FEATURE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE); //TODO: Looks a bit funny, modify?
     }
 
     @Override

@@ -104,14 +104,14 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            try (TabLoader loader = createTabLoader(dataFile, FEATURE_ID_COLUMN_NAME ))
+            try (TabLoader loader = createTabLoader(dataFile, FEATURE_ID_COLUMN_NAME))
             {
                 ColumnDescriptor[] cols = loader.getColumns();
                 List<String> columnNames = new ArrayList<>(cols.length);
                 for (ColumnDescriptor col : cols)
                     columnNames.add(col.getColumnName());
 
-                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, FEATURE_ID_COLUMN_NAME );
+                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, FEATURE_ID_COLUMN_NAME);
 
                 boolean importValues = true;
                 if (runProps.containsKey(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
@@ -121,7 +121,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                         importValues = Boolean.valueOf(importValuesStr);
                 }
 
-                if(importValues)
+                if (importValues)
                     insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
             }
         }
