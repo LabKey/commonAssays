@@ -18,33 +18,20 @@ package org.labkey.microarray.matrix;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.qc.DefaultTransformResult;
 import org.labkey.api.qc.TransformResult;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.reader.ColumnDescriptor;
-import org.labkey.api.reader.TabLoader;
-import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.study.assay.DefaultAssayRunCreator;
-import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.matrix.AbstractMatrixRunCreator;
 import org.labkey.microarray.MicroarrayManager;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * User: kevink
  * Date: 1/18/14
  */
-public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<ExpressionMatrixAssayProvider>
+public class ExpressionMatrixRunCreator extends AbstractMatrixRunCreator<ExpressionMatrixAssayProvider>
 {
     public static final String SAMPLES_ROLE_NAME = "Samples";
 
@@ -54,46 +41,33 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
     }
 
     @Override
-    public TransformResult transform(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, ExpRun run) throws ValidationException
+    public String getIdColumnName()
     {
-        TransformResult result = super.transform(context, run);
-
-        try
-        {
-            result = transformFeatureSetId(context, run, result);
-        }
-        catch (ExperimentException e)
-        {
-            throw new ValidationException(e.getMessage());
-        }
-
-        return result;
+        return ExpressionMatrixDataHandler.FEATURE_ID_COLUMN_NAME;
     }
 
-    protected TransformResult transformFeatureSetId(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, ExpRun run, TransformResult result) throws ValidationException, ExperimentException
+    @Override
+    public String getSetPropertyName()
     {
-        Map<DomainProperty, String> runProps = result.getRunProperties() != null && !result.getRunProperties().isEmpty() ? result.getRunProperties() : context.getRunProperties();
-        Map.Entry<DomainProperty, String> featureSetEntry = findFeatureSetProperty(runProps);
-        if (featureSetEntry == null || featureSetEntry.getValue() == null)
-            throw new ValidationException("Feature annotation set required");
+        return ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME;
+    }
 
-        Integer updateFeatureSetId = ensureFeatureAnnotationSet(context, run.getFilePathRoot(), featureSetEntry.getValue());
-        if (updateFeatureSetId != null)
-        {
-            DefaultTransformResult ret = new DefaultTransformResult(result);
+    @Override
+    public String getRoleName()
+    {
+        return SAMPLES_ROLE_NAME;
+    }
 
-            Map<DomainProperty, String> updatedRunProps = new HashMap<>(runProps);
+    @Override
+    public String getSetName()
+    {
+        return "Feature Annotation";
+    }
 
-            // Set the update featureSet id string value
-            updatedRunProps.put(featureSetEntry.getKey(), String.valueOf(updateFeatureSetId));
-
-            ret.setRunProperties(updatedRunProps);
-
-            context.setTransformResult(ret);
-            result = ret;
-        }
-
-        return result;
+    @Override
+    public TransformResult transform(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, ExpRun run) throws ValidationException
+    {
+        return super.transform(context, run);
     }
 
     /**
@@ -105,11 +79,17 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
      * @return The feature annotation set id only if it needs to be saved back to the 'featureSet' property; otherwise null.
      * @throws ValidationException
      */
+    @Override
+    public Integer ensureSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException, ExperimentException
+    {
+        return ensureFeatureAnnotationSet (context, runPath, featureSet);
+    }
+
     protected Integer ensureFeatureAnnotationSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException, ExperimentException
     {
         Integer featureSetId = MicroarrayManager.get().ensureFeatureAnnotationSet(context.getLogger(), context.getContainer(), context.getUser(), runPath, featureSet);
         if (featureSetId == null)
-            throw new ValidationException("Feature annotation set not found '" + featureSet + "'");
+            throw new ValidationException(getSetName()+ " set not found '" + featureSet + "'");
 
         // return featureSet id only if it needs to be updated
         if (!featureSet.equals(String.valueOf(featureSetId)))
@@ -117,54 +97,4 @@ public class ExpressionMatrixRunCreator extends DefaultAssayRunCreator<Expressio
 
         return null;
     }
-
-    private Map.Entry<DomainProperty, String> findFeatureSetProperty(Map<DomainProperty, String> runProps)
-    {
-        for (Map.Entry<DomainProperty, String> entry : runProps.entrySet())
-        {
-            DomainProperty dp = entry.getKey();
-            if (ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME.equalsIgnoreCase(dp.getName()))
-                return entry;
-        }
-
-        return null;
-    }
-
-    @Override
-    protected void addInputMaterials(AssayRunUploadContext<ExpressionMatrixAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
-    {
-        // Attach the materials found in the matrix file to the run
-        try
-        {
-            File dataFile = getPrimaryFile(context);
-            try (TabLoader loader = ExpressionMatrixDataHandler.createTabLoader(dataFile))
-            {
-                ColumnDescriptor[] cols = loader.getColumns();
-
-                List<String> columnNames = new ArrayList<>(cols.length);
-                for (ColumnDescriptor col : cols)
-                    columnNames.add(col.getColumnName());
-
-                Map<String, Integer> samplesMap = ExpressionMatrixDataHandler.ensureSamples(context.getContainer(), context.getUser(), columnNames);
-                List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterials(samplesMap.values());
-                for (ExpMaterial material : materials)
-                {
-                    // TODO: Check if there is some other role that might be useful (well id)
-                    inputMaterials.put(material, SAMPLES_ROLE_NAME);
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException("Failed to read from data file", e);
-        }
-    }
-
-    private File getPrimaryFile(AssayRunUploadContext context) throws IOException, ExperimentException
-    {
-        Map<String, File> files = context.getUploadedData();
-        assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-        return files.get(AssayDataCollector.PRIMARY_FILE);
-    }
-
 }

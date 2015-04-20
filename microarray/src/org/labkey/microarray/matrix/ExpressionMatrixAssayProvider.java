@@ -39,6 +39,7 @@ import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.matrix.ColumnMappingProperty;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -59,7 +60,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
-{
+    {
     public static final String NAME = "Expression Matrix";
     public static final String RESOURCE_NAME = "ExpressionMatrix";
 

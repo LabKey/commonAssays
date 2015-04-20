@@ -836,7 +836,6 @@ microarray/src/org/labkey/microarray/assay/MicroarrayRunCreator.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text
 microarray/src/org/labkey/microarray/controllers/FeatureAnnotationSetController.java -text
 microarray/src/org/labkey/microarray/controllers/MicroarrayController.java -text
-microarray/src/org/labkey/microarray/matrix/ColumnMappingProperty.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixAssayProvider.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixDataHandler.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixMaterialListener.java -text
