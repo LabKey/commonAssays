@@ -148,10 +148,13 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                     var tipData = [];
                     if (rec) {
                         for (var d in rec.data.wellProperties) {
-                            if (rec.data.wellProperties.hasOwnProperty(d))
-                            {
+                            if (rec.data.wellProperties.hasOwnProperty(d)) {
                                 tipData.push({name: d, value : Ext4.htmlEncode(rec.data.wellProperties[d])});
                             }
+                        }
+                        if (0 == tipData.length) {
+                            tipData.push({name: 'SpotCount', value: 'N/A'});
+                            tipData.push({name: 'WellgroupLocation', value: Ext4.htmlEncode(pos)});
                         }
                         tip.update(tipData);
                         return true;
@@ -196,9 +199,9 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
                         if (antigenName && antigenName.length > 0)
                             antigenLabel = antigenGroupName + ' (' + antigenName + ')';
-                        var antigenCls = 'labkey-antigenGroup-';
+                        var antigenCls = '';
                         if (antigenGroupName && antigenGroupName.length > 0)
-                            antigenCls = antigenCls.concat(antigenGroupName.replace(/\s/g, '-'));
+                            antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
 
                         this.antigenGroups[antigenGroupName] = {
                             label : antigenLabel,
@@ -210,6 +213,14 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                             position    : rec.data.position,
                             sCls        : sampleCls,
                             aCls        : antigenCls
+                        });
+                    }
+                    else {
+                        cols.push({
+                            name        : 'N/A',
+                            position    : rec.data.position,
+                            sCls        : '',
+                            aCls        : ''
                         });
                     }
                 }

@@ -17,6 +17,7 @@
 package org.labkey.elispot;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
@@ -226,44 +227,45 @@ public class ElispotController extends SpringActionController
 
                 Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data.get(0).getLSID(), position);
                 RunDataRow runDataRow = ElispotManager.get().getRunDataRow(dataRowLsid.toString(), run.getContainer());
-                if (null == runDataRow)
-                    throw new ExperimentException("Unable to find run data.");
                 WellInfo wellInfo = new WellInfo(runDataRow);
-                wellInfo.setTitle(reader.getWellDisplayValue(runDataRow.getSpotCount()));
-
-                for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
+                if (null != runDataRow)
                 {
-                    if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
-                    {
-//                        specimenGroup = String.valueOf(prop.value());                 // TODO: probably remove all of loop
-//                        wellInfo.addWellProperty(prop);
-                    }
-                    else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
-                    {
-//                        wellInfo.setTitle(reader.getWellDisplayValue(prop.value()));
-                    }
-                    else
-                        wellInfo.addWellProperty(prop);
+                    wellInfo.setTitle(reader.getWellDisplayValue(runDataRow.getSpotCount()));
 
-                }
-
-                // get the specimen wellgroup info
-/*
-                Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
-                List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
-                if (!StringUtils.isEmpty(specimenGroup))
-                {
-                    ExpMaterial material = inputs.get(specimenGroup);
-                    if (material != null)
+                    for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
                     {
-                        for (DomainProperty dp : sampleProperties)
+                        if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
                         {
-                            Object value = material.getProperty(dp);
-                            wellInfo.addSpecimenProperty(dp, String.valueOf(value));
+                            //                        specimenGroup = String.valueOf(prop.value());                 // TODO: probably remove all of loop
+                            //                        wellInfo.addWellProperty(prop);
+                        }
+                        else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
+                        {
+                            //                        wellInfo.setTitle(reader.getWellDisplayValue(prop.value()));
+                        }
+                        else
+                            wellInfo.addWellProperty(prop);
+
+                    }
+
+                    // get the specimen wellgroup info
+    /*
+                    Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
+                    List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
+                    if (!StringUtils.isEmpty(specimenGroup))
+                    {
+                        ExpMaterial material = inputs.get(specimenGroup);
+                        if (material != null)
+                        {
+                            for (DomainProperty dp : sampleProperties)
+                            {
+                                Object value = material.getProperty(dp);
+                                wellInfo.addSpecimenProperty(dp, String.valueOf(value));
+                            }
                         }
                     }
+    */
                 }
-*/
                 map.put(position, wellInfo);
             }
         }
@@ -387,7 +389,7 @@ public class ElispotController extends SpringActionController
         private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
         private final RunDataRow _runDataRow;
 
-        public WellInfo(RunDataRow runDataRow)
+        public WellInfo(@Nullable RunDataRow runDataRow)
         {
             _runDataRow = runDataRow;
         }
@@ -451,19 +453,21 @@ public class ElispotController extends SpringActionController
                     wellProps.put(prop.getName(), String.valueOf(prop.value()));
             }
 
-            wellProps.put("SpotCount", _runDataRow.getSpotCount());
-            wellProps.put("AntigenWellgroupName", _runDataRow.getAntigenWellgroupName());
-            wellProps.put("WellgroupName", _runDataRow.getWellgroupName());
-            wellProps.put("WellgroupLocation", _runDataRow.getWellgroupLocation());
-            if (null != _runDataRow.getNormalizedSpotCount())
-                wellProps.put("NormalizedSpotCount", _runDataRow.getNormalizedSpotCount());
-            if (null != _runDataRow.getActivity())
-                wellProps.put("Activity", _runDataRow.getActivity());
-            if (null != _runDataRow.getAnalyte())
-                wellProps.put("Analyte", _runDataRow.getAnalyte());
-            if (null != _runDataRow.getIntensity())
-                wellProps.put("Intensity", _runDataRow.getIntensity());
-
+            if (null != _runDataRow)
+            {
+                wellProps.put("SpotCount", _runDataRow.getSpotCount());
+                wellProps.put("AntigenWellgroupName", _runDataRow.getAntigenWellgroupName());
+                wellProps.put("WellgroupName", _runDataRow.getWellgroupName());
+                wellProps.put("WellgroupLocation", _runDataRow.getWellgroupLocation());
+                if (null != _runDataRow.getNormalizedSpotCount())
+                    wellProps.put("NormalizedSpotCount", _runDataRow.getNormalizedSpotCount());
+                if (null != _runDataRow.getActivity())
+                    wellProps.put("Activity", _runDataRow.getActivity());
+                if (null != _runDataRow.getAnalyte())
+                    wellProps.put("Analyte", _runDataRow.getAnalyte());
+                if (null != _runDataRow.getIntensity())
+                    wellProps.put("Intensity", _runDataRow.getIntensity());
+            }
             well.put("wellProperties", wellProps);
 
             return well;

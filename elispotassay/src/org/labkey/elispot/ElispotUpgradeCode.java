@@ -209,8 +209,8 @@ public class ElispotUpgradeCode implements UpgradeCode
                     }
                     else
                     {
-                        _log.error("Could not find components for antigenLsid");
-                        return;
+                        // This can happen depending on the template used for the assay
+                        _log.info("Could not find components for antigenLsid");
                     }
                 }
                 antigenLsidMap.getAntigenPropMaps().clear();
@@ -344,7 +344,7 @@ public class ElispotUpgradeCode implements UpgradeCode
             for (Map.Entry<Integer, AntigenLsidMap> antigenLsidMapEntry : runMapEntry.getValue().entrySet())
             {
                 int runId = antigenLsidMapEntry.getKey();
-                final TableInfo antigenTable = getAntigenTableAndEnsureProperties(runId);
+                final TableInfo antigenTable = getAntigenTable(runId);
                 if (null == antigenTable)
                     return;     // error already logged
 
@@ -548,7 +548,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         return antigenPropMaps;
     }
 
-    private static TableInfo getAntigenTableAndEnsureProperties(int runId)
+    private static TableInfo getAntigenTable(int runId)
     {
         ExpRun run = ExperimentService.get().getExpRun(runId);
         if (null == run)
@@ -570,11 +570,14 @@ public class ElispotUpgradeCode implements UpgradeCode
             public void exec(RunDataRow row) throws SQLException
             {
                 ExpRun run = ExperimentService.get().getExpRun(row.getRunId());
-                Lsid antigenLsid = ElispotDataHandler.getAntigenLsid(row.getAntigenWellgroupName(), row.getWellgroupName(),
-                                                                     row.getRunId(), run.getProtocol().getName(), null);
-                Map<String, Object> fields = new CaseInsensitiveHashMap<>();
-                fields.put("AntigenLsid", antigenLsid.toString());
-                Table.update(user, runDataTable, fields, row.getRowId());
+                if (null != row.getAntigenWellgroupName() && null != row.getWellgroupName())
+                {
+                    Lsid antigenLsid = ElispotDataHandler.getAntigenLsid(row.getAntigenWellgroupName(), row.getWellgroupName(),
+                            row.getRunId(), run.getProtocol().getName(), null);
+                    Map<String, Object> fields = new CaseInsensitiveHashMap<>();
+                    fields.put("AntigenLsid", antigenLsid.toString());
+                    Table.update(user, runDataTable, fields, row.getRowId());
+                }
             }
         }, RunDataRow.class);
     }
