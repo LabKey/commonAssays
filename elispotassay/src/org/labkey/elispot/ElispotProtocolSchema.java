@@ -126,7 +126,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
 
     @Nullable
     @Override
-    protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
+    protected RunListQueryView createRunsQueryView(final ViewContext context, QuerySettings settings, BindException errors)
     {
         return new RunListDetailsQueryView(this, settings,
                 ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString())
@@ -136,14 +136,19 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
             {
                 super.populateButtonBar(view, bar);
 
-                ActionURL url = new ActionURL(ElispotController.BackgroundSubtractionAction.class, getContainer());
-                ActionButton btn = new ActionButton(url, "Subtract Background");
+                ElispotAssayProvider.DetectionMethodType method = getProvider().getDetectionMethod(context.getContainer(), getProtocol());
+                if (method == ElispotAssayProvider.DetectionMethodType.COLORIMETRIC)
+                {
+                    // background subtraction only supported for legacy colorimetric detection
+                    ActionURL url = new ActionURL(ElispotController.BackgroundSubtractionAction.class, getContainer());
+                    ActionButton btn = new ActionButton(url, "Subtract Background");
 
-                btn.setRequiresSelection(true);
-                btn.setDisplayPermission(InsertPermission.class);
-                btn.setActionType(ActionButton.Action.POST);
+                    btn.setRequiresSelection(true);
+                    btn.setDisplayPermission(InsertPermission.class);
+                    btn.setActionType(ActionButton.Action.POST);
 
-                bar.add(btn);
+                    bar.add(btn);
+                }
             }
         };
     }

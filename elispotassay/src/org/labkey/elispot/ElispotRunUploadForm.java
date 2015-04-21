@@ -16,11 +16,13 @@
 
 package org.labkey.elispot;
 
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -72,5 +74,24 @@ public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvide
     public void setAnalyteProperties(Map<String, Map<DomainProperty, String>> analyteProperties)
     {
         _analyteProperties = analyteProperties;
+    }
+
+    @Override
+    public Map<DomainProperty, String> getRunProperties() throws ExperimentException
+    {
+        ElispotAssayProvider.DetectionMethodType method = getProvider().getDetectionMethod(getContainer(), getProtocol());
+        if (method == ElispotAssayProvider.DetectionMethodType.FLUORESCENT)
+        {
+            Map<DomainProperty, String> runProperties = new LinkedHashMap<>();
+            for (Map.Entry<DomainProperty, String> entry : super.getRunProperties().entrySet())
+            {
+                // don't include the background subtraction property
+                if (!entry.getKey().getName().equalsIgnoreCase(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME))
+                    runProperties.put(entry.getKey(), entry.getValue());
+            }
+            return runProperties;
+        }
+        else
+            return super.getRunProperties();
     }
 }
