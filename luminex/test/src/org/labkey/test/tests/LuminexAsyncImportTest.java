@@ -89,7 +89,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         if (isElementPresent(Locator.linkWithText("ERROR")))
         {
             clickAndWait(Locator.linkWithText("ERROR"));
-            Assert.fail();
+            Assert.fail("Unexpected error during positivity upload. See screenshot for more detail");
         }
         clickAndWait(Locator.linkWithText("COMPLETE", 0));
         assertTextPresent("Warning: No baseline visit data found", 6);
