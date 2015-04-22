@@ -92,14 +92,14 @@ public class NabProviderSchema extends DilutionProviderSchema
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<SampleInfo.Method> result = new EnumTableInfo<>(SampleInfo.Method.class, getDbSchema(), "List of possible sample preparation methods for the NAb assay.", false);
+            EnumTableInfo<SampleInfo.Method> result = new EnumTableInfo<>(SampleInfo.Method.class, this, "List of possible sample preparation methods for the NAb assay.", false);
             result.setPublicSchemaName(SCHEMA_NAME);
             result.setPublicName(SAMPLE_PREPARATION_METHOD_TABLE_NAME);
             return result;
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<StatsService.CurveFitType> result = new EnumTableInfo<>(StatsService.CurveFitType.class, getDbSchema(), new EnumTableInfo.EnumValueGetter<StatsService.CurveFitType>()
+            EnumTableInfo<StatsService.CurveFitType> result = new EnumTableInfo<>(StatsService.CurveFitType.class, this, new EnumTableInfo.EnumValueGetter<StatsService.CurveFitType>()
             {
                 public String getValue(StatsService.CurveFitType e)
                 {
