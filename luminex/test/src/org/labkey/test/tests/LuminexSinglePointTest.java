@@ -15,6 +15,7 @@
  */
 package org.labkey.test.tests;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -28,7 +29,6 @@ import org.labkey.test.pages.AssayDomainEditor;
 import org.labkey.test.pages.LeveyJenningsPlotWindow;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LuminexGuideSetHelper;
-import org.testng.Assert;
 
 import java.io.File;
 import java.util.Arrays;
@@ -71,8 +71,8 @@ public class LuminexSinglePointTest extends LuminexTest
         DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", this);
         tbl.setFilter("Analyte", "Equals", "ENV1 (31)");
         tbl.setSort("SinglePointControl/Run/Name", SortDirection.ASC);
-        Assert.assertEquals(tbl.getDataAsText(0, "Average Fi Bkgd"), "27.0");
-        Assert.assertEquals(tbl.getDataAsText(1, "Average Fi Bkgd"), "30.0");
+        Assert.assertEquals("27.0", tbl.getDataAsText(0, "Average Fi Bkgd"));
+        Assert.assertEquals("30.0", tbl.getDataAsText(1, "Average Fi Bkgd"));
 
         LeveyJenningsPlotWindow ljp = new LeveyJenningsPlotWindow(this);
 
@@ -80,14 +80,14 @@ public class LuminexSinglePointTest extends LuminexTest
         click(tbl.link(0, 1));
         ljp.waitTillReady();
         Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
-        Assert.assertEquals(ljp.getXAxis(), Arrays.asList("Notebook1", "Notebook2") );
+        Assert.assertEquals(Arrays.asList("Notebook1", "Notebook2"), ljp.getXAxis());
         ljp.closeWindow();
 
         addUrlParameter("_testLJQueryLimit=0");
         click(tbl.link(0, 1));
         ljp.waitTillReady();
-        Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
-        Assert.assertEquals(ljp.getXAxis(), Arrays.asList("Notebook1") );
+        Assert.assertEquals("Notebook1", ljp.getXTickTagElementText());
+        Assert.assertEquals(Arrays.asList("Notebook1"), ljp.getXAxis());
         ljp.closeWindow();
 
         clickAndWait(Locator.linkContainingText("graph"));
