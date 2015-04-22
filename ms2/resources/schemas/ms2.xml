@@ -2215,4 +2215,24 @@
     </ns:columns>
     <ns:description>Contains a row for every MS2 run with quantitation data in this folder.</ns:description>
   </ns:table>
+
+  <ns:table tableName="ExpressionData" tableDbType="TABLE" hidden="true">
+    <ns:pkColumnName>RowId</ns:pkColumnName>
+    <ns:tableUrl></ns:tableUrl>
+    <ns:deleteUrl></ns:deleteUrl>
+    <ns:insertUrl></ns:insertUrl>
+    <ns:importUrl></ns:importUrl>
+    <ns:updateUrl></ns:updateUrl>
+    <ns:columns>
+      <ns:column columnName="RowId">
+        <ns:isHidden>true</ns:isHidden>
+        <ns:isKeyField>true</ns:isKeyField>
+      </ns:column>
+      <ns:column columnName="Value"/>
+      <ns:column columnName="SeqId"/>
+      <ns:column columnName="SampleId"/>
+      <ns:column columnName="DataId"/>
+    </ns:columns>
+  </ns:table>
+
 </ns:tables>

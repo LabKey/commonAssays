@@ -104,7 +104,8 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
         {
             public TableInfo getLookupTableInfo()
             {
-                return new SequencesTableInfo(new MS2Schema(_userSchema.getUser(), _userSchema.getContainer()));
+                MS2Schema schema = new MS2Schema(_userSchema.getUser(), _userSchema.getContainer());
+                return schema.createSequencesTable();
             }
         });
         addColumn(col);

@@ -83,6 +83,7 @@ import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
+import org.labkey.ms2.protein.query.ProteinUserSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.DatDocumentParser;
 import org.labkey.ms2.reader.MGFDocumentParser;
@@ -138,7 +139,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 15.10;
+        return 15.11;
     }
 
     @NotNull
@@ -216,6 +217,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         addController("ms2-scoring", ScoringController.class);
 
         MS2Schema.register(this);
+        ProteinUserSchema.register(this);
         CustomAnnotationSchema.register(this);
 
         MS2Service.register(new MS2ServiceImpl());
@@ -345,6 +347,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public void containerDeleted(Container c, User user)
     {
         MS2Manager.markAsDeleted(c, user);
+        MS2Manager.deleteExpressionData(c);
 
         for (CustomAnnotationSet set : ProteinManager.getCustomAnnotationSets(c, false).values())
         {

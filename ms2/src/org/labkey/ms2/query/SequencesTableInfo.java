@@ -25,10 +25,12 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.StringExpressionFactory;
@@ -50,16 +52,18 @@ import java.util.StringTokenizer;
 /**
  * User: jeckels
  * Date: Feb 9, 2007
+ *
+ * NOTE: The SequencesTableInfo is attached to both the MS2Schema and the ProteinUserSchema.
  */
-public class SequencesTableInfo extends FilteredTable<MS2Schema>
+public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredTable<SchemaType>
 {
-    protected SequencesTableInfo(String name, MS2Schema schema)
+    protected SequencesTableInfo(String name, SchemaType schema)
     {
         this(schema);
         setName(name);
     }
 
-    public SequencesTableInfo(MS2Schema schema)
+    public SequencesTableInfo(SchemaType schema)
     {
         super(ProteinManager.getTableInfoSequences(), schema);
         setTitleColumn("BestName");
@@ -81,6 +85,8 @@ public class SequencesTableInfo extends FilteredTable<MS2Schema>
         ColumnInfo bnColumn = getColumn("BestName");
         bnColumn.setURL(StringExpressionFactory.createURL(url));
         bnColumn.setURLTargetWindow("prot");
+
+        setDetailsURL(new DetailsURL(url));
 
         ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
         annotationColumn.setIsUnselectable(true);
@@ -149,12 +155,7 @@ public class SequencesTableInfo extends FilteredTable<MS2Schema>
         cols.add(FieldKey.fromParts("Mass"));
         cols.add(FieldKey.fromParts("OrgId"));
         setDefaultVisibleColumns(cols);
-    }
 
-    @Override
-    public String getPublicSchemaName()
-    {
-        return MS2Schema.SCHEMA_NAME;
     }
 
     public void addPeptideAggregationColumns()

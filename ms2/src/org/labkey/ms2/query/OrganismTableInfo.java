@@ -20,15 +20,16 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.UserSchema;
 import org.labkey.ms2.protein.ProteinManager;
 
 /**
  * User: jeckels
  * Date: Feb 22, 2007
  */
-public class OrganismTableInfo extends FilteredTable<MS2Schema>
+public class OrganismTableInfo extends FilteredTable<UserSchema>
 {
-    public OrganismTableInfo(MS2Schema schema)
+    public OrganismTableInfo(UserSchema schema)
     {
         super(ProteinManager.getTableInfoOrganisms(), schema);
 

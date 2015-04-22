@@ -26,11 +26,17 @@
 			<ns:column columnName="SeqId"/>
 			<ns:column columnName="AnnotSourceId"/>
 			<ns:column columnName="AnnotSourceVersion"/>
-			<ns:column columnName="InsertDate"/>
-			<ns:column columnName="ModDate"/>
+			<ns:column columnName="InsertDate">
+				<ns:isHidden>true</ns:isHidden>
+			</ns:column>
+			<ns:column columnName="ModDate">
+				<ns:isHidden>true</ns:isHidden>
+			</ns:column>
 			<ns:column columnName="StartPos"/>
 			<ns:column columnName="EndPos"/>
-			<ns:column columnName="Deleted"/>
+			<ns:column columnName="Deleted">
+				<ns:isHidden>true</ns:isHidden>
+			</ns:column>
 		</ns:columns>
 	</ns:table>
 	<ns:table tableName="AnnotationTypes" tableDbType="TABLE">

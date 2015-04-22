@@ -1590,7 +1590,8 @@ public class MS2Controller extends SpringActionController
                 throw new RedirectException(targetURL);
             }
 
-            SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(getUser(), getContainer()));
+            MS2Schema schema = new MS2Schema(getUser(), getContainer());
+            SequencesTableInfo tableInfo = schema.createSequencesTable();
             tableInfo.addProteinNameFilter(form.getTargetProtein(), false);
 
             Map<Protein, ActionURL> proteinsWithURLs = new LinkedHashMap<>();
@@ -3140,7 +3141,8 @@ public class MS2Controller extends SpringActionController
         {
             if (_seqId == null)
             {
-                SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(_context.getUser(), _context.getContainer()));
+                MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
+                SequencesTableInfo tableInfo = schema.createSequencesTable();
                 tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch());
                 if (isRestrictProteins())
                 {

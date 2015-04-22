@@ -692,9 +692,9 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    public SequencesTableInfo createSequencesTable()
+    public SequencesTableInfo<MS2Schema> createSequencesTable()
     {
-        return new SequencesTableInfo(this);
+        return new SequencesTableInfo<>(this);
     }
 
     public TableInfo createPeptidesTable(ContainerFilter containerFilter, MS2RunType... runTypes)
@@ -1005,7 +1005,7 @@ public class MS2Schema extends UserSchema
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new SequencesTableInfo(MS2Schema.this);
+                        return MS2Schema.this.createSequencesTable();
                     }
                 };
                 seqFK.setPrefixColumnCaption(false);

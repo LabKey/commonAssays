@@ -36,7 +36,7 @@ import java.util.Collections;
  * User: jeckels
  * Date: Apr 12, 2007
  */
-public class CompareProteinProphetTableInfo extends SequencesTableInfo
+public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema>
 {
     private final List<MS2Run> _runs;
     private final boolean _forExport;

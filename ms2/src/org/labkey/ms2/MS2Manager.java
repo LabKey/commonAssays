@@ -285,6 +285,11 @@ public class MS2Manager
         return getSchema().getTable("QuantSummaries");
     }
 
+    public static TableInfo getTableInfoExpressionData()
+    {
+        return getSchema().getTable("ExpressionData");
+    }
+
     public static MS2Run getRun(int runId)
     {
         MS2Run run = _getRunFromCache(runId);
@@ -1817,4 +1822,39 @@ public class MS2Manager
             throw new RunListException(errors);
         }
     }
+
+    public static void deleteExpressionData(Container c)
+    {
+        // Purge ms2.ExpressionData using the associated ExpData's container
+        TableInfo expressionData = getTableInfoExpressionData();
+        SQLFragment deleteFrag = new SQLFragment();
+        deleteFrag.append("DELETE FROM ").append(expressionData).append(" WHERE DataId IN (");
+        deleteFrag.append(" SELECT RowId FROM ").append(ExperimentService.get().getTinfoData(), "d").append(" WHERE d.container = ?");
+        deleteFrag.add(c.getEntityId());
+        deleteFrag.append(")");
+        new SqlExecutor(expressionData.getSchema()).execute(deleteFrag);
+    }
+
+    public static List<Map> getExpressionDataDistinctSamples(ExpProtocol protocol) throws SQLException
+    {
+        SQLFragment frag = new SQLFragment("SELECT SampleId, Name FROM ");
+        frag.append("(SELECT DISTINCT SampleId FROM ");
+        frag.append(getTableInfoExpressionData(), "e");
+        frag.append(", ");
+        frag.append(ExperimentService.get().getTinfoData(), "d");
+        frag.append(", ");
+        frag.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        frag.append(" WHERE e.DataId = d.RowId\n");
+        frag.append("   AND d.RunId = r.RowId\n");
+        frag.append("   AND d.container=?\n").add(protocol.getContainer());
+        frag.append("   AND r.ProtocolLSID = ?\n").add(protocol.getLSID());
+        frag.append(") as fd, ");
+        frag.append(ExperimentService.get().getTinfoMaterial(), "m");
+        frag.append(" WHERE fd.SampleId = m.RowId");
+
+        SqlSelector selector = new SqlSelector(getSchema(), frag);
+
+        return selector.getArrayList(Map.class);
+    }
+
 }

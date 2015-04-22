@@ -30,6 +30,7 @@ import org.labkey.api.util.CheckedInputStream;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FTPUtil;
 import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protein.ProteinManager;
@@ -72,7 +73,7 @@ public abstract class GoLoader
 
     public static WebPartView getCurrentStatus(String message)
     {
-        StringBuilder html = new StringBuilder(null == message ? "" : message + "<br><br>");
+        StringBuilder html = new StringBuilder(null == message ? "" : PageFlowUtil.filter(message) + "<br><br>");
 
         if (null == _currentLoader)
             html.append("No GO annotation loads have been attempted during this server session");
