@@ -311,7 +311,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             ExpProtocol protocol = form.getProtocol();
             String dataFileName = data.getFile().getName();
             LuminexAssayProvider provider = form.getProvider();
-            Set<ExpMaterial> inputMaterials = new LinkedHashSet<>();
+            Map<ExpMaterial, String> inputMaterials = new LinkedHashMap<>();
             ParticipantVisitResolver resolver = findParticipantVisitResolver(expRun, user, provider);
 
             Domain excelRunDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
@@ -1804,7 +1804,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs, boolean parseDescription) throws ExperimentException
+    protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Map<ExpMaterial, String> materialInputs, boolean parseDescription) throws ExperimentException
     {
         if (resolver == null)
         {
@@ -1897,7 +1897,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if (match != null)
         {
-            materialInputs.add(match.getMaterial());
+            materialInputs.put(match.getMaterial(), null);
         }
     }
 
@@ -2067,7 +2067,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
-                handleParticipantResolver(dataRow, resolver, new LinkedHashSet<ExpMaterial>(), true);
+                handleParticipantResolver(dataRow, resolver, new LinkedHashMap<ExpMaterial, String>(), true);
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");

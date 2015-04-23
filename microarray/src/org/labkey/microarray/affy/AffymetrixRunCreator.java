@@ -150,7 +150,8 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
 
             for (Map<String, Object> rowData : loader)
             {
-                if (rowCounter == 0){
+                if (rowCounter == 0)
+                {
                     for (Map.Entry<String, Object> column : rowData.entrySet())
                     {
                         DomainProperty domainProperty = importMap.get(column.getValue());
