@@ -47,7 +47,8 @@ public class MS2FolderType extends MultiPortalFolderType
                 Portal.getPortalPart("Run Groups").createWebPart(),
                 Portal.getPortalPart("Run Types").createWebPart(),
                 Portal.getPortalPart("Sample Sets").createWebPart(),
-                Portal.getPortalPart("Protocols").createWebPart()
+                Portal.getPortalPart("Protocols").createWebPart(),
+                Portal.getPortalPart("Assay List").createWebPart()
             ),
             getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline"), getModule("Experiment")),
             module);

@@ -28,6 +28,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -64,6 +65,7 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.HttpView;
@@ -1857,4 +1859,12 @@ public class MS2Manager
         return selector.getArrayList(Map.class);
     }
 
+    public static Map<String, Integer> getFastaFileSeqIds(int fastaFileId)
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(FieldKey.fromParts("FastaId"), fastaFileId);
+
+        TableSelector seqIdSelector = new TableSelector(ProteinManager.getTableInfoFastaSequences(), PageFlowUtil.set("LookupString", "SeqId"), filter, null);
+        return seqIdSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
+    }
 }

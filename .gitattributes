@@ -1105,6 +1105,11 @@ ms2/src/org/labkey/ms2/insertAnnots.jsp -text
 ms2/src/org/labkey/ms2/loadGoAutomatic.jsp -text
 ms2/src/org/labkey/ms2/loadGoManual.jsp -text
 ms2/src/org/labkey/ms2/manageViews.jsp -text
+ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixAssayProvider.java -text
+ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixDataHandler.java -text
+ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixMaterialListener.java -text
+ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixProtocolSchema.java -text
+ms2/src/org/labkey/ms2/matrix/ProteinSequenceDataTable.java -text
 ms2/src/org/labkey/ms2/metadata/FractionsDisplayColumn.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecBulkPropertiesTemplateAction.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayForm.java -text

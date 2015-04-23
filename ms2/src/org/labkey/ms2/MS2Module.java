@@ -51,6 +51,9 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
+import org.labkey.ms2.matrix.ProteinExpressionMatrixAssayProvider;
+import org.labkey.ms2.matrix.ProteinExpressionMatrixDataHandler;
+import org.labkey.ms2.matrix.ProteinExpressionMatrixMaterialListener;
 import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.metadata.MassSpecMetadataController;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -271,6 +274,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ExperimentService.get().registerExperimentDataHandler(new PepXmlExperimentDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ProteinProphetExperimentDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new ProteinExpressionMatrixDataHandler());
+        ExperimentService.get().registerExperimentMaterialListener(new ProteinExpressionMatrixMaterialListener());
 
         //We are the first creator of this...
         ContainerManager.addContainerListener(this);
@@ -282,6 +287,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Controller.registerAdminConsoleLinks();
         
         AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
+        AssayService.get().registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
 
         if (null != ServiceRegistry.get(SearchService.class))
         {

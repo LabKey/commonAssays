@@ -24,6 +24,8 @@ import java.util.Set;
 public class ProteinUserSchema extends UserSchema
 {
     public static final String NAME = "protein";
+    public static final String ANNOTATION_TABLE_NAME = TableType.Annotations.name();
+
 
     ProteinUserSchema(User user, Container container)
     {
