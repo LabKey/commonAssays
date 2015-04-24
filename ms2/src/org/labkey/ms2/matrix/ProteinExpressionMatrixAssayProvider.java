@@ -51,7 +51,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
-import org.labkey.ms2.query.MS2Schema;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -161,7 +160,7 @@ public class ProteinExpressionMatrixAssayProvider extends AbstractAssayProvider
         Domain runDomain = result.getKey();
 
         DomainProperty proteinSeqSet = addProperty(runDomain, PROTEIN_SEQUENCE_SET.getName(), PROTEIN_SEQUENCE_SET.getLabel(), PropertyType.INTEGER);
-        proteinSeqSet.setLookup(new Lookup(null, MS2Schema.SCHEMA_NAME, ProteinUserSchema.ANNOTATION_TABLE_NAME)); //TODO: Is this correct?
+        proteinSeqSet.setLookup(new Lookup(null, ProteinUserSchema.NAME, ProteinUserSchema.FASTA_FILE_TABLE_NAME));
         proteinSeqSet.setShownInInsertView(true);
         proteinSeqSet.setShownInUpdateView(false);
         proteinSeqSet.setRequired(true);

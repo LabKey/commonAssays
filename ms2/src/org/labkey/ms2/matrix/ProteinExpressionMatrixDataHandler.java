@@ -133,7 +133,7 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
             Connection connection = MS2Manager.getSchema().getScope().getConnection();
 
             statement = connection.prepareStatement("INSERT INTO ms2." +
-                    MS2Manager.getTableInfoExpressionData().getName() + " (DataId, SampleId, SeqId, \"Value\") " +
+                    MS2Manager.getTableInfoExpressionData().getName() + " (DataId, SampleId, SeqId, Value) " +
                     "VALUES (?, ?, ?, ?)");
             int rowCount = 0;
 
@@ -176,7 +176,7 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                 //All the col names are condition names (ConditionA, ConditionB, etc.) except for the Molecular Identifier/Seq Id col.
                 for (String sampleName : row.keySet())
                 {
-                    if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(seqIdName) == null)
+                    if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
                         continue;
 
                     statement.setInt(1, dataRowId);

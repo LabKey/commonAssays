@@ -1837,7 +1837,7 @@ public class MS2Manager
         new SqlExecutor(expressionData.getSchema()).execute(deleteFrag);
     }
 
-    public static List<Map> getExpressionDataDistinctSamples(ExpProtocol protocol) throws SQLException
+    public static List<Map> getExpressionDataDistinctSamples(ExpProtocol protocol)
     {
         SQLFragment frag = new SQLFragment("SELECT SampleId, Name FROM ");
         frag.append("(SELECT DISTINCT SampleId FROM ");

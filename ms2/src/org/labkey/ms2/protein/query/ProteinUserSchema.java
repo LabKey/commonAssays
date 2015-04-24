@@ -25,9 +25,10 @@ public class ProteinUserSchema extends UserSchema
 {
     public static final String NAME = "protein";
     public static final String ANNOTATION_TABLE_NAME = TableType.Annotations.name();
+    public static final String FASTA_FILE_TABLE_NAME = TableType.FastaFiles.name();
 
 
-    ProteinUserSchema(User user, Container container)
+    public ProteinUserSchema(User user, Container container)
     {
         super(NAME, "Protein annotation, gene ontology, and sequence tables", user, container, ProteinManager.getSchema());
     }
@@ -107,6 +108,13 @@ public class ProteinUserSchema extends UserSchema
             {
                 return schema.createSequences(name);
             }
+        },
+        FastaFiles {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createFastaFileTable(name);
+            }
         };
 
         public abstract TableInfo createTable(ProteinUserSchema schema, String name);
@@ -137,7 +145,8 @@ public class ProteinUserSchema extends UserSchema
                 TableType.GoTerm2Term.name(),
                 TableType.GoTermDefinition.name(),
                 TableType.GoTermSynonym.name(),
-                TableType.Sequences.name()
+                TableType.Sequences.name(),
+                TableType.FastaFiles.name()
         );
     }
 
@@ -186,6 +195,13 @@ public class ProteinUserSchema extends UserSchema
     protected SequencesTableInfo<ProteinUserSchema> createSequences(String name)
     {
         return new SequencesTableInfo<>(this);
+    }
+
+    protected TableInfo createFastaFileTable(String name)
+    {
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaFiles());
+        table.init();
+        return table;
     }
 
 }

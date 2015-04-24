@@ -35,11 +35,11 @@ public class ProteinSequenceDataTable extends FilteredTable<ProteinExpressionMat
         valueColumn.setLabel("Value");
         valueColumn.setFormat("0.000000");
 
-        ColumnInfo featureIdColumn = addColumn(wrapColumn(getRealTable().getColumn("FeatureId")));
-        featureIdColumn.setHidden(false);
-        featureIdColumn.setLabel("Probe Id");
-        featureIdColumn.setFk(new QueryForeignKey(MS2Schema.SCHEMA_NAME, schema.getContainer(), null,
-                schema.getUser(), ProteinUserSchema.ANNOTATION_TABLE_NAME, "RowId", "FeatureId"));
+        ColumnInfo seqIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SeqId")));
+        seqIdColumn.setHidden(false);
+        seqIdColumn.setLabel("Seq Id");
+        seqIdColumn.setFk(new QueryForeignKey(MS2Schema.SCHEMA_NAME, schema.getContainer(), null,
+                schema.getUser(), ProteinUserSchema.ANNOTATION_TABLE_NAME, "RowId", "SeqId"));
 
         ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
         sampleIdColumn.setHidden(false);

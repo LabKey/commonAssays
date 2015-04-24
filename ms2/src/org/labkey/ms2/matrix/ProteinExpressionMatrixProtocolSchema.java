@@ -11,13 +11,12 @@ import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.matrix.AbstractMatrixProtocolSchema;
 import org.labkey.ms2.MS2Manager;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
 {
-    public static final String PROTEIN_SEQ_DATA_TABLE_NAME = "ProteinSequenceData";
+    public static final String PROTEIN_SEQ_DATA_TABLE_NAME = "ExpressionData";
     public static final String PROTEIN_SEQ_DATA_BY_SAMPLE_TABLE_NAME = "ProteinSequenceDataBySample";
     private static final String SEQUENCE_ID = "SequenceId";
     private static final String SAMPLE_ID = "SampleId"; //TODO: change to ConditionId as per client data?
@@ -47,14 +46,8 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
     public List<Map> getDistinctSampleIds()
     {
         List<Map> distinctSampleIds = null;
-        try
-        {
-            distinctSampleIds = MS2Manager.getExpressionDataDistinctSamples(getProtocol());
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        distinctSampleIds = MS2Manager.getExpressionDataDistinctSamples(getProtocol());
+
         return distinctSampleIds;
     }
 
