@@ -7,14 +7,12 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.exp.query.SamplesSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
-import org.labkey.ms2.query.MS2Schema;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,18 +35,16 @@ public class ProteinSequenceDataTable extends FilteredTable<ProteinExpressionMat
 
         ColumnInfo seqIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SeqId")));
         seqIdColumn.setHidden(false);
-        seqIdColumn.setLabel("Seq Id");
-        seqIdColumn.setFk(new QueryForeignKey(MS2Schema.SCHEMA_NAME, schema.getContainer(), null,
-                schema.getUser(), ProteinUserSchema.ANNOTATION_TABLE_NAME, "RowId", "SeqId"));
+        seqIdColumn.setLabel("Protein");
+        seqIdColumn.setFk(new QueryForeignKey(ProteinUserSchema.NAME, schema.getContainer(), null,
+                schema.getUser(), ProteinUserSchema.SEQUENCES_TABLE_NAME, "SeqId", "BestName"));
 
         ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
         sampleIdColumn.setHidden(false);
         sampleIdColumn.setLabel("Sample Id");
 
-        // Allow for multiple sample sets, but assume we're displaying data from whichever is currently active.
-        String activeSampleSet = ExperimentService.get().ensureActiveSampleSet(schema.getContainer()).getName();
-        sampleIdColumn.setFk(new QueryForeignKey(SamplesSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(),
-                activeSampleSet,"RowId","Name"));
+        sampleIdColumn.setFk(new QueryForeignKey(ExpSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(),
+                ExpSchema.TableType.Materials.toString(),"RowId","Name"));
 
         SQLFragment runSQL = new SQLFragment("(SELECT d.RunId FROM ");
         runSQL.append(ExperimentService.get().getTinfoData(), "d");

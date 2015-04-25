@@ -26,6 +26,8 @@ public class ProteinUserSchema extends UserSchema
     public static final String NAME = "protein";
     public static final String ANNOTATION_TABLE_NAME = TableType.Annotations.name();
     public static final String FASTA_FILE_TABLE_NAME = TableType.FastaFiles.name();
+    public static final String SEQUENCES_TABLE_NAME = TableType.Sequences.name();
+
 
 
     public ProteinUserSchema(User user, Container container)

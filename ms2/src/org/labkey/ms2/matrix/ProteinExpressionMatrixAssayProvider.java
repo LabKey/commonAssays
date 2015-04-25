@@ -68,7 +68,7 @@ public class ProteinExpressionMatrixAssayProvider extends AbstractAssayProvider
 
     public static final String PROTEIN_SEQUENCE_SET_PROPERTY_NAME = "fastaFormatProteinSequences";
 
-    public static final ColumnMappingProperty PROTEIN_SEQUENCE_SET = new ColumnMappingProperty(PROTEIN_SEQUENCE_SET_PROPERTY_NAME, "Protein Sequence Set", true);
+    public static final ColumnMappingProperty PROTEIN_SEQUENCE_SET = new ColumnMappingProperty(PROTEIN_SEQUENCE_SET_PROPERTY_NAME, "Fasta/Uniprot File", true);
 //    public static final ColumnMappingProperty IMPORT_VALUES_COLUMN = new ColumnMappingProperty("importValues", "Import Values", false);
 
     public ProteinExpressionMatrixAssayProvider()

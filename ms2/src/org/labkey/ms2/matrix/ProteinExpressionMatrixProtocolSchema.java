@@ -18,8 +18,8 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
 {
     public static final String PROTEIN_SEQ_DATA_TABLE_NAME = "ExpressionData";
     public static final String PROTEIN_SEQ_DATA_BY_SAMPLE_TABLE_NAME = "ProteinSequenceDataBySample";
-    private static final String SEQUENCE_ID = "SequenceId";
-    private static final String SAMPLE_ID = "SampleId"; //TODO: change to ConditionId as per client data?
+    private static final String SEQUENCE_ID = "SeqId";
+    private static final String SAMPLE_ID = "SampleId";
     private static final String VALUE_MEASURE_ID = "Value";
     private static final String TITLE = "Protein Sequence Data By Sample";
 
@@ -39,7 +39,7 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
     @Override
     public TableInfo createTable(String name)
     {
-        return super.createTable(name, SEQUENCE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE); //TODO: Looks a bit funny, modify?
+        return super.createTable(name, SEQUENCE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE);
     }
 
     @Override

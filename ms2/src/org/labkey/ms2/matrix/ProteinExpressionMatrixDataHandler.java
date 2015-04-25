@@ -167,10 +167,12 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                     throw new ExperimentException("Sequence ID (Molecular Identifier) must be present and cannot be blank");
                 }
 
-                Integer seqId = seqIds.get(seqIdName);
+                Integer seqId = seqIds.get(seqIdName); //get a matching seqId from the fasta file
+
+                //if fasta file does not have the matching seq Id as the experiment expression file, then do not allow the import
                 if (seqId == null)
                 {
-                    throw new ExperimentException("Unable to find Sequence ID (Molecular Identifier) with name '" + seqIdName + "'");
+                    throw new ExperimentException("Unable to find Protein '" + seqIdName + "' in the selected Fasta/Uniprot file.");
                 }
 
                 //All the col names are condition names (ConditionA, ConditionB, etc.) except for the Molecular Identifier/Seq Id col.
