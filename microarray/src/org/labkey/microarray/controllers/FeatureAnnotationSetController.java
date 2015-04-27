@@ -138,6 +138,7 @@ public class FeatureAnnotationSetController extends SpringActionController
             // Similarly, deleting a referenced sample set currently throws an FK exception. again, deal with it
             // gracefully and prompt to cascade.
 
+            DataRegionSelection.clearAll(getViewContext());
             return true;
         }
 

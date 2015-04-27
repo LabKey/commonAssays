@@ -166,15 +166,7 @@ public class MicroarrayManager
             DataIterator dataIterator = loader.getDataIterator(dataIteratorContext);
             // TODO should create a custom DataIteratorBuider to wrap this custom iterator
             SimpleTranslator translator = new SimpleTranslator(dataIterator, dataIteratorContext);
-
-            for (int i = 1; i <= dataIterator.getColumnCount(); i++)
-            {
-                ColumnInfo colInfo = dataIterator.getColumnInfo(i);
-                String alias = colInfo.getColumnName().replace("_", "");
-                int aliasIndex = translator.addColumn(i);
-                translator.addAliasColumn(alias, aliasIndex);
-            }
-
+            translator.selectAll();
             translator.addConstantColumn("featureannotationsetid", JdbcType.INTEGER, featureSetRowId);
 
             return queryUpdateService.importRows(user, container, new DataIteratorBuilder.Wrapper(translator), errors, null, null);

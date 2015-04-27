@@ -98,15 +98,41 @@
           </ns:column>
           <ns:column columnName="FeatureId">
               <ns:importAliases>
+                  <ns:importAlias>Feature_ID</ns:importAlias>
                   <ns:importAlias>ProbeId</ns:importAlias>
+                  <ns:importAlias>Probe_ID</ns:importAlias>
               </ns:importAliases>
           </ns:column>
-          <ns:column columnName="GeneSymbol"/>
-          <ns:column columnName="UniGeneId"/>
-          <ns:column columnName="GeneId"/>
-          <ns:column columnName="AccessionId"/>
-          <ns:column columnName="RefSeqProteinId"/>
-          <ns:column columnName="RefSeqTranscriptId"/>
+          <ns:column columnName="GeneSymbol">
+              <ns:importAliases>
+                  <ns:importAlias>Gene_Symbol</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
+          <ns:column columnName="UniGeneId">
+              <ns:importAliases>
+                  <ns:importAlias>UniGene_ID</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
+          <ns:column columnName="GeneId">
+              <ns:importAliases>
+                  <ns:importAlias>Gene_ID</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
+          <ns:column columnName="AccessionId">
+              <ns:importAliases>
+                  <ns:importAlias>Accession_ID</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
+          <ns:column columnName="RefSeqProteinId">
+              <ns:importAliases>
+                  <ns:importAlias>RefSeq_Protein_ID</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
+          <ns:column columnName="RefSeqTranscriptId">
+              <ns:importAliases>
+                  <ns:importAlias>RefSeq_Transcript_ID</ns:importAlias>
+              </ns:importAliases>
+          </ns:column>
           <ns:column columnName="Created">
               <ns:description>Contains the date and time that this data was added to the system</ns:description>
               <ns:isHidden>true</ns:isHidden>
