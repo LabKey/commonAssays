@@ -359,7 +359,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _userSchema);
+                 SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _userSchema);
                 SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
                 ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);

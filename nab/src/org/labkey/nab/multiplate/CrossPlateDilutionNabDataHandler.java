@@ -24,23 +24,13 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.reader.ColumnDescriptor;
-import org.labkey.api.reader.DataLoader;
-import org.labkey.api.reader.ExcelLoader;
-import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
-import org.labkey.api.study.PlateService;
-import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
-import org.labkey.api.util.Pair;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,10 +61,10 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
 
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
-        for (ExpMaterial material : sampleInputs)
+        for (ExpMaterial material : sampleInputs.keySet())
             nameToMaterial.put(material.getName(), material);
 
         Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<>();
