@@ -14,7 +14,6 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
-import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
@@ -29,6 +28,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -85,26 +86,16 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            try (TabLoader loader = createTabLoader(dataFile, PROTEIN_SEQ_ID_COLUMN_NAME))
-            {
-                ColumnDescriptor[] cols = loader.getColumns();
-                List<String> columnNames = new ArrayList<>(cols.length);
-                for (ColumnDescriptor col : cols)
-                    columnNames.add(col.getColumnName());
+            DataLoader loader = createLoader(dataFile, PROTEIN_SEQ_ID_COLUMN_NAME);
 
-                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, PROTEIN_SEQ_ID_COLUMN_NAME);
+            ColumnDescriptor[] cols = loader.getColumns();
+            List<String> columnNames = new ArrayList<>(cols.length);
+            for (ColumnDescriptor col : cols)
+                columnNames.add(col.getColumnName());
 
-//                boolean importValues = true;
-//                if (runProps.containsKey(ProteinExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
-//                {
-//                    String importValuesStr = runProps.get(ProteinExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName());
-//                    if (importValuesStr != null)
-//                        importValues = Boolean.valueOf(importValuesStr);
-//                }
-//
-//                if (importValues)
-                insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
-            }
+            Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, PROTEIN_SEQ_ID_COLUMN_NAME);
+
+            insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
         }
         catch (IOException e)
         {
@@ -156,6 +147,8 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
             }
 
             Map<String, Integer> seqIds = MS2Manager.getFastaFileSeqIds(proteinSet);
+            Map<String, List> partialSeqIds = new HashMap<>(); //map of {"partial Ids", list of "full ids" }
+            storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(seqIds, partialSeqIds);
 
             for (Map<String, Object> row : loader)
             {
@@ -167,15 +160,24 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                     throw new ExperimentException("Sequence ID (Molecular Identifier) must be present and cannot be blank");
                 }
 
-                Integer seqId = seqIds.get(seqIdName); //get a matching seqId from the fasta file
+                List seqIdsList = partialSeqIds.get(seqIdName); //get list of "full ids"
 
                 //if fasta file does not have the matching seq Id as the experiment expression file, then do not allow the import
-                if (seqId == null)
+                if (seqIdsList == null)
                 {
                     throw new ExperimentException("Unable to find Protein '" + seqIdName + "' in the selected Fasta/Uniprot file.");
                 }
 
-                //All the col names are condition names (ConditionA, ConditionB, etc.) except for the Molecular Identifier/Seq Id col.
+                //if there are more than one "full ids" containing a partial id in fasta file
+                if (seqIdsList.size() > 1)
+                {
+                    throw new ExperimentException("More than one protein with id '" + seqIdName + "' found in the selected Fasta/Uniprot file. Unable to choose the correct protein.");
+                }
+
+                String seqIdString = (String) seqIdsList.get(0);
+                Integer seqId = seqIds.get(seqIdString); //get a matching seqId from stored sequences/content of fasta file
+
+                //All the col names are condition names (ConditionA, ConditionB, etc.) except for the Molecular Identifier
                 for (String sampleName : row.keySet())
                 {
                     if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
@@ -195,7 +197,7 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
             }
             LOG.info("Imported " + rowCount + " rows.");
         }
-        catch (SQLException e)
+        catch(SQLException e)
         {
             throw new RuntimeSQLException(e);
         }
@@ -211,6 +213,24 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                 {
                 }
             }
+        }
+    }
+
+    private void storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(Map<String, Integer> seqIds, Map<String, List> substringsSeqId)
+    {
+        for(String seqIdFasta : seqIds.keySet())
+        {
+            String[] fastaSeqHeaderItems = seqIdFasta.split("\\|");
+            String seqIdentiferMatchingExprMatrix = fastaSeqHeaderItems[2];
+            List vals;
+
+            if(substringsSeqId.containsKey(seqIdentiferMatchingExprMatrix))
+                vals = substringsSeqId.get(seqIdentiferMatchingExprMatrix);
+            else
+                vals = new LinkedList();
+
+            vals.add(seqIdFasta);
+            substringsSeqId.put(seqIdentiferMatchingExprMatrix, vals);
         }
     }
 
