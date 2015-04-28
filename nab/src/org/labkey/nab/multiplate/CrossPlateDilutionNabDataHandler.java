@@ -64,8 +64,8 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
-        for (ExpMaterial material : sampleInputs.keySet())
-            nameToMaterial.put(material.getName(), material);
+        for (Map.Entry<ExpMaterial,String> e : sampleInputs.entrySet())
+            nameToMaterial.put(e.getValue(), e.getKey());
 
         Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<>();
         for (Plate plate : plates)

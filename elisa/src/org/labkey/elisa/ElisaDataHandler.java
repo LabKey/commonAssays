@@ -142,8 +142,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                         SimpleRegression regression = new SimpleRegression(true);
 
                         Map<String, ExpMaterial> materialMap = new HashMap<>();
-                        for (ExpMaterial material : data.getRun().getMaterialInputs().keySet())
-                            materialMap.put(material.getName(), material);
+                        for (Map.Entry<ExpMaterial,String> e : data.getRun().getMaterialInputs().entrySet())
+                            materialMap.put(e.getValue(), e.getKey());
 
                         Map<Position, String> specimenGroupMap = new HashMap<>();
                         for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))

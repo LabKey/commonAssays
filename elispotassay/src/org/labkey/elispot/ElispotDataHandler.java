@@ -127,8 +127,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     Map<PlateInfo, Plate> plates = initializePlates(protocol, _dataFile, template, reader);
 
                     Map<String, ExpMaterial> materialMap = new HashMap<>();
-                    for (ExpMaterial material : run.getMaterialInputs().keySet())
-                        materialMap.put(material.getName(), material);
+                    for (Map.Entry<ExpMaterial,String> e : run.getMaterialInputs().entrySet())
+                        materialMap.put(e.getValue(), e.getKey());
 
                     // create a map of analyte to cytokine names (third step of the upload wizard)
                     Map<String, Object> analyteToCytokine = new HashMap<>();
@@ -352,8 +352,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             // calculate antigen statistics on a per sample basis
             Map<String, ExpMaterial> materialMap = new HashMap<>();
 
-            for (ExpMaterial material : run.getMaterialInputs().keySet())
-                materialMap.put(material.getName(), material);
+            for (Map.Entry<ExpMaterial,String> e : run.getMaterialInputs().entrySet())
+                materialMap.put(e.getValue(), e.getKey());
 
             DomainProperty antigenNameProp = antigenDomain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME);
             Map<String, Map<String, Double>> backgroundValueMap = Collections.emptyMap();
@@ -405,7 +405,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, pos);
                                 for (RunDataRow runDataRow : ElispotManager.get().getRunDataRows(dataRowLsid.toString(), container))
                                 {
-                                    assert material.getName().equals(runDataRow.getWellgroupName());
+//                                    assert material.getName().equals(runDataRow.getWellgroupName());
                                     if (!statsDataMap.containsKey(runDataRow.getAnalyte()))
                                         statsDataMap.put(runDataRow.getAnalyte(), new ArrayList<Double>());
                                     List<Double> statsData = statsDataMap.get(runDataRow.getAnalyte());
