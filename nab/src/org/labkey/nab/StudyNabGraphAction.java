@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
@@ -54,7 +55,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
     @Override
     public ModelAndView getView(GraphSelectedForm graphForm, BindException errors) throws Exception
     {
-        Map<Integer, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), graphForm.getId());
+        Map<Pair<Integer, String>, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), graphForm.getId());
         if (ids.values().isEmpty())
             throw new NotFoundException("No IDs available for charting.");
         // We don't care which protocol we get- we just need any valid protocol to get to the provider (which should be
@@ -71,7 +72,13 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
                     throw new IllegalStateException("Cannot graph data from different providers on the same chart");
             }
         }
-        Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
+        int[] objectIds = new int[ids.size()];
+        int i = 0;
+        for (Pair<Integer, String> id : ids.keySet())
+        {
+            objectIds[i++] = id.getKey();
+        }
+        Map<DilutionSummary, DilutionAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), graphForm.getFitTypeEnum(), objectIds);
         Set<Integer> cutoffSet = new HashSet<>();
         for (DilutionSummary summary : summaries.keySet())
         {

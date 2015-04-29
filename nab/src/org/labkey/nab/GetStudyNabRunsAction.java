@@ -26,13 +26,16 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * User: brittp
@@ -44,6 +47,8 @@ import java.util.Map;
 @ApiVersion(10.1)
 public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetStudyNabRunsForm>
 {
+    Map<Integer, Map<String, Object>> _extraObjectIdProps = new HashMap<>();
+
     public static class GetStudyNabRunsForm extends GetNabRunsBaseForm
     {
         private int[] _objectIds;
@@ -74,7 +79,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
             DilutionDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
 
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),
-                    form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));
+                    form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters(), _extraObjectIdProps));
         }
 
         if (errors.hasErrors())
@@ -87,17 +92,26 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
 
     protected Collection<ExpRun> getRuns(GetStudyNabRunsForm form, BindException errors)
     {
-        Map<Integer, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getObjectIds());
+        Map<Pair<Integer, String>, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getObjectIds());
+        Set<ExpRun> runs = new HashSet<>();
 
-        Collection<ExpRun> runs = new ArrayList<>();
-
-        for (Integer objectId : readableObjectIds.keySet())
+        for (Pair<Integer, String> id : readableObjectIds.keySet())
         {
+            // build up additional properties to associate with the object id
+            if (!_extraObjectIdProps.containsKey(id.getKey()))
+            {
+                Map<String, Object> props = new HashMap<>();
+                props.put("datasetRowId", id.getKey());
+                props.put("lsid", id.getValue());
+
+                _extraObjectIdProps.put(id.getKey(), props);
+            }
+
             // Note that we intentionally do NOT filter or check container.  If the user has access to the NAb
             // data copied to the study (verified above), they can get the raw data via the APIs.  This is
             // consistent with the role-based implementation which allows viewing the NAb details view for copied-
             // to-study data even if the Nab details view data is in a folder the user cannot read.
-            ExpRun run = NabManager.get().getNAbRunByObjectId(objectId.intValue());
+            ExpRun run = NabManager.get().getNAbRunByObjectId(id.getKey());
             if (run != null)
                 runs.add(run);
         }

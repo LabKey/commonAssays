@@ -26,6 +26,7 @@ import org.labkey.api.study.Well;
 import org.labkey.api.study.WellGroup;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,12 @@ public class NabRunPropertyMap extends HashMap<String, Object>
 
     public NabRunPropertyMap(DilutionAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut, boolean includeFitParameters)
     {
+        this(assay, includeStats, includeWells, calculateNeut, includeFitParameters, Collections.EMPTY_MAP);
+    }
+
+    public NabRunPropertyMap(DilutionAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut,
+                             boolean includeFitParameters, Map<Integer, Map<String, Object>> extraObjectIdProps)
+    {
         put("runId", assay.getRun().getRowId());
         put("properties", new PropertyNameMap(assay.getRunProperties()));
         put("containerPath", assay.getRun().getContainer().getPath());
@@ -63,6 +70,16 @@ public class NabRunPropertyMap extends HashMap<String, Object>
 
             DilutionSummary dilutionSummary = result.getDilutionSummary();
             sample.put("objectId", result.getObjectId());
+
+            // add any additional properties associated with this object id
+            if (extraObjectIdProps.containsKey(result.getObjectId()))
+            {
+                for (Map.Entry<String, Object> entry : extraObjectIdProps.get(result.getObjectId()).entrySet())
+                {
+                    sample.put(entry.getKey(), entry.getValue());
+                }
+            }
+
             sample.put("wellgroupName", dilutionSummary.getFirstWellGroup().getName());
             try
             {

@@ -23,6 +23,7 @@ import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.springframework.validation.BindException;
 
@@ -41,16 +42,15 @@ public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
     @Override
     public ApiResponse execute(GraphSelectedForm form, BindException errors) throws Exception
     {
-        Map<Integer, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getId());
+        Map<Pair<Integer, String>, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getId());
 
         StringBuilder objectIdParam = new StringBuilder();
         String sep = "";
-        for (Integer id : readableIds.keySet())
+        for (Pair<Integer, String> id : readableIds.keySet())
         {
-            objectIdParam.append(sep).append(id);
+            objectIdParam.append(sep).append(id.getKey());
             sep = ",";
         }
-
 
         ActionURL url = new ActionURL(StudyNabGraphAction.class, getContainer());
         // simply pass the incoming parameters through, except for objectIds, which is subject to modification for

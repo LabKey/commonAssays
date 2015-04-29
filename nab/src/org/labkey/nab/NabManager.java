@@ -22,6 +22,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableResultSet;
@@ -38,9 +39,12 @@ import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabRunDataTable;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -110,7 +114,11 @@ public class NabManager extends AbstractNabManager
         return null;
     }
 
-    public Map<Integer, ExpProtocol> getReadableStudyObjectIds(Container studyContainer, User user, int[] objectIds)
+    /**
+     * Returns the readable study dataset rows that correspond to the specified object ID array
+     * @return a map of row information to ExpProtocol, where the row information is a pair of row ID and LSID values.
+     */
+    public Map<Pair<Integer, String>, ExpProtocol> getReadableStudyObjectIds(Container studyContainer, User user, int[] objectIds)
     {
         if (objectIds == null || objectIds.length == 0)
             throw new IllegalArgumentException("getReadableStudyObjectIds must be passed a non-empty list of object ids.");
@@ -142,21 +150,22 @@ public class NabManager extends AbstractNabManager
             allObjectIds.add(objectId);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RowId"), allObjectIds));
 
-        Map<Integer, ExpProtocol> readableObjectIds = new HashMap<>();
+        final Map<Pair<Integer, String>, ExpProtocol> readableObjectIds = new HashMap<>();
 
         // For each readable study data table, find any NAb runs that match the requested objectIds, and add them to the run list:
         for (Map.Entry<TableInfo, ExpProtocol> entry : dataTables.entrySet())
         {
             TableInfo dataTable = entry.getKey();
-            ExpProtocol protocol = entry.getValue();
-            List<Integer> rowIds = new TableSelector(dataTable.getColumn("RowId"), filter, null).getArrayList(Integer.class);
-            if (rowIds.size() > 0)
+            final ExpProtocol protocol = entry.getValue();
+            TableSelector selector = new TableSelector(dataTable, PageFlowUtil.set("RowId", "Lsid"), filter, null);
+            selector.forEach(new Selector.ForEachBlock<ResultSet>()
             {
-                for (Integer rowId : rowIds)
+                @Override
+                public void exec(ResultSet rs) throws SQLException
                 {
-                    readableObjectIds.put(rowId, protocol);
+                    readableObjectIds.put(new Pair<Integer, String>(rs.getInt("RowId"), rs.getString("Lsid")), protocol);
                 }
-            }
+            });
         }
         return readableObjectIds;
     }
