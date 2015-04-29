@@ -84,7 +84,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     public FlowAssayProvider()
     {
         // NOTE: Flow uses generic 'Protocol' and 'Run' LSID namespace prefixes so we can't
-        // register LSID handlers in the same mannaer the AbstractAssayProvider does.
+        // register LSID handlers in the same manner as the AbstractAssayProvider.
         // FlowAssayProvider.getPriority() will find the 'Flow' protocol in the container.
         //super(FlowProtocol.getProtocolLSIDPrefix(), FlowRun.getRunLSIDPrefix(), null);
         super(null, null, null, ModuleLoader.getInstance().getModule(FlowModule.NAME));
