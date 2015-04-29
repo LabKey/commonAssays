@@ -17,7 +17,6 @@ package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
@@ -54,7 +53,7 @@ public class NabModule extends DefaultModule
 
     public double getVersion()
     {
-        return 15.10;
+        return 15.11;
     }
 
     protected void init()
