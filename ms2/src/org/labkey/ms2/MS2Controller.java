@@ -209,6 +209,7 @@ public class MS2Controller extends SpringActionController
     public static void registerAdminConsoleLinks()
     {
         AdminConsole.addLink(SettingsLinkType.Management, "ms2", getShowMS2AdminURL(null));
+        AdminConsole.addLink(SettingsLinkType.Configuration, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()));
         AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl());
     }
 
@@ -4035,6 +4036,100 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public static class MascotSettingsForm
+    {
+        private String _mascotServer;
+        private String _mascotUserAccount;
+        private String _mascotUserPassword;
+        private String _mascotHTTPProxy;
+
+        public String getMascotServer()
+        {
+            return (null == _mascotServer) ? "" : _mascotServer;
+        }
+
+        public void setMascotServer(String mascotServer)
+        {
+            _mascotServer = mascotServer;
+        }
+
+        public String getMascotUserAccount()
+        {
+            return (null == _mascotUserAccount) ? "" : _mascotUserAccount;
+        }
+
+        public void setMascotUserAccount(String mascotUserAccount)
+        {
+            _mascotUserAccount = mascotUserAccount;
+        }
+
+        public String getMascotUserPassword()
+        {
+            return (null == _mascotUserPassword) ? "" : _mascotUserPassword;
+        }
+
+        public void setMascotUserPassword(String mascotUserPassword)
+        {
+            _mascotUserPassword = mascotUserPassword;
+        }
+
+        public String getMascotHTTPProxy()
+        {
+            return (null == _mascotHTTPProxy) ? "" : _mascotHTTPProxy;
+        }
+
+        public void setMascotHTTPProxy(String mascotHTTPProxy)
+        {
+            _mascotHTTPProxy = mascotHTTPProxy;
+        }
+    }
+
+    @RequiresSiteAdmin
+    public class MascotConfigAction extends FormViewAction<MascotSettingsForm>
+    {
+        @Override
+        public void validateCommand(MascotSettingsForm target, Errors errors)
+        {
+
+        }
+
+        @Override
+        public ModelAndView getView(MascotSettingsForm mascotSettingsForm, boolean reshow, BindException errors) throws Exception
+        {
+            return new JspView<>("/org/labkey/ms2/mascotConfig.jsp", mascotSettingsForm);
+        }
+
+        @Override
+        public boolean handlePost(MascotSettingsForm form, BindException errors) throws Exception
+        {
+            WriteableAppProps props = AppProps.getWriteableInstance();
+
+            props.setMascotServer(form.getMascotServer());
+            props.setMascotUserAccount(form.getMascotUserAccount());
+            props.setMascotUserPassword(form.getMascotUserPassword());
+            props.setMascotHTTPProxy(form.getMascotHTTPProxy());
+
+            props.save();
+
+            //write an audit log event
+            props.writeAuditLogEvent(getContainer(), getViewContext().getUser(), props.getOldProperties());
+
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(MascotSettingsForm mascotSettingsForm)
+        {
+            return PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL();
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL()).addChild("Mascot Server Configuration");
+        }
+    }
+
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowProteinAction extends SimpleViewAction<DetailsForm>
     {
@@ -4835,7 +4930,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;
+            return root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
         }
     }
 
