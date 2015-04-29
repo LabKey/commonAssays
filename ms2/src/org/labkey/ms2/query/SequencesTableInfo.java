@@ -23,6 +23,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.DetailsURL;
@@ -30,6 +31,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpression;
@@ -43,6 +45,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
 import org.labkey.ms2.protein.query.CustomAnnotationTable;
+import org.labkey.ms2.protein.query.ProteinUserSchema;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -138,6 +141,21 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
             }
         });
         addColumn(annotationColumn);
+
+        ColumnInfo goMPColumn = wrapColumn("GOMetabolicProcesses", getRealTable().getColumn("SeqId"));
+        goMPColumn.setLabel("GO Metabolic Processes");
+        goMPColumn.setFk(new MultiValuedForeignKey(new QueryForeignKey(ProteinUserSchema.NAME, getUserSchema().getContainer(), null, getUserSchema().getUser(), "GOMetabolicProcess", "SeqId", "BestName"), "GOMPAnnotId"));
+        addColumn(goMPColumn);
+
+        ColumnInfo goCLColumn = wrapColumn("GOCellularLocations", getRealTable().getColumn("SeqId"));
+        goCLColumn.setLabel("GO Cellular Locations");
+        goCLColumn.setFk(new MultiValuedForeignKey(new QueryForeignKey(ProteinUserSchema.NAME, getUserSchema().getContainer(), null, getUserSchema().getUser(), "GOCellularLocation", "SeqId", "BestName"), "GOCLAnnotId"));
+        addColumn(goCLColumn);
+
+        ColumnInfo goMFColumn = wrapColumn("GOMolecularFunctions", getRealTable().getColumn("SeqId"));
+        goMFColumn.setLabel("GO Molecular Functions");
+        goMFColumn.setFk(new MultiValuedForeignKey(new QueryForeignKey(ProteinUserSchema.NAME, getUserSchema().getContainer(), null, getUserSchema().getUser(), "GOMolecularFunction", "SeqId", "BestName"), "GOMFAnnotId"));
+        addColumn(goMFColumn);
 
         for (CustomAnnotationType type : CustomAnnotationType.values())
         {

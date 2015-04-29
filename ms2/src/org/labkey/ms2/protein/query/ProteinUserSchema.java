@@ -7,6 +7,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
@@ -69,6 +70,13 @@ public class ProteinUserSchema extends UserSchema
                 return schema.createAnnotationsTable(name);
             }
         },
+        AnnotationTypes {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createAnnotationTypesTable(name);
+            }
+        },
         GoGraphPath {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
@@ -102,6 +110,13 @@ public class ProteinUserSchema extends UserSchema
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
                 return schema.createGoTermSynonym(name);
+            }
+        },
+        InfoSources {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createInfoSourcesTable(name);
             }
         },
         Sequences {
@@ -140,22 +155,35 @@ public class ProteinUserSchema extends UserSchema
     @Override
     public Set<String> getTableNames()
     {
-        return Sets.newCaseInsensitiveHashSet(
-                TableType.Annotations.name(),
-                TableType.GoGraphPath.name(),
-                TableType.GoTerm.name(),
-                TableType.GoTerm2Term.name(),
-                TableType.GoTermDefinition.name(),
-                TableType.GoTermSynonym.name(),
-                TableType.Sequences.name(),
-                TableType.FastaFiles.name()
-        );
+        Set<String> result = Sets.newCaseInsensitiveHashSet();
+        for (TableType tableType : TableType.values())
+        {
+            result.add(tableType.name());
+        }
+        return result;
+    }
+
+    private TableInfo createAnnotationTypesTable(String name)
+    {
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoAnnotationTypes());
+        table.init();
+        table.getColumn("SourceId").setFk(new QueryForeignKey(this, null, TableType.InfoSources.name(), null, null));
+        return table;
+    }
+
+    private TableInfo createInfoSourcesTable(String name)
+    {
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoInfoSources());
+        table.init();
+        return table;
     }
 
     protected TableInfo createAnnotationsTable(String name)
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoAnnotations());
         table.init();
+        table.getColumn("AnnotTypeId").setFk(new QueryForeignKey(this, null, TableType.AnnotationTypes.name(), null, null));
+        table.getColumn("AnnotSourceId").setFk(new QueryForeignKey(this, null, TableType.InfoSources.name(), null, null));
         return table;
     }
 
@@ -177,6 +205,8 @@ public class ProteinUserSchema extends UserSchema
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTerm2Term());
         table.init();
+        table.getColumn("term1id").setFk(new QueryForeignKey(this, null, TableType.GoTerm.name(), null, null));
+        table.getColumn("term2id").setFk(new QueryForeignKey(this, null, TableType.GoTerm.name(), null, null));
         return table;
     }
 

@@ -996,6 +996,12 @@ ms2/resources/queries/ms2/XTandemPeptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/XTandemPeptides/SearchEngineProtein.qview.xml -text
 ms2/resources/queries/ms2/XTandemcometPeptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/XTandemcometPeptides/SearchEngineProtein.qview.xml -text
+ms2/resources/queries/protein/GOCellularLocation.query.xml -text
+ms2/resources/queries/protein/GOCellularLocation.sql -text
+ms2/resources/queries/protein/GOMetabolicProcess.query.xml -text
+ms2/resources/queries/protein/GOMetabolicProcess.sql -text
+ms2/resources/queries/protein/GOMolecularFunction.query.xml -text
+ms2/resources/queries/protein/GOMolecularFunction.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-12.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.10-13.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-13.20-13.30.sql -text

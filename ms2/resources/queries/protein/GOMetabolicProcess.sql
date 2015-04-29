@@ -1,0 +1,1 @@
+SELECT AnnotId AS GOMPAnnotId, SeqId FROM Annotations WHERE AnnotTypeId.Name = 'GO_P'

@@ -19,11 +19,15 @@
 <ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ns:table tableName="Annotations" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="AnnotId"/>
+			<ns:column columnName="AnnotId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
 			<ns:column columnName="AnnotTypeId"/>
 			<ns:column columnName="AnnotVal"/>
 			<ns:column columnName="AnnotIdent"/>
-			<ns:column columnName="SeqId"/>
+			<ns:column columnName="SeqId">
+                <ns:columnTitle>Sequence</ns:columnTitle>
+            </ns:column>
 			<ns:column columnName="AnnotSourceId"/>
 			<ns:column columnName="AnnotSourceVersion"/>
 			<ns:column columnName="InsertDate">
@@ -41,7 +45,9 @@
 	</ns:table>
 	<ns:table tableName="AnnotationTypes" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="AnnotTypeId"/>
+			<ns:column columnName="AnnotTypeId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
 			<ns:column columnName="Name"/>
 			<ns:column columnName="SourceId"/>
 			<ns:column columnName="Description"/>
@@ -52,7 +58,9 @@
 	</ns:table>
 	<ns:table tableName="AnnotInsertions" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="InsertId"/>
+			<ns:column columnName="InsertId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
 			<ns:column columnName="FileName"/>
 			<ns:column columnName="FileType"/>
 			<ns:column columnName="Comment"/>
@@ -76,7 +84,9 @@
 	</ns:table>
 	<ns:table tableName="FastaFiles" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="FastaId"/>
+			<ns:column columnName="FastaId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
 			<ns:column columnName="FileName"/>
 			<ns:column columnName="Loaded"/>
 			<ns:column columnName="FileChecksum"/>
@@ -120,7 +130,9 @@
 	</ns:table>
 	<ns:table tableName="IdentTypes" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="IdentTypeId"/>
+			<ns:column columnName="IdentTypeId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
 			<ns:column columnName="Name"/>
 			<ns:column columnName="CannonicalSourceId"/>
 			<ns:column columnName="EntryDate"/>
@@ -130,7 +142,9 @@
 	</ns:table>
 	<ns:table tableName="InfoSources" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="SourceId"/>
+			<ns:column columnName="SourceId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
 			<ns:column columnName="Name"/>
 			<ns:column columnName="CurrentVersion"/>
 			<ns:column columnName="CurrentVersionDate"/>
@@ -255,48 +269,68 @@
 		<ns:tableTitle>FastaAdmin</ns:tableTitle>
 		<ns:pkColumnName>FastaId</ns:pkColumnName>
 	</ns:table>
-	<ns:table tableName="gographpath" tableDbType="TABLE">
+	<ns:table tableName="GoGraphPath" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="id"/>
-			<ns:column columnName="term1id"/>
-			<ns:column columnName="term2id"/>
-			<ns:column columnName="distance"/>
+			<ns:column columnName="Id">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="Term1Id">
+                <ns:columnTitle>Term 1</ns:columnTitle>
+            </ns:column>
+			<ns:column columnName="Term2Id">
+                <ns:columnTitle>Term 1</ns:columnTitle>
+            </ns:column>
+			<ns:column columnName="Distance"/>
 		</ns:columns>
 	</ns:table>
-	<ns:table tableName="goterm" tableDbType="TABLE">
+	<ns:table tableName="GoTerm" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="id"/>
-			<ns:column columnName="name"/>
-			<ns:column columnName="termtype"/>
-			<ns:column columnName="acc"/>
-			<ns:column columnName="isobsolete"/>
-			<ns:column columnName="isroot"/>
+			<ns:column columnName="Id">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="Name"/>
+			<ns:column columnName="TermType"/>
+			<ns:column columnName="Acc"/>
+			<ns:column columnName="IsObsolete"/>
+			<ns:column columnName="IsRoot"/>
 		</ns:columns>
 	</ns:table>
-	<ns:table tableName="goterm2term" tableDbType="TABLE">
+	<ns:table tableName="GoTerm2Term" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="id"/>
-			<ns:column columnName="relationshiptypeid"/>
-			<ns:column columnName="term1id"/>
-			<ns:column columnName="term2id"/>
-			<ns:column columnName="complete"/>
+			<ns:column columnName="Id">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="RelationshipTypeId">
+                <ns:columnTitle>Relationship Type</ns:columnTitle>
+            </ns:column>
+			<ns:column columnName="Term1Id">
+                <ns:columnTitle>Term 1</ns:columnTitle>
+            </ns:column>
+			<ns:column columnName="Term2Id">
+                <ns:columnTitle>Term 1</ns:columnTitle>
+            </ns:column>
+			<ns:column columnName="Complete"/>
 		</ns:columns>
 	</ns:table>
-	<ns:table tableName="gotermdefinition" tableDbType="TABLE">
+	<ns:table tableName="GoTermDefinition" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="termid"/>
-			<ns:column columnName="termdefinition"/>
-			<ns:column columnName="dbxrefid"/>
-			<ns:column columnName="termcomment"/>
-			<ns:column columnName="reference"/>
+			<ns:column columnName="TermId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="TermDefinition"/>
+			<ns:column columnName="DbXRefId"/>
+			<ns:column columnName="TermComment"/>
+			<ns:column columnName="Reference"/>
 		</ns:columns>
 	</ns:table>
-	<ns:table tableName="gotermsynonym" tableDbType="TABLE">
+	<ns:table tableName="GoTermSynonym" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="termid"/>
-			<ns:column columnName="termsynonym"/>
-			<ns:column columnName="accsynonym"/>
-			<ns:column columnName="synonymtypeid"/>
+			<ns:column columnName="TermId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="TermSynonym"/>
+			<ns:column columnName="AccSynonym"/>
+			<ns:column columnName="SynonymTypeId"/>
 		</ns:columns>
 	</ns:table>
 
