@@ -175,24 +175,28 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                     throw new ExperimentException("Sequence ID (Molecular Identifier) must be present and cannot be blank");
                 }
 
-                List seqIdsList = partialSeqIds.get(seqIdName); //get list of "full ids"
+                Integer seqId = seqIds.get(seqIdName); //get a matching seqId from stored sequences/content of fasta file
 
-                //if fasta file does not have the matching seq Id as the experiment expression file, then do not allow the import
-                if (seqIdsList == null)
+                //if fasta file does not have the matching seq Id as the experiment expression file
+                if (seqId == null)
                 {
-                    throw new ExperimentException("Unable to find Protein '" + seqIdName + "' in the selected Fasta/Uniprot file.");
+                    List seqIdsList = partialSeqIds.get(seqIdName); //get list of "partial ids"
+
+                    if(seqIdsList == null)
+                    {
+                        throw new ExperimentException("Unable to find Protein '" + seqIdName + "' in the selected Fasta/Uniprot file.");
+                    }
+                    //if there are more than one "full ids" containing a partial id in fasta file
+                    if (seqIdsList.size() > 1)
+                    {
+                        throw new ExperimentException("More than one protein with id '" + seqIdName + "' found in the selected Fasta/Uniprot file. Unable to choose the correct protein.");
+                    }
+
+                    String seqIdString = (String) seqIdsList.get(0); // get a "full id"
+                    seqId = seqIds.get(seqIdString); //get a matching seqId from stored sequences/content of fasta file
                 }
 
-                //if there are more than one "full ids" containing a partial id in fasta file
-                if (seqIdsList.size() > 1)
-                {
-                    throw new ExperimentException("More than one protein with id '" + seqIdName + "' found in the selected Fasta/Uniprot file. Unable to choose the correct protein.");
-                }
-
-                String seqIdString = (String) seqIdsList.get(0);
-                Integer seqId = seqIds.get(seqIdString); //get a matching seqId from stored sequences/content of fasta file
-
-                //All the col names are condition names (ConditionA, ConditionB, etc.) except for the Molecular Identifier
+                //All the col names are condition names (Condition A, Condition B, etc.) except for the Molecular Identifier
                 for (String sampleName : row.keySet())
                 {
                     if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
