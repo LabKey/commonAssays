@@ -466,9 +466,19 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                         median = medianValue;
                                     }
 
-                                    Map<String, Object> fields = makeAntigenRow(run.getRowId(), material.getLSID(), material.getName(),
-                                            (String) propMap.get(key), mean, median, rowLsid.toString(),
-                                            run.getProtocol().getName(), groupName, statsMapEntry.getKey());
+                                    Map<String, Object> fields = makeAntigenRow
+                                        (
+                                            run.getRowId(),                 // runid
+                                            material.getLSID(),             // specimenLSID
+                                            run.getMaterialInputs().get(material),  // wellgroupName
+                                            (String) propMap.get(key),      // antigenName
+                                            mean,
+                                            median,
+                                            rowLsid.toString(),             // objectUri
+                                            run.getProtocol().getName(),    // protocolName
+                                            groupName,                      // antigenWellgroupName
+                                            statsMapEntry.getKey()          // analyte
+                                        );
                                     if (propMap.containsKey(cellWellKey))
                                         fields.put(ElispotAssayProvider.CELLWELL_PROPERTY_NAME, propMap.get(cellWellKey));
                                     for (DomainProperty antigenProp : antigenProps)
@@ -486,9 +496,19 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     for (String analyteName : analyteNames)
                     {
                         // add the background well values (not normalized)
-                        Map<String, Object> fields = makeAntigenRow(run.getRowId(), material.getLSID(), material.getName(),
-                                BACKGROUND_WELL_PROPERTY, bkMeanValue, bkMedianValue,
-                                rowLsid.toString(), run.getProtocol().getName(), BACKGROUND_WELL_PROPERTY, analyteName);
+                        Map<String, Object> fields = makeAntigenRow
+                            (
+                                run.getRowId(),                         // runid
+                                material.getLSID(),                     // specimenLSID
+                                run.getMaterialInputs().get(material),  // wellgroupName
+                                BACKGROUND_WELL_PROPERTY,               // antigenName
+                                bkMeanValue,
+                                bkMedianValue,
+                                rowLsid.toString(),                     // objectUri
+                                run.getProtocol().getName(),            // protocolName
+                                BACKGROUND_WELL_PROPERTY,               // antigenWellgroupName
+                                analyteName                             // analyte
+                            );
                         antigenRows.add(fields);
                     }
 
