@@ -433,62 +433,51 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             if (propMap.containsKey(key))
                             {
                                 // for each antigen group, create two columns for mean and median values
-                                String antigenName = StringUtils.defaultString(ConvertUtils.convert(propMap.get(key)), "");
                                 String groupName = antigenGroup.getName();
 
-                                if (StringUtils.isEmpty(antigenName))
-                                    antigenName = groupName;
-
-                                if (antigenNames.contains(antigenName))
-                                    antigenName = antigenName + "_" + groupName;
-
-                                if (!antigenNames.contains(antigenName))
+                                Double mean = null;
+                                Double median = null;
+                                if (!Double.isNaN(stats.getMean()))
                                 {
-                                    Double mean = null;
-                                    Double median = null;
-                                    antigenNames.add(antigenName);
-                                    if (!Double.isNaN(stats.getMean()))
-                                    {
-                                        // subtract off the background value, and normalize by 10^6/cellPerWell
-                                        double meanValue = stats.getMean() - bkMeanValue;
-                                        meanValue = Math.max(meanValue, 0);
-                                        if (cellsPerWell > 0)
-                                            meanValue = (meanValue * 1000000) / cellsPerWell;
-                                        mean = meanValue;
-                                    }
-
-                                    if (!Double.isNaN(stats.getMedian()))
-                                    {
-                                        double medianValue = stats.getMedian() - bkMedianValue;
-                                        medianValue = Math.max(medianValue, 0);
-                                        if (cellsPerWell > 0)
-                                            medianValue = (medianValue * 1000000) / cellsPerWell;
-                                        median = medianValue;
-                                    }
-
-                                    Map<String, Object> fields = makeAntigenRow
-                                        (
-                                            run.getRowId(),                 // runid
-                                            material.getLSID(),             // specimenLSID
-                                            run.getMaterialInputs().get(material),  // wellgroupName
-                                            (String) propMap.get(key),      // antigenName
-                                            mean,
-                                            median,
-                                            rowLsid.toString(),             // objectUri
-                                            run.getProtocol().getName(),    // protocolName
-                                            groupName,                      // antigenWellgroupName
-                                            statsMapEntry.getKey()          // analyte
-                                        );
-                                    if (propMap.containsKey(cellWellKey))
-                                        fields.put(ElispotAssayProvider.CELLWELL_PROPERTY_NAME, propMap.get(cellWellKey));
-                                    for (DomainProperty antigenProp : antigenProps)
-                                    {
-                                        String antigenPropKey = UploadWizardAction.getInputName(antigenProp, antigenGroup.getName());
-                                        if (propMap.containsKey(antigenPropKey))
-                                            fields.put(antigenProp.getName(), propMap.get(antigenPropKey));
-                                    }
-                                    antigenRows.add(fields);
+                                    // subtract off the background value, and normalize by 10^6/cellPerWell
+                                    double meanValue = stats.getMean() - bkMeanValue;
+                                    meanValue = Math.max(meanValue, 0);
+                                    if (cellsPerWell > 0)
+                                        meanValue = (meanValue * 1000000) / cellsPerWell;
+                                    mean = meanValue;
                                 }
+
+                                if (!Double.isNaN(stats.getMedian()))
+                                {
+                                    double medianValue = stats.getMedian() - bkMedianValue;
+                                    medianValue = Math.max(medianValue, 0);
+                                    if (cellsPerWell > 0)
+                                        medianValue = (medianValue * 1000000) / cellsPerWell;
+                                    median = medianValue;
+                                }
+
+                                Map<String, Object> fields = makeAntigenRow
+                                    (
+                                        run.getRowId(),                 // runid
+                                        material.getLSID(),             // specimenLSID
+                                        run.getMaterialInputs().get(material),  // wellgroupName
+                                        (String) propMap.get(key),      // antigenName
+                                        mean,
+                                        median,
+                                        rowLsid.toString(),             // objectUri
+                                        run.getProtocol().getName(),    // protocolName
+                                        groupName,                      // antigenWellgroupName
+                                        statsMapEntry.getKey()          // analyte
+                                    );
+                                if (propMap.containsKey(cellWellKey))
+                                    fields.put(ElispotAssayProvider.CELLWELL_PROPERTY_NAME, propMap.get(cellWellKey));
+                                for (DomainProperty antigenProp : antigenProps)
+                                {
+                                    String antigenPropKey = UploadWizardAction.getInputName(antigenProp, antigenGroup.getName());
+                                    if (propMap.containsKey(antigenPropKey))
+                                        fields.put(antigenProp.getName(), propMap.get(antigenPropKey));
+                                }
+                                antigenRows.add(fields);
                             }
                         }
                     }

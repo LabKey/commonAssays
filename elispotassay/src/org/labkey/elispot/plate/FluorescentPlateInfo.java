@@ -15,6 +15,7 @@
  */
 package org.labkey.elispot.plate;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.elispot.ElispotDataHandler;
@@ -78,8 +79,8 @@ public class FluorescentPlateInfo implements PlateInfo
                     measurement = ElispotDataHandler.INTENSITY_PROPERTY_NAME;
             }
 
-            if (analyte != null && measurement != null)
-                return new FluorescentPlateInfo(measurement, analyte);
+            if (!StringUtils.isBlank(analyte) && measurement != null)
+                return new FluorescentPlateInfo(measurement, StringUtils.trim(analyte));
         }
         return null;
     }
