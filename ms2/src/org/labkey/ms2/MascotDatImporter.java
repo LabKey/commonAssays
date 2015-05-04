@@ -23,7 +23,6 @@ import org.labkey.api.security.User;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * User: adam
@@ -44,7 +43,7 @@ public class MascotDatImporter extends MS2Importer
     }
 
     @Override
-    public void importRun(MS2Progress progress) throws IOException, SQLException, XMLStreamException
+    public void importRun(MS2Progress progress) throws IOException, XMLStreamException
     {
         throw new UnsupportedOperationException();
     }

@@ -18,6 +18,7 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
@@ -79,7 +80,7 @@ public class PepXmlImporter extends MS2Importer
 
 
     @Override
-    public void importRun(MS2Progress progress) throws SQLException, XMLStreamException, IOException
+    public void importRun(MS2Progress progress) throws XMLStreamException, IOException
     {
         PepXmlLoader loader = null;
         int fractionCount = 0;
@@ -172,6 +173,10 @@ public class PepXmlImporter extends MS2Importer
                 processSpectrumFile(fraction, scans, progress, shouldImportSpectra, !retentionTimesInPepXml);
             }
         }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
         finally
         {
             if (null != loader)
@@ -193,7 +198,7 @@ public class PepXmlImporter extends MS2Importer
     /**
      * Save relative quantitation summary information (for XPRESS, Q3, etc.)
      */
-    protected void writeQuantSummaries(int runId, List<RelativeQuantAnalysisSummary> quantSummaries) throws SQLException
+    protected void writeQuantSummaries(int runId, List<RelativeQuantAnalysisSummary> quantSummaries)
     {
         if (null == quantSummaries)
             return;
@@ -256,7 +261,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    private void writeFractionInfo(PepXmlFraction fraction) throws SQLException, IOException
+    private void writeFractionInfo(PepXmlFraction fraction) throws IOException
     {
         String dataSuffix = fraction.getDataSuffix();
         String baseName = fraction.getDataBasename();
@@ -333,7 +338,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes) throws SQLException
+    protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
     {
         File mzXmlFile = getMzXMLFile(fraction);
         if ((_run.getType().equalsIgnoreCase("mascot")||_run.getType().equalsIgnoreCase("sequest"))   // TODO: Move this check (perhaps all the code) into the appropriate run classes

@@ -141,6 +141,13 @@ public class ProteinUserSchema extends UserSchema
                 return schema.createSequences(name);
             }
         },
+        FastaSequences {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createFastaSequencesTable(name);
+            }
+        },
         FastaFiles {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
@@ -150,6 +157,15 @@ public class ProteinUserSchema extends UserSchema
         };
 
         public abstract TableInfo createTable(ProteinUserSchema schema, String name);
+    }
+
+    private TableInfo createFastaSequencesTable(String name)
+    {
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaSequences());
+        table.init();
+        table.getColumn("SeqId").setFk(new QueryForeignKey(this, null, TableType.Sequences.name(), null, null));
+        table.getColumn("FastaId").setFk(new QueryForeignKey(this, null, TableType.FastaFiles.name(), null, null));
+        return table;
     }
 
     @Nullable

@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 {
@@ -162,8 +164,11 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
             }
 
             Map<String, Integer> seqIds = MS2Manager.getFastaFileSeqIds(proteinSet);
-            Map<String, List> partialSeqIds = new HashMap<>(); //map of {"partial Ids", list of "full ids" }
+            Map<String, List<String>> partialSeqIds = new HashMap<>(); //map of {"partial Ids", list of "full ids" }
             storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(seqIds, partialSeqIds);
+
+            Set<String> unresolvedProteins = new TreeSet<>();
+            Set<String> ambiguousProteins = new TreeSet<>();
 
             for (Map<String, Object> row : loader)
             {
@@ -180,39 +185,55 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                 //if fasta file does not have the matching seq Id as the experiment expression file
                 if (seqId == null)
                 {
-                    List seqIdsList = partialSeqIds.get(seqIdName); //get list of "partial ids"
+                    List<String> seqIdsList = partialSeqIds.get(seqIdName); //get list of "partial ids"
 
                     if(seqIdsList == null)
                     {
-                        throw new ExperimentException("Unable to find Protein '" + seqIdName + "' in the selected Fasta/Uniprot file.");
+                        unresolvedProteins.add(seqIdName);
+                        continue;
                     }
+
                     //if there are more than one "full ids" containing a partial id in fasta file
                     if (seqIdsList.size() > 1)
                     {
-                        throw new ExperimentException("More than one protein with id '" + seqIdName + "' found in the selected Fasta/Uniprot file. Unable to choose the correct protein.");
+                        ambiguousProteins.add(seqIdName);
+                        continue;
                     }
 
-                    String seqIdString = (String) seqIdsList.get(0); // get a "full id"
+                    String seqIdString = seqIdsList.get(0); // get a "full id"
                     seqId = seqIds.get(seqIdString); //get a matching seqId from stored sequences/content of fasta file
                 }
 
-                //All the col names are condition names (Condition A, Condition B, etc.) except for the Molecular Identifier
-                for (String sampleName : row.keySet())
+                // Don't bother inserting any more if we've already found errors
+                if (unresolvedProteins.isEmpty() && ambiguousProteins.isEmpty())
                 {
-                    if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
-                        continue;
+                    //All the col names are condition names (Condition A, Condition B, etc.) except for the Molecular Identifier
+                    for (String sampleName : row.keySet())
+                    {
+                        if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
+                            continue;
 
-                    statement.setInt(1, dataRowId);
-                    statement.setInt(2, samplesMap.get(sampleName));
-                    statement.setInt(3, seqId);
-                    statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
-                    statement.executeUpdate();
-                }
+                        statement.setInt(1, dataRowId);
+                        statement.setInt(2, samplesMap.get(sampleName));
+                        statement.setInt(3, seqId);
+                        statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
+                        statement.executeUpdate();
+                    }
 
-                if (++rowCount % 5000 == 0)
-                {
-                    LOG.info("Imported " + rowCount + " rows ...");
+                    if (++rowCount % 5000 == 0)
+                    {
+                        LOG.info("Imported " + rowCount + " rows ...");
+                    }
                 }
+            }
+
+            if (!unresolvedProteins.isEmpty())
+            {
+                throw new ExperimentException("Unable to find protein" + (unresolvedProteins.size() > 1 ? "s" : "") + " '" + StringUtils.join(unresolvedProteins, "', '") + "' in the selected FASTA file.");
+            }
+            if (!ambiguousProteins.isEmpty())
+            {
+                throw new ExperimentException("More than one protein matches for name" + (ambiguousProteins.size() > 1 ? "s" : "") + " '" + StringUtils.join(ambiguousProteins, "', '") + "' found in the selected FASTA file. Unable to choose the correct protein.");
             }
             LOG.info("Imported " + rowCount + " rows.");
         }
@@ -235,18 +256,18 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
         }
     }
 
-    private void storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(Map<String, Integer> seqIds, Map<String, List> substringsSeqId)
+    private void storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(Map<String, Integer> seqIds, Map<String, List<String>> substringsSeqId)
     {
         for(String seqIdFasta : seqIds.keySet())
         {
             String[] fastaSeqHeaderItems = seqIdFasta.split("\\|");
             String seqIdentiferMatchingExprMatrix = fastaSeqHeaderItems[2];
-            List vals;
+            List<String> vals;
 
             if(substringsSeqId.containsKey(seqIdentiferMatchingExprMatrix))
                 vals = substringsSeqId.get(seqIdentiferMatchingExprMatrix);
             else
-                vals = new LinkedList();
+                vals = new LinkedList<>();
 
             vals.add(seqIdFasta);
             substringsSeqId.put(seqIdentiferMatchingExprMatrix, vals);

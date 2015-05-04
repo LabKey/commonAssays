@@ -20,7 +20,6 @@ import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.RedirectAction;
-import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -129,7 +128,7 @@ public class PipelineController extends SpringActionController
     {
         public ActionURL getSuccessURL(PipelinePathForm form)
         {
-            return MS2Controller.getShowListURL(getContainer());
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         public void validateCommand(PipelinePathForm form, Errors errors)

@@ -612,7 +612,7 @@ public class MS2Manager
     public static MS2Run importRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              MS2Importer.RunInfo runInfo,
-                             XarContext context) throws SQLException, IOException, XMLStreamException
+                             XarContext context) throws IOException, XMLStreamException
     {
         MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : ""), log, context);
         return importer.upload(runInfo);

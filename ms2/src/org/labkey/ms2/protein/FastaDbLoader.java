@@ -515,12 +515,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         fdbu._emptyIdentsStmt.executeUpdate();
 
         // housekeeping and bookkeeping
-        logger.info(" Added: " +
+        logger.info("Batch complete. Added: " +
                 orgsAdded + " organisms; " +
                 seqsAdded + " sequences; " +
                 identsAdded + " identifiers; " +
                 annotsAdded + " annotations");
-        logger.info(" This batch of records processed successfully");
         fdbu._getCurrentInsertStatsStmt.setInt(1, currentInsertId);
         ResultSet r = null;
 

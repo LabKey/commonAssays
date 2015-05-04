@@ -38,7 +38,7 @@ public class ParserTree
     {
         _log = log;
 
-        ParserTreeNode uniprotNode = new ParserTreeNode(_root, "uniprot", new uniprot());
+        ParserTreeNode uniprotNode = new ParserTreeNode(_root, "uniprot", new uniprot(log));
         ParserTreeNode entryNode = new ParserTreeNode(uniprotNode, "entry", new uniprot_entry());
         new ParserTreeNode(entryNode, "accession", new uniprot_entry_accession());
         ParserTreeNode dbReferenceNode = new ParserTreeNode(entryNode, "dbReference", new uniprot_entry_dbReference());
@@ -53,7 +53,7 @@ public class ParserTree
         new ParserTreeNode(entryNode, "name", new uniprot_entry_name());
         ParserTreeNode organismNode = new ParserTreeNode(entryNode, "organism", new uniprot_entry_organism());
         new ParserTreeNode(organismNode, "dbReference", new uniprot_entry_organism_dbReference());
-        new ParserTreeNode(organismNode, "name", new uniprot_entry_organism_name());
+        new ParserTreeNode(organismNode, "name", new uniprot_entry_organism_name(log));
         ParserTreeNode proteinNode = new ParserTreeNode(entryNode, "protein");
         new ParserTreeNode(proteinNode, "name", new uniprot_entry_protein_name());
         ParserTreeNode recommendedNameNode = new ParserTreeNode(proteinNode, "recommendedName", new uniprot_entry_protein_recommendedName());

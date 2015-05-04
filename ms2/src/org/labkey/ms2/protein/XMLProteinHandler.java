@@ -98,12 +98,12 @@ public class XMLProteinHandler extends DefaultHandler
     private String skipMe = null;
     private XMLProteinLoader _loader;
     public static final String PROGRAM_PREFIX = "XMLProteinLoader";
-    private static Logger _log = Logger.getLogger(XMLProteinHandler.class);
 
     public XMLProteinHandler(Connection conn, XMLProteinLoader loader) throws SAXException, IOException
     {
         _parseContext = new ParseContext(conn, loader.isClearExisting());
         _loader = loader;
+        _tree = new ParserTree(_loader.getLogger());
         setProgProperties(REProperties.loadREProperties(PROGRAM_PREFIX + "." + loaderPrefix));
         setLoaderPackage(
                 this.getClass().getPackage().getName() + "." + getLoaderPrefix() + "."
@@ -129,7 +129,7 @@ public class XMLProteinHandler extends DefaultHandler
         }
         catch (Exception e)
         {
-            parseWarning("One or more requested parser features is unavailable: " + e);
+            _loader.getLogger().warn("One or more requested parser features is unavailable", e);
         }
 
         // parse file
@@ -215,7 +215,7 @@ public class XMLProteinHandler extends DefaultHandler
         _loader.handleThreadStateChangeRequests();
     }
 
-    private ParserTree _tree = new ParserTree(_log);
+    private final ParserTree _tree;
 
     /**
      * Start element.
@@ -297,7 +297,7 @@ public class XMLProteinHandler extends DefaultHandler
         if (skipMe != null) return;
         if (data != null && data.length() > 0)
         {
-            parseWarning("PROCESSING INSTRUCTION: target=" + target + "; data=" + data);
+            _loader.getLogger().warn("PROCESSING INSTRUCTION: target=" + target + "; data=" + data);
         }
     }
 
@@ -312,14 +312,6 @@ public class XMLProteinHandler extends DefaultHandler
     public void parse(File file) throws IOException, SAXException
     {
         getParser().parse(file.getPath());
-    }
-
-    //
-    // Error handlers.
-    //
-    public static void parseWarning(String s)
-    {
-        _log.warn(s);
     }
 }
 

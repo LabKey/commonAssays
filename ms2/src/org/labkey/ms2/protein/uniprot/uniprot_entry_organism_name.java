@@ -15,13 +15,20 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
+import org.apache.log4j.Logger;
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_organism_name extends CharactersParseActions
 {
 
+    private final Logger _log;
     private String _curType = null;
+
+    public uniprot_entry_organism_name(Logger log)
+    {
+        _log = log;
+    }
 
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
@@ -60,19 +67,19 @@ public class uniprot_entry_organism_name extends CharactersParseActions
         {
             String together = _accumulated.trim();
             String separate[] = together.split(" ");
-            if (separate == null || separate.length < 2)
+            if (separate.length < 2)
             {
-                XMLProteinHandler.parseWarning("Found organism with this name: '" + together + "'");
+                _log.warn("Found organism with this name: '" + together + "'");
             }
-            if (separate != null && separate.length >= 1)
+            if (separate.length >= 1)
             {
                 organism.setGenus(separate[0].replaceAll("'", ""));
             }
-            if (separate != null && separate.length >= 2)
+            if (separate.length >= 2)
             {
                 organism.setSpecies(separate[1].replaceAll("'", ""));
             }
-            if (separate != null && (_curType.equalsIgnoreCase("full") || separate.length > 2))
+            if ((_curType.equalsIgnoreCase("full") || separate.length > 2))
             {
                 organism.setComments(together);
             }

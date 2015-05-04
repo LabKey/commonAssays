@@ -2704,7 +2704,7 @@ public class MS2Controller extends SpringActionController
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
 
-            ActionButton insertAnnots = new ActionButton(new ActionURL(InsertAnnotsAction.class, getContainer()), "Load New Annot File");
+            ActionButton insertAnnots = new ActionButton(new ActionURL(InsertAnnotsAction.class, getContainer()), "Import Data");
             insertAnnots.setActionType(ActionButton.Action.LINK);
             bb.add(insertAnnots);
 
@@ -2714,7 +2714,7 @@ public class MS2Controller extends SpringActionController
 
             bb.add(new ActionButton(ReloadSPOMAction.class, "Reload SWP Org Map"));
 
-            ActionButton reloadGO = new ActionButton(LoadGoAction.class, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO");
+            ActionButton reloadGO = new ActionButton(LoadGoAction.class, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " Gene Ontology Data");
             reloadGO.setActionType(ActionButton.Action.LINK);
             bb.add(reloadGO);
 

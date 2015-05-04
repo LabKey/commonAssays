@@ -171,7 +171,7 @@ public abstract class MS2Importer
         }
     }
 
-    protected MS2Run upload(RunInfo info) throws SQLException, IOException, XMLStreamException
+    protected MS2Run upload(RunInfo info) throws IOException, XMLStreamException
     {
         _runId = info.getRunId();
 
@@ -200,7 +200,7 @@ public abstract class MS2Importer
             updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw fnfe;
         }
-        catch (SQLException | IOException | XMLStreamException | RuntimeException e)
+        catch (IOException | XMLStreamException | RuntimeException e)
         {
             logError("MS2 import failed", e);
             updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
@@ -226,7 +226,7 @@ public abstract class MS2Importer
     }
 
 
-    abstract public void importRun(MS2Progress progress) throws IOException, SQLException, XMLStreamException;
+    abstract public void importRun(MS2Progress progress) throws IOException, XMLStreamException;
 
     abstract protected String getType();
 
@@ -292,7 +292,7 @@ public abstract class MS2Importer
     }
 
 
-    protected int createFraction(User user, Container c, int runId, String path, File mzXmlFile) throws SQLException, IOException
+    protected int createFraction(User user, Container c, int runId, String path, File mzXmlFile) throws IOException
     {
         MS2Fraction fraction = new MS2Fraction();
         fraction.setRun(runId);
@@ -380,6 +380,7 @@ public abstract class MS2Importer
 
 
     private static String _updateSeqIdSql;
+    private static String _updateSeqIdPartialMatchSql;
 
     static
     {
@@ -402,6 +403,20 @@ public abstract class MS2Importer
         sql.append(".Protein = fs.LookupString AND fs.FastaId = ?");
 
         _updateSeqIdSql = sql.toString();
+//
+//        // Issue 23220 - Link up unmatched sequences based on partial match on the protein name
+//        StringBuilder partialMatchSQL = new StringBuilder();
+//        partialMatchSQL.append("UPDATE ");
+//        partialMatchSQL.append(MS2Manager.getTableInfoPeptidesData());
+//        partialMatchSQL.append(" SET SeqId = fs.SeqId\nFROM ");
+//        partialMatchSQL.append(ProteinManager.getTableInfoFastaSequences());
+//        partialMatchSQL.append(" fs WHERE ");
+//        partialMatchSQL.append(MS2Manager.getTableInfoPeptidesData());
+//        partialMatchSQL.append(".SeqId IS NULL AND Fraction = ? AND fs.LookupString LIKE ");
+//        partialMatchSQL.append(MS2Manager.getSqlDialect().concatenate("'%|'", MS2Manager.getTableInfoPeptidesData() + ".Protein"));
+//        partialMatchSQL.append(" AND fs.FastaId = ?");
+//
+//        _updateSeqIdPartialMatchSql = partialMatchSQL.toString();
     }
 
     private static SQLFragment _updateSequencePositionSql;
@@ -453,7 +468,10 @@ public abstract class MS2Importer
         for (MS2Fraction fraction : fractions)
         {
             int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), run.getFastaId());
-            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
+            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match");
+//
+//            rowCount = executor.execute(_updateSeqIdPartialMatchSql, fraction.getFraction(), run.getFastaId());
+//            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on partial protein name match");
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);

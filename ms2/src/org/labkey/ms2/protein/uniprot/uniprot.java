@@ -35,7 +35,7 @@ import java.util.*;
 
 public class uniprot extends ParseActions
 {
-    private static Logger _log = Logger.getLogger(XMLProteinLoader.class);
+    private final Logger _log;
     private static SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
     private long _startTime;
 
@@ -43,6 +43,11 @@ public class uniprot extends ParseActions
 
     // n of top-level "entries" to skip
     protected int _skipEntries = 0;
+
+    public uniprot(Logger log)
+    {
+        _log = log;
+    }
 
     public void setSkipEntries(int s)
     {
@@ -460,12 +465,11 @@ public class uniprot extends ParseActions
 
         conn.setAutoCommit(true);
         handleThreadStateChangeRequests();
-        _log.info(new java.util.Date() + " Added: " +
+        _log.info("Batch complete. Added: " +
                 orgsAdded + " organisms; " +
                 seqsAdded + " sequences; " +
                 identsAdded + " identifiers; " +
                 annotsAdded + " annotations");
-        _log.info(new java.util.Date() + " This batch of records processed successfully");
         _getCurrentInsertStats.setInt(1, getCurrentInsertId());
         ResultSet r = _getCurrentInsertStats.executeQuery();
         r.next();
