@@ -77,13 +77,14 @@
         var defaultRowSize = 30;
 
         // local variables for storing the selected graph parameters
-        var _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
+        var _protocolId, _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
 
         function init()
         {
             _controlName = <%=PageFlowUtil.jsString(bean.getControlName())%>;
             _controlType = <%=PageFlowUtil.jsString(bean.getControlType().toString())%>;
             _protocolName = <%=PageFlowUtil.jsString(bean.getProtocol().getName())%>;
+            _protocolId = <%=bean.getProtocol().getRowId()%>;
 
             if ("" == _controlType || "" == _controlName)
             {
@@ -217,6 +218,7 @@
                 cls: 'extContainer',
                 controlName: _controlName,
                 controlType: _controlType,
+                assayId: _protocolId,
                 assayName: _protocolName,
                 networkExists: _networkExists,
                 protocolExists: _protocolExists,

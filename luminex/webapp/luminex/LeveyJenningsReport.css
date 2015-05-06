@@ -12,6 +12,10 @@
     white-space:nowrap;
 }
 
+.leveljenningsreport .related-guidesets a {
+    background: none;
+}
+
 .xticktag {
     fill: #FF0000 !important;
     font-weight: bold !important;

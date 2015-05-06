@@ -28,6 +28,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             throw "You must specify a controlType!";
         if (!config.assayName || config.assayName == "null")
             throw "You must specify a assayName!";
+        if (!config.assayId || config.assayId == "null")
+            throw "You must specify a assayId!";
 
         // apply some Ext panel specific properties to the config
         Ext.apply(config, {
@@ -80,7 +82,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // add a display field listing the current guide set for the graph params
         this.guideSetDisplayField = new Ext.form.DisplayField({
-            fieldLabel: "Current Guide Set",
+            hideLabel: true,
             width: 583,
             border: true
         });
@@ -108,21 +110,29 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.guideSetDetailsButton = new Ext.Button({
             hidden: true,
             text: "Details",
-            tooltip: "View run-based guide set parameter details",
+            tooltip: "View guide set parameters and metric details",
             handler: this.viewParameterDetails,
             scope: this
         });
 
+        this.guideSetLabelPanel = new Ext.Panel({
+            width: 150,
+            html: this.getRelatedGuideSetLabel()
+        });
+
         // add the guide set elements as a composite field for layout reasons
         this.guideSetCompositeField = new Ext.form.CompositeField({
+            hideLabel: true,
+            defaults: {
+                border: false,
+                bodyStyle: 'background-color:#EEEEEE;'
+            },
             items: [
-
+                this.guideSetLabelPanel,
                 this.guideSetDisplayField,
                 {
                     xtype: 'panel',
                     height: 60,
-                    border: false,
-                    bodyStyle: 'background-color:#EEEEEE;',
                     layout:  'vbox',
                     defaults: {
                         xtype: 'panel',
@@ -138,6 +148,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                             items:[this.editGuideSetButton, this.newGuideSetButton]
                         },
                         {
+                            padding: '5px 0 0 0',
                             items: [this.guideSetDetailsButton]
                         }
                     ]
@@ -151,6 +162,40 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.items = items;
 
         LABKEY.LeveyJenningsGuideSetPanel.superclass.initComponent.call(this);
+    },
+
+    getRelatedGuideSetLabel: function() {
+        var html = '<div style="padding-top: 8px;">Current Guide Set:</div>';
+
+        if (Ext.isDefined(this.currentGuideSetId))
+        {
+            var props = {
+                rowId: this.assayId,
+                'GuideSet.ControlType~eq': this.controlType,
+                'GuideSet.ControlName~eq': this.controlName,
+                'GuideSet.AnalyteName~eq': this.analyte
+            };
+
+            if (Ext.isDefined(this.isotype) && this.isotype == '') {
+                props['GuideSet.Isotype~isblank'] = null;
+            }
+            else {
+                props['GuideSet.Isotype~eq'] = this.isotype;
+            }
+
+            if (Ext.isDefined(this.conjugate) && this.conjugate == '') {
+                props['GuideSet.Conjugate~isblank'] = null;
+            }
+            else {
+                props['GuideSet.Conjugate~eq'] = this.conjugate;
+            }
+
+            html += '<div style="padding-top: 11px;" class="related-guidesets">'
+                + LABKEY.Utils.textLink({text: 'All Related Guide Sets', href: LABKEY.ActionURL.buildURL('luminex', 'manageGuideSet', null, props)})
+                + '</div>';
+        }
+
+        return html;
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
@@ -170,7 +215,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // update the guide set display field to say loading...
         this.guideSetDisplayField.setValue("Loading...");
 
-        this.queryCurrentGuideSetInfo(false);
+        this.queryCurrentGuideSetInfo();
     },
 
     queryCurrentGuideSetInfo: function() {
@@ -186,7 +231,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('CurrentGuideSet', true)],
             columns: 'RowId, Comment, Created, ValueBased',
-            success: this.updateGuideSetDisplayField(),
+            success: this.updateGuideSetDisplayField,
             failure: function(response){
                 this.guideSetDisplayField.setValue("Error: " + response.exception);
             },
@@ -194,40 +239,41 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
     },
 
-    updateGuideSetDisplayField: function() {
-        return function(data) {
-            if (data.rows.length == 0)
-            {
-                this.guideSetDisplayField.setValue("<div class='guideset-no'>No current guide set for the selected graph parameters</div>");
+    updateGuideSetDisplayField: function(data) {
+        if (data.rows.length == 0)
+        {
+            this.guideSetDisplayField.setValue("<div class='guideset-no'>No current guide set for the selected graph parameters</div>");
 
-                // remove any reference to a current guide set and enable/disable buttons
-                this.currentGuideSetId = undefined;
-                this.editGuideSetButton.disable();
-                this.newGuideSetButton.enable();
-                this.guideSetDetailsButton.hide();
-            }
-            else
-            {
-                // there can only be one current guide set for any given set of graph params
-                var row = data.rows[0];
-
-                var html = '<table class="guideset-tbl" guide-set-id="' + row["RowId"] + '">'
-                        + '<tr><td class="guideset-hdr">Created:</td><td width="200">' + this.formatDate(row["Created"]) + '</td>'
-                        + '<td class="guideset-hdr">Type: </td><td>' + (row["ValueBased"] ? 'Value-based' : 'Run-based') + '</td></tr>'
-                        + '<tr><td class="guideset-hdr">Comment:</td><td colspan="3">' + (row["Comment"] == null ? "&nbsp;" : $h(row["Comment"])) + '</td></tr>'
-                        + '</table>';
-
-                this.guideSetDisplayField.setValue(html);
-
-                // store a reference to the current guide set and enable buttons
-                this.currentGuideSetId = row["RowId"];
-                this.editGuideSetButton.enable();
-                this.newGuideSetButton.enable();
-                this.guideSetDetailsButton.setVisible(true);
-            }
-
-            this.guideSetCompositeField.doLayout();
+            // remove any reference to a current guide set and enable/disable buttons
+            this.currentGuideSetId = undefined;
+            this.editGuideSetButton.disable();
+            this.newGuideSetButton.enable();
+            this.guideSetDetailsButton.hide();
         }
+        else
+        {
+            // there can only be one current guide set for any given set of graph params
+            var row = data.rows[0];
+
+            var html = '<table class="guideset-tbl" guide-set-id="' + row["RowId"] + '">'
+                    + '<tr><td class="guideset-hdr">Created:</td><td width="200">' + this.formatDate(row["Created"]) + '</td>'
+                    + '<td class="guideset-hdr">Type: </td><td>' + (row["ValueBased"] ? 'Value-based' : 'Run-based') + '</td></tr>'
+                    + '<tr><td class="guideset-hdr">Comment:</td><td colspan="3">' + (row["Comment"] == null ? "&nbsp;" : $h(row["Comment"])) + '</td></tr>'
+                    + '</table>';
+
+            this.guideSetDisplayField.setValue(html);
+
+            // store a reference to the current guide set and enable buttons
+            this.currentGuideSetId = row["RowId"];
+            this.editGuideSetButton.enable();
+            this.newGuideSetButton.enable();
+            this.guideSetDetailsButton.setVisible(true);
+        }
+
+        this.guideSetCompositeField.doLayout();
+
+        // update the "all related guide sets" link
+        this.guideSetLabelPanel.update(this.getRelatedGuideSetLabel());
     },
 
     formatDate: function(val) {
