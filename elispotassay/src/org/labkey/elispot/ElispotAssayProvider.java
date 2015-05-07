@@ -258,9 +258,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
             prop.setHidden(true);
         }
 
-        DomainProperty antigenNameProperty = addProperty(antigenWellGroupDomain, ANTIGENNAME_PROPERTY_NAME, ANTIGENNAME_PROPERTY_CAPTION, PropertyType.STRING);
-        antigenNameProperty.setRequired(true);
-        antigenNameProperty.setDimension(true);
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
 

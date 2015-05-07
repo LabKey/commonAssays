@@ -146,9 +146,13 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     {
         PlateTemplate template = provider.getPlateTemplate(container, protocol);
         List<DomainProperty> domainProperties = new ArrayList<>();
-        for (DomainProperty domainProperty : provider.getAntigenWellGroupDomain(protocol).getProperties())
+        Domain domain = provider.getAntigenWellGroupDomain(protocol);
+        domainProperties.add(domain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME));
+        for (DomainProperty domainProperty : domain.getProperties())
+        {
             if (!domainProperty.isHidden())
                 domainProperties.add(domainProperty);
+        }
         return new PlateAntigenPropertyHelper(domainProperties, template);
     }
 
