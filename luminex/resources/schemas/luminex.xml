@@ -92,6 +92,7 @@
                 <description>True to designate this guide set as value-based. False indicates a run-based guide set.</description>
             </column>
             <column columnName="EC504PLEnabled">
+                <columnTitle>Use EC50 4PL for QC</columnTitle>
                 <description>4PL EC50 metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="EC504PLAverage">
@@ -101,6 +102,7 @@
                 <description>4PL EC50 metric standard deviation value for value-based guide set</description>
             </column>
             <column columnName="EC505PLEnabled">
+                <columnTitle>Use EC50 5PL for QC</columnTitle>
                 <description>5PL EC50 metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="EC505PLAverage">
@@ -110,6 +112,7 @@
                 <description>5PL EC50 metric standard deviation value for value-based guide set</description>
             </column>
             <column columnName="AUCEnabled">
+                <columnTitle>Use AUC for QC</columnTitle>
                 <description>AUC metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="AUCAverage">
@@ -119,6 +122,7 @@
                 <description>AUC metric standard deviation value for value-based guide set</description>
             </column>
             <column columnName="MaxFIEnabled">
+                <columnTitle>Use MaxFI for QC</columnTitle>
                 <description>MFI metric run-based flag for enabling/disabling QC flagging</description>
             </column>
             <column columnName="MaxFIAverage">

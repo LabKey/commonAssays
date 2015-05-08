@@ -61,7 +61,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
                     '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
-                    '<td align="center">{EC504PLRunCounts}</td>',
+                    '<td align="center">{EC504PLRunCount}</td>',
                     '<td><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                     '</tpl>',
                 '</tr>',
@@ -70,7 +70,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
                     '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
-                    '<td align="center">{EC505PLRunCounts}</td>',
+                    '<td align="center">{EC505PLRunCount}</td>',
                     '<td><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                     '</tpl>',
                 '</tr>',
@@ -80,7 +80,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.MaxFIStdDev)]}</td>',
                 '<td align="right">{[this.formatNumber(values.MaxFIAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
-                '<td align="center">{MaxFIRunCounts}</td>',
+                '<td align="center">{MaxFIRunCount}</td>',
                 '<td><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                 '</tpl>',
             '</tr>',
@@ -90,7 +90,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.AUCStdDev)]}</td>',
                     '<td align="right">{[this.formatNumber(values.AUCAverage)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
-                    '<td align="center">{AUCRunCounts}</td>',
+                    '<td align="center">{AUCRunCount}</td>',
                     '<td><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
                     '</tpl>',
                 '</tr>',
@@ -194,10 +194,10 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                     {name: 'MaxFIStdDev'},
                     {name: 'AUCAverage'},
                     {name: 'AUCStdDev'},
-                    {name: 'MaxFIRunCounts', type: 'int'},
-                    {name: 'EC504PLRunCounts', type: 'int'},
-                    {name: 'EC505PLRunCounts', type: 'int'},
-                    {name: 'AUCRunCounts', type: 'int'},
+                    {name: 'MaxFIRunCount', type: 'int'},
+                    {name: 'EC504PLRunCount', type: 'int'},
+                    {name: 'EC505PLRunCount', type: 'int'},
+                    {name: 'AUCRunCount', type: 'int'},
                     {name: 'ControlType'}
                 ]
             });
@@ -218,7 +218,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
                         success: this.handleResponse, scope: this,
                         sql: 'SELECT RowId, AnalyteName, Conjugate, Isotype, Comment, Created, ValueBased, ' +
                              'ControlName, EC504PLEnabled, EC505PLEnabled, AUCEnabled, MaxFIEnabled, ' +
-                             'MaxFIRunCounts, EC504PLRunCounts, EC505PLRunCounts, AUCRunCounts, ControlType, ' +
+                             'MaxFIRunCount, EC504PLRunCount, EC505PLRunCount, AUCRunCount, ControlType, ' +
                              // handle value-based vs run-based
                              'CASE ValueBased WHEN true THEN EC504PLAverage ELSE "Four ParameterCurveFit".EC50Average END "EC504PLAverage", ' +
                              'CASE ValueBased WHEN true THEN EC504PLStdDev ELSE "Four ParameterCurveFit".EC50StdDev END "EC504PLStdDev", ' +

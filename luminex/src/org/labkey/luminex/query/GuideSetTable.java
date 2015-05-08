@@ -198,41 +198,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         defaultCols.add(FieldKey.fromParts("AnalyteName"));
         defaultCols.add(FieldKey.fromParts("Isotype"));
         defaultCols.add(FieldKey.fromParts("Conjugate"));
-
-        //defaultCols.add(FieldKey.fromParts("ValueBased"));
         defaultCols.add(valueBasedCol.getFieldKey());
-
         defaultCols.add(FieldKey.fromParts("Created"));
         defaultCols.add(FieldKey.fromParts("CurrentGuideSet"));
         defaultCols.add(FieldKey.fromParts("Comment"));
-        // Run-based guide set related fields
-        defaultCols.add(FieldKey.fromParts("TitrationMaxFIAverage")); // titration
-        defaultCols.add(FieldKey.fromParts("TitrationMaxFIStdDev")); // titration
-        defaultCols.add(FieldKey.fromParts("SinglePointControlFIAverage")); // single point control
-        defaultCols.add(FieldKey.fromParts("SinglePointControlFIStdDev")); // single point control
-        defaultCols.add(FieldKey.fromParts("MaxFIRunCounts"));
-        defaultCols.add(FieldKey.fromParts("MaxFIEnabled"));
-        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average"));
-        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev"));
-        defaultCols.add(FieldKey.fromParts("EC504PLRunCounts"));
-        defaultCols.add(FieldKey.fromParts("EC504PLEnabled"));
-        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average"));
-        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev"));
-        defaultCols.add(FieldKey.fromParts("EC505PLRunCounts"));
-        defaultCols.add(FieldKey.fromParts("EC505PLEnabled"));
-        defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage"));
-        defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev"));
-        defaultCols.add(FieldKey.fromParts("AUCRunCounts"));
-        defaultCols.add(FieldKey.fromParts("AUCEnabled"));
-        // Value-based guide set related fields
-        defaultCols.add(FieldKey.fromParts("MaxFIAverage"));
-        defaultCols.add(FieldKey.fromParts("MaxFIStdDev"));
-        defaultCols.add(FieldKey.fromParts("EC504PLAverage"));
-        defaultCols.add(FieldKey.fromParts("EC504PLStdDev"));
-        defaultCols.add(FieldKey.fromParts("EC505PLAverage"));
-        defaultCols.add(FieldKey.fromParts("EC505PLStdDev"));
-        defaultCols.add(FieldKey.fromParts("AUCAverage"));
-        defaultCols.add(FieldKey.fromParts("AUCStdDev"));
         setDefaultVisibleColumns(defaultCols);
     }
 
@@ -288,7 +257,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         runCountsBaseSQL.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "at");
         runCountsBaseSQL.append(" ON gs.RowId = at.GuideSetId ");
 
-        // do MaxFI counts before joining in CurveFit table
+        // do MaxFI run count before joining in CurveFit table
         SQLFragment maxFIRunCountsSQL = new SQLFragment("(SELECT CASE IsTitration ");
         maxFIRunCountsSQL.append("WHEN ? THEN (SELECT COUNT(*) FROM ");
         maxFIRunCountsSQL.add(Boolean.TRUE);
@@ -321,8 +290,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         maxFIRunCountsSQL.append(ExprColumn.STR_TABLE_ALIAS);
         maxFIRunCountsSQL.append(".RowId) AS t)"); // needs some name
 
-        ExprColumn maxFIRunCounts = new ExprColumn(this, "MaxFIRunCounts", maxFIRunCountsSQL, JdbcType.INTEGER);
-        maxFIRunCounts.setLabel("Max FI Run Counts");
+        ExprColumn maxFIRunCounts = new ExprColumn(this, "MaxFIRunCount", maxFIRunCountsSQL, JdbcType.INTEGER);
+        maxFIRunCounts.setLabel("MaxFI Run Count");
         addColumn(maxFIRunCounts);
 
         // finish runCountsBaseSQL by joining in CurveFit table
@@ -337,30 +306,21 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
         SQLFragment ec504plRunCountsSQL = new SQLFragment(runCountsBaseSQL);
         ec504plRunCountsSQL.append("AND cf.CurveType='Four Parameter' AND cf.EC50 IS NOT NULL AND cf.FailureFlag IS NULL)");
-
-        ExprColumn ec504plRunCounts = new ExprColumn(this, "EC504PLRunCounts", ec504plRunCountsSQL, JdbcType.INTEGER);
-        ec504plRunCounts.setLabel("EC50 4PL Run Counts");
+        ExprColumn ec504plRunCounts = new ExprColumn(this, "EC504PLRunCount", ec504plRunCountsSQL, JdbcType.INTEGER);
+        ec504plRunCounts.setLabel("EC50 4PL Run Count");
         addColumn(ec504plRunCounts);
 
         SQLFragment ec505plRunCountsSQL = new SQLFragment(runCountsBaseSQL);
         ec505plRunCountsSQL.append("AND cf.CurveType='Five Parameter' AND cf.EC50 IS NOT NULL AND cf.FailureFlag IS NULL)");
-
-        ExprColumn ec505plRunCounts = new ExprColumn(this, "EC505PLRunCounts", ec505plRunCountsSQL, JdbcType.INTEGER);
-        ec505plRunCounts.setLabel("EC50 5PL Run Counts");
+        ExprColumn ec505plRunCounts = new ExprColumn(this, "EC505PLRunCount", ec505plRunCountsSQL, JdbcType.INTEGER);
+        ec505plRunCounts.setLabel("EC50 5PL Run Count");
         addColumn(ec505plRunCounts);
 
         SQLFragment aucRunCountsSQL = new SQLFragment(runCountsBaseSQL);
         aucRunCountsSQL.append("AND cf.CurveType='Trapezoidal' AND cf.AUC IS NOT NULL AND cf.FailureFlag IS NULL)");
-
-        ExprColumn aucRunCounts = new ExprColumn(this, "AUCRunCounts", aucRunCountsSQL, JdbcType.INTEGER);
-        aucRunCounts.setLabel("AUC Run Counts");
+        ExprColumn aucRunCounts = new ExprColumn(this, "AUCRunCount", aucRunCountsSQL, JdbcType.INTEGER);
+        aucRunCounts.setLabel("AUC Run Count");
         addColumn(aucRunCounts);
-    }
-
-    // handles special case for this metric on single point controls
-    private void addMFIRunCounts()
-    {
-
     }
 
     protected LookupForeignKey createCurveFitFK(final String curveType)
