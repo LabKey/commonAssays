@@ -21,6 +21,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.IconDisplayColumn;
@@ -203,6 +204,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get(MicroarrayModule.DB_SCHEMA_NAME);
+        return DbSchema.get(MicroarrayModule.DB_SCHEMA_NAME, DbSchemaType.Module);
     }
 }

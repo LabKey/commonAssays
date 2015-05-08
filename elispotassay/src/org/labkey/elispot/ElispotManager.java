@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.ConcurrentCaseInsensitiveSortedMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.Selector;
@@ -65,7 +66,7 @@ public class ElispotManager
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get(ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME);
+        return DbSchema.get(ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME, DbSchemaType.Module);
     }
 
     public static TableInfo getTableInfoElispotRunData()

@@ -24,6 +24,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.AssayDomainKind;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
+import org.labkey.elispot.ElispotManager;
 import org.labkey.elispot.ElispotProtocolSchema;
 
 import java.util.Collections;
@@ -78,7 +79,7 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
     @Override
     public DbScope getScope()
     {
-        return DbSchema.get(ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME).getScope();
+        return ElispotManager.getSchema().getScope();
     }
 
     @Override

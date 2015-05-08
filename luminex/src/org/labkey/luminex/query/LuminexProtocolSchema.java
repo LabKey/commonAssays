@@ -483,7 +483,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get(DB_SCHEMA_NAME);
+        return DbSchema.get(DB_SCHEMA_NAME, DbSchemaType.Module);
     }
 
     public static TableInfo getTableInfoAnalytes()

@@ -34,6 +34,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DatabaseCache;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
@@ -130,7 +131,7 @@ public class MS2Manager
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get("ms2");
+        return DbSchema.get("ms2", DbSchemaType.Module);
     }
 
 
