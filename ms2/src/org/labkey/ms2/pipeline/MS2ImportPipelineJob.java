@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -28,7 +29,10 @@ import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -83,9 +87,9 @@ public class MS2ImportPipelineJob extends PipelineJob
             setStatus(TaskStatus.complete);
             completeStatus = true;
         }
-        catch (Exception e)
+        catch (RuntimeException | XMLStreamException | IOException | ExperimentException e)
         {
-            getLogger().error("MS2 import failed", e);
+            error("MS2 import failed", e);
         }
         finally
         {

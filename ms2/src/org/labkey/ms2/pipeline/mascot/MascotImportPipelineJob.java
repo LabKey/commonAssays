@@ -174,7 +174,6 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                     ,"-xml"
                     //,"-notgz" - we might not have the mzXML file with us
                     ,"-desc"
-                    ,"-shortid"
                     ),
                     workFile.getParentFile());
 
@@ -211,32 +210,35 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
             // let's import the .pep.xml file
             super.run ();
+            if (getErrors() == 0)
+            {
 
-            if (!filePepXML.delete())
-            {
-                getLogger().error("Failed to delete " + filePepXML.getAbsolutePath());
-                return;
+                if (!filePepXML.delete())
+                {
+                    getLogger().error("Failed to delete " + filePepXML.getAbsolutePath());
+                    return;
+                }
+                else if (!filePepXMLTGZ.delete())
+                {
+                    getLogger().error("Failed to delete " + filePepXMLTGZ.getAbsolutePath());
+                    return;
+                }
+                else if (!workFile.delete())
+                {
+                    getLogger().error("Failed to delete " + workFile.getAbsolutePath());
+                    return;
+                }
+                else if (!dirWork.delete())
+                {
+                    getLogger().error("Failed to delete " + dirWork.getAbsolutePath());
+                    return;
+                }
+                else
+                {
+                    setStatus(TaskStatus.complete);
+                }
+                completeStatus = true;
             }
-            else if (!filePepXMLTGZ.delete())
-            {
-                getLogger().error("Failed to delete " + filePepXMLTGZ.getAbsolutePath());
-                return;
-            }
-            else if (!workFile.delete())
-            {
-                getLogger().error("Failed to delete "+workFile.getAbsolutePath());
-                return;
-            }
-            else if (!dirWork.delete())
-            {
-                getLogger().error("Failed to delete " + dirWork.getAbsolutePath());
-                return;
-            }
-            else
-            {
-                setStatus(TaskStatus.complete);
-            }
-            completeStatus = true;
         }
         catch (Exception e)
         {
