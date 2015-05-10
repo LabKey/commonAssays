@@ -126,15 +126,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
                 MS2Manager.updateRun(run, info.getUser());
             }
         }
-        catch (SQLException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch (XMLStreamException e)
+        catch (SQLException | IOException | XMLStreamException e)
         {
             throw new ExperimentException(e);
         }

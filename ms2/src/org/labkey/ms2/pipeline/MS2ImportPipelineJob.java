@@ -25,6 +25,7 @@ import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
@@ -32,7 +33,6 @@ import org.labkey.ms2.MS2Run;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -64,7 +64,7 @@ public class MS2ImportPipelineJob extends PipelineJob
 
     public ActionURL getStatusHref()
     {
-        return null;
+        return MS2Controller.getShowRunURL(getUser(), getContainer(), _runInfo.getRunId());
     }
 
     public String getDescription()

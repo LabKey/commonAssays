@@ -380,7 +380,6 @@ public abstract class MS2Importer
 
 
     private static String _updateSeqIdSql;
-    private static String _updateSeqIdPartialMatchSql;
 
     static
     {
@@ -403,20 +402,6 @@ public abstract class MS2Importer
         sql.append(".Protein = fs.LookupString AND fs.FastaId = ?");
 
         _updateSeqIdSql = sql.toString();
-//
-//        // Issue 23220 - Link up unmatched sequences based on partial match on the protein name
-//        StringBuilder partialMatchSQL = new StringBuilder();
-//        partialMatchSQL.append("UPDATE ");
-//        partialMatchSQL.append(MS2Manager.getTableInfoPeptidesData());
-//        partialMatchSQL.append(" SET SeqId = fs.SeqId\nFROM ");
-//        partialMatchSQL.append(ProteinManager.getTableInfoFastaSequences());
-//        partialMatchSQL.append(" fs WHERE ");
-//        partialMatchSQL.append(MS2Manager.getTableInfoPeptidesData());
-//        partialMatchSQL.append(".SeqId IS NULL AND Fraction = ? AND fs.LookupString LIKE ");
-//        partialMatchSQL.append(MS2Manager.getSqlDialect().concatenate("'%|'", MS2Manager.getTableInfoPeptidesData() + ".Protein"));
-//        partialMatchSQL.append(" AND fs.FastaId = ?");
-//
-//        _updateSeqIdPartialMatchSql = partialMatchSQL.toString();
     }
 
     private static SQLFragment _updateSequencePositionSql;
@@ -469,9 +454,6 @@ public abstract class MS2Importer
         {
             int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), run.getFastaId());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match");
-//
-//            rowCount = executor.execute(_updateSeqIdPartialMatchSql, fraction.getFraction(), run.getFastaId());
-//            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on partial protein name match");
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);
