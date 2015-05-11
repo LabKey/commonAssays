@@ -28,8 +28,8 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
@@ -279,7 +279,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         //We are the first creator of this...
         ContainerManager.addContainerListener(this);
-        ModuleLoader.getInstance().registerFolderType(this, new MS2FolderType(this));
+        FolderTypeManager.get().registerFolderType(this, new MS2FolderType(this));
 
         ReportService.get().registerReport(new SpectraCountRReport());
         ReportService.get().registerReport(new SingleMS2RunRReport());

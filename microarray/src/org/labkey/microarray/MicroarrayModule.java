@@ -23,8 +23,8 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
@@ -170,7 +170,7 @@ public class MicroarrayModule extends SpringModule
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         final ModuleContext finalModuleContext = moduleContext;
-        ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
+        FolderTypeManager.get().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         AssayService.get().registerAssayProvider(new AffymetrixAssayProvider());
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());

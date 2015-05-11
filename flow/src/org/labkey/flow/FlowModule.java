@@ -25,9 +25,9 @@ import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.flow.api.FlowService;
 import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
@@ -175,7 +175,7 @@ public class FlowModule extends DefaultModule
         FlowProtocolImplementation.register();
         AssayService.get().registerAssayProvider(new FlowAssayProvider());
 
-        ModuleLoader.getInstance().registerFolderType(this, new FlowFolderType(this));
+        FolderTypeManager.get().registerFolderType(this, new FlowFolderType(this));
         if (null != ServiceRegistry.get(SearchService.class))
             ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();

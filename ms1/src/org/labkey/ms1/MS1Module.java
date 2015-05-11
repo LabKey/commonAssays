@@ -25,8 +25,8 @@ import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.ms1.MS1Urls;
@@ -171,7 +171,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
         });
 
         //register the MS1 folder type
-        ModuleLoader.getInstance().registerFolderType(this, new MS1FolderType(this));
+        FolderTypeManager.get().registerFolderType(this, new MS1FolderType(this));
         MS1Controller.registerAdminConsoleLinks();
 
         ReportService.get().registerReport(new FeaturesRReport());
