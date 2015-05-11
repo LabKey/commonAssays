@@ -17,8 +17,10 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
@@ -168,13 +170,19 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
             // let's convert Mascot .dat to .pep.xml
             // via Mascot2XML.exe <input.dat> -D<database> -xml
-            runSubProcess(new ProcessBuilder("Mascot2XML"
-                    ,workFile.getName()
-                    ,"-D" + fileSequenceDatabase.getAbsolutePath()
-                    ,"-xml"
+
+            String mascot2XMLPath = PipelineJobService.get().getExecutablePath("Mascot2XML", null, "tpp", null, getLogger());
+
+            ProcessBuilder builder = new ProcessBuilder(mascot2XMLPath
+                    , workFile.getName()
+                    , "-D" + fileSequenceDatabase.getAbsolutePath()
+                    , "-xml"
                     //,"-notgz" - we might not have the mzXML file with us
-                    ,"-desc"
-                    ),
+                    , "-desc"
+            );
+            builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(mascot2XMLPath).getParent()));
+
+            runSubProcess(builder,
                     workFile.getParentFile());
 
             PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
