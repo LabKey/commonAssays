@@ -18,9 +18,11 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TsvDataExchangeHandler;
+import org.labkey.api.qc.TsvDataSerializer;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.Pair;
@@ -42,6 +44,8 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
 {
     public static final String ANALYTE_DATA_PROP_NAME = "analyteData";
     public static final String TITRATION_DATA_PROP_NAME = "titrationData";
+
+    private DataSerializer _serializer = new LuminexDataSerializer();
 
     @Override
     public Pair<File, Set<File>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
@@ -83,5 +87,20 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
 
         return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
+    }
+
+    @Override
+    public DataSerializer getDataSerializer()
+    {
+        return _serializer;
+    }
+
+    private static class LuminexDataSerializer extends TsvDataSerializer
+    {
+        @Override
+        public List<Map<String, Object>> importRunData(ExpProtocol protocol, File runData) throws Exception
+        {
+            return _importRunData(protocol, runData, false);
+        }
     }
 }
