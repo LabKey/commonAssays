@@ -93,7 +93,7 @@ public class ElispotManager
     public RunDataRow getRunDataRow(int rowId)
     {
         Filter filter = new SimpleFilter(FieldKey.fromString("RowId"), rowId);
-        return getRunDataRow(filter);
+        return new TableSelector(getTableInfoElispotRunData()).getObject(filter, RunDataRow.class);
     }
 
     @NotNull
@@ -106,6 +106,7 @@ public class ElispotManager
     }
 
     @Nullable
+    @Deprecated
     public RunDataRow getRunDataRow(String dataRowLsid, Container container)
     {
         // dataRowLsid is the objectUri column
@@ -115,6 +116,7 @@ public class ElispotManager
     }
 
     @Nullable
+    @Deprecated
     private RunDataRow getRunDataRow(Filter filter)
     {
         List<RunDataRow> runDataRows = new TableSelector(getTableInfoElispotRunData(), filter, null).getArrayList(RunDataRow.class);

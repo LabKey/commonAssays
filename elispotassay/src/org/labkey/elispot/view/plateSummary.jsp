@@ -38,8 +38,8 @@
         var panel = Ext4.create('LABKEY.ext4.PlateSummary', {
             runId       : <%=bean.getRun()%>,
             width       : 1500,
-            height      : 450,
             renderTo    : '<%= renderId %>',
+            isFluorospot: <%=bean.isFluorospot()%>,
             rowLabel    : ['A','B','C','D','E','F','G','H'],
             columnLabel : [1,2,3,4,5,6,7,8,9,10,11,12]
         });

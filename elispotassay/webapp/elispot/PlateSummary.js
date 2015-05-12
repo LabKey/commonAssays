@@ -14,7 +14,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
         Ext4.QuickTips.init();
 
         Ext4.apply(this, config, {
-            layout : 'border',
+            layout : 'hbox',
             frame  : false,
             border : false
         });
@@ -26,14 +26,12 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
         this.items = [];
 
-        this.platePanel = this.getPlatePanel();
         this.centerPanel = Ext4.create('Ext.panel.Panel', {
             border  : false,
             frame   : false,
             bodyPadding : 20,
             region   : 'center',
-            flex     : 1.2,
-            items    : [this.platePanel]
+            flex     : 1.2
         });
         this.items.push(this.centerPanel);
 
@@ -57,7 +55,10 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
             extend : 'Ext.data.Model',
             fields : [
                 {name : 'position'},
-                {name : 'title'},
+                {name : 'spotCount'},
+                {name : 'activity'},
+                {name : 'intensity'},
+                {name : 'analyte'},
                 {name : 'wellProperties'}
             ]
         });
@@ -77,164 +78,114 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
         this.plateStore = Ext4.create('Ext.data.Store', config);
 
-        this.plateStore.on('load', this.renderPlateSummary, this);
+        this.plateStore.on('load', this.createPlateSummary, this);
         this.callParent([arguments]);
     },
 
-    getPlatePanel : function() {
-
-        var template = [
-            '<table>',
-                '<tr><td><div style="width:53px; height:40px; text-align:center;"></div></td>',
-                '<tpl for="columnLabel">',
-                    '<td><div style="width:53px; height:40px; text-align:center;">{.}</div></td>',
-                '</tpl>',
-                '</tr>',
-            '<tpl for="rows">',
-                '<tr><td><div style="width:45px; height:40px; text-align:center;"><br>{label}</div></td>' +
-                    '<tpl for="cols">',
-                        '<td><div class="plate-well-td-div {aCls} {sCls}" position="{position}" style="border:1px solid gray;width:49px; height:35px; vertical-align:middle; text-align:center; background-color:#AAAAAA;">',
-                            '<a style="color: white;" href="javascript:void(0);">{name}</a></div>',
-                        '</td>',
-                    '</tpl>',
-                '</tr>',
-            '</tpl>',
-            '</table>'
-        ];
-
-        this.platePanel = Ext4.create('Ext.panel.Panel', {
-            border  : false,
-            frame   : false,
-            height  : 400,
-            tpl     : template.join('')
-        });
-
-        return this.platePanel;
-    },
-
-    renderPlateSummary : function() {
-
-        console.log('render plate summary');
-        var rows = [];
-
-        var template = [
-            '<table>',
-                '<tpl for=".">',
-                    '<tr><td>{name}</td><td>&nbsp;</td><td>{value}</td></tr>',
-                '</tpl>',
-            '</table>'
-        ];
-
-        var tip = Ext4.create('Ext.tip.ToolTip', {
-            target      : this.platePanel.el,
-            delegate    : '.plate-well-td-div',
-            title       : 'Well Detail',
-            anchor      : 'left',
-            tpl         : template.join(''),
-            bodyPadding : 10,
-            showDelay   : 500,
-            anchorOffset : 100,
-            dismissDelay : 10000,
-            autoHide    : true,
-            scope       : this,
-            anchorToTarget : true,
-            listeners: {
-                // Change content dynamically depending on which element triggered the show.
-                beforeshow: function(tip) {
-                    var element = tip.triggerElement;
-                    var pos = tip.triggerElement.getAttribute('position');
-                    var rec = this.plateStore.findRecord('position', pos);
-
-                    var tipData = [];
-                    if (rec) {
-                        for (var d in rec.data.wellProperties) {
-                            if (rec.data.wellProperties.hasOwnProperty(d)) {
-                                tipData.push({name: d, value : Ext4.htmlEncode(rec.data.wellProperties[d])});
-                            }
-                        }
-                        if (0 == tipData.length) {
-                            tipData.push({name: 'SpotCount', value: 'N/A'});
-                            tipData.push({name: 'WellgroupLocation', value: Ext4.htmlEncode(pos)});
-                        }
-                        tip.update(tipData);
-                        return true;
-                    }
-                    return false;
-                },
-                scope : this
-            }
-        });
-
+    createPlateSummary : function() {
+        var grids = [];
+        this.analytes = [''];
         this.sampleGroups = {};
         this.antigenGroups = {};
 
-        // create the row map to populate the template data
-        for (var row=0, i=0; row < this.rowLabel.length; row++, i++) {
-
-            var label = this.rowLabel[row];
-            var cols = [];
-            for (var col=0, j=0; col < this.columnLabel.length; col++, j++) {
-
-                var position = '(' + i + ', ' + j + ')';
-
-                var rec = this.plateStore.findRecord('position', position);
-
-                if (rec) {
-                    // sample group map
-                    var sampleGroupName = rec.data.wellProperties.WellgroupName;
-
-                    if (sampleGroupName) {
-
-                        var sampleCls = 'labkey-sampleGroup-' + sampleGroupName.replace(/\s/g, '-');
-
-                        this.sampleGroups[sampleGroupName] = {
-                            label : sampleGroupName,
-                            cls : sampleCls
-                        };
-
-                        // antigen group map
-                        var antigenGroupName = rec.data.wellProperties.AntigenWellgroupName;
-                        var antigenName = rec.data.wellProperties.AntigenName;
-                        var antigenLabel = antigenGroupName;
-
-                        if (antigenName && antigenName.length > 0)
-                            antigenLabel = antigenGroupName + ' (' + antigenName + ')';
-                        var antigenCls = '';
-                        if (antigenGroupName && antigenGroupName.length > 0)
-                            antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
-
-                        this.antigenGroups[antigenGroupName] = {
-                            label : antigenLabel,
-                            cls : antigenCls
-                        }
-
-                        cols.push({
-                            name        : rec.data.title,
-                            position    : rec.data.position,
-                            sCls        : sampleCls,
-                            aCls        : antigenCls
-                        });
-                    }
-                    else {
-                        cols.push({
-                            name        : 'N/A',
-                            position    : rec.data.position,
-                            sCls        : '',
-                            aCls        : ''
-                        });
-                    }
-                }
-            }
-            rows.push({label:label, cols:cols});
+        var reader = this.plateStore.getProxy().getReader();
+        if (reader && reader.rawData.analytes){
+            this.analytes = reader.rawData.analytes;
         }
 
-        var data = {
-            columnLabel : this.columnLabel,
-            rows : rows
-        };
+        for (var idx=0; idx < this.analytes.length; idx++){
 
-        this.platePanel.update({columnLabel : this.columnLabel, rows : rows});
+            var analyte = this.analytes[idx];
+            var rows = [];
+
+            this.plateStore.clearFilter();
+            if (analyte){
+                this.plateStore.filter({
+                    property : 'analyte',
+                    value    : analyte,
+                    exactMatch : true
+                });
+            }
+
+            // create the row map to populate the template data
+            for (var row=0, i=0; row < this.rowLabel.length; row++, i++) {
+
+                var label = this.rowLabel[row];
+                var cols = [];
+                for (var col=0, j=0; col < this.columnLabel.length; col++, j++) {
+
+                    var position = '(' + i + ', ' + j + ')';
+
+                    var rec = this.plateStore.findRecord('position', position);
+
+                    if (rec) {
+                        // sample group map
+                        var sampleGroupName = rec.data.wellProperties.WellgroupName;
+
+                        if (sampleGroupName) {
+
+                            var sampleCls = 'labkey-sampleGroup-' + sampleGroupName.replace(/\s/g, '-');
+
+                            this.sampleGroups[sampleGroupName] = {
+                                label : sampleGroupName,
+                                cls : sampleCls
+                            };
+
+                            // antigen group map
+                            var antigenGroupName = rec.data.wellProperties.AntigenWellgroupName;
+                            var antigenName = rec.data.wellProperties.AntigenName;
+                            var antigenLabel = antigenGroupName;
+
+                            if (antigenName && antigenName.length > 0)
+                                antigenLabel = antigenGroupName + ' (' + antigenName + ')';
+                            var antigenCls = '';
+                            if (antigenGroupName && antigenGroupName.length > 0)
+                                antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
+
+                            this.antigenGroups[antigenGroupName] = {
+                                label : antigenLabel,
+                                cls : antigenCls
+                            }
+
+                            cols.push({
+                                spotCount   : rec.data.spotCount,
+                                activity    : rec.data.activity,
+                                intensity   : rec.data.intensity,
+                                dataIndex   : rec.index,
+                                sCls        : sampleCls,
+                                aCls        : antigenCls
+                            });
+                        }
+                        else {
+                            cols.push({
+                                spotCount   : 'N/A',
+                                activity    : 'N/A',
+                                intensity   : 'N/A',
+                                position    : rec.data.position,
+                                dataIndex   : rec.index,
+                                sCls        : '',
+                                aCls        : ''
+                            });
+                        }
+                    }
+                }
+                rows.push({label:label, cols:cols});
+            }
+
+            grids.push(Ext4.create('LABKEY.ext4.PlatePanel', {
+                plateStore  : this.plateStore,
+                isFluorospot: this.isFluorospot,
+                data        : {
+                    columnLabel : this.columnLabel,
+                    analyte     : analyte,
+                    cytokine    : '',
+                    rows        : rows
+                }
+            }));
+        }
+        this.centerPanel.add(grids);
         this.eastPanel.add(this.getEastPanel());
+        this.plateStore.clearFilter();
     },
 
     getEastPanel : function() {
@@ -283,6 +234,26 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
             items       : antigenItems
         });
 
+        var items = [sampleGroup, antigenGroup];
+
+        if (this.isFluorospot){
+
+            items.push(Ext4.create('Ext.form.RadioGroup', {
+                fieldLabel  : 'Measurement',
+                columns     : 1,
+                items       : [
+                    {boxLabel : 'Spot Count', name : 'measurement', inputValue : 'labkey-cls-spotcount', checked : true},
+                    {boxLabel : 'Activity', name : 'measurement', inputValue : 'labkey-cls-activity'},
+                    {boxLabel : 'Intensity', name : 'measurement', inputValue : 'labkey-cls-intensity'}],
+                listeners   : {
+                    change  : {fn : function(cmp, newVal, oldVal){
+                        this.showMeasurement(newVal, oldVal);
+                    }},
+                    scope   : this
+                }
+            }));
+        }
+
         var form = Ext4.create('Ext.form.Panel', {
             border: false,
             fieldDefaults : {
@@ -290,7 +261,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                 labelWidth : 130,
                 labelSeparator : ''
             },
-            items: [sampleGroup, antigenGroup]
+            items: items
         });
 
         return form;
@@ -309,12 +280,136 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
         }
     },
 
+    showMeasurement : function(newVal, oldVal) {
+
+        if (oldVal && oldVal.measurement) {
+
+            // clear the current
+            this.applyStyleToClass(oldVal.measurement, {display: 'none'});
+
+/*
+            this.applyStyleToClass(cls, {backgroundColor: '#126495'});
+            this.currentSelection = cls;
+*/
+        }
+
+        if (newVal && newVal.measurement){
+            this.applyStyleToClass(newVal.measurement, {display: ''});
+        }
+    },
+
     applyStyleToClass : function(cls, style) {
 
-        var sample = Ext.select('.' + cls, true);
+        var sample = Ext4.select('.' + cls, true);
         if (sample) {
             sample.applyStyles(style);
             sample.repaint();
         }
+    }
+});
+
+Ext4.define('LABKEY.ext4.PlatePanel', {
+
+    extend: 'Ext.panel.Panel',
+
+    constructor: function (config)
+    {
+        Ext4.QuickTips.init();
+        Ext4.applyIf(config, {
+            border    : false,
+            frame     : false,
+            height    : 450
+        });
+
+        this.callParent([config]);
+        var plateTemplate = [];
+
+        if (this.isFluorospot){
+            plateTemplate.push(
+                '<div><span>Analyte: {analyte}</span></div>',
+                '<div><span>Cytokine: {cytokine}</span></div>');
+        }
+
+        plateTemplate.push(
+            '<table>',
+            '<tr><td><div style="width:53px; height:40px; text-align:center;"></div></td>',
+            '<tpl for="columnLabel">',
+            '<td><div style="width:53px; height:40px; text-align:center;">{.}</div></td>',
+            '</tpl>',
+            '</tr>',
+            '<tpl for="rows">',
+            '<tr><td><div style="width:45px; height:40px; text-align:center;"><br>{label}</div></td>' +
+            '<tpl for="cols">',
+            '<td><div class="plate-well-td-div {aCls} {sCls}" dataIndex="{dataIndex}" style="border:1px solid gray;width:49px; height:35px; vertical-align:middle; text-align:center; background-color:#AAAAAA;">',
+            '<a class="labkey-cls-spotcount" style="color: white;" href="javascript:void(0);">{spotCount}</a>',
+            '<a class="labkey-cls-activity" style="color: white;display: none" href="javascript:void(0);">{activity}</a>',
+            '<a class="labkey-cls-intensity" style="color: white;display: none" href="javascript:void(0);">{intensity}</a>',
+            '</div>',
+            '</td>',
+            '</tpl>',
+            '</tr>',
+            '</tpl>',
+            '</table>'
+        );
+        this.tpl = plateTemplate.join('');
+    },
+
+    initComponent: function ()
+    {
+        this.listeners = {
+
+            render: function(cmp) {
+                var template = [
+                    '<table>',
+                    '<tpl for=".">',
+                    '<tr><td>{name}</td><td>&nbsp;</td><td>{value}</td></tr>',
+                    '</tpl>',
+                    '</table>'
+                ];
+
+                var tip = Ext4.create('Ext.tip.ToolTip', {
+                    target      : cmp.el,
+                    delegate    : '.plate-well-td-div',
+                    title       : 'Well Detail',
+                    anchor      : 'left',
+                    tpl         : template.join(''),
+                    bodyPadding : 10,
+                    showDelay   : 500,
+                    anchorOffset : 100,
+                    dismissDelay : 10000,
+                    autoHide    : true,
+                    scope       : this,
+                    anchorToTarget : true,
+                    listeners: {
+                        // Change content dynamically depending on which element triggered the show.
+                        beforeshow: function(tip) {
+                            var element = tip.triggerElement;
+                            var index = tip.triggerElement.getAttribute('dataIndex');
+                            var rec = this.plateStore.getAt(index);
+
+                            var tipData = [];
+                            if (rec) {
+                                for (var d in rec.data.wellProperties) {
+                                    if (rec.data.wellProperties.hasOwnProperty(d)) {
+                                        tipData.push({name: d, value : Ext4.htmlEncode(rec.data.wellProperties[d])});
+                                    }
+                                }
+                                if (0 == tipData.length) {
+                                    tipData.push({name: 'SpotCount', value: 'N/A'});
+                                    tipData.push({name: 'WellgroupLocation', value: Ext4.htmlEncode(pos)});
+                                }
+                                tip.update(tipData);
+                                return true;
+                            }
+                            return false;
+                        },
+                        scope : this
+                    }
+                });
+            },
+            scope : this
+        };
+
+        this.callParent();
     }
 });

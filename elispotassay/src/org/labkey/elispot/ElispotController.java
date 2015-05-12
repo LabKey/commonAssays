@@ -80,6 +80,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,8 +134,11 @@ public class ElispotController extends SpringActionController
             if (null == provider)
                 throw new IllegalStateException("ElispotAssayProvider no found.");
 
+            ElispotAssayProvider.DetectionMethodType method = provider.getDetectionMethod(getContainer(), _protocol);
+
             PlateSummaryBean bean = new PlateSummaryBean();
             bean.setRun(form.getRowId());
+            bean.setFluorospot(method == ElispotAssayProvider.DetectionMethodType.FLUORESCENT);
 
             VBox view = new VBox();
 
@@ -207,10 +211,10 @@ public class ElispotController extends SpringActionController
         }
     }
 
-    private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
-                                                      PlateTemplate template, PlateReader reader) throws SQLException, ExperimentException
+    private List<WellInfo> createWellInfoList(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
+                                              PlateTemplate template, PlateReader reader) throws SQLException, ExperimentException
     {
-        Map<Position, WellInfo> map = new HashMap<>();
+        List<WellInfo> wellInfos = new ArrayList<>();
 
         List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
         assert(data.size() == 1);
@@ -226,11 +230,14 @@ public class ElispotController extends SpringActionController
                 Position position = template.getPosition(row, col);
 
                 Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data.get(0).getLSID(), position);
-                RunDataRow runDataRow = ElispotManager.get().getRunDataRow(dataRowLsid.toString(), run.getContainer());
-                WellInfo wellInfo = new WellInfo(runDataRow);
-                if (null != runDataRow)
+                for (RunDataRow dataRow : ElispotManager.get().getRunDataRows(dataRowLsid.toString(), run.getContainer()))
                 {
-                    wellInfo.setTitle(reader.getWellDisplayValue(runDataRow.getSpotCount()));
+                    WellInfo wellInfo = new WellInfo(dataRow, position);
+                    wellInfo.setSpotCount(reader.getWellDisplayValue(dataRow.getSpotCount()));
+                    if (dataRow.getActivity() != null)
+                        wellInfo.setActivity(String.valueOf(dataRow.getActivity()));
+                    if (dataRow.getIntensity() != null)
+                        wellInfo.setIntensity(String.valueOf(dataRow.getIntensity()));
 
                     for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
                     {
@@ -247,29 +254,11 @@ public class ElispotController extends SpringActionController
                             wellInfo.addWellProperty(prop);
 
                     }
-
-                    // get the specimen wellgroup info
-    /*
-                    Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
-                    List<? extends DomainProperty> sampleProperties = sampleDomain.getProperties();
-                    if (!StringUtils.isEmpty(specimenGroup))
-                    {
-                        ExpMaterial material = inputs.get(specimenGroup);
-                        if (material != null)
-                        {
-                            for (DomainProperty dp : sampleProperties)
-                            {
-                                Object value = material.getProperty(dp);
-                                wellInfo.addSpecimenProperty(dp, String.valueOf(value));
-                            }
-                        }
-                    }
-    */
+                    wellInfos.add(wellInfo);
                 }
-                map.put(position, wellInfo);
             }
         }
-        return map;
+        return wellInfos;
     }
 
     private void addRunFilter(ExpProtocol protocol, ActionURL url, int rowId)
@@ -349,18 +338,16 @@ public class ElispotController extends SpringActionController
             if (plateReaderName != null)
             {
                 PlateReader reader = provider.getPlateReader(plateReaderName);
-                Map<Position, WellInfo> wellInfoMap = createWellInfoMap(run, protocol, provider, template, reader);
-
                 JSONArray rows = new JSONArray();
-                for (Map.Entry<Position, WellInfo> entry : wellInfoMap.entrySet())
+                Set<String> analytes = new HashSet<>();
+
+                for (WellInfo wellInfo : createWellInfoList(run, protocol, provider, template, reader))
                 {
-                    JSONObject row = entry.getValue().toJSON();
-
-                    row.put("position", entry.getKey().toString());
-
-                    rows.put(row);
+                    rows.put(wellInfo.toJSON());
+                    analytes.add(wellInfo.getAnalyte());
                 }
                 response.put("summary", rows);
+                response.put("analytes", analytes);
                 response.put("success", true);
             }
             return response;
@@ -385,13 +372,17 @@ public class ElispotController extends SpringActionController
     public static class WellInfo
     {
         private String _dataRowLsid;
-        private String _title = "";
+        private String _spotCount = "";
+        private String _activity = "";
+        private String _intensity = "";
         private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
         private final RunDataRow _runDataRow;
+        private Position _position;
 
-        public WellInfo(@Nullable RunDataRow runDataRow)
+        public WellInfo(@Nullable RunDataRow runDataRow, Position position)
         {
             _runDataRow = runDataRow;
+            _position = position;
         }
 
         public String getDataRowLsid()
@@ -414,36 +405,56 @@ public class ElispotController extends SpringActionController
             return _wellProperties;
         }
 
-        public String getTitle()
+        public String getSpotCount()
         {
-            return _title;
+            return _spotCount;
         }
 
-        public void setTitle(String title)
+        public void setSpotCount(String spotCount)
         {
-            _title = title;
+            _spotCount = spotCount;
         }
 
-        public String getHtml()
+        public String getActivity()
         {
-            StringBuffer sb = new StringBuffer();
+            return _activity;
+        }
 
-            for (ObjectProperty prop : _wellProperties.values())
-            {
-                sb.append(prop.getName());
-                sb.append(':');
-                sb.append(String.valueOf(prop.value()));
-                sb.append("<br/>");
-            }
-            return sb.toString();
+        public void setActivity(String activity)
+        {
+            _activity = activity;
+        }
+
+        public String getIntensity()
+        {
+            return _intensity;
+        }
+
+        public void setIntensity(String intensity)
+        {
+            _intensity = intensity;
+        }
+
+        public Position getPosition()
+        {
+            return _position;
+        }
+
+        public String getAnalyte()
+        {
+            return _runDataRow.getAnalyte();
         }
 
         public JSONObject toJSON()
         {
             JSONObject well = new JSONObject();
 
-            well.put("title", getTitle());
+            well.put("spotCount", getSpotCount());
+            well.put("activity", getActivity());
+            well.put("intensity", getIntensity());
             well.put("dataRowLsid", getDataRowLsid());
+            well.put("position", _position.toString());
+            well.put("analyte", getAnalyte());
 
             JSONObject wellProps = new JSONObject();
             for (ObjectProperty prop : _wellProperties.values())
@@ -477,6 +488,7 @@ public class ElispotController extends SpringActionController
     public static class PlateSummaryBean
     {
         private int _run;
+        private boolean _fluorospot;
 
         public int getRun()
         {
@@ -486,6 +498,16 @@ public class ElispotController extends SpringActionController
         public void setRun(int run)
         {
             _run = run;
+        }
+
+        public boolean isFluorospot()
+        {
+            return _fluorospot;
+        }
+
+        public void setFluorospot(boolean fluorospot)
+        {
+            _fluorospot = fluorospot;
         }
     }
 
