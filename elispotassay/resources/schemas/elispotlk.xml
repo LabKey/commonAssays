@@ -32,6 +32,7 @@
             <column columnName="NormalizedSpotCount"/>
             <column columnName="AntigenWellgroupName"/>
             <column columnName="Analyte"/>
+            <column columnName="Cytokine"/>
             <column columnName="Activity"/>
             <column columnName="Intensity"/>
             <column columnName="ObjectUri"/>

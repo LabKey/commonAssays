@@ -32,6 +32,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.elispot.ElispotAssayProvider;
+import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;
 import org.labkey.elispot.ElispotProtocolSchema;
 
@@ -58,6 +59,12 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("WellgroupName"));
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("SpecimenLsid"));
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromParts("SpecimenLsid", "Property", "ParticipantId"));
+
+        if (elispotRunAntigenTable.getColumn(FieldKey.fromParts(ElispotDataHandler.ANALYTE_PROPERTY_NAME)) != null)
+            crosstabSettings.getRowAxis().addDimension(FieldKey.fromString(ElispotDataHandler.ANALYTE_PROPERTY_NAME));
+        if (elispotRunAntigenTable.getColumn(FieldKey.fromParts(ElispotDataHandler.CYTOKINE_PROPERTY_NAME)) != null)
+            crosstabSettings.getRowAxis().addDimension(FieldKey.fromString(ElispotDataHandler.CYTOKINE_PROPERTY_NAME));
+
         CrosstabDimension colDim = crosstabSettings.getColumnAxis().addDimension(FieldKey.fromString("AntigenHeading"));
 
         crosstabSettings.addMeasure(FieldKey.fromParts("Mean"), CrosstabMeasure.AggregateFunction.AVG, "Mean");

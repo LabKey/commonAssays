@@ -189,6 +189,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                     row.put(WELL_ROW_PROPERTY, pos.getRow());
                                     row.put(WELL_COLUMN_PROPERTY, pos.getColumn());
                                     row.put(ANALYTE_PROPERTY_NAME, analyte);
+                                    if (analyte != null)
+                                        row.put(CYTOKINE_PROPERTY_NAME, analyteToCytokine.get(analyte));
                                     row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
                                 }
                             }
@@ -456,8 +458,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                     median = medianValue;
                                 }
 
-                                Map<String, Object> fields = makeAntigenRow
-                                    (
+                                String analyte = statsMapEntry.getKey();
+                                Map<String, Object> fields = makeAntigenRow(
                                         run.getRowId(),                 // runid
                                         material.getLSID(),             // specimenLSID
                                         run.getMaterialInputs().get(material),  // wellgroupName
@@ -467,8 +469,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                         rowLsid.toString(),             // objectUri
                                         run.getProtocol().getName(),    // protocolName
                                         groupName,                      // antigenWellgroupName
-                                        statsMapEntry.getKey()          // analyte
-                                    );
+                                        analyte,                        // analyte
+                                        propMap.get(analyte)            // cytokine
+                                );
                                 if (propMap.containsKey(cellWellKey))
                                     fields.put(ElispotAssayProvider.CELLWELL_PROPERTY_NAME, propMap.get(cellWellKey));
                                 for (DomainProperty antigenProp : antigenProps)
@@ -496,7 +499,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 rowLsid.toString(),                     // objectUri
                                 run.getProtocol().getName(),            // protocolName
                                 BACKGROUND_WELL_PROPERTY,               // antigenWellgroupName
-                                analyteName                             // analyte
+                                analyteName,                            // analyte
+                                propMap.get(analyteName)                // cytokine
                             );
                         antigenRows.add(fields);
                     }
@@ -539,7 +543,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
     private static Map<String, Object> makeAntigenRow(int runId, String specimenLsid, String wellgroupName, String antigenName,
                                                       Double mean, Double median, String objectUri, String protocolName,
-                                                      String antigenWellgroupName, String analyte)
+                                                      String antigenWellgroupName, String analyte, Object cytokine)
     {
         Map<String, Object> fields = new HashMap<>();
         fields.put(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME, antigenName);
@@ -551,6 +555,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         fields.put(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME, antigenWellgroupName);
         fields.put("AntigenLsid", getAntigenLsid(antigenWellgroupName, wellgroupName, runId, protocolName, analyte));
         fields.put("ObjectUri", objectUri);
+        fields.put(ElispotDataHandler.ANALYTE_PROPERTY_NAME, analyte);
+        if (cytokine != null)
+            fields.put(ElispotDataHandler.CYTOKINE_PROPERTY_NAME, String.valueOf(cytokine));
         return fields;
     }
 

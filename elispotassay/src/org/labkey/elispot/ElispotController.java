@@ -241,18 +241,7 @@ public class ElispotController extends SpringActionController
 
                     for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
                     {
-                        if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
-                        {
-                            //                        specimenGroup = String.valueOf(prop.value());                 // TODO: probably remove all of loop
-                            //                        wellInfo.addWellProperty(prop);
-                        }
-                        else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
-                        {
-                            //                        wellInfo.setTitle(reader.getWellDisplayValue(prop.value()));
-                        }
-                        else
-                            wellInfo.addWellProperty(prop);
-
+                        wellInfo.addWellProperty(prop);
                     }
                     wellInfos.add(wellInfo);
                 }
@@ -339,15 +328,22 @@ public class ElispotController extends SpringActionController
             {
                 PlateReader reader = provider.getPlateReader(plateReaderName);
                 JSONArray rows = new JSONArray();
-                Set<String> analytes = new HashSet<>();
+                Map<String, String> analyteMap = new HashMap<>();
 
                 for (WellInfo wellInfo : createWellInfoList(run, protocol, provider, template, reader))
                 {
                     rows.put(wellInfo.toJSON());
-                    analytes.add(wellInfo.getAnalyte());
+                    if (wellInfo.getAnalyte() != null && wellInfo.getCytokine() != null)
+                    {
+                        analyteMap.put(wellInfo.getAnalyte(), wellInfo.getCytokine());
+                    }
                 }
                 response.put("summary", rows);
-                response.put("analytes", analytes);
+                if (analyteMap.size() > 0)
+                {
+                    response.put("analytes", analyteMap.keySet());
+                    response.put("analyteMap", analyteMap);
+                }
                 response.put("success", true);
             }
             return response;
@@ -445,6 +441,11 @@ public class ElispotController extends SpringActionController
             return _runDataRow.getAnalyte();
         }
 
+        public String getCytokine()
+        {
+            return _runDataRow.getCytokine();
+        }
+
         public JSONObject toJSON()
         {
             JSONObject well = new JSONObject();
@@ -455,6 +456,7 @@ public class ElispotController extends SpringActionController
             well.put("dataRowLsid", getDataRowLsid());
             well.put("position", _position.toString());
             well.put("analyte", getAnalyte());
+            well.put("cytokine", getCytokine());
 
             JSONObject wellProps = new JSONObject();
             for (ObjectProperty prop : _wellProperties.values())
@@ -476,6 +478,8 @@ public class ElispotController extends SpringActionController
                     wellProps.put("Activity", _runDataRow.getActivity());
                 if (null != _runDataRow.getAnalyte())
                     wellProps.put("Analyte", _runDataRow.getAnalyte());
+                if (null != _runDataRow.getCytokine())
+                    wellProps.put("Cytokine", _runDataRow.getCytokine());
                 if (null != _runDataRow.getIntensity())
                     wellProps.put("Intensity", _runDataRow.getIntensity());
             }

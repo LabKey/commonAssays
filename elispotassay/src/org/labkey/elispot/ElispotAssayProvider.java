@@ -96,12 +96,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     public static final String ANTIGENNAME_PROPERTY_NAME = "AntigenName";
     public static final String ANTIGENNAME_PROPERTY_CAPTION = "Antigen Name";
 
-    // analytes
-    public static final String ANALYTE_PROPERTY_NAME = "AnalyteName";
-    public static final String ANALYTE_PROPERTY_CAPTION = "Analyte Name";
-    public static final String CYTOKINE_PROPERTY_NAME = "CytokineName";
-    public static final String CYTOKINE_PROPERTY_CAPTION = "Cytokine Name";
-
     enum PlateReaderType
     {
         CTL("Cellular Technology Ltd. (CTL)", ExcelPlateReader.class),
@@ -270,7 +264,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         Domain analyteWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Analyte Fields");
 
         analyteWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the analyte well groups");
-        addProperty(analyteWellGroupDomain, CYTOKINE_PROPERTY_NAME, CYTOKINE_PROPERTY_CAPTION, PropertyType.STRING);
+        addProperty(analyteWellGroupDomain, "CytokineName", "Cytokine Name", PropertyType.STRING);
 
         return new Pair<>(analyteWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
     }

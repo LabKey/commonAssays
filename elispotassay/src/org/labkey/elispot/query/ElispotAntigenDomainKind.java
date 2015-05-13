@@ -55,6 +55,8 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
         baseFields.add(new PropertyStorageSpec(MEDIAN_COLUMN_NAME, JdbcType.DOUBLE));
         baseFields.add(new PropertyStorageSpec(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME, JdbcType.VARCHAR));
         baseFields.add(new PropertyStorageSpec(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME, JdbcType.VARCHAR).setNullable(false));
+        baseFields.add(new PropertyStorageSpec(ElispotDataHandler.ANALYTE_PROPERTY_NAME, JdbcType.VARCHAR));
+        baseFields.add(new PropertyStorageSpec(ElispotDataHandler.CYTOKINE_PROPERTY_NAME, JdbcType.VARCHAR));
 
         _baseFields = Collections.unmodifiableSet(baseFields);
     }

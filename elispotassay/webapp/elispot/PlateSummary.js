@@ -59,6 +59,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                 {name : 'activity'},
                 {name : 'intensity'},
                 {name : 'analyte'},
+                {name : 'cytokine'},
                 {name : 'wellProperties'}
             ]
         });
@@ -85,12 +86,17 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
     createPlateSummary : function() {
         var grids = [];
         this.analytes = [''];
+        this.analyteMap = {};
         this.sampleGroups = {};
         this.antigenGroups = {};
 
         var reader = this.plateStore.getProxy().getReader();
         if (reader && reader.rawData.analytes){
             this.analytes = reader.rawData.analytes;
+        }
+
+        if (reader && reader.rawData.analyteMap){
+            this.analyteMap = reader.rawData.analyteMap;
         }
 
         for (var idx=0; idx < this.analytes.length; idx++){
@@ -178,7 +184,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                 data        : {
                     columnLabel : this.columnLabel,
                     analyte     : analyte,
-                    cytokine    : '',
+                    cytokine    : this.analyteMap[analyte],
                     rows        : rows
                 }
             }));
@@ -283,14 +289,8 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
     showMeasurement : function(newVal, oldVal) {
 
         if (oldVal && oldVal.measurement) {
-
             // clear the current
             this.applyStyleToClass(oldVal.measurement, {display: 'none'});
-
-/*
-            this.applyStyleToClass(cls, {backgroundColor: '#126495'});
-            this.currentSelection = cls;
-*/
         }
 
         if (newVal && newVal.measurement){

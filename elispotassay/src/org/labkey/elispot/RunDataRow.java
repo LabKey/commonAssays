@@ -34,6 +34,7 @@ public class RunDataRow
     private Double _normalizedSpotCount;
     private String _antigenWellgroupName;
     private String _analyte;
+    private String _cytokine;
     private Double _activity;
     private Double _intensity;
     private String _objectUri;
@@ -109,6 +110,16 @@ public class RunDataRow
     public void setNormalizedSpotCount(Double normalizedSpotCount)
     {
         _normalizedSpotCount = normalizedSpotCount;
+    }
+
+    public String getCytokine()
+    {
+        return _cytokine;
+    }
+
+    public void setCytokine(String cytokine)
+    {
+        _cytokine = cytokine;
     }
 
     public Integer getAntigenId(ExpProtocol protocol)

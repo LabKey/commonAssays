@@ -66,6 +66,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String BACKGROUND_WELL_PROPERTY = "Background";
 
     public static final String ANALYTE_PROPERTY_NAME = "Analyte";
+    public static final String CYTOKINE_PROPERTY_NAME = "Cytokine";
     public static final String ACTIVITY_PROPERTY_NAME = "Activity";
     public static final String INTENSITY_PROPERTY_NAME = "Intensity";
 
@@ -109,6 +110,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                 runDataFields.put(WELLGROUP_PROPERTY_NAME, row.get(WELLGROUP_PROPERTY_NAME));
                 runDataFields.put(WELLGROUP_LOCATION_PROPERTY, row.get(WELLGROUP_LOCATION_PROPERTY));
                 runDataFields.put(ANALYTE_PROPERTY_NAME, row.get(ANALYTE_PROPERTY_NAME));
+                runDataFields.put(CYTOKINE_PROPERTY_NAME, row.get(CYTOKINE_PROPERTY_NAME));
                 runDataFields.put(SFU_PROPERTY_NAME, row.get(SFU_PROPERTY_NAME));
                 runDataFields.put(INTENSITY_PROPERTY_NAME, row.get(INTENSITY_PROPERTY_NAME));
                 runDataFields.put(ACTIVITY_PROPERTY_NAME, row.get(ACTIVITY_PROPERTY_NAME));

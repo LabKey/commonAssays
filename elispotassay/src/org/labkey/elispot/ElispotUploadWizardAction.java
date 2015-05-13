@@ -18,6 +18,7 @@ package org.labkey.elispot;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
@@ -56,8 +57,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: Karl Lum
@@ -145,7 +148,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     public PlateAntigenPropertyHelper createAntigenPropertyHelper(Container container, ExpProtocol protocol, ElispotAssayProvider provider)
     {
         PlateTemplate template = provider.getPlateTemplate(container, protocol);
-        List<DomainProperty> domainProperties = new ArrayList<>();
+        Set<DomainProperty> domainProperties = new LinkedHashSet<>();
         Domain domain = provider.getAntigenWellGroupDomain(protocol);
         domainProperties.add(domain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME));
         for (DomainProperty domainProperty : domain.getProperties())
@@ -153,7 +156,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             if (!domainProperty.isHidden())
                 domainProperties.add(domainProperty);
         }
-        return new PlateAntigenPropertyHelper(domainProperties, template);
+        return new PlateAntigenPropertyHelper(new ArrayList<>(domainProperties), template);
     }
 
     public PlateAnalytePropertyHelper createAnalytePropertyHelper(ElispotRunUploadForm form) throws ExperimentException
@@ -504,6 +507,19 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     Map<DomainProperty, String> properties = groupEntry.getValue();
                     for (Map.Entry<DomainProperty, String> propEntry : properties.entrySet())
                         postedPropMap.put(getInputName(propEntry.getKey(), groupName), propEntry.getValue());
+                }
+
+                if (form.getAnalyteProperties() != null)
+                {
+                    for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : form.getAnalyteProperties().entrySet())
+                    {
+                        String analyteName = groupEntry.getKey();
+                        Map<DomainProperty, String> properties = groupEntry.getValue();
+                        for (String value : properties.values())
+                        {
+                            postedPropMap.put(analyteName, value);
+                        }
+                    }
                 }
 
                 for (Map.Entry<PlateInfo, Plate> entry : plates.entrySet())
