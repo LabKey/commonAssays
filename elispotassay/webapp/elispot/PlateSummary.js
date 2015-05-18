@@ -331,7 +331,7 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
         }
 
         plateTemplate.push(
-            '<table>',
+            '<table class="plate-summary-grid">',
             '<tr><td><div style="width:53px; height:40px; text-align:center;"></div></td>',
             '<tpl for="columnLabel">',
             '<td><div style="width:53px; height:40px; text-align:center;">{.}</div></td>',
