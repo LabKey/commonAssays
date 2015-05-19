@@ -89,7 +89,11 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
 
             for (Map<String, Object> row : loader)
             {
-                String wellGroupName = (String) row.get(wellGroupColumnName);
+                String wellGroupName = null;
+                if (row.containsKey(wellGroupColumnName))
+                {
+                    wellGroupName = String.valueOf(row.get(wellGroupColumnName));
+                }
                 WellGroupTemplate wellgroup = wellGroupName != null ? sampleGroupNames.get(wellGroupName) : null;
 
                 if (wellgroup != null)

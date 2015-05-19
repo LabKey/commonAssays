@@ -333,9 +333,12 @@ public class ElispotController extends SpringActionController
                 for (WellInfo wellInfo : createWellInfoList(run, protocol, provider, template, reader))
                 {
                     rows.put(wellInfo.toJSON());
-                    if (wellInfo.getAnalyte() != null && wellInfo.getCytokine() != null)
+                    if (wellInfo.getAnalyte() != null)
                     {
-                        analyteMap.put(wellInfo.getAnalyte(), wellInfo.getCytokine());
+                        if (wellInfo.getCytokine() != null)
+                            analyteMap.put(wellInfo.getAnalyte(), wellInfo.getCytokine());
+                        else
+                            analyteMap.put(wellInfo.getAnalyte(), "");
                     }
                 }
                 response.put("summary", rows);
