@@ -40,7 +40,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
      *
      */
     @Test
-    public void testMultipleCurve() throws InterruptedException
+    public void testMultipleCurve()
     {
         String name = startCreateMultipleCurveAssayRun();
 
