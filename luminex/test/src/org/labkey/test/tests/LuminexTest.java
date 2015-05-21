@@ -39,9 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.labkey.test.util.ListHelper.ListColumnType;
-
 import static org.junit.Assert.*;
+import static org.labkey.test.util.ListHelper.ListColumnType;
 
 public abstract class LuminexTest extends BaseWebDriverTest
 {
@@ -340,65 +339,25 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     }
 
-    protected void compareColumnValuesAgainstExpected(String column1, String column2, Map<String, Set<String>> column1toColumn2)
+    @LogMethod(quiet = true)
+    protected void assertAnalytesHaveCorrectStandards(Map<String, Set<String>> expectedAnalyteStandards)
     {
-        Set<String> set = new HashSet<>();
-        set.add(column2);
-        column1toColumn2.put(column1, set); //column headers
+        DataRegionTable data = new DataRegionTable(DATA_TABLE_NAME, this);
+        data.showAll();
+        List<String> keyColumn = data.getColumnDataAsText("Analyte");
+        List<String> dataColumn = data.getColumnDataAsText("Standard");
 
-        List<List<String>> columnVals = getColumnValues(DATA_TABLE_NAME, column1, column2);
-
-        assertStandardsMatchExpected(columnVals, column1toColumn2);
-    }
-
-    /**
-     *
-     * @param columnVals two lists of equal length, with corresponding names of analytes and the standards applied to them
-     * @param col1to2Map map of analyte names to the standards that should be applied to them.
-     */
-    private void assertStandardsMatchExpected( List<List<String>> columnVals, Map<String, Set<String>> col1to2Map)
-    {
-        String column1Val;
-        String column2Val;
-        while(columnVals.get(0).size()>0)
+        for (int i = 0; i < keyColumn.size(); i++)
         {
-            column1Val = columnVals.get(0).remove(0);
-            column2Val = columnVals.get(1).remove(0);
-            assertStandardsMatchExpected(column1Val, column2Val, col1to2Map);
+            String analyte = keyColumn.get(i);
+            assertEquals(String.format("Wrong standards for analyte %s at row %d", analyte, i),
+                    expectedAnalyteStandards.get(analyte), splitStandards(dataColumn.get(i)));
         }
     }
 
-    /**
-     *
-     * @param column1Val name of analyte
-     * @param column2Val standard applied to analyte on server
-     * @param colum1toColumn2Map map of all analytes to the appropriate standards
-     */
-    private void assertStandardsMatchExpected(String column1Val, String column2Val, Map<String, Set<String>> colum1toColumn2Map)
+    private Set<String> splitStandards(String standards)
     {
-        String[] splitCol2Val = column2Val.split(",");
-        Set<String> expectedCol2Vals = colum1toColumn2Map.get(column1Val);
-        if(expectedCol2Vals!=null)
-        {
-            try
-            {
-                assertEquals(splitCol2Val.length, expectedCol2Vals.size());
-
-                for(String s: splitCol2Val)
-                {
-                    s = s.trim();
-                    assertTrue("Expected " + expectedCol2Vals + " to contain" + s, expectedCol2Vals.contains(s));
-                }
-            }
-            catch (Exception rethrow)
-            {
-                log("Column1: " + column1Val);
-                log("Expected Column2: " + expectedCol2Vals);
-                log("Column2: " + column2Val);
-
-                throw rethrow;
-            }
-        }
+        return new HashSet<>(Arrays.asList(standards.trim().split("\\s*,\\s*")));
     }
 
     /**

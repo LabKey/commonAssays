@@ -79,7 +79,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         assertTrue("BioPlex FitProb for ENV6 (97) in plate 1, 2, or 3", isTextPresent("0.9667") || isTextPresent("0.4790"));
         assertTrue("BioPlex ResVar for ENV6 (97) in plate 1, 2, 3", isTextPresent("0.1895") || isTextPresent("0.8266"));
 
-        compareColumnValuesAgainstExpected("Analyte", "Standard", analytesAndStandardsConfig);
+        assertAnalytesHaveCorrectStandards(analytesAndStandardsConfig);
 
         // Go to the schema browser to check out the parsed curve fits
         goToSchemaBrowser();
