@@ -85,6 +85,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class ElispotController extends SpringActionController
 {
@@ -328,7 +329,7 @@ public class ElispotController extends SpringActionController
             {
                 PlateReader reader = provider.getPlateReader(plateReaderName);
                 JSONArray rows = new JSONArray();
-                Map<String, String> analyteMap = new HashMap<>();
+                Map<String, String> analyteMap = new TreeMap<>();
 
                 for (WellInfo wellInfo : createWellInfoList(run, protocol, provider, template, reader))
                 {
