@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -193,6 +194,39 @@ public class LuminexController extends SpringActionController
         }
     }
 
+    private class GraphLinkQueryView extends QueryView
+    {
+        private String _tableName;
+        private String _controlType;
+        private ExpProtocol _protocol;
+
+        public GraphLinkQueryView(String tableName, String controlType, ExpProtocol protocol, UserSchema schema, QuerySettings settings, @Nullable Errors errors)
+        {
+            super(schema, settings, errors);
+            _tableName = tableName;
+            _controlType = controlType;
+            _protocol = protocol;
+            setShowUpdateColumn(false);
+            setFrame(WebPartView.FrameType.NONE);
+        }
+
+        @Override
+        protected void setupDataView(DataView ret)
+        {
+            super.setupDataView(ret);
+
+            String tablePrefix = _tableName != null ? _tableName + "/Run/" : "";
+            ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
+            graph.addParameter("controlName", _tableName != null ? "${" + _tableName + "/Name}" : "${ControlName}");
+            graph.addParameter("controlType", _controlType != null ? _controlType : "${ControlType}");
+            graph.addParameter("analyte", _controlType != null ? "${Analyte/Name}" : "${AnalyteName}");
+            graph.addParameter("isotype", "${" + tablePrefix + "Isotype}");
+            graph.addParameter("conjugate", "${" + tablePrefix + "Conjugate}");
+            SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
+            ret.getDataRegion().addDisplayColumn(0, graphDetails);
+        }
+    }
+
     @RequiresPermissionClass(ReadPermission.class)
     public class TitrationQcReportAction extends BaseAssayAction<ProtocolIdForm>
     {
@@ -208,27 +242,8 @@ public class LuminexController extends SpringActionController
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             settings.setBaseFilter(new SimpleFilter(FieldKey.fromParts("Titration", "IncludeInQcReport"), true));
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
-            QueryView view = new QueryView(schema, settings, errors)
-            {
-                @Override
-                protected void setupDataView(DataView ret)
-                {
-                    super.setupDataView(ret);
 
-                    ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
-                    graph.addParameter("controlName", "${Titration/Name}");
-                    graph.addParameter("controlType", "Titration");
-                    graph.addParameter("analyte", "${Analyte/Name}");
-                    graph.addParameter("isotype", "${Titration/Run/Isotype}");
-                    graph.addParameter("conjugate", "${Titration/Run/Conjugate}");
-                    SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
-                    ret.getDataRegion().addDisplayColumn(0, graphDetails);
-                }
-            };
-            view.setShadeAlternatingRows(true);
-            view.setShowBorders(true);
-            view.setShowUpdateColumn(false);
-            view.setFrame(WebPartView.FrameType.NONE);
+            GraphLinkQueryView view = new GraphLinkQueryView("Titration", "Titration", _protocol, schema, settings, errors);
             result.setupViews(view, false, form.getProvider(), form.getProtocol());
 
             return result;
@@ -257,27 +272,8 @@ public class LuminexController extends SpringActionController
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME, LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
-            QueryView view = new QueryView(schema, settings, errors)
-            {
-                @Override
-                protected void setupDataView(DataView ret)
-                {
-                    super.setupDataView(ret);
 
-                    ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
-                    graph.addParameter("controlName", "${SinglePointControl/Name}");
-                    graph.addParameter("controlType", "SinglePoint");
-                    graph.addParameter("analyte", "${Analyte/Name}");
-                    graph.addParameter("isotype", "${SinglePointControl/Run/Isotype}");
-                    graph.addParameter("conjugate", "${SinglePointControl/Run/Conjugate}");
-                    SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
-                    ret.getDataRegion().addDisplayColumn(0, graphDetails);
-                }
-            };
-            view.setShadeAlternatingRows(true);
-            view.setShowBorders(true);
-            view.setShowUpdateColumn(false);
-            view.setFrame(WebPartView.FrameType.NONE);
+            GraphLinkQueryView view = new GraphLinkQueryView("SinglePointControl", "SinglePoint", _protocol, schema, settings, errors);
             result.setupViews(view, false, form.getProvider(), form.getProtocol());
 
             return result;
@@ -914,7 +910,7 @@ public class LuminexController extends SpringActionController
             setHelpTopic(new HelpTopic("applyGuideSets"));
 
             final int protocolId = _protocol.getRowId();
-            QueryView view = new QueryView(schema, settings, errors)
+            GraphLinkQueryView view = new GraphLinkQueryView(null, null, _protocol, schema, settings, errors)
             {
                 @Override
                 public ActionButton createDeleteButton()
@@ -928,30 +924,9 @@ public class LuminexController extends SpringActionController
                     btnDelete.setRequiresSelection(true);
                     return btnDelete;
                 }
-
-                @Override
-                protected void setupDataView(DataView ret)
-                {
-                    super.setupDataView(ret);
-
-                    ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
-                    graph.addParameter("controlName", "${ControlName}");
-                    graph.addParameter("controlType", "${ControlType}");
-                    graph.addParameter("analyte", "${AnalyteName}");
-                    graph.addParameter("isotype", "${Isotype}");
-                    graph.addParameter("conjugate", "${Conjugate}");
-                    SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
-                    ret.getDataRegion().addDisplayColumn(0, graphDetails);
-                }
             };
-
-            view.setShadeAlternatingRows(true);
-            view.setShowBorders(true);
-            view.setShowUpdateColumn(false);
-            view.setShowRecordSelectors(false);
             view.setShowInsertNewButton(false);
             view.setShowImportDataButton(false);
-            view.setFrame(WebPartView.FrameType.NONE);
             result.setupViews(view, false, form.getProvider(), form.getProtocol());
 
             return result;
