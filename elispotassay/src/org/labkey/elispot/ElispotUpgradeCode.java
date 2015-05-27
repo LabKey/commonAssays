@@ -33,7 +33,6 @@ import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -44,7 +43,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -177,7 +175,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                 if (fullName.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
                     String specimenLsid = (String) map.get("StringValue");
-                    String protocolName = getProtocolName(runId, specimenLsid);
+                    String protocolName = getProtocolName(runId);
                     if (null == protocolName)
                         return;     // error already logged
 
@@ -302,7 +300,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                 if (fullName.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
                     String specimenLsid = (String) map.get("StringValue");
-                    String protocolName = getProtocolName(runId, specimenLsid);
+                    String protocolName = getProtocolName(runId);
                     if (null == protocolName)
                         return;     // error already logged
 
@@ -391,11 +389,9 @@ public class ElispotUpgradeCode implements UpgradeCode
         }
     }
 
-    // Return <SampleName, ProtocolName>
     @Nullable
-    private static String getProtocolName(int runId, String specimenLsid)
+    private static String getProtocolName(int runId)
     {
-        // This is a pain, but we need the name of the material for the specimenLsid
         ExpRun run = ExperimentService.get().getExpRun(runId);
         if (null == run)
         {
