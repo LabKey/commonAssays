@@ -50,7 +50,11 @@ CREATE INDEX idx_elispotrundata_runid ON elispotlk.rundata(RunId);
 
 
 INSERT INTO elispotlk.rundata (RunId, Specimenlsid, SpotCount, WellgroupName, WellgroupLocation, NormalizedSpotCount, AntigenWellgroupName, ObjectUri, ObjectId)
-SELECT * FROM (
+SELECT
+    RunId,SpecimenLSID, SpotCount, WellGroupName, WellgroupLocation, NormalizedSpotCount,
+    CASE WHEN AntigenWellgroupNameTemp IS NULL THEN AntigenName ELSE AntigenWellgroupNameTemp END AS AntigenWellgroupName,
+    ObjectURI, ObjectId
+FROM (
 	SELECT
 		(SELECT RunId FROM exp.Data d, exp.Object parent WHERE d.LSID = parent.ObjectURI and parent.ObjectId = o.OwnerObjectId) AS RunId,
 
@@ -65,7 +69,9 @@ SELECT * FROM (
 		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
 			WHERE pd.PropertyURI LIKE '%:NormalizedSpotCount' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS NormalizedSpotCount,
 		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:AntigenWellgroupName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AntigenWellgroupName,
+			WHERE pd.PropertyURI LIKE '%:AntigenWellgroupName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AntigenWellgroupNameTemp,
+        (SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
+            WHERE pd.PropertyURI LIKE '%:AntigenName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AntigenName,
 		ObjectURI,
 		ObjectId
 	FROM exp.Object o WHERE ObjectURI LIKE '%ElispotAssayDataRow%') x

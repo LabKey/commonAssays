@@ -68,6 +68,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         // build up groups of props; after figuring out antigenLsid they get moved
         // Map objectId to AntigenPropMap
         private final Map<Integer, AntigenPropMap> _antigenPropMaps = new HashMap<>();
+        private boolean _useAntigenName = false;
 
         // Within the run, map ElispotProperty names to their propertyIds
         private final Map<String, Integer> _propertyNameToIdMap = new HashMap<>();
@@ -80,6 +81,16 @@ public class ElispotUpgradeCode implements UpgradeCode
         public Map<String, Integer> getPropertyNameToIdMap()
         {
             return _propertyNameToIdMap;
+        }
+
+        public boolean useAntigenName()
+        {
+            return _useAntigenName;
+        }
+
+        public void setUseAntigenName(boolean useAntigenName)
+        {
+            _useAntigenName = useAntigenName;
         }
     }
 
@@ -166,16 +177,15 @@ public class ElispotUpgradeCode implements UpgradeCode
                 if (fullName.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
                     String specimenLsid = (String) map.get("StringValue");
-                    Pair<String, String> pair = getSpecimenAndProtocolNames(runId, specimenLsid);
-                    if (null == pair)
+                    String protocolName = getProtocolName(runId, specimenLsid);
+                    if (null == protocolName)
                         return;     // error already logged
 
-                    antigenPropMap.put(ElispotDataHandler.WELLGROUP_PROPERTY_NAME, pair.first);
-                    antigenPropMap.put("ProtocolName", pair.second);
+                    antigenPropMap.put("ProtocolName", protocolName);
                     antigenPropMap.put(fullName, specimenLsid);
                 }
                 else if (!fullName.equals(ElispotDataHandler.SFU_PROPERTY_NAME) && !fullName.equals(ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME) &&
-                        !fullName.equals(ElispotDataHandler.WELLGROUP_PROPERTY_NAME) && !fullName.equals(ElispotDataHandler.WELLGROUP_LOCATION_PROPERTY))
+                         !fullName.equals(ElispotDataHandler.WELLGROUP_LOCATION_PROPERTY))
                 {
                     String typeTag = (String) map.get("TypeTag");
                     if (null == typeTag)
@@ -192,6 +202,8 @@ public class ElispotUpgradeCode implements UpgradeCode
         });
 
         // We know enough to calculate AntigenLsids now, so do that and move AntigenProperties into AntigenPropMap
+        // And calculate specimenLsid -> wellgroupName map
+        final Map<String, String> specimenLsidToWellgroupNameMap = new HashMap<>();
         for (RunMap runMap : containerToRunMap.values())
         {
             for (Map.Entry<Integer, AntigenLsidMap> antigenLsidMapEntry : runMap.entrySet())
@@ -200,17 +212,29 @@ public class ElispotUpgradeCode implements UpgradeCode
                 AntigenLsidMap antigenLsidMap = antigenLsidMapEntry.getValue();
                 for (AntigenPropMap antigenPropMap : antigenLsidMap.getAntigenPropMaps().values())
                 {
-                    if (antigenPropMap.containsKey(ElispotDataHandler.WELLGROUP_PROPERTY_NAME) && antigenPropMap.containsKey("ProtocolName") &&
-                            antigenPropMap.containsKey(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME))
+                    String antigenWellgroupName = (String)antigenPropMap.get(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME);
+                    if (null == antigenWellgroupName)
                     {
-                        Lsid antigenLsid = ElispotDataHandler.getAntigenLsid((String) antigenPropMap.get(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME),
-                                (String) antigenPropMap.get(ElispotDataHandler.WELLGROUP_PROPERTY_NAME), runId, (String) antigenPropMap.get("ProtocolName"), null);
+                        antigenWellgroupName = (String)antigenPropMap.get(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME);
+                        antigenLsidMap.setUseAntigenName(true);
+                    }
+                    else if (antigenLsidMap.useAntigenName())
+                    {
+                        _log.info("Some but not all AntigenWellgroupNames missing in Run " + runId);
+                    }
+
+                    String wellgroupName = (String)antigenPropMap.get(ElispotDataHandler.WELLGROUP_PROPERTY_NAME);
+                    specimenLsidToWellgroupNameMap.put((String)antigenPropMap.get(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY), wellgroupName);
+                    if (null != wellgroupName && antigenPropMap.containsKey("ProtocolName") && null != antigenWellgroupName)
+                    {
+                        Lsid antigenLsid = ElispotDataHandler.getAntigenLsid(antigenWellgroupName, wellgroupName, runId,
+                                                                             (String)antigenPropMap.get("ProtocolName"), null);
                         antigenLsidMap.put(antigenLsid.toString(), getStreamlinedAntigenPropMap(antigenPropMap));
                     }
                     else
                     {
                         // This can happen depending on the template used for the assay
-                        _log.info("Could not find components for antigenLsid");
+                        _log.info("Could not find components for antigenLsid for Wellgroup '" + wellgroupName + "', Run " + runId);
                     }
                 }
                 antigenLsidMap.getAntigenPropMaps().clear();
@@ -278,12 +302,12 @@ public class ElispotUpgradeCode implements UpgradeCode
                 if (fullName.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
                     String specimenLsid = (String) map.get("StringValue");
-                    Pair<String, String> pair = getSpecimenAndProtocolNames(runId, specimenLsid);
-                    if (null == pair)
+                    String protocolName = getProtocolName(runId, specimenLsid);
+                    if (null == protocolName)
                         return;     // error already logged
 
-                    antigenPropMap.put(ElispotDataHandler.WELLGROUP_PROPERTY_NAME, pair.first);
-                    antigenPropMap.put("ProtocolName", pair.second);
+                    antigenPropMap.put(ElispotDataHandler.WELLGROUP_PROPERTY_NAME, specimenLsidToWellgroupNameMap.get(specimenLsid));
+                    antigenPropMap.put("ProtocolName", protocolName);
                     antigenPropMap.put(fullName, specimenLsid);
                 }
                 else
@@ -303,7 +327,7 @@ public class ElispotUpgradeCode implements UpgradeCode
 
                 for (AntigenPropMap antigenPropMap : antigenLsidMap.getAntigenPropMaps().values())
                 {
-                    Map<String, AntigenPropMap> awgNameToProps = getProcessedAntigenProperties(antigenPropMap, antigenLsidMap);
+                    Map<String, AntigenPropMap> awgNameToProps = getProcessedAntigenProperties(antigenPropMap, antigenLsidMap, antigenLsidMap.useAntigenName());
                     for (Map.Entry<String, AntigenPropMap> awgNameToProp : awgNameToProps.entrySet())
                     {
                         String antigenWellGroupName = awgNameToProp.getKey();
@@ -312,25 +336,29 @@ public class ElispotUpgradeCode implements UpgradeCode
                         {
                             Lsid antigenLsid = ElispotDataHandler.getAntigenLsid(antigenWellGroupName,
                                     (String)processedAntigenPropMap.get(ElispotDataHandler.WELLGROUP_PROPERTY_NAME), runId, (String)processedAntigenPropMap.get("ProtocolName"), null);
-                            if (!antigenLsidMap.containsKey(antigenLsid.toString()))
+                            AntigenPropMap localAntigenPropMap = antigenLsidMap.get(antigenLsid.toString());
+                            if (null == localAntigenPropMap)
                             {
                                 if (!"Background".equals(antigenWellGroupName))
                                 {
-                                    _log.error("We expected entry for antigenLsid to already exist");
-                                    return;
+                                    _log.info("RunData properties for run '" + runId + "' do not include enough information to match antigen properties.");
                                 }
-                                antigenLsidMap.put(antigenLsid.toString(), new AntigenPropMap());
-                                antigenLsidMap.get(antigenLsid.toString()).put(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME, antigenWellGroupName);
-                                antigenLsidMap.get(antigenLsid.toString()).put(ElispotDataHandler.WELLGROUP_PROPERTY_NAME, processedAntigenPropMap.get(ElispotDataHandler.WELLGROUP_PROPERTY_NAME));
-                                antigenLsidMap.get(antigenLsid.toString()).put(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, processedAntigenPropMap.get("SpecimenLsid"));
+                                localAntigenPropMap = new AntigenPropMap();
+                                antigenLsidMap.put(antigenLsid.toString(), localAntigenPropMap);
+                                localAntigenPropMap.put(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME, antigenWellGroupName);
+                                localAntigenPropMap.put(ElispotDataHandler.WELLGROUP_PROPERTY_NAME, processedAntigenPropMap.get(ElispotDataHandler.WELLGROUP_PROPERTY_NAME));
+                                localAntigenPropMap.put(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, processedAntigenPropMap.get("SpecimenLsid"));
                             }
-                            antigenLsidMap.get(antigenLsid.toString()).put("Mean", processedAntigenPropMap.get("Mean"));
-                            antigenLsidMap.get(antigenLsid.toString()).put("Median", processedAntigenPropMap.get("Median"));
+                            localAntigenPropMap.put("Mean", processedAntigenPropMap.get("Mean"));
+                            localAntigenPropMap.put("Median", processedAntigenPropMap.get("Median"));
+                            if (antigenLsidMap.useAntigenName())
+                            {
+                                localAntigenPropMap.put(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME, localAntigenPropMap.get(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME));
+                            }
                         }
                         else
                         {
-                            _log.error("Could not find components for antigenLsid");
-                            return;
+                            _log.info("Could not find components for antigenLsid in Run " + runId);
                         }
                     }
                 }
@@ -351,9 +379,12 @@ public class ElispotUpgradeCode implements UpgradeCode
                 for (Map.Entry<String, AntigenPropMap> antigenPropMapEntry : antigenLsidMapEntry.getValue().entrySet())
                 {
                     AntigenPropMap antigenPropMap = antigenPropMapEntry.getValue();
-                    antigenPropMap.put("AntigenLsid", antigenPropMapEntry.getKey());
-                    antigenPropMap.put("RunId", runId);
-                    Table.insert(user, antigenTable, antigenPropMap);
+                    if (antigenPropMap.containsKey("Mean") && antigenPropMap.containsKey("Median"))
+                    {
+                        antigenPropMap.put("AntigenLsid", antigenPropMapEntry.getKey());
+                        antigenPropMap.put("RunId", runId);
+                        Table.insert(user, antigenTable, antigenPropMap);
+                    }
                 }
             }
             removeOldOntologyObjects(container);
@@ -362,7 +393,7 @@ public class ElispotUpgradeCode implements UpgradeCode
 
     // Return <SampleName, ProtocolName>
     @Nullable
-    private static Pair<String, String> getSpecimenAndProtocolNames(int runId, String specimenLsid)
+    private static String getProtocolName(int runId, String specimenLsid)
     {
         // This is a pain, but we need the name of the material for the specimenLsid
         ExpRun run = ExperimentService.get().getExpRun(runId);
@@ -371,26 +402,12 @@ public class ElispotUpgradeCode implements UpgradeCode
             _log.error("Run not found: " + runId);
             return null;
         }
-        String wellgroupName = null;
-        for (ExpMaterial material : run.getMaterialInputs().keySet())
-            if (material.getLSID().equals(specimenLsid))
-            {
-                wellgroupName = material.getName();
-                break;
-            }
-
-        if (null == wellgroupName)
-        {
-            _log.error("Specimen name not found for Lsid: " + specimenLsid);
-            return null;
-        }
         if (null == run.getProtocol())
         {
             _log.error("Protocol not found for run :" + runId);
             return null;
         }
-        String protocolName = run.getProtocol().getName();
-        return new Pair<>(wellgroupName, protocolName);
+        return run.getProtocol().getName();
     }
 
     private static AntigenPropMap getStreamlinedAntigenPropMap(AntigenPropMap antigenPropMapIn)
@@ -406,13 +423,15 @@ public class ElispotUpgradeCode implements UpgradeCode
         return antigenPropMap;
     }
 
-    private static Map<String, AntigenPropMap> getProcessedAntigenProperties(AntigenPropMap antigenPropMap, AntigenLsidMap antigenLsidMap)
+    private static Map<String, AntigenPropMap> getProcessedAntigenProperties(AntigenPropMap antigenPropMap, AntigenLsidMap antigenLsidMap, boolean useAntigenName)
     {
         // Properties we collected from antigen rows need to be processed;
         // they are named in the form <antigenname>[_antigenwellgoupname]_(Mean|Median)
         // -- To determine antigenLsid, if name has antigenwellgroupname, use it, otherwise find antigen (processed in first step) that
         //      has antigenname that matches and take the associated antigenwellgroupname (that hasn't already been used)
         // -- map property into Mean or Median property for that antigenLsid
+
+        // useAntigenName means AntigenWellgroupNames were not found in the data properties, so just take the entire name minus Mean/Median
         Map<String, AntigenPropMap> awgNameToProps = new HashMap<>();
         Set<String> usedAnitigenWellgroupNames = new HashSet<>();
 
@@ -434,89 +453,93 @@ public class ElispotUpgradeCode implements UpgradeCode
             {
                 String[] splitKey = key.split("_");
                 assert splitKey.length == 2 || splitKey.length == 3;
-                if (splitKey.length > 2)
+                if (splitKey.length == 2 && splitKey[0].equals("Background"))
                 {
-                    String antigenWellgroupName = splitKey[1];
-                    addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[2].equals("Mean"));
-                    usedAnitigenWellgroupNames.add(antigenWellgroupName);
+                    addPropToAntigenPropMap(awgNameToProps, "Background", antigenPropEntry.getValue(), splitKey[splitKey.length - 1].equals("Mean"));
                 }
-                else if (splitKey[0].equals("Background"))
+                else if (splitKey.length > 2 || useAntigenName)
                 {
-                    addPropToAntigenPropMap(awgNameToProps, "Background", antigenPropEntry.getValue(), splitKey[1].equals("Mean"));
+                    String antigenWellgroupName = splitKey.length == 2 ? splitKey[0] : (splitKey[0] + splitKey[1]);
+                    addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[splitKey.length - 1].equals("Mean"));
+                    usedAnitigenWellgroupNames.add(antigenWellgroupName);
                 }
             }
         }
         assert null != wellgroupName && null != protocolName && null != specimenLsid;
 
-        Map<String, Set<AntigenPropMap>> mapKeyToAntigenWellgroupPossibilities = new HashMap<>();
-        for (Map.Entry<String, Object> antigenPropEntry : antigenPropMap.entrySet())
+        if (!useAntigenName)
         {
-            String key = antigenPropEntry.getKey();
-            if (!key.equals(ElispotDataHandler.WELLGROUP_PROPERTY_NAME) && !key.equals("ProtocolName") &&
-                !key.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
+            // Not using AntigenName as AntigenWellgroupName, so we need to parse out the composite names
+            Map<String, Set<AntigenPropMap>> mapKeyToAntigenWellgroupPossibilities = new HashMap<>();
+            for (Map.Entry<String, Object> antigenPropEntry : antigenPropMap.entrySet())
             {
-                String[] splitKey = key.split("_");
-                assert splitKey.length == 2 || splitKey.length == 3;
-                if (splitKey.length == 2 && !splitKey[0].equals("Background"))
+                String key = antigenPropEntry.getKey();
+                if (!key.equals(ElispotDataHandler.WELLGROUP_PROPERTY_NAME) && !key.equals("ProtocolName") &&
+                        !key.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
-                    // Need to lookup antigen name
-                    String antigenNameIfAny = splitKey[0];
-                    Set<AntigenPropMap> antigenPropMapsMatchingName = getAntigenPropMapsMatchingName(antigenNameIfAny, antigenLsidMap);
-                    if (!mapKeyToAntigenWellgroupPossibilities.containsKey(antigenNameIfAny))
+                    String[] splitKey = key.split("_");
+                    assert splitKey.length == 2 || splitKey.length == 3;
+                    if (splitKey.length == 2 && !splitKey[0].equals("Background"))
                     {
-                        mapKeyToAntigenWellgroupPossibilities.put(antigenNameIfAny, antigenPropMapsMatchingName);
+                        // Need to lookup antigen name
+                        String antigenNameIfAny = splitKey[0];
+                        Set<AntigenPropMap> antigenPropMapsMatchingName = getAntigenPropMapsMatchingName(antigenNameIfAny, antigenLsidMap);
+                        if (!mapKeyToAntigenWellgroupPossibilities.containsKey(antigenNameIfAny))
+                        {
+                            mapKeyToAntigenWellgroupPossibilities.put(antigenNameIfAny, antigenPropMapsMatchingName);
+                        }
                     }
                 }
             }
-        }
 
-        Map<String, String> mapKeyToWellgroupName = new HashMap<>();
-        for (Map.Entry<String, Set<AntigenPropMap>> antigenPropMapsMatchingNameEntry : mapKeyToAntigenWellgroupPossibilities.entrySet())
-        {
-            String key = antigenPropMapsMatchingNameEntry.getKey();
-            if (antigenPropMapsMatchingNameEntry.getValue().isEmpty())
+            Map<String, String> mapKeyToWellgroupName = new HashMap<>();
+            for (Map.Entry<String, Set<AntigenPropMap>> antigenPropMapsMatchingNameEntry : mapKeyToAntigenWellgroupPossibilities.entrySet())
             {
-                // Nothing matched the possible antigen name, so it must have been null;
-                // Therefore this name must be the antigenWellgroupName
-                if (!usedAnitigenWellgroupNames.contains(key))
+                String key = antigenPropMapsMatchingNameEntry.getKey();
+                if (antigenPropMapsMatchingNameEntry.getValue().isEmpty())
                 {
-                    mapKeyToWellgroupName.put(key, key);
-                    usedAnitigenWellgroupNames.add(key);
+                    // Nothing matched the possible antigen name, so it must have been null;
+                    // Therefore this name must be the antigenWellgroupName
+                    if (!usedAnitigenWellgroupNames.contains(key))
+                    {
+                        mapKeyToWellgroupName.put(key, key);
+                        usedAnitigenWellgroupNames.add(key);
+                    }
+                    else
+                    {
+                        _log.error("Somehow the wellgroupName was already used.");
+                        return Collections.emptyMap();
+                    }
                 }
                 else
                 {
-                    _log.error("Somehow the wellgroupName was already used.");
-                    return Collections.emptyMap();
-                }
-            }
-            else
-            {
-                for (AntigenPropMap antigenPropMap1 : antigenPropMapsMatchingNameEntry.getValue())
-                {
-                    String antigenWellgroupName = (String) antigenPropMap1.get(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME);
-                    if (!usedAnitigenWellgroupNames.contains(antigenWellgroupName))
+                    for (AntigenPropMap antigenPropMap1 : antigenPropMapsMatchingNameEntry.getValue())
                     {
-                        mapKeyToWellgroupName.put(key, antigenWellgroupName);
-                        usedAnitigenWellgroupNames.add(antigenWellgroupName);
-                        break;
+                        String antigenWellgroupName = (String) antigenPropMap1.get(ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME);
+                        if (!usedAnitigenWellgroupNames.contains(antigenWellgroupName))
+                        {
+                            mapKeyToWellgroupName.put(key, antigenWellgroupName);
+                            usedAnitigenWellgroupNames.add(antigenWellgroupName);
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        for (Map.Entry<String, Object> antigenPropEntry : antigenPropMap.entrySet())
-        {
-            String key = antigenPropEntry.getKey();
-            if (!key.equals(ElispotDataHandler.WELLGROUP_PROPERTY_NAME) && !key.equals("ProtocolName") &&
-                    !key.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
+            for (Map.Entry<String, Object> antigenPropEntry : antigenPropMap.entrySet())
             {
-                String[] splitKey = key.split("_");
-                assert splitKey.length == 2 || splitKey.length == 3;
-                if (splitKey.length == 2 && !splitKey[0].equals("Background"))
+                String key = antigenPropEntry.getKey();
+                if (!key.equals(ElispotDataHandler.WELLGROUP_PROPERTY_NAME) && !key.equals("ProtocolName") &&
+                        !key.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
-                    String antigenNameIfAny = splitKey[0];
-                    String antigenWellgroupName = mapKeyToWellgroupName.get(antigenNameIfAny);
-                    addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[1].equals("Mean"));
+                    String[] splitKey = key.split("_");
+                    assert splitKey.length == 2 || splitKey.length == 3;
+                    if (splitKey.length == 2 && !splitKey[0].equals("Background"))
+                    {
+                        String antigenNameIfAny = splitKey[0];
+                        String antigenWellgroupName = mapKeyToWellgroupName.get(antigenNameIfAny);
+                        addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[1].equals("Mean"));
+                    }
                 }
             }
         }

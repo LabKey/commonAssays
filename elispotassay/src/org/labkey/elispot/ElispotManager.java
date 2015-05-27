@@ -162,9 +162,12 @@ public class ElispotManager
             public void exec(Map<String, Object> object) throws SQLException
             {
                 String antigenHeading = (String)object.get("AntigenHeading");
-                if (!antigenHeadingMap.containsKey(antigenHeading))
-                    antigenHeadingMap.put(antigenHeading, new HashSet<Integer>());
-                antigenHeadingMap.get(antigenHeading).add((Integer)object.get("RunId"));
+                if (null != antigenHeading)
+                {
+                    if (!antigenHeadingMap.containsKey(antigenHeading))
+                        antigenHeadingMap.put(antigenHeading, new HashSet<Integer>());
+                    antigenHeadingMap.get(antigenHeading).add((Integer)object.get("RunId"));
+                }
             }
         });
         return antigenHeadingMap;

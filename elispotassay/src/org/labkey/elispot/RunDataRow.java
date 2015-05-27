@@ -126,14 +126,14 @@ public class RunDataRow
     {
         if (null == _antigenRow)
             _antigenRow = ElispotManager.get().getAntigenRow(_antigenLsid, protocol);
-        return (Integer)_antigenRow.get("AntigenId");
+        return null != _antigenRow ? (Integer)_antigenRow.get("AntigenId") : null;
     }
 
     public String getAntigenName(ExpProtocol protocol)
     {
         if (null == _antigenRow)
             _antigenRow = ElispotManager.get().getAntigenRow(_antigenLsid, protocol);
-        return (String)_antigenRow.get("AntigenName");
+        return null != _antigenRow ? (String)_antigenRow.get("AntigenName") : null;
     }
 
     public String getAntigenWellgroupName()
@@ -150,7 +150,7 @@ public class RunDataRow
     {
         if (null == _antigenRow)
             _antigenRow = ElispotManager.get().getAntigenRow(_antigenLsid, protocol);
-        return (Integer)_antigenRow.get("CellWell");
+        return null != _antigenRow ? (Integer)_antigenRow.get("CellWell") : null;
     }
 
     public String getAnalyte()
