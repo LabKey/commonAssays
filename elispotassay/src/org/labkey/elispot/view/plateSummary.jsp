@@ -19,7 +19,19 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.elispot.ElispotController" %>
+<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    public LinkedHashSet<ClientDependency> getClientDependencies()
+    {
+        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
+        resources.add(ClientDependency.fromPath("Ext4"));
+        resources.add(ClientDependency.fromPath("elispot/PlateSummary.js"));
+        resources.add(ClientDependency.fromPath("elispot/PlateSummary.css"));
+        return resources;
+    }
+%>
 <%
     JspView<ElispotController.PlateSummaryBean> me = (JspView<ElispotController.PlateSummaryBean>)HttpView.currentView();
     ElispotController.PlateSummaryBean bean = me.getModelBean();
@@ -28,20 +40,13 @@
 %>
 
 <script type="text/javascript">
-    LABKEY.requiresExt4Sandbox();
-    LABKEY.requiresScript("elispot/PlateSummary.js");
-</script>
-
-<script type="text/javascript">
 
     Ext4.onReady(function(){
         var panel = Ext4.create('LABKEY.ext4.PlateSummary', {
             runId       : <%=bean.getRun()%>,
             width       : 1500,
             renderTo    : '<%= renderId %>',
-            isFluorospot: <%=bean.isFluorospot()%>,
-            rowLabel    : ['A','B','C','D','E','F','G','H'],
-            columnLabel : [1,2,3,4,5,6,7,8,9,10,11,12]
+            isFluorospot: <%=bean.isFluorospot()%>
         });
     });
 </script>

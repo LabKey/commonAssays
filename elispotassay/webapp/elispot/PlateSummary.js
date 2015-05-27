@@ -7,17 +7,21 @@ LABKEY.requiresExt4Sandbox();
 
 Ext4.define('LABKEY.ext4.PlateSummary', {
 
-    extend : 'Ext.panel.Panel',
+    extend  : 'Ext.panel.Panel',
+
+    layout  : 'hbox',
+
+    frame   : false,
+
+    border  : false,
+
+    rowLabel    : ['A','B','C','D','E','F','G','H'],
+
+    columnLabel : [1,2,3,4,5,6,7,8,9,10,11,12],
 
     constructor : function(config) {
 
         Ext4.QuickTips.init();
-
-        Ext4.apply(this, config, {
-            layout : 'hbox',
-            frame  : false,
-            border : false
-        });
 
         this.callParent([config]);
     },
@@ -30,7 +34,6 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
             border  : false,
             frame   : false,
             bodyPadding : 20,
-            region   : 'center',
             flex     : 1.2
         });
         this.items.push(this.centerPanel);
@@ -39,7 +42,6 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
             border  : false,
             frame   : false,
             bodyPadding : 20,
-            region  : 'east',
             flex    : 1,
             items   : [
                 {html:'<span>Click on a button to highlight the wells in a particular well group.<br>Hover over an individual well ' +
@@ -178,7 +180,9 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                 rows.push({label:label, cols:cols});
             }
 
-            grids.push(Ext4.create('LABKEY.ext4.PlatePanel', {
+            grids.push({
+                xtype       : 'lk_platepanel',
+                height      : 450,
                 plateStore  : this.plateStore,
                 isFluorospot: this.isFluorospot,
                 data        : {
@@ -187,7 +191,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                     cytokine    : this.analyteMap[analyte],
                     rows        : rows
                 }
-            }));
+            });
         }
         this.centerPanel.add(grids);
         this.eastPanel.add(this.getEastPanel());
@@ -310,16 +314,17 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
 Ext4.define('LABKEY.ext4.PlatePanel', {
 
-    extend: 'Ext.panel.Panel',
+    extend  : 'Ext.panel.Panel',
+
+    alias   : 'widget.lk_platepanel',
+
+    border  : false,
+
+    frame   : false,
 
     constructor: function (config)
     {
         Ext4.QuickTips.init();
-        Ext4.applyIf(config, {
-            border    : false,
-            frame     : false,
-            height    : 450
-        });
 
         this.callParent([config]);
         var plateTemplate = [];
@@ -332,18 +337,18 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
 
         plateTemplate.push(
             '<table class="plate-summary-grid">',
-            '<tr><td><div style="width:53px; height:40px; text-align:center;"></div></td>',
+            '<tr><td><div class="plate-columnlabel"></div></td>',
             '<tpl for="columnLabel">',
-            '<td><div style="width:53px; height:40px; text-align:center;">{.}</div></td>',
+            '<td><div class="plate-columnlabel">{.}</div></td>',
             '</tpl>',
             '</tr>',
             '<tpl for="rows">',
-            '<tr><td><div style="width:45px; height:40px; text-align:center;"><br>{label}</div></td>' +
+            '<tr><td><div class="plate-rowlabel"><br>{label}</div></td>' +
             '<tpl for="cols">',
-            '<td><div class="plate-well-td-div {aCls} {sCls}" dataIndex="{dataIndex}" style="border:1px solid gray;width:49px; height:35px; vertical-align:middle; text-align:center; background-color:#AAAAAA;">',
-            '<a class="labkey-cls-spotcount" style="color: white;" href="javascript:void(0);">{spotCount}</a>',
-            '<a class="labkey-cls-activity" style="color: white;display: none" href="javascript:void(0);">{activity}</a>',
-            '<a class="labkey-cls-intensity" style="color: white;display: none" href="javascript:void(0);">{intensity}</a>',
+            '<td><div class="plate-well-td-div {aCls} {sCls}" dataIndex="{dataIndex}">',
+            '<a class="labkey-cls-spotcount" style="display:" href="javascript:void(0);">{spotCount}</a>',
+            '<a class="labkey-cls-activity" style="display: none" href="javascript:void(0);">{activity}</a>',
+            '<a class="labkey-cls-intensity" style="display: none" href="javascript:void(0);">{intensity}</a>',
             '</div>',
             '</td>',
             '</tpl>',

@@ -194,6 +194,7 @@ elispotassay/src/org/labkey/elispot/query/ElispotRunAntigenTable.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/query/PlateBasedAssayRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
+elispotassay/webapp/elispot/PlateSummary.css -text
 elispotassay/webapp/elispot/PlateSummary.js -text
 flow/FlowEngine.iml -text
 flow/build.xml -text
