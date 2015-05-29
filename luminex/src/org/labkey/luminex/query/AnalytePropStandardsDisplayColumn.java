@@ -81,37 +81,34 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
             selectedSQL.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
             selectedSQL.append(" WHERE LOWER(a.Name) = LOWER(?) AND a.RowId = at.AnalyteId AND ");
             selectedSQL.add(_analyteName);
-            selectedSQL.append("t.RowId = at.TitrationId AND t.RunId = ? AND LOWER(t.Name) = LOWER(?)");
+            selectedSQL.append("t.RowId = at.TitrationId AND t.RunId = ? AND LOWER(t.Name) = LOWER(?) AND t.Standard = ?");
             selectedSQL.add(_form.getReRun().getRowId());
             selectedSQL.add(titrationName);
+            selectedSQL.add(Boolean.TRUE);
 
-            if (new SqlSelector(LuminexProtocolSchema.getSchema(), selectedSQL).exists())
-            {
-                defVal = Boolean.TRUE.toString();
-            }
-
+            defVal = new SqlSelector(LuminexProtocolSchema.getSchema(), selectedSQL).exists() ? "true" : "false";
         }
         String checked = "";
 
-        // if reshowing form on error, preselect based on request value
         if (_errorReshow)
         {
+            // if reshowing form on error, preselect based on request value
             if (_form.getViewContext().getRequest().getParameter(propertyName) != null)
                 checked = "CHECKED";
         }
-        // if there is only one standard, then preselect the checkbox
-        else if (_standardTitrations.size() == 1 && _standardTitrations.contains(_titration))
+        else if (_standardTitrations.contains(_titration))
         {
-            checked = "CHECKED";
-        }
-        else if (_standardTitrations.size() > 1)
-        {
-            // if > 1 standard and default value exists, set checkbox based on default value
-            if (defVal != null && defVal.toLowerCase().equals("true"))
+            if (_standardTitrations.size() == 1)
+            {
+                // if there is only one standard, then preselect the checkbox
                 checked = "CHECKED";
-                // if no default value and titration is standard, then preselect the checkbox
-            else if (defVal == null && _standardTitrations.contains(_titration))
+            }
+            else if (_standardTitrations.size() > 1 && (defVal == null || defVal.toLowerCase().equals("true")))
+            {
+                // if > 1 standard and default value exists, set checkbox based on default value
+                // else if no default value and titration is standard, then preselect the checkbox
                 checked = "CHECKED";
+            }
         }
 
         out.write("<input type='checkbox' value='" + value + "' name='" + propertyName + "' " + checked + " />");

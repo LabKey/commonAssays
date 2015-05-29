@@ -640,17 +640,17 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     public static String getTitrationTypeCheckboxName(Titration.Type type, Titration titration)
     {
-        return "_titrationRole_" + type + "_" + titration.getName();
+        return ColumnInfo.propNameFromName("_titrationRole_" + type + "_" + titration.getName());
     }
 
     public static String getSinglePointControlCheckboxName(String singlePointControl)
     {
-        return "_singlePointControl_" + singlePointControl;
+        return ColumnInfo.propNameFromName("_singlePointControl_" + singlePointControl);
     }
 
     public static String getTitrationColumnCellName(String titrationName)
     {
-        return "_titrationcell_" + titrationName;
+        return ColumnInfo.propNameFromName("_titrationcell_" + titrationName);
     }
 
     protected class LuminexRunStepHandler extends RunStepHandler

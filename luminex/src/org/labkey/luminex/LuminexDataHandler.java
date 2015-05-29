@@ -741,7 +741,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
         {
             Titration titration = titrations.get(titrationName);
-            insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
+            if (titration != null)
+            {
+                insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
+            }
         }
     }
 
