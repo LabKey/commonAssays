@@ -123,23 +123,25 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
                 visibleColumns.add(FieldKey.fromParts("Run", AssayService.BATCH_COLUMN_NAME, prop.getName()));
         }
 
-        addContainerColumn();
+        SQLFragment protocolConditionSql = new SQLFragment("(SELECT d.ProtocolLsid FROM exp.ExperimentRun d WHERE d.RowId = RunId) = '" + _protocol.getLSID() + "'");
+        addCondition(protocolConditionSql);
+
         setDefaultVisibleColumns(visibleColumns);
     }
 
     protected abstract void addPropertyColumns(final AssaySchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns);
     protected abstract boolean hasMaterialSpecimenPropertyColumnDecorator();
 
-    protected ColumnInfo addContainerColumn()
+    @Override
+    protected void applyContainerFilter(ContainerFilter filter)
     {
-        TableInfo expRunTable = ExperimentService.get().getTinfoExperimentRun();
-        ColumnInfo containerCol = LookupColumn.create(getColumn("Run"), expRunTable.getColumn("RowId"),
-                                                      expRunTable.getColumn("Container"), false);
-
-        containerCol = ContainerForeignKey.initColumn(containerCol, _userSchema);
-        containerCol.setHidden(true);
-        containerCol.setIsUnselectable(true);
-        containerCol.setAlias("Container");
-        return addColumn(containerCol);
+        // There isn't a container column directly on this table so do a special filter
+        if (getContainer() != null)
+        {
+            FieldKey containerColumn = FieldKey.fromParts("Run", "Folder");
+            clearConditions(containerColumn);
+            addCondition(filter.getSQLFragment(getSchema(), new SQLFragment("(SELECT d.Container FROM exp.ExperimentRun d WHERE d.RowId = RunId)"), getContainer()), containerColumn);
+        }
     }
+
 }
