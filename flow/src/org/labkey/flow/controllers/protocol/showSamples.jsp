@@ -36,8 +36,8 @@
     boolean unlinkedOnly = form.isUnlinkedOnly();
 %>
 <% if (ss == null || samples == null || samples.size() == 0) { %>
-    No samples have been uploaded in this folder.<br>
-    <labkey:link href="<%=protocol.urlUploadSamples(ss != null)%>" text="Upload samples from a spreadsheet" /><br>
+    No samples have been imported in this folder.<br>
+    <labkey:link href="<%=protocol.urlUploadSamples(ss != null)%>" text="Import samples from a spreadsheet" /><br>
 <% } else { %>
 <p>
 There are <a href="<%=h(ss.detailsURL())%>"><%=samples.size()%> sample descriptions</a> in this folder.

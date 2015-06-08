@@ -117,7 +117,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(ShowSamplesForm form, BindException errors) throws Exception
         {
             protocol = form.getProtocol();
-            return FormPage.getView(ProtocolController.class, form, errors, "showSamples.jsp");
+            return FormPage.getView(ProtocolController.class, form, errors, "showSamples2.jsp");
         }
 
         public NavTree appendNavTrail(NavTree root)

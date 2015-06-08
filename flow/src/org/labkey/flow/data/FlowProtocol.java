@@ -23,8 +23,10 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -42,6 +44,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.FlowParam;
@@ -383,6 +386,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return getUnlinkedSampleCount(ss.getSamples());
     }
 
+    // TODO: Remove me as I am very expensive
     public static int getUnlinkedSampleCount(List<? extends ExpMaterial> samples)
     {
         if (samples == null)
@@ -413,6 +417,46 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             FlowDataObject.addDataOfType(app.getOutputDatas(), FlowDataType.FCSFile, result);
         }
         return result;
+    }
+
+    // CONSIDER: Use a fancy NestableQueryView to group FCSFiles by Sample
+    public static Map<Pair<Integer, String>, List<Pair<Integer, String>>> getFCSFilesGroupedBySample(User user, Container c)
+    {
+        Map<Pair<Integer, String>, List<Pair<Integer,String>>> ret = new LinkedHashMap<>();
+
+        FlowSchema schema = new FlowSchema(user, c);
+        String sql = "SELECT " +
+                "FCSFiles.RowId As FCSFileRowId,\n" +
+                "FCSFiles.Name As FCSFileName,\n" +
+                "M.RowId AS SampleRowId,\n" +
+                "M.Name AS SampleName\n" +
+                "FROM FCSFiles\n" +
+                "FULL OUTER JOIN exp.Materials M ON\n" +
+                "FCSFiles.Sample = M.RowId\n" +
+                "ORDER BY M.Name";
+        try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, sql))
+        {
+            for (Map<String, Object> row : rs)
+            {
+                Integer sampleRowId = (Integer) row.get("SampleRowId");
+                String sampleName = (String) row.get("SampleName");
+                Pair<Integer, String> samplePair = Pair.of(sampleRowId, sampleName);
+                List<Pair<Integer, String>> fcsFiles = ret.get(samplePair);
+                if (fcsFiles == null)
+                    ret.put(samplePair, fcsFiles = new ArrayList<>());
+
+                Integer fcsFileRowId = (Integer) row.get("FCSFIleRowId");
+                String fcsFileName = (String) row.get("FCSFileName");
+                Pair<Integer, String> fcsFilePair = Pair.of(fcsFileRowId, fcsFileName);
+                fcsFiles.add(fcsFilePair);
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
+        return ret;
     }
 
 

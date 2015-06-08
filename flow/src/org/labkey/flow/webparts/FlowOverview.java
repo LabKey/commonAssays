@@ -227,7 +227,7 @@ public class FlowOverview extends Overview
 
     private Step getAnalysisScriptStep()
     {
-        Step.Status status;
+        Step.Status status = Step.Status.normal;
         if (_scriptAnalysis != null)
         {
             status = Step.Status.normal;
@@ -237,10 +237,6 @@ public class FlowOverview extends Overview
             if (_fcsRealRunCount == 0)
             {
                 status = Step.Status.disabled;
-            }
-            else
-            {
-                status = Step.Status.required;
             }
         }
         Step ret = new Step("Create Analysis Script", status);
@@ -420,7 +416,7 @@ public class FlowOverview extends Overview
             if (ss != null)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples(false))).append("\">").append(ss.getSamples().size()).append(" sample descriptions</a> in this folder.");
+                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples(false))).append("\">").append(ss.getSamples(getContainer()).size()).append(" sample descriptions</a> in this folder.");
 
                 ret.setStatusHTML(sb.toString());
 
