@@ -27,6 +27,9 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
+<%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -38,22 +41,64 @@
     ExperimentUrls expUrls = PageFlowUtil.urlProvider(ExperimentUrls.class);
 
     Map<Pair<Integer, String>, List<Pair<Integer, String>>> fcsFilesBySample = protocol.getFCSFilesGroupedBySample(getUser(), getContainer());
+    Map<Pair<Integer, String>, List<Pair<Integer,String>>> linkedSamples = new LinkedHashMap<>();
     List<Pair<Integer,String>> unlinkedSamples = new ArrayList<>();
     List<Pair<Integer,String>> unlinkedFCSFiles = new ArrayList<>();
 
+    int linkedFCSFileCount = 0;
+    for (Pair<Integer, String> sample : fcsFilesBySample.keySet())
+    {
+        List<Pair<Integer, String>> fcsFiles = fcsFilesBySample.get(sample);
+        if (sample.first == null)
+        {
+            unlinkedFCSFiles.addAll(fcsFiles);
+            continue;
+        }
+
+        int fcsFileCount = 0;
+        for (Pair<Integer, String> fcsFile : fcsFiles)
+        {
+            if (fcsFile.first != null)
+                fcsFileCount++;
+        }
+
+        if (fcsFileCount == 0)
+        {
+            unlinkedSamples.add(sample);
+            continue;
+        }
+
+        linkedFCSFileCount += fcsFileCount;
+        linkedSamples.put(sample, fcsFiles);
+    }
+
+    int sampleCount = linkedSamples.size() + unlinkedSamples.size();
+
+    ActionURL urlFcsFilesWithSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
+            .addParameter("query.Sample/Name~isnonblank", "");
+
+    ActionURL urlFcsFilesWithoutSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
+            .addParameter("query.Sample/Name~isblank", "");
 %>
+
 <% if (ss == null) { %>
     No samples have been imported in this folder.<br>
     <labkey:link href="<%=protocol.urlUploadSamples(ss != null)%>" text="Import samples" /><br>
 <% } else { %>
 <p>
-There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample descriptions</a> in this folder.
+There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
 <% if (protocol.getSampleSetJoinFields().size() == 0) { %>
 <p>
     <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
 <% } else { %>
+
+    <% if (unlinkedSamples.size() > 0) { %>
+    <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedSamples.size()%> <%=text(unlinkedSamples.size() == 1 ? "sample is" : "samples are")%> not joined</a> to any FCS Files. <br>
+    <% } %>
+    <a href="<%=h(urlFcsFilesWithSamples)%>"><%=linkedFCSFileCount%> FCS Files</a> have been joined with a sample.<br>
+    <a href="<%=h(urlFcsFilesWithoutSamples)%>"><%=unlinkedFCSFiles.size()%> FCS Files</a> are not joined with any samples.<br>
 
     <table cellpadding="10">
         <tr>
@@ -69,29 +114,11 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample 
         </thead>
     <%
         int i = 0;
-        for (Pair<Integer, String> sample : fcsFilesBySample.keySet())
+        for (Pair<Integer, String> sample : linkedSamples.keySet())
         {
-            List<Pair<Integer, String>> fcsFiles = fcsFilesBySample.get(sample);
-            if (sample.first == null)
-            {
-                unlinkedFCSFiles.addAll(fcsFiles); continue;
-            }
-
             i++;
-
-            int fcsFileCount = 0;
-            for (Pair<Integer, String> fcsFile : fcsFiles)
-            {
-                if (fcsFile.first != null)
-                    fcsFileCount++;
-            }
-
-            if (fcsFileCount == 0)
-            {
-                unlinkedSamples.add(sample);
-                continue;
-            }
-
+            List<Pair<Integer, String>> fcsFiles = fcsFilesBySample.get(sample);
+            int fcsFileCount = fcsFiles.size();
             %>
         <tr class="<%=getShadeRowClass(i%2 == 0)%>">
             <td valign="top">
@@ -113,6 +140,10 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample 
             <%
         }
     %>
+        <tr class="labkey-col-total labkey-row">
+            <td>Count: <%=linkedSamples.size()%></td>
+            <td><%=linkedFCSFileCount%></td>
+        </tr>
     </table>
 
             </td>
@@ -124,6 +155,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample 
                     <tr>
                         <td class="labkey-column-header">Sample Name</td>
                     </tr>
+                    </thead>
                     <%
                         int sampleIdx = 0;
                         for (Pair<Integer,String> sample : unlinkedSamples)
@@ -136,7 +168,9 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample 
                         </td>
                     </tr>
                     <% } %>
-                    </thead>
+                    <tr class="labkey-col-total labkey-row">
+                        <td>Count: <%=unlinkedSamples.size()%></td>
+                    </tr>
                 </table>
             </td>
 
@@ -147,6 +181,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample 
                     <tr>
                         <td class="labkey-column-header">FCSFile</td>
                     </tr>
+                    </thead>
                     <%
                         int fcsFileIdx = 0;
                         for (Pair<Integer,String> fcsFile : unlinkedFCSFiles)
@@ -159,7 +194,9 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=fcsFilesBySample.size()%> sample 
                         </td>
                     </tr>
                     <% } %>
-                    </thead>
+                    <tr class="labkey-col-total labkey-row">
+                        <td>Count: <%=unlinkedFCSFiles.size()%></td>
+                    </tr>
                 </table>
             </td>
         </tr>
