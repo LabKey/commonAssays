@@ -35,9 +35,10 @@
 #  - 9.0.20140716 : Changes for LabKey server 14.3: add Other Control type for titrations
 #  - 9.1.20140718 : Allow use of alternate negative control bead on per-analyte basis (FI-Bkgd-Neg instead of FI-Bkgd-Blank)
 #  - 9.2.20141103 : Issue 21268: Add OtherControl titrations to PDF output of curves from transform script
+#  - 10.0.20150910 : Changes for LabKey server 15.2. Issue 23230: Luminex transform script error when standard or QC control name has a slash in it
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "9.2.20141103";
+transformVersion = "10.0.20150910";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -253,6 +254,12 @@ writeErrorOrWarning <- function(type, msg)
     }
 }
 
+convertToFileName <- function(name)
+{
+    # Issue 23230: slashes in the file name cause issues creating the PDFs, for now convert "/" and " " to "_"
+    gsub("[/ ]", "_", name);
+}
+
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
 run.props = readRunPropertiesFile();
@@ -348,7 +355,7 @@ if (nrow(titration.data) > 0)
        {
           # we want to create PDF plots of the curves for QC Controls
           if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
-              mypdf(file=paste(titrationName, "Control_Curves", toupper(fitTypes[typeIndex]), sep="_"), mfrow=c(1,1));
+              mypdf(file=paste(convertToFileName(titrationName), "Control_Curves", toupper(fitTypes[typeIndex]), sep="_"), mfrow=c(1,1));
           }
 
           # calculate the curve fit params for each analyte
@@ -710,7 +717,7 @@ if (runRumiCalculation)
                 }
 
                 # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns
-                mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
+                mypdf(file=paste(convertToFileName(stndVal), "5PL", sep="_"), mfrow=c(2,2));
                 fits = rumi(standard.dat, force.fit=TRUE, log.transform=curveFitLogTransform, plot.se.profile=curveFitLogTransform, verbose=TRUE);
                 fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
                 dev.off();
@@ -741,7 +748,7 @@ if (runRumiCalculation)
                 }
 
                 # call the rumi function to calculate new estimated log concentrations using 4PL for the unknowns
-                mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
+                mypdf(file=paste(convertToFileName(stndVal), "4PL", sep="_"), mfrow=c(2,2));
                 fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, log.transform=curveFitLogTransform, plot.se.profile=curveFitLogTransform, verbose=TRUE);
                 fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
                 dev.off();

@@ -29,8 +29,7 @@
     public LinkedHashSet<ClientDependency> getClientDependencies()
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        // NOTE: ext3 is required for the GuideSetWindow.js to work (while there is no dependency, there is a rendering artifact where data is missing without this dependency)
-        resources.add(ClientDependency.fromPath("Ext3"));
+        resources.add(ClientDependency.fromPath("Ext3")); // TODO: fix rendering issue to be able to remove this dependency
         resources.add(ClientDependency.fromPath("Ext4"));
         resources.add(ClientDependency.fromPath("luminex/GuideSetWindow.js"));
         return resources;

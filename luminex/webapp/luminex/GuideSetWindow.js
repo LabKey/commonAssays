@@ -115,6 +115,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
             store: this.getGuideSetStore()
         }];
 
+        // TODO: the guide set details dialog should be read-only from the Confirm Delete page
         this.buttons = [{
             id: 'GuideSetSaveButton',
             disabled: true,

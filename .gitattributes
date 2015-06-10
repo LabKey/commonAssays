@@ -793,6 +793,7 @@ luminex/webapp/luminex/WellExclusionPanel.js -text
 luminex/webapp/luminex/excluded.png -text
 luminex/webapp/luminex/included.png -text
 luminex/webapp/luminex/ljPlotIcon.png -text
+luminex/webapp/luminexLeveyJennings.lib.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/MicroarrayAssayDesigner.gwt.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayAssayDesigner.java -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayDesignerMainPanel.java -text

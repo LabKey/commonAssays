@@ -1,0 +1,22 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="luminex/LeveyJenningsGraphParamsPanel.js"/>
+        <script path="luminex/LeveyJenningsGuideSetPanel.js"/>
+        <script path="luminex/LeveyJenningsTrendPlotPanel.js"/>
+        <script path="luminex/LeveyJenningsTrackingDataPanel.js"/>
+        <script path="luminex/LeveyJenningsPlotHelpers.js"/>
+        <script path="luminex/ManageGuideSetPanel.js"/>
+        <script path="luminex/GuideSetWindow.js"/>
+        <script path="luminex/ApplyGuideSetPanel.js"/>
+        <script path="luminex/LeveyJenningsReport.css"/>
+        <script path="luminex/GuideSet.css"/>
+
+        <script path="Experiment/QCFlagToggleWindow.js"/>
+        <script path="fileAddRemoveIcon.css"/>
+    </library>
+    <dependencies>
+        <dependency path="clientapi/ext3"/>
+        <dependency path="Ext4"/>
+        <dependency path="vis/vis"/>
+    </dependencies>
+</libraries>
