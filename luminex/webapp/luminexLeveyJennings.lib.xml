@@ -10,9 +10,6 @@
         <script path="luminex/ApplyGuideSetPanel.js"/>
         <script path="luminex/LeveyJenningsReport.css"/>
         <script path="luminex/GuideSet.css"/>
-
-        <script path="Experiment/QCFlagToggleWindow.js"/>
-        <script path="fileAddRemoveIcon.css"/>
     </library>
     <dependencies>
         <dependency path="clientapi/ext3"/>

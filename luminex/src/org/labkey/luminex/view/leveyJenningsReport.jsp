@@ -34,6 +34,8 @@
     {
         LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
         resources.add(ClientDependency.fromPath("luminexLeveyJennings"));
+        resources.add(ClientDependency.fromPath("Experiment/QCFlagToggleWindow.js"));
+        resources.add(ClientDependency.fromPath("fileAddRemoveIcon.css"));
         return resources;
     }
 %>
