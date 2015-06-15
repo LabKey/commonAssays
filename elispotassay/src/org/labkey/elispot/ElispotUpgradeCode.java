@@ -448,14 +448,19 @@ public class ElispotUpgradeCode implements UpgradeCode
             else
             {
                 String[] splitKey = key.split("_");
-                assert splitKey.length == 2 || splitKey.length == 3;
                 if (splitKey.length == 2 && splitKey[0].equals("Background"))
                 {
                     addPropToAntigenPropMap(awgNameToProps, "Background", antigenPropEntry.getValue(), splitKey[splitKey.length - 1].equals("Mean"));
                 }
-                else if (splitKey.length > 2 || useAntigenName)
+                else if (useAntigenName)
                 {
-                    String antigenWellgroupName = splitKey.length == 2 ? splitKey[0] : (splitKey[0] + splitKey[1]);
+                    String antigenWellgroupName = joinAllButLast(splitKey);
+                    addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[splitKey.length - 1].equals("Mean"));
+                    usedAnitigenWellgroupNames.add(antigenWellgroupName);
+                }
+                else if (splitKey.length > 2 && splitKey[splitKey.length - 2].startsWith("Antigen "))
+                {
+                    String antigenWellgroupName = splitKey[splitKey.length - 2];
                     addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[splitKey.length - 1].equals("Mean"));
                     usedAnitigenWellgroupNames.add(antigenWellgroupName);
                 }
@@ -465,7 +470,7 @@ public class ElispotUpgradeCode implements UpgradeCode
 
         if (!useAntigenName)
         {
-            // Not using AntigenName as AntigenWellgroupName, so we need to parse out the composite names
+            // Not using AntigenName as AntigenWellgroupName, so we need to get the AntigenNames where the AntigenWellgroupName was not part of the key
             Map<String, Set<AntigenPropMap>> mapKeyToAntigenWellgroupPossibilities = new HashMap<>();
             for (Map.Entry<String, Object> antigenPropEntry : antigenPropMap.entrySet())
             {
@@ -474,11 +479,10 @@ public class ElispotUpgradeCode implements UpgradeCode
                         !key.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
                     String[] splitKey = key.split("_");
-                    assert splitKey.length == 2 || splitKey.length == 3;
-                    if (splitKey.length == 2 && !splitKey[0].equals("Background"))
+                    if (isSplitWholeName(splitKey))
                     {
                         // Need to lookup antigen name
-                        String antigenNameIfAny = splitKey[0];
+                        String antigenNameIfAny = joinAllButLast(splitKey);
                         Set<AntigenPropMap> antigenPropMapsMatchingName = getAntigenPropMapsMatchingName(antigenNameIfAny, antigenLsidMap);
                         if (!mapKeyToAntigenWellgroupPossibilities.containsKey(antigenNameIfAny))
                         {
@@ -529,12 +533,11 @@ public class ElispotUpgradeCode implements UpgradeCode
                         !key.equals(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY))
                 {
                     String[] splitKey = key.split("_");
-                    assert splitKey.length == 2 || splitKey.length == 3;
-                    if (splitKey.length == 2 && !splitKey[0].equals("Background"))
+                    if (isSplitWholeName(splitKey))
                     {
-                        String antigenNameIfAny = splitKey[0];
+                        String antigenNameIfAny = joinAllButLast(splitKey);
                         String antigenWellgroupName = mapKeyToWellgroupName.get(antigenNameIfAny);
-                        addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[1].equals("Mean"));
+                        addPropToAntigenPropMap(awgNameToProps, antigenWellgroupName, antigenPropEntry.getValue(), splitKey[splitKey.length - 1].equals("Mean"));
                     }
                 }
             }
@@ -547,6 +550,20 @@ public class ElispotUpgradeCode implements UpgradeCode
             antigenPropMap1.put(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, specimenLsid);
         }
         return awgNameToProps;
+    }
+
+    private static String joinAllButLast(String[] splitKey)
+    {
+        String result = splitKey[0];
+        for (int i = 1; i < splitKey.length - 1; i++)
+            result += "_" + splitKey[i];
+        return result;
+    }
+
+    private static boolean isSplitWholeName(String[] splitKey)
+    {
+        return ((splitKey.length == 2 && !splitKey[0].equals("Background")) ||
+                (splitKey.length > 2 && !splitKey[splitKey.length - 2].startsWith("Antigen ")));
     }
 
     private static void addPropToAntigenPropMap(Map<String, AntigenPropMap> awgNameToProps, String antigenWellgroupName, Object value, boolean isMean)
