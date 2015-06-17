@@ -58,6 +58,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
             fields : [
                 {name : 'position'},
                 {name : 'spotCount'},
+                {name : 'spotSize'},
                 {name : 'activity'},
                 {name : 'intensity'},
                 {name : 'analyte'},
@@ -157,6 +158,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
                             cols.push({
                                 spotCount   : rec.data.spotCount,
+                                spotSize    : rec.data.spotSize,
                                 activity    : rec.data.activity,
                                 intensity   : rec.data.intensity,
                                 dataIndex   : rec.index,
@@ -167,6 +169,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                         else {
                             cols.push({
                                 spotCount   : 'N/A',
+                                spotSize    : 'N/A',
                                 activity    : 'N/A',
                                 intensity   : 'N/A',
                                 position    : rec.data.position,
@@ -253,8 +256,9 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                 columns     : 1,
                 items       : [
                     {boxLabel : 'Spot Count', name : 'measurement', inputValue : 'labkey-cls-spotcount', checked : true},
+                    {boxLabel : 'Spot Size (microns)', name : 'measurement', inputValue : 'labkey-cls-spotsize'},
                     {boxLabel : 'Activity', name : 'measurement', inputValue : 'labkey-cls-activity'},
-                    {boxLabel : 'Intensity', name : 'measurement', inputValue : 'labkey-cls-intensity'}],
+                    {boxLabel : 'Intensity (fluorescence)', name : 'measurement', inputValue : 'labkey-cls-intensity'}],
                 listeners   : {
                     change  : {fn : function(cmp, newVal, oldVal){
                         this.showMeasurement(newVal, oldVal);
@@ -347,6 +351,7 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
             '<tpl for="cols">',
             '<td><div class="plate-well-td-div {aCls} {sCls}" dataIndex="{dataIndex}">',
             '<a class="labkey-cls-spotcount" style="display:" href="javascript:void(0);">{spotCount}</a>',
+            '<a class="labkey-cls-spotsize" style="display: none" href="javascript:void(0);">{spotSize}</a>',
             '<a class="labkey-cls-activity" style="display: none" href="javascript:void(0);">{activity}</a>',
             '<a class="labkey-cls-intensity" style="display: none" href="javascript:void(0);">{intensity}</a>',
             '</div>',

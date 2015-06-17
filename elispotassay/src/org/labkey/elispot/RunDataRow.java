@@ -29,6 +29,7 @@ public class RunDataRow
     private String _specimenLsid;
     private String _antigenLsid;
     private Double _spotCount;
+    private Double _spotSize;
     private String _wellgroupName;
     private String _wellgroupLocation;
     private Double _normalizedSpotCount;
@@ -211,5 +212,15 @@ public class RunDataRow
     public void setAntigenLsid(String antigenLsid)
     {
         _antigenLsid = antigenLsid;
+    }
+
+    public Double getSpotSize()
+    {
+        return _spotSize;
+    }
+
+    public void setSpotSize(Double spotSize)
+    {
+        _spotSize = spotSize;
     }
 }

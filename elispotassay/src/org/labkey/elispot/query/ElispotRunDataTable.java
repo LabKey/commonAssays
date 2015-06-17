@@ -72,6 +72,20 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                 }
             });
         }
+
+        // display column for spot size
+        ColumnInfo spotSizeCol = getColumn(FieldKey.fromParts(ElispotDataHandler.SPOT_SIZE_PROPERTY_NAME));
+        if (spotSizeCol != null)
+        {
+            spotSizeCol.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    return new SpotCountDisplayColumn(colInfo, schema);
+                }
+            });
+        }
     }
 
     protected void addPropertyColumns(final AssaySchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
@@ -155,6 +169,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         fieldKeys.add(FieldKey.fromString(ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME));
         if (ElispotAssayProvider.DetectionMethodType.FLUORESCENT == method)
         {
+            fieldKeys.add(FieldKey.fromString(ElispotDataHandler.SPOT_SIZE_PROPERTY_NAME));
             fieldKeys.add(FieldKey.fromString(ElispotDataHandler.ANALYTE_PROPERTY_NAME));
             fieldKeys.add(FieldKey.fromString(ElispotDataHandler.CYTOKINE_PROPERTY_NAME));
             fieldKeys.add(FieldKey.fromString(ElispotDataHandler.ACTIVITY_PROPERTY_NAME));

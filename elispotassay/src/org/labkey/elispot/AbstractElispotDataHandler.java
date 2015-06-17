@@ -69,6 +69,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String CYTOKINE_PROPERTY_NAME = "Cytokine";
     public static final String ACTIVITY_PROPERTY_NAME = "Activity";
     public static final String INTENSITY_PROPERTY_NAME = "Intensity";
+    public static final String SPOT_SIZE_PROPERTY_NAME = "SpotSize";
 
 
     public interface ElispotDataFileParser
@@ -114,6 +115,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                 runDataFields.put(SFU_PROPERTY_NAME, row.get(SFU_PROPERTY_NAME));
                 runDataFields.put(INTENSITY_PROPERTY_NAME, row.get(INTENSITY_PROPERTY_NAME));
                 runDataFields.put(ACTIVITY_PROPERTY_NAME, row.get(ACTIVITY_PROPERTY_NAME));
+                runDataFields.put(SPOT_SIZE_PROPERTY_NAME, row.get(SPOT_SIZE_PROPERTY_NAME));
 
                 ElispotManager.get().insertRunDataRow(null, runDataFields);
             }

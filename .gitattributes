@@ -162,9 +162,11 @@ elispotassay/module.properties -text
 elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.10-15.12.sql -text
 elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.11-15.12.sql -text
 elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.12-15.13.sql -text
+elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.13-15.14.sql -text
 elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.10-15.12.sql -text
 elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.11-15.12.sql -text
 elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.12-15.13.sql -text
+elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.13-15.14.sql -text
 elispotassay/resources/schemas/elispotlk.xml -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text

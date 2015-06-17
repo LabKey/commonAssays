@@ -77,6 +77,8 @@ public class FluorescentPlateInfo implements PlateInfo
                     measurement = ElispotDataHandler.ACTIVITY_PROPERTY_NAME;
                 else if (lcAnnotation.contains("intensity"))
                     measurement = ElispotDataHandler.INTENSITY_PROPERTY_NAME;
+                else if (lcAnnotation.contains("av.size"))
+                    measurement = ElispotDataHandler.SPOT_SIZE_PROPERTY_NAME;
             }
 
             if (!StringUtils.isBlank(analyte) && measurement != null)

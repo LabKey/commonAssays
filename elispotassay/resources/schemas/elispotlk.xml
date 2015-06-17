@@ -27,6 +27,7 @@
             <column columnName="SpecimenLsid"/>
             <column columnName="AntigenLsid"/>
             <column columnName="SpotCount"/>
+            <column columnName="SpotSize"/>
             <column columnName="WellgroupName"/>
             <column columnName="WellgroupLocation"/>
             <column columnName="NormalizedSpotCount"/>

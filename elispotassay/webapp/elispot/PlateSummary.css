@@ -25,6 +25,6 @@ div.plate-well-td-div {
     background-color : #AAAAAA;
 }
 
-a.labkey-cls-spotcount, a.labkey-cls-activity, a.labkey-cls-intensity {
+a.labkey-cls-spotcount, a.labkey-cls-activity, a.labkey-cls-intensity, a.labkey-cls-spotsize {
     color : white;
 }

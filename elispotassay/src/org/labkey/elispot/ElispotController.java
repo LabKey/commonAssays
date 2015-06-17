@@ -235,6 +235,8 @@ public class ElispotController extends SpringActionController
                 {
                     WellInfo wellInfo = new WellInfo(dataRow, position);
                     wellInfo.setSpotCount(reader.getWellDisplayValue(dataRow.getSpotCount()));
+                    if (dataRow.getSpotSize() != null)
+                        wellInfo.setSpotSize(reader.getWellDisplayValue(dataRow.getSpotSize()));
                     if (dataRow.getActivity() != null)
                         wellInfo.setActivity(String.valueOf(dataRow.getActivity()));
                     if (dataRow.getIntensity() != null)
@@ -373,6 +375,7 @@ public class ElispotController extends SpringActionController
     {
         private String _dataRowLsid;
         private String _spotCount = "";
+        private String _spotSize = "";
         private String _activity = "";
         private String _intensity = "";
         private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
@@ -413,6 +416,16 @@ public class ElispotController extends SpringActionController
         public void setSpotCount(String spotCount)
         {
             _spotCount = spotCount;
+        }
+
+        public String getSpotSize()
+        {
+            return _spotSize;
+        }
+
+        public void setSpotSize(String spotSize)
+        {
+            _spotSize = spotSize;
         }
 
         public String getActivity()
@@ -461,6 +474,7 @@ public class ElispotController extends SpringActionController
             well.put("position", _position.toString());
             well.put("analyte", getAnalyte());
             well.put("cytokine", getCytokine());
+            well.put("spotSize", getSpotSize());
 
             JSONObject wellProps = new JSONObject();
             for (ObjectProperty prop : _wellProperties.values())

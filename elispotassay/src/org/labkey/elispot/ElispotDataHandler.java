@@ -183,6 +183,8 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                         row.put(INTENSITY_PROPERTY_NAME, well.getValue());
                                     else if (ACTIVITY_PROPERTY_NAME.equalsIgnoreCase(measurement))
                                         row.put(ACTIVITY_PROPERTY_NAME, well.getValue());
+                                    else if (SPOT_SIZE_PROPERTY_NAME.equalsIgnoreCase(measurement))
+                                        row.put(SPOT_SIZE_PROPERTY_NAME, well.getValue());
 
                                     row.put(WELLGROUP_PROPERTY_NAME, group.getName());
                                     row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());

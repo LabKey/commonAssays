@@ -41,11 +41,15 @@ public class AIDPlateReader extends TextPlateReader
     }
 
     @Override
-    protected double convertWellValue(String token) throws ValidationException
+    public double convertWellValue(String token) throws ValidationException
     {
         if ("TNTC".equalsIgnoreCase(token))
         {
             return WELL_NOT_COUNTED;
+        }
+        else if ("--".equalsIgnoreCase(token))
+        {
+            return WELL_OFF_SCALE;
         }
         return super.convertWellValue(token);
     }
@@ -61,7 +65,7 @@ public class AIDPlateReader extends TextPlateReader
                 DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
                 DataLoader loader = factory.createLoader(dataFile, false);
 
-                return PlateUtils.parseGrid(dataFile, loader.load(), template.getRows(), template.getColumns());
+                return PlateUtils.parseGrid(dataFile, loader.load(), template.getRows(), template.getColumns(), this);
             }
             catch (IOException ioe)
             {
@@ -85,7 +89,7 @@ public class AIDPlateReader extends TextPlateReader
                 DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
                 DataLoader loader = factory.createLoader(dataFile, false);
 
-                return PlateUtils.parseAllGrids(dataFile, loader.load(), template.getRows(), template.getColumns());
+                return PlateUtils.parseAllGrids(dataFile, loader.load(), template.getRows(), template.getColumns(), this);
             }
             catch (IOException ioe)
             {

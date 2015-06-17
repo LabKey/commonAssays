@@ -220,7 +220,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         // Next, attempt to parse grid-style data without column headers.
         loader = load.createGrid();
         rows = loader.load();
-        double[][] matrix = PlateUtils.parseGrid(dataFile, rows, expectedRows, expectedCols);
+        double[][] matrix = PlateUtils.parseGrid(dataFile, rows, expectedRows, expectedCols, null);
         if (matrix != null)
             return matrix;
 
