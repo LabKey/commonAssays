@@ -88,6 +88,10 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
         assert null != provider;
         assert null != provider.getAntigenWellGroupDomain(protocol);
+
+        // add caption over the antigen well groups
+        crosstabSettings.getColumnAxis().setCaption("Spot count per million cells");
+
         for (DomainProperty property : provider.getAntigenWellGroupDomain(protocol).getNonBaseProperties())
         {
             nonBasePropertyNames.add(property.getName());
