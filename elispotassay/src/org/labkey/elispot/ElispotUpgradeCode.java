@@ -128,31 +128,31 @@ public class ElispotUpgradeCode implements UpgradeCode
                 String containerId = (String) map.get("Container");
                 if (null == containerId)
                 {
-                    _log.error("Null containerId");
+                    _log.info("Null containerId; ignoring ElispotAssayDataRow");
                     return;
                 }
                 Integer runId = (Integer) map.get("RunId");
                 if (null == runId)
                 {
-                    _log.error("Null antigen runId");
+                    _log.info("Null antigen runId; ignoring ElispotAssayDataRow");
                     return;
                 }
                 Integer objectId = (Integer) map.get("ObjectId");
                 if (null == objectId)
                 {
-                    _log.error("Null antigen objectId");
+                    _log.info("Null antigen objectId; ignoring ElispotAssayDataRow");
                     return;
                 }
                 String fullName = (String) map.get("Name");
                 if (null == fullName)
                 {
-                    _log.error("Null antigen property name");
+                    _log.info("Null antigen property name; ignoring ElispotAssayDataRow");
                     return;
                 }
                 Integer propertyId = (Integer) map.get("PropertyId");
                 if (null == propertyId)
                 {
-                    _log.error("Null antigen property id");
+                    _log.info("Null antigen property id; ignoring ElispotAssayDataRow");
                     return;
                 }
 
@@ -188,7 +188,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                     String typeTag = (String) map.get("TypeTag");
                     if (null == typeTag)
                     {
-                        _log.error("Property type tag not found");
+                        _log.info("Property type tag not found; ignoring ElispotAssayDataRow");
                         return;
                     }
                     antigenPropMap.put(fullName, "f".equals(typeTag) ? map.get("FloatValue") :
@@ -257,37 +257,37 @@ public class ElispotUpgradeCode implements UpgradeCode
                 String containerId = (String) map.get("Container");
                 if (null == containerId)
                 {
-                    _log.error("Null containerId");
+                    _log.info("Null containerId; ignoring ElispotAssayAntigenRow");
                     return;
                 }
                 Integer objectId = (Integer) map.get("ObjectId");
                 if (null == objectId)
                 {
-                    _log.error("Null antigen objectId");
+                    _log.info("Null antigen objectId; ignoring ElispotAssayAntigenRow");
                     return;
                 }
                 Integer runId = (Integer) map.get("RunId");
                 if (null == runId)
                 {
-                    _log.error("Null antigen runId");
+                    _log.info("Null antigen runId; ignoring ElispotAssayAntigenRow");
                     return;
                 }
                 String fullName = (String) map.get("Name");
                 if (null == fullName)
                 {
-                    _log.error("Null antigen property name");
+                    _log.info("Null antigen property name; ignoring ElispotAssayAntigenRow");
                     return;
                 }
 
                 if (!containerToRunMap.containsKey(containerId))
                 {
-                    _log.error("Should have seen data props with this containerId before");
+                    _log.info("Should have seen data props with containerId " + containerId + "; ignoring ElispotAssayAntigenRow");
                     return;
                 }
                 RunMap runMap = containerToRunMap.get(containerId);
                 if (!runMap.containsKey(runId))
                 {
-                    _log.error("Should have seen data props with this runId before");
+                    _log.info("Should have seen data props with runId " + runId + "; ignoring ElispotAssayAntigenRow");
                     return;
                 }
                 AntigenLsidMap antigenLsidMap = runMap.get(runId);
@@ -372,7 +372,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                 int runId = antigenLsidMapEntry.getKey();
                 final TableInfo antigenTable = getAntigenTable(runId);
                 if (null == antigenTable)
-                    return;     // error already logged
+                    continue;     // error already logged
 
                 for (Map.Entry<String, AntigenPropMap> antigenPropMapEntry : antigenLsidMapEntry.getValue().entrySet())
                 {
@@ -395,12 +395,12 @@ public class ElispotUpgradeCode implements UpgradeCode
         ExpRun run = ExperimentService.get().getExpRun(runId);
         if (null == run)
         {
-            _log.error("Run not found: " + runId);
+            _log.info("Run not found: " + runId + "; ignoring Elispot data or antigen row");
             return null;
         }
         if (null == run.getProtocol())
         {
-            _log.error("Protocol not found for run :" + runId);
+            _log.info("Protocol not found for run :" + runId + "; ignoring Elispot data or antigen row");
             return null;
         }
         return run.getProtocol().getName();
@@ -507,8 +507,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                     }
                     else
                     {
-                        _log.error("Somehow the wellgroupName was already used.");
-                        return Collections.emptyMap();
+                        _log.info("The wellgroupName (" + key + ") was already used.");
                     }
                 }
                 else
@@ -589,7 +588,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         ExpRun run = ExperimentService.get().getExpRun(runId);
         if (null == run)
         {
-            _log.error("Run not found: " + runId);
+            _log.error("Run not found: " + runId + "; cannot create/update antigen table for this run.");
             return null;
         }
 
