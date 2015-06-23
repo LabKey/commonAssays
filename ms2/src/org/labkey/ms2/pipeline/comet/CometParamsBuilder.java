@@ -97,8 +97,8 @@ public class CometParamsBuilder extends SequestParamsBuilder
                 "0=no (default), 1=concatenated search, 2=separate search",       // comment in the parameters file
                 ConverterFactory.getSequestBasicConverter(),                      
                 null,
-                false
-        ));
+                true
+        )).setInputXmlLabels("comet, decoy_search");
         _params.addProperty(new SequestParam(
                 21,                                                       //sortOrder
                 "DECOY_",                                            // default value of the property
@@ -106,8 +106,8 @@ public class CometParamsBuilder extends SequestParamsBuilder
                 "decoy entries are denoted by this string which is pre-pended to each protein accession",       // comment in the parameters file
                 ConverterFactory.getSequestBasicConverter(),                      
                 null,
-                false
-        ));
+                true
+        )).setInputXmlLabels("comet, decoy_prefix");
 
         _params.addProperty(new SequestParam(
                 22,                                                       //sortOrder
@@ -584,11 +584,27 @@ public class CometParamsBuilder extends SequestParamsBuilder
             assertTrue(text.contains("digest_mass_range = 400.0 5943.0"));
             assertTrue(text.contains("peptide_mass_units = 1"));
             assertTrue(text.contains("decoy_search = 0"));
+            assertTrue(text.contains("decoy_prefix = DECOY_"));
             // Be sure that the amino acid names start with a lower-case character
             assertTrue(text.contains("add_C_cysteine = 100.12"));
             assertTrue(text.contains("allowed_missed_cleavage = 2"));
             assertTrue(text.contains("search_enzyme_number = 0"));
             assertTrue(text.contains("0.  No_enzyme"));
+        }
+
+        @Test
+        public void testDecoy() throws SequestParamsException
+        {
+            Map<String, String> paramMap = new HashMap<>();
+
+            paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
+            paramMap.put("comet, decoy_search", "1");
+            paramMap.put("comet, decoy_prefix", "NEW_PREFIX_");
+            CometParamsBuilder spb = new CometParamsBuilder(paramMap, _root);
+            spb.initXmlValues();
+            String text = spb.getSequestParamsText();
+            assertTrue(text.contains("decoy_search = 1"));
+            assertTrue(text.contains("decoy_prefix = NEW_PREFIX_"));
         }
 
         @Test
