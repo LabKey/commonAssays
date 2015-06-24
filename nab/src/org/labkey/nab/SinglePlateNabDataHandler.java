@@ -343,7 +343,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
-        if (NAB_DATA_TYPE.matches(lsid))
+        if (NAB_DATA_TYPE.matches(lsid) || NAB_TRANSFORMED_DATA_TYPE.matches(lsid))
         {
             return Priority.HIGH;
         }
