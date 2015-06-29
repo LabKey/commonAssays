@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PepXmlImporter extends MS2Importer
 {
@@ -131,7 +132,7 @@ public class PepXmlImporter extends MS2Importer
                 float importSpectraMinProbability = (null == fraction.getImportSpectraMinProbability() ? -Float.MAX_VALUE : fraction.getImportSpectraMinProbability());
                 progress.setImportSpectra(shouldImportSpectra);
                 // Initialize scans to a decent size, but only if we're going to load spectra
-                HashSet<Integer> scans = new HashSet<>(shouldImportSpectra ? 1000 : 0);
+                Set<Integer> scans = new HashSet<>(shouldImportSpectra ? 1000 : 0);
                 _conn.setAutoCommit(false);
 
                 boolean retentionTimesInPepXml = false;
@@ -338,7 +339,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
+    protected void processSpectrumFile(PepXmlFraction fraction, Set<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
     {
         File mzXmlFile = getMzXMLFile(fraction);
         if ((_run.getType().equalsIgnoreCase("mascot")||_run.getType().equalsIgnoreCase("sequest"))   // TODO: Move this check (perhaps all the code) into the appropriate run classes

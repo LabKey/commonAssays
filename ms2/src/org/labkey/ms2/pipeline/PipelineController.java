@@ -160,8 +160,7 @@ public class PipelineController extends SpringActionController
                     // mascot .dat result file does not follow that of pipeline
                     protocolName = "none";
                     // dirDataOriginal = file;
-                    description = AbstractFileAnalysisJob.
-                            getDataDescription(null, file.getName(), AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName);
+                    description = file.getName();
                 }
                 else
                 {
