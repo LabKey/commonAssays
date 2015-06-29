@@ -43,6 +43,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
+import org.labkey.api.util.ExceptionUtil;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -588,7 +589,9 @@ public class ElispotUpgradeCode implements UpgradeCode
         ExpRun run = ExperimentService.get().getExpRun(runId);
         if (null == run)
         {
-            _log.error("Run not found: " + runId + "; cannot create/update antigen table for this run.");
+            String message = "Run not found: " + runId + "; cannot create/update antigen table for this run.";
+            ExceptionUtil.logExceptionToMothership(null, new Exception(message));
+            _log.error(message);
             return null;
         }
 
@@ -667,6 +670,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                         }
                         catch (ChangePropertyDescriptorException e)
                         {
+                            ExceptionUtil.logExceptionToMothership(null, e);
                             _log.error(e.getMessage());
                         }
                     }
