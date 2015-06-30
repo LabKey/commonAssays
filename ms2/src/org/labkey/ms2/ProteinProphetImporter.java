@@ -111,7 +111,7 @@ public class ProteinProphetImporter
         boolean createdTempTables = false;
         int proteinGroupIndex = 0;
 
-        try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().beginTransaction())
+        try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().ensureTransaction())
         {
             Connection connection = transaction.getConnection();
             try

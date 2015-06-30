@@ -108,7 +108,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
             factory.setNamespaceAware(false);
             factory.setValidating(false);
             SAXParser parser = factory.newSAXParser();
-            try (DbScope.Transaction transaction = DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().beginTransaction())
+            try (DbScope.Transaction transaction = DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().ensureTransaction())
             {
                 PeaksFileImporter importer = new PeaksFileImporter(data, getMzXmlFilePath(data), info.getUser(), log, transaction);
                 parser.parse(dataFile, importer);
