@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-DROP INDEX microarray.IX_FeatureData_DataId;
+/* nab-15.10-15.11.sql */
+
+EXEC core.fn_dropifexists 'NAbSpecimen', 'nab', 'INDEX', 'idx_nabspecimen_specimenlsid';
+
+CREATE INDEX IDX_NAbSpecimen_SpecimenLSID ON nab.NAbSpecimen(SpecimenLSID);

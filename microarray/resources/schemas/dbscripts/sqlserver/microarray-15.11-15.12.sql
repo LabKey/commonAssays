@@ -13,6 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* microarray-15.11-15.12.sql */
 
 DROP INDEX IX_FeatureData_DataId ON microarray.FeatureData;

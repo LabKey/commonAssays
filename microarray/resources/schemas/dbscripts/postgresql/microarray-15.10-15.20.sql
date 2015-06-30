@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/* microarray-15.10-15.11.sql */
+
+ALTER TABLE microarray.FeatureData ADD CONSTRAINT UQ_FeatureData_DataId_FeatureId_SampleId UNIQUE (DataId, FeatureId, SampleId);
+
+/* microarray-15.11-15.12.sql */
+
 DROP INDEX microarray.IX_FeatureData_DataId;

@@ -94,7 +94,7 @@ public class MicroarrayModule extends SpringModule
 
     public double getVersion()
     {
-        return 15.12;
+        return 15.20;
     }
 
     protected void init()

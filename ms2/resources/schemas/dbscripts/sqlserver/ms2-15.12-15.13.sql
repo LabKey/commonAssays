@@ -13,6 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* ms2-15.12-15.13.sql */
 
 DROP INDEX IX_ExpressionData_DataId ON ms2.ExpressionData;

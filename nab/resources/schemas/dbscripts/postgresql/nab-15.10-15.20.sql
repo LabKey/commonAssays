@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 LabKey Corporation
+ * Copyright (c) 2014-2015 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-DROP INDEX microarray.IX_FeatureData_DataId;
+/* nab-15.10-15.11.sql */
+
+SELECT core.fn_dropifexists('NAbSpecimen', 'nab', 'INDEX', 'idx_nabspecimen_specimenlsid');
+CREATE INDEX IDX_NAbSpecimen_SpecimenLSID ON nab.NAbSpecimen(SpecimenLSID);

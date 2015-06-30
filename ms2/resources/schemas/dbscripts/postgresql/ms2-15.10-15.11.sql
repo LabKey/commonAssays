@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* ms2-15.10-15.11.sql */
-
 CREATE TABLE ms2.ExpressionData (
   RowId SERIAL,
   Value REAL,
