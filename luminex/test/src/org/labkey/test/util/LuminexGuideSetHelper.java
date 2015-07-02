@@ -86,7 +86,7 @@ public class LuminexGuideSetHelper
         {
             _test.waitForText("Manage Guide Set...");
             _test.waitForText("Guide Set ID:");
-            Integer id = Integer.parseInt(Locator.id("guideSetIdLabel").waitForElement(_test.getDriver(), _test.shortWait()).getText());
+            Integer id = Integer.parseInt(Locator.id("guideSetIdLabel").waitForElement(_test.shortWait()).getText());
             _test.assertTextPresentInThisOrder("Created:", timestamps.get(id));
         }
     }
@@ -132,13 +132,13 @@ public class LuminexGuideSetHelper
             _test.clickButton("Save", 0);
         }
         waitForGuideSetExtMaskToDisappear();
-        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.getDriver(), _test.shortWait()).getAttribute("guide-set-id"));
+        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.shortWait()).getAttribute("guide-set-id"));
         timestamps.put(id, LuminexTest.df.format(Calendar.getInstance().getTime()));
     }
 
     private void checkLeveyJenningsGuideSetHeader(String comment, String guideSetType)
     {
-        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.getDriver(), _test.shortWait()).getAttribute("guide-set-id"));
+        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.shortWait()).getAttribute("guide-set-id"));
         _test.waitForElement(Locator.tagWithText("td", timestamps.get(id)), 2 * _test.defaultWaitForPage);
         _test.waitForElement(Locator.tagWithText("td", comment));
         _test.assertElementPresent(Locator.tagWithText("td", guideSetType));
