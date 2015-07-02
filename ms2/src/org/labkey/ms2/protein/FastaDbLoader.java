@@ -629,8 +629,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                     ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
         }
 
-        Thread.currentThread().setName("AnnotLoader" + currentInsertId);
-
         int protCount = 0;
         int negCount = 0;
         // TODO: Need a container to make this configurable.

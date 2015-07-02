@@ -94,25 +94,28 @@ public class uniprot extends ParseActions
 
                 if (null != idrs)
                 {
-                    idrs.next();
-                    setCurrentInsertId(idrs.getInt(1));
-                    idrs.close();
+                    try
+                    {
+                        idrs.next();
+                        setCurrentInsertId(idrs.getInt(1));
+                    }
+                    finally
+                    {
+                        idrs.close();
+                    }
                 }
 
                 context.getConnection().commit();
             }
             else
             {
-                ResultSet rs =
-                        context.getConnection().createStatement().executeQuery(
-                                "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + getCurrentInsertId()
-                        );
-                rs.next();
-                setSkipEntries(rs.getInt("RecordsProcessed"));
-                rs.close();
+                try (ResultSet rs = context.getConnection().createStatement().executeQuery(
+                            "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + getCurrentInsertId()))
+                {
+                    rs.next();
+                    setSkipEntries(rs.getInt("RecordsProcessed"));
+                }
             }
-            Thread.currentThread().setName("AnnotLoader" + getCurrentInsertId());
-            //c.commit();
         }
         catch (SQLException e)
         {
