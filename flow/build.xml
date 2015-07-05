@@ -45,9 +45,9 @@
             destdir="${build.dir}/flow-engine/classes"
             debug="true"
             optimize="true"
-            source="1.7"
-            target="1.7"
-            bootclasspathref="java7.bootclasspath">
+            source="${java.source.and.target}"
+            target="${java.source.and.target}"
+            bootclasspathref="java.bootclasspath">
             <classpath>
                 <path refid="component.class.path"/>
                 <pathelement path="${build.modules.dir}/flow/explodedModule/lib/schemas.jar"/>
