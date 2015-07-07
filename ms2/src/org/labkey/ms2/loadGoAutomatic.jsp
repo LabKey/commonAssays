@@ -25,7 +25,7 @@
 %>
 <br>
 <table><tr><td>
-You are about to <%=loaded ? "reload" : "load"%> the latest Gene Ontology (GO) annotation files into your
+You are about to <%=h(loaded ? "reload" : "load")%> the latest Gene Ontology (GO) annotation files into your
 LabKey database.  If you click "Continue" your LabKey Server will automatically:
 
 <ul>
@@ -40,7 +40,7 @@ LabKey database.  If you click "Continue" your LabKey Server will automatically:
     }
 
     %>
-    <li><%=loaded ? "Reload" : "Load"%> the database tables with information from the downloaded GO files</li>
+    <li><%=h(loaded ? "Reload" : "Load")%> the database tables with information from the downloaded GO files</li>
 </ul>
 
 Your LabKey Server must be able to connect via the Internet to ftp.geneontology.org. Assuming a reasonably fast
@@ -48,10 +48,10 @@ Internet connection, this process should take less than five minutes to complete
 in the background and you can continue to use your LabKey Server normally. If you want, you can monitor the
 process by refreshing the status information on the next page.<br><br>
 
-<%if (SystemUtils.IS_JAVA_1_7 && SystemUtils.IS_OS_WINDOWS) { %>
-<span class="labkey-error">Warning: This server is running Java 7 and Windows, a combination that has known firewall
-issues with FTP downloads. If the server's firewall has not been properly configured then the automatic GO download will
-fail, in which case you should switch to the "Manual" tab and follow the instructions there.</span> For more information,
+<%if (SystemUtils.IS_OS_WINDOWS) { %>
+<span class="labkey-error">Warning: Since this server is running Windows it may encounter firewall issues with FTP downloads.
+If the server's firewall has not been properly configured then the automatic GO download may fail, in which case you should
+switch to the "Manual" tab and follow the instructions there.</span> For more information,
 <%=helpLink("annotations#go", "visit the documentation")%>.<br><br>
 <% } %>
 
