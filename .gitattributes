@@ -1550,6 +1550,11 @@ redcap/src/org/labkey/redcap/RedcapManager.java -text
 redcap/src/org/labkey/redcap/RedcapModule.java -text
 redcap/src/org/labkey/redcap/RedcapReloadSource.java -text
 redcap/src/org/labkey/redcap/view/configure.jsp -text
+redcap/test/sampledata/redcap/template.xml -text
+redcap/test/src/org/labkey/test/pages/redcap/ConfigurePage.java -text
+redcap/test/src/org/labkey/test/tests/RedCapTest.java -text
+redcap/test/src/org/labkey/test/util/redcap/ConfigXmlBuilder.java -text
+redcap/test/test_redcap.iml -text
 viability/Viability.iml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-14.10-14.11.sql -text
