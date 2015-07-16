@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-ALTER TABLE luminex.GuideSet ADD EC504PLEnabled BIT;
-ALTER TABLE luminex.GuideSet ADD EC505PLEnabled BIT;
-ALTER TABLE luminex.GuideSet ADD AUCEnabled BIT;
-ALTER TABLE luminex.GuideSet ADD MaxFIEnabled BIT;
-GO
-UPDATE luminex.GuideSet SET EC504PLEnabled=1, EC505PLEnabled=1, AUCEnabled=1, MaxFIEnabled=1;
-ALTER TABLE luminex.GuideSet ALTER COLUMN EC504PLEnabled BIT NOT NULL;
-ALTER TABLE luminex.GuideSet ALTER COLUMN EC505PLEnabled BIT NOT NULL;
-ALTER TABLE luminex.GuideSet ALTER COLUMN AUCEnabled BIT NOT NULL;
-ALTER TABLE luminex.GuideSet ALTER COLUMN MaxFIEnabled BIT NOT NULL;
+ALTER TABLE luminex.GuideSet ADD EC504PLEnabled BOOLEAN;
+ALTER TABLE luminex.GuideSet ADD EC505PLEnabled BOOLEAN;
+ALTER TABLE luminex.GuideSet ADD AUCEnabled BOOLEAN;
+ALTER TABLE luminex.GuideSet ADD MaxFIEnabled BOOLEAN;
+UPDATE luminex.GuideSet SET EC504PLEnabled=TRUE, EC505PLEnabled=TRUE, AUCEnabled=TRUE, MaxFIEnabled=TRUE;
+ALTER TABLE luminex.GuideSet ALTER COLUMN EC504PLEnabled SET NOT NULL;
+ALTER TABLE luminex.GuideSet ALTER COLUMN EC505PLEnabled SET NOT NULL;
+ALTER TABLE luminex.GuideSet ALTER COLUMN AUCEnabled SET NOT NULL;
+ALTER TABLE luminex.GuideSet ALTER COLUMN MaxFIEnabled SET NOT NULL;

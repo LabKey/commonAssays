@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 LabKey Corporation
+ * Copyright (c) 2013 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-ALTER TABLE luminex.GuideSet ALTER COLUMN EC504PLEnabled SET DEFAULT TRUE;
-ALTER TABLE luminex.GuideSet ALTER COLUMN EC505PLEnabled SET DEFAULT TRUE;
-ALTER TABLE luminex.GuideSet ALTER COLUMN AUCEnabled SET DEFAULT TRUE;
-ALTER TABLE luminex.GuideSet ALTER COLUMN MaxFIEnabled SET DEFAULT TRUE;
+/* nab-13.10-13.11.sql */
+
+EXEC core.fn_dropifexists 'NAbSpecimen', 'nab', 'INDEX', 'IDX_NAbSpecimen_ProtocolId';
+CREATE INDEX IDX_NAbSpecimen_ProtocolId ON nab.NAbSpecimen(ProtocolId);
+
+/* nab-13.11-13.12.sql */
+
+EXEC core.fn_dropifexists 'CutoffValue', 'nab', 'INDEX', 'IDX_CutoffValue_NabSpecimenId';
+CREATE INDEX IDX_CutoffValue_NabSpecimenId ON nab.cutoffvalue(NabSpecimenId);

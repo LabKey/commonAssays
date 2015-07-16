@@ -221,10 +221,4 @@ public class FlowModule extends DefaultModule
     {
         return "LabKey Server";
     }
-
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new FlowUpgradeCode();
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 LabKey Corporation
+ * Copyright (c) 2014 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,5 @@
  * limitations under the License.
  */
 
-ALTER TABLE luminex.GuideSet ADD IsTitration BIT;
-GO
-UPDATE luminex.GuideSet SET IsTitration =
-  (
-    /* Set the control type to single point control if the GuideSet is used in the AnalyteSinglePointControl table.
-       Default to setting the control type to titration if not found. */
-    CASE WHEN RowId IN (SELECT DISTINCT GuideSetId FROM luminex.AnalyteSinglePointControl WHERE GuideSetId IS NOT NULL) THEN 0 ELSE 1 END
-  )
-;
-ALTER TABLE luminex.GuideSet ALTER COLUMN IsTitration BIT NOT NULL;
+CREATE INDEX IX_LuminexSinglePointControl_RunId ON luminex.SinglePointControl (RunId);
+CREATE INDEX IDX_AnalyteSinglePointControl_AnalyteId ON luminex.AnalyteSinglePointControl(AnalyteId);

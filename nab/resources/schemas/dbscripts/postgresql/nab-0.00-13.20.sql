@@ -17,7 +17,7 @@
 /* nab-11.10-11.20.sql */
 
 -- Set all of the NAb run properties that control the calculations to be not shown in update views
-UPDATE exp.propertydescriptor SET showninupdateview = 0 WHERE propertyid IN
+UPDATE exp.propertydescriptor SET showninupdateview = false WHERE propertyid IN
 (
 	SELECT pd.propertyid
 	FROM exp.propertydescriptor pd, exp.propertydomain propdomain, exp.domaindescriptor dd
@@ -34,74 +34,73 @@ UPDATE exp.propertydescriptor SET showninupdateview = 0 WHERE propertyid IN
 		)
 );
 
-GO
-
 /* nab-12.30-13.10.sql */
 
-CREATE SCHEMA NAb;
-GO
+CREATE SCHEMA nab;
 
-CREATE TABLE NAb.CutoffValue
+CREATE TABLE nab.cutoffvalue
 (
-    RowId INT IDENTITY (1, 1) NOT NULL,
-    NAbSpecimenId INT NOT NULL,
-    Cutoff REAL,
-    Point REAL,
-    PointOORIndicator NVARCHAR(20),
+    rowid SERIAL NOT NULL,
+    nabspecimenid INT NOT NULL,
+    cutoff REAL,
+    point REAL,
+    pointoorindicator VARCHAR(20),
+    
+    ic_poly REAL,
+    ic_polyoorindicator VARCHAR(20),
+    ic_4pl REAL,
+    ic_4ploorindicator VARCHAR(20),
+    ic_5pl REAL,
+    ic_5ploorindicator VARCHAR(20),
 
-    IC_Poly REAL,
-    IC_PolyOORIndicator NVARCHAR(20),
-    IC_4pl REAL,
-    IC_4plOORIndicator NVARCHAR(20),
-    IC_5pl REAL,
-    IC_5plOORIndicator NVARCHAR(20),
-
-    CONSTRAINT PK_NAb_CutoffValue PRIMARY KEY (RowId)
+    CONSTRAINT pk_nab_cutoffvalue PRIMARY KEY (rowid)
 );
 
-CREATE TABLE NAb.NAbSpecimen
+CREATE TABLE nab.nabspecimen
 (
-    RowId INT IDENTITY (1, 1) NOT NULL,
-    DataId INT,
-    RunId INT NOT NULL,
-    SpecimenLSID LSIDtype NOT NULL,
+    rowid SERIAL NOT NULL,
+    dataid INT,
+    runid INT NOT NULL,
+    specimenlsid lsidtype NOT NULL,
     FitError REAL,
-    WellgroupName NVARCHAR(100),
-
-    AUC_poly REAL,
-    PositiveAUC_Poly REAL,
-    AUC_4pl REAL,
-    PositiveAUC_4pl REAL,
-    AUC_5pl REAL,
-    PositiveAUC_5pl REAL,
+    WellgroupName VARCHAR(100),
+    
+    auc_poly REAL,
+    positiveauc_poly REAL,
+    auc_4pl REAL,
+    positiveauc_4pl REAL,
+    auc_5pl REAL,
+    positiveauc_5pl REAL,
 
     -- For legacy migration purposes
-    ObjectUri NVARCHAR(300),
-    ObjectId INT NOT NULL,
-    ProtocolId INT,
+    objecturi VARCHAR(300),
+    objectid INT NOT NULL,
+    protocolid INT,
 
-    CONSTRAINT PK_NAb_Specimen PRIMARY KEY (RowId),
-    CONSTRAINT FK_NAbSpecimen_ExperimentRun FOREIGN KEY (RunId)
-      REFERENCES Exp.ExperimentRun (RowId)
+    CONSTRAINT pk_nab_specimen PRIMARY KEY (rowid),
+    CONSTRAINT fk_nabspecimen_experimentrun FOREIGN KEY (runid)
+      REFERENCES exp.experimentrun (rowid) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT FK_NAbSpecimen_SpecimenLSID FOREIGN KEY (SpecimenLSID)
-      REFERENCES Exp.Material (LSID)
+    CONSTRAINT fk_nabspecimen_specimenlsid FOREIGN KEY (specimenlsid)
+      REFERENCES exp.material (lsid)
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
-CREATE INDEX IDX_NAbSpecimen_RunId ON NAb.NAbSpecimen(RunId);
-CREATE INDEX IDX_NAbSpecimen_ObjectId ON NAb.NAbSpecimen(ObjectId);
-CREATE INDEX IDX_NAbSpecimen_DataId ON NAb.NAbSpecimen(DataId);
+CREATE INDEX idx_nabspecimen_runid ON nab.nabspecimen(runid);
+CREATE INDEX idx_nabspecimen_objectid ON nab.nabspecimen(objectid);
+CREATE INDEX idx_nabspecimen_dataid ON nab.nabspecimen(dataid);
 
-ALTER TABLE NAb.CutoffValue ADD CONSTRAINT FK_CutoffValue_NAbSpecimen FOREIGN KEY (NAbSpecimenId)
-        REFERENCES NAb.NAbSpecimen (rowid);
-ALTER TABLE NAb.NAbSpecimen ADD CONSTRAINT FK_NAbSpecimen_ProtocolId FOREIGN KEY (ProtocolId)
-        REFERENCES Exp.Protocol (rowid);
+ALTER TABLE nab.cutoffvalue ADD CONSTRAINT fk_cutoffvalue_nabspecimen FOREIGN KEY (nabspecimenid)
+        REFERENCES nab.nabspecimen (rowid) MATCH SIMPLE
+        ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE nab.nabspecimen ADD CONSTRAINT fk_nabspecimen_protocolid FOREIGN KEY (protocolid)
+        REFERENCES exp.protocol (rowid) MATCH SIMPLE
+        ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /* Script to migrate existing Nab assay data from Object Properities to NabSpecimen and CutoffValue tables */
 
-delete from nab.CutoffValue;
-delete from nab.NAbSpecimen;
+delete from nab.cutoffvalue;
+delete from nab.nabspecimen;
 
 INSERT INTO nab.NAbSpecimen (DataId, RunID, ProtocolID, SpecimenLSID, FitError, WellGroupName, AUC_Poly, AUC_5PL, AUC_4PL, PositiveAUC_Poly, PositiveAUC_5PL, PositiveAUC_4PL, ObjectURI, ObjectId)
 SELECT * FROM (
@@ -134,7 +133,7 @@ SELECT * FROM (
 	WHERE specimenlsid IS NOT NULL AND DataId IS NOT NULL AND RunID IS NOT NULL AND ProtocolID IS NOT NULL;
 
 INSERT INTO nab.CutoffValue (NAbSpecimenId, Cutoff, Point)
-	SELECT s.RowId, CAST (SUBSTRING(pd.PropertyURI, CHARINDEX(':Point+IC', pd.PropertyURI) + 9, 2) AS INT), op.FloatValue
+	SELECT s.RowId, CAST (substr(pd.PropertyURI, POSITION(':Point+IC' IN pd.PropertyURI) + 9, 2) AS INT), op.FloatValue
 	FROM nab.NAbSpecimen s, exp.PropertyDescriptor pd, exp.ObjectProperty op, exp.Object o
 	WHERE pd.PropertyId = op.PropertyId AND op.ObjectId = o.ObjectId AND o.ObjectURI = s.ObjectURI AND pd.PropertyURI LIKE '%:NabProperty.%:Point+IC%' AND pd.PropertyURI NOT LIKE '%OORIndicator';
 
@@ -143,39 +142,37 @@ UPDATE nab.CutoffValue SET
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Point+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + 'OORIndicator'),
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Point+IC' || CAST(Cutoff AS INT) || 'OORIndicator'),
 	IC_4PL = (SELECT op.FloatValue FROM
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE ('%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_4pl')),
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_4pl'),
 	IC_4PLOORIndicator = (SELECT op.StringValue FROM
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_4plOORIndicator'),
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_4plOORIndicator'),
 	IC_5PL = (SELECT op.FloatValue FROM
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_5pl'),
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_5pl'),
 	IC_5PLOORIndicator = (SELECT op.StringValue FROM
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_5plOORIndicator'),
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_5plOORIndicator'),
 	IC_Poly = (SELECT op.FloatValue FROM
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_poly'),
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_poly'),
 	IC_PolyOORIndicator = (SELECT op.StringValue FROM
 		exp.ObjectProperty op,
 		exp.PropertyDescriptor pd,
 		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' + CAST(CAST(Cutoff AS INT) AS NVARCHAR) + '_polyOORIndicator');
-
-GO
+		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_polyOORIndicator');
 
 -- Change keyPropertyName in study.dataset
 UPDATE study.DataSet SET KeyPropertyName = 'RowId' WHERE ProtocolId IN (SELECT ProtocolId FROM nab.NAbSpecimen);
@@ -226,3 +223,11 @@ DELETE FROM exp.PropertyDescriptor
 	   PropertyURI LIKE '%:NabProperty%:PositiveAUC%' OR
 	   PropertyURI LIKE '%:NabProperty%:Point+IC%' OR
 	   PropertyURI LIKE '%:NabProperty%:Curve+IC%');
+
+/* nab-13.10-13.20.sql */
+
+SELECT core.fn_dropifexists('NAbSpecimen', 'nab', 'INDEX', 'IDX_NAbSpecimen_ProtocolId');
+CREATE INDEX IDX_NAbSpecimen_ProtocolId ON nab.NAbSpecimen(ProtocolId);
+
+SELECT core.fn_dropifexists('CutoffValue', 'nab', 'INDEX', 'IDX_CutoffValue_NabSpecimenId');
+CREATE INDEX IDX_CutoffValue_NabSpecimenId ON nab.cutoffvalue USING btree (NabSpecimenId);
