@@ -61,4 +61,45 @@
             <column columnName="VirusLsid"/>
         </columns>
     </table>
+    <table tableName="WellData" tableDbType="TABLE">
+        <titleColumn>WellName</titleColumn>
+        <columns>
+            <column columnName="RowId">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="RunId"/>
+            <column columnName="SpecimenLSID"/>
+            <column columnName="RunDataId"/>
+            <column columnName="DilutionDataId"/>
+            <column columnName="ProtocolId">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="Row"/>
+            <column columnName="Column"/>
+            <column columnName="Value"/>
+            <column columnName="ControlWellgroup"/>
+            <column columnName="VirusWellgroup"/>
+            <column columnName="SpecimenWellgroup"/>
+            <column columnName="ReplicateWellgroup"/>
+            <column columnName="ReplicateNumber"/>
+            <column columnName="Container">
+                <isHidden>true</isHidden>
+            </column>
+        </columns>
+    </table>
+    <table tableName="DilutionData" tableDbType="TABLE">
+        <columns>
+            <column columnName="RowId">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="Dilution"/>
+            <column columnName="DilutionOrder"/>
+            <column columnName="PercentNeutralization"/>
+            <column columnName="NeutralizationPlusMinus"/>
+            <column columnName="Min"/>
+            <column columnName="Max"/>
+            <column columnName="Mean"/>
+            <column columnName="StdDev"/>
+        </columns>
+    </table>
 </tables>

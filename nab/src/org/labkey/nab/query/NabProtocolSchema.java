@@ -178,6 +178,18 @@ public class NabProtocolSchema extends AssayProtocolSchema
                 return createNAbSpecimenTable();
             }
 
+            if (DilutionManager.WELL_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                NabWellDataTable table = new NabWellDataTable(this, getProtocol());
+                addCopiedToStudyColumns(table, true);
+                return table;
+            }
+
+            if (DilutionManager.DILUTION_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return new NabDilutionDataTable(this, getProtocol());
+            }
+
             if (DilutionManager.VIRUS_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 Domain virusDomain = getVirusWellGroupDomain();
@@ -207,6 +219,8 @@ public class NabProtocolSchema extends AssayProtocolSchema
     {
         Set<String> result = super.getTableNames();
         result.add(DilutionManager.CUTOFF_VALUE_TABLE_NAME);
+        result.add(DilutionManager.WELL_DATA_TABLE_NAME);
+        result.add(DilutionManager.DILUTION_DATA_TABLE_NAME);
 
         if (getVirusWellGroupDomain() != null)
             result.add(DilutionManager.VIRUS_TABLE_NAME);
