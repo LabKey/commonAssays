@@ -23,6 +23,7 @@ import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.query.AliasManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
@@ -196,7 +197,7 @@ public class ProteinProphetImporter
                 long insertStartTime = System.currentTimeMillis();
                 log.info("Starting to move data into ms2.PeptidesMemberships");
 
-                peptideIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + peptidesTempTableName + " ON " + peptidesTempTableName + "(TrimmedPeptide, Charge)");
+                peptideIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + AliasManager.makeLegalName(peptidesTempTableName,null) + " ON " + peptidesTempTableName + "(TrimmedPeptide, Charge)");
                 peptideIndexStmt.execute();
 
                 // Move the peptide information of the temp table into the real table
@@ -217,11 +218,11 @@ public class ProteinProphetImporter
                 log.info("Starting to move data into ms2.ProteinGroupMemberships");
 
                 // Create an index to use for the join with prot.fastasequences
-                proteinIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + " ON " + proteinsTempTableName + "(LookupString)");
+                proteinIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + AliasManager.makeLegalName(proteinsTempTableName,null) + " ON " + proteinsTempTableName + "(LookupString)");
                 proteinIndexStmt.execute();
 
                 // Create an index to use for the GROUP BY
-                proteinIndex2Stmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + "2 ON " + proteinsTempTableName + "(ProteinGroupId, Probability)");
+                proteinIndex2Stmt = connection.prepareStatement("CREATE INDEX idx_" + AliasManager.makeLegalName(proteinsTempTableName,null) + "2 ON " + proteinsTempTableName + "(ProteinGroupId, Probability)");
                 proteinIndex2Stmt.execute();
 
                 String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
