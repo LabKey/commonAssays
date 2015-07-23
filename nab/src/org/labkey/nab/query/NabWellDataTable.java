@@ -16,6 +16,7 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
@@ -38,6 +39,7 @@ import java.util.Map;
 
 /**
  * Created by davebradlee on 7/10/15.
+ *
  */
 public class NabWellDataTable extends NabBaseTable
 {
@@ -126,7 +128,7 @@ public class NabWellDataTable extends NabBaseTable
 
     private void addWellgroupPropertyColumns(Map<String, WellGroupTemplate> wellgroupTemplates, String wellgroupNameColumnName)
     {
-        Map<String, Map<String, Object>> propertyMap = new HashMap<>();        // Map propertyName -> (Map wellGroupName -> propertyValue)
+        Map<String, Map<String, Object>> propertyMap = new CaseInsensitiveHashMap<>();        // Map propertyName -> (Map wellGroupName -> propertyValue)
         for (WellGroupTemplate template : wellgroupTemplates.values())
         {
             for (String propertyName : template.getPropertyNames())
@@ -151,13 +153,14 @@ public class NabWellDataTable extends NabBaseTable
             {
                 if (null == displayField)
                 {
-                    return wellgroupNameColumn;
+                    return parent;
                 }
                 else
                 {
                     TableInfo tableInfo = getLookupTableInfo();
                     ColumnInfo column = tableInfo.getColumn(displayField);
-                    return new ExprColumn(parentTable, column.getName(), column.getValueSql(ExprColumn.STR_TABLE_ALIAS), column.getJdbcType(), wellgroupNameColumn);
+                    return new ExprColumn(null != parent ? parent.getParentTable() : parentTable, column.getName(),
+                            column.getValueSql(ExprColumn.STR_TABLE_ALIAS), column.getJdbcType(), wellgroupNameColumn);
                 }
             }
 
