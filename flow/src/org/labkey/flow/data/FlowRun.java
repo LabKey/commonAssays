@@ -21,6 +21,7 @@ import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
@@ -602,6 +603,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     @Override
     public String getDownloadURL(ViewContext context, String name)
+    {
+        return null;
+    }
+
+    @Override
+    public SecurityPolicy getSecurityPolicy()
     {
         return null;
     }
