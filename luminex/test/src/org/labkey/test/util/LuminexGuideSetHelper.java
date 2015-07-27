@@ -194,7 +194,7 @@ public class LuminexGuideSetHelper
             _test.click(ExtHelper.locateGridRowCheckbox(comment));
 
         _test.sleep(1000);// wait for apply thresholds button to be enabled
-        _test.click(_test.getButtonLocator("Apply Thresholds"));
+        _test.clickButton("Apply Thresholds", 0);
         _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
         // verify that the plot is reloaded
         waitForLeveyJenningsTrendPlot();
