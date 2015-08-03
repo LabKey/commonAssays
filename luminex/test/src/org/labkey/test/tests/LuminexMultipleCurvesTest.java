@@ -24,6 +24,8 @@ import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.Luminex;
 import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.LoggedParam;
+import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -255,34 +257,33 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
             for(String standard: standardsList)
             {
                 if(analyteStandards.contains(standard))
-                    checkAnalyteAndStandardCheckBox(analyte, standard, true);
+                    setAnalyteAndStandardCheckBox(analyte, standard, true);
                 else
-                    checkAnalyteAndStandardCheckBox(analyte, standard, false);
+                    setAnalyteAndStandardCheckBox(analyte, standard, false);
             }
         }
     }
 
     /**
      * check or uncheck the checkbox for the given standard and analyte
-     *
-     * @param analyte
-     * @param standard
-     * @param checked
      */
-    @LogMethod
-    private void checkAnalyteAndStandardCheckBox(String analyte, String standard, boolean checked)
+    @LogMethod (quiet = true)
+    private void setAnalyteAndStandardCheckBox(@LoggedParam String analyte, @LoggedParam String standard, boolean check)
     {
-        String checkboxName = "titration_" + analyte + "_" + standard;
+        Locator.XPathLocator checkBoxLocator = Locator.checkboxByName("titration_" + analyte + "_" + standard);
+        WebElement checkbox = checkBoxLocator.findElement(getDriver());
 
-        if(checked)
+        if(check)
         {
-            checkCheckbox(Locator.checkboxByName(checkboxName));
+            checkCheckbox(checkbox);
         }
         else
         {
-            //not all checkboxes are visible for all plates
-            if(getDriver().findElement(Locator.checkboxByName(checkboxName).toBy()).isDisplayed());
-                uncheckCheckbox(Locator.checkboxByName(checkboxName));
+            if(checkbox.isDisplayed())
+            {
+                //not all checkboxes are visible for all plates
+                uncheckCheckbox(checkbox);
+            }
         }
     }
 
