@@ -93,6 +93,7 @@ import org.labkey.ms2.reader.MGFDocumentParser;
 import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.ms2.reader.SequestLogDocumentParser;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.MSSearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
@@ -294,6 +295,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MzXMLDocumentParser());
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MzMLDocumentParser());
             ServiceRegistry.get(SearchService.class).addDocumentParser(new DatDocumentParser());
+            ServiceRegistry.get(SearchService.class).addDocumentParser(new SequestLogDocumentParser());
             ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
         }
 

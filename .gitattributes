@@ -1447,6 +1447,7 @@ ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisSummary.java -text
 ms2/src/org/labkey/ms2/reader/Rounder.java -text
 ms2/src/org/labkey/ms2/reader/SensitivitySummary.java -text
 ms2/src/org/labkey/ms2/reader/SequentialMzxmlIterator.java -text
+ms2/src/org/labkey/ms2/reader/SequestLogDocumentParser.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScan.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScanIterator.java -text
 ms2/src/org/labkey/ms2/reader/SimpleXMLEventRewriter.java -text
