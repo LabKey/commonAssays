@@ -187,21 +187,11 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         {
             Locator loc = getWellRoleCheckboxLoc(desc, role);
             if(ArrayUtils.contains(unselectedRoles, role))
-            {
-                //unselect if selected, otherwise do nothing
-                if(isCheckboxChecked(loc.findElement(getDriver())))
-                {
-                    uncheckCheckbox(loc);
-                }
-            }
+                //unselect if undesired role is selected
+                uncheckCheckbox(loc);
             else
-            {
                 //is desired role, select if unselected
-                if(!isCheckboxChecked(loc.findElement(getDriver())))
-                {
-                    checkCheckbox(loc);
-                }
-            }
+                checkCheckbox(loc);
         }
     }
 
@@ -285,15 +275,6 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
                 uncheckCheckbox(checkbox);
             }
         }
-    }
-
-    private void checkWellAndRoleCheckBox(String well, WellRole role, boolean checked)
-    {
-        Locator checkBoxLocator = getWellRoleCheckboxLoc(well, role);
-        if(checked)
-            checkCheckbox(checkBoxLocator);
-        else
-            uncheckCheckbox(checkBoxLocator);
     }
 
     //check to ensure that either an EC50 value exists, or failure flag is set
