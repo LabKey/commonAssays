@@ -309,7 +309,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         DataRegionTable table = new DataRegionTable("StatusFiles", this);
         table.setFilter("Info", "Starts With", expectedInfo);
         assertElementPresent(Locator.linkWithText("COMPLETE"), numMatchingJobs);
-        clickAndWait(Locator.linkWithText("COMPLETE", 0));
+        clickAndWait(Locator.linkWithText("COMPLETE").index(0));
         assertTextPresent(
                 expectedInfo,
                 "Assay Id: " + runName,
@@ -577,7 +577,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     @LogMethod
     private void verifyQCFlagLink(String analyteName, String expectedFlag)
     {
-        click(Locator.linkContainingText(expectedFlag, 0));
+        click(Locator.linkContainingText(expectedFlag).index(0));
         _extHelper.waitForExt3Mask(WAIT_FOR_JAVASCRIPT);
         sleep(1500);
         assertTextPresent("CV", 4); // 3 occurances of PCV and 1 of %CV
@@ -643,7 +643,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
 
         //verify link to Levey-Jennings plot
-        clickAndWait(Locator.linkWithText("graph", 0));
+        clickAndWait(Locator.linkWithText("graph").index(0));
         waitForText(" - " + isotype + " " + conjugate);
         assertTextPresent("Levey-Jennings Report", "Standard1");
     }
