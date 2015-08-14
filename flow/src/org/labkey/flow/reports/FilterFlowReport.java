@@ -627,7 +627,7 @@ public abstract class FilterFlowReport extends FlowReport
 
         if (getReportId() != null)
         {
-            FilterFlowReport origReport = (FilterFlowReport) ReportService.get().getReport(getReportId().getRowId());
+            FilterFlowReport origReport = (FilterFlowReport) ReportService.get().getReport(context.getContainer(), getReportId().getRowId());
             if (origReport != null)
             {
                 String origPropStr = origReport.getDescriptor().getProperty(descriptorPropName);
