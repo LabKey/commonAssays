@@ -54,8 +54,7 @@ public class FlowReportManager
 {
     public static Collection<FlowReport> getFlowReports(Container c, User user)
     {
-        Report[] all = ReportService.get().getReports(user, c);
-
+        Collection<Report> all = ReportService.get().getReports(user, c);
         TreeMap<String, FlowReport> reports = new CaseInsensitiveTreeMap<>();
 
         for (Report r : all)
