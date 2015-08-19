@@ -100,7 +100,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
-    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData) throws ExperimentException
+    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData, User user) throws ExperimentException
     {
         try
         {
@@ -113,6 +113,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             for (ExpMaterial material : run.getMaterialInputs().keySet())
                 inputMaterialMap.put(material.getLSID(), material);
 
+            Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
             for (Map<String, Object> group : rawData)
             {
                 if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
@@ -145,7 +146,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 nabSpecimenEntries.put("ProtocolId", protocol.getRowId());
                 nabSpecimenEntries.put("DataId", data.getRowId());
                 nabSpecimenEntries.put("RunId", run.getRowId());
-                nabSpecimenEntries.put("SpecimenLsid", group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY));
+                nabSpecimenEntries.put("SpecimenLsid", specimenLsid);
                 nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
                 nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + POLY_SUFFIX));
                 nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + POLY_SUFFIX));
@@ -157,6 +158,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
 
                 int nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);
+                wellGroupNameToNabSpecimen.put(groupName, new Pair<>(nabRowid, specimenLsid));
 
                 for (Integer cutoffValue : cutoffFormats.keySet())
                 {
@@ -185,6 +187,8 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 }
                 NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
             }
+
+            populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
         }
         catch (SQLException e)
         {

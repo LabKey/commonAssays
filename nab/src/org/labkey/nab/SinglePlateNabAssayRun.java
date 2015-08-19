@@ -99,7 +99,8 @@ public class SinglePlateNabAssayRun extends NabAssayRun
                         if (specimenGroup.contains(position))
                             specimenVirusPos.add(position);
                     }
-                    WellGroup specimenVirusGroup = PlateService.get().createWellGroup(_plate, specimenGroup.getName() + ":" + virusGroup.getName(),
+                    WellGroup specimenVirusGroup = PlateService.get().createWellGroup(_plate,
+                            DilutionDataHandler.getSpecimenVirusWellgroupName(specimenGroup, virusGroup),
                             WellGroup.Type.SPECIMEN, specimenVirusPos);
 
                     // transfer the sample properties to the new sample/virus well group so dilutions can be computed
@@ -277,7 +278,9 @@ public class SinglePlateNabAssayRun extends NabAssayRun
             Map<WellGroup, WellGroup> virusToControl = new HashMap<>();
             for (Map.Entry<WellGroup, List<Position>> entry : virusToControlPositions.entrySet())
             {
-                WellGroup controlGroup = PlateService.get().createWellGroup(plate, entry.getKey().getName(), WellGroup.Type.CONTROL, entry.getValue());
+                String name = DilutionDataHandler.getWellgroupNameVirusNameCombo(controlGroupName, entry.getKey().getName());
+                WellGroup controlGroup = PlateService.get().createWellGroup(plate, name,
+                                            WellGroup.Type.CONTROL, entry.getValue());
                 virusToControl.put(entry.getKey(), controlGroup);
             }
             _virusGroupToControlMap.put(controlGroupName, virusToControl);

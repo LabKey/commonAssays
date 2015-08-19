@@ -16,6 +16,7 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 
 /**
@@ -27,6 +28,23 @@ public class NabDilutionDataTable extends NabBaseTable
     public NabDilutionDataTable(final NabProtocolSchema schema, ExpProtocol protocol)
     {
         super(schema, DilutionManager.getTableInfoDilutionData(), protocol);
-        wrapAllColumns(true);
+        addRunColumn();
+
+        for (ColumnInfo col : getRealTable().getColumns())
+        {
+            if ("RunId".equalsIgnoreCase(col.getName()))
+                continue;
+
+            String name = col.getName();
+            if ("RunDataId".equalsIgnoreCase(name))
+                name = "RunData";
+            ColumnInfo newCol = addWrapColumn(name, col);
+            if (col.isHidden())
+            {
+                newCol.setHidden(col.isHidden());
+            }
+        }
+
+        addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
     }
 }

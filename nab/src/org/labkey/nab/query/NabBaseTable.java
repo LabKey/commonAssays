@@ -31,6 +31,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
@@ -43,7 +44,7 @@ import org.labkey.nab.SinglePlateNabDataHandler;
  * Date: 2/20/13
  * Time: 6:36 PM
  */
-public abstract class NabBaseTable extends FilteredTable<AssaySchema>
+public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
 {
     protected final NabProtocolSchema _schema;
     protected final ExpProtocol _protocol;

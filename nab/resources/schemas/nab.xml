@@ -71,9 +71,6 @@
             <column columnName="SpecimenLSID"/>
             <column columnName="RunDataId"/>
             <column columnName="DilutionDataId"/>
-            <column columnName="ProtocolId">
-                <isHidden>true</isHidden>
-            </column>
             <column columnName="Row"/>
             <column columnName="Column"/>
             <column columnName="Value"/>
@@ -82,6 +79,11 @@
             <column columnName="SpecimenWellgroup"/>
             <column columnName="ReplicateWellgroup"/>
             <column columnName="ReplicateNumber"/>
+            <column columnName="PlateNumber"/>
+            <column columnName="PlateVirusName"/>
+            <column columnName="ProtocolId">
+                <isHidden>true</isHidden>
+            </column>
             <column columnName="Container">
                 <isHidden>true</isHidden>
             </column>
@@ -92,6 +94,8 @@
             <column columnName="RowId">
                 <isHidden>true</isHidden>
             </column>
+            <column columnName="RunId"/>
+            <column columnName="RunDataId"/>
             <column columnName="Dilution"/>
             <column columnName="DilutionOrder"/>
             <column columnName="PercentNeutralization"/>
@@ -100,6 +104,17 @@
             <column columnName="Max"/>
             <column columnName="Mean"/>
             <column columnName="StdDev"/>
+            <column columnName="MinDilution"/>
+            <column columnName="MaxDilution"/>
+            <column columnName="WellgroupName"/>
+            <column columnName="ReplicateName"/>
+            <column columnName="PlateNumber"/>
+            <column columnName="ProtocolId">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="Container">
+                <isHidden>true</isHidden>
+            </column>
         </columns>
     </table>
 </tables>

@@ -84,6 +84,7 @@ public class NabWellDataTable extends NabBaseTable
                 addWellgroupPropertyColumns(template);
             }
         }
+        addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
     }
 
     private void addWellNameColumn(int rowCount)

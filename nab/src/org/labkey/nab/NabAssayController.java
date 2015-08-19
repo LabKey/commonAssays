@@ -316,8 +316,12 @@ public class NabAssayController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
-            return root.addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _runRowId + " Details");
+            if (null != _protocol)
+            {
+                ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
+                return root.addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _runRowId + " Details");
+            }
+            return null;
         }
     }
 

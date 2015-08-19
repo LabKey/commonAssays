@@ -47,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -146,7 +145,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;
                 if (++wellCount == wellsPerPlate)
                 {
-                    Plate plate = PlateService.get().createPlate(template, wellValues);
+                    Plate plate = PlateService.get().createPlate(template, wellValues, PlateService.NO_RUNID, plateCount + 1);
                     plate.setProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, plateToVirusMap.get(plateCount));
 
                     plates.add(plate);

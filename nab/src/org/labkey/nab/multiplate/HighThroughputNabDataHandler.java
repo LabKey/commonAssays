@@ -17,7 +17,9 @@ package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
+import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
@@ -38,8 +40,8 @@ import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
 
 import java.io.File;
@@ -88,9 +90,10 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             if (matrices == null || matrices.size() == 0)
                 throw createParseError(dataFile, "No plate data found");
 
+            int plateNumber = 1;
             List<Plate> plates = new ArrayList<>(matrices.size());
             for (double[][] matrix : matrices)
-                plates.add(PlateService.get().createPlate(template, matrix));
+                plates.add(PlateService.get().createPlate(template, matrix, PlateService.NO_RUNID, plateNumber++));
 
             return plates;
         }
@@ -98,6 +101,42 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         {
             throw createParseError(dataFile, null, e);
         }
+    }
+
+    @Override
+    protected List<Plate> createPlates(ExpRun run, PlateTemplate template) throws ExperimentException
+    {
+        List<WellDataRow> wellDataRows = DilutionManager.getWellDataRows(run);
+        if (wellDataRows.isEmpty())
+            throw new ExperimentException("Well data could not be found for run " + run.getName() + ". Run details are not available.");
+
+        Map<Integer, double[][]> matrices = new HashMap<>();
+        Map<Integer, String> plateToVirusMap = new HashMap<>();
+        for (WellDataRow wellDataRow : wellDataRows)
+        {
+            Integer plateNum = wellDataRow.getPlateNumber();
+            if (null == plateNum)
+                throw new IllegalStateException("WellData plate number should not be null.");
+            if (!matrices.containsKey(plateNum))
+                matrices.put(plateNum, new double[template.getRows()][template.getColumns()]);
+            double[][] cellValues = matrices.get(plateNum);
+            cellValues[wellDataRow.getRow()][wellDataRow.getColumn()] = wellDataRow.getValue();
+            plateToVirusMap.put(plateNum, wellDataRow.getPlateVirusName());
+        }
+
+        List<Plate> plates = new ArrayList<>(matrices.size());
+        for (Map.Entry<Integer, double[][]> matrix : matrices.entrySet())
+        {
+            Plate plate = PlateService.get().createPlate(template, matrix.getValue(), run.getRowId(), matrix.getKey());
+            plate.setProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, plateToVirusMap.get(matrix.getKey()));
+            plates.add(plate);
+        }
+        return plates;
+    }
+
+    protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate) throws ExperimentException
+    {
+        throw new IllegalStateException("getCellValues should not be called for High Throughput handlers.");
     }
 
     protected List<double[][]> parse(File dataFile, ColumnDescriptor[] columns, List<Map<String, Object>> rows, int expectedRows, int expectedCols) throws ExperimentException
@@ -195,6 +234,6 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     @Override
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
-        importRows(data, run, context.getProtocol(), dataMap);
+        importRows(data, run, context.getProtocol(), dataMap, context.getUser());
     }
 }
