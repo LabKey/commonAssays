@@ -20,9 +20,11 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
+import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 
 import java.io.*;
 import java.net.URI;
@@ -69,6 +71,14 @@ public class MS2PipelineManager
             }
 
             return false;
+        }
+    }
+
+    public static class XtanXmlFileFilter extends PipelineProvider.FileEntryFilter
+    {
+        public boolean accept(File file)
+        {
+            return XTandemSearchTask.getNativeFileType(FileType.gzSupportLevel.SUPPORT_GZ).isType(file);
         }
     }
 

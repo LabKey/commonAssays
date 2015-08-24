@@ -986,6 +986,7 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/Enzyme.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/EnzymeComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/EnzymeParseException.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/GWTSearchServiceResult.java -text
+ms2/gwtsrc/org/labkey/ms2/pipeline/client/GeneralInputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/InputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/LocationComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/MzXmlComposite.java -text
@@ -1003,12 +1004,9 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/SearchService.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/SearchServiceAsync.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/SequenceDbComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/TPPComposite.java -text
-ms2/gwtsrc/org/labkey/ms2/pipeline/client/comet/CometInputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotEnzymeComposite.java -text
-ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotInputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotSequenceDbComposite.java -text
-ms2/gwtsrc/org/labkey/ms2/pipeline/client/sequest/SequestInputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/sequest/SequestResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/sequest/SimpleSequenceDbComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemInputXmlComposite.java -text
@@ -1207,6 +1205,7 @@ ms2/src/org/labkey/ms2/peptideview/StandardProteinTSVGridWriter.java -text
 ms2/src/org/labkey/ms2/pickPeptideColumns.jsp -text
 ms2/src/org/labkey/ms2/pickProteinColumns.jsp -text
 ms2/src/org/labkey/ms2/pickView.jsp -text
+ms2/src/org/labkey/ms2/pipeline/AbstractMS2PipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchProtocol.java -text
@@ -1264,6 +1263,11 @@ ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
+ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupDefaults.xml -text
+ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupPipelineProvider.java -text
+ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupProtocol.java -text
+ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractMultipleValueParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractSequestParams.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractSequestSearchTaskFactory.java -text
@@ -1313,6 +1317,7 @@ ms2/src/org/labkey/ms2/pipeline/tandem/XTandemRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchTask.java -text
+ms2/src/org/labkey/ms2/pipeline/tandem/XTandemToXMLTask.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemcometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/setTandemDefaults.jsp -text
 ms2/src/org/labkey/ms2/protAnnots.jsp -text

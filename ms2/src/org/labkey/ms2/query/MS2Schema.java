@@ -84,6 +84,7 @@ public class MS2Schema extends UserSchema
     public static final String MASCOT_PROTOCOL_OBJECT_PREFIX = "MS2.Mascot";
     public static final String COMET_PROTOCOL_OBJECT_PREFIX = "MS2.Comet";
     public static final String SEQUEST_PROTOCOL_OBJECT_PREFIX = "MS2.Sequest";
+    public static final String FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX = "MS2.FractionRollup";
     public static final String XTANDEM_PROTOCOL_OBJECT_PREFIX = "MS2.XTandem";
     public static final String IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX = "MS2.ImportedSearch";
     public static final String SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX = "MS2.PreSearch.";
@@ -194,6 +195,15 @@ public class MS2Schema extends UserSchema
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(SequestSearchRuns.toString(), ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
                 searchTable.setDescription("Contains one row per Sequest search result loaded in this folder.");
+                return searchTable;
+            }
+        },
+        FractionRollupsRuns
+        {
+            public ExpRunTable createTable(MS2Schema ms2Schema)
+            {
+                ExpRunTable searchTable = ms2Schema.createSearchTable(FractionRollupsRuns.toString(), ContainerFilter.CURRENT, FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
+                searchTable.setDescription("Contains one row per fraction rollup analysis result loaded in this folder.");
                 return searchTable;
             }
         },
@@ -386,7 +396,7 @@ public class MS2Schema extends UserSchema
 
     public ExpRunTable createRunsTable(String name, ContainerFilter filter)
     {
-        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, COMET_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, COMET_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX, FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)

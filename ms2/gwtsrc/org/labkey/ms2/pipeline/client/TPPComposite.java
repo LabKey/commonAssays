@@ -238,7 +238,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
     {
         for (GWTPipelineTask task : result.getTasks())
         {
-            if ("tpp".equalsIgnoreCase(task.getGroupName()))
+            if ("tpp".equalsIgnoreCase(task.getGroupName()) || "tpp fractions".equalsIgnoreCase(task.getGroupName()))
             {
                 _visible = true;
                 setVisibilityInParentTable();

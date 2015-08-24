@@ -16,12 +16,10 @@
 
 package org.labkey.ms2.pipeline.client;
 
-import org.labkey.ms2.pipeline.client.comet.CometInputXmlComposite;
+import com.sun.istack.internal.Nullable;
 import org.labkey.ms2.pipeline.client.mascot.MascotEnzymeComposite;
-import org.labkey.ms2.pipeline.client.mascot.MascotInputXmlComposite;
 import org.labkey.ms2.pipeline.client.mascot.MascotResidueModComposite;
 import org.labkey.ms2.pipeline.client.mascot.MascotSequenceDbComposite;
-import org.labkey.ms2.pipeline.client.sequest.SequestInputXmlComposite;
 import org.labkey.ms2.pipeline.client.sequest.SequestResidueModComposite;
 import org.labkey.ms2.pipeline.client.sequest.SimpleSequenceDbComposite;
 import org.labkey.ms2.pipeline.client.tandem.XtandemInputXmlComposite;
@@ -40,6 +38,7 @@ public class SearchFormCompositeFactory
 {
     private static final String XTANDEM = "X! Tandem";
     private static final String MASCOT = "Mascot";
+    private static final String FRACTION_ROLLUP = "FractionRollup";
     private static final String SEQUEST = "Sequest";
     private static final String COMET = "Comet";
     private String searchEngine;
@@ -49,13 +48,15 @@ public class SearchFormCompositeFactory
         this.searchEngine = searchEngine;
     }
 
+    @Nullable
     public SequenceDbComposite getSequenceDbComposite(Search search)
     {
         if(searchEngine.equals(XTANDEM))
             return new XtandemSequenceDbComposite(search);
         else if(searchEngine.equals(MASCOT))
             return new MascotSequenceDbComposite(search);
-
+        else if (searchEngine.equals(FRACTION_ROLLUP))
+            return null;
         return new SimpleSequenceDbComposite(search);
     }
 
@@ -64,23 +65,33 @@ public class SearchFormCompositeFactory
         if(searchEngine.equals(XTANDEM))
             return new XtandemInputXmlComposite();
         else if(searchEngine.equals(MASCOT))
-            return new MascotInputXmlComposite();
+        {
+            ParameterNames.ENZYME = "mascot, enzyme";
+            ParameterNames.STATIC_MOD = "mascot, fixed modifications";
+            ParameterNames.DYNAMIC_MOD = "mascot, variable modifications";
+            return new GeneralInputXmlComposite("Mascot XML", "pipelineMascot");
+        }
         else if(searchEngine.equals(SEQUEST))
-            return new SequestInputXmlComposite();
+            return new GeneralInputXmlComposite("Sequest XML", "pipelineSequest");
         else if(searchEngine.equals(COMET))
-            return new CometInputXmlComposite();
+            return new GeneralInputXmlComposite("Comet XML", "pipelineComet");
+        else if(searchEngine.equals(FRACTION_ROLLUP))
+            return new GeneralInputXmlComposite("Fraction rollup XML", "pipelineFractionRollup");
         else
             return null;
     }
 
+    @Nullable
     public EnzymeComposite getEnzymeComposite()
     {
         if(searchEngine.equals(MASCOT))
             return new MascotEnzymeComposite();
-
+        else if (searchEngine.equals(FRACTION_ROLLUP))
+            return null;
         return new EnzymeComposite();
     }
 
+    @Nullable
     public ResidueModComposite getResidueModComposite(Search searchForm)
     {
         if(searchEngine.equals(XTANDEM))

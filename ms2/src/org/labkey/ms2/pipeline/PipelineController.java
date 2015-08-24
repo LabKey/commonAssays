@@ -63,6 +63,8 @@ import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
+import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineJob;
+import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineJob;
@@ -225,6 +227,21 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermissionClass(InsertPermission.class)
+    public class FractionRollupAction extends SearchAction
+    {
+        public String getProviderName()
+        {
+           return FractionRollupPipelineProvider.NAME;
+        }
+
+        @Override
+        protected TaskId getTaskId()
+        {
+            return new TaskId(FractionRollupPipelineJob.class);
+        }
+    }
+
+    @RequiresPermissionClass(InsertPermission.class)
     public class SearchMascotAction extends SearchAction
     {
         public String getProviderName()
@@ -287,7 +304,7 @@ public class PipelineController extends SpringActionController
         private PipeRoot _root;
         private File _dirSeqRoot;
         private File _dirData;
-        private AbstractMS2SearchPipelineProvider _provider;
+        private AbstractMS2PipelineProvider _provider;
         private AbstractMS2SearchProtocol _protocol;
 
         public abstract String getProviderName();
@@ -323,7 +340,7 @@ public class PipelineController extends SpringActionController
                 form.setSearchEngine(getProviderName());
 
             _provider =
-                (AbstractMS2SearchPipelineProvider)PipelineService.get().getPipelineProvider(form.getSearchEngine());
+                (AbstractMS2PipelineProvider)PipelineService.get().getPipelineProvider(form.getSearchEngine());
             if (_provider == null)
                 throw new NotFoundException("No such provider: " + form.getSearchEngine());
             AbstractMS2SearchProtocolFactory protocolFactory = _provider.getProtocolFactory();

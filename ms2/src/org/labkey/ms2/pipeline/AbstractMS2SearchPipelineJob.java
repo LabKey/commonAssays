@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.TaskFactorySettings;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -67,7 +68,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     protected File _dirSequenceRoot;
     protected boolean _fractions;
 
-    public AbstractMS2SearchPipelineJob(AbstractMS2SearchProtocol protocol,
+    public AbstractMS2SearchPipelineJob(AbstractFileAnalysisProtocol protocol,
                                         String providerName,
                                         ViewBackgroundInfo info,
                                         PipeRoot root,
@@ -183,7 +184,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     public List<File> getInteractInputFiles()
     {
-        ArrayList<File> files = new ArrayList<>();
+        List<File> files = new ArrayList<>();
         for (File fileSpectra : getInputFiles())
         {
             files.add(getPepXMLConvertFile(getAnalysisDirectory(),

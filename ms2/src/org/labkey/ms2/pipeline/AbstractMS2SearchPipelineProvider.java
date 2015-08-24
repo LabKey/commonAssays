@@ -15,14 +15,12 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
+import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.module.Module;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +28,7 @@ import java.util.Map;
  * <code>AbstractMS2SearchPipelineProvider</code>
  */
 abstract public class AbstractMS2SearchPipelineProvider
-        extends AbstractFileAnalysisProvider<AbstractMS2SearchProtocolFactory, TaskPipeline>
+        extends AbstractMS2PipelineProvider<AbstractMS2SearchProtocolFactory>
 {
     public AbstractMS2SearchPipelineProvider(String name, Module owningModule)
     {
@@ -70,10 +68,6 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     abstract public boolean hasRemoteDirectories();
 
-    abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
-
-    abstract public void ensureEnabled() throws PipelineValidationException;
-
     abstract public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException;
 
     abstract public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException;
@@ -86,6 +80,4 @@ abstract public class AbstractMS2SearchPipelineProvider
     abstract public Map<String, String> getResidue0Mods() throws IOException;
 
     abstract public Map<String, String> getResidue1Mods() throws IOException;
-
-    abstract public String getHelpTopic();
 }

@@ -52,7 +52,6 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     private AbstractMS2SearchPipelineProvider provider;
     private AbstractMS2SearchProtocol protocol;
 
-
     public SearchServiceImpl(ViewContext context)
     {
         super(context);
@@ -60,13 +59,16 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
     public GWTSearchServiceResult getSearchServiceResult(String searchEngine, String path, String[] fileNames)
     {
-        provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
-        getProtocols("", searchEngine, path, fileNames);
-        if(results.getSelectedProtocol() == null || results.getSelectedProtocol().equals("") )
-            getSequenceDbs(results.getDefaultSequenceDb(), searchEngine, false);
-        getMascotTaxonomy(searchEngine);
-        getEnzymes(searchEngine);
-        getResidueMods(searchEngine);
+        AbstractMS2PipelineProvider baseProvider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+        getProtocols("", baseProvider, searchEngine, path, fileNames);
+        if (baseProvider instanceof AbstractMS2SearchPipelineProvider)
+        {
+            if (results.getSelectedProtocol() == null || results.getSelectedProtocol().equals(""))
+                getSequenceDbs(results.getDefaultSequenceDb(), searchEngine, false);
+            getMascotTaxonomy(searchEngine);
+            getEnzymes(searchEngine);
+            getResidueMods(searchEngine);
+        }
         return results;
     }
 
@@ -92,16 +94,14 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
     public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String path, String[] fileNames)
     {
-        if(provider == null)
+        AbstractMS2PipelineProvider provider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+        if (provider == null)
         {
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
-            if (provider == null)
-            {
-                results.setSelectedProtocol("Loading Error");
-                _log.debug("Problem loading protocols: provider equals null");
-                results.appendError("Problem loading protocol: provider equals null\n");
-            }
+            results.setSelectedProtocol("Loading Error");
+            _log.debug("Problem loading protocols: provider equals null");
+            results.appendError("Problem loading protocol: provider equals null\n");
         }
+
         if(protocolName == null || protocolName.length() == 0)
         {
             protocolName = PipelineService.get().getLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
@@ -112,7 +112,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         if(protocolName.equals("new"))
         {
             results.setSelectedProtocol("");
-            getMzXml(path, fileNames, searchEngine, false);
+            getMzXml(path, fileNames, false);
             return results;
         }
         PipeRoot root = getPipelineRoot();
@@ -144,22 +144,25 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setProtocolDescription("");
             results.setProtocolXml("");
             PipelineService.get().rememberLastProtocolSetting(provider.getProtocolFactory(), getContainer(), getUser(), "");
-            getMzXml(path, fileNames, searchEngine, false);
+            getMzXml(path, fileNames, false);
             _log.error("Could not load " + protocolName + ".", e);
         }
         if (protocol != null)
         {
             results.setSelectedProtocol(protocolName);
-            if (protocol.getDbNames().length > 0)
+            if (provider instanceof AbstractMS2SearchPipelineProvider)
             {
-                results.setDefaultSequenceDb(protocol.getDbNames()[0]);
-                if(!provider.dbExists(getSequenceRoot(), protocol.getDbNames()[0]))
-                    results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
-            }
-            else
-            {
-                _log.debug("Problem loading protocol: no database in protocol");
-                results.appendError("Problem loading protocol: No database in protocol");
+                if (protocol.getDbNames().length > 0)
+                {
+                    results.setDefaultSequenceDb(protocol.getDbNames()[0]);
+                    if (!((AbstractMS2SearchPipelineProvider) provider).dbExists(getSequenceRoot(), protocol.getDbNames()[0]))
+                        results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
+                }
+                else
+                {
+                    _log.debug("Problem loading protocol: no database in protocol");
+                    results.appendError("Problem loading protocol: No database in protocol");
+                }
             }
 
             PipelineService.get().rememberLastSequenceDbSetting(provider.getProtocolFactory(), getContainer(),
@@ -167,7 +170,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setProtocolDescription(protocol.getDescription());
             results.setProtocolXml(protocol.getXml());
         }
-        getMzXml(path, fileNames, searchEngine, protocolExists);
+        getMzXml(path, fileNames, protocolExists);
         return results;
     }
 
@@ -236,14 +239,14 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
     }
 
-    private void getProtocols(String defaultProtocol, String searchEngine, String path, String[] fileNames)
+    private void getProtocols(String defaultProtocol, AbstractMS2PipelineProvider provider, String searchEngine, String path, String[] fileNames)
     {
         ArrayList<String> protocolList = new ArrayList<>();
         if(defaultProtocol == null || defaultProtocol.length() == 0 )
         {
             if(provider == null)
             {
-                provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+                provider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
             }
             defaultProtocol = PipelineService.get().getLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
                     getUser());
@@ -437,10 +440,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return results;
     }
 
-    private void getMzXml(String path, String[] fileNames, String searchEngine, boolean protocolExists)
+    private void getMzXml(String path, String[] fileNames, boolean protocolExists)
     {
-        if (provider == null)
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
         if (protocol == null)
             protocolExists = false;
 
@@ -458,13 +459,13 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 dirAnalysis = protocol.getAnalysisDir(dirData, pr);
 
             results.setActiveJobs(false);
-            results.setFileInputNames(new ArrayList<String>());
-            results.setFileInputStatus(new ArrayList<String>());
+            results.setFileInputNames(new ArrayList<>());
+            results.setFileInputStatus(new ArrayList<>());
 
             Arrays.sort(fileNames, String.CASE_INSENSITIVE_ORDER);
             for (String name : fileNames)
             {
-                if (name == null || name.indexOf("..") != -1 || name.indexOf("/") != -1 || name.indexOf("\\") != -1)
+                if (name == null || name.contains("..") || name.contains("/") || name.contains("\\"))
                 {
                     results.appendError("Invalid file name " + name);
                 }

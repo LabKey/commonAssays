@@ -289,7 +289,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             // TODO: mzXML files may be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
             List<File> inputFiles = getJobSupport().getInteractInputFiles();
-            File[] inputWorkFiles = new File[inputFiles.size()];
+            List<File> inputWorkFiles = new ArrayList<>(inputFiles.size());
             for (File fileInput : inputFiles)
             {
                 pepXMLAction.addInput(fileInput, "RawPepXML");
@@ -302,8 +302,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             {
                 try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
                 {
-                    for (int i = 0; i < inputFiles.size(); i++)
-                        inputWorkFiles[i] = _wd.inputFile(inputFiles.get(i), false);
+                    for (File inputFile : inputFiles)
+                        inputWorkFiles.add(_wd.inputFile(inputFile, false));
 
                     // Always copy spectra files to be local, since PeptideProphet wants them as of TPP 4.6.3
                     for (File spectraFile : getJobSupport().getInteractSpectraFiles())

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2013 LabKey Corporation
+ * Copyright (c) 2013 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.pipeline.client.sequest;
+package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import org.labkey.api.gwt.client.ui.HelpPopup;
-import org.labkey.ms2.pipeline.client.InputXmlComposite;
-import org.labkey.ms2.pipeline.client.ParamParser;
 
 /**
  * User: billnelson@uky.edu
  * Date: Apr 18, 2008
  */
 
-/**
- * <code>SequestInputXmlComposite</code>
- */
-public class SequestInputXmlComposite extends InputXmlComposite
+public class GeneralInputXmlComposite extends InputXmlComposite
 {
+    private final String _description;
+    private final String _helpTopic;
+
+    public GeneralInputXmlComposite(String description, String helpTopic)
+    {
+        _description = description;
+        _helpTopic = helpTopic;
+    }
+
     public String update(String text)
     {
         if(params == null)
@@ -42,11 +46,11 @@ public class SequestInputXmlComposite extends InputXmlComposite
 
     public Widget getLabel()
     {
-        Label label = new Label("Sequest XML");
+        Label label = new Label(_description);
         label.setStyleName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);
-        panel.add(new HelpPopup("Sequest XML", "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineSequest\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
+        panel.add(new HelpPopup(_description, "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=" + _helpTopic + "\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
         return panel;
     }
 }

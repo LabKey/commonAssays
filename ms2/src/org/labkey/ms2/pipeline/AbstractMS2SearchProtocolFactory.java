@@ -15,11 +15,14 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
-import org.labkey.api.pipeline.ParamParser;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 /**
  * <code>AbstractMS2SearchProtocolFactory</code>

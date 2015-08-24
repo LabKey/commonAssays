@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sun.istack.internal.Nullable;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTService;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTServiceAsync;
@@ -68,10 +69,13 @@ public class Search implements EntryPoint
     private                 Hidden                  runSearch = new Hidden();
     private                 VerticalPanel           messagesPanel = new VerticalPanel();
     private                 ProtocolComposite       protocolComposite;
+    @Nullable
     private                 SequenceDbComposite     sequenceDbComposite;
     private                 LocationComposite       locationComposite;
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
+    @Nullable
     private                 EnzymeComposite         enzymeComposite;
+    @Nullable
     private                 ResidueModComposite     residueModComposite;
     private                 TPPComposite            tppComposite;
     private                 OtherParametersComposite otherParametersComposite;
@@ -105,7 +109,7 @@ public class Search implements EntryPoint
     {
         if (service == null)
         {
-            service = (SearchServiceAsync) GWT.create(SearchService.class);
+            service = GWT.create(SearchService.class);
             ServiceUtil.configureEndpoint(service, "searchService");
         }
         return service;
@@ -160,13 +164,22 @@ public class Search implements EntryPoint
         actualSearchEngineLabel.setStylePrimaryName("labkey-read-only");
         actualSearchEngineLabel.setText(searchEngine);
 
-        sequenceDbComposite.setName("sequenceDB");
-        sequenceDbComposite.setWidth(INPUT_WIDTH);
-        sequenceDbComposite.setVisibleItemCount(4);
+        if (sequenceDbComposite != null)
+        {
+            sequenceDbComposite.setName("sequenceDB");
+            sequenceDbComposite.setWidth(INPUT_WIDTH);
+            sequenceDbComposite.setVisibleItemCount(4);
+        }
 
-        enzymeComposite.setWidth(INPUT_WIDTH);
+        if (enzymeComposite != null)
+        {
+            enzymeComposite.setWidth(INPUT_WIDTH);
+        }
 
-        residueModComposite.setWidth(INPUT_WIDTH);
+        if (residueModComposite != null)
+        {
+            residueModComposite.setWidth(INPUT_WIDTH);
+        }
 
         inputXmlComposite.setName("configureXml");
         inputXmlComposite.setWidth("100%");
@@ -208,7 +221,7 @@ public class Search implements EntryPoint
                 {
                     if (input instanceof PipelineConfigCallback)
                     {
-                        ((PipelineConfigCallback)input).setPipelineConfig(result);
+                        ((PipelineConfigCallback) input).setPipelineConfig(result);
                     }
                 }
             }
@@ -216,11 +229,18 @@ public class Search implements EntryPoint
 
         protocolComposite.addChangeHandler(new ProtocolChangeListener());
 
-        sequenceDbComposite.addChangeListener(new SequenceDbChangeListener());
-        sequenceDbComposite.addRefreshClickHandler(new RefreshSequenceDbPathsClickListener());
-        sequenceDbComposite.addClickHandler(new SequenceDbClickListener());
-        sequenceDbComposite.addTaxonomyChangeHandler(new TaxonomyChangeListener());
-        enzymeComposite.addChangeListener(new EnzymeChangeListener());
+        if (sequenceDbComposite != null)
+        {
+            sequenceDbComposite.addChangeListener(new SequenceDbChangeListener());
+            sequenceDbComposite.addRefreshClickHandler(new RefreshSequenceDbPathsClickListener());
+            sequenceDbComposite.addClickHandler(new SequenceDbClickListener());
+            sequenceDbComposite.addTaxonomyChangeHandler(new TaxonomyChangeListener());
+        }
+
+        if (enzymeComposite != null)
+        {
+            enzymeComposite.addChangeListener(new EnzymeChangeListener());
+        }
         locationComposite.addChangeListener(new LocationChangeListener());
         tppComposite.addChangeListener(new LocationChangeListener());
         otherParametersComposite.addChangeListener(new LocationChangeListener());
@@ -283,12 +303,18 @@ public class Search implements EntryPoint
 
     private void changeProtocol()
     {
-        residueModComposite.clear();
+        if (residueModComposite != null)
+        {
+            residueModComposite.clear();
+        }
         mzXmlComposite.clearStatus();
-        sequenceDbComposite.setLoading(true);
-        sequenceDbComposite.setEnabled(false, false);
-        getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), searchEngine, false,
-                new SequenceDbServiceCallback());
+        if (sequenceDbComposite != null)
+        {
+            sequenceDbComposite.setLoading(true);
+            sequenceDbComposite.setEnabled(false, false);
+            getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), searchEngine, false,
+                    new SequenceDbServiceCallback());
+        }
         buttonPanel.remove(copyButton);
         protocolComposite.setFocus(true);
         String error = syncXml2Form();
@@ -325,9 +351,18 @@ public class Search implements EntryPoint
         subPanel.setWidth("100%");
 
         inputs.add(mzXmlComposite);
-        inputs.add(sequenceDbComposite);
-        inputs.add(enzymeComposite);
-        inputs.add(residueModComposite);
+        if (sequenceDbComposite != null)
+        {
+            inputs.add(sequenceDbComposite);
+        }
+        if (enzymeComposite != null)
+        {
+            inputs.add(enzymeComposite);
+        }
+        if (residueModComposite != null)
+        {
+            inputs.add(residueModComposite);
+        }
         inputs.add(tppComposite);
         inputs.add(locationComposite);
         inputs.add(otherParametersComposite);
@@ -440,12 +475,16 @@ public class Search implements EntryPoint
         {
           return "Trouble adding selected parameter to input XML.\n" + e.getMessage();
         }
-        return residueModComposite.validate();
+        if (residueModComposite != null)
+        {
+            return residueModComposite.validate();
+        }
+        return "";
     }
 
     public String syncXml2Form()
     {
-        StringBuffer error = new StringBuffer();
+        StringBuilder error = new StringBuilder();
         for (SearchFormComposite input : inputs)
         {
             error.append(input.syncXmlToForm(inputXmlComposite.params));
@@ -569,7 +608,10 @@ public class Search implements EntryPoint
         {
             clearErrors();
             appendError(protocolComposite.validate());
-            appendError(sequenceDbComposite.validate());
+            if (sequenceDbComposite != null)
+            {
+                appendError(sequenceDbComposite.validate());
+            }
             appendError(tppComposite.validate());
             if (hasErrors())
             {
@@ -584,7 +626,7 @@ public class Search implements EntryPoint
             {
                 appendError("The LabKey server is not responding.");
             }
-            else if(results.indexOf("SUCCESS=") != -1)
+            else if(results.contains("SUCCESS="))
             {
                 String destination = results.substring(results.indexOf("SUCCESS=") + 8);
                 destination  = destination.trim();
@@ -597,7 +639,7 @@ public class Search implements EntryPoint
                 appendMessage("Navigating to " + destination);
 
             }
-            else if(results.indexOf("ERROR=") != -1)
+            else if(results.contains("ERROR="))
             {
                 String errorString = results.substring(results.indexOf("ERROR=") + 6);
                 errorString  = errorString.trim();
@@ -612,7 +654,7 @@ public class Search implements EntryPoint
                     setReadOnly(false, true);
                 }
             }
-            else if(results.indexOf("User does not have permission") != -1)
+            else if(results.contains("User does not have permission"))
             {
                 cancelForm();
             }
@@ -628,7 +670,7 @@ public class Search implements EntryPoint
     {
         public void reportFailure(String message, Throwable caught)
         {
-            if(caught.getMessage().indexOf("User does not have permission") != -1)
+            if(caught.getMessage().contains("User does not have permission"))
             {
                 cancelForm();
             }
@@ -709,7 +751,10 @@ public class Search implements EntryPoint
             appendError(inputXmlComposite.update(gwtResult.getProtocolXml()));
             appendError(syncXml2Form());
             String defaultDb = gwtResult.getDefaultSequenceDb();
-            sequenceDbComposite.setSequenceDbsListBoxContents(null, defaultDb);
+            if (sequenceDbComposite != null)
+            {
+                sequenceDbComposite.setSequenceDbsListBoxContents(null, defaultDb);
+            }
             if(defaultProtocol == null || defaultDb.equals(""))
                 setReadOnly(false);
             else
@@ -726,15 +771,24 @@ public class Search implements EntryPoint
             List<String> sequenceDbPaths = gwtResult.getSequenceDbPaths();
             String defaultDb = gwtResult.getDefaultSequenceDb();
             List<String> taxonomy = gwtResult.getMascotTaxonomyList();
-            sequenceDbComposite.update(sequenceDbs,sequenceDbPaths, defaultDb, taxonomy );
+            if (sequenceDbComposite != null)
+            {
+                sequenceDbComposite.update(sequenceDbs, sequenceDbPaths, defaultDb, taxonomy);
+            }
             List<String> protocols = gwtResult.getProtocols();
             String defaultProtocol = gwtResult.getSelectedProtocol();
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
             mzXmlComposite.update(gwtResult.getFileInputNames(), gwtResult.getFileInputStatus(),
                     gwtResult.isActiveJobs());
-            enzymeComposite.update(gwtResult.getEnzymeMap());
-            residueModComposite.update(gwtResult.getMod0Map(), gwtResult.getMod1Map());
+            if (enzymeComposite != null)
+            {
+                enzymeComposite.update(gwtResult.getEnzymeMap());
+            }
+            if (residueModComposite != null)
+            {
+                residueModComposite.update(gwtResult.getMod0Map(), gwtResult.getMod1Map());
+            }
             appendError(inputXmlComposite.update(gwtResult.getProtocolXml()));
             appendError(syncXml2Form());
             appendError(gwtResult.getErrors());

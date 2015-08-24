@@ -54,7 +54,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
     private static final String TAXON_NAME = "sequences";
 
     private static final String X_TANDEM_ACTION_NAME = "X!Tandem";
-    private static final String TANDEM2_XML_ACTION_NAME = "Tandem2XML";
+    public static final String TANDEM2_XML_ACTION_NAME = "Tandem2XML";
     
     // TPP's xtandem build treats xml.gz as a native format
     public static FileType getNativeFileType(FileType.gzSupportLevel gzSupport)

@@ -48,6 +48,7 @@
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory">
                     <property name="javaVMOptions" value="-Xmx1200m" />
                 </bean>
+                <bean class="org.labkey.ms2.pipeline.tandem.XTandemToXMLTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
                 <bean class="org.labkey.ms2.pipeline.MSDaPlLoaderTask$Factory" />
                 <bean class="org.labkey.ms2.pipeline.Sqt2PinTask$Factory" />
@@ -151,6 +152,21 @@
                         </list>
                     </property>
                 </bean>
+
+                <!-- Pipeline for rolling up existing .pep.xml files -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.rollup.FractionRollupPipelineJob"/>
+                    <property name="protocolObjectId" value="MS2.FractionRollup" />
+                    <property name="protocolName" value="Fraction rollup analysis" />
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <ref bean="tandemToXMLTask"/>
+                            <ref bean="tppTaskJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
+                        </list>
+                    </property>
+                </bean>
+
             </list>
         </property>
     </bean>
@@ -668,6 +684,10 @@
     <bean id="tppTaskJoin" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
         <constructor-arg type="java.lang.String" value="join"/>
+    </bean>
+
+    <bean id="tandemToXMLTask" class="org.labkey.api.pipeline.TaskId">
+        <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemToXMLTask</value></constructor-arg>
     </bean>
 
     <!-- Part of the MacCoss UW Sequest pipeline -->
