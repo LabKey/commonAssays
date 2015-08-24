@@ -156,7 +156,7 @@ public class MicroarrayManager
         return null;
     }
 
-    private Integer insertFeatureAnnotations(User user, Container container, Integer featureSetRowId, DataLoader loader, BatchValidationException errors) throws SQLException
+    private Integer insertFeatureAnnotations(User user, Container container, Integer featureSetRowId, DataLoader loader, BatchValidationException errors) throws SQLException, BatchValidationException
     {
         QueryUpdateService queryUpdateService = getAnnotationQueryTableInfo(user, container).getUpdateService();
 
@@ -164,6 +164,10 @@ public class MicroarrayManager
         {
             DataIteratorContext dataIteratorContext = new DataIteratorContext(errors);
             DataIterator dataIterator = loader.getDataIterator(dataIteratorContext);
+            if (dataIterator == null)
+            {
+                throw dataIteratorContext.getErrors();
+            }
             // TODO should create a custom DataIteratorBuider to wrap this custom iterator
             SimpleTranslator translator = new SimpleTranslator(dataIterator, dataIteratorContext);
             translator.selectAll();
