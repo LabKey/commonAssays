@@ -126,7 +126,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
     }
 
     @Override
-    protected InsertView createBatchInsertView(MassSpecMetadataAssayForm form, boolean reshow, BindException errors)
+    protected InsertView createBatchInsertView(MassSpecMetadataAssayForm form, boolean reshow, BindException errors) throws ExperimentException
     {
         InsertView result = super.createBatchInsertView(form, reshow, errors);
         ActionURL templateURL = new ActionURL(MassSpecBulkPropertiesTemplateAction.class, getContainer());

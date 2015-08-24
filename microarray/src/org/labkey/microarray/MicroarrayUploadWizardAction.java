@@ -132,7 +132,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         return super.showBatchStep(form, uploadDomain);
     }
 
-    protected InsertView createBatchInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)
+    protected InsertView createBatchInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors) throws ExperimentException
     {
         InsertView result = super.createBatchInsertView(form, reshow, errors);
         ActionURL templateURL = new ActionURL(MicroarrayBulkPropertiesTemplateAction.class, getContainer());
