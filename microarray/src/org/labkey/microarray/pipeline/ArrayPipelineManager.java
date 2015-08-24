@@ -20,25 +20,22 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.reader.Readers;
 import org.labkey.microarray.MicroarrayModule;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class ArrayPipelineManager
 {
-    
     protected static String _pipelineLogExt = ".log";
     protected static String _pipelineResultsExt = ".tgz";
     
@@ -86,13 +83,7 @@ public class ArrayPipelineManager
         Map<File, FileStatus> imageFileMap = new LinkedHashMap<>();
         if (imageFiles != null && imageFiles.length > 0)
         {
-            Arrays.sort(imageFiles, new Comparator<File>()
-            {
-                public int compare(File o1, File o2)
-                {
-                    return o1.getName().compareTo(o2.getName());
-                }
-            });
+            Arrays.sort(imageFiles, (o1, o2) -> o1.getName().compareTo(o2.getName()));
 
             File logFile = getExtractionLog(imageDir, null);
             boolean logExists = exists(logFile, knownFiles, checkedDirectories);
@@ -109,10 +100,8 @@ public class ArrayPipelineManager
                     else
                         status = FileStatus.RUNNING;
                     
-                    BufferedReader logFileReader = null;
-                    try
+                    try (BufferedReader logFileReader = Readers.getReader(logFile))
                     {
-                        logFileReader = new BufferedReader(new FileReader(logFile));
                         String line;
                         while ((line = logFileReader.readLine()) != null)
                         {
@@ -129,14 +118,6 @@ public class ArrayPipelineManager
                         {
                             imageFileMap.put(file, FileStatus.UNKNOWN);
                         }
-                    }
-                    finally
-                    {
-                        try
-                        {
-                            logFileReader.close();
-                        }
-                        catch (Exception e) {}
                     }
                 }
                 else
@@ -166,5 +147,4 @@ public class ArrayPipelineManager
         }
         return file.exists();
     }
-    
 }
