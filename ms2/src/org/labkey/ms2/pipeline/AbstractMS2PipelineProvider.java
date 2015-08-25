@@ -7,6 +7,7 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 
 /**
+ * Shared between search-engine pipeline providers and ones that operate on existing search results.
  * Created by: jeckels
  * Date: 8/23/15
  */
@@ -17,9 +18,11 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
         super(name, owningModule);
     }
 
+    /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server */
     abstract public void ensureEnabled() throws PipelineValidationException;
 
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
 
+    /** @return the name of the help topic that the user can consult for guidance on setting parameters */
     abstract public String getHelpTopic();
 }

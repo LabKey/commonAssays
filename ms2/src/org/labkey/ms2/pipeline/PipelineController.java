@@ -38,7 +38,7 @@ import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -116,7 +116,7 @@ public class PipelineController extends SpringActionController
         return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(container);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
         public ActionURL getRedirectURL(Object o)
@@ -125,7 +125,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class UploadAction extends RedirectAction<PipelinePathForm>
     {
         public ActionURL getSuccessURL(PipelinePathForm form)
@@ -211,7 +211,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class SearchXTandemAction extends SearchAction
     {
         public String getProviderName()
@@ -226,7 +226,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class FractionRollupAction extends SearchAction
     {
         public String getProviderName()
@@ -241,7 +241,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class SearchMascotAction extends SearchAction
     {
         public String getProviderName()
@@ -256,7 +256,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class SearchSequestAction extends SearchAction
     {
         public String getProviderName()
@@ -272,7 +272,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class SearchCometAction extends SearchAction
     {
         public String getProviderName()
@@ -288,7 +288,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class SearchServiceAction extends GWTServiceAction
     {
         protected BaseRemoteService createService()
@@ -298,7 +298,7 @@ public class PipelineController extends SpringActionController
     }
 
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public abstract class SearchAction extends FormViewAction<MS2SearchForm>
     {
         private PipeRoot _root;
@@ -496,8 +496,6 @@ public class PipelineController extends SpringActionController
                 AbstractMS2SearchPipelineJob job =
                         _protocol.createPipelineJob(getViewBackgroundInfo(), _root, mzXMLFiles, fileParameters);
 
-                boolean preserveId = false;
-
                 // Check for existing job
                 PipelineStatusFile existingJobStatusFile = PipelineService.get().getStatusFile(job.getLogFile());
                 if (existingJobStatusFile != null && existingJobStatusFile.getJobStore() != null)
@@ -517,7 +515,6 @@ public class PipelineController extends SpringActionController
                         }
                     }
                     existingJob.setActiveTaskId(existingJob.getTaskPipeline().getTaskProgression()[0]);
-                    preserveId = true;
                 }
 
                 boolean allFilesReady = true;
@@ -601,9 +598,9 @@ public class PipelineController extends SpringActionController
         private String getErrors(BindException errors)
         {
             if(errors == null) return "";
-            List errorMessages = errors.getAllErrors();
+            List<ObjectError> errorMessages = errors.getAllErrors();
             StringBuilder errorString = new StringBuilder();
-            for (ObjectError errorMessage : (Iterable<ObjectError>) errorMessages)
+            for (ObjectError errorMessage : errorMessages)
             {
                 errorString.append(errorMessage.getDefaultMessage());
                 errorString.append("\n");
@@ -618,7 +615,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class SetupClusterSequenceDBAction extends FormViewAction<SequenceDBRootForm>
     {
         public void validateCommand(SequenceDBRootForm form, Errors errors)
@@ -695,7 +692,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class SetTandemDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -719,7 +716,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class SetMascotDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -743,7 +740,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class SetSequestDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -767,7 +764,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class SetCometDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -844,7 +841,7 @@ public class PipelineController extends SpringActionController
             }
             catch (FileNotFoundException e)
             {
-                if (e.getMessage().indexOf("Access") != -1)
+                if (e.getMessage().contains("Access"))
                     errors.addError(new LabkeyError("Access denied attempting to write defaults. Contact the server administrator."));
                 else
                     errors.addError(new LabkeyError("Failure attempting to write defaults.  Please try again."));

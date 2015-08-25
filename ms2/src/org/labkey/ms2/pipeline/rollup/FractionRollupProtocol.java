@@ -45,9 +45,7 @@ public class FractionRollupProtocol extends AbstractMS2SearchProtocol<FractionRo
 
     public FractionRollupPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                 PipeRoot root, List<File> filesInput,
-                                                File fileParameters
-    )
-            throws IOException
+                                                File fileParameters) throws IOException
     {
         return new FractionRollupPipelineJob(this, info, root, getName(),
                 filesInput, fileParameters);

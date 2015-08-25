@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="tandem-input-style.xsl"?>
 <bioml>
-
+    <!-- No pre-set defaults, but this file is required -->
 </bioml>

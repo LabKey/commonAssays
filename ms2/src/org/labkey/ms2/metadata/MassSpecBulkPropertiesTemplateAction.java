@@ -24,7 +24,7 @@ import jxl.write.WritableWorkbook;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.assay.AssayProvider;
@@ -41,7 +41,7 @@ import java.util.Map;
  * User: jeckels
  * Date: May 31, 2009
  */
-@RequiresPermissionClass(ReadPermission.class)
+@RequiresPermission(ReadPermission.class)
 public class MassSpecBulkPropertiesTemplateAction extends BaseAssayAction<MassSpecMetadataAssayForm>
 {
     public ModelAndView getView(MassSpecMetadataAssayForm form, BindException errors) throws Exception

@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Accepts .xtan.xml files and shows a pipeline action letting the user combine the files into a single
+ * set of combined search results.
  * @author jeckels
  */
 public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
@@ -99,7 +101,7 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     @Override
     public void ensureEnabled() throws PipelineValidationException
     {
-
+        // This is always available
     }
 }
 

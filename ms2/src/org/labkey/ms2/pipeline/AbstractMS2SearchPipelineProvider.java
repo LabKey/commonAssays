@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <code>AbstractMS2SearchPipelineProvider</code>
+ * Common base class for pipeline providers that map to MS2 searches (XTandem, Mascot, etc)
  */
 abstract public class AbstractMS2SearchPipelineProvider
         extends AbstractMS2PipelineProvider<AbstractMS2SearchProtocolFactory>

@@ -348,7 +348,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             }
             else
             {
-                StringBuffer prophetOpts = new StringBuffer("-Opt");
+                StringBuilder prophetOpts = new StringBuilder("-Opt");
                 if ("yes".equalsIgnoreCase(params.get("pipeline prophet, accurate mass")))
                     prophetOpts.append("A");
                 if ("yes".equalsIgnoreCase(params.get("pipeline prophet, allow multiple instruments")))

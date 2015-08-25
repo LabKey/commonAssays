@@ -23,7 +23,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.query.*;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.security.User;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
@@ -56,7 +56,7 @@ public class ProteinController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -70,7 +70,7 @@ public class ProteinController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowAnnotationSetAction extends ShowSetAction
     {
         public ShowAnnotationSetAction()
@@ -146,7 +146,7 @@ public class ProteinController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowAnnotationSetWithSequencesAction extends ShowSetAction
     {
         public ShowAnnotationSetWithSequencesAction()
@@ -155,7 +155,7 @@ public class ProteinController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteCustomAnnotationSetsAction extends FormHandlerAction
     {
         public void validateCommand(Object target, Errors errors)
@@ -187,7 +187,7 @@ public class ProteinController extends SpringActionController
         return new ActionURL(BeginAction.class, c);
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class UploadCustomProteinAnnotations extends FormViewAction<UploadAnnotationsForm>
     {
         public void validateCommand(UploadAnnotationsForm target, Errors errors)

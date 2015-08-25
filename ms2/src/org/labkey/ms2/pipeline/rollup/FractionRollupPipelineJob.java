@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Job for rolling up multiple search engine results (after the search has already been completed) into a combined
+ * set of analysis results. Currently only works for .xtan.xml files - XTandem's native output file format.
  * @author jeckels
  */
 public class FractionRollupPipelineJob extends AbstractMS2SearchPipelineJob

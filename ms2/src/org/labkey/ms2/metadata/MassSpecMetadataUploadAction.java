@@ -28,7 +28,7 @@ import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.RedirectException;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.pipeline.PipelineUrls;
@@ -47,7 +47,7 @@ import java.util.Map;
  * Date: Sep 17, 2007
  * Time: 12:30:55 AM
  */
-@RequiresPermissionClass(InsertPermission.class)
+@RequiresPermission(InsertPermission.class)
 public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardAction<MassSpecMetadataAssayForm, MassSpecMetadataAssayProvider>
 {
     public MassSpecMetadataUploadAction()
@@ -56,7 +56,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         addStepHandler(new DeleteAssaysStepHandler());
     }
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteAssaysStepHandler extends StepHandler<MassSpecMetadataAssayForm>
     {
         public static final String NAME = "DELETEASSAYS";
