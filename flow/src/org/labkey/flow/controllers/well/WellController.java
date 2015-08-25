@@ -33,7 +33,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresNoPermission;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.SecurityPolicyManager;
 import org.labkey.api.security.permissions.AdminPermission;
@@ -133,7 +133,7 @@ public class WellController extends BaseFlowController
         return new ActionURL(ShowWellAction.class, ContainerManager.getRoot());
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowWellAction extends SimpleViewAction
     {
         FlowWell well;
@@ -154,7 +154,7 @@ public class WellController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditWellAction extends FormViewAction<EditWellForm>
     {
         FlowWell well;
@@ -235,7 +235,7 @@ public class WellController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
         FlowWell well;
@@ -285,7 +285,7 @@ public class WellController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     @ContextualRoles(GraphContextualRoles.class)
     public class ShowGraphAction extends SimpleViewAction
     {
@@ -344,7 +344,7 @@ public class WellController extends BaseFlowController
         response.getOutputStream().write(bytes);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class GenerateGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
         public ModelAndView getView(ChooseGraphForm form, BindException errors) throws IOException
@@ -415,7 +415,7 @@ public class WellController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DownloadAction extends FCSAction
     {
         @Override
@@ -443,7 +443,7 @@ public class WellController extends BaseFlowController
         }
     }
     
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class KeywordsAction extends FCSAction
     {
         protected ModelAndView internalGetView(FlowWell well) throws Exception
@@ -463,7 +463,7 @@ public class WellController extends BaseFlowController
 
 
     // this is really for dev use as far as I can tell
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowFCSAction extends FCSAction
     {
         public ModelAndView internalGetView(FlowWell well) throws Exception
@@ -512,7 +512,7 @@ public class WellController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class BulkUpdateKeywordsAction extends FormViewAction<UpdateKeywordsForm>
     {
         Integer keywordid = null;

@@ -54,7 +54,7 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.LimitedUser;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -145,7 +145,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -206,7 +206,7 @@ public class NabAssayController extends SpringActionController
         return getProvider(run).getDataHandler();
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DownloadDatafileAction extends SimpleViewAction<RenderAssayForm>
     {
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
@@ -304,7 +304,7 @@ public class NabAssayController extends SpringActionController
 
     private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class DetailsAction extends RunDetailsAction<RenderAssayBean>
     {
@@ -367,7 +367,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
     {
         @Override
@@ -403,7 +403,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteRunAction extends SimpleViewAction<DeleteRunForm>
     {
         public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors) throws Exception
@@ -451,13 +451,13 @@ public class NabAssayController extends SpringActionController
         return arr;
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
     {
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class GraphAction extends DilutionGraphAction
     {
@@ -612,7 +612,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class SampleSpreadsheetTemplateAction extends ExportAction<SampleSpreadsheetForm>
     {
         @Override

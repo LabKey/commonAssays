@@ -36,7 +36,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.PropertyValidationError;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.StudyPickerColumn;
 import org.labkey.api.study.actions.UploadWizardAction;
@@ -65,7 +65,7 @@ import java.util.Map;
  * User: kevink
  * Date: Sep 19, 2009
  */
-@RequiresPermissionClass(ReadPermission.class)
+@RequiresPermission(ReadPermission.class)
 public class ViabilityAssayUploadWizardAction extends UploadWizardAction<ViabilityAssayRunUploadForm, ViabilityAssayProvider>
 {
     public ViabilityAssayUploadWizardAction()

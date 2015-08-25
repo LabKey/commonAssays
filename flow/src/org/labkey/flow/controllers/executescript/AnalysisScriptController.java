@@ -30,7 +30,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -115,7 +115,7 @@ public class AnalysisScriptController extends BaseFlowController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         FlowScript script;
@@ -191,7 +191,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class ChooseRunsToAnalyzeAction extends BaseAnalyzeRunsAction
     {
         FlowScript script;
@@ -203,7 +203,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class AnalyzeSelectedRunsAction extends BaseAnalyzeRunsAction
     {
         public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
@@ -390,7 +390,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class ConfirmImportRunsAction extends ImportRunsBaseAction
     {
         public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
@@ -399,7 +399,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class ImportRunsAction extends ImportRunsBaseAction
     {
         public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
@@ -408,7 +408,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class ShowUploadRunsAction extends RedirectAction
     {
         public ActionURL getSuccessURL(Object o)
@@ -517,7 +517,7 @@ public class AnalysisScriptController extends BaseFlowController
      * This action acts as a bridge between FlowPipelineProvider and ImportAnalysisAction
      * by setting the 'workspace.path' parameter and POSTs to the first wizard step.
      */
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class ImportAnalysisFromPipelineAction extends SimpleViewAction<PipelinePathForm>
     {
         @Override
@@ -543,7 +543,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class ImportAnalysisAction extends FormViewAction<ImportAnalysisForm>
     {
         String title;
@@ -1573,7 +1573,7 @@ public class AnalysisScriptController extends BaseFlowController
 
     /*
     // Called from pipeline import panel
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class ImportAnalysisResultsAction extends SimpleViewAction<PipelinePathForm>
     {
         @Override

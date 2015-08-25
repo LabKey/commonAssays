@@ -30,7 +30,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayProtocolSchema;
@@ -55,7 +55,7 @@ import java.util.Map;
  * Time: 5:13:30 PM
  */
 
-@RequiresPermissionClass(ReadPermission.class)
+@RequiresPermission(ReadPermission.class)
 @ApiVersion(9.1)
 public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 {

@@ -57,7 +57,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -121,7 +121,7 @@ public class LuminexController extends SpringActionController
         setActionResolver(_resolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -135,7 +135,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ExcludedDataAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
@@ -227,7 +227,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class TitrationQcReportAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
@@ -258,7 +258,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class SinglePointControlQcReportAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
@@ -288,7 +288,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class LeveyJenningsReportAction extends SimpleViewAction<LeveyJenningsForm>
     {
         private LeveyJenningsForm _form;
@@ -322,7 +322,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class LeveyJenningsMenuAction extends SimpleViewAction<ProtocolIdForm>
     {
         private ProtocolIdForm _form;
@@ -348,7 +348,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(DesignAssayPermission.class)
+    @RequiresPermission(DesignAssayPermission.class)
     public class SetAnalyteDefaultValuesAction extends FormViewAction<DefaultValuesForm>
     {
         @Override
@@ -481,7 +481,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(DesignAssayPermission.class)
+    @RequiresPermission(DesignAssayPermission.class)
     public class ImportDefaultValuesAction extends AbstractQueryImportAction<ProtocolIdForm>
     {
         ExpProtocol _protocol;
@@ -587,7 +587,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(DesignAssayPermission.class)
+    @RequiresPermission(DesignAssayPermission.class)
     public class ExportDefaultValuesAction extends ExportAction<ProtocolIdForm>
     {
         @Override
@@ -617,7 +617,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class SaveExclusionAction extends ApiAction<LuminexSaveExclusionsForm>
     {
         @Override
@@ -660,7 +660,7 @@ public class LuminexController extends SpringActionController
     }
 
     // NOTE: following example of AbstractDeleteAction in ExperimentController
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteGuideSetAction extends FormViewAction<DeleteForm>
     {
 
@@ -893,7 +893,7 @@ public class LuminexController extends SpringActionController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ManageGuideSetAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;

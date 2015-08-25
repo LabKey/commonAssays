@@ -22,7 +22,7 @@ import org.labkey.api.action.ApiVersion;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
@@ -43,7 +43,7 @@ import java.util.Set;
  * Time: 5:13:30 PM
  */
 
-@RequiresPermissionClass(ReadPermission.class)
+@RequiresPermission(ReadPermission.class)
 @ApiVersion(10.1)
 public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetStudyNabRunsForm>
 {

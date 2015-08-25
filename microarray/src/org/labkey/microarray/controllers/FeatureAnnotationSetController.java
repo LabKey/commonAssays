@@ -41,7 +41,7 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -82,7 +82,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends RedirectAction
     {
         @Override
@@ -103,7 +103,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ManageAction extends SimpleViewAction
     {
         @Override
@@ -123,7 +123,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteAction extends FormViewAction<DeleteFeatureAnnotationSetForm>
     {
         @Override
@@ -167,7 +167,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class UploadAction extends FormViewAction<FeatureAnnotationSetForm>
     {
         @Override
@@ -281,7 +281,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DetailsAction extends SimpleViewAction<FeatureAnnotationSetForm>
     {
         @Override

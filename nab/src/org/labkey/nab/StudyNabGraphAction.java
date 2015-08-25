@@ -19,7 +19,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabGraph;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.Pair;
@@ -40,7 +40,7 @@ import java.util.Set;
  * Date: Apr 21, 2010 12:46:56 PM
  */
 
-@RequiresPermissionClass(ReadPermission.class)
+@RequiresPermission(ReadPermission.class)
 public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
 {
     private int[] toArray(Collection<Integer> integerList)

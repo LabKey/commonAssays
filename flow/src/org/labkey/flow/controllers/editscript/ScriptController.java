@@ -37,7 +37,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -117,7 +117,7 @@ public class ScriptController extends BaseFlowController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -136,7 +136,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -160,7 +160,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditScriptAction extends FlowAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -204,7 +204,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class NewProtocolAction extends SimpleViewAction<NewProtocolForm>
     {
         public ModelAndView getView(NewProtocolForm form, BindException errors) throws Exception
@@ -267,7 +267,7 @@ public class ScriptController extends BaseFlowController
         return ret;
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditAnalysisAction extends FlowAction<AnalysisForm>
     {
         public ModelAndView getView(AnalysisForm form, BindException errors) throws Exception
@@ -439,7 +439,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class UploadAnalysisAction extends FlowAction<UploadAnalysisForm>
     {
         public ModelAndView getView(UploadAnalysisForm form, BindException errors) throws Exception
@@ -519,7 +519,7 @@ public class ScriptController extends BaseFlowController
         return null;
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class UploadCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
@@ -538,7 +538,7 @@ public class ScriptController extends BaseFlowController
 
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class ChooseCompensationRunAction extends FlowAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
@@ -570,7 +570,7 @@ public class ScriptController extends BaseFlowController
         return graphDef;
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
@@ -699,7 +699,7 @@ public class ScriptController extends BaseFlowController
         return true;
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class GraphImageAction extends SimpleViewAction<GraphForm>
     {
         public ModelAndView getView(GraphForm form, BindException errors) throws Exception
@@ -843,7 +843,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditGateTreeAction extends FlowAction<EditGateTreeForm>
     {
         public ModelAndView getView(EditGateTreeForm form, BindException errors) throws Exception
@@ -928,7 +928,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class CopyAction extends FlowAction<CopyProtocolForm>
     {
         String scriptName;
@@ -987,7 +987,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditPropertiesAction extends FlowAction<EditPropertiesForm>
     {
         public ModelAndView getView(EditPropertiesForm form, BindException errors) throws Exception
@@ -1007,7 +1007,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditSettingsAction extends FlowAction<EditSettingsForm>
     {
         public ModelAndView getView(EditSettingsForm form, BindException errors) throws Exception
@@ -1112,7 +1112,7 @@ public class ScriptController extends BaseFlowController
         return success;
     }
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteAction extends FlowAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -1132,7 +1132,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class GateEditorAction extends FlowAction<GateEditorForm>
     {
         public ModelAndView getView(GateEditorForm form, BindException errors) throws Exception
@@ -1168,7 +1168,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class GateEditorService extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

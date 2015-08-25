@@ -23,7 +23,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
@@ -65,7 +65,7 @@ public class MicroarrayController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(DesignAssayPermission.class)
+    @RequiresPermission(DesignAssayPermission.class)
     public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
     {
         protected ModelAndView createGWTView(Map<String, String> properties)
@@ -85,7 +85,7 @@ public class MicroarrayController extends SpringActionController
         return new ActionURL(ShowPendingMageMLFilesAction.class, c);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -102,7 +102,7 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowPendingMageMLFilesAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -123,7 +123,7 @@ public class MicroarrayController extends SpringActionController
      * 3. LabKey Server will then cause the user's browser to navigate to a URL of the general form that you described. It will include a GET parameter that gives the path to the ZIP file or directory.
      * 4. The Analyst plugin takes over from here.
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class GeneDataAnalysisAction extends RedirectAction<PipelinePathForm>
     {
         private URLHelper _successURL;
@@ -175,7 +175,7 @@ public class MicroarrayController extends SpringActionController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class MatrixQueryAction extends SimpleViewAction
     {
         @Override

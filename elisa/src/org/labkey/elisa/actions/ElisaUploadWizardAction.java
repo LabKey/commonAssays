@@ -29,7 +29,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.PropertyValidationError;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.actions.PlateBasedUploadWizardAction;
@@ -54,7 +54,7 @@ import java.util.Map;
  * User: klum
  * Date: 10/9/12
  */
-@RequiresPermissionClass(InsertPermission.class)
+@RequiresPermission(InsertPermission.class)
 public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaRunUploadForm, ElisaAssayProvider>
 {
     public ElisaUploadWizardAction()

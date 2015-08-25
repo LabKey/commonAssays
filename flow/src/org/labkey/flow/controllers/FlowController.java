@@ -33,7 +33,7 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -91,7 +91,7 @@ public class FlowController extends BaseFlowController
         AdminConsole.addLink(SettingsLinkType.Configuration, "flow cytometry", new ActionURL(FlowAdminAction.class, ContainerManager.getRoot()));
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -129,7 +129,7 @@ public class FlowController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class QueryAction extends SimpleViewAction
     {
         String query;
@@ -197,7 +197,7 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
     {
         public void validate(StatusJobForm form, BindException errors)
@@ -324,7 +324,7 @@ public class FlowController extends BaseFlowController
         return null;
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class CancelJobAction extends SimpleViewAction<CancelJobForm>
     {
         public ModelAndView getView(CancelJobForm form, BindException errors) throws Exception
@@ -383,7 +383,7 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class NewFolderAction extends FormViewAction<NewFolderForm>
     {
         Container destContainer;
@@ -557,7 +557,7 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class SavePerferencesAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

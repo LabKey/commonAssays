@@ -49,7 +49,7 @@ import org.labkey.api.query.CrosstabView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.PlateTemplate;
@@ -99,7 +99,7 @@ public class ElispotController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -113,7 +113,7 @@ public class ElispotController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class RunDetailsAction extends SimpleViewAction<DetailsForm>
     {
         private ExpProtocol _protocol;
@@ -279,7 +279,7 @@ public class ElispotController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class RunDetailRedirectAction extends SimpleRedirectAction<DetailsForm>
     {
         public ActionURL getRedirectURL(DetailsForm form) throws Exception
@@ -298,7 +298,7 @@ public class ElispotController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class GetPlateSummary extends ApiAction<DetailsForm>
     {
         @Override
@@ -533,7 +533,7 @@ public class ElispotController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class BackgroundSubtractionAction extends FormHandlerAction<Object>
     {
         @Override

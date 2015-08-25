@@ -25,7 +25,7 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.DbReportIdentifier;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.reports.report.ReportIdentifier;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -72,7 +72,7 @@ public class ReportsController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public static class BeginAction extends SimpleViewAction
     {
         public BeginAction()
@@ -158,7 +158,7 @@ public class ReportsController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(InsertPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public static class CreateAction extends CreateOrUpdateAction<CreateReportForm>
     {
         @Override
@@ -176,7 +176,7 @@ public class ReportsController extends BaseFlowController
         }
     }
     
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public static class UpdateAction extends CreateOrUpdateAction<IdForm>
     {
         @Override
@@ -208,7 +208,7 @@ public class ReportsController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public static class CopyAction extends FormViewAction<CopyForm>
     {
         FlowReport r;
@@ -270,7 +270,7 @@ public class ReportsController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public static class DeleteAction extends ConfirmAction<IdForm>
     {
         IdForm _form;
@@ -328,7 +328,7 @@ public class ReportsController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ExecuteAction extends SimpleViewAction<ExecuteForm>
     {
         FlowReport r;

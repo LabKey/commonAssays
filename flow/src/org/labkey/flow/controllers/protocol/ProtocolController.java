@@ -21,7 +21,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.RequiresNoPermission;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.view.ActionURL;
@@ -84,7 +84,7 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowProtocolAction extends SimpleViewAction<ProtocolForm>
     {
         FlowProtocol protocol = null;
@@ -109,7 +109,7 @@ public class ProtocolController extends BaseFlowController
         public void setUnlinkedOnly(boolean b) { unlinkedOnly = b; }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowSamplesAction extends SimpleViewAction<ShowSamplesForm>
     {
         FlowProtocol protocol;
@@ -126,7 +126,7 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleSetForm>
     {
         public void validateCommand(JoinSampleSetForm form, Errors errors)
@@ -165,7 +165,7 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class UpdateSamplesAction extends SimpleViewAction<UpdateSamplesForm>
     {
         FlowProtocol protocol;
@@ -183,7 +183,7 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditFCSAnalysisNameAction extends ProtocolViewAction<EditFCSAnalysisNameForm>
     {
         public void validateCommand(EditFCSAnalysisNameForm form, Errors errors)
@@ -214,7 +214,7 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditFCSAnalysisFilterAction extends ProtocolViewAction<EditFCSAnalysisFilterForm>
     {
         public void validateCommand(EditFCSAnalysisFilterForm target, Errors errors)
@@ -244,7 +244,7 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class EditICSMetadataAction extends ProtocolViewAction<EditICSMetadataForm>
     {
         ICSMetadata metadata;

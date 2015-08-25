@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
+ * Imports an existing ProteinProphet .prot.xml output file.
  * User: jeckels
  * Date: Feb 17, 2006
  */

@@ -26,7 +26,7 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.FileNameUniquifier;
@@ -107,7 +107,7 @@ public class RunController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowRunAction extends SimpleViewAction<RunForm>
     {
         FlowRun run;
@@ -129,7 +129,7 @@ public class RunController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction<RunsForm>
     {
         FlowExperiment experiment;
@@ -159,7 +159,7 @@ public class RunController extends BaseFlowController
 
 
     @RequiresLogin
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
         private FlowRun _run;
@@ -344,7 +344,7 @@ public class RunController extends BaseFlowController
     }
 
     @RequiresLogin
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ExportAnalysis extends FormViewAction<ExportAnalysisForm>
     {
         List<FlowRun> _runs = null;
@@ -557,7 +557,7 @@ public class RunController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class MoveToWorkspaceAction extends FormViewAction<RunForm>
     {
         FlowRun run;
@@ -609,7 +609,7 @@ public class RunController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class MoveToAnalysisAction extends FormViewAction<MoveToAnalysisForm>
     {
         FlowRun run;
@@ -673,7 +673,7 @@ public class RunController extends BaseFlowController
         private String name;
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DownloadImageAction extends SimpleViewAction<AttachmentForm>
     {
         public ModelAndView getView(final AttachmentForm form, BindException errors) throws Exception

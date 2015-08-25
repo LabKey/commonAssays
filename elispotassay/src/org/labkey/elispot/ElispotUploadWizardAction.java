@@ -35,7 +35,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
@@ -67,7 +67,7 @@ import java.util.Set;
  * Date: Jan 9, 2008
  */
 
-@RequiresPermissionClass(InsertPermission.class)
+@RequiresPermission(InsertPermission.class)
 public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUploadForm, ElispotAssayProvider>
 {
     public ElispotUploadWizardAction()

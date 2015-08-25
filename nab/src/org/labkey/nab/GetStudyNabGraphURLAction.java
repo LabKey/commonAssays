@@ -21,7 +21,7 @@ import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
 import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -35,7 +35,7 @@ import java.util.Map;
  * Date: April 21, 2010
  */
 
-@RequiresPermissionClass(ReadPermission.class)
+@RequiresPermission(ReadPermission.class)
 @ApiVersion(10.2)
 public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
 {

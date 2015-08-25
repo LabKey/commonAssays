@@ -31,7 +31,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
@@ -82,7 +82,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Begin action for the MS1 Module. Displays a list of msInspect feature finding runs
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         // Invoked via reflection
@@ -200,7 +200,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to show the features for a given experiment run
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowFeaturesAction extends BasicFeaturesViewAction<ShowFeaturesForm>
     {
         public static final String PARAM_RUNID = "runId";
@@ -316,7 +316,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to show the peaks for a given experiment run and scan number
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowPeaksAction extends QueryViewAction<PeaksViewForm, PeaksView>
     {
         private int _runId = -1;
@@ -414,7 +414,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to show the related MS2 peptide(s) for the specified feature
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowMS2PeptideAction extends SimpleViewAction<MS2PeptideForm>
     {
         public ModelAndView getView(MS2PeptideForm form, BindException errors) throws Exception
@@ -454,7 +454,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to show the feature details view (with all the charts)
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowFeatureDetailsAction extends SimpleViewAction<FeatureDetailsForm>
     {
         private FeatureDetailsForm _form = null;
@@ -539,7 +539,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to render a particular chart--typically called from an img tag
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowChartAction extends SimpleViewAction<ChartForm>
     {
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
@@ -580,7 +580,7 @@ public class MS1Controller extends SpringActionController
         return new ActionURL(ShowAdminAction.class, ContainerManager.getRoot());
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class ShowAdminAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -610,7 +610,7 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class PepSearchAction extends BaseFeaturesViewAction<PeptideFilterSearchForm, QueryView>
     {
         public PepSearchAction()
@@ -858,7 +858,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action for finding features similar to a specified feature id
      */
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class SimilarSearchAction extends BasicFeaturesViewAction<SimilarSearchForm>
     {
         public SimilarSearchAction()
@@ -915,7 +915,7 @@ public class MS1Controller extends SpringActionController
     {
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class CompareRunsSetupAction extends SimpleViewAction<CompareRunsSetupForm>
     {
         public ModelAndView getView(CompareRunsSetupForm compareRunsSetupForm, BindException errors) throws Exception
@@ -969,7 +969,7 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class CompareRunsAction extends QueryViewAction<CompareRunsForm,CompareRunsView>
     {
         public CompareRunsAction()
@@ -1318,7 +1318,7 @@ public class MS1Controller extends SpringActionController
         return "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", '" + url.getLocalURIString() + "', 'post', 'runs')) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }";
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class CompareServiceAction extends GWTServiceAction
     {
         protected BaseRemoteService createService()

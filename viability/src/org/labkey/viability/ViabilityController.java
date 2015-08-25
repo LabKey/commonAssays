@@ -18,7 +18,7 @@ package org.labkey.viability;
 
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.ProtocolIdForm;
@@ -44,7 +44,7 @@ public class ViabilityController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
         public ActionURL getRedirectURL(Object o) throws Exception

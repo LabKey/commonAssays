@@ -29,7 +29,7 @@ import org.labkey.api.query.QueryForm;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -65,7 +65,7 @@ public class CompensationController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<QueryForm>
     {
         public ModelAndView getView(QueryForm form, BindException errors) throws Exception
@@ -82,7 +82,7 @@ public class CompensationController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public class UploadAction extends FormViewAction<UploadCompensationForm>
     {
         FlowCompensationMatrix _flowComp = null;
@@ -147,7 +147,7 @@ public class CompensationController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<ViewForm>
     {
         FlowCompensationMatrix _comp;
@@ -184,7 +184,7 @@ public class CompensationController extends BaseFlowController
     }
 
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     public class ShowCompensationAction extends SimpleViewAction<ViewForm>
     {
         FlowCompensationMatrix _comp;
@@ -210,7 +210,7 @@ public class CompensationController extends BaseFlowController
 
 
 
-    @RequiresPermissionClass(DeletePermission.class)
+    @RequiresPermission(DeletePermission.class)
     public class DeleteAction extends ConfirmAction<ViewForm>
     {
         public void validateCommand(ViewForm target, Errors errors)

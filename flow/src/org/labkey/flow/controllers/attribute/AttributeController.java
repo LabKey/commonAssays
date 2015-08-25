@@ -21,7 +21,7 @@ import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -143,7 +143,7 @@ public class AttributeController extends BaseFlowController
         return tree;
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class SummaryAction extends SimpleViewAction<AttributeForm>
     {
         AttributeType _type;
@@ -161,7 +161,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class DetailsAction extends SimpleViewAction<AttributeForm>
     {
         AttributeCache.Entry _entry;
@@ -200,7 +200,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class EditAction extends FormViewAction<EditAttributeForm>
     {
         AttributeCache.Entry _entry;
@@ -273,7 +273,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class CreateAliasAction extends FormViewAction<CreateAliasForm>
     {
         AttributeCache.Entry _entry;
@@ -328,7 +328,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class DeleteAction extends ConfirmAction<AttributeForm>
     {
         @Override
@@ -363,7 +363,7 @@ public class AttributeController extends BaseFlowController
         public Collection<FlowManager.FlowEntry> unusedGraphs;
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class DeleteUnusedAction extends ConfirmAction<ReturnUrlForm>
     {
         @Override
@@ -403,7 +403,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
+    @RequiresPermission(AdminPermission.class)
     public class MakePrimaryAction extends ConfirmAction<AttributeForm>
     {
 
