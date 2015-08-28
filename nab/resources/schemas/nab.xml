@@ -69,8 +69,12 @@
             </column>
             <column columnName="RunId"/>
             <column columnName="SpecimenLSID"/>
-            <column columnName="RunDataId"/>
-            <column columnName="DilutionDataId"/>
+            <column columnName="RunDataId">
+                <url>executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=Data&amp;query.RowId~eq=${RunDataId}</url>
+            </column>
+            <column columnName="DilutionDataId">
+                <url>executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=DilutionData&amp;query.RowId~eq=${DilutionDataId}</url>
+            </column>
             <column columnName="Row"/>
             <column columnName="Column"/>
             <column columnName="Value"/>
@@ -95,7 +99,9 @@
                 <isHidden>true</isHidden>
             </column>
             <column columnName="RunId"/>
-            <column columnName="RunDataId"/>
+            <column columnName="RunDataId">
+                <url>executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=Data&amp;query.RowId~eq=${RunDataId}</url>
+            </column>
             <column columnName="Dilution"/>
             <column columnName="DilutionOrder"/>
             <column columnName="PercentNeutralization"/>

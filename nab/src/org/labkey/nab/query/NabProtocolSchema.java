@@ -181,7 +181,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
             if (DilutionManager.WELL_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 NabWellDataTable table = new NabWellDataTable(this, getProtocol());
-                addCopiedToStudyColumns(table, true);
                 return table;
             }
 
