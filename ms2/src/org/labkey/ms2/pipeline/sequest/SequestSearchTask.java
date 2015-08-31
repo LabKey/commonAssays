@@ -75,7 +75,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     public static final String INDEX_FILE_NAME_PARAMETER_NAME = "pipeline, index file name";
 
     public static final FileType INDEX_FILE_TYPE = new FileType(".hdr");
-    public static final FileType SEQUEST_LOG_FILE_TYPE = new FileType(".sequest.log");
+    public static final FileType SEQUEST_LOG_FILE_TYPE = new FileType(".sequestLog");
     public static final FileType SEQUEST_PARAMS_FILE_TYPE = new FileType(".sequest.params");
 
     private static final Object INDEX_LOCK = new Object();

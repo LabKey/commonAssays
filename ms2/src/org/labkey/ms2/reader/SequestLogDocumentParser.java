@@ -17,6 +17,7 @@ package org.labkey.ms2.reader;
 
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.webdav.WebdavResource;
+import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * .sequest.log file Lucene document parser
+ * .sequestLog file Lucene document parser
  * User: jeckels
  */
 public class SequestLogDocumentParser extends AbstractDocumentParser
@@ -42,6 +43,6 @@ public class SequestLogDocumentParser extends AbstractDocumentParser
 
     public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
     {
-        return resource.getName().toLowerCase().endsWith(".sequest.log");
+        return SequestSearchTask.SEQUEST_LOG_FILE_TYPE.isType(resource.getName());
     }
 }
