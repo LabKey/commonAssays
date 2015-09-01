@@ -68,6 +68,10 @@ authentication/webapp/authentication/duo/Duo-Web-v1.js -text
 authentication/webapp/authentication/duo/Duo-Web-v1.min.js -text
 authentication/webapp/authentication/duo/LICENSE -text
 authentication/webapp/authentication/openid_google.png -text
+cas/CAS.iml -text
+cas/module.properties -text
+cas/src/org/labkey/cas/CasModule.java -text
+cas/test/test_cas.iml -text
 cbcassay/CBCAssay.iml -text
 cbcassay/data/ex_20081016_131859.small.dat -text
 cbcassay/data/ex_20090115_jul08BAD.dat -text
@@ -165,6 +169,10 @@ dataintegration/src/org/labkey/di/view/ProcessJobsView.java -text
 dataintegration/src/org/labkey/di/view/transformConfiguration.jsp -text
 dataintegration/src/org/labkey/di/view/transformDetails.jsp -text
 dataintegration/src/org/labkey/di/view/transformHistory.jsp -text
+duo/Duo.iml -text
+duo/module.properties -text
+duo/src/org/labkey/duo/DuoManager.java -text
+duo/src/org/labkey/duo/DuoModule.java -text
 elisa/Elisa.iml -text
 elisa/module.properties -text
 elisa/src/org/labkey/elisa/ElisaAssayProvider.java -text
@@ -1576,6 +1584,13 @@ nab/src/org/labkey/nab/query/NabRunDataTable.java -text
 nab/src/org/labkey/nab/query/NabVirusDataTable.java -text
 nab/src/org/labkey/nab/query/NabVirusDomainKind.java -text
 nab/src/org/labkey/nab/query/NabWellDataTable.java -text
+oauth/OAuth.iml -text
+oauth/module.properties -text
+oauth/src/org/labkey/oauth/OAuthManager.java -text
+oauth/src/org/labkey/oauth/OAuthModule.java -text
+premium/Premium.iml -text
+premium/module.properties -text
+premium/src/org/labkey/premium/PremiumModule.java -text
 redcap/RedCap.iml -text
 redcap/module.properties -text
 redcap/resources/web/redcap/settings.js -text
@@ -1604,6 +1619,9 @@ redcap/test/src/org/labkey/test/pages/redcap/ConfigurePage.java -text
 redcap/test/src/org/labkey/test/tests/RedCapTest.java -text
 redcap/test/src/org/labkey/test/util/redcap/ConfigXmlBuilder.java -text
 redcap/test/test_redcap.iml -text
+saml/SAML.iml -text
+saml/module.properties -text
+saml/src/org/labkey/saml/SamlModule.java -text
 viability/Viability.iml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-14.10-14.11.sql -text
