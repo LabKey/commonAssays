@@ -35,6 +35,9 @@ public class NabDilutionDataTable extends NabBaseTable
             if ("RunId".equalsIgnoreCase(col.getName()))
                 continue;
 
+            if ("MaxDilution".equalsIgnoreCase(col.getName()))
+                continue;           // Do with MinDilution to ensure ordering (hack because SqlServer DB order is reversed)
+
             String name = col.getName();
             if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
@@ -42,6 +45,12 @@ public class NabDilutionDataTable extends NabBaseTable
             if (col.isHidden())
             {
                 newCol.setHidden(col.isHidden());
+            }
+            if ("MinDilution".equalsIgnoreCase(col.getName()))
+            {
+                ColumnInfo maxCol = getRealTable().getColumn("MaxDilution");
+                if (null != maxCol)
+                    addWrapColumn(maxCol.getName(), maxCol);
             }
         }
 

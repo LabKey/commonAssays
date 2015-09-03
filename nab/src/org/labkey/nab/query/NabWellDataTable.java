@@ -98,7 +98,9 @@ public class NabWellDataTable extends NabBaseTable
             rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").append(i).append(" THEN '").append(new Character(chr)).append("'");
         }
         rowSql.append("\nELSE '' END) ");
-        SQLFragment sql = getSqlDialect().concatenate(rowSql, column.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        SQLFragment colSql = new SQLFragment("CAST(");
+        colSql.append(column.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append(" AS VARCHAR(10))");
+        SQLFragment sql = getSqlDialect().concatenate(rowSql, colSql);
         addColumn(new ExprColumn(this, "WellName", sql, JdbcType.VARCHAR, row, column));
     }
 
