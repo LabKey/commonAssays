@@ -1547,9 +1547,6 @@ oauth/src/org/labkey/authentication/oauth/OAuthController.java -text
 oauth/src/org/labkey/authentication/oauth/configure.jsp -text
 oauth/src/org/labkey/oauth/OAuthManager.java -text
 oauth/src/org/labkey/oauth/OAuthModule.java -text
-premium/Premium.iml -text
-premium/module.properties -text
-premium/src/org/labkey/premium/PremiumModule.java -text
 redcap/RedCap.iml -text
 redcap/module.properties -text
 redcap/resources/web/redcap/settings.js -text
