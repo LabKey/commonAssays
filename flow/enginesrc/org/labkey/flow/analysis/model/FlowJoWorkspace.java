@@ -851,13 +851,30 @@ abstract public class FlowJoWorkspace extends Workspace
             assertAdvanced(workspace, "10.0.7", false);
         }
 
+        @Test
+        public void loadPCAdvanced_10_0_8() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.8.wsp");
+            assertAdvanced(workspace, "10.0.8", false);
+        }
+
         private void assertAdvanced(Workspace workspace, String version, boolean mac)
         {
             assertEquals(16, workspace.getSampleCount());
             assertEquals(16, workspace._sampleAnalyses.size());
             assertEquals(16, workspace._sampleAnalysisResults.size());
-            assertEquals(7, workspace._groupInfos.size());
-            assertEquals(7, workspace._groupAnalyses.size());
+            if ("10.0.8".equals(version))
+            {
+                // 10.0.8 automagically added a "Compensation" group
+                assertTrue(workspace._groupInfos.containsKey("Compensation"));
+                assertEquals(8, workspace._groupInfos.size());
+                assertEquals(8, workspace._groupAnalyses.size());
+            }
+            else
+            {
+                assertEquals(7, workspace._groupInfos.size());
+                assertEquals(7, workspace._groupAnalyses.size());
+            }
             //assertEquals(1, workspace.getCompensationMatrices().size());
             assertEquals(5, workspace.getParameterNames().size());
 
@@ -1015,7 +1032,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                 }
-                else if ("10.0.6".equals(version) || "10.0.7".equals(version))
+                else if ("10.0.6".equals(version) || "10.0.7".equals(version) || "10.0.8".equals(version))
                 {
                     // It's tiresome caring about stat values
                     assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
