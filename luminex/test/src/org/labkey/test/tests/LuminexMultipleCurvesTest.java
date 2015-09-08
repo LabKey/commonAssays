@@ -198,7 +198,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
     /**
      * using the list of analytes and standards, select one or more standards for each analyte.  Expects at least three
      * analytes and exactly two standards, and returns two analytes using different standards and the rest using both.
-     * This is based on the test data we're currently using, can be changed to accomodate future changes
+     * This is based on the test data we're currently using, can be changed to accommodate future changes
      *
      * preconditions: none, does not interact with server
      *
