@@ -86,17 +86,23 @@ public class NabUpgradeCode implements UpgradeCode
                         {
                             if (wellGroupNameToNabSpecimen.isEmpty())
                             {
-                                _log.error(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " +
-                                        run.getName() + ".  Deleted from file system? Run details will not be available.");
+                                _log.warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " +
+                                        run.getName() + ". Run details will not be available. Continuing upgrade for other runs.");
                             }
                             else
                             {
                                 dilutionDataHandler.populateWellData(protocol, run, context.getUpgradeUser(), cutoffFormats, wellGroupNameToNabSpecimen);
                             }
                         }
+                        catch (DilutionDataHandler.MissingDataFileException e)
+                        {
+                            _log.warn(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " + run.getRowId() + " (" +
+                                    run.getName() + "). Deleted from file system? Run details will not be available. Continuing upgrade for other runs.");
+                        }
                         catch (ExperimentException | SQLException e)
                         {
-                            _log.error("Run " + run.getRowId() + " failed to upgrade due to exception: " + e.getMessage());
+                            _log.warn("Run " + run.getRowId() + " (" + run.getName() + ") failed to upgrade due to exception: " +
+                                    e.getMessage() + ". Continuing upgrade for other runs.");
                         }
                     }
 
