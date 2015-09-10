@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import org.labkey.api.gwt.client.ui.FontButton;
 import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.api.gwt.client.ui.ImageButton;
 import org.labkey.api.gwt.client.ui.PropertiesEditor;
@@ -236,7 +237,7 @@ public class OtherParametersComposite extends SearchFormComposite
             else
             {
                 _table.setWidget(row, 1, entry.getValue());
-                PushButton deleteButton = createDeleteButton(entry.getKey());
+                FontButton deleteButton = createDeleteButton(entry.getKey());
                 _table.setWidget(row, 2, deleteButton);
             }
             row++;
@@ -250,7 +251,7 @@ public class OtherParametersComposite extends SearchFormComposite
 
     }
 
-    private PushButton createDeleteButton(final String paramName)
+    private FontButton createDeleteButton(final String paramName)
     {
         return PropertiesEditor.getDeleteButton(paramName, new ClickHandler()
         {
