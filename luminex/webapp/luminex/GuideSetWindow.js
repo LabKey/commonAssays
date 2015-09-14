@@ -6,7 +6,7 @@
 // TODO: it was a bad move to go with XTemplate here. This should be replaced with a full ExtJS implementation whenever possible.
 // issues include styling, dirtying the form, and a few other things
 
-Ext4.define('Luminex.window.GuideSetWindow', {
+Ext4.define('LABKEY.luminex.GuideSetWindow', {
 
     extend: 'Ext.window.Window',
     title: 'Guide Set Parameter Details',
@@ -110,7 +110,7 @@ Ext4.define('Luminex.window.GuideSetWindow', {
     {
         this.items = [{
             xtype: 'dataview',
-            tpl: Luminex.window.GuideSetWindow.viewTpl,
+            tpl: LABKEY.luminex.GuideSetWindow.viewTpl,
             padding: 10,
             store: this.getGuideSetStore()
         }];
@@ -288,7 +288,7 @@ function createGuideSetWindow(protocolId, currentGuideSetId) {
             if (Ext4.isArray(assay) && assay.length == 1)
             {
                 // could use either full name or base name here...
-                Ext4.create('Luminex.window.GuideSetWindow', {
+                Ext4.create('LABKEY.luminex.GuideSetWindow', {
                     assayName: assay[0].name,
                     currentGuideSetId: currentGuideSetId
                 });

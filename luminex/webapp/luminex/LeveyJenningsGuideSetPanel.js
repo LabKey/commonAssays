@@ -352,7 +352,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     viewParameterDetails: function() {
         if (this.currentGuideSetId)
         {
-            Ext4.create('Luminex.window.GuideSetWindow', {
+            Ext4.create('LABKEY.luminex.GuideSetWindow', {
                 assayName: this.assayName,
                 currentGuideSetId: this.currentGuideSetId,
                 listeners: {
