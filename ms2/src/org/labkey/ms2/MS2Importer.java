@@ -215,7 +215,12 @@ public abstract class MS2Importer
 
         MS2Manager.recomputeBasicStats();       // Update runs/peptides statistics
         progress.getCumulativeTimer().logSummary("import \"" + _fileName + "\"" + (progress.getCumulativeTimer().hasTask(Tasks.ImportSpectra) ? " and import spectra" : ""));
-        return MS2Manager.getRun(info.getRunId());
+        MS2Run refreshedRun = MS2Manager.getRun(info.getRunId());
+        if (refreshedRun == null)
+        {
+            throw new IllegalStateException("Unable to find imported run with ID " + info.getRunId() + ". Previous run: " + run + ", previous status: " + (run == null ? "unknown" : run.getStatus()));
+        }
+        return refreshedRun;
     }
 
 
