@@ -1538,10 +1538,8 @@ nab/src/org/labkey/nab/query/NabVirusDataTable.java -text
 nab/src/org/labkey/nab/query/NabVirusDomainKind.java -text
 nab/src/org/labkey/nab/query/NabWellDataTable.java -text
 oauth/OAuth.iml -text
-oauth/lib/jopenid-1.08.jar -text
 oauth/module.properties -text
-oauth/resources/credits/jars.txt -text
-oauth/resources/web/authentication/openid_google.png -text
+oauth/resources/web/oauth/openid_google.png -text
 oauth/src/org/labkey/authentication/oauth/GoogleOAuthProvider.java -text
 oauth/src/org/labkey/authentication/oauth/OAuthController.java -text
 oauth/src/org/labkey/authentication/oauth/configure.jsp -text
