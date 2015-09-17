@@ -1603,6 +1603,12 @@ saml/src/schemas/text-schema.xsd -text
 saml/src/schemas/xenc-schema.xsd -text
 saml/src/schemas/xml.xsd -text
 saml/src/schemas/xmldsig-core-schema.xsd -text
+synonym/Synonym.iml -text
+synonym/module.properties -text
+synonym/src/org/labkey/synonym/SynonymManager.java -text
+synonym/src/org/labkey/synonym/SynonymModule.java -text
+synonym/src/org/labkey/synonym/SynonymTableResolver.java -text
+synonym/src/org/labkey/synonym/SynonymTestCase.java -text
 viability/Viability.iml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-14.10-14.11.sql -text
