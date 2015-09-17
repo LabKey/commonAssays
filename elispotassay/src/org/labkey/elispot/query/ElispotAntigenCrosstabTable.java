@@ -26,10 +26,10 @@ import org.labkey.api.data.CrosstabMember;
 import org.labkey.api.data.CrosstabSettings;
 import org.labkey.api.data.CrosstabTable;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
@@ -37,6 +37,7 @@ import org.labkey.elispot.ElispotManager;
 import org.labkey.elispot.ElispotProtocolSchema;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import java.util.Set;
 
 /**
  * Created by davebradlee on 3/23/15.
+ *
  */
 public class ElispotAntigenCrosstabTable extends CrosstabTable
 {
@@ -58,22 +60,26 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("RunId"));
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("WellgroupName"));
         crosstabSettings.getRowAxis().addDimension(FieldKey.fromString("SpecimenLsid"));
-        crosstabSettings.getRowAxis().addDimension(FieldKey.fromParts("SpecimenLsid", "Property", "ParticipantId"));
 
-        if (elispotRunAntigenTable.getColumn(FieldKey.fromParts(ElispotDataHandler.ANALYTE_PROPERTY_NAME)) != null)
-            crosstabSettings.getRowAxis().addDimension(FieldKey.fromString(ElispotDataHandler.ANALYTE_PROPERTY_NAME));
-        if (elispotRunAntigenTable.getColumn(FieldKey.fromParts(ElispotDataHandler.CYTOKINE_PROPERTY_NAME)) != null)
-            crosstabSettings.getRowAxis().addDimension(FieldKey.fromString(ElispotDataHandler.CYTOKINE_PROPERTY_NAME));
+        FieldKey ptidFieldKey = FieldKey.fromParts("SpecimenLsid", "Property", "ParticipantId");
+        if (!QueryService.get().getColumns(elispotRunAntigenTable, Arrays.asList(ptidFieldKey)).isEmpty())
+            crosstabSettings.getRowAxis().addDimension(ptidFieldKey);
+
+        FieldKey analyteFieldKey = FieldKey.fromParts(ElispotDataHandler.ANALYTE_PROPERTY_NAME);
+        if (null != elispotRunAntigenTable.getColumn(analyteFieldKey))
+            crosstabSettings.getRowAxis().addDimension(analyteFieldKey);
+        FieldKey cytokineFieldKey = FieldKey.fromParts(ElispotDataHandler.CYTOKINE_PROPERTY_NAME);
+        if (null != elispotRunAntigenTable.getColumn(cytokineFieldKey))
+            crosstabSettings.getRowAxis().addDimension(cytokineFieldKey);
 
         CrosstabDimension colDim = crosstabSettings.getColumnAxis().addDimension(FieldKey.fromString("AntigenHeading"));
 
         crosstabSettings.addMeasure(FieldKey.fromParts("Mean"), CrosstabMeasure.AggregateFunction.AVG, "Mean");
         crosstabSettings.addMeasure(FieldKey.fromParts("Median"), CrosstabMeasure.AggregateFunction.AVG, "Median");
 
-        TableInfo runAntigenTable = protocolSchema.createProviderTable(ElispotProtocolSchema.ANTIGEN_TABLE_NAME);
         ArrayList<CrosstabMember> members = new ArrayList<>();
         for (Map.Entry<String, Set<Integer>> antigenHeadingEntry :
-                ElispotManager.get().getAntigenHeadings(elispotRunAntigenTable.getContainer(), runAntigenTable).entrySet())
+                ElispotManager.get().getAntigenHeadings(elispotRunAntigenTable.getContainer(), elispotRunAntigenTable).entrySet())
         {
             String antigenHeading = antigenHeadingEntry.getKey();
             if (null != antigenHeading)
