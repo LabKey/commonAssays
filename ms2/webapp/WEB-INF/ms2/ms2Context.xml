@@ -956,12 +956,20 @@
         <property name="statusName" value="MZXML CONVERSION"/>
         <property name="groupParameterName" value="msconvert"/>
         <property name="protocolActionName" value="msconvert mzXML Conversion"/>
-        <property name="outputExtension" value=".mzXML"/>
         <property name="inputPaths">
             <map>
                 <entry key="Spectra">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg ref="rawFileType"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="mzXML">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="mzXMLFileType"/>
                     </bean>
                 </entry>
             </map>
@@ -976,6 +984,171 @@
                 <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                     <property name="switchName" value="mzXML"/>
                 </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="outfile"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="mzXML" />
+                    <property name="function" value="output" />
+                </bean>
+
+                <!-- Filter options -->
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, index"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="index ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, precursorRecalculation"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="precursorRecalculation ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, precursorRefine"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="precursorRefine ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, peakPicking"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="peakPicking ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, scanNumber"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="scanNumber ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, scanEvent"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="scanEvent ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, scanTime"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="scanTime ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, sortByScanTime"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="sortByScanTime ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, stripIT"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="stripIT ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, msLevel"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="msLevel ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, metadataFixer"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="metadataFixer ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, titleMaker"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="titleMaker ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, threshold"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="threshold ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, mzWindow"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="mzWindow ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, mzPrecursors"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="mzPrecursors ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, defaultArrayLength"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="defaultArrayLength ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, chargeStatePredictor"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="chargeStatePredictor ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, activation"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="activation ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, analyzerType"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="analyzerType ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, analyzer"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="analyzer ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, polarity"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="polarity ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.SubstitutionWithSwitch">
+                    <property name="parameter" value="pipeline msconvert, zeroSamples"/>
+                    <property name="regex" value="(.+)"/>
+                    <property name="substitution" value="zeroSamples ${1}"/>
+                    <property name="switchName" value="filter"/>
+                    <property name="switchFormat" ref="msconvertFilterSwitch" />
+                </bean>
+
+                <!-- 32 vs 64 bit config -->
                 <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
                     <property name="parameter" value="pipeline msconvert, conversion bits"/>
                     <property name="default" value="none"/>
@@ -989,6 +1162,42 @@
                             <entry key="64">
                                 <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                                     <property name="switchName" value="64"/>
+                                </bean>
+                            </entry>
+                        </map>
+                    </property>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="pipeline msconvert, mz conversion bits"/>
+                    <property name="default" value="none"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="32">
+                                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                    <property name="switchName" value="mz32"/>
+                                </bean>
+                            </entry>
+                            <entry key="64">
+                                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                    <property name="switchName" value="mz64"/>
+                                </bean>
+                            </entry>
+                        </map>
+                    </property>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="pipeline msconvert, intensity conversion bits"/>
+                    <property name="default" value="none"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="32">
+                                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                    <property name="switchName" value="inten32"/>
+                                </bean>
+                            </entry>
+                            <entry key="64">
+                                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                    <property name="switchName" value="inten64"/>
                                 </bean>
                             </entry>
                         </map>
@@ -1314,6 +1523,10 @@
     <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
     <bean id="unixCompactSwitch" class="org.labkey.api.pipeline.cmd.UnixCompactSwitchFormat"/>
     <bean id="unixDefaultSwitch" class="org.labkey.api.pipeline.cmd.UnixSwitchFormat"/>
+    <bean id="msconvertFilterSwitch" class="org.labkey.api.pipeline.cmd.UnixSwitchFormat">
+        <property name="separator" value=" " />
+        <property name="switch" value="--" />
+    </bean>
 
     <bean id="mzXMLFileType" class="org.labkey.api.util.massSpecDataFileType">
         <constructor-arg>
@@ -1330,6 +1543,7 @@
         <constructor-arg>
             <list>
                 <value>.raw</value>
+                <value>.wiff</value>
             </list>
         </constructor-arg>
         <constructor-arg value=".raw"/>
