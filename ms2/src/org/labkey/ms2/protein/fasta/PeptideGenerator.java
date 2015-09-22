@@ -495,7 +495,7 @@ public class PeptideGenerator implements Runnable
      *  table of pk values :
      *  Note: the current algorithm does not use the last two columns. Each
      *  row corresponds to an amino acid starting with Ala. J, O and U are
-     *  inexistant, but here only in order to have the complete alphabet.
+     *  non-existent, but here only in order to have the complete alphabet.
      *
      *          Ct    Nt   Sm     Sc     Sn
      */
