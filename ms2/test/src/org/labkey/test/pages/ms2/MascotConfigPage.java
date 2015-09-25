@@ -56,7 +56,7 @@ public class MascotConfigPage extends LabKeyPage
 
     public MascotTestPage testMascotSettings()
     {
-        _test.clickAndWait(elements().testLink);
+        elements().testLink.click();
         return new MascotTestPage(this);
     }
 

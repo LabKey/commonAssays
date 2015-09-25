@@ -16,20 +16,18 @@
 
 package org.labkey.test.ms2;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestCredentials;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.InDevelopment;
+import org.labkey.test.categories.DailyB;
+import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.Mascot;
-import org.labkey.test.credentials.ApiKey;
 import org.labkey.test.credentials.Login;
 import org.labkey.test.pages.ms2.MascotConfigPage;
 import org.labkey.test.pages.ms2.MascotTestPage;
@@ -37,8 +35,6 @@ import org.labkey.test.pages.ms2.MascotTestPage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -56,7 +52,7 @@ import static org.junit.Assert.*;
  *          Rule 5 ">[^ ]* \(.*\)"   (the rule number can be different, but regex must be the same or equivalent)
  *
  */
-@Category({/*MS2.class, */Mascot.class, InDevelopment.class})
+@Category({MS2.class, Mascot.class, DailyB.class})
 public class MascotTest extends AbstractMS2SearchEngineTest
 {
     protected static final String PEPTIDE = "R.RLPVGADR.G";
@@ -73,9 +69,9 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     protected static final String SEARCH_BUTTON = "Mascot";
     protected static final String SEARCH_NAME = "MASCOT";
 
-    private String MASCOT_HOST;
-    private Login MASCOT_USER_LOGIN;
-    private String MASCOT_PROXY;
+    private static String MASCOT_HOST;
+    private static Login MASCOT_USER_LOGIN;
+    private static String MASCOT_PROXY;
 
     @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
@@ -104,12 +100,15 @@ public class MascotTest extends AbstractMS2SearchEngineTest
             MASCOT_USER_LOGIN = TestCredentials.getServer(SEARCH_TYPE).getLogins().get(0);
             MASCOT_PROXY = (String)TestCredentials.getServer(SEARCH_TYPE).getExtraValues().get("proxy");
         }
+
+        createProjectAndFolder();
     }
 
     @Test
     public void testMascotAuthentication()
     {
-        Assume.assumeTrue(TestCredentials.hasCredentials(SEARCH_TYPE));
+        Assume.assumeTrue("Add Mascot Server info to test.credentials.json to test Mascot authentication",
+                TestCredentials.hasCredentials(SEARCH_TYPE));
 
         String mascotServerURL = MASCOT_HOST;
         String mascotUserAccount = MASCOT_USER_LOGIN.getUsername();
@@ -153,7 +152,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     @Test
     public void testAlternateMascotAuthentication() throws Exception
     {
-        Assume.assumeTrue(TestCredentials.hasCredentials(SEARCH_TYPE));
+        Assume.assumeTrue("Add Mascot Server info to test.credentials.json to test Mascot authentication",
+                TestCredentials.hasCredentials(SEARCH_TYPE));
 
         URL url = new URL((MASCOT_HOST.startsWith("http://") ? "" : "http://") + MASCOT_HOST);
         StringBuilder alternativeLink = new StringBuilder("http://");
@@ -206,53 +206,21 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     }
 
     @Test
-    public void testSteps()
+    public void testDatImport()
     {
-        // Do normal MS2 test
-        basicMS2Check();
-
         // test import of .dat file
         log("Upload existing Mascot .dat result file.");
+        goToProjectHome();
         clickFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
-        _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test3/", "Import Results");
+        _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test3/", "Import Search Results");
 
-        log("Verify upload started.");
-        String mascotDatLabel = SAMPLE_BASE_NAME + ".dat (none)";
-        assertElementPresent(Locator.linkWithText(mascotDatLabel));
-
-        pushLocation();
-
-        clickFolder(FOLDER_NAME);
-
-/*
-        Commented out because .dat is not loaded as part of an experiment, so it won't appear in the dashboard
-
-        assertElementPresent(Locator.linkWithText(mascotDatLabel));
-*/
-
-        assertElementPresent(Locator.linkWithText("MS2 Runs"));
-        log("Navigate to MS2 runs.");
-        clickAndWait(Locator.linkWithText("MS2 Runs"));
-
-        log("Navigate to Pipeline status.");
-        //was: clickTab("Pipeline");
-        clickFolder(FOLDER_NAME);
-        clickAndWait(Locator.linkWithText("All"));
-        int sec = 300;
-        while (!isElementPresent(Locator.linkWithText("COMPLETE").index(1)) && sec-- > 0)
-        {
-            log("Waiting for load to complete");
-            sleep(1000);
-            refresh();
-        }
-        if (!isElementPresent(Locator.linkWithText("COMPLETE").index(1)))
-            fail("Mascot .dat import did not complete.");
-
-        popLocation();
+        String mascotDatLabel = SAMPLE_BASE_NAME + ".dat";
+        waitForPipelineJobsToComplete(1, mascotDatLabel, false);
+        waitForElement(Locator.linkWithText(mascotDatLabel));
 
         log("Spot check results loaded from .dat file");
-        clickAndWait(Locator.linkWithText("CAexample_mini.dat (none)"));
+        clickAndWait(Locator.linkWithText(mascotDatLabel));
         assertTextPresent(
                 "sampledata/xarfiles/ms2pipe/databases/Bovine_mini.fasta",
                 "MASCOT",
@@ -268,7 +236,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     protected void setupEngine()
     {
         log("Analyze " + SEARCH_NAME + " sample data.");
-        clickButton(SEARCH_BUTTON + " Peptide Search", defaultWaitForPage);
+        _fileBrowserHelper.selectImportDataAction(SEARCH_BUTTON + " Peptide Search");
     }
 
     protected void basicChecks()
