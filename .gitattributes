@@ -1466,6 +1466,16 @@ ms2/test/src/org/labkey/test/ms2/params/MS2Tests_20070101__3_0_2a.java -text
 ms2/test/src/org/labkey/test/ms2/params/MS2Tests_20070701__3_0_2.java -text
 ms2/test/src/org/labkey/test/ms2/params/MS2Tests_20070701__3_4_0.java -text
 ms2/test/src/org/labkey/test/ms2/params/MS2Tests_20070701__3_4_1.java -text
+ms2/test/src/org/labkey/test/pages/ms2/MascotConfigPage.java -text
+ms2/test/src/org/labkey/test/pages/ms2/MascotTestPage.java -text
+ms2/test/src/org/labkey/test/tests/AbstractMS2ImportTest.java -text
+ms2/test/src/org/labkey/test/tests/LibraTest.java -text
+ms2/test/src/org/labkey/test/tests/MS2ExportTest.java -text
+ms2/test/src/org/labkey/test/tests/MS2GZTest.java -text
+ms2/test/src/org/labkey/test/tests/MS2Test.java -text
+ms2/test/src/org/labkey/test/tests/PipelineTest.java -text
+ms2/test/src/org/labkey/test/tests/XTandemShortTest.java -text
+ms2/test/src/org/labkey/test/tests/XTandemTest.java -text
 ms2/test/test_ms2.iml -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text

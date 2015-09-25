@@ -17,18 +17,28 @@
 package org.labkey.test.ms2;
 
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
+import org.labkey.test.TestCredentials;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.InDevelopment;
 import org.labkey.test.categories.Mascot;
+import org.labkey.test.credentials.ApiKey;
+import org.labkey.test.credentials.Login;
+import org.labkey.test.pages.ms2.MascotConfigPage;
+import org.labkey.test.pages.ms2.MascotTestPage;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -63,162 +73,141 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     protected static final String SEARCH_BUTTON = "Mascot";
     protected static final String SEARCH_NAME = "MASCOT";
 
+    private String MASCOT_HOST;
+    private Login MASCOT_USER_LOGIN;
+    private String MASCOT_PROXY;
+
+    @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         try {
             deleteViews(VIEW); } catch (Throwable t) {}
         try {deleteRuns(); } catch (Throwable t) {}
         cleanPipe(SEARCH_TYPE);
-        deleteProject(getProjectName(), afterTest);
+
+        _containerHelper.deleteProject(getProjectName(), afterTest);
+    }
+
+    @BeforeClass
+    public static void setupProject() throws Exception
+    {
+        MascotTest init = (MascotTest) getCurrentTest();
+
+        init.doSetup();
+    }
+
+    private void doSetup() throws IOException
+    {
+        if (TestCredentials.hasCredentials(SEARCH_TYPE))
+        {
+            MASCOT_HOST = TestCredentials.getServer(SEARCH_TYPE).getHost();
+            MASCOT_USER_LOGIN = TestCredentials.getServer(SEARCH_TYPE).getLogins().get(0);
+            MASCOT_PROXY = (String)TestCredentials.getServer(SEARCH_TYPE).getExtraValues().get("proxy");
+        }
+    }
+
+    @Test
+    public void testMascotAuthentication()
+    {
+        Assume.assumeTrue(TestCredentials.hasCredentials(SEARCH_TYPE));
+
+        String mascotServerURL = MASCOT_HOST;
+        String mascotUserAccount = MASCOT_USER_LOGIN.getUsername();
+        String mascotUserPassword = MASCOT_USER_LOGIN.getPassword();
+        String mascotHTTPProxyURL = MASCOT_PROXY;
+        MascotConfigPage configPage;
+        MascotTestPage testPage;
+
+        // Case 1: default setting has to pass as it is configured by the administrator initially
+        log("Testing Mascot settings");
+        configPage = MascotConfigPage.beginAt(this);
+        configPage.
+                setMascotServer(mascotServerURL).
+                setMascotUser(mascotUserAccount).
+                setMascotPassword(mascotUserPassword);
+        testPage = configPage.testMascotSettings();
+        assertTextPresent("Test passed.");
+        configPage = testPage.close();
+
+        // Case 2: correct server, wrong user id
+        log("Testing non-existent Mascot user via " + mascotServerURL);
+        configPage.
+                setMascotServer(mascotServerURL).
+                setMascotUser("nonexistent").
+                setMascotPassword(mascotUserPassword);
+        testPage = configPage.testMascotSettings();
+        assertTextPresent("Test failed.");
+        configPage = testPage.close();
+
+        // Case 3: correct server, wrong user password
+        log("Testing wrong password fo Mascot user " + mascotUserAccount + " via " + mascotServerURL);
+        configPage.
+                setMascotServer(mascotServerURL).
+                setMascotUser(mascotUserAccount).
+                setMascotPassword("wrongpassword");
+        testPage = configPage.testMascotSettings();
+        assertTextPresent("Test failed.");
+        testPage.close();
+    }
+
+    @Test
+    public void testAlternateMascotAuthentication() throws Exception
+    {
+        Assume.assumeTrue(TestCredentials.hasCredentials(SEARCH_TYPE));
+
+        URL url = new URL((MASCOT_HOST.startsWith("http://") ? "" : "http://") + MASCOT_HOST);
+        StringBuilder alternativeLink = new StringBuilder("http://");
+        alternativeLink.append(url.getHost());
+        if (80 != url.getPort() && -1 != url.getPort())
+        {
+            alternativeLink.append(":").append(url.getPort());
+        }
+        alternativeLink.append("/");
+        if ("".equals(url.getPath()))
+            alternativeLink.append("alternativefolder/");
+
+        String mascotServerURL = alternativeLink.toString();
+        String mascotUserAccount = MASCOT_USER_LOGIN.getUsername();
+        String mascotUserPassword = MASCOT_USER_LOGIN.getPassword();
+        String mascotHTTPProxyURL = MASCOT_PROXY;
+        MascotConfigPage configPage;
+        MascotTestPage testPage;
+
+        // Case 1: default setting has to pass as it is configured by the administrator initially
+        log("Testing Mascot settings");
+        configPage = MascotConfigPage.beginAt(this);
+        configPage.
+                setMascotServer(mascotServerURL).
+                setMascotUser(mascotUserAccount).
+                setMascotPassword(mascotUserPassword);
+        testPage = configPage.testMascotSettings();
+        assertTextPresent("Test passed.");
+        configPage = testPage.close();
+
+        // Case 2: correct server, wrong user id
+        log("Testing non-existent Mascot user via " + mascotServerURL);
+        configPage.
+                setMascotServer(mascotServerURL).
+                setMascotUser("nonexistent").
+                setMascotPassword(mascotUserPassword);
+        testPage = configPage.testMascotSettings();
+        assertTextPresent("Test failed.");
+        configPage = testPage.close();
+
+        // Case 3: correct server, wrong user password
+        log("Testing wrong password fo Mascot user " + mascotUserAccount + " via " + mascotServerURL);
+        configPage.
+                setMascotServer(mascotServerURL).
+                setMascotUser(mascotUserAccount).
+                setMascotPassword("wrongpassword");
+        testPage = configPage.testMascotSettings();
+        assertTextPresent("Test failed.");
+        testPage.close();
     }
 
     @Test
     public void testSteps()
     {
-        log("Verifying that pipeline files were cleaned up properly");
-        File test2 = new File(PIPELINE_PATH + "/bov_sample/" + SEARCH_TYPE + "/test2");
-        Assert.assertFalse("Pipeline files were not cleaned up; test2(" + test2.toString() + ") directory still exists", test2.exists());
-
-        //cheehong:
-        //  starting with v1.7, "Has Mascot server" checkbox removed
-        //  Mascot is considered configured if there is a Mascot URL available
-        //  TODO: write code to check on the respond of setting check
-        beginAt("/admin/showCustomizeSite.view");
-        if (null == getAttribute(Locator.name("mascotServer"), "value") || "".equals(getAttribute(Locator.name("mascotServer"), "value")))
-        {
-            log("Your mascot settings are not configured.  Skipping mascot test.");
-            return;
-        }
-
-        String mascotServerURL = getAttribute(Locator.name("mascotServer"), "value");
-        String mascotUserAccount = "";
-        String mascotUserPassword = "";
-        String mascotHTTPProxyURL = "mascotHTTPProxy";
-
-        boolean testAuthentication = !("".equals(mascotUserAccount) && "".equals(mascotUserPassword));
-
-        // Case 1: default setting has to pass as it is configured by the administrator initially
-        log("Testing your Mascot settings");
-        addUrlParameter("testInPage=true");
-        pushLocation();
-        clickAndWait(Locator.linkWithText("Test Mascot settings"));
-        assertTextPresent("Test passed.");
-        log("Return to customize page.");
-        popLocation();
-
-        if (testAuthentication)
-        {
-            // Case 2: correct server, wrong user id
-            log("Testing non-existent Mascot user via " + mascotServerURL);
-            setFormElement(Locator.name("mascotUserAccount"), "nonexistent");
-            setFormElement(Locator.name("mascotUserPassword"), mascotUserPassword);
-            pushLocation();
-            clickAndWait(Locator.linkWithText("Test Mascot settings"));
-            assertTextPresent("Test failed.");
-            log("Return to customize page.");
-            popLocation();
-        }
-        else
-        {
-            log("No authentication information, skip testing non-existent Mascot user via " + mascotServerURL);
-        }
-
-        if (testAuthentication)
-        {
-            // Case 3: correct server, wrong user password
-            log("Testing wrong password fo Mascot user " + mascotUserAccount + " via " + mascotServerURL);
-            setFormElement(Locator.name("mascotUserAccount"), mascotUserAccount);
-            setFormElement(Locator.name("mascotUserPassword"), "wrongpassword");
-            pushLocation();
-            clickAndWait(Locator.linkWithText("Test Mascot settings"));
-            assertTextPresent("Test failed.");
-            log("Return to customize page.");
-            popLocation();
-        }
-        else
-        {
-            log("No authentication information, skip testing wrong password fo Mascot user " + mascotUserAccount + " via " + mascotServerURL);
-        }
-
-        String altMascotServer = "";
-        try
-        {
-            URL url = new URL((mascotServerURL.startsWith("http://") ? "" : "http://") + mascotServerURL);
-            StringBuffer alternativeLink = new StringBuffer("http://");
-            alternativeLink.append(url.getHost());
-            if (80 != url.getPort() && -1 != url.getPort())
-            {
-                alternativeLink.append(":").append(url.getPort());
-            }
-            alternativeLink.append("/");
-            if ("".equals(url.getPath()))
-                alternativeLink.append("alternativefolder/");
-            altMascotServer = alternativeLink.toString();
-        }
-        catch (MalformedURLException x)
-        {
-            //wch: this will not happen as we passed Case#1
-        }
-
-        // Case 4: use auto-detection setting
-//        log("Testing Mascot settings detection via " + altMascotServer);
-//        setFormElement("mascotServer", altMascotServer);
-//        setFormElement("mascotUserAccount", mascotUserAccount);
-//        setFormElement("mascotUserPassword", mascotUserPassword);
-//        pushLocation();
-//        clickAndWait(Locator.linkWithText("Test Mascot settings"));
-//        assertTextPresent("Test passed.");
-//        log("Return to customize page.");
-//        popLocation();
-
-        if (testAuthentication)
-        {
-            // Case 5: auto-detect server, wrong user id
-            log("Testing non-existent Mascot user and server auto-detection via " + altMascotServer);
-            setFormElement(Locator.name("mascotServer"), altMascotServer);
-            setFormElement(Locator.name("mascotUserAccount"), "nonexistent");
-            setFormElement(Locator.name("mascotUserPassword"), mascotUserPassword);
-            pushLocation();
-            clickAndWait(Locator.linkWithText("Test Mascot settings"));
-            assertTextPresent("Test failed.");
-            log("Return to customize page.");
-            popLocation();
-        }
-        else
-        {
-            log("No authentication information, skip testing non-existent Mascot user and server auto-detection via " + altMascotServer);
-        }
-
-        if (testAuthentication)
-        {
-            // Case 6: auto-detect server, wrong user password
-            log("Testing wrong password fo Mascot user " + mascotUserAccount + "  and server auto-detection via " + mascotServerURL);
-            setFormElement(Locator.name("mascotServer"), altMascotServer);
-            setFormElement(Locator.name("mascotUserAccount"), mascotUserAccount);
-            setFormElement(Locator.name("mascotUserPassword"), "wrongpassword");
-            pushLocation();
-            clickAndWait(Locator.linkWithText("Test Mascot settings"));
-            assertTextPresent("Test failed.");
-            log("Return to customize page.");
-            popLocation();
-        }
-        else
-        {
-            log("No authentication information, skip testing wrong password fo Mascot user " + mascotUserAccount + "  and server auto-detection via " + mascotServerURL);
-        }
-
-        // Case 7: wrong server
-        altMascotServer = "http://bogus.domain/";
-        log("Testing wrong Mascot server via " + altMascotServer);
-        setFormElement(Locator.name("mascotServer"), altMascotServer);
-        setFormElement(Locator.name("mascotUserAccount"), mascotUserAccount);
-        setFormElement(Locator.name("mascotUserPassword"), mascotUserPassword);
-        pushLocation();
-        clickAndWait(Locator.linkWithText("Test Mascot settings"));
-        assertTextPresent("Test failed.", "Failed to interact with Mascot Server");
-        log("Return to customize page.");
-        popLocation();
-
         // Do normal MS2 test
         basicMS2Check();
 
