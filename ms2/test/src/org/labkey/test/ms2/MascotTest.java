@@ -31,10 +31,16 @@ import org.labkey.test.categories.Mascot;
 import org.labkey.test.credentials.Login;
 import org.labkey.test.pages.ms2.MascotConfigPage;
 import org.labkey.test.pages.ms2.MascotTestPage;
+import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.PortalHelper;
+import org.labkey.test.util.TextSearcher;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -221,16 +227,35 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         log("Spot check results loaded from .dat file");
         clickAndWait(Locator.linkWithText(mascotDatLabel));
-        assertTextPresent(
-                "sampledata/xarfiles/ms2pipe/databases/Bovine_mini.fasta",
+        String overviewText = getText(PortalHelper.Locators.webPart.withDescendant(PortalHelper.Locators.webPartTitle("Run Overview")));
+        assertTextPresent(new TextSearcher(() -> overviewText),
+                "trypsin",
                 "MASCOT",
                 "CAexample_mini.dat",
                 "sampledata/xarfiles/ms2pipe/databases/Bovine_mini.fasta",
-                "K.VEHLDKDLFR.R",
-                "gi|23335713|hypothetical_prot",
-                "1374.3173",
-                "R.VWGACVLCLLGPLPIVLGHVHPECDVITQLR.E",
-                "gi|4689022|ribosomal_protein_");
+                "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test3");
+
+        DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
+        assertEquals("Wrong number of peptides found", 58, peptidesTable.getDataRowCount());
+        List<String> peptideRow = peptidesTable.getRowDataAsText(0);
+        List<String> expectedPeptideRow = new ArrayList<>(Arrays.asList(
+                "4",                // Scan
+                "3+",               // Z
+                "15.100",           // Ion
+                "29.770",           // Identity
+                "24.030",           // Homology
+                "8%",               // Ion%
+                "-0.8489",          // dMass
+                "0.0000",           // PepProphet
+                "K.VEHLDKDLFR.R",   // Peptide
+                "1",                // SeqHits
+                "gi|23335713|hypothetical_prot")); // Protein
+        expectedPeptideRow.removeAll(peptideRow);
+        assertTrue("Missing values from first peptide row: [" + String.join(",", expectedPeptideRow) + "]", expectedPeptideRow.isEmpty());
+        String value = peptidesTable.getDataAsText(0, "Expect");
+        assertEquals("Wrong value for 'Expect' in first row", 1.47, Double.parseDouble(value), 0.01);
+        value = peptidesTable.getDataAsText(0, "CalcMH+");
+        assertEquals("Wrong value for 'CalcMH+' in first row", 1272.43, Double.parseDouble(value), 0.01);
     }
 
     protected void setupEngine()
