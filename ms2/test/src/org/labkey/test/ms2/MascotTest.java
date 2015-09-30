@@ -232,8 +232,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "trypsin",
                 "MASCOT",
                 "CAexample_mini.dat",
-                "sampledata/xarfiles/ms2pipe/databases/Bovine_mini.fasta",
-                "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test3");
+                "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test3",
+                "Bovine_mini.fasta");
 
         DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
         assertEquals("Wrong number of peptides found", 58, peptidesTable.getDataRowCount());
