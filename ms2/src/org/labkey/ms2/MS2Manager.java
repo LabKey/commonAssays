@@ -458,6 +458,9 @@ public class MS2Manager
             run.setExperimentRunLSID(expRun.getLSID());
             MS2Manager.updateRun(run, user);
 
+            // Ensure that any custom data handlers have a chance to do their magic
+            pepXMLData.findDataHandler().importFile(pepXMLData, pepXMLFile, info, _log, source.getXarContext());
+
             transaction.commit();
             return expRun;
         }
