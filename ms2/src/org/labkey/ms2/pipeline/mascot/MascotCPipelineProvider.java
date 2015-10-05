@@ -15,7 +15,9 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
+import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
@@ -26,7 +28,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -123,6 +124,12 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
     public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
     {
         return null;//No directories for Mascot databases.
+    }
+
+    @Override
+    public boolean dbExists(File sequenceRoot, String db) throws IOException
+    {
+        return new CaseInsensitiveHashSet(getSequenceDbDirList(sequenceRoot)).contains(db);
     }
 
     public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException {

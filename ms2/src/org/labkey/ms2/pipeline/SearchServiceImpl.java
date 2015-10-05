@@ -155,8 +155,20 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 if (protocol.getDbNames().length > 0)
                 {
                     results.setDefaultSequenceDb(protocol.getDbNames()[0]);
-                    if (!((AbstractMS2SearchPipelineProvider) provider).dbExists(getSequenceRoot(), protocol.getDbNames()[0]))
+                    boolean dbExists;
+                    try
+                    {
+                        dbExists = ((AbstractMS2SearchPipelineProvider) provider).dbExists(getSequenceRoot(), protocol.getDbNames()[0]);
+                    }
+                    catch (IOException e)
+                    {
+                        _log.error("Unable to get DBs for " + getSequenceRoot(), e);
+                        dbExists = false;
+                    }
+                    if (!dbExists)
+                    {
                         results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
+                    }
                 }
                 else
                 {

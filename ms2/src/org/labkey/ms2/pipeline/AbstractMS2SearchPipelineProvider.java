@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.util.NetworkDrive;
@@ -56,7 +57,7 @@ abstract public class AbstractMS2SearchPipelineProvider
         return null; 
     }
 
-    public boolean dbExists(File sequenceRoot, String db)
+    public boolean dbExists(File sequenceRoot, String db) throws IOException
     {
         File dbFile = new File(sequenceRoot, db);
         return NetworkDrive.exists(dbFile);
@@ -68,8 +69,12 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     abstract public boolean hasRemoteDirectories();
 
+    /** @return the list of subdirectories that might contain sequence DBs */
+    @Nullable
     abstract public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException;
 
+    /** @return the list of sequence DBs in a given directory */
+    @Nullable
     abstract public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException;
 
     abstract public List<String> getTaxonomyList() throws IOException;

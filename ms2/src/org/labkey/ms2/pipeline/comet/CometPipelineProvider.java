@@ -110,7 +110,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
     {
-        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
+        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<>());
     }
 
     public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException

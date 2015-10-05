@@ -388,9 +388,9 @@ public class MascotClientImpl implements SearchClient
                 }
                 else
                 {
-                    // there was some problem, we bait out
+                    // there was some problem, we bail out
                     errorCode = 1;
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     int nPos1 = result.indexOf("\n");
                     if (-1 != nPos1)
                     {
@@ -424,8 +424,7 @@ public class MascotClientImpl implements SearchClient
         parameters.setProperty("cmd", "downloaddb");
         parameters.setProperty("db", db);
         parameters.setProperty("release", release);
-        StringBuffer sb;
-        sb=new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append(offset);
         parameters.setProperty("offset", sb.toString());
         parameters.setProperty("hash", hash);
@@ -459,7 +458,7 @@ public class MascotClientImpl implements SearchClient
         }
         finally
         {
-            try { in.close(); } catch (IOException e) { }
+            try { in.close(); } catch (IOException ignored) { }
         }
 
         return sb.toString();
@@ -561,7 +560,7 @@ public class MascotClientImpl implements SearchClient
         // try to find out about the platform that Mascot Server is running on
         String mascotRequestURL;
         {
-            StringBuffer urlSB = new StringBuffer(_url);
+            StringBuilder urlSB = new StringBuilder(_url);
             if (!_url.endsWith("/"))
                 urlSB.append("/");
             urlSB.append("client.pl?version");
@@ -607,8 +606,6 @@ public class MascotClientImpl implements SearchClient
 
     protected Properties getTaskID (String sessionID)
     {
-        Properties results = new Properties();
-
         errorCode = 0;
         errorString = "";
         //sessionID is optional
@@ -621,7 +618,7 @@ public class MascotClientImpl implements SearchClient
         parameters.setProperty("create_task_id", "");
         if (!"".equals(sessionID))
             parameters.setProperty("sessionID", sessionID);
-        results = request (parameters, true);
+        Properties results = request (parameters, true);
         if (! "0".equals(results.getProperty("error","0")))
             results.clear();
         // if the call succeeded, we have keys={'actionstring', 'taskID'}
@@ -1106,7 +1103,7 @@ public class MascotClientImpl implements SearchClient
         //     "spectrum, parent monoisotopic mass error minus"}, or
         //  "search, tol"}
         String formFieldKey = "TOL";
-        String formFieldValue = null;
+        String formFieldValue;
         String formFieldValue1 = parser.getInputParameter("spectrum, parent monoisotopic mass error plus");
         String formFieldValue2 = parser.getInputParameter("spectrum, parent monoisotopic mass error minus");
         if (formFieldValue1 != null || formFieldValue2 != null)
@@ -1163,7 +1160,7 @@ public class MascotClientImpl implements SearchClient
 
         String mascotRequestURL;
         {
-            StringBuffer urlSB = new StringBuffer(_url);
+            StringBuilder urlSB = new StringBuilder(_url);
             if (!_url.endsWith("/"))
                 urlSB.append("/");
             urlSB.append(actionString);
@@ -1225,7 +1222,6 @@ public class MascotClientImpl implements SearchClient
             final String endOfUploadMarker = "Finished uploading search details";
             BufferedReader in = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream()));
             String str;
-            StringBuffer reply = new StringBuffer();
             while ((str = in.readLine()) != null)
             {
                 //getLogger().info("Mascot Server: "+str);
@@ -1284,7 +1280,7 @@ public class MascotClientImpl implements SearchClient
         OutputStream out = null;
         try
         {
-            // TODO: wch - write to log on the retsult retrieval progress
+            // TODO: wch - write to log on the result retrieval progress
             //       we do not know the real size, as it is chunked stream
             out = new FileOutputStream(outFile);
             byte[] buffer = new byte [4096]; // use 4-KB fragment
@@ -1293,12 +1289,6 @@ public class MascotClientImpl implements SearchClient
                 lByteRead += readLen;
                 out.write(buffer, 0, readLen);
             }
-        }
-        catch (FileNotFoundException e)
-        {
-            // output file cannot be created!
-            ioError = true;
-            getLogger().error("getResultFile(result="+resultFile+",session="+sessionID+",taskid="+taskID+")", e);
         }
         catch (IOException e)
         {
@@ -1343,7 +1333,7 @@ public class MascotClientImpl implements SearchClient
         }
         finally
         {
-            try { if (null != resultStream) resultStream.close(); } catch (IOException e) {}
+            try { if (null != resultStream) resultStream.close(); } catch (IOException ignored) {}
         }
 
         firstLine=contentLines.get(0);
@@ -1385,7 +1375,7 @@ public class MascotClientImpl implements SearchClient
 
     private String requestURL (Properties parameters)
     {
-        StringBuffer requestURLLSB = new StringBuffer(_url);
+        StringBuilder requestURLLSB = new StringBuilder(_url);
         if (!_url.endsWith("/"))
         {
             requestURLLSB.append("/");
@@ -1451,7 +1441,7 @@ public class MascotClientImpl implements SearchClient
             {
                 String str;
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                StringBuffer reply = new StringBuffer();
+                StringBuilder reply = new StringBuilder();
                 while ((str = reader.readLine()) != null) {
                     reply.append (str);
                     reply.append ("\n");
@@ -1490,7 +1480,7 @@ public class MascotClientImpl implements SearchClient
         }
         finally
         {
-            if (in != null) { try { in.close(); } catch (IOException e) {} }
+            if (in != null) { try { in.close(); } catch (IOException ignored) {} }
         }
 
         return results;
