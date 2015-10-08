@@ -66,7 +66,11 @@ public class NabWellDataTable extends NabBaseTable
             else if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
 
-            ColumnInfo newCol = addWrapColumn(name, col);
+            ColumnInfo newCol;
+            if ("Row".equalsIgnoreCase(name) || "Column".equalsIgnoreCase(name))
+                newCol = addOneBasedColumn(name, col);
+            else
+                newCol = addWrapColumn(name, col);
             if (col.isHidden())
             {
                 newCol.setHidden(col.isHidden());
@@ -87,6 +91,15 @@ public class NabWellDataTable extends NabBaseTable
         addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
     }
 
+    private ColumnInfo addOneBasedColumn(String name, ColumnInfo column)
+    {
+        if (!JdbcType.INTEGER.equals(column.getJdbcType()))
+            throw new IllegalStateException("Can only add 1 to value of integer type.");
+        SQLFragment sql = new SQLFragment("(");
+        sql.append(column.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append(" + 1)");
+        return addColumn(new ExprColumn(this, name, sql, JdbcType.INTEGER, column));
+    }
+
     private void addWellNameColumn(int rowCount)
     {
         ColumnInfo row = getColumn("Row");
@@ -95,7 +108,7 @@ public class NabWellDataTable extends NabBaseTable
         for (int i = 0; i < rowCount; i++)
         {
             char chr = (char)('A' + i);
-            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").append(i).append(" THEN '").append(new Character(chr)).append("'");
+            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").append(i + 1).append(" THEN '").append(new Character(chr)).append("'");
         }
         rowSql.append("\nELSE '' END) ");
         SQLFragment colSql = new SQLFragment("CAST(");

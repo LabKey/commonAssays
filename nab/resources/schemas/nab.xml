@@ -104,12 +104,18 @@
             </column>
             <column columnName="Dilution"/>
             <column columnName="DilutionOrder"/>
-            <column columnName="PercentNeutralization"/>
-            <column columnName="NeutralizationPlusMinus"/>
+            <column columnName="PercentNeutralization">
+                <formatString>0.00%</formatString>
+            </column>
+            <column columnName="NeutralizationPlusMinus">
+                <formatString>0.000000</formatString>
+            </column>
             <column columnName="Min"/>
             <column columnName="Max"/>
             <column columnName="Mean"/>
-            <column columnName="StdDev"/>
+            <column columnName="StdDev">
+                <formatString>0.0000</formatString>
+            </column>
             <column columnName="MinDilution"/>
             <column columnName="MaxDilution"/>
             <column columnName="WellgroupName"/>
