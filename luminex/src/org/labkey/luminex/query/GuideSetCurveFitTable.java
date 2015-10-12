@@ -131,6 +131,7 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
     public void setContainerFilter(@NotNull ContainerFilter containerFilter)
     {
         checkLocked();
+        ContainerFilter.logSetContainerFilter(containerFilter, getClass().getSimpleName(), getName());
         _containerFilter = containerFilter;
     }
 
