@@ -511,7 +511,7 @@ CREATE INDEX IX_GoTermSynonym_termSynonym ON prot.GoTermSynonym(TermSynonym);
 CREATE UNIQUE INDEX UQ_GoTermSynonym_termId_termSynonym ON prot.GoTermSynonym(TermId, TermSynonym);
 
 -- add most common ncbi Taxonomy id's
-CREATE TABLE #idents
+CREATE TABLE prot.idents
 (
     RowId INT NOT NULL IDENTITY,
     Identifier VARCHAR(50) NOT NULL,
@@ -523,64 +523,64 @@ CREATE TABLE #idents
     IdentTypeId INT NULL
 );
 
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('chicken', 'Gallus', 'gallus', '9031');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('chimp', 'Pan', 'troglodytes', '9598');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('cow', 'Bos', 'taurus', '9913');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('dog', 'Canis', 'familiaris', '9615');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('ecoli', 'Escherichia', 'coli', '562');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('fruit fly', 'Drosophila', 'melanogaster', '7227');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('horse', 'Equus', 'caballus', '9796');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('human', 'Homo', 'sapiens', '9606');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('mouse', 'Mus', 'musculus', '10090');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('nematode', 'Caenorhabditis', 'elegans', '6239');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('pig', 'Sus', 'scrofa', '9823');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('rat', 'Rattus', 'norvegicus', '10116');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('yeast', 'Saccharomyces', 'cerevisiae', '4932');
-INSERT #idents (CommonName, Genus, Species, Identifier)
+INSERT prot.idents (CommonName, Genus, Species, Identifier)
     VALUES ('zebrafish', 'Danio', 'rerio', '7955');
 
-UPDATE #idents
+UPDATE prot.idents
     SET IdentTypeId = (SELECT identtypeid FROM prot.IdentTypes WHERE name='NCBI Taxonomy');
 
 INSERT prot.Organisms (CommonName, Genus, Species)
-SELECT CommonName, Genus, Species FROM #idents
+SELECT CommonName, Genus, Species FROM prot.idents
     WHERE NOT EXISTS
-        (SELECT * FROM prot.Organisms PO INNER JOIN #idents i ON (PO.Genus = i.Genus AND PO.Species = i.Species));
+        (SELECT * FROM prot.Organisms PO INNER JOIN prot.idents i ON (PO.Genus = i.Genus AND PO.Species = i.Species));
 
 INSERT prot.Identifiers (Identifier, IdentTypeId)
-    SELECT Identifier, IdentTypeId FROM #idents
+    SELECT Identifier, IdentTypeId FROM prot.idents
     WHERE NOT EXISTS
-        (SELECT * FROM prot.Identifiers PI INNER JOIN #idents i ON (PI.Identifier = i.Identifier AND PI.IdentTypeId = i.IdentTypeId));
+        (SELECT * FROM prot.Identifiers PI INNER JOIN prot.idents i ON (PI.Identifier = i.Identifier AND PI.IdentTypeId = i.IdentTypeId));
 
-UPDATE #idents
+UPDATE prot.idents
     SET OrgId = PO.OrgId
     FROM prot.Organisms PO
-    WHERE #idents.Genus = PO.Genus AND #idents.Species = PO.Species;
+    WHERE prot.idents.Genus = PO.Genus AND prot.idents.Species = PO.Species;
 
-UPDATE #idents
+UPDATE prot.idents
     SET IdentId = PI.IdentId
     FROM prot.Identifiers PI
-    WHERE #idents.Identifier = PI.Identifier AND #idents.IdentTypeId = PI.IdentTypeId;
+    WHERE prot.idents.Identifier = PI.Identifier AND prot.idents.IdentTypeId = PI.IdentTypeId;
 
 UPDATE prot.Organisms
     SET IdentId = i.IdentID
-    FROM #idents i
+    FROM prot.idents i
     WHERE i.OrgId = prot.Organisms.OrgId;
 
-DROP TABLE #idents
+DROP TABLE prot.idents
 GO
 
 CREATE TABLE ms2.PeptidesData
