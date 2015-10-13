@@ -154,12 +154,12 @@
   <note>By default, don't import spectra into the database. We'll still resolve them by looking at the file system --></note>
   <note type="input" label="pipeline, import spectra">no</note>
 
-<note>pipeline paramaters</note>
+<note>pipeline parameters</note>
 	<note type="input" label="pipeline, data type">Samples</note>
 		<note>Samples, Fractions, or Both; determines wheather input data files are treated as 
 			separate samples, or grouped as fractions into a single run, or both.</note>
 
-<note>pipeline quantitation paramaters</note>
+<note>pipeline quantitation parameters</note>
 <!--
 	<note label="pipeline quantitation, algorithm" type="input">xpress</note>
 		<note>Must be set to "xpress"; other options are not yet implemented</note>
