@@ -29,7 +29,6 @@ cbcassay/src/org/labkey/cbcassay/data/CBCDataProperty.java -text
 cbcassay/src/org/labkey/cbcassay/view/showDetails.jsp -text
 dataintegration/Dataintegration.iml -text
 dataintegration/module.properties -text
-dataintegration/resources/queries/dataintegration/TransformHistory/.qview.xml -text
 dataintegration/resources/schemas/dataintegration.xml -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-0.00-13.20.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.20-13.30.sql -text
