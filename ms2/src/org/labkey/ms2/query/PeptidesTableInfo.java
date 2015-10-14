@@ -316,7 +316,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         }
         sql.append(" AND ");
 
-        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), _userSchema.getContainer(), false, true));
+        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), _userSchema.getContainer(), true));
         if (_userSchema.getRuns() != null)
         {
             sql.append(" AND Run IN ");
