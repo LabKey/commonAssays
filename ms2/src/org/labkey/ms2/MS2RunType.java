@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.Pair;
 import org.labkey.ms2.pipeline.UnknownMS2Run;
 import org.labkey.ms2.pipeline.comet.CometRun;
 import org.labkey.ms2.pipeline.comet.LegacyCometRun;
@@ -44,37 +43,37 @@ import java.util.List;
 public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
 {
     LegacyComet(LegacyCometRun.class,
-            new Pair<>("RawScore", "dotproduct"),
-            new Pair<>("Delta", "delta"),
-            new Pair<>("ZScore", "zscore")),
+            new ScoreInfo("RawScore", "dotproduct"),
+            new ScoreInfo("Delta", "delta"),
+            new ScoreInfo("ZScore", "zscore")),
     Comet(CometRun.class,
-            new Pair<>("SpScore", "spscore"),
-            new Pair<>("DeltaCn", "deltacn"),
-            new Pair<>("XCorr", "xcorr"),
-            new Pair<>("SpRank", "sprank"),
-            new Pair<>("DeltaCnStar", "deltacnstar"),
-            new Pair<>("Expect", "expect")),
+            new ScoreInfo("SpScore", "spscore"),
+            new ScoreInfo("DeltaCn", "deltacn"),
+            new ScoreInfo("XCorr", "xcorr", "COMET XCORR"),
+            new ScoreInfo("SpRank", "sprank"),
+            new ScoreInfo("DeltaCnStar", "deltacnstar"),
+            new ScoreInfo("Expect", "expect")),
     Mascot(MascotRun.class,
-            new Pair<>("Ion", "ionscore"),
-            new Pair<>("Identity", "identityscore"),
-            new Pair<>("Homology", "homologyscore"),
-            new Pair<>("NullScore", "null"),
-            new Pair<>("Expect", "expect")),
+            new ScoreInfo("Ion", "ionscore", "MASCOT IONS SCORE"),
+            new ScoreInfo("Identity", "identityscore"),
+            new ScoreInfo("Homology", "homologyscore"),
+            new ScoreInfo("NullScore", "null"),
+            new ScoreInfo("Expect", "expect")),
     Phenyx(PhenyxRun.class,
-           new Pair<>("OrigScore", "origScore"),
-           new Pair<>("Bogus", "bogus"),
-           new Pair<>("ZScore", "zscore")),
+           new ScoreInfo("OrigScore", "origScore"),
+           new ScoreInfo("Bogus", "bogus"),
+           new ScoreInfo("ZScore", "zscore")),
     Sequest(SequestRun.class,
-            new Pair<>("SpScore", "spscore"),
-            new Pair<>("DeltaCn", "deltacn"),
-            new Pair<>("XCorr", "xcorr"),
-            new Pair<>("SpRank", "sprank")),
+            new ScoreInfo("SpScore", "spscore"),
+            new ScoreInfo("DeltaCn", "deltacn"),
+            new ScoreInfo("XCorr", "xcorr", "SEQUEST XCORR"),
+            new ScoreInfo("SpRank", "sprank")),
     XComet(XCometRun.class,
-            new Pair<>("RawScore", "dotproduct"),
-            new Pair<>("Delta", "delta"),
-            new Pair<>("ZScore", "zscore"),
-            new Pair<>("DeltaStar", "deltastar"),
-            new Pair<>("Expect", "expect"))
+            new ScoreInfo("RawScore", "dotproduct"),
+            new ScoreInfo("Delta", "delta"),
+            new ScoreInfo("ZScore", "zscore"),
+            new ScoreInfo("DeltaStar", "deltastar"),
+            new ScoreInfo("Expect", "expect"))
     {
         public boolean isPeptideTableHidden()
         {
@@ -82,11 +81,11 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
         }
     },
     XTandem(XTandemRun.class,
-            new Pair<>("Hyper", "hyperscore"),
-            new Pair<>("Next", "nextscore"),
-            new Pair<>("B", "bscore"),
-            new Pair<>("Y", "yscore"),
-            new Pair<>("Expect", "expect"))
+            new ScoreInfo("Hyper", "hyperscore"),
+            new ScoreInfo("Next", "nextscore"),
+            new ScoreInfo("B", "bscore"),
+            new ScoreInfo("Y", "yscore"),
+            new ScoreInfo("Expect", "expect", "TANDEM EXPECTATION SCORE"))
             {
                 @Override
                 public Priority getPriority(SearchEngineInfo searchEngineInfo)
@@ -100,11 +99,11 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
                 }
             },
     XTandemcomet(XTandemcometRun.class,
-            new Pair<>("RawScore", "dotproduct"),
-            new Pair<>("Delta", "delta"),
-            new Pair<>("ZScore", "zscore"),
-            new Pair<>("DeltaStar", "deltastar"),
-            new Pair<>("Expect", "expect"))
+            new ScoreInfo("RawScore", "dotproduct"),
+            new ScoreInfo("Delta", "delta"),
+            new ScoreInfo("ZScore", "zscore"),
+            new ScoreInfo("DeltaStar", "deltastar"),
+            new ScoreInfo("Expect", "expect"))
     {
         public boolean isPeptideTableHidden()
         {
@@ -129,23 +128,55 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
     private final String _scoreColumnNames;
     private final List<FieldKey> _scoreColumnList = new ArrayList<>();
     private final List<FieldKey> _pepXmlScoreNames = new ArrayList<>();
+    private final Integer _bibliospecScoreColumnIndex;
+    private final String _bibliospecScoreName;
 
-    private MS2RunType(Class<? extends MS2Run> runClass, Pair<String, String>... scoreNames)
+    MS2RunType(Class<? extends MS2Run> runClass, ScoreInfo... scoreInfos)
     {
         _runClass = runClass;
         StringBuilder sb = new StringBuilder();
         String separator = "";
-        for (Pair<String, String> p : scoreNames)
+        String bibliospecScoreName = null;
+        Integer bibliospecScoreIndex = null;
+
+
+        for (int i = 0; i < scoreInfos.length; i++)
         {
-            String scoreColumnName = p.getKey();
-            String pepXmlName = p.getValue(); 
+            ScoreInfo p = scoreInfos[i];
+            String scoreColumnName = p._columnName;
+            String pepXmlName = p._pepXMLName;
             sb.append(separator);
             separator = ", ";
             sb.append(scoreColumnName);
             _scoreColumnList.add(FieldKey.fromParts(scoreColumnName));
             _pepXmlScoreNames.add(FieldKey.fromParts(pepXmlName));
+            if (p._bibliospecScoreName != null)
+            {
+                if (bibliospecScoreIndex != null)
+                {
+                    throw new IllegalArgumentException("More than one Bibliospec score column for " + this);
+                }
+                bibliospecScoreIndex = i;
+                bibliospecScoreName = p._bibliospecScoreName;
+            }
         }
+        _bibliospecScoreColumnIndex = bibliospecScoreIndex;
+        _bibliospecScoreName = bibliospecScoreName;
         _scoreColumnNames = sb.toString();
+    }
+
+    public int getBibliospecScoreColumnIndex()
+    {
+        if (_bibliospecScoreColumnIndex == null)
+        {
+            throw new IllegalStateException(this + " has no Bibliospec score column");
+        }
+        return _bibliospecScoreColumnIndex.intValue();
+    }
+
+    public String getBibliospecScoreName()
+    {
+        return _bibliospecScoreName;
     }
 
     public Class<? extends MS2Run> getRunClass()
@@ -238,6 +269,25 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
         public String getVersion()
         {
             return _version;
+        }
+    }
+
+    private static class ScoreInfo
+    {
+        private final String _columnName;
+        private final String _pepXMLName;
+        private final String _bibliospecScoreName;
+
+        public ScoreInfo(String columnName, String pepXMLName)
+        {
+            this(columnName, pepXMLName, null);
+        }
+
+        public ScoreInfo(String columnName, String pepXMLName, String bibliospecScoreName)
+        {
+            _columnName = columnName;
+            _pepXMLName = pepXMLName;
+            _bibliospecScoreName = bibliospecScoreName;
         }
     }
 

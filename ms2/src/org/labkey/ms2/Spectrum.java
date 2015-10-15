@@ -23,15 +23,17 @@ package org.labkey.ms2;
  */
 public interface Spectrum
 {
-    public float[] getX();
-    public float[] getY();
-    public int getCharge();
-    public int getFraction();
-    public int getRun();
-    public double getPrecursorMass();
-    public double getMZ();
-    public String getSequence();
-    public String getTrimmedSequence();
-    public String getNextAA();
-    public String getPrevAA();
+    float[] getX();
+    float[] getY();
+    int getCharge();
+    int getFraction();
+    int getRun();
+    double getPrecursorMass();
+    double getMZ();
+    double getScore(int index);
+    Double getRetentionTime();
+    String getSequence();
+    String getTrimmedSequence();
+    String getNextAA();
+    String getPrevAA();
 }

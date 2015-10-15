@@ -54,8 +54,11 @@ public class QueryResultSetSpectrumIterator extends ResultSetSpectrumIterator
             SQLFragment sql = new SQLFragment();
 
             // Pull out peptides and spectra (if in the database) for the current run
-            sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum FROM (SELECT pep.*, Spectrum FROM ");
+            sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum, RetentionTime, Score1, Score2, Score3, Score4, Score5 FROM (SELECT pep.*, pd.Score1, pd.Score2, pd.Score3, pd.Score4, pd.Score5, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
             sql.append(MS2Manager.getTableInfoPeptides(), "pep");
+            sql.append(" INNER JOIN ");
+            sql.append(MS2Manager.getTableInfoPeptidesData(), "pd");
+            sql.append(" ON pep.RowId = pd.RowId ");
             sql.append(" LEFT OUTER JOIN ");         // LEFT OUTER so we also get peptides without spectra in the database
             sql.append(MS2Manager.getTableInfoSpectraData(), "sd");
             sql.append(" ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan WHERE pep.RowId IN (");

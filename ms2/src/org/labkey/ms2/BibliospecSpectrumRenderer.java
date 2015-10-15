@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.Connection;
@@ -34,14 +36,17 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Creates a Bibliospec SQLite data file based on a set of peptides/spectra
@@ -53,6 +58,8 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
     private final ViewContext _context;
 
     private DecimalFormat MODIFICATION_MASS_FORMAT = new DecimalFormat("0.0");
+
+    private static final int UNKNOWN_SCORE_TYPE = 0;
 
     public BibliospecSpectrumRenderer(ViewContext context)
     {
@@ -68,32 +75,56 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
         {
             Class.forName("org.sqlite.JDBC");
             tempFile.deleteOnExit();
+
+            Map<MS2RunType, Integer> scoreIndices = new HashMap<>();
+
             try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + tempFile.getAbsolutePath());
                  Statement statement = connection.createStatement())
             {
                 statement.execute("CREATE TABLE LibInfo (libLSID TEXT not null, createTime TEXT not null, numSpecs INT not null, majorVersion INT not null, minorVersion INT not null, primary key (libLSID))");
                 statement.execute("CREATE TABLE Modifications (id  integer primary key autoincrement, RefSpectraId BIGINT, position INT not null, mass DOUBLE not null, constraint FK928405BDF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
-                statement.execute("CREATE TABLE RefSpectra (id  integer primary key autoincrement, peptideSeq TEXT not null, peptideModSeq TEXT not null, precursorCharge INT not null, precursorMZ DOUBLE not null, prevAA TEXT, nextAA TEXT, copies SMALLINT not null, numPeaks INTEGER not null);");
+                statement.execute("CREATE TABLE RefSpectra (id  integer primary key autoincrement, peptideSeq VARCHAR(150) not null, peptideModSeq TEXT not null, precursorCharge INT not null, precursorMZ DOUBLE not null, prevAA CHAR(1), nextAA CHAR(1), copies SMALLINT not null, numPeaks INTEGER not null, ionMobilityValue REAL, ionMobilityType INTEGER, ionMobolityHighEnergyDriftTimeOffsetMsec REAL, retentionTime REAL, score REAL, scoreType TINYINT, fileID INTEGER, SpecIDinFile VARCHAR(256));");
                 statement.execute("CREATE TABLE RefSpectraPeaks (RefSpectraId BIGINT not null, peakMZ BLOB, peakIntensity BLOB, primary key (RefSpectraId), constraint FKACE51F3F1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
+                statement.execute("CREATE TABLE ScoreTypes (Id INTEGER PRIMARY KEY, scoreType VARCHAR(128));");
+
+                try (PreparedStatement scoreTypesPS = connection.prepareStatement("INSERT INTO ScoreTypes (Id, ScoreType) VALUES (?, ?)"))
+                {
+                    scoreTypesPS.setInt(1, UNKNOWN_SCORE_TYPE);
+                    scoreTypesPS.setString(2, "UNKNOWN");
+                    scoreTypesPS.execute();
+
+                    int scoreTypeIndex = 1;
+                    for (MS2RunType ms2RunType : MS2RunType.values())
+                    {
+                        if (ms2RunType.getBibliospecScoreName() != null)
+                        {
+                            scoreIndices.put(ms2RunType, scoreTypeIndex);
+                            scoreTypesPS.setInt(1, scoreTypeIndex++);
+                            scoreTypesPS.setString(2, ms2RunType.getBibliospecScoreName());
+                            scoreTypesPS.execute();
+                        }
+                    }
+                }
 
                 // We're creating a redundant library, which isn't expected to contain retention times, so we can
-                // omit the table. Also, Skyline refuses to show spectra within a document if we include the source files
+                // omit the table.
 //                statement.execute("CREATE TABLE RetentionTimes (id  integer primary key autoincrement, RefSpectraId BIGINT, RedundantRefSpectraId BIGINT, SpectrumSourceId BIGINT, retentionTime DOUBLE, bestSpectrum INT, constraint FKF3D3B64AF1ADF3B4 foreign key (RefSpectraId) references RefSpectra);");
-//                statement.execute("CREATE TABLE SpectrumSourceFiles (id  integer primary key autoincrement, fileName TEXT);");
+
+                statement.execute("CREATE TABLE SpectrumSourceFiles (id  integer primary key autoincrement, fileName TEXT);");
 
                 // Keep track of the sequence value so that we can set foreign key values
                 int spectraCount = 0;
 
                 // Create the statements to insert all of the data
-                try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, nextAA, prevAA, copies, numPeaks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, nextAA, prevAA, copies, numPeaks, retentionTime, score, scoreType, FileId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                      PreparedStatement spectraPS = connection.prepareStatement("INSERT INTO RefSpectraPeaks(RefSpectraId, PeakMZ, PeakIntensity) VALUES (?, ?, ?)");
-//                     PreparedStatement sourceFilePS = connection.prepareStatement("INSERT INTO SpectrumSourceFiles (fileName) VALUES (?)");
+                     PreparedStatement sourceFilePS = connection.prepareStatement("INSERT INTO SpectrumSourceFiles (fileName) VALUES (?)");
                      PreparedStatement modificationPS = connection.prepareStatement("INSERT INTO Modifications (RefSpectraId, Position, Mass) VALUES (?, ?, ?)"))
                 {
                     // Run ID->Modification list
                     Map<Integer, List<MS2Modification>> modificationsCache = new HashMap<>();
 
-//                    Set<Integer> fractionIdsIncluded = new HashSet<>();
+                    Map<Integer, Integer> fractionIdsIncluded = new HashMap<>();
 
                     // Iterate over all of the spectra
                     while (iter.hasNext())
@@ -103,37 +134,38 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         float[] mzFloats = spectrum.getX();
                         float[] intensityFloats = spectrum.getY();
 
+                        MS2Run run = MS2Manager.getRun(spectrum.getRun());
+                        if (run == null)
+                        {
+                            throw new IllegalStateException("Could not find run " + spectrum.getRun());
+                        }
+
                         List<MS2Modification> modifications = modificationsCache.get(spectrum.getRun());
                         if (modifications == null)
                         {
-                            MS2Run run = MS2Manager.getRun(spectrum.getRun());
-                            if (run == null)
-                            {
-                                throw new IllegalStateException("Could not find run " + spectrum.getRun());
-                            }
                             modifications = MS2Manager.getModifications(run);
                             modificationsCache.put(run.getRun(), modifications);
                         }
 
-//                        // Make sure we have a record for the .mzXML file in the SpectrumSourceFiles table
-//                        if (!fractionIdsIncluded.contains(spectrum.getFraction()))
-//                        {
-//                            MS2Fraction fraction = MS2Manager.getFraction(spectrum.getFraction());
-//                            if (fraction == null)
-//                            {
-//                                throw new IllegalStateException("Could not find fraction " + spectrum.getFraction());
-//                            }
-//                            try
-//                            {
-//                                sourceFilePS.setString(1, new File(new URI(fraction.getMzXmlURL())).getAbsolutePath());
-////                                sourceFilePS.execute();
-//                                fractionIdsIncluded.add(fraction.getFraction());
-//                            }
-//                            catch (URISyntaxException e)
-//                            {
-//                                throw new UnexpectedException(e);
-//                            }
-//                        }
+                        // Make sure we have a record for the .mzXML file in the SpectrumSourceFiles table
+                        if (!fractionIdsIncluded.containsKey(spectrum.getFraction()))
+                        {
+                            MS2Fraction fraction = MS2Manager.getFraction(spectrum.getFraction());
+                            if (fraction == null)
+                            {
+                                throw new IllegalStateException("Could not find fraction " + spectrum.getFraction());
+                            }
+                            try
+                            {
+                                sourceFilePS.setString(1, new File(new URI(fraction.getMzXmlURL())).getAbsolutePath());
+                                sourceFilePS.execute();
+                                fractionIdsIncluded.put(fraction.getFraction(), fractionIdsIncluded.size() + 1);
+                            }
+                            catch (URISyntaxException e)
+                            {
+                                throw new UnexpectedException(e);
+                            }
+                        }
 
                         // Hold on to the index->mass difference info so we can insert into the Modifications table as well
                         Map<Integer, Float> peptideModifications = new HashMap<>();
@@ -146,6 +178,30 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         peptidePS.setString(6, spectrum.getPrevAA());
                         peptidePS.setInt(7, 1); // We're creating redundant libraries, which will always have one entry per sequence
                         peptidePS.setInt(8, mzFloats.length);
+                        Double retentionTime = spectrum.getRetentionTime();
+                        if (retentionTime == null)
+                        {
+                            peptidePS.setNull(9, Types.DOUBLE);
+                        }
+                        else
+                        {
+                            // Bibliospec wants retention times in minutes, not seconds
+                            peptidePS.setDouble(9, retentionTime.doubleValue() / 60.0);
+                        }
+                        MS2RunType runType = run.getRunType();
+                        if (runType.getBibliospecScoreName() != null)
+                        {
+                            peptidePS.setDouble(10, spectrum.getScore(runType.getBibliospecScoreColumnIndex()));
+                            peptidePS.setInt(11, scoreIndices.get(runType));
+                        }
+                        else
+                        {
+                            peptidePS.setNull(10, Types.DOUBLE);
+                            peptidePS.setNull(11, Types.INTEGER);
+                        }
+                        // FileID
+                        peptidePS.setInt(12, fractionIdsIncluded.get(spectrum.getFraction()));
+
                         peptidePS.execute();
                         spectraCount++;
 
@@ -188,9 +244,9 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                     ps.setString(1, new Lsid("spectral_library", "bibliospec").setVersion("redundant") + ":" + Lsid.encodePart(_context.getContainer().getName()));
                     ps.setString(2, new SimpleDateFormat("EEE MMM HH:mm:ss yyyy").format(new Date()));
                     ps.setInt(3, spectraCount);
-                    // Writing out older version of library file
+                    // Writing out version 1.3
                     ps.setInt(4, 1);
-                    ps.setInt(5, 0);
+                    ps.setInt(5, 3);
                     ps.execute();
                 }
 

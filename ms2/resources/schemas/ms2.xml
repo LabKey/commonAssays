@@ -126,6 +126,7 @@
         </ns:column>
         <ns:column columnName="RetentionTime">
           <ns:columnTitle>RetTime</ns:columnTitle>
+          <ns:description>The peptide's retention time, in seconds</ns:description>
           <ns:formatString>0.00</ns:formatString>
           <ns:inputType>text</ns:inputType>
           <ns:displayWidth>65</ns:displayWidth>

@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
@@ -234,6 +235,33 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
+        public double getScore(int index)
+        {
+            try
+            {
+                return _rs.getDouble("Score" + index);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        @Override
+        public Double getRetentionTime()
+        {
+            try
+            {
+                double retentionTime = _rs.getDouble("RetentionTime");
+                return _rs.wasNull() ? null : retentionTime;
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
         public double getPrecursorMass()
         {
             try
@@ -259,17 +287,20 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         {
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
 
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum FROM (SELECT pep.*, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
-            sql.append(MS2Manager.getTableInfoPeptides());
-            sql.append(" pep LEFT OUTER JOIN ");         // We want all peptides, even those without spectra in the database
-            sql.append(MS2Manager.getTableInfoSpectraData());
-            sql.append(" sd ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan) X\n");
+            SQLFragment sql = new SQLFragment();
+            sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum, RetentionTime, Score1, Score2, Score3, Score4, Score5 FROM (SELECT pep.*, pd.Score1, pd.Score2, pd.Score3, pd.Score4, pd.Score5, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
+            sql.append(MS2Manager.getTableInfoPeptides(), "pep");
+            sql.append(" INNER JOIN ");
+            sql.append(MS2Manager.getTableInfoPeptidesData(), "pd");
+            sql.append(" ON pep.RowId = pd.RowId ");
+            sql.append(" LEFT OUTER JOIN ");         // We want all peptides, even those without spectra in the database
+            sql.append(MS2Manager.getTableInfoSpectraData(), "sd");
+            sql.append(" ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan) X\n");
             sql.append(_filter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
             sql.append('\n');
             sql.append(_sort.getOrderByClause(MS2Manager.getSqlDialect()));
 
-            return new SqlSelector(MS2Manager.getSchema(), sql.toString(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides())).getResultSet(false);
+            return new SqlSelector(MS2Manager.getSchema(), sql.getSQL(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides())).getResultSet(false);
         }
     }
 }
