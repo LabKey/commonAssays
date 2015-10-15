@@ -212,7 +212,8 @@ public abstract class NabDataHandler extends DilutionDataHandler
     /**
      * Parse a list of values into multiple plates.
      */
-    protected List<double[][]> parseList(File dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader, int maxPlates, int expectedRows, int expectedCols) throws ExperimentException
+    protected List<double[][]> parseList(File dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader,
+                                         int maxPlates, int expectedRows, int expectedCols, List<ExperimentException> errors) throws ExperimentException
     {
         int wellsPerPlate = expectedRows * expectedCols;
 
@@ -235,8 +236,9 @@ public abstract class NabDataHandler extends DilutionDataHandler
             Object dataValue = row.get(resultColumnHeader);
             if (dataValue == null)
             {
-                throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
-                        "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
+                errors.add(createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                        "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue));
+                return plates;
             }
 
             Integer value = null;
@@ -256,8 +258,11 @@ public abstract class NabDataHandler extends DilutionDataHandler
             }
 
             if (value == null)
-                throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
-                        "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
+            {
+                errors.add(createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                        "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue));
+                return plates;
+            }
 
             wellValues[plateRow - 1][plateCol - 1] = value;
             if (++wellCount == wellsPerPlate)
@@ -275,8 +280,8 @@ public abstract class NabDataHandler extends DilutionDataHandler
 
         if (wellCount != 0)
         {
-            throw createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
-                    plateCount + " complete plates of data, plus " + wellCount + " extra rows.");
+            errors.add(createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
+                    plateCount + " complete plates of data, plus " + wellCount + " extra rows."));
         }
 
         if (plates.size() > 0)

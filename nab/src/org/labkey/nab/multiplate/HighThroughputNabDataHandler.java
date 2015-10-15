@@ -148,7 +148,10 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             String resultColumnHeader = columns[columns.length-1].name;
             if (!resultColumnHeader.equals("column" + (columns.length-1)))
             {
-                List<double[][]> values = parseList(dataFile, rows, LOCATION_COLUMNN_HEADER, resultColumnHeader, 0, expectedRows, expectedCols);
+                List<ExperimentException> errors = new ArrayList<>();
+                List<double[][]> values = parseList(dataFile, rows, LOCATION_COLUMNN_HEADER, resultColumnHeader, 0, expectedRows, expectedCols, errors);
+                if (!errors.isEmpty())
+                    throw errors.get(0);
                 if (values != null && !values.isEmpty())
                     return values;
             }

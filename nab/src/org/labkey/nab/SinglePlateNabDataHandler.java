@@ -193,7 +193,13 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             String resultColumnHeader = columns[columns.length-1].name;
             if (!resultColumnHeader.equals("column" + (columns.length-1)))
             {
-                List<double[][]> plates = parseList(dataFile, rows, "Well", resultColumnHeader, 1, expectedRows, expectedCols);
+                List<ExperimentException> errors = new ArrayList<>();
+                List<double[][]> plates = parseList(dataFile, rows, "Well", resultColumnHeader, 1, expectedRows, expectedCols, errors);
+                if (!errors.isEmpty())
+                {
+                    LOG.warn("Unable to parse list style data from file (retrying using grid method) : " + errors.get(0).getMessage());
+                }
+
                 if (plates != null && !plates.isEmpty())
                 {
                     return plates.get(0);
