@@ -56,6 +56,8 @@ public class NabUpgradeCode implements UpgradeCode
     {
         if (!context.isNewInstall())
         {
+            int runCount = 0;
+            int protocolCount = 0;
             Set<ExpProtocol> protocols = new HashSet<>();   // protocols may be accessible by more than one container
             Set<Container> allContainers = ContainerManager.getAllChildren(ContainerManager.getRoot());
             for (Container container : allContainers)
@@ -70,9 +72,11 @@ public class NabUpgradeCode implements UpgradeCode
                 AssayProvider provider = AssayService.get().getProvider(protocol);
                 if (provider instanceof NabAssayProvider)
                 {
+                    protocolCount += 1;
                     DilutionDataHandler dilutionDataHandler = ((NabAssayProvider) provider).getDataHandler();
                     for (ExpRun run : protocol.getExpRuns())
                     {
+                        runCount += 1;
                         Map<Integer, String> cutoffFormats = DilutionDataHandler.getCutoffFormats(protocol, run);
                         final Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
                         TableInfo tableInfo = DilutionManager.getTableInfoNAbSpecimen();
@@ -86,8 +90,9 @@ public class NabUpgradeCode implements UpgradeCode
                         {
                             if (wellGroupNameToNabSpecimen.isEmpty())
                             {
-                                _log.warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " +
-                                        run.getName() + ". Run details will not be available. Continuing upgrade for other runs.");
+                                _log.warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " + run.getRowId() +  " (" +
+                                        run.getName() + ") in container '" + run.getContainer().getPath() +
+                                        "'. Run details will not be available. Continuing upgrade for other runs.");
                             }
                             else
                             {
@@ -97,17 +102,23 @@ public class NabUpgradeCode implements UpgradeCode
                         catch (DilutionDataHandler.MissingDataFileException e)
                         {
                             _log.warn(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " + run.getRowId() + " (" +
-                                    run.getName() + "). Deleted from file system? Run details will not be available. Continuing upgrade for other runs.");
+                                    run.getName() + ") in container '" + run.getContainer().getPath() +
+                                    "'. Deleted from file system? Run details will not be available. Continuing upgrade for other runs.");
                         }
                         catch (ExperimentException | SQLException e)
                         {
-                            _log.warn("Run " + run.getRowId() + " (" + run.getName() + ") failed to upgrade due to exception: " +
+                            _log.warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
+                                    run.getContainer().getPath() + "' failed to upgrade due to exception: " +
                                     e.getMessage() + ". Continuing upgrade for other runs.");
                         }
-                    }
 
+                        if ((runCount % 500) == 0)
+                            _log.info("Runs processed: " + runCount);
+
+                    }
                 }
             }
+            _log.info("Total runs processed: " + runCount + "; Total protocols: " + protocolCount);
         }
     }
 }
