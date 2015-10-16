@@ -110,6 +110,11 @@ public class NabUpgradeCode implements UpgradeCode
                             _log.warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
                                     run.getContainer().getPath() + "' failed to upgrade due to exception: " +
                                     e.getMessage() + ". Continuing upgrade for other runs.");
+                            for (StackTraceElement stackTraceElement : e.getStackTrace())
+                            {
+                                _log.info("\t\t" + stackTraceElement.toString());
+                            }
+                            _log.info("");
                         }
 
                         if ((runCount % 500) == 0)
