@@ -213,88 +213,88 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * Parse a list of values into multiple plates.
      */
     protected List<double[][]> parseList(File dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader,
-                                         int maxPlates, int expectedRows, int expectedCols, List<ExperimentException> errors) throws ExperimentException
+                                         int maxPlates, int expectedRows, int expectedCols, List<ExperimentException> errors)
     {
         int wellsPerPlate = expectedRows * expectedCols;
-
         int wellCount = 0;
         int plateCount = 0;
         double[][] wellValues = new double[expectedRows][expectedCols];
         List<double[][]> plates = new ArrayList<>();
-        for (Map<String, Object> row : rows)
+
+        try
         {
-            // Current line in the data file is calculated by the number of wells we've already read,
-            // plus one for the current row, plus one for the header row:
-            int line = plateCount * wellsPerPlate + wellCount + 2;
-            Pair<Integer, Integer> location = getWellLocation(dataFile, locationColumnHeader, expectedRows, expectedCols, row, line);
-            if (location == null)
-                break;
-
-            int plateRow = location.getKey();
-            int plateCol = location.getValue();
-
-            Object dataValue = row.get(resultColumnHeader);
-            if (dataValue == null)
+            for (Map<String, Object> row : rows)
             {
-                errors.add(createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
-                        "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue));
-                return plates;
-            }
+                // Current line in the data file is calculated by the number of wells we've already read,
+                // plus one for the current row, plus one for the header row:
+                int line = plateCount * wellsPerPlate + wellCount + 2;
+                Pair<Integer, Integer> location = getWellLocation(dataFile, locationColumnHeader, expectedRows, expectedCols, row, line);
+                if (location == null)
+                    break;
 
-            Integer value = null;
-            if (dataValue instanceof Integer)
-                value = (Integer)dataValue;
-            if (dataValue instanceof String)
-            {
-                try
+                int plateRow = location.getKey();
+                int plateCol = location.getValue();
+
+                Object dataValue = row.get(resultColumnHeader);
+                if (dataValue == null)
                 {
-                    Double d = Double.valueOf((String)dataValue);
-                    value = (int)Math.round(d);
+                    errors.add(createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                            "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue));
+                    return plates;
                 }
-                catch (NumberFormatException nfe)
+
+                Integer value = null;
+                if (dataValue instanceof Integer)
+                    value = (Integer)dataValue;
+                if (dataValue instanceof String)
                 {
-                    // ignore
+                    try
+                    {
+                        Double d = Double.valueOf((String)dataValue);
+                        value = (int)Math.round(d);
+                    }
+                    catch (NumberFormatException nfe)
+                    {
+                        // ignore
+                    }
                 }
+
+                if (value == null)
+                {
+                    errors.add(createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                            "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue));
+                    return plates;
+                }
+
+                wellValues[plateRow - 1][plateCol - 1] = value;
+                if (++wellCount == wellsPerPlate)
+                {
+                    plates.add(wellValues);
+                    wellValues = new double[expectedRows][expectedCols];
+                    plateCount++;
+                    wellCount = 0;
+                }
+
+                // Stop if we've reached the expected number of plates
+                if (maxPlates > 0 && plateCount == maxPlates)
+                    break;
             }
 
-            if (value == null)
+            if (wellCount != 0)
             {
-                errors.add(createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
-                        "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue));
-                return plates;
+                errors.add(createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
+                        plateCount + " complete plates of data, plus " + wellCount + " extra rows."));
             }
-
-            wellValues[plateRow - 1][plateCol - 1] = value;
-            if (++wellCount == wellsPerPlate)
-            {
-                plates.add(wellValues);
-                wellValues = new double[expectedRows][expectedCols];
-                plateCount++;
-                wellCount = 0;
-            }
-
-            // Stop if we've reached the expected number of plates
-            if (maxPlates > 0 && plateCount == maxPlates)
-                break;
         }
-
-        if (wellCount != 0)
+        catch (ExperimentException e)
         {
-            errors.add(createParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
-                    plateCount + " complete plates of data, plus " + wellCount + " extra rows."));
+            errors.add(e);
         }
 
         if (plates.size() > 0)
             LOG.debug("found " + plates.size() + " list style plate data in " + dataFile.getName());
 
         return plates;
-    }
-
-    protected ExperimentException createWellLocationParseError(File dataFile, String locationColumnHeader, int lineNumber, Object locationValue) throws ExperimentException
-    {
-        return createParseError(dataFile, "Failed to find valid location in column \"" + locationColumnHeader + "\" on line " + lineNumber +
-                ".  Locations should be identified by a single row letter and column number, such as " +
-                "A1 or P24.  Found \"" + (locationValue != null ? locationValue.toString() : "") + "\".");
     }
 
     /**
