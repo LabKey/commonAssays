@@ -65,7 +65,8 @@ public class LuminexSinglePointTest extends LuminexTest
         waitForPipelineJobsToFinish(3);
         assertElementNotPresent(Locator.linkWithText("ERROR"));
         goToTestAssayHome();
-        _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), "view single point control qc report");
+        waitForElement(Locator.tagWithText("a", "view qc report"));
+        _extHelper.clickExtMenuButton(true, Locator.tagWithText("a", "view qc report"), "view single point control qc report");
         waitForText("Average Fi Bkgd");
 
         DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", this);
@@ -77,14 +78,14 @@ public class LuminexSinglePointTest extends LuminexTest
         LeveyJenningsPlotWindow ljp = new LeveyJenningsPlotWindow(this);
 
         // check LJ plots column
-        click(tbl.link(0, 1));
+        click(tbl.link(0, 2));
         ljp.waitTillReady();
         Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
         Assert.assertEquals(Arrays.asList("Notebook1", "Notebook2"), ljp.getXAxis());
         ljp.closeWindow();
 
         addUrlParameter("_testLJQueryLimit=0");
-        click(tbl.link(0, 1));
+        click(tbl.link(0, 2));
         ljp.waitTillReady();
         Assert.assertEquals("Notebook1", ljp.getXTickTagElementText());
         Assert.assertEquals(Arrays.asList("Notebook1"), ljp.getXAxis());
