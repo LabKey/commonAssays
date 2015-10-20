@@ -24,7 +24,11 @@ import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.ms2.MS2TestBase;
+import org.labkey.test.util.DataRegionExportHelper;
+import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.TextSearcher;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -142,13 +146,13 @@ public class LibraTest extends MS2TestBase
         assertTextNotPresent("R.AEGTFPGK.I", "R.ILEKSGSPER.I");
 
         // Try a TSV export
-        addUrlParameter("exportAsWebPage=true");
-        clickExportToText();
-        assertTextPresent("# Peptide filter: (Hyper > 250)", "-.MM'EILRGSPALSAFR.I", "R.TDTGEPM'GR.G");
-        assertTextNotPresent("R.AEGTFPGK.I", "R.ILEKSGSPER.I");
+        File tsvFile = new DataRegionExportHelper(new DataRegionTable("SpectraCount", this)).exportText();
+        String tsv = TestFileUtils.getFileContents(tsvFile);
+        TextSearcher tsvSearcher = new TextSearcher(() -> tsv).setSearchTransformer(t -> t);
+        assertTextPresent(tsvSearcher, "# Peptide filter: (Hyper > 250)", "-.MM'EILRGSPALSAFR.I", "R.TDTGEPM'GR.G");
+        assertTextNotPresent(tsvSearcher, "R.AEGTFPGK.I", "R.ILEKSGSPER.I");
 
         // Validate that it remembers our options
-        goBack();
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptideCharge"));
         assertFormElementEquals(Locator.id("PeptidesFilter.viewName"), "HyperFilter");
