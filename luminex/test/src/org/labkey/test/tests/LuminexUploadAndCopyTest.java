@@ -176,7 +176,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Save and Finish");
 
         log("Check that upload worked");
-        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), longWaitForPage);
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), longWaitForPage*3);
         assertTextPresent("Hu IL-1b (32)");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
