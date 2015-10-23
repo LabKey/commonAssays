@@ -104,7 +104,7 @@ public class SequestImportTest extends BaseWebDriverTest
             waitForElement(FileBrowserHelper.Locators.gridRowWithNodeId(file).append(runLink));
         }
 
-        clickAndWait(runLink);
+        clickAndWait(runLink, defaultWaitForPage * 2);
         assertElementPresent(Locator.pageHeader(runName));
         clickAndWait(Locator.linkWithText(runProtocol));
 
