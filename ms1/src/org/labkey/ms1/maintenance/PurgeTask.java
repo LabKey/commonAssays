@@ -17,6 +17,7 @@
 package org.labkey.ms1.maintenance;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.util.DefaultSystemMaintenanceTask;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.util.SystemMaintenance.MaintenanceTask;
 import org.labkey.ms1.MS1Manager;
@@ -28,7 +29,7 @@ import org.labkey.ms1.MS1Manager;
  * Date: Nov 1, 2007
  * Time: 10:15:38 AM
  */
-public class PurgeTask implements MaintenanceTask
+public class PurgeTask extends DefaultSystemMaintenanceTask
 {
     private transient Logger _log = Logger.getLogger(PurgeTask.class);
 
@@ -62,13 +63,4 @@ public class PurgeTask implements MaintenanceTask
     {
         return "PurgeMS1";
     }
-
-    @Override
-    public boolean canDisable()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean hideFromAdminPage() { return false; }
 }
