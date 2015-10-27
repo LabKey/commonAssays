@@ -131,49 +131,52 @@ public class NabUpgradeCode implements UpgradeCode
                     DilutionDataHandler dilutionDataHandler = ((NabAssayProvider) provider).getDataHandler();
                     for (ExpRun run : protocol.getExpRuns())
                     {
-                        runCount += 1;
-                        Map<Integer, String> cutoffFormats = DilutionDataHandler.getCutoffFormats(protocol, run);
-                        final Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
-                        TableInfo tableInfo = DilutionManager.getTableInfoNAbSpecimen();
-                        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("RunId"), run.getRowId());
-                        new TableSelector(tableInfo, filter, null).forEach((NabSpecimen nabSpecimen) ->
+                        if (!DilutionDataHandler.isWellDataPopulated(run))
                         {
-                            wellGroupNameToNabSpecimen.put(nabSpecimen.getWellgroupName(), new Pair<>(nabSpecimen.getRowId(), nabSpecimen.getSpecimenLsid()));
-                        }, NabSpecimen.class);
-
-                        try
-                        {
-                            if (wellGroupNameToNabSpecimen.isEmpty())
+                            runCount += 1;
+                            Map<Integer, String> cutoffFormats = DilutionDataHandler.getCutoffFormats(protocol, run);
+                            final Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
+                            TableInfo tableInfo = DilutionManager.getTableInfoNAbSpecimen();
+                            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("RunId"), run.getRowId());
+                            new TableSelector(tableInfo, filter, null).forEach((NabSpecimen nabSpecimen) ->
                             {
-                                warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " + run.getRowId() + " (" +
+                                wellGroupNameToNabSpecimen.put(nabSpecimen.getWellgroupName(), new Pair<>(nabSpecimen.getRowId(), nabSpecimen.getSpecimenLsid()));
+                            }, NabSpecimen.class);
+
+                            try
+                            {
+                                if (wellGroupNameToNabSpecimen.isEmpty())
+                                {
+                                    warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " + run.getRowId() + " (" +
+                                            run.getName() + ") in container '" + run.getContainer().getPath() +
+                                            "'. Run details will not be available. Continuing upgrade for other runs.");
+                                }
+                                else
+                                {
+                                    dilutionDataHandler.populateWellData(protocol, run, getUser(), cutoffFormats, wellGroupNameToNabSpecimen);
+                                }
+                            }
+                            catch (DilutionDataHandler.MissingDataFileException e)
+                            {
+                                warn(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " + run.getRowId() + " (" +
                                         run.getName() + ") in container '" + run.getContainer().getPath() +
-                                        "'. Run details will not be available. Continuing upgrade for other runs.");
+                                        "'. Deleted from file system? Run details will not be available. Continuing upgrade for other runs.");
                             }
-                            else
+                            catch (ExperimentException | SQLException e)
                             {
-                                dilutionDataHandler.populateWellData(protocol, run, getUser(), cutoffFormats, wellGroupNameToNabSpecimen);
+                                warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
+                                        run.getContainer().getPath() + "' failed to upgrade due to exception: " +
+                                        e.getMessage() + ". Continuing upgrade for other runs.");
+                                for (StackTraceElement stackTraceElement : e.getStackTrace())
+                                {
+                                    warn("\t\t" + stackTraceElement.toString());
+                                }
+                                warn("");
                             }
-                        }
-                        catch (DilutionDataHandler.MissingDataFileException e)
-                        {
-                            warn(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " + run.getRowId() + " (" +
-                                    run.getName() + ") in container '" + run.getContainer().getPath() +
-                                    "'. Deleted from file system? Run details will not be available. Continuing upgrade for other runs.");
-                        }
-                        catch (ExperimentException | SQLException e)
-                        {
-                            warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
-                                    run.getContainer().getPath() + "' failed to upgrade due to exception: " +
-                                    e.getMessage() + ". Continuing upgrade for other runs.");
-                            for (StackTraceElement stackTraceElement : e.getStackTrace())
-                            {
-                               warn("\t\t" + stackTraceElement.toString());
-                            }
-                            warn("");
-                        }
 
-                        if ((runCount % 500) == 0)
-                            info("Runs processed: " + runCount);
+                            if ((runCount % 500) == 0)
+                                info("Runs processed: " + runCount);
+                        }
 
                     }
                 }
