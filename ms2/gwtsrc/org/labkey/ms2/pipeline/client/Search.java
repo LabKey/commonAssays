@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sun.istack.internal.Nullable;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTService;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTServiceAsync;
@@ -69,13 +68,13 @@ public class Search implements EntryPoint
     private                 Hidden                  runSearch = new Hidden();
     private                 VerticalPanel           messagesPanel = new VerticalPanel();
     private                 ProtocolComposite       protocolComposite;
-    @Nullable
+    // Nullable
     private                 SequenceDbComposite     sequenceDbComposite;
     private                 LocationComposite       locationComposite;
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
-    @Nullable
+    // Nullable
     private                 EnzymeComposite         enzymeComposite;
-    @Nullable
+    // Nullable
     private                 ResidueModComposite     residueModComposite;
     private                 TPPComposite            tppComposite;
     private                 OtherParametersComposite otherParametersComposite;

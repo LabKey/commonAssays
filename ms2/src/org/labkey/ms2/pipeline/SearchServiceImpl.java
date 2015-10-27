@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.gwt.server.BaseRemoteService;
@@ -61,7 +62,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         AbstractMS2PipelineProvider baseProvider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
         getProtocols("", baseProvider, searchEngine, path, fileNames);
-        if (baseProvider instanceof AbstractMS2SearchPipelineProvider)
+        if (baseProvider != null && baseProvider.isSearch())
         {
             if (results.getSelectedProtocol() == null || results.getSelectedProtocol().equals(""))
                 getSequenceDbs(results.getDefaultSequenceDb(), searchEngine, false);
@@ -150,7 +151,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         if (protocol != null)
         {
             results.setSelectedProtocol(protocolName);
-            if (provider instanceof AbstractMS2SearchPipelineProvider)
+            if (provider.isSearch())
             {
                 if (protocol.getDbNames().length > 0)
                 {
@@ -158,7 +159,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                     boolean dbExists;
                     try
                     {
-                        dbExists = ((AbstractMS2SearchPipelineProvider) provider).dbExists(getSequenceRoot(), protocol.getDbNames()[0]);
+                        dbExists = provider.dbExists(getSequenceRoot(), protocol.getDbNames()[0]);
                     }
                     catch (IOException e)
                     {
@@ -477,7 +478,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             Arrays.sort(fileNames, String.CASE_INSENSITIVE_ORDER);
             for (String name : fileNames)
             {
-                if (name == null || name.contains("..") || name.contains("/") || name.contains("\\"))
+                if (name == null || StringUtils.containsAny(name, "..", "/", "\\"))
                 {
                     results.appendError("Invalid file name " + name);
                 }

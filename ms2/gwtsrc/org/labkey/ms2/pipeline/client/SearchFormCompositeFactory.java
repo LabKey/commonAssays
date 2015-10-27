@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.pipeline.client;
 
-import com.sun.istack.internal.Nullable;
 import org.labkey.ms2.pipeline.client.mascot.MascotEnzymeComposite;
 import org.labkey.ms2.pipeline.client.mascot.MascotResidueModComposite;
 import org.labkey.ms2.pipeline.client.mascot.MascotSequenceDbComposite;
@@ -48,7 +47,7 @@ public class SearchFormCompositeFactory
         this.searchEngine = searchEngine;
     }
 
-    @Nullable
+    /** Nullable */
     public SequenceDbComposite getSequenceDbComposite(Search search)
     {
         if(searchEngine.equals(XTANDEM))
@@ -81,7 +80,7 @@ public class SearchFormCompositeFactory
             return null;
     }
 
-    @Nullable
+    /** Nullable */
     public EnzymeComposite getEnzymeComposite()
     {
         if(searchEngine.equals(MASCOT))
@@ -91,7 +90,7 @@ public class SearchFormCompositeFactory
         return new EnzymeComposite();
     }
 
-    @Nullable
+    /** Nullable */
     public ResidueModComposite getResidueModComposite(Search searchForm)
     {
         if(searchEngine.equals(XTANDEM))

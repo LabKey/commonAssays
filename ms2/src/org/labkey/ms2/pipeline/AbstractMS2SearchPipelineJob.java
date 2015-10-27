@@ -65,7 +65,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return getPepXMLConvertFile(dirAnalysis,baseName, FileType.gzSupportLevel.SUPPORT_GZ);
     }
 
-    protected File _dirSequenceRoot;
+    protected final File _dirSequenceRoot;
     protected boolean _fractions;
 
     public AbstractMS2SearchPipelineJob(AbstractFileAnalysisProtocol protocol,

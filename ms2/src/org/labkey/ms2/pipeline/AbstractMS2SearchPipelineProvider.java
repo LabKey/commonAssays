@@ -36,6 +36,12 @@ abstract public class AbstractMS2SearchPipelineProvider
         super(name, owningModule);
     }
 
+    @Override
+    public boolean isSearch()
+    {
+        return true;
+    }
+
     public void initSystemDirectory(File rootDir, File systemDir)
     {
         AbstractMS2SearchProtocolFactory factory = getProtocolFactory();
@@ -43,12 +49,14 @@ abstract public class AbstractMS2SearchPipelineProvider
             factory.initSystemDirectory(rootDir, systemDir);
     }
 
+    @Override
     public AbstractMS2SearchProtocolFactory getProtocolFactory(TaskPipeline pipeline)
     {
         // MS2 search providers all support only one protocol factory each.
         return getProtocolFactory();
     }
 
+    @Override
     public AbstractMS2SearchProtocolFactory getProtocolFactory(File file)
     {
         AbstractMS2SearchProtocolFactory factory = getProtocolFactory();
@@ -57,6 +65,7 @@ abstract public class AbstractMS2SearchPipelineProvider
         return null; 
     }
 
+    @Override
     public boolean dbExists(File sequenceRoot, String db) throws IOException
     {
         File dbFile = new File(sequenceRoot, db);

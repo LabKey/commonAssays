@@ -21,6 +21,9 @@ import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Shared between search-engine pipeline providers and ones that operate on existing search results.
  * Created by: jeckels
@@ -40,4 +43,9 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
 
     /** @return the name of the help topic that the user can consult for guidance on setting parameters */
     abstract public String getHelpTopic();
+
+    /** @return true if this will be a full-blown search, false if it's operating on already searched-data */
+    abstract public boolean isSearch();
+
+    abstract public boolean dbExists(File sequenceRoot, String dbName) throws IOException;
 }

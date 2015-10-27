@@ -38,6 +38,7 @@ public class FractionRollupPipelineJob extends AbstractMS2SearchPipelineJob
     private static final Logger LOG = getJobLogger(FractionRollupPipelineJob.class);
     protected static final TaskId TASK_ID = new TaskId(FractionRollupPipelineJob.class);
 
+    @Override
     public Logger getClassLogger()
     {
         return LOG;
@@ -76,17 +77,19 @@ public class FractionRollupPipelineJob extends AbstractMS2SearchPipelineJob
         return files;
     }
 
+    @Override
     public TaskId getTaskPipelineId()
     {
         return TASK_ID;
     }
 
+    @Override
     public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
         return new FractionRollupPipelineJob(this, file);
     }
 
-    // if fire does not exist, will append .gz if config indicates preference for gzipped outputs
+    @Override
     public File getSearchNativeOutputFile()
     {
         throw new UnsupportedOperationException();

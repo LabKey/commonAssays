@@ -49,11 +49,13 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
             super(XTandemToXMLTask.class);
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new XTandemToXMLTask(this, job);
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             FileAnalysisJobSupport support = (FileAnalysisJobSupport) job;
@@ -64,11 +66,13 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
             return NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(XTandemSearchTask.TANDEM2_XML_ACTION_NAME);
         }
 
+        @Override
         public String getGroupParameterName()
         {
             return "xtandem";
@@ -85,6 +89,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
         return getJob().getJobSupport(FileAnalysisJobSupport.class);
     }
 
+    @Override
     public RecordedActionSet run() throws PipelineJobException
     {
         try
@@ -109,7 +114,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
 
             // Move final outputs to analysis directory.
             File filePepXMLRaw;
-            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+            try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
             {
                 filePepXMLRaw = _wd.outputFile(fileWorkPepXMLRaw);
             }

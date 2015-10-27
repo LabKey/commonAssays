@@ -49,12 +49,14 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
         super(NAME, owningModule);
     }
 
+    @Override
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         String nameParameters = FractionRollupProtocolFactory.get().getParametersFileName();
         return nameParameters.equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
+    @Override
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -96,6 +98,18 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     public String getHelpTopic()
     {
         return "pipelineparams";
+    }
+
+    @Override
+    public boolean isSearch()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean dbExists(File sequenceRoot, String s)
+    {
+        throw new UnsupportedOperationException();
     }
 
     @Override
