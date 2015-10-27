@@ -260,7 +260,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     @Test
     public void verifyGuideSetParameterDetailsWindow()
     {
-        Locator closeBtn = Ext4Helper.Locators.ext4Button("Close");
+        Locator cancelBtn = Ext4Helper.Locators.ext4Button("Cancel");
         // validates both a run-based and a value-based GuideSet
         _guideSetHelper.goToManageGuideSetsPage(TEST_ASSAY_LUM);
 
@@ -276,7 +276,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         assertTextPresent("Num Runs");
         assertElementPresent(TABLE_LOCATOR.append("//input[@type='checkbox']"));
         // this gets a mis-fire and selenium raises error that element is not the expected click element.
-        click(closeBtn);
+        click(cancelBtn);
 
         clickGuideSetDetailsByComment(VALUE_BASED_COMMENT);
         validateGuideSetRunDetails("Value-based", "Titration");
@@ -289,7 +289,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         // validate checkboxes are not displayed
         assertTextNotPresent("Num Runs");
         assertElementNotPresent(TABLE_LOCATOR.append("//input[@type='checkbox']"));
-        click(closeBtn);
+        click(cancelBtn);
     }
 
     private void clickGuideSetDetailsByComment(String comment)

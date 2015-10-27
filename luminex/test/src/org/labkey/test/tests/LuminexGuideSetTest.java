@@ -503,7 +503,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         assertExpectedAnalyte1QCFlagsPresent();
         clickButtonContainingText("Edit", 0);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_3"}, "edited analyte 1", false);
-        assertEC505PLQCFlagsPresent(1);
+        assertQCFlagsNotPresent();
 
         //8. Edit the GS Analyte (1) guide set and remove plate 3
         //	- the QC Flags for plates 3, 4, 5, and 5a return (HMFI for all 4 and AUC for plates 4, 5, and 5a)
@@ -524,13 +524,12 @@ public final class LuminexGuideSetTest extends LuminexTest
     private void assertExpectedAnalyte1QCFlagsPresent()
     {
         assertElementPresent(Locator.xpath("//a[contains(text(),'HMFI')]"), 4);
+        assertElementPresent(Locator.xpath("//a[contains(text(),'AUC')]"), 3);
     }
 
-    private void assertEC505PLQCFlagsPresent(int count)
+    private void assertQCFlagsNotPresent()
     {
-        assertEquals("Unexpected QC Flag Highlight Present", count,
-                getElementCount(Locator.xpath("//div[contains(@style,'red')]")));
-        assertElementPresent(Locator.xpath("//a[contains(text(),'EC50-5')]"), count);
+        // NOTE: don't check EC50-5 as it is inconsistent
         for(String flag : new String[] {"AUC", "HMFI", "EC50-4", "PCV"})
         {
             assertElementNotPresent(Locator.xpath("//a[contains(text(),'" + flag + "')]"));

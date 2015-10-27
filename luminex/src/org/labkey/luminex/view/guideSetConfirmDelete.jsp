@@ -53,7 +53,7 @@
 
     <ul>
         <% for (LuminexController.GuideSetsDeleteBean.GuideSet gs : guideSets) { %>
-            <li><a href="#" tabindex="-1" onclick="createGuideSetWindow('<%=h(bean.getProtocol().getRowId())%>','<%=h(gs.getGuideSetId())%>')">Guide Set <%= h(gs.getGuideSetId()) %>: <%= h(gs.getComment()) %></a></li>
+            <li><a href="#" tabindex="-1" onclick="createGuideSetWindow('<%=h(bean.getProtocol().getRowId())%>','<%=h(gs.getGuideSetId())%>', false)">Guide Set <%= h(gs.getGuideSetId()) %>: <%= h(gs.getComment()) %></a></li>
             <br>
             Type: <% if(gs.isValueBased()) out.print("Value-based"); else out.print("Run-based"); %>
             <br><br>

@@ -20,6 +20,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
     // NOTE: these are required fields (any way to enforce?)
     assayName: null,
     currentGuideSetId: null,
+    canEdit: false,
 
     statics: {
         viewTpl: new Ext4.XTemplate(
@@ -62,7 +63,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
                     '<td align="center">{EC504PLRunCount}</td>',
-                    '<td><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                    '<td><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
                 '</tr>',
                 '<tr>',
@@ -71,7 +72,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
                     '<td align="center">{EC505PLRunCount}</td>',
-                    '<td><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                    '<td><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
                 '</tr>',
             '</tpl>',
@@ -81,7 +82,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.MaxFIAverage)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
                 '<td align="center">{MaxFIRunCount}</td>',
-                '<td><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                '<td><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.MaxFIEnabled, values.UserCanEdit)]}></td>',
                 '</tpl>',
             '</tr>',
             '<tpl if="ControlType ==\'Titration\'">',
@@ -91,7 +92,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.AUCAverage)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
                     '<td align="center">{AUCRunCount}</td>',
-                    '<td><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();"></td>',
+                    '<td><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.AUCEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
                 '</tr>',
             '</tpl>',
@@ -101,6 +102,18 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
             {
                 formatNumber: function(value) { return value != null ? value.toFixed(3) : "N/A"; },
                 formatNone: function(value) { return value ? Ext4.util.Format.htmlEncode(value) : '[None]'; },
+                initCheckbox: function(check, editable)
+                {
+                    // set the checked and disabled state of the checkbox
+                    var props = '';
+                    if (check) {
+                        props += 'checked';
+                    }
+                    if (!editable) {
+                        props += ' disabled';
+                    }
+                    return props;
+                },
                 dateRenderer: function(val) { return val ? new Date(val).format("Y-m-d") : null; }
             }
         )
@@ -115,11 +128,11 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
             store: this.getGuideSetStore()
         }];
 
-        // TODO: the guide set details dialog should be read-only from the Confirm Delete page
         this.buttons = [{
             id: 'GuideSetSaveButton',
             disabled: true,
             text: 'Save',
+            hidden: !this.canEdit,
             scope: this,
             handler: function(btn) {
                 this.getEl().mask("Saving QC flag changes...");
@@ -148,7 +161,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                 });
             }
         },{
-            text: 'Close',
+            text: this.canEdit ? 'Cancel' : 'Close',
             scope: this,
             handler: function() { this.close(); }
         }];
@@ -199,7 +212,8 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     {name: 'EC504PLRunCount', type: 'int'},
                     {name: 'EC505PLRunCount', type: 'int'},
                     {name: 'AUCRunCount', type: 'int'},
-                    {name: 'ControlType'}
+                    {name: 'ControlType'},
+                    {name: 'UserCanEdit', type: 'boolean', defaultValue: this.canEdit}
                 ]
             });
 
@@ -255,17 +269,10 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     var form = document.forms['GuideSetForm'];
                     if (!record.get("ValueBased"))
                     {
-                        form.elements['MFICheckBox'].checked = record.get("MaxFIEnabled");
-
                         // NOTE: using this for dirty bit logic.
                         form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
-
                         if(record.get("ControlType") == "Titration")
                         {
-                            form.elements['EC504PLCheckBox'].checked = record.get("EC504PLEnabled");
-                            form.elements['EC505PLCheckBox'].checked = record.get("EC505PLEnabled");
-                            form.elements['AUCCheckBox'].checked = record.get("AUCEnabled");
-
                             form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
                             form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
                             form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
@@ -281,7 +288,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
 });
 
 // helper used in display column
-function createGuideSetWindow(protocolId, currentGuideSetId) {
+function createGuideSetWindow(protocolId, currentGuideSetId, allowEdit) {
     LABKEY.Assay.getById({
         id: protocolId,
         success: function(assay){
@@ -290,7 +297,8 @@ function createGuideSetWindow(protocolId, currentGuideSetId) {
                 // could use either full name or base name here...
                 Ext4.create('LABKEY.luminex.GuideSetWindow', {
                     assayName: assay[0].name,
-                    currentGuideSetId: currentGuideSetId
+                    currentGuideSetId: currentGuideSetId,
+                    canEdit: allowEdit && LABKEY.user.canUpdate
                 });
             }
         }

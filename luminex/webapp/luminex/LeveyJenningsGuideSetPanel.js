@@ -120,6 +120,20 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             html: this.getRelatedGuideSetLabel()
         });
 
+        // if the user has permissions to update in this container, show them the Guide Set Edit/New buttons
+        var buttonItems = [];
+        if (this.userCanUpdate)
+        {
+            buttonItems.push({
+                xtype: 'compositefield',
+                items:[this.editGuideSetButton, this.newGuideSetButton]
+            });
+        }
+        buttonItems.push({
+            padding: '5px 0 0 0',
+            items: [this.guideSetDetailsButton]
+        });
+
         // add the guide set elements as a composite field for layout reasons
         this.guideSetCompositeField = new Ext.form.CompositeField({
             hideLabel: true,
@@ -142,22 +156,12 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         padding: 2,
                         width: 200
                     },
-                    items: [
-                        {
-                            xtype: 'compositefield',
-                            items:[this.editGuideSetButton, this.newGuideSetButton]
-                        },
-                        {
-                            padding: '5px 0 0 0',
-                            items: [this.guideSetDetailsButton]
-                        }
-                    ]
+                    items: buttonItems
                 }
             ]
         });
 
-        // if the user has permissions to update in this container, show them the Guide Set Edit/New buttons
-        this.userCanUpdate ? items.push(this.guideSetCompositeField) : items.push(this.guideSetDisplayField);
+        items.push(this.guideSetCompositeField);
 
         this.items = items;
 
@@ -355,6 +359,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             Ext4.create('LABKEY.luminex.GuideSetWindow', {
                 assayName: this.assayName,
                 currentGuideSetId: this.currentGuideSetId,
+                canEdit: this.userCanUpdate,
                 listeners: {
                     scope: this,
                     aftersave: function() { this.fireEvent('guideSetMetricsUpdated'); }
