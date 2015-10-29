@@ -25,6 +25,7 @@ import org.labkey.test.categories.BVT;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.XTandem;
 import org.labkey.test.ms2.AbstractXTandemTest;
+import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
 
@@ -106,8 +107,9 @@ public class XTandemTest extends AbstractXTandemTest
 
         log("Test Comparing Peptides");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
-        click(Locator.name(".toggle"));
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Peptide (Legacy)");
+        DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", this);
+        ms2Runs.checkAll();
+        ms2Runs.clickHeaderButton("Compare", true, "Peptide (Legacy)");
         selectOptionByText(Locator.name("viewParams"), VIEW);
         clickButton("Compare");
         assertTextPresent("(Mass > 1000.0)");
