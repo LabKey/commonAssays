@@ -19,7 +19,6 @@ package org.labkey.flow;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -92,7 +91,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 15.20;
+        return 15.30;
     }
 
     protected void init()
@@ -196,7 +195,7 @@ public class FlowModule extends DefaultModule
     @NotNull
     public Set<Class> getUnitTests()
     {
-        return new HashSet<Class>(Arrays.asList(
+        return new HashSet<>(Arrays.asList(
                 PopulationName.NameTests.class,
                 SubsetParser.TestLexer.class,
                 SubsetTests.class,

@@ -34,6 +34,7 @@ dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-0.00-13.2
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.20-13.30.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-13.30-14.10.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-15.20-15.21.sql -text
+dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-15.20-15.30.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-15.21-15.22.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.00-13.10.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-13.10-13.20.sql -text
@@ -41,6 +42,7 @@ dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-0.00-13.20
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.20-13.30.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-13.30-14.10.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-15.20-15.21.sql -text
+dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-15.20-15.30.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-15.21-15.22.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.00-13.10.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-13.10-13.20.sql -text
@@ -1508,6 +1510,7 @@ nab/resources/schemas/dbscripts/postgresql/nab-14.20-14.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.10-15.11.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.10-15.20.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.20-15.21.sql -text
+nab/resources/schemas/dbscripts/postgresql/nab-15.20-15.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.21-15.22.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.22-15.23.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-0.00-13.10.sql -text
@@ -1522,6 +1525,7 @@ nab/resources/schemas/dbscripts/sqlserver/nab-14.30-15.10.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-15.10-15.11.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-15.10-15.20.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-15.20-15.21.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-15.20-15.30.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-15.21-15.22.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-15.22-15.23.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-0.00-13.10.sql -text
