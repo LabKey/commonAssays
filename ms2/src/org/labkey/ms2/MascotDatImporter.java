@@ -56,7 +56,7 @@ public class MascotDatImporter extends PeptideImporter
     @Override
     public void importRun(MS2Progress progress) throws IOException, XMLStreamException
     {
-        progress.setImportSpectra(false);
+
         File f = new File(_path + "/" + _fileName);
         NetworkDrive.ensureDrive(f.getPath());
         MascotDatLoader loader = new MascotDatLoader(f, _log);
@@ -124,7 +124,7 @@ public class MascotDatImporter extends PeptideImporter
                     }
                 }
             }
-
+            progress.setImportSpectra(false);
             progress.setCurrentMs2FileOffset(loader.getFileLength());
             writePeptides();
         }
