@@ -279,6 +279,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ExperimentService.get().registerExperimentDataHandler(new PepXmlExperimentDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ProteinProphetExperimentDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ProteinExpressionMatrixDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new MascotDatExperimentDataHandler());
+
         ExperimentService.get().registerExperimentMaterialListener(new ProteinExpressionMatrixMaterialListener());
 
         //We are the first creator of this...

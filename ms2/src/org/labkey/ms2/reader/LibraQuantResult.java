@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.ms2.PepXmlImporter;
+import org.labkey.ms2.PeptideImporter;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -298,212 +298,212 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
     }
 
     @Override
-    public void insert(PepXmlImporter pepXmlImporter) throws SQLException
+    public void insert(PeptideImporter importer) throws SQLException
     {
         int index = 1;
-        pepXmlImporter._iTraqQuantStmt.setLong(index++, getPeptideId());
+        importer._iTraqQuantStmt.setLong(index++, getPeptideId());
 
         if (getTargetMass1() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass1());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass1());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity1() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity1());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity1());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized1() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized1());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized1());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass2() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass2());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass2());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity2() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity2());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity2());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized2() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized2());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized2());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass3() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass3());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass3());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity3() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity3());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity3());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized3() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized3());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized3());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass4() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass4());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass4());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity4() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity4());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity4());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized4() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized4());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized4());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass5() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass5());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass5());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity5() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity5());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity5());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized5() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized5());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized5());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass6() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass6());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass6());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity6() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity6());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity6());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized6() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized6());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized6());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass7() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass7());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass7());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity7() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity7());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity7());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized7() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized7());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized7());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
         if (getTargetMass8() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getTargetMass8());
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass8());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getAbsoluteIntensity8() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity8());
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity8());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
         if (getNormalized8() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getNormalized8());
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized8());
         }
         else
         {
-            pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
-        pepXmlImporter._iTraqQuantStmt.executeUpdate();
+        importer._iTraqQuantStmt.executeUpdate();
     }
 
     public String getMatch(float mz, double tolerance)

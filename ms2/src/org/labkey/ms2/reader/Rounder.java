@@ -25,6 +25,9 @@ public class Rounder
     protected static final double factors[] =
             {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
 
+    protected static final float floatFactors[] =
+            {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+
     /**
      * Round the double <n> to <places> decimal places.  If <places> is negative or greater than 9,
      * round to 9 decimal places
@@ -37,5 +40,12 @@ public class Rounder
         if (places < 0 || places > 9) places = 9;
 
         return Math.round(n * factors[places]) / factors[places];
+    }
+
+    public static float round(float n, int places)
+    {
+        if (places < 0 || places > 9) places = 9;
+
+        return Math.round(n * floatFactors[places]) / floatFactors[places];
     }
 }

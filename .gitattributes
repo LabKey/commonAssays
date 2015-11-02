@@ -1068,10 +1068,12 @@ ms2/src/org/labkey/ms2/MS2RunType.java -text
 ms2/src/org/labkey/ms2/MS2SearchExperimentRunType.java -text
 ms2/src/org/labkey/ms2/MS2ServiceImpl.java -text
 ms2/src/org/labkey/ms2/MS2StatsWebPart.java -text
+ms2/src/org/labkey/ms2/MascotDatExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/MascotDatImporter.java -text
 ms2/src/org/labkey/ms2/MassType.java -text
 ms2/src/org/labkey/ms2/PepXmlExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/PepXmlImporter.java -text
+ms2/src/org/labkey/ms2/PeptideImporter.java -text
 ms2/src/org/labkey/ms2/PeptideProphetGraphs.java -text
 ms2/src/org/labkey/ms2/PeptideQuantitation.java -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
@@ -1396,6 +1398,8 @@ ms2/src/org/labkey/ms2/reader/LibraQuantResult.java -text
 ms2/src/org/labkey/ms2/reader/MGFDocumentParser.java -text
 ms2/src/org/labkey/ms2/reader/MS2Loader.java -text
 ms2/src/org/labkey/ms2/reader/MS2ModificationList.java -text
+ms2/src/org/labkey/ms2/reader/MS2XmlLoader.java -text
+ms2/src/org/labkey/ms2/reader/MascotDatLoader.java -text
 ms2/src/org/labkey/ms2/reader/ModifiedAminoAcid.java -text
 ms2/src/org/labkey/ms2/reader/MzMLDocumentParser.java -text
 ms2/src/org/labkey/ms2/reader/MzXMLDocumentParser.java -text

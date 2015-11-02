@@ -35,6 +35,15 @@ public class MS2ModificationList extends ArrayList<MS2Modification>
         return null;
     }
 
+    public MS2Modification get(String aa)
+    {
+        for (MS2Modification mod : this)
+            if (aa.equals(mod.getAminoAcid()))
+                return mod;
+
+        return null;
+    }
+
 
     private static final String _symbols = "'\"~#*@!$%&:0123456789";
 

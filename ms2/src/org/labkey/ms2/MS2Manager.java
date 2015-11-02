@@ -562,12 +562,12 @@ public class MS2Manager
     }
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
-                                                    File file,
-                                                    String description, PipeRoot root) throws SQLException, IOException
+                                                          File file,
+                                                          String description, PipeRoot root, boolean useXmlFormat) throws SQLException, IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
-        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, root);
+        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, root, useXmlFormat);
         try
         {
             PipelineService.get().queueJob(job);
@@ -614,9 +614,9 @@ public class MS2Manager
     }
     
     public static MS2Run importRun(ViewBackgroundInfo info, Logger log,
-                             File file,
-                             MS2Importer.RunInfo runInfo,
-                             XarContext context) throws IOException, XMLStreamException
+                                   File file,
+                                   MS2Importer.RunInfo runInfo,
+                                   XarContext context) throws IOException, XMLStreamException
     {
         MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : ""), log, context);
         return importer.upload(runInfo);

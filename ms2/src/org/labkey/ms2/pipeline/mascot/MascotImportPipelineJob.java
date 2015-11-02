@@ -18,17 +18,18 @@ package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Importer;
+import org.labkey.ms2.PeptideImporter;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.ms2.reader.MascotDatLoader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,13 +47,14 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 {
     private final File _file;
 
-    private static final String DB_PREFIX = "DB=";
-    private static final String FASTAFILE_PREFIX = "fastafile=";
+    private Boolean _useMascot2XML = false;
+
 
     public MascotImportPipelineJob(ViewBackgroundInfo info, File file, String description,
-                                MS2Importer.RunInfo runInfo, PipeRoot root)
+                                   MS2Importer.RunInfo runInfo, PipeRoot root, Boolean useMascot2XML)
     {
-        super(info, TPPTask.getPepXMLFile(file.getParentFile(), FileUtil.getBaseName(file)), description, runInfo, root);
+        super(info, (useMascot2XML ? TPPTask.getPepXMLFile(file.getParentFile(), FileUtil.getBaseName(file)) : file), description, runInfo, root);
+        _useMascot2XML = useMascot2XML;
         _file = file;
     }
 
@@ -64,8 +66,9 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         if (!NetworkDrive.exists(dat))
             throw new FileNotFoundException(_file.getAbsolutePath() + " not found");
 
+        // TODO replace with use of MascotDatLoader
         InputStream datIn = new FileInputStream(dat);
-        BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn));
+        BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn, StringUtilsLabKey.DEFAULT_CHARSET));
         boolean skipParameter = true;
         String dbValue = null;
         String fastaFileValue = null;
@@ -79,58 +82,27 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
             }
             else if (!skipParameter)
             {
-                if (line.startsWith(DB_PREFIX))
+                if (line.startsWith(MascotDatLoader.DB_PREFIX))
                 {
-                    dbValue = line.substring(DB_PREFIX.length());
+                    dbValue = line.substring(MascotDatLoader.DB_PREFIX.length());
                 }
-                else if (line.startsWith(FASTAFILE_PREFIX))
+                else if (line.startsWith(MascotDatLoader.FASTAFILE_PREFIX))
                 {
-                    fastaFileValue = line.substring(FASTAFILE_PREFIX.length());
+                    fastaFileValue = line.substring(MascotDatLoader.FASTAFILE_PREFIX.length());
                 }
             }
 
             if (dbValue != null && fastaFileValue != null)
                 break;
         }
+        datReader.close();
 
-        Container pipeRootContainer = getPipeRoot().getContainer();
-
-        // Try looking for the "DB" value under the FASTA root
-        if (dbValue != null)
-        {
-            File file = new File(MS2PipelineManager.getSequenceDatabaseRoot(pipeRootContainer).getPath(), dbValue);
-            if (file.isFile())
-            {
-                return file;
-            }
-        }
-
-        if (fastaFileValue != null)
-        {
-            // Try using the full path and see if it resolves
-            File file = new File(fastaFileValue);
-            if (file.isFile())
-            {
-                return file;
-            }
-
-            // Finally, try looking for the file name in our FASTA directory
-            String[] fileNameParts = fastaFileValue.split("[\\\\/]");
-            String fileName = fileNameParts[fileNameParts.length - 1];
-            file = new File(MS2PipelineManager.getSequenceDatabaseRoot(pipeRootContainer).getPath(), fileName);
-
-            if (file.isFile())
-            {
-                return file;
-            }
-        }
-
-        throw new FileNotFoundException("Could not find FASTA file. " + (dbValue == null ? "" : (DB_PREFIX + dbValue)) + " " + (fastaFileValue == null ? "" : (FASTAFILE_PREFIX + fastaFileValue)));
+        return PeptideImporter.getDatabaseFile(getPipeRoot().getContainer(), dbValue, fastaFileValue);
     }
 
     public void run()
     {
-        if (!setStatus("TRANSLATING"))
+        if ((_useMascot2XML && !setStatus("TRANSLATING")) || (!_useMascot2XML && !setStatus("INITIALIZING")))
         {
             return;
         }
@@ -150,8 +122,6 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         boolean completeStatus = false;
         try
         {
-            File fileSequenceDatabase = getSequenceDatabase();
-
             if (!dirWork.exists() && !dirWork.mkdir())
             {
                 getLogger().error("Failed create working folder "+dirWork.getAbsolutePath()+".");
@@ -168,65 +138,70 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                 return;
             }
 
-            // let's convert Mascot .dat to .pep.xml
-            // via Mascot2XML.exe <input.dat> -D<database> -xml
-
-            String mascot2XMLPath = PipelineJobService.get().getExecutablePath("Mascot2XML", null, "tpp", null, getLogger());
-
-            ProcessBuilder builder = new ProcessBuilder(mascot2XMLPath
-                    , workFile.getName()
-                    , "-D" + fileSequenceDatabase.getAbsolutePath()
-                    , "-xml"
-                    //,"-notgz" - we might not have the mzXML file with us
-                    , "-desc"
-            );
-            builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(mascot2XMLPath).getParent()));
-
-            runSubProcess(builder,
-                    workFile.getParentFile());
-
-            PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
-            fileOutputXML = new File(dirWork.getAbsolutePath(), pepxft.getName(dirWork.getAbsolutePath(), _baseName));
-            // three possible output names: basename.xml, basename.pep.xml, basename.pep.xml.gz
-            String pepXMLFileName = _baseName + "." + pepxft.getDefaultRole() + (fileOutputXML.getName().endsWith(".gz")?".gz":"");
-            filePepXML = new File(_dirAnalysis, pepXMLFileName);
-
-            // we let any error fall thru' to super.run() so that
-            // MS2Run's status get updated correctly
-            if (!fileOutputTGZ.exists())
+            if (_useMascot2XML)
             {
-                getLogger().error("Failed running Mascot2XML - expected output file " + fileOutputTGZ + " was not created");
-                return;
-            }
-            if (!fileOutputXML.exists())
-            {
-                getLogger().error("Failed running Mascot2XML - expected output file " + fileOutputXML + " was not created");
-                return;
+                File fileSequenceDatabase = getSequenceDatabase();
+
+                // let's convert Mascot .dat to .pep.xml
+                // via Mascot2XML.exe <input.dat> -D<database> -xml
+
+                String mascot2XMLPath = PipelineJobService.get().getExecutablePath("Mascot2XML", null, "tpp", null, getLogger());
+
+                ProcessBuilder builder = new ProcessBuilder(mascot2XMLPath
+                        , workFile.getName()
+                        , "-D" + fileSequenceDatabase.getAbsolutePath()
+                        , "-xml"
+                        //,"-notgz" - we might not have the mzXML file with us
+                        , "-desc"
+                );
+                builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(mascot2XMLPath).getParent()));
+
+                runSubProcess(builder,
+                        workFile.getParentFile());
+
+                PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
+                fileOutputXML = new File(dirWork.getAbsolutePath(), pepxft.getName(dirWork.getAbsolutePath(), _baseName));
+                // three possible output names: basename.xml, basename.pep.xml, basename.pep.xml.gz
+                String pepXMLFileName = _baseName + "." + pepxft.getDefaultRole() + (fileOutputXML.getName().endsWith(".gz") ? ".gz" : "");
+                filePepXML = new File(_dirAnalysis, pepXMLFileName);
+
+                // we let any error fall thru' to super.run() so that
+                // MS2Run's status get updated correctly
+                if (!fileOutputTGZ.exists())
+                {
+                    getLogger().error("Failed running Mascot2XML - expected output file " + fileOutputTGZ + " was not created");
+                    return;
+                }
+                if (!fileOutputXML.exists())
+                {
+                    getLogger().error("Failed running Mascot2XML - expected output file " + fileOutputXML + " was not created");
+                    return;
+                }
+
+                // let's rename the file to the appropriate extension
+                if (!fileOutputTGZ.renameTo(filePepXMLTGZ))
+                {
+                    getLogger().error("Failed moving " + fileOutputTGZ.getName() + " to " + filePepXMLTGZ.getAbsolutePath());
+                    return;
+                }
+                if (!fileOutputXML.renameTo(filePepXML))
+                {
+                    getLogger().error("Failed moving " + fileOutputXML.getName() + " to " + filePepXML.getAbsolutePath());
+                    return;
+                }
             }
 
-            // let's rename the file to the appropriate extension
-            if (!fileOutputTGZ.renameTo (filePepXMLTGZ))
-            {
-                getLogger().error("Failed moving "+fileOutputTGZ.getName()+" to "+filePepXMLTGZ.getAbsolutePath());
-                return;
-            }
-            if (!fileOutputXML.renameTo (filePepXML))
-            {
-                getLogger().error("Failed moving "+fileOutputXML.getName()+" to "+filePepXML.getAbsolutePath());
-                return;
-            }
-
-            // let's import the .pep.xml file
-            super.run ();
+            // let's import the .pep.xml or .dat file
+            super.run();
             if (getErrors() == 0)
             {
 
-                if (!filePepXML.delete())
+                if (_useMascot2XML && filePepXML != null && !filePepXML.delete())
                 {
                     getLogger().error("Failed to delete " + filePepXML.getAbsolutePath());
                     return;
                 }
-                else if (!filePepXMLTGZ.delete())
+                else if (_useMascot2XML && !filePepXMLTGZ.delete())
                 {
                     getLogger().error("Failed to delete " + filePepXMLTGZ.getAbsolutePath());
                     return;

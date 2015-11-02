@@ -229,7 +229,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         clickAndWait(Locator.linkWithText(mascotDatLabel));
         String overviewText = getText(PortalHelper.Locators.webPart.withDescendant(PortalHelper.Locators.webPartTitle("Run Overview")));
         assertTextPresent(new TextSearcher(() -> overviewText),
-                "trypsin",
+                "Trypsin", // N.B. when importing via XML, this becomes lower case ("trypsin")
                 "MASCOT",
                 "CAexample_mini.dat",
                 "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test3",

@@ -296,33 +296,41 @@ public abstract class MS2Importer
         return (Integer)returnMap.get("Run");
     }
 
+    protected boolean isMzXmlFile(File file)
+    {
+        String name = file.getName();
+        return name.endsWith(".mzxml") || name.endsWith(".mzxml.gz");
+    }
 
-    protected int createFraction(User user, Container c, int runId, String path, File mzXmlFile) throws IOException
+
+    protected int createFraction(User user, Container c, int runId, String path, File file) throws IOException
     {
         MS2Fraction fraction = new MS2Fraction();
         fraction.setRun(runId);
 
         // Old Comet runs won't have an mzXmlFile
-        if (null != mzXmlFile)
+        if (null != file && isMzXmlFile(file))
         {
-            _log.info("Starting to parse " + mzXmlFile + " to get scan counts");
-            int totalScans = loadScanCounts(mzXmlFile, fraction);
+            _log.info("Starting to parse " + file + " to get scan counts");
+            int totalScans = loadScanCounts(file, fraction);
             _log.info("Finished parsing to get scan counts. Total: " + totalScans + ", MS1: " + fraction.getMS1ScanCount() + ", MS2: " + fraction.getMS2ScanCount() + ", MS3: " + fraction.getMS3ScanCount() + ", MS4:" + fraction.getMS4ScanCount());
 
-            fraction.setMzXmlURL(FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
+            fraction.setMzXmlURL(FileUtil.getAbsoluteCaseSensitiveFile(file).toURI().toString());
+
             massSpecDataFileType msdft = new massSpecDataFileType();
-            String pepXMLFileName  = msdft.getBaseName(mzXmlFile); // strip off .mzxml or .mzxml.gz
+            String peptideFileName  = msdft.getBaseName(file); // strip off .mzxml or .mzxml.gz
             PepXMLFileType ft = new PepXMLFileType();
-            pepXMLFileName = ft.getName(path, pepXMLFileName); // look for basename.pep.xml or basename.pep.xml.gz
-            File pepXMLFile = new File(pepXMLFileName);
+            peptideFileName = ft.getName(path, peptideFileName); // look for basename.pep.xml or basename.pep.xml.gz
+            File pepXMLFile = new File(peptideFileName);
 
             ExpData pepXMLData = ExperimentService.get().getExpDataByURL(pepXMLFile, c);
             if (pepXMLData != null)
             {
                 fraction.setPepXmlDataLSID(pepXMLData.getLSID());
             }
-            fraction.setFileName(mzXmlFile.getName());
         }
+        fraction.setFileName(file.getName());
+
 
         fraction = Table.insert(user, MS2Manager.getTableInfoFractions(), fraction);
         return fraction.getFraction();
@@ -409,6 +417,41 @@ public abstract class MS2Importer
         _updateSeqIdSql = sql.toString();
     }
 
+
+    private static String _updateSwissProtSeqIdSql;
+
+    static
+    {
+        StringBuilder sql = new StringBuilder();
+        /*
+        UPDATE ms2.PeptidesData SET SeqId = (SELECT SeqId FROM
+            (SELECT SeqId, Count(*) AS C FROM
+                prot.identifiers i INNER JOIN prot.identtypes it
+                ON it.identtypeid = i.identtypeid AND it.Name = 'SwissProt'
+                WHERE i.Identifier = Protein AND SeqId IN
+                    (SELECT SeqId FROM prot.FastaSequences WHERE FastaId = ?)
+                GROUP BY SeqId) AS S
+            WHERE C = 1)
+        WHERE SeqId IS NULL AND Fraction = ?;
+        */
+
+        sql.append("UPDATE ");
+        sql.append(MS2Manager.getTableInfoPeptidesData());
+        sql.append(" SET SeqId = (SELECT SeqId FROM ");
+        sql.append(" (SELECT SeqId, Count(*) AS C FROM ");
+        sql.append(ProteinManager.getTableInfoIdentifiers()).append(" I ");
+        sql.append(" INNER JOIN ");
+        sql.append(ProteinManager.getTableInfoIdentTypes()).append(" IT ");
+        sql.append(" ON IT.IdentTypeId = I.IdentTypeId AND IT.Name = 'SwissProt'");
+        sql.append(" WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ");
+        sql.append(ProteinManager.getTableInfoFastaSequences());
+        sql.append(" WHERE FastaId = ?) GROUP BY SeqId) AS S");
+        sql.append(" WHERE C = 1)");
+        sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
+
+        _updateSwissProtSeqIdSql = sql.toString();
+    }
+
     private static SQLFragment _updateSequencePositionSql;
 
     static
@@ -459,6 +502,9 @@ public abstract class MS2Importer
         {
             int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), run.getFastaId());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match");
+
+            rowCount = executor.execute(_updateSwissProtSeqIdSql, run.getFastaId(), fraction.getFraction());
+            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database");
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);

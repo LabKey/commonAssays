@@ -5235,7 +5235,8 @@ public class MS2Controller extends SpringActionController
                     int run;
                     if (MascotSearchProtocolFactory.get().getClass().equals(protocolFactory.getClass()))
                     {
-                        run = MS2Manager.addMascotRunToQueue(info, f, form.getDescription(), pipeRoot).getRunId();
+                        // TODO: should the useXml parameter be set in the form?
+                        run = MS2Manager.addMascotRunToQueue(info, f, form.getDescription(), pipeRoot, true).getRunId();
                     }
                     else
                     {

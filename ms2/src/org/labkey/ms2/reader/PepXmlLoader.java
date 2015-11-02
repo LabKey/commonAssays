@@ -17,20 +17,22 @@
 package org.labkey.ms2.reader;
 
 import org.apache.log4j.Logger;
-import org.labkey.ms2.protein.fasta.Protein;
-import org.labkey.ms2.MS2Modification;
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.ms2.MS2Modification;
+import org.labkey.ms2.protein.fasta.Protein;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class PepXmlLoader extends MS2Loader
+public class PepXmlLoader extends MS2XmlLoader
 {
     private PeptideProphetSummary _ppSummary;
 
@@ -41,7 +43,6 @@ public class PepXmlLoader extends MS2Loader
         init(f, log);
         readAnalysisSummaries();
     }
-
 
     // Read xpress, peptide prophet, etc. analysis summaries at the top of the file
     // Starts at the beginning and ends on the first msms_run_summary tag
@@ -122,25 +123,12 @@ public class PepXmlLoader extends MS2Loader
     }
 
 
-    public static class PepXmlFraction
+    public static class PepXmlFraction extends PeptideFraction
     {
         private SimpleXMLStreamReader _parser;
 
-        private String _massSpecType = null;
-        private String _searchEngine = null;
-        private String _searchEngineVersion = null;
-        private String _searchEnzyme = null;
-
-        //dhmay adding 2008/01/30
         private int _searchConstraintMaxInternalCleavages;
         private int _searchConstraintMinTermini;
-
-        private String _databaseLocalPath = null;
-        private String _dataBasename, _dataSuffix;
-        private String _spectrumPath = null;
-        private Float _importSpectraMinProbability = null;
-        private boolean _loadSpectra = false;
-        private MS2ModificationList _modifications = new MS2ModificationList();
 
 
         public static PepXmlFraction getNextFraction(SimpleXMLStreamReader parser) throws XMLStreamException
@@ -266,7 +254,6 @@ public class PepXmlLoader extends MS2Loader
                 mod.setSymbol(_parser.getAttributeValue(null, "symbol"));
             else
                 mod.setSymbol("?");
-//System.err.println("new modification: " + mod);
             _modifications.add(mod);
         }
 
@@ -287,36 +274,6 @@ public class PepXmlLoader extends MS2Loader
                 _searchConstraintMinTermini = 0;
         }
 
-
-        public String getMassSpecType()
-        {
-            return _massSpecType;
-        }
-
-
-        public List<MS2Modification> getModifications()
-        {
-            return _modifications;
-        }
-
-
-        public String getSearchEngine()
-        {
-            return _searchEngine;
-        }
-
-        public String getSearchEngineVersion()
-        {
-            return _searchEngineVersion;
-        }
-
-
-        public String getSearchEnzyme()
-        {
-            return _searchEnzyme;
-        }
-
-
         public int getSearchConstraintMaxInternalCleavages()
         {
             return _searchConstraintMaxInternalCleavages;
@@ -327,53 +284,10 @@ public class PepXmlLoader extends MS2Loader
             return _searchConstraintMinTermini;
         }
 
-        public String getDataBasename()
-        {
-            return _dataBasename;
-        }
-
-
-        public String getDataSuffix()
-        {
-            return _dataSuffix;
-        }
-
-
-        public String getDatabaseLocalPath()
-        {
-            return _databaseLocalPath;
-        }
-
-
-        public String getSpectrumPath()
-        {
-            return _spectrumPath;
-        }
-
-        //The pepXML for sequest does not contain input.xml params.
-        public void setSpectrumPath(String spectrumPath)
-        {
-            this._spectrumPath = spectrumPath;
-        }
-
-        public boolean shouldLoadSpectra()
-        {
-            return _loadSpectra;
-        }
-
-        public Float getImportSpectraMinProbability()
-        {
-            return _importSpectraMinProbability;
-        }
 
         public PeptideIterator getPeptideIterator()
         {
             return new PeptideIterator(_parser, _modifications, this);
-        }
-
-        public boolean isSequest()
-        {
-            return "sequest".equalsIgnoreCase(getSearchEngine());
         }
     }
 
@@ -482,30 +396,15 @@ public class PepXmlLoader extends MS2Loader
     }
 
 
-    public static class PepXmlPeptide
+    public static class PepXmlPeptide extends MS2Loader.Peptide
     {
-        //keeps track of all unknown modifications we find, for later reporting
-        protected boolean[] _unknownModArray;
-
         private SimpleXMLStreamReader _parser;
-        private int _scan, _endScan, _charge, _matchedIons, _totalIons, _proteinHits;
-        private Double _retentionTime = null;
-        private float _ionPercent, _deltaMass;
-        private double _calculatedNeutralMass;
-        private String _peptide, _prevAA, _trimmedPeptide, _nextAA, _protein, _dtaFileName;
-        //dhmay adding _alternativeProteins 04/23/08
-        private List<String> _alternativeProteins;
-        private Integer hitRank = null;
-        private HashMap<String, String> _scores;
-        private MS2ModificationList _modifications;
+        private String  _dtaFileName;
         private final PepXmlFraction _fraction;
-        private static final Pattern SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d{1})\\.??[a-zA-z0-9_]*?$");
 
         //This variable stays null unless there are actually modificationsIf there are,
         //then all elements are null except the actual modifications.  Index+1 = position of mod
-        private ModifiedAminoAcid[] _modifiedAminoAcids = null;
-
-        private HashMap<String, PepXmlAnalysisResultHandler.PepXmlAnalysisResult> _analysisResultMap = null;
+        private ModifiedAminoAcid[] _modifiedAminoAcids = null; // TODO Delete this? This doesn't seem to be used ???
 
         private static Logger _log = Logger.getLogger(PepXmlPeptide.class);
 
@@ -558,8 +457,7 @@ public class PepXmlLoader extends MS2Loader
         {
             endOfSpectrumQuery = false;
             endOfRun = false;
-            hitRank = null;
-            _scores = new HashMap<>(10);
+            _hitRank = null;
             _alternativeProteins = new ArrayList<>();
 
             while (!endOfSpectrumQuery && !endOfRun)
@@ -584,7 +482,7 @@ public class PepXmlLoader extends MS2Loader
                 _parser.next();
             }
 
-            fixUp();
+            setDerivedFieldValues();
             return true;
         }
 
@@ -610,25 +508,25 @@ public class PepXmlLoader extends MS2Loader
                     // Mascot exported pepXML can have start_scan="0" and end_scan="0"
                     if (0 == _scan)
                     {
-                        Matcher m = SCAN_REGEX.matcher (_dtaFileName);
+                        Matcher m = MascotDatLoader.QUERY_TITLE_SCAN_REGEX.matcher(_dtaFileName);
                         if (m.find())
                         {
                             // endScan=m.group(2), charge=m.group(3)
-                            _scan = Integer.parseInt(m.group(1));
-                            _endScan = Integer.parseInt(m.group(2));
+                            setScan(Integer.parseInt(m.group(MascotDatLoader.START_SCAN_GROUP_NUM)));
+                            setEndScan(Integer.parseInt(m.group(MascotDatLoader.END_SCAN_GROUP_NUM)));
                         }
                     }
 
                     break;
                 case(SEARCH_RESULT):
                     // Start over again within each spectrum_query block
-                    hitRank = null;
+                    _hitRank = null;
                     break;
                 case(SEARCH_HIT):
                     Integer h = Integer.valueOf(_parser.getAttributeValue(null, "hit_rank"));
-                    if (hitRank == null || h.compareTo(hitRank) <= 0)
+                    if (_hitRank == null || h.compareTo(_hitRank) <= 0)
                     {
-                        hitRank = h;
+                        _hitRank = h;
                         _prevAA = _parser.getAttributeValue(null, "peptide_prev_aa");
                         _trimmedPeptide = _parser.getAttributeValue(null, "peptide");
                         _nextAA = _parser.getAttributeValue(null, "peptide_next_aa");
@@ -728,7 +626,7 @@ public class PepXmlLoader extends MS2Loader
 //System.err.println("No mod for " + String.valueOf(aa) + ", " + modifiedMass);
                                 //record the unknown modification, but don't print out anything yet
                                 _unknownModArray[position] = true;
-                                _log.debug("Unknown modification at scan " + _scan + ": " + aa +
+                                _log.debug("Unknown modification at scan " + getScan() + ": " + aa +
                                            " " + modifiedMass);
                             }
                             else if (mod.getVariable())
@@ -760,7 +658,7 @@ public class PepXmlLoader extends MS2Loader
                 case(SEARCH_SCORE):
                     String name = _parser.getAttributeValue(null, "name");
                     String value = _parser.getAttributeValue(null, "value");
-                    _scores.put(name, value);
+                    setScore(name, value);
                     break;
                 case(ANALYSIS_RESULT):
                     PepXmlAnalysisResultHandler.setAnalysisResult(_parser, this);
@@ -786,147 +684,6 @@ public class PepXmlLoader extends MS2Loader
                     endOfRun = true;
                     break;
             }
-        }
-
-        /**
-         * Called after peptide loading is complete
-         */
-        private void fixUp()
-        {
-            if (null == _peptide)
-                _peptide = _trimmedPeptide;
-
-            _peptide = (_prevAA != null ? _prevAA + "." : "") +
-                    _peptide + (_nextAA != null ? "." + _nextAA : "");
-
-            if (0 == _matchedIons || 0 == _totalIons)
-                _ionPercent = 0.0f;
-            else
-                _ionPercent = (float)(Rounder.round((float) _matchedIons / _totalIons, 2));
-        }
-
-        public int getCharge()
-        {
-            return _charge;
-        }
-
-        public Double getRetentionTime()
-        {
-            return _retentionTime;
-        }
-
-        public float getDeltaMass()
-        {
-            return _deltaMass;
-        }
-
-        public String getDtaFileName()
-        {
-            return _dtaFileName;
-        }
-
-        public float getIonPercent()
-        {
-            return _ionPercent;
-        }
-
-        public double getCalculatedNeutralMass()
-        {
-            return _calculatedNeutralMass;
-        }
-
-        public String getNextAA()
-        {
-            return _nextAA;
-        }
-
-        public String getPeptide()
-        {
-            return _peptide;
-        }
-
-        public String getPrevAA()
-        {
-            return _prevAA;
-        }
-
-        public String getProtein()
-        {
-            return _protein;
-        }
-
-        public int getProteinHits()
-        {
-            return _proteinHits;
-        }
-
-        public int getScan()
-        {
-            return _scan;
-        }
-
-        public int getEndScan()
-        {
-            return _endScan;
-        }
-
-        public Map<String, String> getScores()
-        {
-            return _scores;
-        }
-
-        public String getTrimmedPeptide()
-        {
-            return _trimmedPeptide;
-        }
-
-
-        protected void addAnalysisResult(String analysisType,
-                                         PepXmlAnalysisResultHandler.PepXmlAnalysisResult analysisResult)
-        {
-            if (_analysisResultMap == null)
-               _analysisResultMap = new HashMap<>();
-            _analysisResultMap.put(analysisType, analysisResult);
-        }
-
-        public PepXmlAnalysisResultHandler.PepXmlAnalysisResult getAnalysisResult(String analysisType)
-        {
-            if (_analysisResultMap == null)
-                return null;
-            return _analysisResultMap.get(analysisType);
-        }
-
-        public PeptideProphetHandler.PeptideProphetResult getPeptideProphetResult()
-        {
-            return (PeptideProphetHandler.PeptideProphetResult)
-                    getAnalysisResult(PeptideProphetHandler.analysisType);
-        }
-
-
-        public XPressHandler.XPressResult getXPressResult()
-        {
-            return (XPressHandler.XPressResult)
-                    getAnalysisResult(XPressHandler.analysisType);
-        }
-
-        public Q3Handler.Q3Result getQ3Result()
-        {
-            return (Q3Handler.Q3Result)
-                    getAnalysisResult(Q3Handler.ANALYSIS_TYPE);
-        }
-
-        public ModifiedAminoAcid[] getModifiedAminoAcids()
-        {
-            return _modifiedAminoAcids;
-        }
-
-        /**
-         * Never null.  Empty if nothing's there
-         * @return
-         */
-        public List<String> getAlternativeProteins()
-        {
-            return _alternativeProteins;
         }
     }
 

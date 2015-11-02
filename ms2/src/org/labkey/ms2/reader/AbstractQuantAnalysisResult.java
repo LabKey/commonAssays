@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.ms2.PepXmlImporter;
+import org.labkey.ms2.PeptideImporter;
 
 import java.sql.SQLException;
 
@@ -48,5 +48,5 @@ public abstract class AbstractQuantAnalysisResult extends PepXmlAnalysisResultHa
         this.peptideId = peptideId;
     }
 
-    public abstract void insert(PepXmlImporter pepXmlImporter) throws SQLException;
+    public abstract void insert(PeptideImporter pepXmlImporter) throws SQLException;
 }

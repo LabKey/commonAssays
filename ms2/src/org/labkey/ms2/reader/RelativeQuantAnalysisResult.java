@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.ms2.PepXmlImporter;
+import org.labkey.ms2.PeptideImporter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -137,7 +137,7 @@ public abstract class RelativeQuantAnalysisResult extends AbstractQuantAnalysisR
     }
 
     @Override
-    public void insert(PepXmlImporter pepXmlImporter) throws SQLException
+    public void insert(PeptideImporter pepXmlImporter) throws SQLException
     {
         int index = 1;
         pepXmlImporter._quantStmt.setLong(index++, getPeptideId());
