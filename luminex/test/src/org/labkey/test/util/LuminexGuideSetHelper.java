@@ -187,18 +187,15 @@ public class LuminexGuideSetHelper
         for (String network : networks)
             _test.click(ExtHelper.locateGridRowCheckbox(network));
 
-        _test.clickButton("Apply Guide Set", 0);
-        _test.sleep(1000);//we need a little time even after all the elements have appeared, so waits won't work
+        _test.doAndWaitForPageSignal(() -> _test.clickButton("Apply Guide Set", 0), "guideSetSelectionChange");
 
         if(!useCurrent)
-            _test.click(ExtHelper.locateGridRowCheckbox(comment));
+            _test.doAndWaitForPageSignal(() -> _test.click(ExtHelper.locateGridRowCheckbox(comment)), "guideSetSelectionChange");
 
-        _test.sleep(1000);// wait for apply thresholds button to be enabled
         _test.clickButton("Apply Thresholds", 0);
         _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
         // verify that the plot is reloaded
         waitForLeveyJenningsTrendPlot();
-
     }
 
     public void waitForLeveyJenningsTrendPlot()

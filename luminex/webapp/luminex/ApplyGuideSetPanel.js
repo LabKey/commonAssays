@@ -196,7 +196,12 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var guideSetsSelModel = new Ext.grid.CheckboxSelectionModel({
             id: 'guideSetsSelModel',
             header: '',
-            singleSelect: true
+            singleSelect: true,
+            listeners: {
+                'selectionchange': function(scope) {
+                    LABKEY.Utils.signalWebDriverTest('guideSetSelectionChange');
+                }
+            }
         });
 
         // column model for the list of guide sets that can be "applied" to the runs
