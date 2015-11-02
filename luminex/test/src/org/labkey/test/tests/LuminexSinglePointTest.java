@@ -56,6 +56,12 @@ public class LuminexSinglePointTest extends LuminexTest
         assayDesigner.saveAndClose();
     }
 
+    @Override
+    protected boolean renameTargetStudy()
+    {
+        return true;
+    }
+
     @Test
     public void testSinglePoint()
     {
@@ -146,7 +152,8 @@ public class LuminexSinglePointTest extends LuminexTest
     {
         goToTestAssayHome();
         _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), "view single point control qc report");
-        waitForText("Average Fi Bkgd");
+        DataRegionTable table = new DataRegionTable("AnalyteSinglePointControl", this);
+        table.setFilter("Analyte", "Equals", "ENV1 (31)");
         clickAndWait(Locator.linkContainingText("graph"));
     }
 

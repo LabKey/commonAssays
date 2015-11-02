@@ -114,6 +114,11 @@ public abstract class LuminexTest extends BaseWebDriverTest
         return true;
     }
 
+    protected boolean renameTargetStudy()
+    {
+        return false;
+    }
+
     @BeforeClass
     public static void initTest()
     {
@@ -148,6 +153,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         {
             // import the assay design from the XAR file
             _assayHelper.uploadXarFileAsAssayDesign(TEST_ASSAY_XAR_FILE, 1);
+
             // since we want to test special characters in the assay name, copy the assay design to rename
             goToManageAssays();
             clickAndWait(Locator.linkWithText(TEST_ASSAY_XAR_NAME));
@@ -155,6 +161,11 @@ public abstract class LuminexTest extends BaseWebDriverTest
             AssayDomainEditor assayDesigner = new AssayDomainEditor(this);
             assayDesigner.setName(TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
+
+            // rename TargetStudy field to avoid the expensive assay-to-study SpecimenId join
+            if (renameTargetStudy())
+                _listHelper.setColumnName(this.getPropertyXPath("Batch Fields"), 1, "TargetStudyTemp");
+
             assayDesigner.saveAndClose();
         }
         else
@@ -240,14 +251,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
             setFormat("Data Fields", 16, "0.0");
 
             assayDesigner.saveAndClose();
-
-            // remove the SpecimenID field from the results grid to speed up the test
-//            clickAndWait(Locator.linkWithText("Assay List"));
-//            clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
-//            clickAndWait(Locator.linkWithText("view results"));
-//            _customizeViewsHelper.openCustomizeViewPanel();
-//            _customizeViewsHelper.removeCustomizeViewColumn("SpecimenID");
-//            _customizeViewsHelper.saveDefaultView();
         }
     }
 
