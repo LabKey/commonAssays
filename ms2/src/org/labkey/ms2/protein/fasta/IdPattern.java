@@ -51,7 +51,7 @@ public class IdPattern
         addUntypedIdPattern("SwissProtAccn", "[A-Z][0-9][A-Z,0-9][A-Z,0-9][A-Z,0-9][0-9]", null, "SwissProt");
         addUntypedIdPattern("UniRef100", "UniRef100_([A-Z][0-9][A-Z,0-9][A-Z,0-9][A-Z,0-9][0-9])", "$1", null);
 
-        //TypedID patterns may still need tranformation
+        //TypedID patterns may still need transformation
         addTypedIdPattern("SI", "([A-Z,0-9]+)_.*", "$1");
 
         addWholeHeaderIdPattern("ENSEMBL", "^([YRQ][-A-Z,0-9]{4,9})[ ][A-Z]{1}[A-Z,0-9,-]{3,9}[ ]SGDID:[S][0-9]{9}.*","$1");

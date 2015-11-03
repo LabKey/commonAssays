@@ -452,6 +452,32 @@ public abstract class MS2Importer
         _updateSwissProtSeqIdSql = sql.toString();
     }
 
+    private static String _updateSeqIdInexactMatchSql;
+
+    static
+    {
+        StringBuilder sql = new StringBuilder();
+
+        /*
+            UPDATE ms2.peptidesdata p SET SeqId = (SELECT SeqId FROM
+                (SELECT SeqId, Count(*) AS C FROM
+                    prot.fastasequences fs
+                    WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%') GROUP BY SeqId) AS S
+                WHERE C = 1)
+            WHERE p.SeqId IS NULL AND FRACTION = ?
+         */
+
+        sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData()).append(" p ");
+        sql.append("SET SeqId = (SELECT SeqId FROM ");
+        sql.append(" (SELECT SeqId, Count(*) AS C FROM ");
+        sql.append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
+        sql.append(" WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%') GROUP BY SeqId) AS S");
+        sql.append(" WHERE C = 1) ");
+        sql.append("WHERE p.SeqId IS NULL AND FRACTION = ?");
+
+        _updateSeqIdInexactMatchSql = sql.toString();
+    }
+
     private static SQLFragment _updateSequencePositionSql;
 
     static
@@ -505,6 +531,9 @@ public abstract class MS2Importer
 
             rowCount = executor.execute(_updateSwissProtSeqIdSql, run.getFastaId(), fraction.getFraction());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database");
+
+            rowCount = executor.execute(_updateSeqIdInexactMatchSql, run.getFastaId(), fraction.getFraction());
+            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on inexact protein name match");
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);
