@@ -141,6 +141,7 @@ public class MascotDatImporter extends PeptideImporter
 
     private void writePeptides() throws SQLException
     {
+        _log.info("Writing peptides data");
         for (MS2Loader.Peptide peptide : _peptides.values())
         {
             // There can be some data for peptides that were not found(?).  We skip over those.

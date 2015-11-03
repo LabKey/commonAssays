@@ -779,6 +779,21 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             parseAndCompare("P38903|2A5D_YEAST", idMapE);
 
             idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"41_MOUSE"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"P48193"));
+            parseAndCompare("sp|P48193|41_MOUSE", idMapE);   // check this
+
+            idMapE = null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "IPIL1_MOUSE"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"A2ASA8"));
+            parseAndCompare("sp|A2ASA8|IPIL1_MOUSE", idMapE);
+
+            idMapE = null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "P_MOUSE"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q62052"));
+            parseAndCompare("sp|Q62052|P_MOUSE", idMapE);
+
+            idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"143G_BOVIN"));
             parseAndCompare("143G_BOVIN", idMapE);
 
@@ -1041,7 +1056,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         protected void parseAndCompare(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)
         {
             Map<String, Set<String>> idMapReturned = Protein.identParse(strLookup, wholeHeader);
-            assertTrue(compareIdMaps(idMapExpected, idMapReturned));
+            assertTrue("map not as expected.  Actual: " + idMapReturned + " Expected: " + idMapExpected, compareIdMaps(idMapExpected, idMapReturned));
         }
 
         protected void parseAndCompareReplaceAlias(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)

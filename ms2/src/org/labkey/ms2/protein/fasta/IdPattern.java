@@ -45,9 +45,9 @@ public class IdPattern
     public static final List<String> WHOLE_HEADER_ID_PATTERN_LIST = new ArrayList<>();
     static
     {
-        addUntypedIdPattern("IPI", "IPI..*");
+        addUntypedIdPattern("IPI", "IPI[^_][^_]*");
         addUntypedIdPattern("COG", "COG[0-9][0-9][0-9][0-9][0-9]");
-        addUntypedIdPattern("SwissProt", "[A-Z,0-9]{3,6}_[A-Z,0-9]{3,5}");
+        addUntypedIdPattern("SwissProt", "[A-Z,0-9]{1,6}_[A-Z,0-9]{3,5}");
         addUntypedIdPattern("SwissProtAccn", "[A-Z][0-9][A-Z,0-9][A-Z,0-9][A-Z,0-9][0-9]", null, "SwissProt");
         addUntypedIdPattern("UniRef100", "UniRef100_([A-Z][0-9][A-Z,0-9][A-Z,0-9][A-Z,0-9][0-9])", "$1", null);
 
