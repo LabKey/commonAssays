@@ -111,7 +111,6 @@ outer:
                     }
                     catch (InterruptedException e)
                     {
-                        e.printStackTrace();
                     }
                 }
                 exitIdle();

@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray.matrix;
 
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -69,7 +70,8 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            // NEED COMMENT - why doesn't this rethrow?
+            Logger.getLogger(ExpressionMatrixProtocolSchema.class).warn(e);
         }
         return distinctSampleIds;
     }

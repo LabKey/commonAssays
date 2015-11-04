@@ -59,7 +59,7 @@ public class FlowQuerySettings extends QuerySettings
                 }
                 catch (IllegalArgumentException ex)
                 {
-                    System.out.println(ex.getMessage());
+                    _showGraphs = ShowGraphs.None;
                 }
             }
         }
