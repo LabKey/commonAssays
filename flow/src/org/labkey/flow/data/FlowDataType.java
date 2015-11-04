@@ -30,7 +30,7 @@ import org.labkey.flow.persist.ObjectType;
 
 abstract public class FlowDataType extends AssayDataType
 {
-    // The prefix of the LSID namepsace prefix :)
+    // The prefix of the LSID namespace prefix :)
     public static final String FLOW_DATA_PREFIX = "Flow-";
 
     String _name;
