@@ -467,13 +467,13 @@ public abstract class MS2Importer
             WHERE p.SeqId IS NULL AND FRACTION = ?
          */
 
-        sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData()).append(" p ");
-        sql.append("SET SeqId = (SELECT SeqId FROM ");
+        sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
+        sql.append(" SET SeqId = (SELECT SeqId FROM ");
         sql.append(" (SELECT SeqId, Count(*) AS C FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
         sql.append(" WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%') GROUP BY SeqId) AS S");
         sql.append(" WHERE C = 1) ");
-        sql.append("WHERE p.SeqId IS NULL AND FRACTION = ?");
+        sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
         _updateSeqIdInexactMatchSql = sql.toString();
     }
