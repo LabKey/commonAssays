@@ -541,7 +541,7 @@ public abstract class MS2Loader
                 _ionPercent = (float) (Rounder.round((float) _matchedIons / _totalIons, 2));
             }
 
-            if (getScore("expect") == null)
+            if (getScore("expect") == null && getScore("identityscore") != null && getScore("ionscore") != null)
             {
                 // ASMS Workshop and User Meeting 2005
                 // as defined in http://www.matrixscience.com/pdf/2005WKSHP4.pdf
