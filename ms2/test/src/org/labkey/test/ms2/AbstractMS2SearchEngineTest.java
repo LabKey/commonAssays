@@ -172,7 +172,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Data: CAexample_mini.mzXML"));
         assertTextPresent(
                 "bov_sample/" + SAMPLE_BASE_NAME,
-                "Data File CAexample_mini.mzXML",
+                "Data CAexample_mini.mzXML",
                 "AutomatedTestAssay");
 
         clickAndWait(Locator.linkWithText(ANNOTATION_RUN_NAME));
