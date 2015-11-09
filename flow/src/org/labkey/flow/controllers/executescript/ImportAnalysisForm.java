@@ -32,10 +32,10 @@ public class ImportAnalysisForm
     public static final String NAME = "importAnalysis";
     
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
-    public static final String PARAMATER_SEPARATOR = "\ufe50";
+    public static final String PARAMETER_SEPARATOR = "\ufe50";
 
     // unicode fullwidth comma
-    //public static final String NORMALIZATION_PARAMATER_SEPARATOR = "\uff0c";
+    //public static final String NORMALIZATION_PARAMETER_SEPARATOR = "\uff0c";
 
     public enum SelectFCSFileOption
     {
@@ -166,7 +166,7 @@ public class ImportAnalysisForm
 
     public void setrEngineNormalizationReference(String rEngineNormalizationReference)
     {
-        this.rEngineNormalizationReference = StringUtils.join(split(rEngineNormalizationReference), PARAMATER_SEPARATOR);
+        this.rEngineNormalizationReference = StringUtils.join(split(rEngineNormalizationReference), PARAMETER_SEPARATOR);
     }
 
     public List<String> getrEngineNormalizationParameterList()
@@ -181,7 +181,7 @@ public class ImportAnalysisForm
 
     public void setrEngineNormalizationParameters(String rEngineNormalizationParameters)
     {
-        this.rEngineNormalizationParameters = StringUtils.join(split(rEngineNormalizationParameters), PARAMATER_SEPARATOR);
+        this.rEngineNormalizationParameters = StringUtils.join(split(rEngineNormalizationParameters), PARAMETER_SEPARATOR);
     }
 
     public List<String> getrEngineNormalizationSubsetList()
@@ -196,7 +196,7 @@ public class ImportAnalysisForm
 
     public void setrEngineNormalizationSubsets(String rEngineNormalizationParameters)
     {
-        this.rEngineNormalizationSubsets = StringUtils.join(split(rEngineNormalizationParameters), PARAMATER_SEPARATOR);
+        this.rEngineNormalizationSubsets = StringUtils.join(split(rEngineNormalizationParameters), PARAMETER_SEPARATOR);
     }
 
     public void setExistingKeywordRunId(int existingKeywordRunId)
@@ -271,7 +271,7 @@ public class ImportAnalysisForm
             return Collections.emptyList();
 
         List<String> ret = new ArrayList<>();
-        for (String s : list.split(PARAMATER_SEPARATOR))
+        for (String s : list.split(PARAMETER_SEPARATOR))
             ret.add(s.trim());
         return ret;
     }

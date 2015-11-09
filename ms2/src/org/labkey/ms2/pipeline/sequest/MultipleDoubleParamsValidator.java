@@ -106,7 +106,7 @@ public class MultipleDoubleParamsValidator extends AbstractMultipleValueParamsVa
         }
 
         @Test
-        public void testBadDelimeter()
+        public void testBadDelimiter()
         {
             String value = "400.0, 6000.0";
             _property.setValue(value);

@@ -67,7 +67,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
             {
                 row.put(entry.getKey().getName(), entry.getValue());
             }
-            // TODO - What delimeter is safest to use?
+            // TODO - What delimiter is safest to use?
             row.put("titrations", StringUtils.join(form.getTitrationsForAnalyte(analyteName), ","));
             analytes.add(row);
         }

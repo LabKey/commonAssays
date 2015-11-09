@@ -132,7 +132,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         {
                             // get the list of unique wells (by splitting the concatenated string)
                             TreeSet<String> uniqueWells = new TreeSet<>();
-                            uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMETER_REGEX)));
+                            uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMITER_REGEX)));
 
                             // put the unique wells back into a comma separated string
                             StringBuilder sb = new StringBuilder();

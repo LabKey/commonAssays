@@ -201,7 +201,7 @@
                 valueField: "myId",
                 displayField: "displayText",
                 allowBlank: false,
-                separator: "<%=text(ImportAnalysisForm.PARAMATER_SEPARATOR)%>",
+                separator: "<%=text(ImportAnalysisForm.PARAMETER_SEPARATOR)%>",
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
                     data: normalizationReference && jsonSubsetMap[normalizationReference] || []
@@ -243,7 +243,7 @@
                 valueField: "myId",
                 displayField: "displayText",
                 allowBlank: false,
-                separator: "<%=text(ImportAnalysisForm.PARAMATER_SEPARATOR)%>",
+                separator: "<%=text(ImportAnalysisForm.PARAMETER_SEPARATOR)%>",
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
                     data: <%=jsonParams%>
