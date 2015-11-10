@@ -1611,6 +1611,7 @@ viability/resources/schemas/dbscripts/postgresql/obsolete/viability-14.10-14.11.
 viability/resources/schemas/dbscripts/postgresql/obsolete/viability-14.11-14.12.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-14.10-14.20.sql -text
+viability/resources/schemas/dbscripts/postgresql/viability-15.30-15.31.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-14.10-14.11.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-14.11-14.12.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.30.sql -text
