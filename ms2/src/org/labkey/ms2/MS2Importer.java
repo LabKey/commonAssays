@@ -642,6 +642,7 @@ public abstract class MS2Importer
     protected enum Tasks implements CumulativeTimer.TimerTask
     {
         ImportFASTA("import FASTA file"),
+        ImportDecoys("import decoy peptide data"),
         ImportPeptides("import peptide search results"),
         ImportSpectra("import spectra"),
         UpdateSeqId("update SeqId column"),

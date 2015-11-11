@@ -344,6 +344,9 @@
           <ns:isReadOnly>false</ns:isReadOnly>
           <ns:isUserEditable>true</ns:isUserEditable>
         </ns:column>
+       <ns:column columnName="QueryNumber"/>
+       <ns:column columnName="HitRank"/>
+       <ns:column columnName="Decoy"/>
     </ns:columns>
     <ns:description>Contains a row for every peptide loaded in an MS2 run.</ns:description>
   </ns:table>
@@ -487,6 +490,8 @@
         <ns:columnTitle>NegativeHits</ns:columnTitle>
         <ns:formatString>#,##0</ns:formatString>
       </ns:column>
+      <ns:column columnName="MascotFile"/>
+      <ns:column columnName="DistillerRawFile"/>
     </ns:columns>
     <ns:tableTitle>MS2Runs</ns:tableTitle>
     <ns:versionColumnName>_ts</ns:versionColumnName>
@@ -602,6 +607,8 @@
       <ns:column columnName="PeptideCount"/>
       <ns:column columnName="SpectrumCount"/>
       <ns:column columnName="NegativeHitCount"/>
+      <ns:column columnName="MascotFile"/>
+      <ns:column columnName="DistillerRawFile"/>
     </ns:columns>
     <ns:tableTitle>MS2Runs</ns:tableTitle>
     <ns:pkColumnName>Run</ns:pkColumnName>

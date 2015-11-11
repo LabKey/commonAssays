@@ -811,7 +811,7 @@ public class ProteinManager
     public static Sort getPeptideBaseSort()
     {
         // Always sort peptide lists by Fraction, Scan, Charge
-        return new Sort("Fraction,Scan,Charge");
+        return new Sort("Fraction,Scan,HitRank,Charge");
     }
 
     public static SimpleFilter getPeptideFilter(ActionURL currentUrl, List<MS2Run> runs, int mask, User user)

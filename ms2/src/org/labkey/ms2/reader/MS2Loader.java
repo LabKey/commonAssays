@@ -70,6 +70,8 @@ public abstract class MS2Loader
         protected Float _importSpectraMinProbability = null;
         protected boolean _loadSpectra = false;
         protected MS2ModificationList _modifications = new MS2ModificationList();
+        protected String _mascotFile = null;
+        protected String _distillerRawFile = null;
 
         public String getMassSpecType()
         {
@@ -165,6 +167,26 @@ public abstract class MS2Loader
         {
             _modifications.add(modification);
         }
+
+        public String getMascotFile()
+        {
+            return _mascotFile;
+        }
+
+        public void setMascotFile(String mascotFile)
+        {
+            _mascotFile = mascotFile;
+        }
+
+        public String getDistillerRawFile()
+        {
+            return _distillerRawFile;
+        }
+
+        public void setDistillerRawFile(String distillerRawFile)
+        {
+            _distillerRawFile = distillerRawFile;
+        }
     }
 
     public static class Peptide
@@ -185,10 +207,12 @@ public abstract class MS2Loader
         protected Integer _matchedIons = 0;
         protected Integer _totalIons;
         protected String _protein;
-        protected Integer _hitRank = null;
+        protected Integer _hitRank = 1;
         protected Map<String, String> _scores = new HashMap<>(10);
         protected MS2ModificationList _modifications;
         protected List<String> _alternativeProteins = new ArrayList<>();
+        protected Integer _queryNumber = null;
+        protected Boolean _decoy = false;
 
         //keeps track of all unknown modifications we find, for later reporting
         protected boolean[] _unknownModArray;
@@ -198,8 +222,6 @@ public abstract class MS2Loader
         protected ModifiedAminoAcid[] _modifiedAminoAcids = null;
 
         protected HashMap<String, PepXmlAnalysisResultHandler.PepXmlAnalysisResult> _analysisResultMap = null;
-
-        private static Logger _log = Logger.getLogger(Peptide.class);
 
         public void setCalculatedNeutralMass(double calculatedNeutralMass)
         {
@@ -229,11 +251,6 @@ public abstract class MS2Loader
         public void setIonPercent(float ionPercent)
         {
             _ionPercent = ionPercent;
-        }
-
-        public static void set_log(Logger _log)
-        {
-            Peptide._log = _log;
         }
 
         public void setModifications(MS2ModificationList modifications)
@@ -459,55 +476,24 @@ public abstract class MS2Loader
                     getAnalysisResult(Q3Handler.ANALYSIS_TYPE);
         }
 
-        public void merge(Peptide otherPeptide)
+        public Integer getQueryNumber()
         {
-            if (otherPeptide.getFraction() != null)
-                setFraction(otherPeptide.getFraction());
-            if (otherPeptide.getScan() != null)
-                setScan(otherPeptide.getScan());
-            if (otherPeptide.getEndScan() != null)
-                setEndScan(otherPeptide.getEndScan());
-            if (otherPeptide.getCharge() != null)
-                setCharge(otherPeptide.getCharge());
-            if (otherPeptide.getMatchedIons() != null)
-                setMatchedIons(otherPeptide.getMatchedIons());
-            if (otherPeptide.getTotalIons() != null)
-                setTotalIons(otherPeptide.getTotalIons());
-            if (otherPeptide.getProteinHits() != null)
-                setProteinHits(otherPeptide.getProteinHits());
-            if (otherPeptide.getRetentionTime() != null)
-                setRetentionTime(otherPeptide.getRetentionTime());
-            if (otherPeptide.getIonPercent() != null)
-                setIonPercent(otherPeptide.getIonPercent());
-            if (otherPeptide.getDeltaMass() != null)
-                setDeltaMass(otherPeptide.getDeltaMass());
-            if (otherPeptide.getCalculatedNeutralMass() != null)
-                setCalculatedNeutralMass(otherPeptide.getCalculatedNeutralMass());
-            if (otherPeptide.getPeptide() != null)
-                setPeptide(otherPeptide.getPeptide());
-            if (otherPeptide.getPrevAA() != null)
-                setPrevAA(otherPeptide.getPrevAA());
-            if (otherPeptide.getTrimmedPeptide() != null)
-                setTrimmedPeptide(otherPeptide.getTrimmedPeptide());
-            if (otherPeptide.getNextAA() != null)
-                setNextAA(otherPeptide.getNextAA());
-            if (otherPeptide.getProtein() != null)
-                setProtein(otherPeptide.getProtein());
-            if (otherPeptide.getHitRank() != null)
-                setHitRank(otherPeptide.getHitRank());
-            if (otherPeptide.getScores() != null)
-            {
-                if (getScores() == null)
-                    setScores(otherPeptide.getScores());
-                else
-                {
-                    getScores().putAll(otherPeptide.getScores());
-                }
-            }
-            if (otherPeptide.getModifications() != null)
-                setModifications(otherPeptide.getModifications());
+            return _queryNumber;
+        }
 
-            getAlternativeProteins().addAll(otherPeptide.getAlternativeProteins());
+        public void setQueryNumber(Integer queryNumber)
+        {
+            _queryNumber = queryNumber;
+        }
+
+        public Boolean getDecoy()
+        {
+            return _decoy;
+        }
+
+        public void setDecoy(Boolean decoy)
+        {
+            _decoy = decoy;
         }
 
         /**

@@ -40,7 +40,7 @@ import java.util.Map;
 public class MascotDatImporter extends PeptideImporter
 {
     Map<Integer, MascotDatLoader.DatPeptide> _peptides = new HashMap<>();
-
+    Map<Integer, MascotDatLoader.DatPeptide> _decoyPeptides = new HashMap<>();
 
     public MascotDatImporter(User user, Container c, String description, String fullFileName, Logger log, XarContext context)
     {
@@ -59,13 +59,13 @@ public class MascotDatImporter extends PeptideImporter
 
         File f = new File(_path + "/" + _fileName);
         NetworkDrive.ensureDrive(f.getPath());
-        MascotDatLoader loader = new MascotDatLoader(f, _log);
-        _fractionId = createFraction(_user, _container, _runId, _path, f);
+         _fractionId = createFraction(_user, _container, _runId, _path, f);
         MS2Loader.PeptideFraction fraction = new MS2Loader.PeptideFraction();
         fraction.setSpectrumPath(f.getPath());
-        progress.setMs2FileInfo(loader.getFileLength(), loader.getCharactersRead()*2);
-        try
+
+        try (MascotDatLoader loader = new MascotDatLoader(f, _log))
         {
+            progress.setMs2FileInfo(loader.getFileLength(), loader.getCharactersRead()*2);
             while (loader.findSection())
             {
                 MascotDatLoader.Section section = loader.getCurrentSection();
@@ -103,14 +103,14 @@ public class MascotDatImporter extends PeptideImporter
                             _log.error("Peptides section encountered before parameters and header; no run information available.");
                         progress.getCumulativeTimer().setCurrentTask(Tasks.ImportPeptides, " from file " + fraction.getSpectrumPath());
                         progress.setPeptideMode();
-                        loader.loadPeptides(_peptides, fraction);
+                        loader.loadPeptides(_peptides, fraction, false);
                         progress.setCurrentMs2FileOffset(loader.getCharactersRead()*2);
                         break;
                     }
                     case SUMMARY:
                     {
                         _log.info("Loading summary");
-                        loader.loadSummary(_peptides);
+                        loader.loadSummary(_peptides, false);
                         progress.setCurrentMs2FileOffset(loader.getCharactersRead()*2);
                         break;
                     }
@@ -118,7 +118,25 @@ public class MascotDatImporter extends PeptideImporter
                     {
                         if (loader.getCurrentQueryNum() == 1 )
                             _log.info("Loading query data");
-                        loader.loadQuery(_peptides);
+                        loader.loadQuery(_peptides, _decoyPeptides);
+                        progress.setCurrentMs2FileOffset(loader.getCharactersRead()*2);
+                        break;
+                    }
+                    case DECOY_PEPTIDES:
+                    {
+                        _log.info("Loading decoy peptides");
+                        if (!loader.isLoaded(MascotDatLoader.Section.PARAMETERS) || !loader.isLoaded(MascotDatLoader.Section.HEADER))
+                            _log.error("Decoy section encountered before parameters and header; no run information available.");
+                        progress.getCumulativeTimer().setCurrentTask(Tasks.ImportDecoys, " from file " + fraction.getSpectrumPath());
+                        progress.setPeptideMode();
+                        loader.loadPeptides(_decoyPeptides, fraction, true);
+                        progress.setCurrentMs2FileOffset(loader.getCharactersRead()*2);
+                        break;
+                    }
+                    case DECOY_SUMMARY:
+                    {
+                        _log.info("Loading decoy summary");
+                        loader.loadSummary(_decoyPeptides, true);
                         progress.setCurrentMs2FileOffset(loader.getCharactersRead()*2);
                         break;
                     }
@@ -126,29 +144,34 @@ public class MascotDatImporter extends PeptideImporter
             }
             progress.setImportSpectra(false);
             progress.setCurrentMs2FileOffset(loader.getFileLength());
-            writePeptides();
+            writePeptides(_peptides, false);
+            // Not every file will have decoys, but we built this list up in the query section
+            if (loader.isLoaded(MascotDatLoader.Section.DECOY_PEPTIDES))
+                writePeptides(_decoyPeptides, true);
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
         }
-        finally
-        {
-            if (null != loader)
-                loader.close();
-        }
     }
 
-    private void writePeptides() throws SQLException
+    private void writePeptides(Map<Integer, MascotDatLoader.DatPeptide> peptides, boolean decoys) throws SQLException
     {
-        _log.info("Writing peptides data");
-        for (MS2Loader.Peptide peptide : _peptides.values())
+        _log.info("Writing " + (decoys ? "decoy " : "") + "peptides data");
+        for (MascotDatLoader.DatPeptide peptide : peptides.values())
         {
-            // There can be some data for peptides that were not found(?).  We skip over those.
+            // There can be some data for peptides that were not found. e.g., a scan may only have a corresponding peptide or decoy peptide,
+            // but not both. We skip over those.
             if (peptide.getTrimmedPeptide() != null)
             {
                 peptide.setDerivedFieldValues();
                 write(peptide, null);
+                for (MascotDatLoader.DatPeptide higherHitRank : peptide.getOtherHitRanks())
+                {
+                    higherHitRank.mergeQueryAndSummarySections(peptide, true);
+                    higherHitRank.setDerivedFieldValues();
+                    write(higherHitRank, null);
+                }
             }
         }
 

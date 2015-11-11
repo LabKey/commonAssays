@@ -126,7 +126,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
                 {
                     int fraction = _rs.getInt("Fraction");
                     int scan = _rs.getInt("Scan");
-                    _pair = MS2Manager.getSpectrumFromMzXML(fraction, scan);
+                    _pair = MS2Manager.getSpectrumFromMzXML(MS2Manager.getFraction(fraction), scan);
                 }
             }
             catch (SQLException e)

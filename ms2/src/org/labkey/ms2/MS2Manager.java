@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
+import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
@@ -82,6 +83,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.LibraQuantResult;
+import org.labkey.ms2.reader.MascotDatLoader;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
@@ -1059,14 +1061,22 @@ public class MS2Manager
         if (null != spectrumBytes)
             return SpectrumImporter.byteArrayToFloatArrays(spectrumBytes);
         else
-            return getSpectrumFromMzXML(fractionId, scan);
+            return getSpectrumFromFile(fractionId, scan);
     }
 
-
-    public static Pair<float[], float[]> getSpectrumFromMzXML(int fractionId, int scan) throws SpectrumException
+    private static Pair<float[], float[]> getSpectrumFromFile(int fractionId, int scan) throws SpectrumException
     {
         MS2Fraction fraction = MS2Manager.getFraction(fractionId);
+        if (null == fraction)
+            throw new SpectrumException("Can't locate fraction.");
+        if (StringUtils.endsWithIgnoreCase(fraction.getFileName(), ".dat"))
+            return getSpectrumFromDat(fraction, scan);
+        else
+            return getSpectrumFromMzXML(fraction, scan);
+    }
 
+    public static Pair<float[], float[]> getSpectrumFromMzXML(MS2Fraction fraction, int scan) throws SpectrumException
+    {
         if (null == fraction || fraction.getMzXmlURL() == null)
             throw new SpectrumException("Can't locate spectrum file.");
 
@@ -1128,6 +1138,19 @@ public class MS2Manager
         }
     }
 
+    private static Pair<float[], float[]> getSpectrumFromDat(@NotNull MS2Fraction fraction, int scan) throws SpectrumException
+    {
+        File f = new File(getRun(fraction.getRun()).getPath(), fraction.getFileName());
+        NetworkDrive.ensureDrive(f.getPath());
+        try (MascotDatLoader loader = new MascotDatLoader(f, _log))
+        {
+            return loader.loadSpectrum(scan);
+        }
+        catch (IOException | XMLStreamException e)
+        {
+            throw new SpectrumException("Can't read .dat file", e);
+        }
+    }
 
     private static void _addRunToCache(int runId, MS2Run run)
     {

@@ -1,22 +1,30 @@
 package org.labkey.ms2.reader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.PeptideImporter;
+import org.labkey.ms2.SpectrumException;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +32,7 @@ import java.util.regex.Pattern;
 /**
  * Created by susanh on 10/22/15.
  */
-public class MascotDatLoader extends MS2Loader
+public class MascotDatLoader extends MS2Loader implements AutoCloseable
 {
     public static final String DB_PREFIX = "DB=";
     public static final String FASTAFILE_PREFIX = "fastafile=";
@@ -32,6 +40,9 @@ public class MascotDatLoader extends MS2Loader
     public static final String ENZYME_PREFIX_LC = "cle=";
     public static final String DEFAULT_ENZYME = "trypsin";
     public static final String SEARCH_ENGINE_NAME = "MASCOT";
+    public static final String MASCOT_FILE_PREFIX = "FILE=";
+    public static final String DISTILLER_RAWFILE_PREFIX = "_DISTILLER_RAWFILE=";
+
 
     // Content-Type: multipart/mixed; boundary=gc0p4Jq0M2Yt08jU534c0p
     private static final Pattern BOUNDARY_MARKER_LINE = Pattern.compile("\\s*Content-Type: multipart/mixed; boundary=(.*)");
@@ -55,9 +66,11 @@ public class MascotDatLoader extends MS2Loader
     // FixedMod1=57.021464,Carbamidomethyl (C)
     private static final Pattern MASS_FIXED_MOD_LINE = Pattern.compile("FixedMod(\\d+)=([^,]*),(.*\\((.*)\\))");
     // FixedModResidues1=C
+    @SuppressWarnings({"UnusedDeclaration"})
     private static final Pattern MASS_FIXED_MOD_RESIDUES_LINE = Pattern.compile("FixedModResidues(\\d+)=(.*)");
     private static final int MASS_INDEX_GROUP_NUM = 1;
     private static final int MASS_DELTA_GROUP_NUM = 2;
+    @SuppressWarnings({"UnusedDeclaration"})
     private static final int MASS_FIXED_MOD_RESIDUES_GROUP_NUM = 2;
     private static final int MASS_DELTA_NAME_GROUP_NUM = 3;
     private static final int MASS_RESIDUES_GROUP_NUM = 4;
@@ -108,15 +121,19 @@ public class MascotDatLoader extends MS2Loader
     private static final String QUERY_TITLE_PREFIX = "title=";
     private static final String QUERY_SCANS_PREFIX = "scans=";
     private static final String QUERY_RETENTION_TIME_PREFIX = "rtinseconds=";
+    private static final String QUERY_SPECTRUM_PREFIX = "Ions1=";
 
     // the title line starts out looking like this:
     //  title=CAexample_mini%2e0110%2e0110%2e1
     // once URL decoded, the value looks like this:
     //  CAexample_mini.0110.0110.1
-    public static final Pattern QUERY_TITLE_SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d{1})\\.??[a-zA-z0-9_]*?$");
+    public static final Pattern QUERY_TITLE_SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d)\\.??[a-zA-z0-9_]*?$");
     public static final int START_SCAN_GROUP_NUM = 1;
     public static final int END_SCAN_GROUP_NUM = 2;
+    @SuppressWarnings({"UnusedDeclaration"})
     public static final int CHARGE_GROUP_NUM = 3; // Not currently used as we extract the charge value elsewhere, left for documentation
+    public static final String IDENTITY_SCORE = "identityscore";
+    public static final String HOMOLOGY_SCORE = "homologyscore";
 
     /**
      * The sections that appear in a .dat file.  It's unclear if they always appear in this order or not, but empirical evidence
@@ -125,17 +142,19 @@ public class MascotDatLoader extends MS2Loader
     public enum Section {
         PARAMETERS,
         MASSES,
+        QUANTITATION,      // Not currently used
         UNIMOD,            // Not currently used
         ENZYME,            // Not currently used
         TAXONOMY,          // Not currently used
         HEADER,
         SUMMARY,
-        DECOY_SUMMARY,     // Not currently used
+        DECOY_SUMMARY,
         PEPTIDES,
-        DECOY_PEPTIDES,    // Not currently used
+        DECOY_PEPTIDES,
         PROTEINS,          // Not currently used
         QUERY,
-        INDEX;             // Not currently used
+        INDEX,             // Not currently used
+        UNKNOWN_SECTION   // We don't have an exhaustive list. Set to this if we find a section we don't know about.
     }
 
     private String _boundaryMarker = null;
@@ -154,7 +173,7 @@ public class MascotDatLoader extends MS2Loader
     public MascotDatLoader(File f, Logger log) throws IOException, XMLStreamException
     {
         init(f, log);
-        _reader = new BufferedReader(new FileReader(f));
+        _reader = new BufferedReader(new InputStreamReader(new FileInputStream(f), StringUtilsLabKey.DEFAULT_CHARSET));
         findBoundaryMarker();
     }
 
@@ -201,7 +220,16 @@ public class MascotDatLoader extends MS2Loader
             Matcher matcher = CONTENT_TYPE_LINE.matcher(_currentLine);
             if (matcher.matches())
             {
-                _currentSection = Section.valueOf(matcher.group(SECTION_NAME_GROUP_NUM).toUpperCase());
+                try
+                {
+                    _currentSection = Section.valueOf(matcher.group(SECTION_NAME_GROUP_NUM).toUpperCase());
+                }
+                catch (IllegalArgumentException e) // Don't fail on sections we don't know about
+                {
+                    _log.warn("Unknown section found in dat file: " + matcher.group(SECTION_NAME_GROUP_NUM));
+                    _currentSection = Section.UNKNOWN_SECTION;
+                    return true;
+                }
                 if (!matcher.group(QUERY_SECTION_INDEX_GROUP_NUM).isEmpty())
                 {
                     _currentQueryNum = Integer.valueOf(matcher.group(QUERY_SECTION_INDEX_GROUP_NUM));
@@ -225,6 +253,22 @@ public class MascotDatLoader extends MS2Loader
     public Integer getCurrentQueryNum()
     {
         return _currentQueryNum;
+    }
+
+    /**
+     * Seek to a specific query section within the file
+     * @param scan query number
+     *
+     */
+    public boolean findQueryByNumber(int scan) throws IOException
+    {
+        Integer seekQueryNum = Integer.valueOf(scan);
+        while (findSection())
+        {
+            if (Section.QUERY.equals(getCurrentSection()) && seekQueryNum.equals(_currentQueryNum))
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -277,9 +321,16 @@ public class MascotDatLoader extends MS2Loader
             {
                 fraction.setSearchEnzyme(_currentLine.substring(ENZYME_PREFIX.length()).trim());
             }
+            else if (_currentLine.startsWith(MASCOT_FILE_PREFIX))
+            {
+                fraction.setMascotFile(_currentLine.substring(MASCOT_FILE_PREFIX.length()).trim());
+            }
+            else if (_currentLine.startsWith(DISTILLER_RAWFILE_PREFIX))
+            {
+                fraction.setDistillerRawFile(_currentLine.substring(DISTILLER_RAWFILE_PREFIX.length()).trim());
+            }
             readLine();
         }
-//        _log.info("Loaded parameters");
         _loadedSections.add(Section.PARAMETERS);
     }
 
@@ -376,7 +427,6 @@ public class MascotDatLoader extends MS2Loader
             readLine();
         }
         ((MS2ModificationList) fraction.getModifications()).initializeSymbols();
-//        _log.info("Loaded masses");
         _loadedSections.add(Section.MASSES);
     }
 
@@ -397,32 +447,66 @@ public class MascotDatLoader extends MS2Loader
         }
     }
 
-    public void loadPeptides(Map<Integer, DatPeptide> peptides, PeptideFraction fraction)
+    public void loadPeptides(Map<Integer, DatPeptide> peptides, PeptideFraction fraction, boolean decoys)
     {
         PeptideIterator iterator = new PeptideIterator(fraction);
         DatPeptide peptide;
         while (iterator.hasNext())
         {
             peptide = iterator.next();
-            if (peptide.getHitRank() == 1)
+            peptide.setDecoy(decoys);
+            if (peptides.containsKey(peptide.getIndex()))
             {
-                if (peptides.containsKey(peptide.getIndex()))
+                DatPeptide existingPeptide = peptides.get(peptide.getIndex());
+                if (Objects.equals(peptide.getHitRank(), existingPeptide.getHitRank()))
                 {
-                    DatPeptide existingPeptide = peptides.get(peptide.getIndex());
                     existingPeptide.merge(peptide);
                 }
                 else
                 {
-                    peptides.put(peptide.getIndex(), peptide);
+                    existingPeptide.getOtherHitRanks().add(peptide);
                 }
             }
+            else
+            {
+                if (null == peptide.getHitRank())
+                    peptide.setHitRank(1);
+                peptides.put(peptide.getIndex(), peptide);
+            }
         }
-//        _log.info("Loaded peptides");
-        _loadedSections.add(Section.PEPTIDES);
+        _loadedSections.add(decoys ? Section.DECOY_PEPTIDES : Section.PEPTIDES);
     }
 
+    /**
+     * Used for on-demand spectrum loading from the file, not for database storage
+     */
+    public Pair<float[], float[]> loadSpectrum(int queryNum) throws SpectrumException, IOException
+    {
+        if (!findQueryByNumber(queryNum))
+            throw new SpectrumException("Can't find requested scan: " + queryNum);
 
-    public void loadSummary(Map<Integer, DatPeptide> peptides) throws IOException
+        readLine();
+        while (!atEndOfSection())
+        {
+            if (_currentLine.startsWith(QUERY_SPECTRUM_PREFIX))
+            {
+                String[] coordPairs = StringUtils.substringAfter(_currentLine, QUERY_SPECTRUM_PREFIX).trim().split(",");
+                float[][] data = new float[2][coordPairs.length];
+
+                for (int i = 0; i < coordPairs.length; i++)
+                {
+                    String[] coords = coordPairs[i].trim().split(":");
+                    data[0][i]= Float.parseFloat(coords[0].trim());
+                    data[1][i]= Float.parseFloat(coords[1].trim());
+                }
+                return new Pair<>(data[0], data[1]);
+            }
+            readLine();
+        }
+        throw new SpectrumException("Spectrum information not found for scan: " + queryNum);
+    }
+
+    public void loadSummary(Map<Integer, DatPeptide> peptides, boolean decoys) throws IOException
     {
         readLine();
         while (!atEndOfSection())
@@ -431,44 +515,32 @@ public class MascotDatLoader extends MS2Loader
             if (matcher.matches())
             {
                 Integer index = Integer.valueOf(matcher.group(QUERY_INDEX_GROUP_NUM));
-                if (!peptides.containsKey(index))
-                {
-                    peptides.put(index, new DatPeptide());
-                }
-                DatPeptide peptide = peptides.get(index);
+                DatPeptide peptide = initDatPeptide(peptides, index, decoys);
                 if (matcher.group(KV_VALUE_GROUP_NUM).isEmpty())
-                    peptide.setScore("identityscore", "100.0");
+                    peptide.setScore(IDENTITY_SCORE, "100.0");
                 else
                 {
                     Float matchValue = Float.valueOf(matcher.group(KV_VALUE_GROUP_NUM));
                     double valueLog10 = 10 * Math.log(matchValue)/Math.log(10);
-                    peptide.setScore("identityscore", String.format("%.2f", valueLog10));
+                    peptide.setScore(IDENTITY_SCORE, String.format("%.2f", valueLog10));
                 }
             }
             else if ((matcher = HOMOLOGY_SCORE_SUMMARY_LINE.matcher(_currentLine)).matches())
             {
                 Integer index = Integer.valueOf(matcher.group(QUERY_INDEX_GROUP_NUM));
-                if (!peptides.containsKey(index))
-                {
-                    peptides.put(index, new DatPeptide());
-                }
-                DatPeptide peptide = peptides.get(index);
+                DatPeptide peptide = initDatPeptide(peptides, index, decoys);
                 if (matcher.group(KV_VALUE_GROUP_NUM).isEmpty())
-                    peptide.setScore("homologyscore", "100.0");
+                    peptide.setScore(HOMOLOGY_SCORE, "100.0");
                 else
                 {
                     Float scoreValue = Float.valueOf(matcher.group(KV_VALUE_GROUP_NUM));
-                    peptide.setScore("homologyscore", String.format("%.2f", scoreValue));
+                    peptide.setScore(HOMOLOGY_SCORE, String.format("%.2f", scoreValue));
                 }
             }
             else if ((matcher = PRECURSOR_ION_CHARGE_SUMMARY_LINE.matcher(_currentLine)).matches())
             {
                 Integer index = Integer.valueOf(matcher.group(QUERY_INDEX_GROUP_NUM));
-                if (!peptides.containsKey(index))
-                {
-                    peptides.put(index, new DatPeptide());
-                }
-                DatPeptide peptide = peptides.get(index);
+                DatPeptide peptide = initDatPeptide(peptides, index, decoys);
                 if (matcher.group(ION_CHARGE_GROUP_NUM).isEmpty())
                     peptide.setCharge(UNKNOWN_ION_CHARGE_VALUE);
                 else
@@ -478,22 +550,38 @@ public class MascotDatLoader extends MS2Loader
             }
             readLine();
         }
-//        _log.info("Loaded summary data");
-        _loadedSections.add(Section.SUMMARY);
+        _loadedSections.add(decoys ? Section.DECOY_SUMMARY : Section.SUMMARY);
     }
 
-    public void loadQuery(Map<Integer, DatPeptide> peptides) throws IOException
+    @NotNull
+    private DatPeptide initDatPeptide(Map<Integer, DatPeptide> peptides, Integer index, boolean isDecoy)
+    {
+        DatPeptide peptide = peptides.get(index);
+        if (null == peptide)
+        {
+            peptide = new DatPeptide();
+            peptide.setDecoy(isDecoy);
+            peptides.put(index, peptide);
+        }
+        return peptide;
+    }
+
+    /**
+     * Load the query section, which applies to both peptides and decoys, and all hit ranks. Make one pass to fill in for both
+     * peptides and the decoy peptides at same time. Note, this is a bit inefficient if it turns out there are no decoy peptides
+     * for this run, as we'll build up that list just to drop it on the floor later. But this is necessary to support arbitrary
+     * ordering of sections.
+     */
+    public void loadQuery(Map<Integer, DatPeptide> peptides, Map<Integer, DatPeptide> decoyPeptides) throws IOException
     {
         readLine();
-        DatPeptide peptide = peptides.get(_currentQueryNum);
+        DatPeptide peptide = initDatPeptide(peptides, _currentQueryNum, false);
+        peptide.setQueryNumber(_currentQueryNum);
         String title = null;
         while (!atEndOfSection())
         {
             if (_currentLine.startsWith(QUERY_TITLE_PREFIX))
             {
-                if (!peptides.containsKey(_currentQueryNum))
-                    peptides.put(_currentQueryNum, new DatPeptide());
-
                 title = URLDecoder.decode(_currentLine.substring(QUERY_TITLE_PREFIX.length()), "UTF-8");
                 Matcher matcher = QUERY_TITLE_SCAN_REGEX.matcher(title);
                 if (matcher.find())
@@ -518,9 +606,15 @@ public class MascotDatLoader extends MS2Loader
             _log.debug("Scan for peptide " + peptide.getTrimmedPeptide() + " in query " + _currentQueryNum + " not found.  Title parsing may be necessary.");
             findScanFromTitle(title, peptide);
         }
+
+        DatPeptide decoyPeptide = initDatPeptide(decoyPeptides, _currentQueryNum, true);
+        decoyPeptide.setQueryNumber(_currentQueryNum);
+        decoyPeptide.setScan(peptide.getScan());
+        decoyPeptide.setEndScan(peptide.getEndScan());
+        decoyPeptide.setRetentionTime(peptide.getRetentionTime());
     }
 
-    private void findScanFromTitle(String title, DatPeptide peptide)
+    private void findScanFromTitle(String title, @NotNull DatPeptide peptide)
     {
         Pair<Integer, Integer> range = new Pair<>(-1,-1);
         Double retentionTime = null;
@@ -618,6 +712,8 @@ public class MascotDatLoader extends MS2Loader
     {
 
         private int _index;
+        // The DatPeptide itself will have the properties for hitRank == 1; hit ranks > 1 are stored in this member list
+        private List<DatPeptide> otherHitRanks = new ArrayList<>();
 
         public int getIndex()
         {
@@ -627,6 +723,11 @@ public class MascotDatLoader extends MS2Loader
         public void setIndex(int index)
         {
             _index = index;
+        }
+
+        public List<DatPeptide> getOtherHitRanks()
+        {
+            return otherHitRanks;
         }
 
         private String getPeptideWithModifications(MS2ModificationList modificationList, String modificationsMask)
@@ -719,11 +820,72 @@ public class MascotDatLoader extends MS2Loader
 
         public void merge(DatPeptide otherPeptide)
         {
-            setIndex(otherPeptide.getIndex());
-            super.merge((Peptide) otherPeptide);
+            if (otherPeptide.getFraction() != null)
+                setFraction(otherPeptide.getFraction());
+            // load
+            if (otherPeptide.getPeptide() != null)
+                setPeptide(otherPeptide.getPeptide());
+            if (otherPeptide.getMatchedIons() != null)
+                setMatchedIons(otherPeptide.getMatchedIons());
+            if (otherPeptide.getProteinHits() != null)
+                setProteinHits(otherPeptide.getProteinHits());
+            if (otherPeptide.getPrevAA() != null)
+                setPrevAA(otherPeptide.getPrevAA());
+            if (otherPeptide.getTrimmedPeptide() != null)
+                setTrimmedPeptide(otherPeptide.getTrimmedPeptide());
+            if (otherPeptide.getNextAA() != null)
+                setNextAA(otherPeptide.getNextAA());
+            if (otherPeptide.getProtein() != null)
+                setProtein(otherPeptide.getProtein());
+            getAlternativeProteins().addAll(otherPeptide.getAlternativeProteins());
+            // pepXmlLoad
+            if (otherPeptide.getModifications() != null)
+                setModifications(otherPeptide.getModifications());
+            if (otherPeptide.getDeltaMass() != null)
+                setDeltaMass(otherPeptide.getDeltaMass());
+            if (otherPeptide.getCalculatedNeutralMass() != null)
+                setCalculatedNeutralMass(otherPeptide.getCalculatedNeutralMass());
+            // some scores come from initial load, some from summary info
+            if (otherPeptide.getScores() != null)
+            {
+                if (getScores() == null)
+                    setScores(otherPeptide.getScores());
+                else
+                {
+                    getScores().putAll(otherPeptide.getScores());
+                }
+            }
+            mergeQueryAndSummarySections(otherPeptide, false);
+            // derived fields
+            if (otherPeptide.getTotalIons() != null)
+                setTotalIons(otherPeptide.getTotalIons());
+            if (otherPeptide.getIonPercent() != null)
+                setIonPercent(otherPeptide.getIonPercent());
         }
 
-
+        public void mergeQueryAndSummarySections(DatPeptide otherPeptide, boolean mergeSummaryScores)
+        {
+            // query
+            if (otherPeptide.getQueryNumber() != null)
+                setQueryNumber(otherPeptide.getQueryNumber());
+            if (otherPeptide.getScan() != null)
+                setScan(otherPeptide.getScan());
+            if (otherPeptide.getEndScan() != null)
+                setEndScan(otherPeptide.getEndScan());
+            if (otherPeptide.getRetentionTime() != null)
+                setRetentionTime(otherPeptide.getRetentionTime());
+            // summary
+            if (otherPeptide.getCharge() != null)
+                setCharge(otherPeptide.getCharge());
+            if (mergeSummaryScores)
+            {
+                // some scores come from initial load, some from summary info
+                if (otherPeptide.getScore(IDENTITY_SCORE) != null)
+                    setScore(IDENTITY_SCORE, otherPeptide.getScore(IDENTITY_SCORE));
+                if (otherPeptide.getScore(HOMOLOGY_SCORE) != null)
+                    setScore(HOMOLOGY_SCORE, otherPeptide.getScore(HOMOLOGY_SCORE));
+            }
+        }
     }
 
     public class PeptideIterator implements Iterator<DatPeptide>

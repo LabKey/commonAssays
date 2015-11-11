@@ -129,6 +129,8 @@ public abstract class PeptideImporter extends MS2Importer
         m.put("SearchEngine", fraction.getSearchEngine());
         m.put("MassSpecType", fraction.getMassSpecType());
         m.put("SearchEnzyme", fraction.getSearchEnzyme());
+        m.put("MascotFile", fraction.getMascotFile());
+        m.put("DistillerRawFile", fraction.getDistillerRawFile());
 
         // If path to fasta is relative, prepend current dir
         if (! isAbsolute(databaseLocalPath))
@@ -187,6 +189,9 @@ public abstract class PeptideImporter extends MS2Importer
             columnNames.append(", Score");
             columnNames.append(i + 1);
         }
+        columnNames.append(", QueryNumber");
+        columnNames.append(", HitRank");
+        columnNames.append(", Decoy");
 
         return super.getTableColumnNames() + columnNames.toString();
     }
@@ -250,6 +255,13 @@ public abstract class PeptideImporter extends MS2Importer
             String value = scores.get(scoreColumnName.toString());  // Get value from the scores parsed from XML
             setAsFloat(stmt, n++, value);
         }
+        if (null != peptide.getQueryNumber())
+            stmt.setInt(n++, peptide.getQueryNumber());
+        else
+            stmt.setNull(n++, Types.INTEGER);
+
+        stmt.setInt(n++, peptide.getHitRank());
+        stmt.setBoolean(n, peptide.getDecoy());
     }
 
 

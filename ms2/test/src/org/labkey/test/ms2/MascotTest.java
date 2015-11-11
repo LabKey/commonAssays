@@ -236,7 +236,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "Bovine_mini.fasta");
 
         DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
-        assertEquals("Wrong number of peptides found", 58, peptidesTable.getDataRowCount());
+        // TODO: really 466 peptides in the .dat import, but only first 100 show in default view
+        assertEquals("Wrong number of peptides found", 100, peptidesTable.getDataRowCount());
         List<String> peptideRow = peptidesTable.getRowDataAsText(0);
         List<String> expectedPeptideRow = new ArrayList<>(Arrays.asList(
                 "4",                // Scan
