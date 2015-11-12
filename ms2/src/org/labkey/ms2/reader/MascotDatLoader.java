@@ -732,7 +732,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
 
         private String getPeptideWithModifications(MS2ModificationList modificationList, String modificationsMask)
         {
-            StringBuffer peptide = new StringBuffer(_trimmedPeptide);
+            StringBuilder peptide = new StringBuilder(_trimmedPeptide);
             char[] modChars = new char[_trimmedPeptide.length()];
             _unknownModArray = new boolean[_trimmedPeptide.length()];
             boolean isModified = false;

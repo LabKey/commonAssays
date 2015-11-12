@@ -68,34 +68,36 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
         // TODO replace with use of MascotDatLoader
         InputStream datIn = new FileInputStream(dat);
-        BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn, StringUtilsLabKey.DEFAULT_CHARSET));
         boolean skipParameter = true;
         String dbValue = null;
         String fastaFileValue = null;
         String line;
-        while ((line = datReader.readLine()) != null)
+        try (BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn, StringUtilsLabKey.DEFAULT_CHARSET));
+        )
         {
-            // TODO: check for actual MIME boundary
-            if (line.startsWith("Content-Type: "))
+            while ((line = datReader.readLine()) != null)
             {
-                skipParameter = !line.endsWith("; name=\"parameters\"") && !line.endsWith("; name=\"header\"");
-            }
-            else if (!skipParameter)
-            {
-                if (line.startsWith(MascotDatLoader.DB_PREFIX))
+                // TODO: check for actual MIME boundary
+                if (line.startsWith("Content-Type: "))
                 {
-                    dbValue = line.substring(MascotDatLoader.DB_PREFIX.length());
+                    skipParameter = !line.endsWith("; name=\"parameters\"") && !line.endsWith("; name=\"header\"");
                 }
-                else if (line.startsWith(MascotDatLoader.FASTAFILE_PREFIX))
+                else if (!skipParameter)
                 {
-                    fastaFileValue = line.substring(MascotDatLoader.FASTAFILE_PREFIX.length());
+                    if (line.startsWith(MascotDatLoader.DB_PREFIX))
+                    {
+                        dbValue = line.substring(MascotDatLoader.DB_PREFIX.length());
+                    }
+                    else if (line.startsWith(MascotDatLoader.FASTAFILE_PREFIX))
+                    {
+                        fastaFileValue = line.substring(MascotDatLoader.FASTAFILE_PREFIX.length());
+                    }
                 }
-            }
 
-            if (dbValue != null && fastaFileValue != null)
-                break;
+                if (dbValue != null && fastaFileValue != null)
+                    break;
+            }
         }
-        datReader.close();
 
         return PeptideImporter.getDatabaseFile(getPipeRoot().getContainer(), dbValue, fastaFileValue);
     }
