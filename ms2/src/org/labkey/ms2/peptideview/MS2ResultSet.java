@@ -17,13 +17,15 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.ResultSetWrapper;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -85,6 +87,27 @@ public abstract class MS2ResultSet extends ResultSetWrapper
         resultset = getNextResultSet();
 
         return true;
+    }
+
+    /**
+     * Wraps the join of Peptides, PeptidesData, & SpectraData in a subselect to disambiguate scan & fraction column references in filters/sorts
+     *
+     */
+    protected SQLFragment getBaseResultSetSql()
+    {
+        SQLFragment sql = new SQLFragment();
+
+        // Pull out peptides and spectra (if in the database) for the current run
+        sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum, RetentionTime, Score1, Score2, Score3, Score4, Score5, Score6, HitRank, QueryNumber, Decoy FROM (SELECT pep.*, pd.Score1, pd.Score2, pd.Score3, pd.Score4, pd.Score5, pd.Score6, Spectrum, pd.HitRank, pd.QueryNumber, pd.Decoy FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
+        sql.append(MS2Manager.getTableInfoPeptides(), "pep");
+        sql.append(" INNER JOIN ");
+        sql.append(MS2Manager.getTableInfoPeptidesData(), "pd");
+        sql.append(" ON pep.RowId = pd.RowId ");
+        sql.append(" LEFT OUTER JOIN ");         // LEFT OUTER so we also get peptides without spectra in the database
+        sql.append(MS2Manager.getTableInfoSpectraData(), "sd");
+        sql.append(" ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan");
+
+        return sql;
     }
 
     abstract ResultSet getNextResultSet() throws SQLException;

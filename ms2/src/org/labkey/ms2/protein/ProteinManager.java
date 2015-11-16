@@ -810,7 +810,7 @@ public class ProteinManager
 
     public static Sort getPeptideBaseSort()
     {
-        // Always sort peptide lists by Fraction, Scan, Charge
+        // Always sort peptide lists by Fraction, Scan, HitRank, Charge
         return new Sort("Fraction,Scan,HitRank,Charge");
     }
 

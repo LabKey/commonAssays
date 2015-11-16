@@ -260,12 +260,12 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
      * @param scan query number
      *
      */
-    public boolean findQueryByNumber(int scan) throws IOException
+    public boolean findQueryByNumber(@NotNull Integer scan) throws IOException
     {
-        Integer seekQueryNum = Integer.valueOf(scan);
+        //Integer seekQueryNum = Integer.valueOf(scan);
         while (findSection())
         {
-            if (Section.QUERY.equals(getCurrentSection()) && seekQueryNum.equals(_currentQueryNum))
+            if (Section.QUERY.equals(getCurrentSection()) && scan.equals(_currentQueryNum))
                 return true;
         }
         return false;
@@ -490,16 +490,23 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         {
             if (_currentLine.startsWith(QUERY_SPECTRUM_PREFIX))
             {
-                String[] coordPairs = StringUtils.substringAfter(_currentLine, QUERY_SPECTRUM_PREFIX).trim().split(",");
-                float[][] data = new float[2][coordPairs.length];
-
-                for (int i = 0; i < coordPairs.length; i++)
+                try
                 {
-                    String[] coords = coordPairs[i].trim().split(":");
-                    data[0][i]= Float.parseFloat(coords[0].trim());
-                    data[1][i]= Float.parseFloat(coords[1].trim());
+                    String[] coordPairs = StringUtils.substringAfter(_currentLine, QUERY_SPECTRUM_PREFIX).trim().split(",");
+                    float[][] data = new float[2][coordPairs.length];
+
+                    for (int i = 0; i < coordPairs.length; i++)
+                    {
+                        String[] coords = coordPairs[i].trim().split(":");
+                        data[0][i] = Float.parseFloat(coords[0].trim());
+                        data[1][i] = Float.parseFloat(coords[1].trim());
+                    }
+                    return new Pair<>(data[0], data[1]);
                 }
-                return new Pair<>(data[0], data[1]);
+                catch (Exception e)
+                {
+                    throw new SpectrumException("Dat file spectrum information is corrupted for scan: " + queryNum);
+                }
             }
             readLine();
         }
