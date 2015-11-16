@@ -116,7 +116,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
             if (phrase.startsWith("SIMILARITY")) continue;
             if (phrase.startsWith("ACCEPTED")) continue;
             if (phrase.startsWith("ACCEPTOR")) continue;
-            if (phrase.indexOf("-COA") != -1) continue;
+            if (phrase.contains("-COA")) continue;
             if (phrase.startsWith("ACYL-")) continue;
             if (phrase.startsWith("ACYLATING")) continue;
             if (phrase.startsWith("PROTEIN")) continue;
@@ -125,10 +125,10 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
             if (phrase.startsWith("GLUTAMINE-")) continue;
             if (phrase.startsWith("ADP-")) continue;
             if (phrase.startsWith("ALPHA-")) continue;
-            if (phrase.indexOf("CONTAINS:") != -1) continue;
-            if (phrase.indexOf("INCLUDES:") != -1) continue;
-            if (phrase.indexOf("-QUINONE") != -1) continue;
-            if (phrase.indexOf("RIBULOSE") != -1) continue;
+            if (phrase.contains("CONTAINS:")) continue;
+            if (phrase.contains("INCLUDES:")) continue;
+            if (phrase.contains("-QUINONE")) continue;
+            if (phrase.contains("RIBULOSE")) continue;
             if (phrase.startsWith("PYRUVATE")) continue;
             if (phrase.length() < 7) continue;
 
@@ -139,10 +139,10 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
 
             if (words[0].indexOf('(') != -1) continue;
             if (words[0].equalsIgnoreCase("ORF")) continue;
-            if (words[0].indexOf("POTASSIUM") != -1) continue;
+            if (words[0].contains("POTASSIUM")) continue;
             if (words[0].equalsIgnoreCase("SODIUM")) continue;
             if (words[0].startsWith("NAD")) continue;
-            if (words[0].indexOf("N-OXIDE") != -1) continue;
+            if (words[0].contains("N-OXIDE")) continue;
 
             if (words.length >= 1) key = words[0].trim().toUpperCase();
             if (words.length >= 2) key += " " + words[1].trim().toUpperCase();
