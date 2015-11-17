@@ -26,12 +26,15 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @Category({MS2.class, DailyA.class})
 public class MS2Test extends AbstractMS2ImportTest
@@ -45,11 +48,19 @@ public class MS2Test extends AbstractMS2ImportTest
     protected static final String RUN_GROUP1_COMMENTS = "Here are comments.";
     protected static final String RUN_GROUP2_NAME = "Test Run Group 2";
     protected static final String RUN_GROUP3_NAME = "Test Run Group 3";
+    protected static final String PROTOCOL_NAME = "Protocol Rollup 1";
+    protected static final String PROTOCOL_XML =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<bioml>\n" +
+                    "    <note label=\"pipeline, database\" type=\"input\">Bovine_mini.fasta</note>\n" +
+                    "    <note label=\"protein, cleavage site\" type=\"input\">[KR]|{P}</note>\n" +
+                    "</bioml>";
 
     @Override
     @LogMethod
     protected void setupMS2()
     {
+        cleanPipeline();
         super.setupMS2();
         importMS2Run("DRT2", 2);
     }
@@ -1236,5 +1247,41 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent(expectedError);
 
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+    }
+
+    private void fractionRollupTest()
+    {
+        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        clickButton("Process and Import Data");
+        _fileBrowserHelper.selectFileBrowserItem("bov_fract/xtandem/test1/CAexample_mini1.xtan.xml");
+        _fileBrowserHelper.checkFileBrowserFileCheckbox("CAexample_mini2.xtan.xml");
+        if(isElementPresent(Locator.tagWithClassContaining("span", "x4-toolbar-more-icon")))
+        {
+            click(Locator.tagWithClassContaining("span", "x4-toolbar-more-icon"));
+            click(Locator.tagWithText("span", "Fraction Rollup Analysis"));
+        }
+        else
+        {
+            clickButton(" Fraction Rollup Analysis");
+        }
+        waitForElement(Locator.input("protocolName"));
+        setFormElement(Locator.input("protocolName"), PROTOCOL_NAME);
+        setFormElement(Locator.textarea("configureXml"), PROTOCOL_XML);
+        clickButton("Search");
+        waitForRunningPipelineJobs(defaultWaitForPage);
+        waitForElementWithRefresh(Locator.linkContainingText(PROTOCOL_NAME), WAIT_FOR_JAVASCRIPT);
+        waitAndClick(Locator.linkContainingText(PROTOCOL_NAME));
+        waitForElement(Locator.linkWithText("K.LLASMLAK.A"));
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
+        List<String> peptides = peptidesTable.getColumnDataAsText("Peptide");
+        assertEquals(Arrays.asList("K.LLASMLAK.A", "R.Q^YALHVDGVGTK.A", "R.EFAEVVSKIRR.S", "A.KKVVAVIK.L", "K.ELQAAQAR.L", "R.EYDTSKIEAAIWK.E", "K.TEGVIPSR.E", "R.LGRHPNK.A", "K.LLASMLAK.A", "R.Q^YALHVDGVGTK.A", "R.EFAEVVSKIRR.S", "A.KKVVAVIK.L", "K.ELQAAQAR.L", "R.EYDTSKIEAAIWK.E", "K.TEGVIPSR.E", "R.LGRHPNK.A"), peptides);
+    }
+
+    private void cleanPipeline()
+    {
+        if (PIPELINE_PATH == null)
+            return;
+        File rootDir = new File(PIPELINE_PATH);
+        delete(new File(rootDir, ".labkey/protocols/rollup/Protocol Rollup 1.xml"));
     }
 }
