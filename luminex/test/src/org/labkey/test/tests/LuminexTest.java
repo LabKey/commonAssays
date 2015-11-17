@@ -131,7 +131,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
         // setup a scripting engine to run a java transform script
         QCAssayScriptHelper javaEngine = new QCAssayScriptHelper(this);
         javaEngine.ensureEngineConfig();
-        javaEngine.createNetrcFile();
 
         // fail fast if R is not configured
         RReportHelper _rReportHelper = new RReportHelper(this);
