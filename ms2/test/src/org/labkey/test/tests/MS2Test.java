@@ -25,6 +25,7 @@ import org.labkey.test.categories.MS2;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.TextSearcher;
 
 import java.io.File;
 import java.util.Arrays;
@@ -870,7 +871,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addCustomizeViewColumn(new String[]{"RunGroupToggle", "Default Experiment"}, "Run Groups Default Experiment");
         _customizeViewsHelper.applyCustomView();
 
-        assertTextPresent(
+        assertTextPresent(new TextSearcher(this).setSearchTransformer(TextSearcher.TextTransformers.FIELD_LABEL),
                 RUN_GROUP1_NAME2,
                 RUN_GROUP2_NAME,
                 DEFAULT_EXPERIMENT);
