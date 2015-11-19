@@ -259,6 +259,82 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertEquals("Wrong value for 'CalcMH+' in first row", 1272.43, Double.parseDouble(value), 0.01);
     }
 
+
+    @Test
+    public void testDatImportWithDecoys()
+    {
+        // test import of .dat file
+        log("Upload existing Mascot .dat result file.");
+        goToProjectHome();
+        clickFolder(FOLDER_NAME);
+        clickButton("Process and Import Data");
+        _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test4/", "Import Search Results");
+
+        String mascotDatLabel = SAMPLE_BASE_NAME + "_decoy.dat";
+        waitForPipelineJobsToComplete(1, mascotDatLabel, false);
+        waitForElement(Locator.linkWithText(mascotDatLabel));
+
+        log("Spot check results loaded from .dat file");
+        clickAndWait(Locator.linkWithText(mascotDatLabel));
+        String overviewText = getText(PortalHelper.Locators.webPart.withDescendant(PortalHelper.Locators.webPartTitle("Run Overview")));
+        assertTextPresent(new TextSearcher(() -> overviewText),
+                "Trypsin", // N.B. when importing via XML, this becomes lower case ("trypsin")
+                "MASCOT",
+                "CAexample_mini_decoy.dat",
+                "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test4",
+                "Bovine_mini.fasta");
+
+        DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
+        peptidesTable.ensureColumnsPresent("HitRank", "QueryNumber", "Decoy");
+        peptidesTable = new DataRegionTable("MS2Peptides", this);
+
+        assertEquals("Wrong number of peptides found", 67, peptidesTable.getDataRowCount());
+        List<String> peptideRow = peptidesTable.getRowDataAsText(0);
+        List<String> expectedPeptideRow = new ArrayList<>(Arrays.asList(
+                "20",             // Scan
+                "1+",               // Z
+                "23.260",            // Ion
+                "26.590",           // Identity
+                "25.340",           // Homology
+                "29%",              // Ion%
+                "-0.0695",          // dMass
+                "0.0000",           // PepProphet
+                "K.GTPAAGDP.-",     // Peptide
+                "1",                // SeqHits
+                "gi|5002198|AF143203_1_interle"));     // Protein
+        expectedPeptideRow.removeAll(peptideRow);
+        assertTrue("Missing values from first peptide row: [" + String.join(",", expectedPeptideRow) + "]", expectedPeptideRow.isEmpty());
+        String value = peptidesTable.getDataAsText(0, "Expect");
+        assertEquals("Wrong value for 'Expect' in first row", 0.110, Double.parseDouble(value), 0.01);
+        value = peptidesTable.getDataAsText(0, "CalcMH+");
+        assertEquals("Wrong value for 'CalcMH+' in first row", 685.7027, Double.parseDouble(value), 0.01);
+        value = peptidesTable.getDataAsText(0, "QueryNumber");
+        assertEquals("Wrong value for 'QueryNumber' in first row", 12, Integer.parseInt(value));
+        value = peptidesTable.getDataAsText(0, "HitRank");
+        assertEquals("Wrong value for 'HitRank' in first row", 1, Integer.parseInt(value));
+        value = peptidesTable.getDataAsText(0, "Decoy");
+        assertEquals("Wrong value for 'Decoy' in first row", "false", value);
+        peptidesTable.setFilter("Decoy", "Equals", "true");
+        assertEquals("Wrong number of decoy peptides", 6, peptidesTable.getDataRowCount());
+        peptidesTable.setFilter("QueryNumber", "Equals", "12");
+        assertEquals("Should not have a decoy peptide for query 12", 0, peptidesTable.getDataRowCount());
+        peptidesTable.clearAllFilters("QueryNumber");
+        peptidesTable.clearAllFilters("Decoy");
+        peptidesTable.setFilter("Decoy", "Equals", "false");
+        assertEquals("Wrong number of non-decoy peptides", 61, peptidesTable.getDataRowCount());
+        peptidesTable.setFilter("QueryNumber", "Equals", "2");
+        assertEquals("Should not have a non-decoy peptide for query 2", 0, peptidesTable.getDataRowCount());
+        peptidesTable.clearAllFilters("QueryNumber");
+        peptidesTable.clearAllFilters("Decoy");
+        peptidesTable.setFilter("HitRank", "Is Greater Than", "1");
+        peptidesTable.setSort("HitRank", SortDirection.DESC);
+        assertEquals("Wrong number of peptides with hit rank > 1", 55, peptidesTable.getDataRowCount());
+        value = peptidesTable.getDataAsText(0, "HitRank");
+        assertEquals("Wrong value for maximum 'HitRank'", "10", value);
+        value = peptidesTable.getDataAsText(0, "QueryNumber");
+        assertEquals("Wrong value for 'QueryNumber' in first row with max hit rank", "5", value);
+    }
+
     protected void setupEngine()
     {
         log("Analyze " + SEARCH_NAME + " sample data.");
