@@ -222,7 +222,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test3/", "Import Search Results");
 
         String mascotDatLabel = SAMPLE_BASE_NAME + ".dat";
-        waitForPipelineJobsToComplete(1, mascotDatLabel, false);
+        waitForRunningPipelineJobs(MAX_WAIT_SECONDS);
         waitForElement(Locator.linkWithText(mascotDatLabel));
 
         log("Spot check results loaded from .dat file");
@@ -236,7 +236,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "Bovine_mini.fasta");
 
         DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
-        // TODO: really 466 peptides in the .dat import, but only first 100 show in default view
+
+        // really 466 peptides in the .dat import, but only first 100 show in default view
         assertEquals("Wrong number of peptides found", 100, peptidesTable.getDataRowCount());
         List<String> peptideRow = peptidesTable.getRowDataAsText(0);
         List<String> expectedPeptideRow = new ArrayList<>(Arrays.asList(
@@ -271,7 +272,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test4/", "Import Search Results");
 
         String mascotDatLabel = SAMPLE_BASE_NAME + "_decoy.dat";
-        waitForPipelineJobsToComplete(1, mascotDatLabel, false);
+        waitForRunningPipelineJobs(MAX_WAIT_SECONDS);
         waitForElement(Locator.linkWithText(mascotDatLabel));
 
         log("Spot check results loaded from .dat file");
@@ -333,6 +334,9 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertEquals("Wrong value for maximum 'HitRank'", "10", value);
         value = peptidesTable.getDataAsText(0, "QueryNumber");
         assertEquals("Wrong value for 'QueryNumber' in first row with max hit rank", "5", value);
+        peptidesTable.clearSort("HitRank");
+        peptidesTable.clearAllFilters("HitRank");
+        _customizeViewsHelper.revertUnsavedViewGridClosed();
     }
 
     protected void setupEngine()
