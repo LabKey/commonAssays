@@ -162,7 +162,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         // that we got something that matches what we expect. IE doesn't do this, so assume that we're good if we don't
         // get a 404, error message, etc
         if (getBrowserType() == BrowserType.FIREFOX)
-            assertTitleContains("showFile.view (PNG Image");
+            assertTitleContains("(PNG Image");
         popLocation();
 
         log("Verify experiment view");
