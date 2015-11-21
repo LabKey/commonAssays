@@ -63,6 +63,8 @@ import java.util.Set;
  */
 public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 {
+    public static final String DUMMY_SCORE_COLUMN_NAME = "NullScore";
+
     private final MS2RunType[] _runTypes;
 
     public PeptidesTableInfo(MS2Schema schema)
@@ -389,7 +391,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             int index = 1;
             // Since some search engines have the same names for different scores, build a list of all of the
-            // possible intepretations for a given score name based on the run type
+            // possible interpretations for a given score name based on the run type
             for (FieldKey name : runType.getScoreColumnList())
             {
                 List<Pair<MS2RunType, Integer>> l = columnMap.get(name);
@@ -507,7 +509,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             Set<FieldKey> scoreCols = new HashSet<>();
             for (FieldKey name : runType.getScoreColumnList())
             {
-                if (scoreCols.add(name))
+                if (!DUMMY_SCORE_COLUMN_NAME.equalsIgnoreCase(name.getName()) && scoreCols.add(name))
                 {
                     result.add(name);
                 }

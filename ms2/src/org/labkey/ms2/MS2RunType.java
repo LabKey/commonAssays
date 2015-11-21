@@ -31,6 +31,7 @@ import org.labkey.ms2.pipeline.sequest.SequestRun;
 import org.labkey.ms2.pipeline.tandem.XCometRun;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
 import org.labkey.ms2.pipeline.tandem.XTandemcometRun;
+import org.labkey.ms2.query.PeptidesTableInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +58,8 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
             new ScoreInfo("Ion", "ionscore", "MASCOT IONS SCORE"),
             new ScoreInfo("Identity", "identityscore"),
             new ScoreInfo("Homology", "homologyscore"),
-            new ScoreInfo("NullScore", "null"),
+            // Dummy score column so that Expect aligns at the same index for the score4 column with some of the other run types
+            new ScoreInfo(PeptidesTableInfo.DUMMY_SCORE_COLUMN_NAME, "null"),
             new ScoreInfo("Expect", "expect")),
     Phenyx(PhenyxRun.class,
            new ScoreInfo("OrigScore", "origScore"),
