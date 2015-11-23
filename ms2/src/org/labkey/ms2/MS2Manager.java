@@ -565,11 +565,11 @@ public class MS2Manager
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
                                                           File file,
-                                                          String description, PipeRoot root, boolean useXmlFormat) throws SQLException, IOException
+                                                          String description, PipeRoot root) throws SQLException, IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
-        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, root, useXmlFormat);
+        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, root);
         try
         {
             PipelineService.get().queueJob(job);

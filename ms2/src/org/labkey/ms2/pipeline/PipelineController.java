@@ -192,7 +192,7 @@ public class PipelineController extends SpringActionController
                     }
                     else if (MascotSearchTask.isNativeOutputFile(file))
                     {
-                        MS2Manager.addMascotRunToQueue(info, file, description, form.getPipeRoot(getContainer()), "xml".equals(form.getFormat()));
+                        MS2Manager.addMascotRunToQueue(info, file, description, form.getPipeRoot(getContainer()));
                     }
                 }
                 catch (IOException e)
