@@ -223,7 +223,7 @@ public class ScoringController extends SpringActionController
             if (size == 0)
             {
                 runIdValues = request.getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
-                size = runIdValues.length;
+                size = runIdValues == null ? 0 : runIdValues.length;
             }
             else
             {
