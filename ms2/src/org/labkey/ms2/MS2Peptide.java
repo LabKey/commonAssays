@@ -43,7 +43,7 @@ public class MS2Peptide
     private float _ionPercent;
     private double _mass;
     private float _deltaMass;
-    private float _peptideProphet;
+    private Float _peptideProphet;
     private String _peptide;
     private String _protein;
     private int _proteinHits;
@@ -571,13 +571,13 @@ public class MS2Peptide
     }
 
 
-    public float getPeptideProphet()
+    public Float getPeptideProphet()
     {
         return _peptideProphet;
     }
 
 
-    public void setPeptideProphet(float peptideProphet)
+    public void setPeptideProphet(Float peptideProphet)
     {
         _peptideProphet = peptideProphet;
     }

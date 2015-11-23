@@ -1,0 +1,1 @@
+ALTER TABLE ms2.PeptidesData ALTER COLUMN PeptideProphet REAL NULL;

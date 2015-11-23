@@ -82,7 +82,7 @@
                 </tr>
                 <tr>
                     <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
-                    <td class="labkey-form-label">PeptideProphet</td><td><%= h(Formats.f2.format(p.getPeptideProphet())) %></td>
+                    <td class="labkey-form-label">PeptideProphet</td><td><%= ((p.getPeptideProphet() == null) ? "" : h(Formats.f2.format(p.getPeptideProphet()))) %></td>
                     <td class="labkey-form-label" rowspan="2">Run</td><td rowspan="2"><%= h(run.getDescription()) %></td>
                 </tr>
                 <tr>

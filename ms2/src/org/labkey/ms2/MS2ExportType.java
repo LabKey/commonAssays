@@ -132,7 +132,7 @@ public enum MS2ExportType
                 {
                     writer.write(peptide.getScan() + "\t");
                     writer.write(peptide.getPeptide() + "\t");
-                    writer.write(peptide.getPeptideProphet() + "\t");
+                    writer.write(peptide.getPeptideProphet() == null ? "\t" : peptide.getPeptideProphet() + "\t");
                     writer.write(peptide.getProtein() + "\t");
                     writer.write(ionType + (i + 1) + "+\t");
                     writer.write((j + 1) + "\t");

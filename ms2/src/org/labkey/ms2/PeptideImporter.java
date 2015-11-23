@@ -223,7 +223,10 @@ public abstract class PeptideImporter extends MS2Importer
         stmt.setFloat(n++, peptide.getDeltaMass().floatValue());
 
         PeptideProphetHandler.PeptideProphetResult pp = peptide.getPeptideProphetResult();
-        stmt.setFloat(n++, (null == pp ? 0 : pp.getProbability()));
+        if (pp == null)
+            stmt.setNull(n++, Types.FLOAT);
+        else
+            stmt.setFloat(n++, pp.getProbability());
 
         Float errorRate = null;
         if (peptideProphetSummary != null && pp != null)

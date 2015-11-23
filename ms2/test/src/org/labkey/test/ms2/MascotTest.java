@@ -248,7 +248,6 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "24.030",           // Homology
                 "8%",               // Ion%
                 "-0.8489",          // dMass
-                "0.0000",           // PepProphet
                 "K.VEHLDKDLFR.R",   // Peptide
                 "1",                // SeqHits
                 "gi|23335713|hypothetical_prot")); // Protein
@@ -299,7 +298,6 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "25.340",           // Homology
                 "29%",              // Ion%
                 "-0.0695",          // dMass
-                "0.0000",           // PepProphet
                 "K.GTPAAGDP.-",     // Peptide
                 "1",                // SeqHits
                 "gi|5002198|AF143203_1_interle"));     // Protein
