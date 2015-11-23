@@ -63,7 +63,9 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
             SQLFragment sql;
             String joinSql;
 
-            String columnNames = "Peptide, TrimmedPeptide, NextAA, PrevAA, Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum";
+            // Peptide columns are coming from ms2.SimplePeptides, so translate the search-engine specific scoring
+            // column aliases back to Score1, etc. Along with addition of RetentionTime, fixes issue 24836
+            String columnNames = "Peptide, TrimmedPeptide, RetentionTime, RawScore AS Score1, DeltaCN AS Score2, ZScore AS Score3, SPRank AS Score4, Expect AS Score5, NextAA, PrevAA, Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum";
             if (_peptideView instanceof StandardProteinPeptideView)
             {
                 sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, columnNames + ", Run", _user);
