@@ -35,6 +35,8 @@ public abstract class MS2Run implements Serializable
 {
     private static Logger _log = Logger.getLogger(MS2Run.class);
 
+    protected final static String[] EMPTY_STRING_ARRAY = new String[0];
+
     protected int run;
     protected Container container;
     protected String description;

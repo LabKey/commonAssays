@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.pipeline.tandem;
 
-import org.apache.axis.utils.StringUtils;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 
@@ -54,6 +53,6 @@ public class XTandemRun extends MS2Run
 
     public String[] getGZFileExtensions()
     {
-        return StringUtils.EMPTY_STRING_ARRAY;
+        return EMPTY_STRING_ARRAY;
     }
 }
