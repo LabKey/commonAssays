@@ -697,9 +697,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             // only need to check %CV thresholds for potentially positive samples (i.e. mean MFI of replicates > 100)
             if (null != dataRow.getCv() && dataRow.getFi() > 100.0 && 
-                ((dataRow.getWellRole().equals("Unknown") && dataRow.getCv() > 0.15) ||
-                 (dataRow.getWellRole().contains("Standard") && dataRow.getCv() > 0.2) ||
-                 (dataRow.getWellRole().contains("Control") && dataRow.getCv() > 0.2)))
+                ((dataRow.getWellRole().equalsIgnoreCase("Unknown") && dataRow.getCv() > 0.15) ||
+                 (dataRow.getWellRole().toLowerCase().contains("standard") && dataRow.getCv() > 0.2) ||
+                 (dataRow.getWellRole().toLowerCase().contains("control") && dataRow.getCv() > 0.2)))
             {
                 String description = dataRow.getType() + " : " + dataRow.getDescription() + " with " + analyte.getName() + " over threshold value for %CV";
                 CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), QC_FLAG_CV_FLAG_TYPE, description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
