@@ -1012,7 +1012,6 @@ ms2/src/org/labkey/ms2/FirstProteinDisplayColumn.java -text
 ms2/src/org/labkey/ms2/FloatParser.java -text
 ms2/src/org/labkey/ms2/GZFileRenderer.java -text
 ms2/src/org/labkey/ms2/GroupNumberDisplayColumn.java -text
-ms2/src/org/labkey/ms2/HideShowScoringColumn.java -text
 ms2/src/org/labkey/ms2/Hydrophobicity3.java -text
 ms2/src/org/labkey/ms2/HydrophobicityColumn.java -text
 ms2/src/org/labkey/ms2/IcatProteinQuantitation.java -text
@@ -1390,9 +1389,6 @@ ms2/src/org/labkey/ms2/reader/XPressHandler.java -text
 ms2/src/org/labkey/ms2/renameRun.jsp -text
 ms2/src/org/labkey/ms2/runSummary.jsp -text
 ms2/src/org/labkey/ms2/saveView.jsp -text
-ms2/src/org/labkey/ms2/scoring/ScoringController.java -text
-ms2/src/org/labkey/ms2/scoring/compare.jsp -text
-ms2/src/org/labkey/ms2/scoring/discriminate.jsp -text
 ms2/src/org/labkey/ms2/search/MSSearchWebpart.java -text
 ms2/src/org/labkey/ms2/search/ProteinSearchBean.java -text
 ms2/src/org/labkey/ms2/search/ProteinSearchWebPart.java -text

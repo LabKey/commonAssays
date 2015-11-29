@@ -150,7 +150,6 @@ import org.labkey.ms2.query.SequencesTableInfo;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
-import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -198,7 +197,6 @@ public class MS2Controller extends SpringActionController
     private static final String MS2_DEFAULT_VIEW_CATEGORY = "MS2DefaultView";
     private static final String DEFAULT_VIEW_NAME = "DefaultViewName";
     private static final String SHARED_VIEW_SUFFIX = " (Shared)";
-    static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
 
     public MS2Controller()
     {
@@ -5401,18 +5399,6 @@ public class MS2Controller extends SpringActionController
             }
 
             return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
-        }
-    }
-
-
-    @RequiresPermission(ReadPermission.class)
-    public class DiscriminateScoreAction extends SimpleRedirectAction<RunForm>
-    {
-        public ActionURL getRedirectURL(RunForm form) throws Exception
-        {
-            ActionURL url = new ActionURL(ScoringController.DiscriminateAction.class, getContainer());
-            url.addParameter("runId", form.getRun());
-            return url;
         }
     }
 

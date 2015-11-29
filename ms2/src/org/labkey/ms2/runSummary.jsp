@@ -67,11 +67,6 @@ if (null != bean.quantAlgorithm)
         if (run.hasProteinProphet())
         { %>
             <%=PageFlowUtil.textLink("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), null, "proteinProphetDetailsLink", java.util.Collections.singletonMap("target", "proteinProphetSummary"))%><%
-        }
-
-        if (run.getNegativeHitCount() > run.getPeptideCount() / 3)
-        { %>
-            <%=textLink("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
         } %>
         </div>
     </td></tr>

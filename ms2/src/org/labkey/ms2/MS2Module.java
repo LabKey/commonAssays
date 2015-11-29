@@ -95,7 +95,6 @@ import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SequestLogDocumentParser;
-import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.MSSearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -219,7 +218,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         addController("xarassay", MassSpecMetadataController.class);
         addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
-        addController("ms2-scoring", ScoringController.class);
 
         MS2Schema.register(this);
         ProteinUserSchema.register(this);
