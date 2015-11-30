@@ -1063,11 +1063,6 @@ public class FlowSchema extends UserSchema
 
         /* ExpTable */
 
-        public void setContainer(Container container)
-        {
-            _container = container;
-        }
-
         public Container getContainer()
         {
             return _container;
