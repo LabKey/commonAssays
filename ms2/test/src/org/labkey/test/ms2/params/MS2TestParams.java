@@ -16,7 +16,6 @@
 package org.labkey.test.ms2.params;
 
 import org.labkey.test.Locator;
-import org.labkey.test.ms2.MS2ClusterTest;
 import org.labkey.test.pipeline.AbstractPipelineTestParams;
 import org.labkey.test.pipeline.PipelineWebTestBase;
 
@@ -24,7 +23,7 @@ public class MS2TestParams extends AbstractPipelineTestParams
 {
     public MS2TestParams(PipelineWebTestBase test, String dataPath, String protocolName, String... sampleNames)
     {
-        super(test, dataPath, "xtandem", protocolName + MS2ClusterTest.PROTOCOL_MODIFIER, sampleNames);
+        super(test, dataPath, "xtandem", protocolName, sampleNames);
 
         setParametersFile("tandem.xml");
         if (sampleNames.length == 0)
