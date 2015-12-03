@@ -714,6 +714,7 @@ luminex/test/src/org/labkey/test/tests/LuminexPositivityTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexRTransformTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexSinglePointTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexTest.java -text
+luminex/test/src/org/labkey/test/tests/LuminexTransformWarningTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexUploadAndCopyTest.java -text
 luminex/test/src/org/labkey/test/tests/LuminexValueBasedGuideSetTest.java -text
 luminex/test/src/org/labkey/test/util/LuminexGuideSetHelper.java -text
