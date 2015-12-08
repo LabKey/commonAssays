@@ -471,7 +471,9 @@ public abstract class MS2Importer
         sql.append(" SET SeqId = (SELECT SeqId FROM ");
         sql.append(" (SELECT SeqId, Count(*) AS C FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
-        sql.append(" WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%') GROUP BY SeqId) AS S");
+        sql.append(" WHERE fs.FastaId = ? AND fs.LookupString LIKE ");
+        sql.append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'"));
+        sql.append(" GROUP BY SeqId) AS S");
         sql.append(" WHERE C = 1) ");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
