@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.data.ExcelColumn;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.Results;
 
 import java.sql.SQLException;
@@ -36,9 +37,9 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
     protected GroupedResultSet _groupedRS = null;
 
     @Override
-    public void renderGrid(Sheet sheet, List<ExcelColumn> columns, Results rs) throws SQLException, MaxRowsExceededException
+    public void renderGrid(RenderContext ctx, Sheet sheet, List<ExcelColumn> columns, Results rs) throws SQLException, MaxRowsExceededException
     {
-        super.renderGrid(sheet, columns, rs);
+        super.renderGrid(ctx, sheet, columns, rs);
 
         if (null != _groupedRS)
             _groupedRS.close();
