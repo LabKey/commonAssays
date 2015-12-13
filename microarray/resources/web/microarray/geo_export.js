@@ -65,9 +65,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                                         scope: this,
                                         load: function(store){
                                             var recordStore = this.store;
-                                            recordStore.each(function(rec){
-                                                recordStore.remove(rec);
-                                            }, this);
+                                            recordStore.removeAll();
 
                                             //reset all items
                                             this.items.each(function(tab){
