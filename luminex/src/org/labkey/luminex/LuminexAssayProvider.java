@@ -116,7 +116,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 return getDataForDataRow(lsid.getObjectId(), null);
             }
 
-            public String getDisplayURL(Lsid lsid)
+            @Nullable
+            public ActionURL getDisplayURL(Lsid lsid)
             {
                 ExpData data = getDataForDataRow(lsid.getObjectId(), null);
                 if (data == null)
@@ -127,8 +128,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ExpProtocol protocol = expRun.getProtocol();
                 if (protocol == null)
                     return null;
-                ActionURL dataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(expRun.getContainer(), protocol, expRun.getRowId());
-                return dataURL.getLocalURIString();
+                return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(expRun.getContainer(), protocol, expRun.getRowId());
             }
         });
     }

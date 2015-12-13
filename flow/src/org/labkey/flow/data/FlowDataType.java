@@ -16,6 +16,7 @@
 
 package org.labkey.flow.data;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.api.DataType;
@@ -58,15 +59,16 @@ abstract public class FlowDataType extends AssayDataType
                 return null;
             }
 
+            @Nullable
             @Override
-            public String getDisplayURL(Lsid lsid)
+            public ActionURL getDisplayURL(Lsid lsid)
             {
                 FlowDataObject fdo = FlowDataObject.fromLSID(lsid.toString());
                 if (fdo != null)
                 {
                     ActionURL url = fdo.urlShow();
                     if (url != null)
-                        return url.toString();
+                        return url;
                 }
 
                 return null;
