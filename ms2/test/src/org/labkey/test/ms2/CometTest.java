@@ -21,7 +21,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.BVT;
+import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.FileBrowser;
 import org.labkey.test.categories.MS2;
 
@@ -29,7 +29,7 @@ import java.io.File;
 
 import static org.junit.Assert.fail;
 
-@Category({MS2.class, BVT.class, FileBrowser.class})
+@Category({MS2.class, DailyB.class, FileBrowser.class})
 public class CometTest extends AbstractMS2SearchEngineTest
 {
     protected static final String SEARCH_BUTTON = "Comet";

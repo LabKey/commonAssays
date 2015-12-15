@@ -21,7 +21,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.BVT;
+import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.XTandem;
 import org.labkey.test.ms2.AbstractXTandemTest;
@@ -31,7 +31,7 @@ import java.io.File;
 
 import static org.junit.Assert.*;
 
-@Category({BVT.class, MS2.class, XTandem.class})
+@Category({DailyB.class, MS2.class, XTandem.class})
 public class XTandemTest extends AbstractXTandemTest
 {
     protected static final String SEARCH = "gi|4689022";
