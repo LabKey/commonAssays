@@ -33,7 +33,6 @@ import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
-import org.labkey.ms2.query.SequencesTableInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("LookupString"));
-        PropertyDescriptor[] props = OntologyManager.getPropertiesForType(annotationSet.getLsid(), annotationSet.lookupContainer());
+        List<PropertyDescriptor> props = OntologyManager.getPropertiesForType(annotationSet.getLsid(), annotationSet.lookupContainer());
         for (PropertyDescriptor prop : props)
         {
             defaultCols.add(FieldKey.fromParts("Property", prop.getName()));
