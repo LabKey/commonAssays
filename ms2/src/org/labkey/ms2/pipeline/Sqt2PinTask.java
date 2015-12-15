@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJob;
@@ -49,6 +50,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
         super(factory, job);
     }
 
+    @NotNull
     @Override
     public RecordedActionSet run() throws PipelineJobException
     {

@@ -17,6 +17,7 @@ package org.labkey.microarray.pipeline;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJob;
@@ -60,6 +61,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
         return (AbstractFileAnalysisJob)super.getJob();
     }
 
+    @NotNull
     @Override
     public RecordedActionSet run() throws PipelineJobException
     {

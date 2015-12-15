@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray.pipeline;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
@@ -48,6 +49,7 @@ public class MageMLDataCreatorTask extends WorkDirectoryTask<MageMLDataCreatorTa
         return (AbstractFileAnalysisJob)super.getJob();
     }
 
+    @NotNull
     @Override
     public RecordedActionSet run() throws PipelineJobException
     {

@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline.tandem;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -127,6 +128,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         return getJob().getJobSupport(JobSupport.class);
     }
 
+    @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
         try

@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -267,6 +268,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         return getJob().getJobSupport(JobSupport.class);
     }
 
+    @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
         try

@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.pipeline.PipelineJob;
@@ -242,6 +243,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return Collections.singletonList(indexFile);
     }
 
+    @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
         try

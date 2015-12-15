@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
@@ -234,6 +235,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         return Collections.singletonList(indexFile);
     }
 
+    @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
         try

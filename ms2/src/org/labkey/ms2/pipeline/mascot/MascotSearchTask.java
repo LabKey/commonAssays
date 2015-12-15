@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -158,6 +159,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         return getJob().getJobSupport(JobSupport.class);
     }
 
+    @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
         try

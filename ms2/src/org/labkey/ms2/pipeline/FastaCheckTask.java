@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
@@ -114,6 +115,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         return getJob().getJobSupport(MS2SearchJobSupport.class);
     }
 
+    @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
         try

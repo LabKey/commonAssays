@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.comet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -74,6 +75,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
         return (CometPipelineJob)super.getJob();
     }
 
+    @NotNull
     @Override
     public RecordedActionSet run() throws PipelineJobException
     {
