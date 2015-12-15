@@ -75,11 +75,11 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         _containerHelper.createProject(getProjectName(), "Assay");
     }
 
-    @Test @Ignore("Java transform not working with GPAT assay")
+    @Test //@Ignore("Java transform not working with GPAT assay")
     public void testJavaTransformWarning()
     {
         String assayName = "transformWarningJar";
-        String importData = "Participant\njavaWarned";
+        String importData = "ParticipantId\nJavaWarned";
         String runName = "java transform run";
 
         AssayDomainEditor assayDesigner = _assayHelper.createAssayAndEdit("General", assayName);
