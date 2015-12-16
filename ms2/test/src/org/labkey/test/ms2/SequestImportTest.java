@@ -103,8 +103,7 @@ public class SequestImportTest extends BaseWebDriverTest
         {
             waitForElement(FileBrowserHelper.Locators.gridRowWithNodeId(file).append(runLink));
         }
-
-        clickAndWait(runLink);
+        clickAt(runLink, 5, 5, getDefaultWaitForPage());  // The library is having a hard time clicking on the element, so changing the click to be on an X,Y coordinate.
         assertElementPresent(Locator.pageHeader(runName));
         clickAndWait(Locator.linkWithText(runProtocol));
 
