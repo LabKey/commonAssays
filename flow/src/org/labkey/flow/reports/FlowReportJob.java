@@ -19,7 +19,6 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -249,14 +248,9 @@ public class FlowReportJob extends RReportJob
             public void updateStatistics(int currentRow) throws SQLException { }
         };
 
-        List<? extends DomainProperty> dps = domain.getProperties();
-        PropertyDescriptor[] pds = new PropertyDescriptor[dps.size()];
-        for (int i = 0; i < dps.size(); i++)
-            pds[i] = dps.get(i).getPropertyDescriptor();
-
         Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
 
-        List<String> lsids = OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, pds, loader.load(), true);
+        List<String> lsids = OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, loader.load(), true);
     }
 
     @Override

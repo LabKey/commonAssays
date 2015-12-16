@@ -109,7 +109,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1633,12 +1632,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Clear out the values - this is necessary if this is a XAR import where the run properties would
         // have been loaded as part of the ExperimentRun itself.
         Integer objectId = OntologyManager.ensureObject(container, data.getLSID());
-        List<? extends DomainProperty> props = domain.getProperties();
-        PropertyDescriptor[] pds = new PropertyDescriptor[props.size()];
-        for (int i = 0; i < props.size(); i++)
+        for (DomainProperty prop : domain.getProperties())
         {
-            OntologyManager.deleteProperty(data.getLSID(), props.get(i).getPropertyURI(), container, protocol.getContainer());
-            pds[i] = props.get(i).getPropertyDescriptor();
+            OntologyManager.deleteProperty(data.getLSID(), prop.getPropertyURI(), container, protocol.getContainer());
         }
 
         List<Map<String, Object>> excelRunPropsList = new ArrayList<>();
@@ -1662,7 +1658,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             public void updateStatistics(int currentRow) throws SQLException
             {
             }
-        }, pds, excelRunPropsList, true);
+        }, domain, excelRunPropsList, true);
     }
 
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
