@@ -62,7 +62,8 @@ function showViewDesigner(queryName, renderTo, viewSelectId, saveCallback)
         }, this);
     });
 
-    //LABKEY.DataRegion2.loadViewDesigner(function() {
+    // TODO: Comment this in when turning on new region
+    //LABKEY.DataRegion.loadViewDesigner(function() {
     //
     //    var viewName = viewSelectId == null || viewSelectId == '' ? null : document.getElementById(viewSelectId).value;
     //    LABKEY.Query.getQueryDetails({
