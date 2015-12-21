@@ -34,6 +34,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
@@ -214,6 +215,65 @@ public class MS2Schema extends UserSchema
                 ExpRunTable runsTable = ms2Schema.createRunsTable(MS2SearchRuns.toString(), ContainerFilter.CURRENT);
                 runsTable.setDescription("Contains one row per MS2 search result, regardless of source, loaded in this folder.");
                 return runsTable;
+            }
+        },
+        MS2RunDetails
+        {
+            public TableInfo createTable(MS2Schema ms2Schema)
+            {
+                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoRuns(), ms2Schema);
+                result.addWrapColumn(result.getRealTable().getColumn("Run"));
+                result.addWrapColumn(result.getRealTable().getColumn("Description"));
+                result.addWrapColumn(result.getRealTable().getColumn("Created"));
+                result.addWrapColumn(result.getRealTable().getColumn("Path"));
+                result.addWrapColumn(result.getRealTable().getColumn("SearchEngine"));
+                result.addWrapColumn(result.getRealTable().getColumn("MassSpecType"));
+                result.addWrapColumn(result.getRealTable().getColumn("PeptideCount"));
+
+                // Add count columns for MS1-MS4 data
+                result.addColumn(new ExprColumn(result, "MS1ScanCount", getScanCountSqlFragment(1), JdbcType.INTEGER));
+
+                // SpectrumCount is an old column that was populated based on the number of spectra imported into the
+                // ms2.spectradata table. Use its value if available, otherwise defer to the fractions' MS2ScanCount values
+                SQLFragment ms2SQL = new SQLFragment("CASE WHEN SpectrumCount > 0 THEN SpectrumCount ELSE ");
+                ms2SQL.append(getScanCountSqlFragment(2));
+                ms2SQL.append(" END");
+                result.addColumn(new ExprColumn(result, "MS2ScanCount", ms2SQL, JdbcType.INTEGER));
+                result.addColumn(new ExprColumn(result, "SpectrumCount", ms2SQL, JdbcType.INTEGER)).setHidden(true);
+
+                result.addColumn(new ExprColumn(result, "MS3ScanCount", getScanCountSqlFragment(3), JdbcType.INTEGER));
+                result.addColumn(new ExprColumn(result, "MS4ScanCount", getScanCountSqlFragment(4), JdbcType.INTEGER));
+
+                result.addWrapColumn(result.getRealTable().getColumn("SearchEnzyme"));
+                result.addWrapColumn(result.getRealTable().getColumn("Filename"));
+                result.addWrapColumn(result.getRealTable().getColumn("Status"));
+                result.addWrapColumn(result.getRealTable().getColumn("StatusId")).setHidden(true);
+                result.addWrapColumn(result.getRealTable().getColumn("Type"));
+
+                ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
+                iconColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        ActionURL linkURL = MS2Controller.getShowRunURL(ms2Schema.getUser(), ms2Schema.getContainer());
+                        return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
+                    }
+                });
+                result.addColumn(iconColumn);
+                return result;
+            }
+
+            @NotNull
+            public SQLFragment getScanCountSqlFragment(int msLevel)
+            {
+                SQLFragment sql = new SQLFragment("(SELECT SUM(MS");
+                sql.append(msLevel);
+                sql.append("ScanCount) FROM ");
+                sql.append(MS2Manager.getTableInfoFractions(), "f");
+                sql.append(" WHERE f.Run = ");
+                sql.append(ExprColumn.STR_TABLE_ALIAS);
+                sql.append(".Run)");
+                return sql;
             }
         },
         Peptides
@@ -730,38 +790,9 @@ public class MS2Schema extends UserSchema
         sql.add(Boolean.FALSE);
         ColumnInfo ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, JdbcType.INTEGER);
         ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
-        ms2DetailsColumn.setFk(new LookupForeignKey(url, "run", "Run", "Description")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoRuns(), MS2Schema.this);
-                result.addWrapColumn(result.getRealTable().getColumn("Run"));
-                result.addWrapColumn(result.getRealTable().getColumn("Description"));
-                result.addWrapColumn(result.getRealTable().getColumn("Created"));
-                result.addWrapColumn(result.getRealTable().getColumn("Path"));
-                result.addWrapColumn(result.getRealTable().getColumn("SearchEngine"));
-                result.addWrapColumn(result.getRealTable().getColumn("MassSpecType"));
-                result.addWrapColumn(result.getRealTable().getColumn("PeptideCount"));
-                result.addWrapColumn(result.getRealTable().getColumn("SpectrumCount"));
-                result.addWrapColumn(result.getRealTable().getColumn("SearchEnzyme"));
-                result.addWrapColumn(result.getRealTable().getColumn("Filename"));
-                result.addWrapColumn(result.getRealTable().getColumn("Status"));
-                result.addWrapColumn(result.getRealTable().getColumn("StatusId")).setHidden(true);
-                result.addWrapColumn(result.getRealTable().getColumn("Type"));
-
-                ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
-                iconColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-                {
-                    public DisplayColumn createRenderer(ColumnInfo colInfo)
-                    {
-                        ActionURL linkURL = MS2Controller.getShowRunURL(getUser(), getContainer());
-                        return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
-                    }
-                });
-                result.addColumn(iconColumn);
-                return result;
-            }
-        });
+        DetailsURL detailsURL = new DetailsURL(url, Collections.singletonMap("Run", ms2DetailsColumn.getFieldKey()));
+        ms2DetailsColumn.setURL(detailsURL);
+        ms2DetailsColumn.setFk(new QueryForeignKey(this, null, TableType.MS2RunDetails.name(), "Run", "Description"));
         result.addColumn(ms2DetailsColumn);
 
         result.getColumn("Name").setDisplayColumnFactory(new DisplayColumnFactory()
