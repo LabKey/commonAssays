@@ -16,6 +16,7 @@
 
 package org.labkey.elispot.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -199,6 +200,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
             _schema = schema;
         }
 
+        @NotNull
         @Override
         public String getFormattedValue(RenderContext ctx)
         {
