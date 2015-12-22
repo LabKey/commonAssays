@@ -298,7 +298,7 @@ public abstract class MS2Importer
 
     protected boolean isMzXmlFile(File file)
     {
-        String name = file.getName();
+        String name = file.getName().toLowerCase();
         return name.endsWith(".mzxml") || name.endsWith(".mzxml.gz");
     }
 
