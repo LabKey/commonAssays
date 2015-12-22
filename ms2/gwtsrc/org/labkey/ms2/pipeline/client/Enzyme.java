@@ -16,9 +16,6 @@
 
 package org.labkey.ms2.pipeline.client;
 
-import org.labkey.ms2.pipeline.client.CutSite;
-import com.google.gwt.core.client.GWT;
-
 /**
  * User: billnelson@uky.edu
  * Date: Apr 24, 2008
@@ -84,23 +81,26 @@ public class Enzyme
     public boolean equals(Object o)
     {
         if (this == o) return true;
+        if (!(o instanceof Enzyme))
+        {
+            return false;
+        }
 
         Enzyme enzyme = (Enzyme) o;
 
         if(cutSite.length != enzyme.cutSite.length) return false;
-        boolean same = false;
-        for(int i = 0; i < cutSite.length; i++ )
+        for (CutSite aCutSite : cutSite)
         {
-            same = false;
-            for(int y = 0; y < cutSite.length; y++)
+            boolean same = false;
+            for (int y = 0; y < cutSite.length; y++)
             {
-                if(cutSite[i].equals(enzyme.cutSite[y]))
+                if (aCutSite.equals(enzyme.cutSite[y]))
                 {
                     same = true;
                     break;
                 }
             }
-            if(!same) return false;
+            if (!same) return false;
         }
         if(displayName != null)
            if(displayName.equalsIgnoreCase(enzyme.displayName)) return true;
@@ -108,11 +108,11 @@ public class Enzyme
         if(names == enzyme.names)return true;
         if(names != null && enzyme.names != null)
         {
-            for(int i = 0; i < names.length; i++)
+            for (String name : names)
             {
-                for(int y = 0; y < enzyme.names.length; y++)
+                for (int y = 0; y < enzyme.names.length; y++)
                 {
-                    if(names[i].equalsIgnoreCase(enzyme.names[y]))
+                    if (name.equalsIgnoreCase(enzyme.names[y]))
                     {
                         return true;
                     }
