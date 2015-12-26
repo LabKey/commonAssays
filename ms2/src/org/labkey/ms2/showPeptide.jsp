@@ -22,8 +22,9 @@
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.ms2.MS2Fraction"%>
 <%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
-<%@ page import="org.labkey.ms2.MS2Manager" %>
+<%@ page import="org.labkey.ms2.MS2Manager"%>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
+<%@ page import="org.labkey.ms2.MS2RunType" %>
 <%@ page import="org.labkey.ms2.MassType" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
@@ -82,7 +83,7 @@
                 </tr>
                 <tr>
                     <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
-                    <td class="labkey-form-label">PeptideProphet</td><td><%= ((p.getPeptideProphet() == null) ? "" : h(Formats.f2.format(p.getPeptideProphet()))) %></td>
+                    <td class="labkey-form-label">PeptideProphet</td><td><%= h((p.getPeptideProphet() == null) ? "" : Formats.f2.format(p.getPeptideProphet())) %></td>
                     <td class="labkey-form-label" rowspan="2">Run</td><td rowspan="2"><%= h(run.getDescription()) %></td>
                 </tr>
                 <tr>
@@ -93,6 +94,15 @@
                     <td class="labkey-form-label">Charge</td><td><%=p.getCharge()%>+</td>
                     <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= h(p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())) %></td>
                 </tr>
+                <% if (MS2RunType.Mascot.equals(run.getRunType())) { %>
+                    <tr>
+                        <td class="labkey-form-label">Query Number</td><td><%= p.getQueryNumber() %></td>
+                        <td class="labkey-form-label">Hit Rank</td><td><%= p.getHitRank() %></td>
+                    </tr>
+                    <tr>
+                        <td class="labkey-form-label">Is Decoy</td><td><%= p.isDecoy() %></td>
+                    </tr>
+                <% } %>
             </table>
 
 <%

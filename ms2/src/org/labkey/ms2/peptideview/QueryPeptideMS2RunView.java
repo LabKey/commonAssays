@@ -128,8 +128,10 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return peptideView;
     }
 
-    private class PeptideQueryView extends AbstractMS2QueryView
+    public class PeptideQueryView extends AbstractMS2QueryView
     {
+        private List<DisplayColumn> _additionalDisplayColumns = new ArrayList<>();
+
         public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
             super(schema, settings, expanded, allowNesting,
@@ -139,18 +141,20 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         public List<DisplayColumn> getDisplayColumns()
         {
+            List<DisplayColumn> result = new ArrayList<>();
+
             if (_overrideColumns != null)
             {
-                List<DisplayColumn> result = new ArrayList<>();
                 for (ColumnInfo colInfo : QueryService.get().getColumns(getTable(), _overrideColumns).values())
                 {
                     result.add(colInfo.getRenderer());
                 }
                 assert result.size() == _overrideColumns.size() : "Got the wrong number of columns back, " + result.size() + " instead of " + _overrideColumns.size();
-                return result;
             }
+            else result.addAll(super.getDisplayColumns());
+            result.addAll(_additionalDisplayColumns);
 
-            return super.getDisplayColumns();
+            return result;
         }
 
         protected DataRegion createDataRegion()
@@ -175,6 +179,11 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         public PeptidesTableInfo createTable()
         {
             return createPeptideTable((MS2Schema)getSchema());
+        }
+
+        public void addDisplayColumn(DisplayColumn column)
+        {
+            _additionalDisplayColumns.add(column);
         }
     }
 

@@ -49,6 +49,9 @@ public class MS2Peptide
     private int _proteinHits;
     private long _rowId;
     private Integer _seqId;
+    private int _hitRank;
+    private Integer _queryNumber;
+    private boolean _decoy;
 
     // Calculated variables
     private Map<MassType, double[]> _massTables = new HashMap<>();
@@ -644,5 +647,35 @@ public class MS2Peptide
             _libraQuantResult = MS2Manager.getLibraQuantResult(getRowId());
         }
         return _libraQuantResult;
+    }
+
+    public int getHitRank()
+    {
+        return _hitRank;
+    }
+
+    public void setHitRank(int hitRank)
+    {
+        _hitRank = hitRank;
+    }
+
+    public Integer getQueryNumber()
+    {
+        return _queryNumber;
+    }
+
+    public void setQueryNumber(Integer queryNumber)
+    {
+        _queryNumber = queryNumber;
+    }
+
+    public boolean isDecoy()
+    {
+        return _decoy;
+    }
+
+    public void setDecoy(boolean decoy)
+    {
+        _decoy = decoy;
     }
 }

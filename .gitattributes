@@ -1077,6 +1077,7 @@ ms2/src/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/compareSearchEngineProteinOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/spectraCountOptions.jsp -text
 ms2/src/org/labkey/ms2/currentFilter.jsp -text
+ms2/src/org/labkey/ms2/decoySummary.jsp -text
 ms2/src/org/labkey/ms2/editElution.jsp -text
 ms2/src/org/labkey/ms2/extraExportOptions.jsp -text
 ms2/src/org/labkey/ms2/filterHeader.jsp -text

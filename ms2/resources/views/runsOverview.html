@@ -7,6 +7,8 @@ var allRuns = null;
 var _filterMap = {};
 var active = "Peptides";
 var inactive = "Proteins";
+var haveSearchOptionsChanged = false;
+var initSearchEngine = null;
 
 function addContainer(container, allContainers)
 {
@@ -52,6 +54,21 @@ function init()
     });
 
     getRunFiltersContent();
+
+    LABKEY.Ajax.request({
+        url: LABKEY.ActionURL.buildURL('ms2', 'mS2SearchOptions.api'),
+        scope: this,
+        success: LABKEY.Utils.getCallbackWrapper(function(response)
+        {
+            Ext4.iterate(response.properties, function(key, value)
+            {
+                if (key == "searchEngine")
+                {
+                    initSearchEngine = value;
+                }
+            });
+        }, this, false)
+    });
 }
 
 function getRunFiltersContent()
@@ -93,7 +110,7 @@ function setQueryOptions()
     if (allContainers && allRuns)
     {
         // All the Containers and their associated MS2 Runs are available.
-        var validContainers = new Array();
+        var validContainers = [];
         var validFASTA = {};
         var validEngine = {};
 
@@ -170,19 +187,21 @@ function setQueryOptions()
             _panel.insert(3, getPanelSignature('Results', false, null));
             _panel.doLayout(true, true);
             validateRunFilters();
+            persistSearchOptions();
         });
 
         var clearRunsFilters = new Ext.Button({
             text    : 'Clear Runs Filters',
             handler : function() {
                 Ext.getCmp('filter-fasta').reset();
-                Ext.getCmp('filter-engine').reset();
+                Ext.getCmp('filter-engine').setValue(null);
                 var grid = Ext.getCmp('runs-grid');
                 grid.selModel.clearSelections();
+                haveSearchOptionsChanged = true;
             }
         });
 
-        var simple = new Ext.FormPanel({
+      var simple = new Ext.FormPanel({
             id: 'runs-panel',
             layout: 'table',
             items : [{
@@ -226,6 +245,13 @@ function setQueryOptions()
                             }
                             delete _filterMap['filter-engine'];
                             return true;
+                        },
+                        listeners: {
+                            scope: this,
+                            change: function()
+                            {
+                                haveSearchOptionsChanged = true
+                            }
                         }
                     }), new Ext.form.ComboBox({
                         id: 'filter-fasta',
@@ -269,7 +295,7 @@ function setQueryOptions()
         {
             console.info('ERROR: The Run Filters did not load correctly.');
         }
-
+        Ext.getCmp('filter-engine').setValue(initSearchEngine);
     }
 
     function validateRunFilters()
@@ -321,6 +347,11 @@ function setQueryOptions()
             filterArray     : runsFilterArray
         };
 
+        if ("MASCOT" == Ext.getCmp('filter-engine').value)
+        {
+            _storeConfig.columns += ", MS2Details/MascotFile, MS2Details/DistillerRawFile";
+        }
+
         var _store = new LABKEY.ext.Store(_storeConfig);
         
         var runsGrid = new LABKEY.ext.EditorGridPanel({
@@ -346,6 +377,18 @@ function setQueryOptions()
 
         showResultFilters(active);
     }
+
+    var persistSearchOptions = function()
+    {
+        if (haveSearchOptionsChanged)
+        {
+            haveSearchOptionsChanged = false;
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('ms2', 'mS2SearchOptions.api'),
+                params: { saveValues: true, searchEngine: Ext.getCmp('filter-engine').getValue()}
+            });
+        }
+    };
 }
 
 function showResultFilters(formChoice)
@@ -378,7 +421,12 @@ function showResultFilters(formChoice)
         }}});
         colItems.push({boxLabel: 'Peptide', name: 'Peptide'});
         colItems.push({boxLabel: 'Protein', name: 'Protein'});
-
+        if ("MASCOT" == Ext.getCmp('filter-engine').value)
+        {
+            colItems.push({boxLabel: 'Query Number', name: 'QueryNumber'});
+            colItems.push({boxLabel: 'Hit Rank', name: 'HitRank'});
+            colItems.push({boxLabel: 'Decoy', name: 'Decoy'});
+        }
         formItems = [{
             xtype   : 'checkboxgroup',
             columns : 3,

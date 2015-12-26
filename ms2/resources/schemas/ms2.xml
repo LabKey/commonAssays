@@ -1099,6 +1099,9 @@
       <ns:column columnName="ProphetNumTrypticTerm"/>
       <ns:column columnName="ProphetNumMissedCleav"/>
       <ns:column columnName="RowId"/>
+      <ns:column columnName="QueryNumber"/>
+      <ns:column columnName="HitRank"/>
+      <ns:column columnName="Decoy"/>
     </ns:columns>
     <ns:tableTitle>MS2Peptides</ns:tableTitle>
     <ns:pkColumnName>Run,RowId</ns:pkColumnName>
@@ -1553,6 +1556,9 @@
       <ns:column columnName="ProphetNumTrypticTerm"/>
       <ns:column columnName="ProphetNumMissedCleav"/>
       <ns:column columnName="RowId"/>
+      <ns:column columnName="QueryNumber"/>
+      <ns:column columnName="HitRank"/>
+      <ns:column columnName="Decoy"/>
     </ns:columns>
     <ns:tableTitle>MS2Peptides</ns:tableTitle>
     <ns:pkColumnName>Run,RowId</ns:pkColumnName>

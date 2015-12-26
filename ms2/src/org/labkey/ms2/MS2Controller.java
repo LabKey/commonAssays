@@ -21,7 +21,9 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
+import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.ExportException;
 import org.labkey.api.action.FormHandlerAction;
@@ -125,6 +127,7 @@ import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
+import org.labkey.ms2.pipeline.mascot.MascotRun;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.protein.AnnotationInsertion;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
@@ -426,6 +429,20 @@ public class MS2Controller extends SpringActionController
             bean.writePermissions = getViewContext().hasPermission(UpdatePermission.class);
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
+
+            if (run instanceof MascotRun) // TODO: complete logic on when to display- must have decoys- the isResult() call below is not correct
+            {
+                String fdrThresh = form.getViewContext().getRequest().getParameter("fdrThreshold");
+                float convertedFdrThreshold = StringUtils.trimToNull(fdrThresh) != null ? Float.valueOf(fdrThresh) : 0.05f;
+                MS2Manager.DecoySummaryBean decoySummary = MS2Manager.getDecoySummaryForRun(run.getRun(), convertedFdrThreshold);
+                if (decoySummary.isHasDecoys())
+                {
+                    JspView<MS2Manager.DecoySummaryBean> decoySummaryView = new JspView<>("/org/labkey/ms2/decoySummary.jsp", decoySummary);
+                    decoySummaryView.setFrame(WebPartView.FrameType.PORTAL);
+                    decoySummaryView.setTitle("Decoy Summary");
+                    vBox.addView(decoySummaryView);
+                }
+            }
 
             List<Pair<String, String>> sqlSummaries = new ArrayList<>();
             SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run);
@@ -910,6 +927,20 @@ public class MS2Controller extends SpringActionController
                 result.addView(quantView);
             }
             getPageConfig().setTemplate(PageConfig.Template.Print);
+
+            if (MS2RunType.Mascot.equals(run.getRunType()))
+            {
+                QueryPeptideMS2RunView altPeptideView = (QueryPeptideMS2RunView) getPeptideView(form.getGrouping(), run);
+                SimpleFilter altPeptideFilter = new SimpleFilter(FieldKey.fromParts("scan"), peptide.getScan());
+                altPeptideFilter.addCondition(FieldKey.fromParts("fraction"), peptide.getFraction());
+                altPeptideFilter.addCondition(FieldKey.fromParts("charge"), peptide.getCharge());
+
+                QueryPeptideMS2RunView.PeptideQueryView altPeptideGrid = (QueryPeptideMS2RunView.PeptideQueryView) altPeptideView.createGridView(altPeptideFilter);
+
+                altPeptideGrid.setTitle("All Matches To This Query");
+                altPeptideGrid.addDisplayColumn(new CurrentPeptideColumn(peptideId));
+                result.addView(altPeptideGrid);
+            }
             return result;
         }
 
@@ -919,6 +950,29 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    private static final class CurrentPeptideColumn extends SimpleDisplayColumn
+    {
+        private final Long _currentPeptideId;
+
+        public CurrentPeptideColumn(long currentPeptideId) throws SQLException
+        {
+            _currentPeptideId = currentPeptideId;
+            setCaption("Current View");
+        }
+
+        public void renderDetailsCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            renderGridCellContents(ctx, out);
+        }
+
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            if (_currentPeptideId.equals(ctx.getRow().get("rowId")))
+            {
+                out.write("<b>&#x2714;</b>"); // html checkmark
+            }
+        }
+    }
 
     private long[] getPeptideIndex(ActionURL currentURL, MS2Run run)
     {
@@ -5013,6 +5067,57 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
+    @RequiresPermission(ReadPermission.class)
+    public class MS2SearchOptionsAction extends ApiAction<MS2SearchOptions>
+    {
+        private static final String CATEGORY = "MS2SearchOptions";
+
+        @Override
+        public Object execute(MS2SearchOptions form, BindException errors) throws Exception
+        {
+            PropertyManager.PropertyMap properties = PropertyManager.getWritableProperties(getUser(), getContainer(), CATEGORY, true);
+
+            Map<String, String> valuesToPersist = form.getOptions();
+            if (!valuesToPersist.isEmpty())
+            {
+                properties.putAll(valuesToPersist);
+                properties.save();
+            }
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("properties", properties);
+            return response;
+        }
+    }
+
+    private static class MS2SearchOptions
+    {
+        private String _searchEngine;
+        private boolean _saveValues = false;
+
+        public Map<String, String> getOptions()
+        {
+            Map<String, String> valueMap = new HashMap<>();
+            if (_saveValues)
+            {
+                valueMap.put("searchEngine", _searchEngine);
+            }
+            return valueMap;
+        }
+
+        @SuppressWarnings({"UnusedDeclaration"})
+        public void setSaveValues(boolean saveValues)
+        {
+            _saveValues = saveValues;
+        }
+
+        @SuppressWarnings({"UnusedDeclaration"})
+        public void setSearchEngine(String searchEngine)
+        {
+            _searchEngine = searchEngine;
+        }
+    }
 
     @RequiresPermission(ReadPermission.class)
     public class ApplyRunViewAction extends SimpleRedirectAction<MS2ViewForm>

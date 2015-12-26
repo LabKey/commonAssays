@@ -534,7 +534,7 @@ public class MS2Manager
         List<MS2Run> runs = new ArrayList<>();
 
         try (ResultSet rs = new SqlSelector(getSchema(),
-                    "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, runs.FastaId, ff.FileName AS FastaFileName, Loaded, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount FROM " + getTableInfoRuns() + " runs LEFT OUTER JOIN " + ProteinManager.getTableInfoFastaFiles() + " ff ON runs.FastaId = ff.FastaId WHERE " + whereClause,
+                    "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, runs.FastaId, ff.FileName AS FastaFileName, Loaded, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount, MascotFile, DistillerRawFile FROM " + getTableInfoRuns() + " runs LEFT OUTER JOIN " + ProteinManager.getTableInfoFastaFiles() + " ff ON runs.FastaId = ff.FastaId WHERE " + whereClause,
                     params).getResultSet())
         {
             while (rs.next())
@@ -1893,5 +1893,154 @@ public class MS2Manager
 
         TableSelector seqIdSelector = new TableSelector(ProteinManager.getTableInfoFastaSequences(), PageFlowUtil.set("LookupString", "SeqId"), filter, null);
         return seqIdSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
+    }
+
+    public static class DecoySummaryBean
+    {
+        private int targetCount;
+        private int decoyCount;
+        private float identityThreshold;
+        private float fdr = 1.0f;
+        private boolean result = false;
+        private float fdrThreshold;
+        private boolean hasDecoys = false; // The best FDR might be at a decoyCount of 0, but the run does have decoys.
+        public int getTargetCount()
+        {
+            return targetCount;
+        }
+
+        public void setTargetCount(int targetCount)
+        {
+            this.targetCount = targetCount;
+        }
+
+        public int getDecoyCount()
+        {
+            return decoyCount;
+        }
+
+        public void setDecoyCount(int decoyCount)
+        {
+            this.decoyCount = decoyCount;
+        }
+
+        public float getIdentityThreshold()
+        {
+            return identityThreshold;
+        }
+
+        public void setIdentityThreshold(float identityThreshold)
+        {
+            this.identityThreshold = identityThreshold;
+        }
+
+        public float getFdr()
+        {
+            return fdr;
+        }
+
+        public void setFdr(float fdr)
+        {
+            this.fdr = fdr;
+        }
+
+        public boolean isResult()
+        {
+            return result;
+        }
+
+        public void setResult(boolean result)
+        {
+            this.result = result;
+        }
+
+        public float getFdrThreshold()
+        {
+            return fdrThreshold;
+        }
+
+        public void setFdrThreshold(float fdrThreshold)
+        {
+            this.fdrThreshold = fdrThreshold;
+        }
+
+        public boolean isHasDecoys()
+        {
+            return hasDecoys;
+        }
+
+        public void setHasDecoys(boolean hasDecoys)
+        {
+            this.hasDecoys = hasDecoys;
+        }
+
+        void setValues(int targetTotal, int decoyTotal, float fdr, float identityThreshold)
+        {
+            setTargetCount(targetTotal);
+            setDecoyCount(decoyTotal);
+            setIdentityThreshold(identityThreshold);
+            setFdr(fdr);
+            setResult(true);
+        }
+    }
+
+    public static DecoySummaryBean getDecoySummaryForRun(int run, float fdrThreshold)
+    {
+        DbSchema schema = getSchema();
+        SQLFragment sql = new SQLFragment("SELECT isNull(t.targets, 0) targetCount, isNull(d.decoys,0) decoyCount, coalesce(t.score2, d.score2) identityThreshold FROM\n")
+                .append("(SELECT count(rowId) targets, score2 \n")
+                .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
+                .append("WHERE  f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanFALSE()).append("\n")
+                .append("GROUP BY p.score2) t\n")
+                .append("FULL OUTER JOIN\n")
+                .append("(SELECT count(rowId) decoys, score2 \n")
+                .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
+                .append("WHERE f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanTRUE()).append("\n")
+                .append("GROUP BY p.score2) d ON t.score2 = d.score2\n")
+                .append("ORDER BY coalesce(t.score2, d.score2)");
+        sql.add(run);
+        sql.add(run);
+
+        DecoySummaryBean result = new DecoySummaryBean();
+        DecoySummaryBean bestResultOverThreshold = new DecoySummaryBean();
+        int targetTotal = 0;
+        int decoyTotal = 0;
+        float fdr;
+
+        for (DecoySummaryBean row : new SqlSelector(schema.getScope(), sql).getArrayList(DecoySummaryBean.class))
+        {
+            targetTotal += row.getTargetCount();
+            decoyTotal += row.getDecoyCount();
+            if (targetTotal == 0)
+            {
+                fdr = 1.0f;
+            }
+            else
+            {
+                fdr = (float)decoyTotal / targetTotal;
+            }
+            if (decoyTotal > 0) // TODO: Possible to have a valid result where FDR == 0?
+            {
+                if (Float.compare(fdr, fdrThreshold) < 1) // We're still getting closer to the highest FDR we'll allow
+                {
+//                    // TODO: Still not 100% sure of algorithm. Should only count if this fdr is higher than one we've seen?
+                    if (!result.isResult() || Float.compare(fdr, result.getFdr()) > 0)
+                        result.setValues(targetTotal, decoyTotal, fdr, row.getIdentityThreshold());
+                }
+                else if (result.isResult()) // We went one too far, the previous row was the best result without going over
+                    break;
+                // Also keep track of the best we've seen that exceeds the desired FDR
+                else if (Float.compare(fdr, bestResultOverThreshold.getFdr()) < 0 || !bestResultOverThreshold.isResult())
+                {
+                    bestResultOverThreshold.setValues(targetTotal, decoyTotal, fdr, row.getIdentityThreshold());
+                }
+            }
+        }
+
+        if (!result.isResult() && bestResultOverThreshold.isResult())
+            result = bestResultOverThreshold;
+        result.setFdrThreshold(fdrThreshold);
+        result.setHasDecoys(decoyTotal > 0);
+        return result;
     }
 }

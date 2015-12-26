@@ -249,6 +249,8 @@ public class MS2Schema extends UserSchema
                 result.addWrapColumn(result.getRealTable().getColumn("Status"));
                 result.addWrapColumn(result.getRealTable().getColumn("StatusId")).setHidden(true);
                 result.addWrapColumn(result.getRealTable().getColumn("Type"));
+                result.addWrapColumn(result.getRealTable().getColumn("MascotFile"));
+                result.addWrapColumn(result.getRealTable().getColumn("DistillerRawFile"));
 
                 ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
                 iconColumn.setDisplayColumnFactory(new DisplayColumnFactory()

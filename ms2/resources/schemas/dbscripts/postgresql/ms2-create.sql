@@ -52,7 +52,7 @@ CREATE VIEW ms2.SimplePeptides AS
             ELSE (pep.mass + pep.deltamass + ((pep.charge - 1)::numeric * 1.007276)::double precision) / pep.charge::double precision
         END AS mz, pep.peptideprophet, pep.PeptideProphetErrorRate, pep.peptide, pep.proteinhits, pep.protein, pep.prevaa, pep.trimmedpeptide, pep.nextaa, ltrim(rtrim((pep.prevaa::text || pep.trimmedpeptide::text) || pep.nextaa::text)) AS strippedpeptide, pep.sequenceposition, pep.seqid, pep.rowid,
         quant.DecimalRatio, quant.Heavy2LightRatio, quant.HeavyArea, quant.HeavyFirstScan, quant.HeavyLastScan, quant.HeavyMass, quant.LightArea, quant.LightFirstScan, quant.LightLastScan, quant.LightMass, quant.Ratio, quant.Invalidated,
-        proph.ProphetFVal, proph.ProphetDeltaMass, proph.ProphetNumTrypticTerm, proph.ProphetNumMissedCleav
+        proph.ProphetFVal, proph.ProphetDeltaMass, proph.ProphetNumTrypticTerm, proph.ProphetNumMissedCleav,  pep.QueryNumber, pep.HitRank, pep.Decoy
     FROM ms2.PeptidesData pep
     JOIN ms2.Fractions frac ON pep.Fraction = frac.Fraction
     JOIN ms2.Runs run ON frac.Run = run.Run

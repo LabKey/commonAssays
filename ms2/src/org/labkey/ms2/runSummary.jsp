@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
+<%@ page import="org.labkey.ms2.pipeline.mascot.MascotRun" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
@@ -30,15 +31,23 @@
 %>
 <table>
     <tr>
-    <td class="labkey-form-label">Search Enzyme</td><td><%=MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a")%></td>
-    <td class="labkey-form-label">File Name</td><td><%=MS2Controller.defaultIfNull(run.getFileName(), "n/a")%></td>
+    <td class="labkey-form-label">Search Enzyme</td><td><%=h(MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a"))%></td>
+    <td class="labkey-form-label">File Name</td><td><%=h(MS2Controller.defaultIfNull(run.getFileName(), "n/a"))%></td>
     </tr><tr>
-    <td class="labkey-form-label">Search Engine</td><td><%=MS2Controller.defaultIfNull(run.getSearchEngine(), "n/a")%></td>
-    <td class="labkey-form-label">Path</td><td><%=MS2Controller.defaultIfNull(run.getPath(), "n/a")%></td>
+    <td class="labkey-form-label">Search Engine</td><td><%=h(MS2Controller.defaultIfNull(run.getSearchEngine(), "n/a"))%></td>
+    <td class="labkey-form-label">Path</td><td><%=h(MS2Controller.defaultIfNull(run.getPath(), "n/a"))%></td>
     </tr><tr>
-    <td class="labkey-form-label">Mass Spec Type</td><td><%=MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a")%></td>
-    <td class="labkey-form-label">Fasta File</td><td><%=MS2Controller.defaultIfNull(run.getFastaFileName(), "n/a")%></td>
-    </tr><%
+    <td class="labkey-form-label">Mass Spec Type</td><td><%=h(MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a"))%></td>
+    <td class="labkey-form-label">Fasta File</td><td><%=h(MS2Controller.defaultIfNull(run.getFastaFileName(), "n/a"))%></td>
+    </tr>
+    <% if (run instanceof MascotRun) { %>
+    <tr>
+        <td class="labkey-form-label">Mascot File</td><td><%=h(MS2Controller.defaultIfNull(((MascotRun)run).getMascotFile(), "n/a"))%></td>
+        <td class="labkey-form-label">Distiller Raw File</td><td><%=h(MS2Controller.defaultIfNull(((MascotRun)run).getDistillerRawFile(), "n/a"))%></td>
+    </tr>
+    <% } %>
+
+    <%
 
 if (null != bean.quantAlgorithm)
 { %>

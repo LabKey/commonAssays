@@ -28,6 +28,9 @@ import java.util.Map;
  */
 public class MascotRun extends MS2Run
 {
+    private String mascotFile;
+    private String distillerRawFile;
+
     @Override
     public void adjustScores(Map<String, String> map)
     {
@@ -66,5 +69,25 @@ public class MascotRun extends MS2Run
     public String[] getGZFileExtensions()
     {
         return new String[]{"out", "dta"};
+    }
+
+    public String getMascotFile()
+    {
+        return mascotFile;
+    }
+
+    public void setMascotFile(String mascotFile)
+    {
+        this.mascotFile = mascotFile;
+    }
+
+    public String getDistillerRawFile()
+    {
+        return distillerRawFile;
+    }
+
+    public void setDistillerRawFile(String distillerRawFile)
+    {
+        this.distillerRawFile = distillerRawFile;
     }
 }
