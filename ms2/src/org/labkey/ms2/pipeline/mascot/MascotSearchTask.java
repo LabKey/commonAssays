@@ -26,6 +26,7 @@ import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
+import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
@@ -62,7 +63,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
     private static final FileType FT_MASCOT_DAT = new FileType(".dat");
     private static final FileType FT_MASCOT_MGF = new FileType(".mgf");
     private static final String MZXML2SEARCH_ACTION_NAME = "MzXML2Search";
-    private static final String MASCOT_ACTION_NAME = "Mascot";
+    private static final String MASCOT_ACTION_NAME = MS2RunType.Mascot.name();
     private static final String MASCOT2XML_ACTION_NAME = "Mascot2XML";
 
     public static File getNativeSpectraFile(File dirAnalysis, String baseName)

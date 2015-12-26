@@ -37,7 +37,7 @@ public class MS2ServiceImpl implements MS2Service.Service
 {
     public SearchClient createSearchClient(String server, String url, Logger instanceLogger, String userAccount, String userPassword)
     {
-        if(server.equalsIgnoreCase("mascot"))
+        if(server.equalsIgnoreCase(MS2RunType.Mascot.name()))
             return new MascotClientImpl(url, instanceLogger, userAccount, userPassword);
         return null;
     }

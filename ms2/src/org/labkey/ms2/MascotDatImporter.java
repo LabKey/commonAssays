@@ -50,7 +50,7 @@ public class MascotDatImporter extends PeptideImporter
     @Override
     public String getType()
     {
-        return "Mascot";
+        return MS2RunType.Mascot.name();
     }
 
     @Override

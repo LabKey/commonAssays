@@ -7,6 +7,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.MS2Modification;
+import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.PeptideImporter;
 import org.labkey.ms2.SpectrumException;
 
@@ -39,7 +40,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     public static final String ENZYME_PREFIX = "CLE=";
     public static final String ENZYME_PREFIX_LC = "cle=";
     public static final String DEFAULT_ENZYME = "trypsin";
-    public static final String SEARCH_ENGINE_NAME = "MASCOT";
+    public static final String SEARCH_ENGINE_NAME = MS2RunType.Mascot.name().toUpperCase();
     public static final String MASCOT_FILE_PREFIX = "FILE=";
     public static final String DISTILLER_RAWFILE_PREFIX = "_DISTILLER_RAWFILE=";
 

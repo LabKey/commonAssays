@@ -243,6 +243,10 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     {
         ActionURL baseURL = null != extraPeptideUrlParams ? new ActionURL(_url.toString() + "&" + extraPeptideUrlParams) : _url.clone();
         baseURL.setAction(MS2Controller.ShowPeptideAction.class);
+        // We might be displaying a peptide grid within a peptide detail (e.g. all matches in a Mascot run); don't duplicate the peptideId & rowIndex params
+        // TODO: Should DetailsURL replaceParameter instead of addParameter?
+        baseURL.deleteParameter("peptideId");
+        baseURL.deleteParameter("rowIndex");
         Map<String, Object> peptideParams = new HashMap<>();
         peptideParams.put("peptideId", "RowId");
         peptideParams.put("rowIndex", "_row");

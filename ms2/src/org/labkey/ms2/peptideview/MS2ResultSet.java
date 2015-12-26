@@ -98,7 +98,7 @@ public abstract class MS2ResultSet extends ResultSetWrapper
         SQLFragment sql = new SQLFragment();
 
         // Pull out peptides and spectra (if in the database) for the current run
-        sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum, RetentionTime, Score1, Score2, Score3, Score4, Score5, Score6, HitRank, QueryNumber, Decoy FROM (SELECT pep.*, pd.Score1, pd.Score2, pd.Score3, pd.Score4, pd.Score5, pd.Score6, Spectrum, pd.HitRank, pd.QueryNumber, pd.Decoy FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
+        sql.append("SELECT TrimmedPeptide, Peptide, NextAA, PrevAA, Fraction, Scan, Charge, PrecursorMass, MZ, Run, Spectrum, RetentionTime, Score1, Score2, Score3, Score4, Score5, Score6, HitRank, QueryNumber, Decoy FROM (SELECT pep.*, pd.Score1, pd.Score2, pd.Score3, pd.Score4, pd.Score5, pd.Score6, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
         sql.append(MS2Manager.getTableInfoPeptides(), "pep");
         sql.append(" INNER JOIN ");
         sql.append(MS2Manager.getTableInfoPeptidesData(), "pd");

@@ -223,7 +223,7 @@ public class PepXmlImporter extends PeptideImporter
     protected void processSpectrumFile(PepXmlFraction fraction, Set<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
     {
         File mzXmlFile = getMzXMLFile(fraction);
-        if ((_run.getType().equalsIgnoreCase("mascot")||_run.getType().equalsIgnoreCase("sequest"))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
+        if ((_run.getType().equalsIgnoreCase(MS2RunType.Mascot.name())||_run.getType().equalsIgnoreCase(MS2RunType.Sequest.name()))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
                 && null == mzXmlFile)
         {
             // we attempt to load spectra from .mzXML rather than .pep.tgz
