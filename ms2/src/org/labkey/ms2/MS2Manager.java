@@ -1987,7 +1987,7 @@ public class MS2Manager
     public static DecoySummaryBean getDecoySummaryForRun(int run, float fdrThreshold)
     {
         DbSchema schema = getSchema();
-        SQLFragment sql = new SQLFragment("SELECT isNull(t.targets, 0) targetCount, isNull(d.decoys,0) decoyCount, coalesce(t.score2, d.score2) identityThreshold FROM\n")
+        SQLFragment sql = new SQLFragment("SELECT coalesce(t.targets, 0) targetCount, coalesce(d.decoys,0) decoyCount, coalesce(t.score2, d.score2) identityThreshold FROM\n")
                 .append("(SELECT count(rowId) targets, score2 \n")
                 .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
                 .append("WHERE  f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanFALSE()).append("\n")
