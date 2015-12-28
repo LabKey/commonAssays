@@ -1997,9 +1997,38 @@ public class MS2Manager
                 .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
                 .append("WHERE f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanTRUE()).append("\n")
                 .append("GROUP BY p.score2) d ON t.score2 = d.score2\n")
-                .append("ORDER BY coalesce(t.score2, d.score2)");
+                .append("ORDER BY coalesce(t.score2, d.score2) DESC");
         sql.add(run);
         sql.add(run);
+
+        // For debugging, this block of code calculates the FDR for every identity value, both starting the cume totals
+        // from the highest identity (probably correct) and starting from the lowest (probably incorrect).
+        // This can be removed once we're 100% certain we've implemented the correct algorithm.
+//        Map<Float, Pair<String, String>> fullMap = new LinkedHashMap<>();
+//        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+//        defaultFormat.setMinimumFractionDigits(2);
+//        int tempTargetTotal = 0;
+//        int tempDecoyTotal = 0;
+//        List<DecoySummaryBean> identities = new SqlSelector(schema.getScope(), sql).getArrayList(DecoySummaryBean.class);
+//        for (DecoySummaryBean row : identities)
+//        {
+//            tempTargetTotal += row.getTargetCount();
+//            tempDecoyTotal += row.getDecoyCount();
+//            float fullFdr = (float)tempDecoyTotal / (tempTargetTotal + tempDecoyTotal);
+//            Pair<String, String> fdrs = new Pair<>(defaultFormat.format(fullFdr), null);
+//
+//            fullMap.put(row.getIdentityThreshold(), fdrs);
+//        }
+//        Collections.reverse(identities);
+//        tempDecoyTotal = 0;
+//        tempTargetTotal = 0;
+//        for (DecoySummaryBean row : identities)
+//        {
+//            tempTargetTotal += row.getTargetCount();
+//            tempDecoyTotal += row.getDecoyCount();
+//            float fullFdr = (float)tempDecoyTotal / (tempTargetTotal + tempDecoyTotal);
+//            fullMap.get(row.getIdentityThreshold()).setValue(defaultFormat.format(fullFdr)) ;
+//        }
 
         DecoySummaryBean result = new DecoySummaryBean();
         DecoySummaryBean bestResultOverThreshold = new DecoySummaryBean();
@@ -2011,14 +2040,8 @@ public class MS2Manager
         {
             targetTotal += row.getTargetCount();
             decoyTotal += row.getDecoyCount();
-            if (targetTotal == 0)
-            {
-                fdr = 1.0f;
-            }
-            else
-            {
-                fdr = (float)decoyTotal / targetTotal;
-            }
+            fdr = (float)decoyTotal / (targetTotal + decoyTotal);
+
             if (decoyTotal > 0) // TODO: Possible to have a valid result where FDR == 0?
             {
                 if (Float.compare(fdr, fdrThreshold) < 1) // We're still getting closer to the highest FDR we'll allow
