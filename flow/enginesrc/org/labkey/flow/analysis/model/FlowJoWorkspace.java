@@ -993,6 +993,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertEquals(29.700d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Parent")), 0.001d);
                 assertEquals(13.900d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Frequency")), 0.001d);
                 assertEquals(18.400d, stats.get(new StatisticSpec("Lymphocytes/T Cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
+                assertEquals(3049.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
             }
             else
             {
@@ -1013,6 +1014,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(29.628d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(13.810d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                    assertEquals(2867.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
                 }
                 else if ("10.0.5".equals(version))
                 {
@@ -1031,6 +1033,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(18.519d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(38.462d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                    assertEquals(2867.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
                 }
                 else if ("10.0.6".equals(version) || "10.0.7".equals(version) || "10.0.8".equals(version))
                 {
@@ -1050,6 +1053,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                    assertEquals(2867.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
                 }
                 else
                 {
@@ -1067,6 +1071,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(18.270d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
                     assertEquals(29.605d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
                     assertEquals(13.790d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                    assertEquals(2867.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
                 }
             }
 

@@ -182,11 +182,12 @@ public class PCWorkspace extends FlowJoWorkspace
         return new PolygonGate(axes.get(0), axes.get(1), new Polygon(X, Y));
     }
 
-    protected Population readBoolean(Element elBoolNode, SubsetSpec parentSubset, String sampleId)
+    protected Population readBoolean(Element elBoolNode, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         Population ret = new Population();
         PopulationName name = PopulationName.fromString(elBoolNode.getAttribute("name"));
         ret.setName(name);
+        SubsetSpec subset = new SubsetSpec(parentSubset, name);
 
         List<Gate> gates = new ArrayList<>();
         Element elDependents = getElementByTagName(elBoolNode, "Dependents");
@@ -219,6 +220,8 @@ public class PCWorkspace extends FlowJoWorkspace
         {
             warning(sampleId, name, parentSubset, "No dependent gates found for boolean gate");
         }
+
+        readStats(subset, elBoolNode, results, analysis, sampleId, warnOnMissingStats);
 
         return ret;
     }
@@ -291,7 +294,7 @@ public class PCWorkspace extends FlowJoWorkspace
             if ("Population".equals(tagName))
                 subpops.add(readPopulation(elPopulation, parentSubset, analysis, results, sampleId, warnOnMissingStats));
             else if ("AndNode".equals(tagName) || "OrNode".equals(tagName) || "NotNode".equals(tagName))
-                subpops.add(readBoolean(elPopulation, parentSubset, sampleId));
+                subpops.add(readBoolean(elPopulation, parentSubset, analysis, results, sampleId, warnOnMissingStats));
         }
         return subpops;
     }
