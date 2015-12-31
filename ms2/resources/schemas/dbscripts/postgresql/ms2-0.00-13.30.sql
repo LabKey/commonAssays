@@ -49,6 +49,7 @@ CREATE TABLE prot.AnnotInsertions
     CONSTRAINT PK_ProtAnnotInsertions PRIMARY KEY (InsertId)
 );
 
+ALTER TABLE prot.AnnotInsertions ALTER COLUMN FileName TYPE VARCHAR(400);
 /****** InfoSources                                     */
 CREATE TABLE prot.InfoSources
 (
@@ -73,6 +74,16 @@ INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('NiceProt', 'http:/
 INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('GeneCards', 'http://www.genecards.org/cgi-bin/carddisp?{}&alias=yes', '2005-03-04 12:08:10');
 INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('NCBI Taxonomy', 'http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}', '2005-03-04 12:08:10');
 INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('GO', 'http://amigo.geneontology.org/cgi-bin/amigo/go.cgi?action=query&view=query&query={}', '2005-03-04 12:08:52');
+
+/* ms2-9.20-9.30.sql */
+
+UPDATE prot.InfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene={}' WHERE Name = 'GeneCards';
+
+/* ms2-12.10-12.20.sql */
+
+UPDATE prot.InfoSources SET URL = 'http://www.uniprot.org/uniprot/{}' WHERE Name = 'NiceProt';
+
+UPDATE prot.InfoSources SET URL = 'http://www.ncbi.nlm.nih.gov/protein/{}' WHERE Name = 'Genbank';
 
 /****** AnnotationTypes                                 */
 CREATE TABLE prot.AnnotationTypes
@@ -383,6 +394,10 @@ CREATE INDEX MS2Runs_Stats ON ms2.Runs(PeptideCount, SpectrumCount, Deleted, Sta
 CREATE INDEX MS2Runs_ExperimentRunLSID ON ms2.Runs(ExperimentRunLSID);
 CREATE INDEX MS2Runs_Container ON ms2.Runs(Container);
 
+/* ms2-13.20-13.30.sql */
+
+UPDATE ms2.Runs SET Type = 'LegacyComet' WHERE Type = 'Comet';
+
 CREATE TABLE ms2.Fractions
 (
     Fraction SERIAL,
@@ -402,6 +417,14 @@ CREATE TABLE ms2.Fractions
 CREATE INDEX IX_Fractions_Run_Fraction ON ms2.Fractions(Run,Fraction);
 
 CREATE INDEX IX_Fractions_MzXMLURL ON ms2.fractions(mzxmlurl);
+
+/* ms2-11.10-11.20.sql */
+
+ALTER TABLE ms2.Fractions ADD COLUMN ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS1ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS2ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS3ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS4ScanCount INT;
 
 CREATE TABLE ms2.Modifications
 (
@@ -631,6 +654,17 @@ CREATE UNIQUE INDEX UQ_MS2PeptidesData_FractionScanCharge ON ms2.PeptidesData (F
 CREATE INDEX IX_MS2PeptidesData_TrimmedPeptide ON ms2.PeptidesData(TrimmedPeptide);
 CREATE INDEX IX_MS2PeptidesData_Peptide ON ms2.PeptidesData(Peptide);
 
+ALTER TABLE ms2.peptidesdata ALTER score1 DROP NOT NULL;
+ALTER TABLE ms2.peptidesdata ALTER score1 DROP DEFAULT;
+
+ALTER TABLE ms2.peptidesdata ALTER score2 DROP NOT NULL;
+ALTER TABLE ms2.peptidesdata ALTER score2 DROP DEFAULT;
+
+ALTER TABLE ms2.peptidesdata ALTER score3 DROP NOT NULL;
+ALTER TABLE ms2.peptidesdata ALTER score3 DROP DEFAULT;
+
+ALTER TABLE ms2.PeptidesData ADD COLUMN score6 REAL;
+
 CREATE TABLE ms2.ProteinProphetFiles
 (
     RowId SERIAL NOT NULL,
@@ -647,6 +681,10 @@ CREATE TABLE ms2.ProteinProphetFiles
     CONSTRAINT FK_MS2ProteinProphetFiles_MS2Runs FOREIGN KEY (Run) REFERENCES ms2.Runs(Run),
     CONSTRAINT UQ_MS2ProteinProphetFiles UNIQUE (Run)
 );
+
+/* ms2-13.10-13.20.sql */
+
+ALTER TABLE ms2.proteinprophetfiles ALTER COLUMN FilePath TYPE VARCHAR(512);
 
 CREATE TABLE ms2.ProteinGroups
 (
@@ -723,6 +761,10 @@ CREATE TABLE ms2.Quantitation
     CONSTRAINT PK_Quantitation PRIMARY KEY (PeptideId),
     CONSTRAINT FK_Quantitation_MS2PeptidesData FOREIGN KEY (PeptideId) REFERENCES ms2.PeptidesData(RowId)
 );
+
+/* ms2-10.20-10.30.sql */
+
+ALTER TABLE ms2.Quantitation ADD COLUMN Invalidated BOOLEAN;
 
 CREATE TABLE ms2.ProteinQuantitation
 (
@@ -839,94 +881,6 @@ CREATE INDEX IX_CustomAnnotation_CustomAnnotationSetId ON prot.CustomAnnotation(
 
 UPDATE exp.DataInput SET Role = 'Spectra' WHERE Role = 'mzXML';
 
--- Create functions to drop & create all GO indexes.  This helps with load performance.
-CREATE FUNCTION prot.create_go_indexes() RETURNS void AS $$
-    BEGIN
-        ALTER TABLE prot.goterm ADD CONSTRAINT pk_goterm PRIMARY KEY (id);
-        CREATE INDEX IX_GoTerm_Name ON prot.GoTerm(name);
-        CREATE INDEX IX_GoTerm_TermType ON prot.GoTerm(termtype);
-        CREATE UNIQUE INDEX UQ_GoTerm_Acc ON prot.GoTerm(acc);
-
-        ALTER TABLE prot.goterm2term ADD CONSTRAINT pk_goterm2term PRIMARY KEY (id);
-        CREATE INDEX IX_GoTerm2Term_term1Id ON prot.GoTerm2Term(term1Id);
-        CREATE INDEX IX_GoTerm2Term_term2Id ON prot.GoTerm2Term(term2Id);
-        CREATE INDEX IX_GoTerm2Term_term1_2_Id ON prot.GoTerm2Term(term1Id,term2Id);
-        CREATE INDEX IX_GoTerm2Term_relationshipTypeId ON prot.GoTerm2Term(relationshipTypeId);
-        CREATE UNIQUE INDEX UQ_GoTerm2Term_1_2_R ON prot.GoTerm2Term(term1Id,term2Id,relationshipTypeId);
-
-        ALTER TABLE prot.gographpath ADD CONSTRAINT pk_gographpath PRIMARY KEY (id);
-        CREATE INDEX IX_GoGraphPath_term1Id ON prot.GoGraphPath(term1Id);
-        CREATE INDEX IX_GoGraphPath_term2Id ON prot.GoGraphPath(term2Id);
-        CREATE INDEX IX_GoGraphPath_term1_2_Id ON prot.GoGraphPath(term1Id,term2Id);
-        CREATE INDEX IX_GoGraphPath_t1_distance ON prot.GoGraphPath(term1Id,distance);
-
-        CREATE INDEX IX_GoTermDefinition_dbXrefId ON prot.GoTermDefinition(dbXrefId);
-        CREATE UNIQUE INDEX UQ_GoTermDefinition_termId ON prot.GoTermDefinition(termId);
-
-        CREATE INDEX IX_GoTermSynonym_SynonymTypeId ON prot.GoTermSynonym(synonymTypeId);
-        CREATE INDEX IX_GoTermSynonym_TermId ON prot.GoTermSynonym(termId);
-        CREATE INDEX IX_GoTermSynonym_termSynonym ON prot.GoTermSynonym(termSynonym);
-        CREATE UNIQUE INDEX UQ_GoTermSynonym_termId_termSynonym ON prot.GoTermSynonym(termId,termSynonym);
-    END;
-    $$ LANGUAGE plpgsql;
-
--- Use fn_dropifexists to make drop GO indexes function more reliable
-CREATE OR REPLACE FUNCTION prot.drop_go_indexes() RETURNS void AS $$
-    BEGIN
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Constraint', 'pk_goterm');
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'IX_GoTerm_Name');
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'IX_GoTerm_TermType');
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'UQ_GoTerm_Acc');
-
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Constraint', 'pk_goterm2term');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term1Id');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term2Id');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term1_2_Id');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_relationshipTypeId');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'UQ_GoTerm2Term_1_2_R');
-
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Constraint', 'pk_gographpath');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term1Id');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term2Id');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term1_2_Id');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_t1_distance');
-
-        PERFORM core.fn_dropifexists('gotermdefinition', 'prot', 'Index', 'IX_GoTermDefinition_dbXrefId');
-        PERFORM core.fn_dropifexists('gotermdefinition', 'prot', 'Index', 'UQ_GoTermDefinition_termId');
-
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_SynonymTypeId');
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_TermId');
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_termSynonym');
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'UQ_GoTermSynonym_termId_termSynonym');
-    END;
-    $$ LANGUAGE plpgsql;
-
-/* ms2-9.20-9.30.sql */
-
-UPDATE prot.InfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene={}'
-    WHERE Name = 'GeneCards';
-
-ALTER TABLE ms2.peptidesdata ALTER score1 DROP NOT NULL;
-ALTER TABLE ms2.peptidesdata ALTER score1 DROP DEFAULT;
-
-ALTER TABLE ms2.peptidesdata ALTER score2 DROP NOT NULL;
-ALTER TABLE ms2.peptidesdata ALTER score2 DROP DEFAULT;
-
-ALTER TABLE ms2.peptidesdata ALTER score3 DROP NOT NULL;
-ALTER TABLE ms2.peptidesdata ALTER score3 DROP DEFAULT;
-
-/* ms2-10.20-10.30.sql */
-
-ALTER TABLE ms2.Quantitation ADD COLUMN Invalidated BOOLEAN;
-
-/* ms2-11.10-11.20.sql */
-
-ALTER TABLE ms2.Fractions ADD COLUMN ScanCount INT;
-ALTER TABLE ms2.Fractions ADD COLUMN MS1ScanCount INT;
-ALTER TABLE ms2.Fractions ADD COLUMN MS2ScanCount INT;
-ALTER TABLE ms2.Fractions ADD COLUMN MS3ScanCount INT;
-ALTER TABLE ms2.Fractions ADD COLUMN MS4ScanCount INT;
-
 /* ms2-11.20-11.30.sql */
 
 CREATE TABLE ms2.iTraqPeptideQuantitation
@@ -961,6 +915,15 @@ CREATE TABLE ms2.iTraqPeptideQuantitation
     CONSTRAINT FK_iTraqPeptideQuantitation_MS2PeptidesData FOREIGN KEY (PeptideId) REFERENCES ms2.PeptidesData(RowId)
 );
 
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass1 TO AbsoluteIntensity1;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass2 TO AbsoluteIntensity2;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass3 TO AbsoluteIntensity3;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass4 TO AbsoluteIntensity4;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass5 TO AbsoluteIntensity5;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass6 TO AbsoluteIntensity6;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass7 TO AbsoluteIntensity7;
+ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass8 TO AbsoluteIntensity8;
+
 CREATE TABLE ms2.iTraqProteinQuantitation
 (
     ProteinGroupId BIGINT NOT NULL,
@@ -985,29 +948,66 @@ CREATE TABLE ms2.iTraqProteinQuantitation
     CONSTRAINT FK_iTraqProteinQuantitation_ProteinGroups FOREIGN KEY (ProteinGroupId) REFERENCES ms2.ProteinGroups(RowId)
 );
 
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass1 TO AbsoluteIntensity1;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass2 TO AbsoluteIntensity2;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass3 TO AbsoluteIntensity3;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass4 TO AbsoluteIntensity4;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass5 TO AbsoluteIntensity5;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass6 TO AbsoluteIntensity6;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass7 TO AbsoluteIntensity7;
-ALTER TABLE ms2.iTraqPeptideQuantitation RENAME COLUMN AbsoluteMass8 TO AbsoluteIntensity8;
 
-/* ms2-12.10-12.20.sql */
+-- Create functions to drop & create all GO indexes. This helps with load performance.
+CREATE FUNCTION prot.create_go_indexes() RETURNS void AS $$
+    BEGIN
+        ALTER TABLE prot.goterm ADD CONSTRAINT pk_goterm PRIMARY KEY (id);
+        CREATE INDEX IX_GoTerm_Name ON prot.GoTerm(name);
+        CREATE INDEX IX_GoTerm_TermType ON prot.GoTerm(termtype);
+        CREATE UNIQUE INDEX UQ_GoTerm_Acc ON prot.GoTerm(acc);
 
-UPDATE prot.InfoSources SET URL = 'http://www.uniprot.org/uniprot/{}' WHERE Name = 'NiceProt';
+        ALTER TABLE prot.goterm2term ADD CONSTRAINT pk_goterm2term PRIMARY KEY (id);
+        CREATE INDEX IX_GoTerm2Term_term1Id ON prot.GoTerm2Term(term1Id);
+        CREATE INDEX IX_GoTerm2Term_term2Id ON prot.GoTerm2Term(term2Id);
+        CREATE INDEX IX_GoTerm2Term_term1_2_Id ON prot.GoTerm2Term(term1Id,term2Id);
+        CREATE INDEX IX_GoTerm2Term_relationshipTypeId ON prot.GoTerm2Term(relationshipTypeId);
+        CREATE UNIQUE INDEX UQ_GoTerm2Term_1_2_R ON prot.GoTerm2Term(term1Id,term2Id,relationshipTypeId);
 
-UPDATE prot.InfoSources SET URL = 'http://www.ncbi.nlm.nih.gov/protein/{}' WHERE Name = 'Genbank';
+        ALTER TABLE prot.gographpath ADD CONSTRAINT pk_gographpath PRIMARY KEY (id);
+        CREATE INDEX IX_GoGraphPath_term1Id ON prot.GoGraphPath(term1Id);
+        CREATE INDEX IX_GoGraphPath_term2Id ON prot.GoGraphPath(term2Id);
+        CREATE INDEX IX_GoGraphPath_term1_2_Id ON prot.GoGraphPath(term1Id,term2Id);
+        CREATE INDEX IX_GoGraphPath_t1_distance ON prot.GoGraphPath(term1Id,distance);
 
-/* ms2-13.10-13.20.sql */
+        CREATE INDEX IX_GoTermDefinition_dbXrefId ON prot.GoTermDefinition(dbXrefId);
+        CREATE UNIQUE INDEX UQ_GoTermDefinition_termId ON prot.GoTermDefinition(termId);
 
-ALTER TABLE ms2.proteinprophetfiles ALTER COLUMN FilePath TYPE VARCHAR(512);
+        CREATE INDEX IX_GoTermSynonym_SynonymTypeId ON prot.GoTermSynonym(synonymTypeId);
+        CREATE INDEX IX_GoTermSynonym_TermId ON prot.GoTermSynonym(termId);
+        CREATE INDEX IX_GoTermSynonym_termSynonym ON prot.GoTermSynonym(termSynonym);
+        CREATE UNIQUE INDEX UQ_GoTermSynonym_termId_termSynonym ON prot.GoTermSynonym(termId,termSynonym);
+    END;
+    $$ LANGUAGE plpgsql;
 
-/* ms2-13.20-13.30.sql */
+-- Use fn_dropifexists to increase reliability
+CREATE OR REPLACE FUNCTION prot.drop_go_indexes() RETURNS void AS $$
+    BEGIN
+        PERFORM core.fn_dropifexists('goterm', 'prot', 'Constraint', 'pk_goterm');
+        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'IX_GoTerm_Name');
+        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'IX_GoTerm_TermType');
+        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'UQ_GoTerm_Acc');
 
-UPDATE ms2.Runs SET Type = 'LegacyComet' WHERE Type = 'Comet';
+        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Constraint', 'pk_goterm2term');
+        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term1Id');
+        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term2Id');
+        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term1_2_Id');
+        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_relationshipTypeId');
+        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'UQ_GoTerm2Term_1_2_R');
 
-ALTER TABLE ms2.PeptidesData ADD COLUMN score6 REAL;
+        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Constraint', 'pk_gographpath');
+        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term1Id');
+        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term2Id');
+        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term1_2_Id');
+        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_t1_distance');
 
-ALTER TABLE prot.AnnotInsertions ALTER COLUMN FileName TYPE VARCHAR(400);
+        PERFORM core.fn_dropifexists('gotermdefinition', 'prot', 'Index', 'IX_GoTermDefinition_dbXrefId');
+        PERFORM core.fn_dropifexists('gotermdefinition', 'prot', 'Index', 'UQ_GoTermDefinition_termId');
+
+        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_SynonymTypeId');
+        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_TermId');
+        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_termSynonym');
+        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'UQ_GoTermSynonym_termId_termSynonym');
+    END;
+    $$ LANGUAGE plpgsql;
+
