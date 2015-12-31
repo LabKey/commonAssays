@@ -33,30 +33,33 @@ public class MzXmlComposite extends SearchFormComposite
     VerticalPanel instance = new VerticalPanel();
     private boolean hasWork;
     private boolean hasRun;
+    private List<String> _fileInputNames;
 
     public MzXmlComposite()
     {
         initWidget(instance);
     }
 
-    public void update(List fileInputNames, List fileInputStatus, boolean isActiveJobs)
+    public void update(List<String> fileInputNames, List<String> fileInputStatus, boolean isActiveJobs)
     {
         hasRun = false;
         hasWork = !isActiveJobs;
+        // Stash for refreshing without getting a new list of files
+        _fileInputNames = fileInputNames;
 
         instance.clear();
         int num = (fileInputNames == null ? 0 : fileInputNames.size());
         if(num != 0)
         {
-            StringBuffer names = new StringBuffer();
+            StringBuilder names = new StringBuilder();
             for(int i = 0; i < num; i++)
             {
                 if (i > 0)
                     names.append("<br>");
-                names.append((String) fileInputNames.get(i));
+                names.append(fileInputNames.get(i));
                 if(fileInputStatus != null && i < fileInputStatus.size())
                 {
-                    String status = (String) fileInputStatus.get(i);
+                    String status = fileInputStatus.get(i);
                     if (status != null && !"".equals(status))
                     {
                         names.append(" (<b>").append(status).append("</b>)");
@@ -123,15 +126,7 @@ public class MzXmlComposite extends SearchFormComposite
 
     public void clearStatus()
     {
-        for(Iterator it = instance.iterator(); it.hasNext();)
-        {
-            Label mz = (Label)it.next();
-            String name = mz.getText();
-            if(name.indexOf("(") != -1)
-                name = name.substring(0, name.indexOf("("));
-            mz.setText(name);
-        }
-        setHasWork(true);
+        update(_fileInputNames, null, false);
     }
 
     @Override
