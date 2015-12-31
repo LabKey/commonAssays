@@ -16,27 +16,34 @@
 
 package org.labkey.flow.analysis.model;
 
+import Jama.Matrix;
+import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.flow.analysis.data.NumberArray;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMSource;
-import java.util.*;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.io.*;
-
-import Jama.Matrix;
-
-import org.labkey.flow.analysis.data.NumberArray;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.labkey.flow.analysis.model.WorkspaceParser.COMPENSATION_1_5_NS;
 import static org.labkey.flow.analysis.model.WorkspaceParser.COMPENSATION_2_0_NS;
@@ -103,7 +110,7 @@ public class CompensationMatrix implements Serializable
 
     public CompensationMatrix(InputStream is) throws Exception
     {
-        String strContents = IOUtils.toString(is);
+        String strContents = PageFlowUtil.getStreamContentsAsString(is);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         try

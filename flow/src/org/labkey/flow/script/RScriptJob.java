@@ -15,7 +15,6 @@
  */
 package org.labkey.flow.script;
 
-import org.apache.commons.io.IOUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
@@ -24,6 +23,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.reports.ExternalScriptEngine;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
@@ -151,7 +151,7 @@ public class RScriptJob extends FlowExperimentJob
 
         try (InputStream is = r.getInputStream())
         {
-            return IOUtils.toString(is);
+            return PageFlowUtil.getStreamContentsAsString(is);
         }
     }
 

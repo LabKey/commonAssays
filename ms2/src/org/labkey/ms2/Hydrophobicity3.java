@@ -1,9 +1,10 @@
 package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.reader.Readers;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1238,12 +1239,17 @@ public class Hydrophobicity3 {
     public static void main(String argv[]) {
 //        BasicConfigurator.configure();
         String pep;
-        try {
-           BufferedReader in = new BufferedReader(new FileReader(argv[0]));
-           while((pep = in.readLine()) != null) {
-              System.out.println(pep+"\t"+TSUM3(pep));
+
+        try
+        {
+           BufferedReader in = Readers.getReader(new File(argv[0]));
+           while((pep = in.readLine()) != null)
+           {
+              System.out.println(pep + "\t" + TSUM3(pep));
            }
-        } catch (Exception e)  {
+        }
+        catch (Exception e)
+        {
            System.err.println("problem in hydrophobicity test: "+e);
            e.printStackTrace();
         }

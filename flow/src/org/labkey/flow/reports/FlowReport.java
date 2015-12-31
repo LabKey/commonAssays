@@ -15,7 +15,6 @@
  */
 package org.labkey.flow.reports;
 
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -27,6 +26,7 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.reports.report.AbstractReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -37,11 +37,12 @@ import org.labkey.flow.query.FlowTableType;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
-import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+
+import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
 /**
  * User: matthewb
@@ -142,7 +143,7 @@ abstract public class FlowReport extends AbstractReport
 
         try (InputStream is = m.getResourceStream("flowReports/" + file))
         {
-            return IOUtils.toString(is);
+            return PageFlowUtil.getStreamContentsAsString(is);
         }
     }
 
