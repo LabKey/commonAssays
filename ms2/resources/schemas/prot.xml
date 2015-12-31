@@ -83,6 +83,7 @@
 		</ns:columns>
 	</ns:table>
 	<ns:table tableName="FastaFiles" tableDbType="TABLE">
+		<ns:deleteUrl>ms2/deleteDataBases.view</ns:deleteUrl>
 		<ns:columns>
 			<ns:column columnName="FastaId">
                 <ns:isHidden>true</ns:isHidden>
@@ -92,6 +93,11 @@
 			<ns:column columnName="FileChecksum"/>
             <ns:column columnName="ScoringAnalysis"/>
 		</ns:columns>
+		<ns:buttonBarOptions includeStandardButtons="true">
+			<ns:item text="Reload FASTA" requiresSelection="true" permission="ADMIN" insertPosition="end">
+				<ns:target method="POST">ms2/reloadFasta.view</ns:target>
+			</ns:item>
+		</ns:buttonBarOptions>
 	</ns:table>
 	<ns:table tableName="FastaSequences" tableDbType="TABLE">
 		<ns:columns>
@@ -225,6 +231,7 @@
 		</ns:columns>
 	</ns:table>
 	<ns:table tableName="FastaAdmin" tableDbType="VIEW">
+		<ns:deleteUrl>ms2/deleteDataBases.view</ns:deleteUrl>
 		<ns:columns>
 			<ns:column columnName="Filename">
 				<ns:columnTitle>FASTA File Name</ns:columnTitle>
