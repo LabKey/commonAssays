@@ -424,29 +424,40 @@ public abstract class MS2Importer
     {
         StringBuilder sql = new StringBuilder();
         /*
-        UPDATE ms2.PeptidesData SET SeqId = (SELECT SeqId FROM
-            (SELECT SeqId, Count(*) AS C FROM
+        UPDATE ms2.PeptidesData SET SeqId = (SELECT
+            CASE (SELECT Count(*) FROM
                 prot.identifiers i INNER JOIN prot.identtypes it
                 ON it.identtypeid = i.identtypeid AND it.Name = 'SwissProt'
                 WHERE i.Identifier = Protein AND SeqId IN
-                    (SELECT SeqId FROM prot.FastaSequences WHERE FastaId = ?)
-                GROUP BY SeqId) AS S
-            WHERE C = 1)
+                    (SELECT SeqId FROM prot.FastaSequences WHERE FastaId = ?))
+            WHEN 1
+                (SELECT SeqId FROM
+                prot.identifiers i INNER JOIN prot.identtypes it
+                ON it.identtypeid = i.identtypeid AND it.Name = 'SwissProt'
+                WHERE i.Identifier = Protein AND SeqId IN
+                    (SELECT SeqId FROM prot.FastaSequences WHERE FastaId = ?))
+            ELSE
+                NULL
+            END
+        )
         WHERE SeqId IS NULL AND Fraction = ?;
+
         */
 
-        sql.append("UPDATE ");
-        sql.append(MS2Manager.getTableInfoPeptidesData());
-        sql.append(" SET SeqId = (SELECT SeqId FROM ");
-        sql.append(" (SELECT SeqId, Count(*) AS C FROM ");
-        sql.append(ProteinManager.getTableInfoIdentifiers()).append(" I ");
-        sql.append(" INNER JOIN ");
-        sql.append(ProteinManager.getTableInfoIdentTypes()).append(" IT ");
-        sql.append(" ON IT.IdentTypeId = I.IdentTypeId AND IT.Name = 'SwissProt'");
-        sql.append(" WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" WHERE FastaId = ?) GROUP BY SeqId) AS S");
-        sql.append(" WHERE C = 1)");
+        sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
+        sql.append(" SET SeqId = (");
+        sql.append("    SELECT ");
+        sql.append("        CASE (SELECT Count(*) FROM ").append(ProteinManager.getTableInfoIdentifiers()).append(" I ").append(" INNER JOIN ").append(ProteinManager.getTableInfoIdentTypes()).append(" IT ");
+        sql.append("                ON IT.IdentTypeId = I.IdentTypeId AND IT.Name = 'SwissProt'");
+        sql.append("                WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" WHERE FastaId = ?))");
+        sql.append("        WHEN 1 THEN ");
+        sql.append("            (SELECT SeqId FROM ").append(ProteinManager.getTableInfoIdentifiers()).append(" I ").append(" INNER JOIN ").append(ProteinManager.getTableInfoIdentTypes()).append(" IT ");
+        sql.append("                ON IT.IdentTypeId = I.IdentTypeId AND IT.Name = 'SwissProt'");
+        sql.append("                WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" WHERE FastaId = ?))");
+        sql.append("        ELSE ");
+        sql.append("            NULL");
+        sql.append("        END");
+        sql.append(")");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
         _updateSwissProtSeqIdSql = sql.toString();
@@ -459,22 +470,31 @@ public abstract class MS2Importer
         StringBuilder sql = new StringBuilder();
 
         /*
-            UPDATE ms2.peptidesdata p SET SeqId = (SELECT SeqId FROM
-                (SELECT SeqId, Count(*) AS C FROM
-                    prot.fastasequences fs
-                    WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%') GROUP BY SeqId) AS S
-                WHERE C = 1)
-            WHERE p.SeqId IS NULL AND FRACTION = ?
+            UPDATE ms2.peptidesdata p SET SeqId = (
+            SELECT
+                CASE (SELECT count(*) FROM prot.fastasequences fs
+                        WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%'))
+                WHEN 1 THEN
+	                (SELECT SeqId FROM prot.fastasequences fs
+                        WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%'))
+	            ELSE
+		            NULL
+	            END
+           )
+           WHERE p.SeqId IS NULL AND FRACTION = ?
          */
 
         sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
-        sql.append(" SET SeqId = (SELECT SeqId FROM ");
-        sql.append(" (SELECT SeqId, Count(*) AS C FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
-        sql.append(" WHERE fs.FastaId = ? AND fs.LookupString LIKE ");
-        sql.append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'"));
-        sql.append(" GROUP BY SeqId) AS S");
-        sql.append(" WHERE C = 1) ");
+        sql.append(" SET SeqId = (");
+        sql.append("    SELECT " );
+        sql.append("        CASE (SELECT COUNT(*) FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
+        sql.append("                WHERE fs.FastaId = ? AND fs.LookupString LIKE ").append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'")).append(")");
+        sql.append("        WHEN 1 THEN " );
+        sql.append("            (SELECT SeqId FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
+        sql.append("                WHERE fs.FastaId = ? AND fs.LookupString LIKE ").append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'")).append(")");
+        sql.append("        ELSE  ");
+        sql.append("            NULL");
+        sql.append("        END)");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
         _updateSeqIdInexactMatchSql = sql.toString();
@@ -531,10 +551,10 @@ public abstract class MS2Importer
             int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), run.getFastaId());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match");
 
-            rowCount = executor.execute(_updateSwissProtSeqIdSql, run.getFastaId(), fraction.getFraction());
+            rowCount = executor.execute(_updateSwissProtSeqIdSql, run.getFastaId(), run.getFastaId(), fraction.getFraction());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database");
 
-            rowCount = executor.execute(_updateSeqIdInexactMatchSql, run.getFastaId(), fraction.getFraction());
+            rowCount = executor.execute(_updateSeqIdInexactMatchSql, run.getFastaId(), run.getFastaId(), fraction.getFraction());
             _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on inexact protein name match");
         }
 
