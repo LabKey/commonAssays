@@ -997,6 +997,7 @@ ms2/resources/schemas/ms2.xml -text
 ms2/resources/schemas/prot.xml -text
 ms2/resources/views/MS2[!!-~]Runs[!!-~]Browser.webpart.xml -text
 ms2/resources/views/runsOverview.html -text
+ms2/resources/views/runsOverview.view.xml -text
 ms2/schemas/pepXML.xsd -text
 ms2/schemas/pepXML_v117.xsd -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text

@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view"
+      title="MS2 Runs Overview">
+    <dependencies>
+        <dependency path="clientapi/ext3"/>
+    </dependencies>
+</view>
