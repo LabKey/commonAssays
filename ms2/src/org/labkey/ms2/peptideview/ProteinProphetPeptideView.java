@@ -396,7 +396,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
         String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
-        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames, getUser()), "ProteinGroupId");
+        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS_EXCEL_97, sqlPeptideColumnNames, getUser()), "ProteinGroupId");
         ewProtein.setGroupedResultSet(peptideRS);
 
         if (expanded)

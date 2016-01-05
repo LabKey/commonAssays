@@ -3267,7 +3267,7 @@ public class MS2Controller extends SpringActionController
             List<Long> peptideIds = new ArrayList<>(exportRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
-            for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS); i++)
+            for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS_EXCEL_97); i++)
             {
                 String[] row = exportRows.get(i).split(",");
                 try

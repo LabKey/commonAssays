@@ -272,7 +272,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         public ModelAndView exportToExcel(HttpServletResponse response, List<String> selectedRows) throws IOException
         {
             createRowIdFragment(selectedRows);
-            getSettings().setMaxRows(ExcelWriter.MAX_ROWS);
+            getSettings().setMaxRows(ExcelWriter.MAX_ROWS_EXCEL_97);
             exportToExcel(response);
             return null;
         }

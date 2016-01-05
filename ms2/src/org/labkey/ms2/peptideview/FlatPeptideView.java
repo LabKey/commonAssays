@@ -169,7 +169,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
             List<Long> peptideIds = new ArrayList<>(selectedRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
-            for (int i = 0; i < Math.min(selectedRows.size(), ExcelWriter.MAX_ROWS); i++)
+            for (int i = 0; i < Math.min(selectedRows.size(), ExcelWriter.MAX_ROWS_EXCEL_97); i++)
             {
                 String[] row = selectedRows.get(i).split(",");
                 peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
@@ -183,7 +183,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run) throws IOException
     {
         String columnNames = getPeptideColumnNames(requestedPeptideColumns);
-        DataRegion rgn = getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS, 0);
+        DataRegion rgn = getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS_EXCEL_97, 0);
         Container c = getContainer();
         ProteinManager.replaceRunCondition(filter, null, run);
 

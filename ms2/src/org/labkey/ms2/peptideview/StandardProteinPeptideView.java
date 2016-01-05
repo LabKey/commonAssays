@@ -177,8 +177,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
         String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
-        ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, ExcelWriter.MAX_ROWS, getUser());
-        GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames, getUser());
+        ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, ExcelWriter.MAX_ROWS_EXCEL_97, getUser());
+        GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS_EXCEL_97, sqlPeptideColumnNames, getUser());
         DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, Table.ALL_ROWS, 0);
 
         ewProtein.setResultSet(proteinRS);

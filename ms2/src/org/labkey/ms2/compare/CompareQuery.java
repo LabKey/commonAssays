@@ -333,7 +333,7 @@ public abstract class CompareQuery extends SQLFragment
     {
         // Limit Excel export to 65,535 rows. Should change this now that we support .xlsx export, which doesn't have the
         // same row count limits
-        int maxRows = export ? ExcelWriter.MAX_ROWS : 1000;
+        int maxRows = export ? ExcelWriter.MAX_ROWS_EXCEL_97 : 1000;
         CompareDataRegion rgn = new CompareDataRegion(createResultSet(export, maxRows));
         rgn.setMaxRows(maxRows);
         TableInfo ti = MS2Manager.getTableInfoCompare();
