@@ -30,14 +30,6 @@ public class MS2PipelineFolder extends PipelineFolder
                              String folderName,
                              String pipelinePath)
     {
-        this(test, folderName, pipelinePath, Type.mini);
-    }
-
-    public MS2PipelineFolder(PipelineWebTestBase test,
-                             String folderName,
-                             String pipelinePath,
-                             Type type)
-    {
         super(test, folderName, pipelinePath);
         setFolderType("MS2");   // Default to MS2 dashboard
     }
