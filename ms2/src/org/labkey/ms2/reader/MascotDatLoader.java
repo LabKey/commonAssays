@@ -128,7 +128,13 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     //  title=CAexample_mini%2e0110%2e0110%2e1
     // once URL decoded, the value looks like this:
     //  CAexample_mini.0110.0110.1
+
     public static final Pattern QUERY_TITLE_SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d)\\.??[a-zA-z0-9_]*?$");
+    // the title line may also look like this:
+    // title=Spectrum270258%20scans%3a6721%2c
+    // decoded to:
+    // Spectrum270258 scans:6721,
+    public static final Pattern SPECTRUM_SCANS_REGEX = Pattern.compile(".*\\s+scans:(\\d+).*");
     public static final int START_SCAN_GROUP_NUM = 1;
     public static final int END_SCAN_GROUP_NUM = 2;
     @SuppressWarnings({"UnusedDeclaration"})
@@ -596,6 +602,15 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 {
                     peptide.setScan(Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM)));
                     peptide.setEndScan(Integer.parseInt(matcher.group(END_SCAN_GROUP_NUM)));
+                }
+                else
+                {
+                    matcher = SPECTRUM_SCANS_REGEX.matcher(title);
+                    if (matcher.find())
+                    {
+                        peptide.setScan(Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM)));
+                        peptide.setEndScan(peptide.getScan());
+                    }
                 }
             }
             else if (_currentLine.startsWith(QUERY_SCANS_PREFIX)) // N.B. This line is not parsed in the Mascot2XML code, but it seems a good place to get the start scan data; the syntax is unknown for multiple scans, though
