@@ -70,7 +70,6 @@ public class Search implements EntryPoint
     private                 ProtocolComposite       protocolComposite;
     // Nullable
     private                 SequenceDbComposite     sequenceDbComposite;
-    private                 LocationComposite       locationComposite;
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
     // Nullable
     private                 EnzymeComposite         enzymeComposite;
@@ -137,7 +136,6 @@ public class Search implements EntryPoint
         sequenceDbComposite = compositeFactory.getSequenceDbComposite(this);
         inputXmlComposite = compositeFactory.getInputXmlComposite();
         enzymeComposite = compositeFactory.getEnzymeComposite();
-        locationComposite = new LocationComposite(inputXmlComposite);
         residueModComposite = compositeFactory.getResidueModComposite(this);
         tppComposite = new TPPComposite();
         protocolComposite = new ProtocolComposite();
@@ -240,7 +238,6 @@ public class Search implements EntryPoint
         {
             enzymeComposite.addChangeListener(new EnzymeChangeListener());
         }
-        locationComposite.addChangeListener(new LocationChangeListener());
         tppComposite.addChangeListener(new LocationChangeListener());
         otherParametersComposite.addChangeListener(new LocationChangeListener());
 
@@ -363,7 +360,6 @@ public class Search implements EntryPoint
             inputs.add(residueModComposite);
         }
         inputs.add(tppComposite);
-        inputs.add(locationComposite);
         inputs.add(otherParametersComposite);
 
         int row = 0;

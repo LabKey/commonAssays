@@ -16,15 +16,12 @@
 
 package org.labkey.ms2.pipeline.client;
 
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLTable;
-import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.Widget;
-import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**

@@ -907,7 +907,6 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/EnzymeParseException.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/GWTSearchServiceResult.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/GeneralInputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/InputXmlComposite.java -text
-ms2/gwtsrc/org/labkey/ms2/pipeline/client/LocationComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/MzXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/OtherParametersComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ParamParser.java -text

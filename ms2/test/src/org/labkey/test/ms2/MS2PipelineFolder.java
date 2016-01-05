@@ -38,7 +38,7 @@ public class MS2PipelineFolder extends PipelineFolder
                              String pipelinePath,
                              Type type)
     {
-        super(test, folderName, pipelinePath, type);
+        super(test, folderName, pipelinePath);
         setFolderType("MS2");   // Default to MS2 dashboard
     }
 
