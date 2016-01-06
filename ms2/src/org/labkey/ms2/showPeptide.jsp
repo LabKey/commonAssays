@@ -96,7 +96,7 @@
                 </tr>
                 <% if (MS2RunType.Mascot.equals(run.getRunType())) { %>
                     <tr>
-                        <td class="labkey-form-label">Query Number</td><td><%= p.getQueryNumber() %></td>
+                        <td class="labkey-form-label">Query Number</td><td><%= p.getQueryNumber() == null ? "" : p.getQueryNumber() %></td>
                         <td class="labkey-form-label">Hit Rank</td><td><%= p.getHitRank() %></td>
                     </tr>
                     <tr>
