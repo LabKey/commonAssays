@@ -41,6 +41,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.template.ClientDependency;
 import org.labkey.luminex.LuminexAssayProvider;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.LuminexResultsDataRegion;
@@ -744,7 +745,6 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     excludeAnalytes.setScript("analyteExclusionWindow(" + getProtocol().getRowId() + ", " + runId + ");");
                     excludeAnalytes.setDisplayPermission(UpdatePermission.class);
 
-
                     SimpleFilter f = new SimpleFilter();
                     f.addCondition(FieldKey.fromParts("Standard"), false, CompareType.EQUAL);
                     f.addCondition(FieldKey.fromParts("Run"), Integer.parseInt(runId), CompareType.EQUAL);
@@ -757,14 +757,25 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     excludeTitration.setScript("titrationExclusionWindow(" + getProtocol().getRowId() + ", " + runId + ");");
                     excludeTitration.setDisplayPermission(UpdatePermission.class);
 
-                    // todo: move the JS and CSS inclusion to the page level
-
                     ButtonBar buttonBar = new ButtonBar(result.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
                     buttonBar.add(excludeAnalytes);
                     buttonBar.add(excludeTitration);
                     result.getDataRegion().setButtonBar(buttonBar, DataRegion.MODE_GRID);
                 }
                 return result;
+            }
+
+            @NotNull
+            @Override
+            public LinkedHashSet<ClientDependency> getClientDependencies()
+            {
+                LinkedHashSet<ClientDependency> dependencies = super.getClientDependencies();
+                dependencies.add(ClientDependency.fromPath("luminex/BaseExclusionPanel.js"));
+                dependencies.add(ClientDependency.fromPath("luminex/WellExclusionPanel.js"));
+                dependencies.add(ClientDependency.fromPath("luminex/AnalyteExclusionPanel.js"));
+                dependencies.add(ClientDependency.fromPath("luminex/TitrationExclusionPanel.js"));
+                dependencies.add(ClientDependency.fromPath("luminex/Exclusion.css"));
+                return dependencies;
             }
         };
 

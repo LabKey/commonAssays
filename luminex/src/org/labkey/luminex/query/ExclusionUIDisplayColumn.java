@@ -42,7 +42,6 @@ public class ExclusionUIDisplayColumn extends DataColumn
     private final FieldKey _wellIDKey;
     private final FieldKey _exclusionCommentKey;
     private final Integer _protocolId;
-    private boolean _exclusionJSIncluded = false;
     private final Container _container;
     private final User _user;
 
@@ -90,21 +89,6 @@ public class ExclusionUIDisplayColumn extends DataColumn
         String wellID = PageFlowUtil.filter((String)ctx.get(_wellIDKey));
 
         String id = "__changeExclusions__" + wellID;
-
-        if (!_exclusionJSIncluded)
-        {
-            // add script block to include the necessary JS and CSS files for the exclusion popups
-            // TODO: there has to be a better place to put these
-            out.write("<script type='text/javascript'>"
-                    + "   LABKEY.requiresScript('luminex/BaseExclusionPanel.js');"
-                    + "   LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
-                    + "   LABKEY.requiresScript('luminex/TitrationExclusionPanel.js');"
-                    + "   LABKEY.requiresScript('luminex/WellExclusionPanel.js');"
-                    + "   LABKEY.requiresCss('luminex/Exclusion.css');"
-                    + "</script>");
-
-            _exclusionJSIncluded = true;
-        }
 
         // add onclick handler to call the well exclusion window creation function
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
