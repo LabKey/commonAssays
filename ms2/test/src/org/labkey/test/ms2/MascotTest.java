@@ -34,15 +34,20 @@ import org.labkey.test.pages.ms2.MascotTestPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.TextSearcher;
+import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests the fields added to the Customize Site form for the MS2 modules.
@@ -108,6 +113,10 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         }
 
         createProjectAndFolder();
+        PortalHelper _portalHelper = new PortalHelper(this);
+        goToProjectHome();
+        clickFolder(FOLDER_NAME);
+        _portalHelper.addWebPart("MS2 Runs Browser");
     }
 
     @Test
@@ -257,6 +266,24 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertEquals("Wrong value for 'Expect' in first row", 1.47, Double.parseDouble(value), 0.01);
         value = peptidesTable.getDataAsText(0, "CalcMH+");
         assertEquals("Wrong value for 'CalcMH+' in first row", 1272.43, Double.parseDouble(value), 0.01);
+        clickTab("MS2 Dashboard");
+        waitForElement(Locator.id("filter-engine"));
+        setFormElement(Locator.id("filter-engine"), "MASCOT");
+        setFormElement(Locator.id("filter-fasta"), "Bovine_mini.fasta");
+        click(Locator.xpath("//tr[td/div[text()='/MS2VerifyProject/ms2folder']]//div[@class='x-grid3-row-checker']"));
+        click(Locator.button("Show Matching MS2 Runs"));
+        waitAndClick(Locator.linkWithText("CAexample_mini.dat"));
+        waitForText("Peptides");
+        assertTextPresent("CAexample_mini.mgf");
+        click(Locator.linkWithText("K.GTPAAGDP.-"));
+        Set<String> windows = getDriver().getWindowHandles();
+        getDriver().switchTo().window((String)windows.toArray()[1]);
+        //Check grid of peptides filtered on the current fraction/scan/charge
+        assertElementPresent(Locator.linkWithText("K.GTPAAGDP.-"));
+        assertElementPresent(Locator.linkWithText("K.GAQAPLK.G"));
+        assertElementPresent(Locator.linkWithText("K.VVKVLK.A"));
+        getDriver().close();
+        getDriver().switchTo().window((String)windows.toArray()[0]);
     }
 
 
@@ -335,6 +362,27 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         peptidesTable.clearSort("HitRank");
         peptidesTable.clearAllFilters("HitRank");
         _customizeViewsHelper.revertUnsavedViewGridClosed();
+        clickTab("MS2 Dashboard");
+        waitForElement(Locator.id("filter-engine"));
+        setFormElement(Locator.id("filter-engine"), "MASCOT");
+        setFormElement(Locator.id("filter-fasta"), "Bovine_mini.fasta");
+        click(Locator.xpath("//tr[td/div[text()='/MS2VerifyProject/ms2folder']]//div[@class='x-grid3-row-checker']"));
+        click(Locator.button("Show Matching MS2 Runs"));
+        waitAndClick(Locator.linkWithText("CAexample_mini_decoy.dat"));
+        waitForText("Peptides");
+        assertTextPresent("Decoy Summary");
+        //get and check values in Decoy Summary table
+        List<WebElement> headers = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table[@class='labkey-data-region labkey-show-borders']//th").toBy());
+        List<WebElement> values = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table[@class='labkey-data-region labkey-show-borders']//td").toBy());
+        Map<String,String> decoySummary = new HashMap<>();
+        for(int i = 0; i < headers.size(); i++)
+        {
+            decoySummary.put(headers.get(i).getText(), values.get(i).getText());
+        }
+        assertEquals("Incorrect Identity Threshold in Decoy Summary",decoySummary.get("Identity Threshold"), "25.17");
+        assertEquals("Incorrect In Target count in Decoy Summary",decoySummary.get("In Target"), "61");
+        assertEquals("Incorrect In Decoy count in Decoy Summary",decoySummary.get("In Decoy"), "6");
+        assertEquals("Incorrect FDR % in Decoy Summary",decoySummary.get("FDR"), "8.96%");
     }
 
     protected void setupEngine()
