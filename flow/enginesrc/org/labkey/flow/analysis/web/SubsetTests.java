@@ -16,11 +16,11 @@
 package org.labkey.flow.analysis.web;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.labkey.api.util.Pair;
 import org.labkey.flow.analysis.model.AndGate;
 import org.labkey.flow.analysis.model.Gate;
+import org.labkey.flow.analysis.model.OrGate;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.SubsetRef;
@@ -155,6 +155,20 @@ public class SubsetTests extends Assert
         assertStatistics(initPopulation(), statistics11_2);
     }
 
+    @Test
+    public void testParseSaveMultipleBooleans()
+    {
+        List<Pair<String, String>> booleans = Arrays.asList(
+                Pair.of("booleans/one and two and three:Count",
+                        "booleans/(one&two&three)"),
+
+                Pair.of("booleans/one or two or three:Count",
+                        "booleans/(one|two|three)")
+        );
+
+        assertStatistics(initPopulation(), booleans);
+    }
+
     private void assertStatistics(Population population, Collection<Pair<String, String>> stats)
     {
         for (Pair<String, String> stat : stats)
@@ -217,7 +231,7 @@ public class SubsetTests extends Assert
                                 p("AViD (new)+"),
                                 p("AViD+"),
                                 p("APC-H7 CD4+ and AViD (new)",
-                                        g("APC-H7 CD4+", "AViD (new)+"))),
+                                        and("APC-H7 CD4+", "AViD (new)+"))),
                         p("Lv",
                                 p("L",
                                         p("CD3+",
@@ -256,6 +270,11 @@ public class SubsetTests extends Assert
                                                         p("57+")))))),
                 p("SSC-A, FSC-A subset"),
                 p("Singlets"),
+                p("booleans",
+                        p("one and two and three",
+                                and("one", "two", "three")),
+                        p("one or two or three",
+                                or("one", "two", "three"))),
                 p("comp"),
                 p("CD45+",
                         p("LYMPHS",
@@ -273,7 +292,7 @@ public class SubsetTests extends Assert
                                                         p("Q9: CD159a, HLA Dr+"),
                                                         p("PD-1 & 95 +")),
                                                 p("Q9 & PD-1",
-                                                        g("CD8+159a+/Q9: CD159a, HLA Dr+", "CD8+159a+/PD-1 & 95 +")))))));
+                                                        and("CD8+159a+/Q9: CD159a, HLA Dr+", "CD8+159a+/PD-1 & 95 +")))))));
 
 
     }
@@ -297,9 +316,23 @@ public class SubsetTests extends Assert
         return p;
     }
 
-    private Gate g(String... names)
+    private Gate and(String... names)
     {
         AndGate gate = new AndGate();
+
+        for (String name : names)
+        {
+            SubsetSpec subset = SubsetSpec.fromEscapedString(name);
+            SubsetRef ref = new SubsetRef(subset);
+            gate.getGates().add(ref);
+        }
+
+        return gate;
+    }
+
+    private Gate or(String... names)
+    {
+        OrGate gate = new OrGate();
 
         for (String name : names)
         {

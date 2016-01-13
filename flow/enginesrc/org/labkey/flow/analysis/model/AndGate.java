@@ -59,8 +59,8 @@ public class AndGate extends GateList implements SubsetExpressionGate
 
     public SubsetExpression.AndTerm createTerm()
     {
-        if (_gates.size() > 2)
-            throw new IllegalStateException("too many gates");
+        if (_gates.size() < 2)
+            throw new IllegalStateException("AndGate expects at least two gates");
 
         Gate leftGate = _gates.get(0);
         if (!(leftGate instanceof SubsetExpressionGate))
@@ -70,8 +70,21 @@ public class AndGate extends GateList implements SubsetExpressionGate
         if (!(rightGate instanceof SubsetExpressionGate))
             throw new FlowException("can't create term from gate type: " + rightGate);
 
-        return new SubsetExpression.AndTerm(
+        SubsetExpression.AndTerm and = new SubsetExpression.AndTerm(
                 ((SubsetExpressionGate)leftGate).createTerm(),
                 ((SubsetExpressionGate)rightGate).createTerm());
+
+        if (_gates.size() > 2)
+        {
+            for (Gate g : _gates.subList(2, _gates.size()))
+            {
+                if (!(g instanceof SubsetExpressionGate))
+                    throw new FlowException("can't create term from gate type: " + leftGate);
+
+                and = new SubsetExpression.AndTerm(and, ((SubsetExpressionGate) g).createTerm());
+            }
+        }
+
+        return and;
     }
 }

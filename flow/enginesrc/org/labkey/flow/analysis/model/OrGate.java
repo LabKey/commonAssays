@@ -59,8 +59,8 @@ public class OrGate extends GateList implements SubsetExpressionGate
 
     public SubsetExpression.OrTerm createTerm()
     {
-        if (_gates.size() > 2)
-            throw new IllegalStateException("too many gates");
+        if (_gates.size() < 2)
+            throw new IllegalStateException("OrGate expects at least two gates");
 
         Gate leftGate = _gates.get(0);
         if (!(leftGate instanceof SubsetExpressionGate))
@@ -70,8 +70,21 @@ public class OrGate extends GateList implements SubsetExpressionGate
         if (!(rightGate instanceof SubsetExpressionGate))
             throw new FlowException("can't create term from gate type: " + rightGate);
 
-        return new SubsetExpression.OrTerm(
+        SubsetExpression.OrTerm or = new SubsetExpression.OrTerm(
                 ((SubsetExpressionGate)leftGate).createTerm(),
                 ((SubsetExpressionGate)rightGate).createTerm());
+
+        if (_gates.size() > 2)
+        {
+            for (Gate g : _gates.subList(2, _gates.size()))
+            {
+                if (!(g instanceof SubsetExpressionGate))
+                    throw new FlowException("can't create term from gate type: " + leftGate);
+
+                or = new SubsetExpression.OrTerm(or, ((SubsetExpressionGate) g).createTerm());
+            }
+        }
+
+        return or;
     }
 }

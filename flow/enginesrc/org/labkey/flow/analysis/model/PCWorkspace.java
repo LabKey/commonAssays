@@ -189,6 +189,7 @@ public class PCWorkspace extends FlowJoWorkspace
         ret.setName(name);
         SubsetSpec subset = new SubsetSpec(parentSubset, name);
 
+        boolean emittedWarnings = false;
         List<Gate> gates = new ArrayList<>();
         Element elDependents = getElementByTagName(elBoolNode, "Dependents");
         if (elDependents != null)
@@ -198,7 +199,25 @@ public class PCWorkspace extends FlowJoWorkspace
                 // NOTE: we only support subset refs relative to the current parent.
                 String dependentName = StringUtils.trimToNull(elDependent.getAttribute("name"));
                 if (dependentName != null)
-                    gates.add(new SubsetRef(new SubsetSpec(parentSubset, PopulationName.fromString(dependentName))));
+                {
+                    if (dependentName.contains("/"))
+                    {
+                        SubsetSpec spec = SubsetSpec.fromUnescapedString(dependentName);
+                        if (spec.getParent().equals(parentSubset))
+                        {
+                            gates.add(new SubsetRef(spec));
+                        }
+                        else
+                        {
+                            warnOnce(sampleId, name, parentSubset, "Boolean gate '" + elBoolNode.getTagName() + "' only supports references to sibling populations.  Found: " + dependentName);
+                            emittedWarnings = true;
+                        }
+                    }
+                    else
+                    {
+                        gates.add(new SubsetRef(new SubsetSpec(parentSubset, PopulationName.fromString(dependentName))));
+                    }
+                }
             }
         }
 
@@ -216,7 +235,7 @@ public class PCWorkspace extends FlowJoWorkspace
             if (gate != null)
                 ret.addGate(gate);
         }
-        else
+        else if (!emittedWarnings)
         {
             warning(sampleId, name, parentSubset, "No dependent gates found for boolean gate");
         }
