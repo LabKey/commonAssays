@@ -127,7 +127,7 @@ public class CompensationController extends BaseFlowController
                 return false;
             }
             AttributeSet attrs = new AttributeSet(comp);
-            AttributeSetHelper.prepareForSave(attrs, getContainer());
+            AttributeSetHelper.prepareForSave(attrs, getContainer(), true);
             try (DbScope.Transaction transaction = svc.ensureTransaction())
             {
                 _flowComp = FlowCompensationMatrix.create(getUser(), getContainer(), form.ff_compensationMatrixName, attrs);

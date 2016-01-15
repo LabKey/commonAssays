@@ -32,16 +32,24 @@ import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowFCSFile;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.InputRole;
 
-import java.io.*;
+import java.io.File;
 import java.net.URI;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -151,7 +159,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             if (file != null && file.exists())
                 keywordAttrs.setURI(uri);
 
-            AttributeSetHelper.prepareForSave(keywordAttrs, getContainer());
+            AttributeSetHelper.prepareForSave(keywordAttrs, getContainer(), false);
         }
 
         if (resultsMap.size() > 0)
@@ -167,7 +175,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             sampleLabels.add(sampleLabel);
 
             AttributeSet resultsAttrs = entry.getValue();
-            AttributeSetHelper.prepareForSave(resultsAttrs, getContainer());
+            AttributeSetHelper.prepareForSave(resultsAttrs, getContainer(), false);
 
             // UNDONE: comp matrix
         }

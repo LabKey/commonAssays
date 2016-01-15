@@ -47,6 +47,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.data.SampleKey;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
@@ -310,9 +311,12 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         for (CompensationMatrix comp : comps)
         {
             AttributeSet compAttrs = new AttributeSet(comp);
-            AttributeSetHelper.prepareForSave(compAttrs, container);
+            AttributeSetHelper.prepareForSave(compAttrs, container, false);
             compMatrixMap.put(comp, compAttrs);
         }
+
+        // Clear cache after preparing all samples and comp. matrices
+        AttributeCache.uncacheAllAfterCommit(container);
 
         ExperimentService.Interface svc = ExperimentService.get();
         boolean success = false;

@@ -203,6 +203,7 @@ public class FlowManager
      */
     public FlowEntry getAttributeEntry(String containerId, AttributeType type, String attr)
     {
+        //_log.info("getAttributeEntry(" + containerId + ", " + type + ", " + attr + ")");
         try (ResultSet rs = new SqlSelector(getSchema(), "SELECT RowId, Id FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", containerId, attr).getResultSet())
         {
             // we're not caching misses because this is an unlimited cachemap
@@ -260,6 +261,7 @@ public class FlowManager
     @Nullable
     public FlowEntry getAttributeEntry(@NotNull AttributeType type, int rowId)
     {
+        //_log.info("getAttributeEntry(" + type + ", " + rowId + ")");
         Map<String, Object> row = new SqlSelector(getSchema(), "SELECT Container, Name, Id FROM " + attributeTable(type) + " WHERE RowId = ?", rowId).getMap();
         if (row == null)
         {
@@ -289,6 +291,7 @@ public class FlowManager
     /** Get all attributes in the container, sorted by name. */
     public Collection<FlowEntry> getAttributeEntries(@NotNull String containerId, @NotNull final AttributeType type)
     {
+        //_log.info("getAttributeEntries(" + containerId + ", " + type + ")");
         TableInfo table = attributeTable(type);
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("Container"), containerId);
@@ -384,6 +387,7 @@ public class FlowManager
      */
     private int ensureAttributeName(String containerId, AttributeType type, String attr, int aliasId)
     {
+        //_log.info("ensureAttributeName(" + containerId + ", " + type + ", " + attr + ", " + aliasId + ")");
         DbSchema schema = getSchema();
         if (schema.getScope().isTransactionActive())
         {
@@ -463,6 +467,7 @@ public class FlowManager
 
     private int ensureAttributeNameAndAliases(Container c, AttributeType type, String name, Iterable<? extends Object> aliases, boolean uncache)
     {
+        //_log.info("ensureAlias(" + c + ", " + type + ", " + name + ", aliases)");
         try
         {
             List<String> names = new ArrayList<>();
@@ -496,12 +501,13 @@ public class FlowManager
         finally
         {
             if (uncache)
-                AttributeCache.uncacheAll(c);
+                AttributeCache.uncacheAllAfterCommit(c);
         }
     }
 
     public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean uncache)
     {
+        //_log.info("ensureAlias(" + type + ", " + rowId + ", " + aliasName + ")");
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
             throw new IllegalArgumentException("Attribute not found");
@@ -622,6 +628,7 @@ public class FlowManager
     /** Get aliases for the preferred/primary attribute rowId or empty collection if rowId is not a preferred attribute. */
     public Collection<FlowEntry> getAliases(final FlowEntry entry)
     {
+        //_log.info("getAliases");
         // Get the attributes that have an id equal to the entry and exclude the entry itself.
         TableInfo table = attributeTable(entry._type);
         SimpleFilter filter = new SimpleFilter();
@@ -651,6 +658,7 @@ public class FlowManager
 
     public Collection<Integer> getAliasIds(final FlowEntry entry)
     {
+        //_log.info("getAliasIds");
         // Get the attributes that have an id equal to the entry and exclude the entry itself.
         TableInfo table = attributeTable(entry._type);
         SimpleFilter filter = new SimpleFilter();
@@ -1049,7 +1057,7 @@ public class FlowManager
         {
             for (Container container : containers)
             {
-                AttributeCache.uncacheAll(container);
+                AttributeCache.uncacheAllAfterCommit(container);
             }
             flowObjectModified();
         }
@@ -1069,7 +1077,7 @@ public class FlowManager
         {
             for (Container container : containers)
             {
-                AttributeCache.uncacheAll(container);
+                AttributeCache.uncacheAllAfterCommit(container);
             }
             flowObjectModified();
         }
@@ -1157,7 +1165,7 @@ public class FlowManager
         }
         finally
         {
-            AttributeCache.uncacheAll(data.getContainer());
+            AttributeCache.uncacheAllAfterCommit(data.getContainer());
         }
 
     }

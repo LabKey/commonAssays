@@ -24,6 +24,7 @@ import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.util.MemTracker;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Cache of attribute names and aliases within a container.
@@ -233,7 +235,6 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
 
     public static class KeywordEntry extends Entry<String, KeywordEntry>
     {
-        //protected KeywordEntry(@NotNull String containerId, int rowId, @NotNull String name, @Nullable KeywordEntry aliased, @NotNull Collection<KeywordEntry> aliases)
         protected KeywordEntry(@NotNull String containerId, int rowId, @NotNull String name, @Nullable Integer aliased, @NotNull Collection<Integer> aliases)
         {
             super(containerId, AttributeType.keyword, rowId, name, name, aliased, aliases);
@@ -254,7 +255,6 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
 
     public static class StatisticEntry extends Entry<StatisticSpec, StatisticEntry>
     {
-        //protected StatisticEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull StatisticSpec spec, @Nullable StatisticEntry aliased, @NotNull Collection<StatisticEntry> aliases)
         protected StatisticEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull StatisticSpec spec, @Nullable Integer aliased, @NotNull Collection<Integer> aliases)
         {
             super(containerId, AttributeType.statistic, rowId, name, spec, aliased, aliases);
@@ -328,26 +328,72 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
         return _type;
     }
 
-    public static void uncacheAll(Container c)
+
+    private static class UncacheTask implements Runnable
     {
-        //LOG.info("+Uncache all: " + (c == null ? "entire world" : "container='" + c.getName() + "'"));
-        KEYWORDS.uncache(c);
-        STATS.uncache(c);
-        GRAPHS.uncache(c);
-        FCSAnalyzer.get().clearFCSCache(null);
-        //LOG.info("-Uncache all: " + (c == null ? "entire world" : "container='" + c.getName() + "'"));
+        private String _prefix;
+
+        UncacheTask(String prefix)
+        {
+            _prefix = prefix;
+        }
+
+        @Override
+        public void run()
+        {
+            _uncacheAll(_prefix);
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UncacheTask that = (UncacheTask) o;
+            return Objects.equals(_prefix, that._prefix);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(_prefix);
+        }
     }
 
-    protected void uncache(Container c)
+    public static void uncacheAllAfterCommit(Container c)
     {
-        if (c == null)
+        FlowManager mgr = FlowManager.get();
+        DbScope.Transaction t = mgr.getSchema().getScope().getCurrentTransaction();
+        if (t != null)
+        {
+            t.addCommitTask(new AttributeCache.UncacheTask(c.getId()), DbScope.CommitTaskOption.POSTCOMMIT);
+        }
+        else
+        {
+            _uncacheAll(c.getId());
+        }
+    }
+
+    private static void _uncacheAll(String prefix)
+    {
+        //LOG.info("+Uncache all: " + (prefix == null ? "entire world" : "container='" + prefix + "'"));
+        KEYWORDS.uncache(prefix);
+        STATS.uncache(prefix);
+        GRAPHS.uncache(prefix);
+        FCSAnalyzer.get().clearFCSCache(null);
+        //LOG.info("-Uncache all: " + (prefix == null ? "entire world" : "container='" + prefix + "'"));
+    }
+
+    protected void uncache(String prefix)
+    {
+        if (prefix == null)
         {
             _cache.clear();
         }
         else
         {
             // clears both the name list and the entries scoped by container
-            _cache.removeUsingPrefix(c.getId());
+            _cache.removeUsingPrefix(prefix);
             // clears all entries by rowid
             _cache.removeUsingPrefix("rowid:");
         }
@@ -361,22 +407,6 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
         AttributeCache cache = AttributeCache.forType(entry._type);
         Container c = ContainerManager.getForId(entry._containerId);
         cache.uncache(c, entry._rowId, entry._name);
-    }
-
-    public void uncache(E entry)
-    {
-        if (entry == null)
-            return;
-
-        Container c = ContainerManager.getForId(entry.getContainerId());
-//        E aliased = entry.getAliasedEntry();
-//        Collection<E> aliases = entry.getAliases();
-//
-//        uncache(aliased);
-//        for (E alias : aliases)
-//            uncache(alias);
-
-        uncache(c, entry.getRowId(), entry.getName());
     }
 
     public void uncache(@NotNull Container c, int rowId, String name)

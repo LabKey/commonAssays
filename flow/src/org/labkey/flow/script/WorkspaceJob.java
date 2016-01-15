@@ -276,9 +276,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             // We assume the FCS file exists in graph editor if the URI is set.
             if (file != null && file.exists())
                 attrs.setURI(uri);
-            
+
             attrs.setKeywords(sample.getKeywords());
-            AttributeSetHelper.prepareForSave(attrs, container);
+            AttributeSetHelper.prepareForSave(attrs, container, false);
             keywordsMap.put(sample.getLabel(), attrs);
 
             CompensationMatrix comp = sample.getCompensationMatrix();
@@ -329,7 +329,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                     }
                 }
 
-                AttributeSetHelper.prepareForSave(results, container);
+                AttributeSetHelper.prepareForSave(results, container, false);
                 resultsMap.put(sample.getLabel(), results);
             }
 
@@ -338,6 +338,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 sampleCompMatrixMap.put(sample.getLabel(), comp);
             }
         }
+
         return false;
     }
 

@@ -16,6 +16,7 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Selector;
@@ -46,6 +47,8 @@ import java.util.TreeMap;
  */
 public class AttributeSetHelper
 {
+    private static final Logger LOG = Logger.getLogger(AttributeSetHelper.class);
+
 
     public static AttributeSet fromData(ExpData data)
     {
@@ -85,12 +88,15 @@ public class AttributeSetHelper
      * names from the cache, or two threads each trying to insert the same attribute name.
      * @throws SQLException
      */
-    public static void prepareForSave(AttributeSet attrs, Container c)
+    public static void prepareForSave(AttributeSet attrs, Container c, boolean clearCache)
     {
+        //LOG.info("+prepareForSave");
         ensureKeywordNames(attrs, c, attrs.getKeywordNames());
         ensureStatisticNames(attrs, c, attrs.getStatisticNames());
         ensureGraphNames(attrs, c, attrs.getGraphNames());
-        AttributeCache.uncacheAll(c);
+        if (clearCache)
+            AttributeCache.uncacheAllAfterCommit(c);
+        //LOG.info("-prepareForSave");
     }
 
     private static void ensureKeywordNames(AttributeSet attrs, Container c, Collection<String> specs)
@@ -121,12 +127,14 @@ public class AttributeSetHelper
 
     public static void save(AttributeSet attrs, User user, ExpData data) throws SQLException
     {
-        prepareForSave(attrs, data.getContainer());
+        prepareForSave(attrs, data.getContainer(), true); // TODO: is clearing the cache here correct?
         doSave(attrs, user, data);
     }
 
+    // NOTE: uncaches on transaction post-commit
     public static void doSave(AttributeSet attrs, User user, ExpData data) throws SQLException
     {
+        //LOG.info("+doSave");
         FlowManager mgr = FlowManager.get();
         try (DbScope.Transaction transaction = mgr.getSchema().getScope().ensureTransaction())
         {
@@ -181,7 +189,8 @@ public class AttributeSetHelper
         }
         finally
         {
-            AttributeCache.uncacheAll(data.getContainer());
+            AttributeCache.uncacheAllAfterCommit(data.getContainer());
+            //LOG.info("-doSave");
         }
 
     }
