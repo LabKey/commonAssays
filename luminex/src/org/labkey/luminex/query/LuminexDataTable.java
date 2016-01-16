@@ -56,7 +56,9 @@ import org.labkey.luminex.LuminexDataHandler;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -72,6 +74,18 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     public static final String EXCLUSION_WELL_GROUP_COMMENT = "Excluded for well replicate group";
     public static final String EXCLUSION_ANALYTE_COMMENT = "Excluded for analyte";
     public static final String EXCLUSION_TITRATION_COMMENT = "Excluded for titration";
+
+    public static final Map<String, String> REMAPPED_SCHEMA_COLUMNS;
+
+    static
+    {
+        CaseInsensitiveHashMap<String> result = new CaseInsensitiveHashMap<>();
+        result.put("PTID", "ParticipantID");
+        result.put("DataId", "Data");
+        result.put("AnalyteId", "Analyte");
+        result.put("ProtocolId", "Protocol");
+        REMAPPED_SCHEMA_COLUMNS = Collections.unmodifiableMap(result);
+    }
 
     public LuminexDataTable(LuminexProtocolSchema schema)
     {
@@ -407,12 +421,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     @Override
     public CaseInsensitiveHashMap<String> remapSchemaColumns()
     {
-        CaseInsensitiveHashMap<String> result = new CaseInsensitiveHashMap<>();
-        result.put("PTID", "ParticipantID");
-        result.put("DataId", "Data");
-        result.put("AnalyteId", "Analyte");
-        result.put("ProtocolId", "Protocol");
-        return result;
+        return new CaseInsensitiveHashMap<>(REMAPPED_SCHEMA_COLUMNS);
     }
 
     @Override
