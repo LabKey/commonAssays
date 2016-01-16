@@ -47,6 +47,7 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
         FieldKey parentFK = getColumnInfo().getFieldKey().getParent();
         _seqIdFK = new FieldKey(parentFK, "SeqId");
         _proteinNameFK = new FieldKey(parentFK, "Protein");
+        addRequiredValue(_seqIdFK);
     }
 
     @Override
