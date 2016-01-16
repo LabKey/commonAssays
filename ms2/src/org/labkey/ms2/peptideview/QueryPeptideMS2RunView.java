@@ -137,6 +137,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             super(schema, settings, expanded, allowNesting,
                     new QueryNestingOption(FieldKey.fromParts("ProteinProphetData", "ProteinGroupId"), FieldKey.fromParts("ProteinProphetData", "ProteinGroupId", "RowId"), getAJAXNestedGridURL()),
                     new QueryNestingOption(FieldKey.fromParts("SeqId"), FieldKey.fromParts("SeqId", "SeqId"), getAJAXNestedGridURL()));
+            setShowDetailsColumn(false);
         }
 
         public List<DisplayColumn> getDisplayColumns()
