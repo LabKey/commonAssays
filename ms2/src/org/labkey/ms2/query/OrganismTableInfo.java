@@ -36,9 +36,13 @@ public class OrganismTableInfo extends FilteredTable<UserSchema>
         wrapAllColumns(true);
 
         SQLFragment sql = new SQLFragment();
-        sql.append("CASE WHEN CommonName IS NULL THEN ");
-        sql.append(getSqlDialect().concatenate("Genus", "' '", "Species"));
-        sql.append(" ELSE CommonName END");
+        sql.append("CASE WHEN ");
+        sql.append(ExprColumn.STR_TABLE_ALIAS);
+        sql.append(".CommonName IS NULL THEN ");
+        sql.append(getSqlDialect().concatenate(ExprColumn.STR_TABLE_ALIAS + ".Genus", "' '", ExprColumn.STR_TABLE_ALIAS + ".Species"));
+        sql.append(" ELSE ");
+        sql.append(ExprColumn.STR_TABLE_ALIAS);
+        sql.append(".CommonName END");
         ExprColumn descriptionColumn = new ExprColumn(this, "Description", sql, JdbcType.VARCHAR);
         addColumn(descriptionColumn);
 
