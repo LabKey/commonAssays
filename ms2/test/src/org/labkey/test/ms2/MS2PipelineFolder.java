@@ -15,7 +15,6 @@
  */
 package org.labkey.test.ms2;
 
-import org.labkey.test.Locator;
 import org.labkey.test.pipeline.PipelineFolder;
 import org.labkey.test.pipeline.PipelineWebTestBase;
 
@@ -24,37 +23,11 @@ import org.labkey.test.pipeline.PipelineWebTestBase;
  */
 public class MS2PipelineFolder extends PipelineFolder
 {
-    private String _fastaPath;
-
     public MS2PipelineFolder(PipelineWebTestBase test,
                              String folderName,
                              String pipelinePath)
     {
         super(test, folderName, pipelinePath);
         setFolderType("MS2");   // Default to MS2 dashboard
-    }
-
-    public String getFastaPath()
-    {
-        return _fastaPath;
-    }
-
-    public void setFastaPath(String fastaPath)
-    {
-        _fastaPath = fastaPath;
-    }
-
-    protected void setupPipeline()
-    {
-        super.setupPipeline();
-
-        if (_fastaPath != null)
-        {
-            _test.log("Set FASTA root");
-            _test.clickAndWait(Locator.linkWithText("Set FASTA root"));
-
-            _test.setFormElement(Locator.name("localPathRoot"), _fastaPath);
-            _test.submit();
-        }
     }
 }
