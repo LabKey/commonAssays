@@ -577,7 +577,9 @@ public class PipelineController extends SpringActionController
              //get help topic
             String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicHref();
             ActionURL returnURL = form.getReturnActionURL(getContainer().getStartURL(getUser()));
-           
+
+            form.getValidatedFiles(getContainer(), true);
+
             //properties to send to GWT page
             Map<String, String> props = new HashMap<>();
             props.put("errors", getErrors(errors));
