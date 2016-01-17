@@ -68,6 +68,11 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         boolean closeRS = false;
         try
         {
+            // Unwrap ResultSet as needed - issue 25207
+            if (originalRS instanceof ResultsImpl)
+            {
+                originalRS = ((ResultsImpl)originalRS).getResultSet();
+            }
             if (originalRS instanceof GroupedResultSet)
             {
                 rs = ((GroupedResultSet) originalRS).getNextResultSet();
