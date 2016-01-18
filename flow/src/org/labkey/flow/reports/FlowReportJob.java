@@ -172,13 +172,16 @@ public class FlowReportJob extends RReportJob
     private void saveTsvOutput(TsvOutput tsv, Domain domain, FlowTableType tableType) throws Exception
     {
         info("Importing tsv file '" + tsv + "' into domain " + domain.getName());
-        TabLoader loader = tsv.createTabLoader();
-        mapTsvColumns(domain, loader);
-        if (getErrors() > 0)
-            return;
+        for (File file : tsv.getFiles())
+        {
+            TabLoader loader = tsv.createTabLoader(file);
+            mapTsvColumns(domain, loader);
+            if (getErrors() > 0)
+                return;
 
-        save(domain, loader, tableType);
-        info("Imported tsv file '" + tsv + "' into domain " + domain.getName());
+            save(domain, loader, tableType);
+            info("Imported tsv file '" + tsv + "' into domain " + domain.getName());
+        }
     }
 
     private void mapTsvColumns(Domain domain, TabLoader loader) throws IOException
