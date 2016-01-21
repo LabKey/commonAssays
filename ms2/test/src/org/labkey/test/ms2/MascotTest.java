@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -370,19 +370,28 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         click(Locator.button("Show Matching MS2 Runs"));
         waitAndClick(Locator.linkWithText("CAexample_mini_decoy.dat"));
         waitForText("Peptides");
+
+        checkDecoySummary();
+
+    }
+
+    private void checkDecoySummary()
+    {
         assertTextPresent("Decoy Summary");
         //get and check values in Decoy Summary table
-        List<WebElement> headers = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table[@class='labkey-data-region labkey-show-borders']//th").toBy());
-        List<WebElement> values = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table[@class='labkey-data-region labkey-show-borders']//td").toBy());
-        Map<String,String> decoySummary = new HashMap<>();
+        List<WebElement> headers = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[@class='labkey-form-label']").toBy());
+        List<WebElement> values = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[not(@class='labkey-form-label')]").toBy());
+        Map<String,String> decoySummary = new LinkedHashMap<>();
         for(int i = 0; i < headers.size(); i++)
         {
             decoySummary.put(headers.get(i).getText(), values.get(i).getText());
         }
-        assertEquals("Incorrect Identity Threshold in Decoy Summary",decoySummary.get("Identity Threshold"), "25.17");
-        assertEquals("Incorrect In Target count in Decoy Summary",decoySummary.get("In Target"), "61");
-        assertEquals("Incorrect In Decoy count in Decoy Summary",decoySummary.get("In Decoy"), "6");
-        assertEquals("Incorrect FDR % in Decoy Summary",decoySummary.get("FDR"), "8.96%");
+        assertEquals("Incorrect Identity Threshold in Decoy Summary", "13.1", decoySummary.get("Ion Threshold"));
+        assertEquals("Incorrect In Target count in Decoy Summary", "3", decoySummary.get("In Target"));
+        assertEquals("Incorrect In Decoy count in Decoy Summary", "0", decoySummary.get("In Decoy"));
+        assertEquals("Incorrect FDR % in Decoy Summary", "0.00%", decoySummary.get("FDR"));
+
+        // TODO: Would be good to test the functionality of the "Adjust FDR To" dropdown, but we may still have further tweaking on this UI to do pending client feedback.
     }
 
     protected void setupEngine()
