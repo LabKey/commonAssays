@@ -127,7 +127,6 @@ import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
-import org.labkey.ms2.pipeline.mascot.MascotRun;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.protein.AnnotationInsertion;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
@@ -430,19 +429,7 @@ public class MS2Controller extends SpringActionController
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
 
-            if (run instanceof MascotRun) // TODO: complete logic on when to display- must have decoys- the isResult() call below is not correct
-            {
-                String fdrThresh = form.getViewContext().getRequest().getParameter("fdrThreshold");
-                float convertedFdrThreshold = StringUtils.trimToNull(fdrThresh) != null ? Float.valueOf(fdrThresh) : 0.05f;
-                MS2Manager.DecoySummaryBean decoySummary = MS2Manager.getDecoySummaryForRun(run.getRun(), convertedFdrThreshold);
-                if (decoySummary.isHasDecoys())
-                {
-                    JspView<MS2Manager.DecoySummaryBean> decoySummaryView = new JspView<>("/org/labkey/ms2/decoySummary.jsp", decoySummary);
-                    decoySummaryView.setFrame(WebPartView.FrameType.PORTAL);
-                    decoySummaryView.setTitle("Decoy Summary");
-                    vBox.addView(decoySummaryView);
-                }
-            }
+            vBox.addView(run.getAdditionalRunSummaryView(form));
 
             List<Pair<String, String>> sqlSummaries = new ArrayList<>();
             SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run);
@@ -928,49 +915,14 @@ public class MS2Controller extends SpringActionController
             }
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            if (MS2RunType.Mascot.equals(run.getRunType()))
-            {
-                QueryPeptideMS2RunView altPeptideView = (QueryPeptideMS2RunView) getPeptideView(form.getGrouping(), run);
-                SimpleFilter altPeptideFilter = new SimpleFilter(FieldKey.fromParts("scan"), peptide.getScan());
-                altPeptideFilter.addCondition(FieldKey.fromParts("fraction"), peptide.getFraction());
-                altPeptideFilter.addCondition(FieldKey.fromParts("charge"), peptide.getCharge());
+            result.addView(run.getAdditionalPeptideSummaryView(getViewContext(), peptide, form.getGrouping()));
 
-                QueryPeptideMS2RunView.PeptideQueryView altPeptideGrid = (QueryPeptideMS2RunView.PeptideQueryView) altPeptideView.createGridView(altPeptideFilter);
-
-                altPeptideGrid.setTitle("All Matches To This Query");
-                altPeptideGrid.addDisplayColumn(new CurrentPeptideColumn(peptideId));
-                result.addView(altPeptideGrid);
-            }
             return result;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
-        }
-    }
-
-    private static final class CurrentPeptideColumn extends SimpleDisplayColumn
-    {
-        private final Long _currentPeptideId;
-
-        public CurrentPeptideColumn(long currentPeptideId) throws SQLException
-        {
-            _currentPeptideId = currentPeptideId;
-            setCaption("Current View");
-        }
-
-        public void renderDetailsCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            renderGridCellContents(ctx, out);
-        }
-
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            if (_currentPeptideId.equals(ctx.getRow().get("rowId")))
-            {
-                out.write("<b>&#x2714;</b>"); // html checkmark
-            }
         }
     }
 
@@ -5099,6 +5051,10 @@ public class MS2Controller extends SpringActionController
         public Map<String, String> getOptions()
         {
             Map<String, String> valueMap = new HashMap<>();
+            // We use the same API/form bean to retrieve the initial values and persist them.
+            // We need to call the API for initial values as the calling page is static html, not jsp.
+            // Hence the saveValues option so we don't wipe out the persisted values on initial page hit.
+            // For the searchEngine, an empty value is a permitted value.
             if (_saveValues)
             {
                 valueMap.put("searchEngine", _searchEngine);
@@ -5526,6 +5482,7 @@ public class MS2Controller extends SpringActionController
         String columns;
         String proteinColumns;
         String proteinGroupingId;
+        String desiredFdr;
 
         public void setExpanded(boolean expanded)
         {
@@ -5697,6 +5654,17 @@ public class MS2Controller extends SpringActionController
             }
 
             return run;
+        }
+
+        @SuppressWarnings({"UnusedDeclaration"})
+        public void setDesiredFdr(String desiredFdr)
+        {
+            this.desiredFdr = desiredFdr;
+        }
+
+        public Float desiredFdrToFloat()
+        {
+            return StringUtils.trimToNull(this.desiredFdr) == null ? null : Float.valueOf(desiredFdr);
         }
     }
 

@@ -1895,15 +1895,20 @@ public class MS2Manager
         return seqIdSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
     }
 
+    private static final float DEFAULT_SCORE_THRESHOLD = 13.1f;
+    private static final float DEFAULT_P_VALUE = .05f;
+
     public static class DecoySummaryBean
     {
         private int targetCount;
         private int decoyCount;
-        private float identityThreshold;
+        private float scoreThreshold;
         private float fdr = 1.0f;
         private boolean result = false;
-        private float fdrThreshold;
-        private boolean hasDecoys = false; // The best FDR might be at a decoyCount of 0, but the run does have decoys.
+        private Float desiredFdr;
+        private float fdrAtDefaultPvalue;
+        private float pValue;
+
         public int getTargetCount()
         {
             return targetCount;
@@ -1924,14 +1929,14 @@ public class MS2Manager
             this.decoyCount = decoyCount;
         }
 
-        public float getIdentityThreshold()
+        public float getScoreThreshold()
         {
-            return identityThreshold;
+            return scoreThreshold;
         }
 
-        public void setIdentityThreshold(float identityThreshold)
+        public void setScoreThreshold(float scoreThreshold)
         {
-            this.identityThreshold = identityThreshold;
+            this.scoreThreshold = scoreThreshold;
         }
 
         public float getFdr()
@@ -1954,54 +1959,83 @@ public class MS2Manager
             this.result = result;
         }
 
-        public float getFdrThreshold()
+        public Float getDesiredFdr()
         {
-            return fdrThreshold;
+            return desiredFdr;
         }
 
-        public void setFdrThreshold(float fdrThreshold)
+        public void setDesiredFdr(Float desiredFdr)
         {
-            this.fdrThreshold = fdrThreshold;
+            this.desiredFdr = desiredFdr;
         }
 
-        public boolean isHasDecoys()
+        public float getFdrAtDefaultPvalue()
         {
-            return hasDecoys;
+            return fdrAtDefaultPvalue;
         }
 
-        public void setHasDecoys(boolean hasDecoys)
+        public void setFdrAtDefaultPvalue(float fdrAtDefaultPvalue)
         {
-            this.hasDecoys = hasDecoys;
+            this.fdrAtDefaultPvalue = fdrAtDefaultPvalue;
         }
 
-        void setValues(int targetTotal, int decoyTotal, float fdr, float identityThreshold)
+        public float getpValue()
         {
-            setTargetCount(targetTotal);
-            setDecoyCount(decoyTotal);
-            setIdentityThreshold(identityThreshold);
-            setFdr(fdr);
+            return pValue;
+        }
+
+        public void setpValue(float pValue)
+        {
+            this.pValue = pValue;
+        }
+
+        void setValues(DecoySummaryBean dsb, boolean useStandardScore)
+        {
+            setTargetCount(dsb.getTargetCount());
+            setDecoyCount(dsb.getDecoyCount());
+            setFdr(dsb.getFdr());
+            if (useStandardScore)
+            {
+                setScoreThreshold(DEFAULT_SCORE_THRESHOLD);
+                setpValue(DEFAULT_P_VALUE);
+            }
+            else
+            {
+                setScoreThreshold(dsb.getScoreThreshold());
+                calcPvalue();
+            }
+
             setResult(true);
+        }
+
+        private void calcPvalue()
+        {
+            pValue = (float)Math.pow(10, (scoreThreshold / -10 ));
         }
     }
 
-    public static DecoySummaryBean getDecoySummaryForRun(int run, float fdrThreshold)
+
+
+    public static DecoySummaryBean getDecoySummaryForRun(int run, Float desiredFdr)
     {
         DbSchema schema = getSchema();
-        SQLFragment sql = new SQLFragment("SELECT coalesce(t.targets, 0) targetCount, coalesce(d.decoys,0) decoyCount, coalesce(t.score2, d.score2) identityThreshold FROM\n")
-                .append("(SELECT count(rowId) targets, score2 \n")
+        SQLFragment sql = new SQLFragment("SELECT coalesce(t.targets, 0) targetCount, coalesce(d.decoys,0) decoyCount, coalesce(t.score1, d.score1) scoreThreshold FROM\n")
+                .append("(SELECT count(rowId) targets, score1 \n")
                 .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
                 .append("WHERE  f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanFALSE()).append("\n")
-                .append("GROUP BY p.score2) t\n")
+                .append(" and p.hitrank = 1")
+                .append("GROUP BY p.score1) t\n")
                 .append("FULL OUTER JOIN\n")
-                .append("(SELECT count(rowId) decoys, score2 \n")
+                .append("(SELECT count(rowId) decoys, score1 \n")
                 .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
                 .append("WHERE f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanTRUE()).append("\n")
-                .append("GROUP BY p.score2) d ON t.score2 = d.score2\n")
-                .append("ORDER BY coalesce(t.score2, d.score2) DESC");
+                .append(" and p.hitrank = 1")
+                .append("GROUP BY p.score1) d ON t.score1 = d.score1\n")
+                .append("ORDER BY coalesce(t.score1, d.score1) DESC");
         sql.add(run);
         sql.add(run);
 
-        // For debugging, this block of code calculates the FDR for every identity value, both starting the cume totals
+        // For debugging, this block of code calculates the FDR for every score value, both starting the cume totals
         // from the highest identity (probably correct) and starting from the lowest (probably incorrect).
         // This can be removed once we're 100% certain we've implemented the correct algorithm.
 //        Map<Float, Pair<String, String>> fullMap = new LinkedHashMap<>();
@@ -2017,7 +2051,7 @@ public class MS2Manager
 //            float fullFdr = (float)tempDecoyTotal / (tempTargetTotal + tempDecoyTotal);
 //            Pair<String, String> fdrs = new Pair<>(defaultFormat.format(fullFdr), null);
 //
-//            fullMap.put(row.getIdentityThreshold(), fdrs);
+//            fullMap.put(row.getScoreThreshold(), fdrs);
 //        }
 //        Collections.reverse(identities);
 //        tempDecoyTotal = 0;
@@ -2027,43 +2061,89 @@ public class MS2Manager
 //            tempTargetTotal += row.getTargetCount();
 //            tempDecoyTotal += row.getDecoyCount();
 //            float fullFdr = (float)tempDecoyTotal / (tempTargetTotal + tempDecoyTotal);
-//            fullMap.get(row.getIdentityThreshold()).setValue(defaultFormat.format(fullFdr)) ;
+//            fullMap.get(row.getScoreThreshold()).setValue(defaultFormat.format(fullFdr)) ;
 //        }
 
         DecoySummaryBean result = new DecoySummaryBean();
         DecoySummaryBean bestResultOverThreshold = new DecoySummaryBean();
         int targetTotal = 0;
         int decoyTotal = 0;
-        float fdr;
 
-        for (DecoySummaryBean row : new SqlSelector(schema.getScope(), sql).getArrayList(DecoySummaryBean.class))
+        List<DecoySummaryBean> scores = new SqlSelector(schema.getScope(), sql).getArrayList(DecoySummaryBean.class);
+
+        if (scores.isEmpty())
+            return null;
+
+        // Calculate the target & decoy cumulative totals, and fdr, for every row
+        for (DecoySummaryBean row : scores)
         {
             targetTotal += row.getTargetCount();
             decoyTotal += row.getDecoyCount();
-            fdr = (float)decoyTotal / (targetTotal + decoyTotal);
+            float fdr = (float) decoyTotal / targetTotal;
 
-            if (decoyTotal > 0) // TODO: Possible to have a valid result where FDR == 0?
-            {
-                if (Float.compare(fdr, fdrThreshold) < 1) // We're still getting closer to the highest FDR we'll allow
-                {
-//                    // TODO: Still not 100% sure of algorithm. Should only count if this fdr is higher than one we've seen?
-                    if (!result.isResult() || Float.compare(fdr, result.getFdr()) > 0)
-                        result.setValues(targetTotal, decoyTotal, fdr, row.getIdentityThreshold());
-                }
-                else if (result.isResult()) // We went one too far, the previous row was the best result without going over
-                    break;
-                // Also keep track of the best we've seen that exceeds the desired FDR
-                else if (Float.compare(fdr, bestResultOverThreshold.getFdr()) < 0 || !bestResultOverThreshold.isResult())
-                {
-                    bestResultOverThreshold.setValues(targetTotal, decoyTotal, fdr, row.getIdentityThreshold());
-                }
-            }
+            row.setTargetCount(targetTotal);
+            row.setDecoyCount(decoyTotal);
+            row.setFdr(fdr);
         }
 
-        if (!result.isResult() && bestResultOverThreshold.isResult())
-            result = bestResultOverThreshold;
-        result.setFdrThreshold(fdrThreshold);
-        result.setHasDecoys(decoyTotal > 0);
+        if (decoyTotal == 0)
+            return null;
+
+        DecoySummaryBean defaultPvalueResult = new DecoySummaryBean();
+        int rowCount = scores.size();
+
+        // Find the FDR at the default threshold
+        // No matter the desired FDR value, the FDR at default p Value is constant.
+        // We'll use it on the initial page load and as an option in the dropdown
+        for (int i = 0; i < rowCount; i++)
+        {
+            int scoreComparison = Float.compare(scores.get(i).getScoreThreshold(), DEFAULT_SCORE_THRESHOLD);
+            if (i == 0 && scoreComparison < 1) // We're already below cutoff, the FDR is 100%
+            {
+                break;
+            }
+            else if (i == rowCount - 1 && scoreComparison > 0) // We got to the end without getting to the score cutoff, use this result
+                defaultPvalueResult = scores.get(i);
+            else if (scoreComparison < 1 || i == rowCount - 1) // We want the one before this
+            {
+                defaultPvalueResult = scores.get(i - 1);
+                break;
+            }
+        }
+        result.setFdrAtDefaultPvalue(defaultPvalueResult.getFdr());
+
+        if (null == desiredFdr) // this is also the result we're looking for
+        {
+            result.setValues(defaultPvalueResult, true);
+        }
+        else
+        {
+            for (DecoySummaryBean row : scores)
+            {
+                if (row.getDecoyCount() > 0) // TODO: FDR == 0 allowed? Maybe if target count is sufficiently high?
+                {
+                    if (Float.compare(row.getFdr(), desiredFdr) < 1) // We're still getting closer to the highest FDR we'll allow
+                    {
+                        if (!result.isResult() || Float.compare(row.getFdr(), result.getFdr()) > 0)
+                        {
+                            result.setValues(row, false);
+                        }
+                    }
+                    else if (result.isResult()) // We went one too far, the previous row was the best result without going over
+                        break;
+                        // Also keep track of the best we've seen that exceeds the desired FDR
+                    else if (Float.compare(row.getFdr(), bestResultOverThreshold.getFdr()) < 0 || !bestResultOverThreshold.isResult())
+                    {
+                        bestResultOverThreshold.setValues(row, false);
+                    }
+                }
+            }
+            if (!result.isResult() && bestResultOverThreshold.isResult())
+                result.setValues(bestResultOverThreshold, false);
+
+            result.setDesiredFdr(desiredFdr);
+        }
+
         return result;
     }
 }

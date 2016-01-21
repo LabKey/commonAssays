@@ -22,6 +22,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.MemTracker;
+import org.labkey.api.view.ViewContext;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -570,5 +572,15 @@ public abstract class MS2Run implements Serializable
     public String getQuantAnalysisType()
     {
         return MS2Manager.getQuantAnalysisType(run);
+    }
+
+    protected ModelAndView getAdditionalRunSummaryView(MS2Controller.RunForm form)
+    {
+        return null;
+    }
+
+    protected ModelAndView getAdditionalPeptideSummaryView(ViewContext viewContext, MS2Peptide peptide, String grouping) throws Exception
+    {
+        return null;
     }
 }

@@ -22,7 +22,9 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -32,45 +34,60 @@
     NumberFormat defaultFormat = NumberFormat.getPercentInstance();
     defaultFormat.setMinimumFractionDigits(2);
     String fdr = defaultFormat.format(bean.getFdr());
-    float fdrThreshold = bean.getFdrThreshold();
+    NumberFormat pValFormat = NumberFormat.getInstance();
+    pValFormat.setMaximumFractionDigits(3);
+    String pVal = pValFormat.format(bean.getpValue());
+    NumberFormat nf = NumberFormat.getNumberInstance();
+    String targetCount = nf.format(bean.getTargetCount());
+    String decoyCount = nf.format(bean.getDecoyCount());
+    Float desiredFdr = bean.getDesiredFdr();
 
     ActionURL setDesiredFdrURL = getViewContext().cloneActionURL();
-    setDesiredFdrURL.deleteParameter("fdrThreshold");
+    setDesiredFdrURL.deleteParameter("desiredFdr");
 %>
-<% if (Float.compare(bean.getFdr(), fdrThreshold) > 0)
+<% if (null != desiredFdr && Float.compare(bean.getFdr(), desiredFdr) > 0)
 { %>
-<span>No identity threshold with FDR below desired value. Showing best FDR over desired value.</span><br/><br/>
+<span>No score threshold with FDR below desired value. Showing best FDR over desired value.</span><br/><br/>
+<%}%>
+<% if (null == desiredFdr && Float.compare(bean.getFdrAtDefaultPvalue(), 1f) > 0)
+{ %>
+<span>No scores were above threshold for standard p-value. FDR is 100%.</span><br/><br/>
 <%}%>
 <labkey:form method="GET" action="<%=setDesiredFdrURL%>" name="decoySummary">
     <% for (Pair<String, String> param : setDesiredFdrURL.getParameters())
     { %>
     <input type="hidden" name="<%=h(param.getKey())%>" value="<%=h(param.getValue())%>"/>
     <% } %>
-    <table class="labkey-data-region labkey-show-borders" cellpadding="4" cellspacing="4">
+    <table >
         <tr>
-            <th>Identity Threshold</th>
-            <th>In Target</th>
-            <th>In Decoy</th>
-            <th>FDR</th>
+            <td class="labkey-form-label">P Value</td>
+            <td class="labkey-form-label">Ion Threshold</td>
+            <td class="labkey-form-label">In Target</td>
+            <td class="labkey-form-label">In Decoy</td>
+            <td class="labkey-form-label" style="padding-left:10px;">FDR</td>
+            <td class="labkey-form-label">Adjust FDR To</td>
         </tr>
         <tr>
-        <td style="text-align:right"><%=h(bean.getIdentityThreshold())%></td>
-        <td style="text-align:right"><%=h(bean.getTargetCount())%></td>
-        <td style="text-align:right"><%=h(bean.getDecoyCount())%></td>
-        <td style="text-align:right"><%=h(fdr)%></td>
-        <td>
-            <%= button("Adjust To").submit(true) %>
-            <select name="fdrThreshold">
-            <%
-                List<Float> fdrOptions = Arrays.asList(.001f, .002f, .01f, .02f, .025f, .05f, .1f);
-                defaultFormat.setMinimumIntegerDigits(1);
-                defaultFormat.setMinimumFractionDigits(1);
-                for(float fdrOption : fdrOptions)
-                { %>
-            <option value="<%=h(fdrOption)%>"<%=selected(Float.compare(fdrOption, fdrThreshold) == 0)%>><%=h(defaultFormat.format(fdrOption))%></option><%
-            } %>
-            </select>
-        </td>
+            <td style="text-align:right"><%=h(pVal)%></td>
+            <td style="text-align:right"><%=h(bean.getScoreThreshold())%></td>
+            <td style="text-align:right"><%=h(targetCount)%></td>
+            <td style="text-align:right"><%=h(decoyCount)%></td>
+            <td style="text-align:right; padding-left:10px;"><%=h(fdr)%></td>
+            <td style="text-align:right">
+                <select name="desiredFdr" onchange="this.form.submit();">
+                    <%
+                        List<Float> fdrOptions = new ArrayList<>(Arrays.asList(.001f, .002f, .01f, .02f, .025f, .05f, .1f));
+                        fdrOptions.add(bean.getFdrAtDefaultPvalue());
+                        Collections.sort(fdrOptions);
+                        defaultFormat.setMinimumIntegerDigits(1);
+                        defaultFormat.setMinimumFractionDigits(1);
+                        for(float fdrOption : fdrOptions)
+                        { %>
+                    <option value="<%= h(Float.compare(fdrOption, bean.getFdrAtDefaultPvalue()) == 0 ? null : fdrOption)%>"
+                            <%=selected(Float.compare(fdrOption, (null == desiredFdr ? bean.getFdrAtDefaultPvalue() : desiredFdr)) == 0)%>><%=h(defaultFormat.format(fdrOption))%></option><%
+                    } %>
+                </select>
+            </td>
         </tr>
     </table>
 </labkey:form>

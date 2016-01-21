@@ -535,7 +535,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 else
                 {
                     Float matchValue = Float.valueOf(matcher.group(KV_VALUE_GROUP_NUM));
-                    double valueLog10 = 10 * Math.log(matchValue)/Math.log(10);
+                    double valueLog10 = 10 * Math.log10(matchValue);
                     peptide.setScore(IDENTITY_SCORE, String.format("%.2f", valueLog10));
                 }
             }
