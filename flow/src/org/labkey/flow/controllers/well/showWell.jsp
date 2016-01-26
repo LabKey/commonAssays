@@ -555,30 +555,22 @@ if (null == fileURI)
 else
 {
     PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
-    if (null != r)
+    boolean canReadFiles = canReadPipelineFiles(user, r);
+    if (null != r && canReadFiles)
     {
-        // UNDONE: PipeRoot should have wrapper for this
-        //NOTE: we are specifically not inheriting policies from the parent container
-        //as the old permissions-checking code did not do this. We need to consider
-        //whether the pipeline root's parent really is the container, or if we should
-        //be checking a different (more specific) permission.
-        SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, false);
-        if (user != null && !user.isGuest() && policy.hasPermission(user, ReadPermission.class))
+        URI rel = URIUtil.relativize(r.getUri(), fileURI);
+        if (null != rel)
         {
-            URI rel = URIUtil.relativize(r.getUri(), fileURI);
-            if (null != rel)
+            File f = r.resolvePath(rel.getPath());
+            if (f != null && f.canRead())
             {
-                File f = r.resolvePath(rel.getPath());
-                if (f != null && f.canRead())
-                {
-                    %><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
-                    %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
-                    %><a href="<%=h(getWell().urlDownload())%>" rel="nofollow">Download FCS file</a><br><%
-                }
-                else
-                {
-                    %><div class="error">The original FCS file is no longer available or is not readable: <%=h(rel.getPath())%></div><%
-                }
+                %><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
+                %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
+                %><a href="<%=h(getWell().urlDownload())%>" rel="nofollow">Download FCS file</a><br><%
+            }
+            else
+            {
+                %><div class="error">The original FCS file is no longer available or is not readable: <%=h(rel.getPath())%></div><%
             }
         }
     }
@@ -605,3 +597,15 @@ if (getRun() != null)
             false, true);
     include(discussion, out);
 %>
+
+
+<%!
+// UNDONE: move to pipeline service
+boolean canReadPipelineFiles(User user, PipeRoot root)
+{
+    // If this is a default pipeline root, then inherit permissions from parent container
+    SecurityPolicy policy = SecurityPolicyManager.getPolicy(root, root.isDefault());
+    return user != null && !user.isGuest() && policy.hasPermission(user, ReadPermission.class);
+}
+%>
+
