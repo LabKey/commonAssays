@@ -65,17 +65,17 @@ if (null != bean.quantAlgorithm)
 
         if (null != run.getParamsFileName() && null != run.getPath())
         { %>
-            <%=PageFlowUtil.textLink("Show " + run.getParamsFileName(), "showParamsFile.view?run=" + run.getRun(), null, "paramFileLink", java.util.Collections.singletonMap("target", "paramFile"))%><%
+            <%=PageFlowUtil.textLink("Show " + run.getParamsFileName(), buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun(), null, "paramFileLink", java.util.Collections.singletonMap("target", "paramFile"))%><%
         }
 
         if (run.getHasPeptideProphet())
         { %>
-            <%=PageFlowUtil.textLink("Show Peptide Prophet Details", "showPeptideProphetDetails.view?run=" + run.getRun(), null, "peptideProphetDetailsLink", java.util.Collections.singletonMap("target", "peptideProphetSummary"))%><%
+            <%=PageFlowUtil.textLink("Show Peptide Prophet Details", buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun(), null, "peptideProphetDetailsLink", java.util.Collections.singletonMap("target", "peptideProphetSummary"))%><%
         }
 
         if (run.hasProteinProphet())
         { %>
-            <%=PageFlowUtil.textLink("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), null, "proteinProphetDetailsLink", java.util.Collections.singletonMap("target", "proteinProphetSummary"))%><%
+            <%=PageFlowUtil.textLink("Show Protein Prophet Details", buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun(), null, "proteinProphetDetailsLink", java.util.Collections.singletonMap("target", "proteinProphetSummary"))%><%
         } %>
         </div>
     </td></tr>
