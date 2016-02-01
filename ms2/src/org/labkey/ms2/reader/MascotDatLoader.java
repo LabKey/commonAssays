@@ -367,11 +367,11 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                     else if ((((residues.length() == 7 || residues.length() == 14) && isProteinTerm)) ||
                              (residues.length() == 6 && isNTerm))
                     {
-                        addVariableModifiedMass(fraction, "n", massDelta);
+                        addVariableModifiedMass(fraction, "N", massDelta);
                     }
                     else if (residues.length() == 6 && isCTerm)
                     {
-                        addVariableModifiedMass(fraction, "c", massDelta);
+                        addVariableModifiedMass(fraction, "C", massDelta);
                     }
                     else
                     {
