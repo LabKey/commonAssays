@@ -24,8 +24,14 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.roles.EditorRole;
+import org.labkey.api.security.roles.Role;
+import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -36,7 +42,9 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -159,8 +167,17 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
 
     protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ExperimentException
     {
+        User elevatedUser = getUser();
+        if (run.getCreatedBy().equals(getUser()) && !getContainer().hasPermission(getUser(), DeletePermission.class))
+        {
+            User currentUser = getUser();
+            Set<Role> contextualRoles = new HashSet<>(currentUser.getStandardContextualRoles());
+            contextualRoles.add(RoleManager.getRole(EditorRole.class));
+            elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
+        }
+
         if (form.getReRun() != null)
-            form.getReRun().delete(getUser());
+            form.getReRun().delete(elevatedUser);
         return super.afterRunCreation(form, run, errors);
     }
 
