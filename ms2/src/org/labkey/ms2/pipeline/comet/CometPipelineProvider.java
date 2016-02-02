@@ -87,6 +87,11 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     class SetupWebPart extends WebPartView
     {
+        public SetupWebPart()
+        {
+            super(FrameType.DIV);
+        }
+
         @Override
         protected void renderView(Object model, PrintWriter out) throws Exception
         {

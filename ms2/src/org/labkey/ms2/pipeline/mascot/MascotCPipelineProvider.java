@@ -100,6 +100,11 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     private static class SetupWebPart extends WebPartView
     {
+        public SetupWebPart()
+        {
+            super(FrameType.DIV);
+        }
+
         @Override
         protected void renderView(Object model, PrintWriter out) throws Exception
         {
