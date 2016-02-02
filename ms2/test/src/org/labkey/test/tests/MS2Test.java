@@ -1207,7 +1207,9 @@ public class MS2Test extends AbstractMS2ImportTest
         Object[] windows = getDriver().getWindowHandles().toArray();
         getDriver().switchTo().window((String) windows[1]);
         waitForElement(Locator.tagWithAttribute("img", "alt", "Charge 3+ Cumulative Observed vs. Model"));
-        assertEquals("Incorrect number of graphs", 13, getElementCount(Locator.tag("img").withAttributeContaining("src", "labkey/ms2/MS2VerifyProject/ms2folder")));
+        assertEquals("Incorrect number of graphs", 1, getElementCount(Locator.tag("img").withAttributeContaining("src", WebTestHelper.buildRelativeUrl("ms2", "MS2VerifyProject/ms2folder", "showPeptideProphetSensitivityPlot"))));
+        assertEquals("Incorrect number of graphs", 6, getElementCount(Locator.tag("img").withAttributeContaining("src", WebTestHelper.buildRelativeUrl("ms2", "MS2VerifyProject/ms2folder", "showPeptideProphetDistributionPlot"))));
+        assertEquals("Incorrect number of graphs", 6, getElementCount(Locator.tag("img").withAttributeContaining("src", WebTestHelper.buildRelativeUrl("ms2", "MS2VerifyProject/ms2folder", "showPeptideProphetObservedVsModelPlot"))));
         assertTextPresent("PeptideProphet Details: ms2pipe/truncated (pepXML)");
         getDriver().close();
         getDriver().switchTo().window((String) windows[0]);
