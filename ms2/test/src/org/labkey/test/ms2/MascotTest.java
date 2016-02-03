@@ -276,14 +276,13 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         waitForText("Peptides");
         assertTextPresent("CAexample_mini.mgf");
         click(Locator.linkWithText("K.GTPAAGDP.-"));
-        Set<String> windows = getDriver().getWindowHandles();
-        getDriver().switchTo().window((String)windows.toArray()[1]);
-        //Check grid of peptides filtered on the current fraction/scan/charge
-        assertElementPresent(Locator.linkWithText("K.GTPAAGDP.-"));
-        assertElementPresent(Locator.linkWithText("K.GAQAPLK.G"));
-        assertElementPresent(Locator.linkWithText("K.VVKVLK.A"));
+
+        switchToWindow(1);
+        peptidesTable = new DataRegionTable("MS2Peptides", this);
+        List<String> peptides = peptidesTable.getColumnDataAsText("Peptide");
+        assertEquals("peptide grid not filtered on the current fraction/scan/charge", Arrays.asList("K.GTPAAGDP.-", "K.GAQAPLK.G", "K.VVKVLK.A"), peptides);
         getDriver().close();
-        getDriver().switchTo().window((String)windows.toArray()[0]);
+        switchToMainWindow();
     }
 
 

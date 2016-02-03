@@ -41,6 +41,7 @@ public class LuminexGuideSetHelper
         _runNumber = 1;
     }
 
+    @LogMethod
     public int importGuideSetRun(String assayName, File guideSetFile)
     {
         _test.goToTestAssayHome(assayName);
@@ -91,6 +92,7 @@ public class LuminexGuideSetHelper
         }
     }
 
+    @LogMethod
     public void editRunBasedGuideSet(String[] rows, String comment, boolean creating)
     {
         checkManageGuideSetHeader(creating);
@@ -103,6 +105,7 @@ public class LuminexGuideSetHelper
         checkLeveyJenningsGuideSetHeader(comment, "Run-based");
     }
 
+    @LogMethod
     public void editValueBasedGuideSet(Map<String, Double> metricInputs, String comment, boolean creating)
     {
         checkManageGuideSetHeader(creating);
@@ -124,24 +127,25 @@ public class LuminexGuideSetHelper
             _test.assertElementNotPresent(Locator.button("Save"));
             _test.assertElementPresent(Locator.button("Create"));
             _test.clickButton("Create", 0);
+            waitForGuideSetExtMaskToDisappear();
+            Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.shortWait()).getAttribute("guide-set-id"));
+            timestamps.put(id, LuminexTest.df.format(Calendar.getInstance().getTime()));
         }
         else
         {
             _test.assertElementNotPresent(Locator.button("Create"));
             _test.assertElementPresent(Locator.button("Save"));
             _test.clickButton("Save", 0);
+            waitForGuideSetExtMaskToDisappear();
         }
-        waitForGuideSetExtMaskToDisappear();
-        Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.shortWait()).getAttribute("guide-set-id"));
-        timestamps.put(id, LuminexTest.df.format(Calendar.getInstance().getTime()));
     }
 
     private void checkLeveyJenningsGuideSetHeader(String comment, String guideSetType)
     {
         Integer id = Integer.parseInt(Locator.css(".guideset-tbl").waitForElement(_test.shortWait()).getAttribute("guide-set-id"));
-        _test.waitForElement(Locator.tagWithText("td", timestamps.get(id)), 2 * _test.defaultWaitForPage);
-        _test.waitForElement(Locator.tagWithText("td", comment));
-        _test.assertElementPresent(Locator.tagWithText("td", guideSetType));
+        _test.waitForElement(Locator.css(".guideset-tbl td").withText(timestamps.get(id)), 2 * _test.defaultWaitForPage);
+        _test.waitForElement(Locator.css(".guideset-tbl td").withText(comment));
+        _test.assertElementPresent(Locator.css(".guideset-tbl td").withText(guideSetType));
     }
 
     private void setValueBasedMetricForm(Map<String, Double> metricInputs)
