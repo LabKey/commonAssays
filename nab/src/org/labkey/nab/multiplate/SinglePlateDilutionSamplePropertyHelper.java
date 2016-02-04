@@ -65,7 +65,7 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
             Map<String, WellGroupTemplate> sampleGroupNames = getSampleWellGroupNameMap();
 
             ExcelLoader loader = new ExcelLoader(metadataFile, true);
-            loader.setScanAheadLineCount(1000); // issue 19539
+            // issue #19539 -- now addressed by larger default value for _scanAheadLineCount
 
             boolean hasSampleNameCol = false;
             boolean hasVirusIdCol = false;

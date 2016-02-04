@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.reports;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
@@ -78,7 +79,7 @@ public class FlowReportJob extends RReportJob
 
     // UNDONE: be like the base RReport and write the input file before the report job runs
     @Override
-    protected File inputFile(RReport report, ViewContext context) throws Exception
+    protected File inputFile(RReport report, @NotNull ViewContext context) throws Exception
     {
         File file = report.createInputDataFile(context);
 
@@ -186,7 +187,6 @@ public class FlowReportJob extends RReportJob
 
     private void mapTsvColumns(Domain domain, TabLoader loader) throws IOException
     {
-        loader.setScanAheadLineCount(1000);
         ColumnDescriptor[] cols = loader.getColumns();
 
         boolean hasLSID = false;

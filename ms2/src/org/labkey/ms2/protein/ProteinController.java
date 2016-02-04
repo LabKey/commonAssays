@@ -213,7 +213,6 @@ public class ProteinController extends SpringActionController
             }
 
             TabLoader tabLoader = new TabLoader(form.getAnnotationsText(), true);
-            tabLoader.setScanAheadLineCount(200);
 
             List<Map<String, Object>> rows = tabLoader.load();
             ColumnDescriptor[] columns = tabLoader.getColumns();
