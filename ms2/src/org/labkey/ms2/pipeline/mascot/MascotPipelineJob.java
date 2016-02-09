@@ -15,9 +15,9 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
@@ -51,11 +51,11 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     {
         super(protocol, MascotCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
-        AppProps.Interface appProps = AppProps.getInstance();
-        _mascotServer = appProps.getMascotServer();
-        _mascotHTTPProxy = appProps.getMascotHTTPProxy();
-        _mascotUserAccount = appProps.getMascotUserAccount();
-        _mascotUserPassword = appProps.getMascotUserPassword();
+        MascotConfig config = MascotConfig.findMascotConfig(info.getContainer());
+        _mascotServer = config.getMascotServer();
+        _mascotHTTPProxy = config.getMascotHTTPProxy();
+        _mascotUserAccount = config.getMascotUserAccount();
+        _mascotUserPassword = config.getMascotUserPassword();
 
         header("Mascot search for " + getBaseName());
         writeInputFilesToLog();

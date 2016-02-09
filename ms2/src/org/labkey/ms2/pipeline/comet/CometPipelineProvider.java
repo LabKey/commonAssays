@@ -74,7 +74,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
     }
 
     @Override
-    public List<PipelineActionConfig> getDefaultActionConfig()
+    public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
         String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
         return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
@@ -118,28 +118,28 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
         return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<>());
     }
 
-    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException
+    public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException
     {
         return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
     }
 
-    public List<String> getTaxonomyList() throws IOException 
+    public List<String> getTaxonomyList(Container container) throws IOException
     {
         //Comet does not support Mascot style taxonomy.
         return null;
     }
 
-    public Map<String, List<String>> getEnzymes() throws IOException
+    public Map<String, List<String>> getEnzymes(Container container) throws IOException
     {
         return SearchFormUtil.getDefaultEnzymeMap();
     }
 
-    public Map<String, String> getResidue0Mods() throws IOException
+    public Map<String, String> getResidue0Mods(Container container) throws IOException
     {
         return SearchFormUtil.getDefaultStaticMods();
     }
 
-    public Map<String, String> getResidue1Mods() throws IOException
+    public Map<String, String> getResidue1Mods(Container container) throws IOException
     {
         return SearchFormUtil.getDefaultDynamicMods();
     }
@@ -149,7 +149,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "pipelineComet";
     }
 
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled(Container container) throws PipelineValidationException
     {
     }
 

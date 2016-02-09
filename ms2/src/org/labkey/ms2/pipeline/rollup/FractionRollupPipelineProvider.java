@@ -70,7 +70,7 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     }
 
     @Override
-    public List<PipelineActionConfig> getDefaultActionConfig()
+    public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
         String actionId = createActionId(PipelineController.FractionRollupAction.class, ACTION_LABEL);
         return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
@@ -107,13 +107,13 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     }
 
     @Override
-    public boolean dbExists(File sequenceRoot, String s)
+    public boolean dbExists(Container container, File sequenceRoot, String s)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled(Container container) throws PipelineValidationException
     {
         // This is always available
     }

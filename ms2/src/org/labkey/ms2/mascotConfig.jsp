@@ -16,19 +16,23 @@
      */
 %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.labkey.api.settings.AppProps"%>
+<%@ page import="org.labkey.api.admin.AdminUrls"%>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.util.HelpTopic" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.util.HelpTopic" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.admin.AdminUrls" %>
+<%@ page import="org.labkey.ms2.pipeline.mascot.MascotConfig" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%=formatMissedErrors("form")%>
 <%
     MS2Controller.MascotSettingsForm bean = ((JspView<MS2Controller.MascotSettingsForm>)HttpView.currentView()).getModelBean();
-    AppProps.Interface appProps = AppProps.getInstance();
+    Container container = HttpView.currentView().getViewContext().getContainer();
+    MascotConfig mascotConfig = MascotConfig.findMascotConfig(container);
+    boolean inherited = !mascotConfig.getContainer().equals(container);
 %>
 <script type="text/javascript">
 
@@ -58,30 +62,39 @@
 </script>
 
 <labkey:form name="preferences" enctype="multipart/form-data" method="post">
+    <input type="hidden" name="reset" value="false" id="resetInput" />
     <table>
         <tr>
-            <th style="width: 35em;"></th>
+            <th></th>
             <th></th>
         </tr>
-
         <tr>
             <td colspan=2>Configure Mascot settings (<%=text(new HelpTopic("configAdmin").getSimpleLinkHtml("more info..."))%>)</td>
-        </tr>
+        </tr> <%
+            if (inherited) { %>
+            <tr>
+                <td colspan="2">
+                    Configuration is currently being inherited from <%= h(mascotConfig.getContainer().isRoot() ? "the site-level" : mascotConfig.getContainer().getPath())%>.
+                    Saving will override the inherited configuration.<br/>
+                    <%= textLink("edit inherited settings", new ActionURL(MS2Controller.MascotConfigAction.class, mascotConfig.getContainer()))%>
+                </td>
+            </tr>
+        <% } %>
         <tr>
             <td class="labkey-form-label">Mascot server</td>
-            <td><input type="text" name="mascotServer" size="64" value="<%=h(appProps.getMascotServer())%>"></td>
+            <td><input type="text" name="mascotServer" size="64" value="<%=h(mascotConfig.getMascotServer())%>"></td>
         </tr>
         <tr>
             <td class="labkey-form-label">User</td>
-            <td><input type="text" name="mascotUserAccount" size="50" value="<%=h(appProps.getMascotUserAccount())%>" autocomplete="off"></td>
+            <td><input type="text" name="mascotUserAccount" size="50" value="<%=h(mascotConfig.getMascotUserAccount())%>" autocomplete="off"></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Password</td>
-            <td><input type="password" name="mascotUserPassword" size="50" value="<%=h(appProps.getMascotUserPassword())%>" autocomplete="off"></td>
+            <td><input type="password" name="mascotUserPassword" size="50" value="<%=h(mascotConfig.getMascotUserPassword())%>" autocomplete="off"></td>
         </tr>
         <tr>
             <td class="labkey-form-label">HTTP Proxy URL</td>
-            <td><input type="text" name="mascotHTTPProxy" size="64" value="<%=h(appProps.getMascotHTTPProxy())%>"></td>
+            <td><input type="text" name="mascotHTTPProxy" size="64" value="<%=h(mascotConfig.getMascotHTTPProxy())%>"></td>
         </tr>
         <tr>
             <td></td>
@@ -92,11 +105,13 @@
         <tr>
             <td>&nbsp;</td>
         </tr>
-
-        <tr>
-            <td><%= button("Save").submit(true) %> <%= button("Cancel").href(PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL())%></td>
-        </tr>
     </table>
+
+    <%= button("Save").submit(true) %>
+    <%= button("Cancel").href(PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL())%>
+    <% if (!inherited) { %>
+    <%= button("Clear Settings").onClick("document.getElementById('resetInput').value = 'true'; document.forms['preferences'].submit();") %>
+    <% } %>
 </labkey:form>
 
 <labkey:form name="mascottest" action="mascotTest.view" enctype="multipart/form-data" method="post" target='_new' >

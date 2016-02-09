@@ -48,8 +48,7 @@ public class MascotClientImpl implements SearchClient
     private static Logger _log = Logger.getLogger(MascotClientImpl.class);
     
     private Logger _instanceLogger = null;
-    //private static AppProps _appProps = AppProps.getInstance();
-    //_appProps.getMascotServer(), _appProps.getMascotHTTPProxy ()
+
     private String _url;
     private String _userAccount = "";
     private String _userPassword = "";

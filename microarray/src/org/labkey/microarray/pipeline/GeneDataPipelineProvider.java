@@ -17,6 +17,7 @@
 package org.labkey.microarray.pipeline;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
@@ -79,7 +80,7 @@ public class GeneDataPipelineProvider extends PipelineProvider
     }
 
     @Override
-    public List<PipelineActionConfig> getDefaultActionConfig()
+    public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
         if (getGeneDataBaseURL() == null || getGeneDataFileRoot() == null)
         {

@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
@@ -23,11 +24,11 @@ import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -67,7 +68,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        if (!AppProps.getInstance().hasMascotServer())
+        if (!MascotConfig.findMascotConfig(context.getContainer()).hasMascotServer())
             return;
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
@@ -80,21 +81,18 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
     }
 
     @Override
-    public List<PipelineActionConfig> getDefaultActionConfig()
+    public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
-        if (AppProps.getInstance().hasMascotServer())
+        if (MascotConfig.findMascotConfig(container).hasMascotServer())
         {
             String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
         }
-        return super.getDefaultActionConfig();
+        return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
     public HttpView getSetupWebPart(Container container)
     {
-        if (!AppProps.getInstance().hasMascotServer())
-            return null;
-
         return new SetupWebPart();
     }
 
@@ -116,7 +114,12 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             ActionURL setDefaultsURL = new ActionURL(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
             html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                     .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                    .append(" - Specify the default XML parameters file for Mascot.</td></tr></table>");
+                    .append(" - Specify the default XML parameters file for Mascot.</td></tr>");
+            ActionURL configMascotURL = new ActionURL(MS2Controller.MascotConfigAction.class, context.getContainer());
+            html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
+                    .append("<a href=\"").append(configMascotURL.getLocalURIString()).append("\">Configure Mascot Server</a>")
+                    .append(" - Specify connection information for the Mascot Server.</td></tr>");
+            html.append("</table>");
             out.write(html.toString());
         }
     }
@@ -132,18 +135,17 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
     }
 
     @Override
-    public boolean dbExists(File sequenceRoot, String db) throws IOException
+    public boolean dbExists(Container container, File sequenceRoot, String db) throws IOException
     {
-        return new CaseInsensitiveHashSet(getSequenceDbDirList(sequenceRoot)).contains(db);
+        return new CaseInsensitiveHashSet(getSequenceDbDirList(container, sequenceRoot)).contains(db);
     }
 
-    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException {
-        AppProps.Interface appProps = AppProps.getInstance();
-        if (!appProps.hasMascotServer())
-            throw new IOException("Mascot server has not been specified in site customization.");
+    public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException
+    {
+        MascotConfig config = ensureMascotConfig(container);
 
-        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
-        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
+        mascotClient.setProxyURL(config.getMascotHTTPProxy());
         List<String> sequenceDBs = mascotClient.getSequenceDbList();
 
         if (0 == sequenceDBs.size())
@@ -156,14 +158,12 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return sequenceDBs;
     }
 
-    public List<String> getTaxonomyList() throws IOException
+    public List<String> getTaxonomyList(Container container) throws IOException
     {
-        AppProps.Interface appProps = AppProps.getInstance();
-        if (!appProps.hasMascotServer())
-            throw new IOException("Mascot server has not been specified in site customization.");
+        MascotConfig config = ensureMascotConfig(container);
 
-        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
-        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
+        mascotClient.setProxyURL(config.getMascotHTTPProxy());
         List<String> taxonomy = mascotClient.getTaxonomyList();
 
         if (0 == taxonomy.size())
@@ -238,14 +238,12 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 //        return mock;
     }
 
-    public Map<String, List<String>> getEnzymes() throws IOException
+    public Map<String, List<String>> getEnzymes(Container container) throws IOException
     {
-        AppProps.Interface appProps = AppProps.getInstance();
-        if (!appProps.hasMascotServer())
-            throw new IOException("Mascot server has not been specified in site customization.");
+        MascotConfig config = ensureMascotConfig(container);
 
-        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
-        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
+        mascotClient.setProxyURL(config.getMascotHTTPProxy());
         Map<String, List<String>> enzymes = mascotClient.getEnzymeMap();
 
         if (0 == enzymes.size())
@@ -255,14 +253,21 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return enzymes;
     }
 
-    public Map<String, String> getResidue0Mods() throws IOException
+    @NotNull
+    private MascotConfig ensureMascotConfig(Container container) throws IOException
     {
-        AppProps.Interface appProps = AppProps.getInstance();
-        if (!appProps.hasMascotServer())
-            throw new IOException("Mascot server has not been specified in site customization.");
+        MascotConfig config = MascotConfig.findMascotConfig(container);
+        if (!config.hasMascotServer())
+            throw new IOException("Mascot Server has not been configured.");
+        return config;
+    }
 
-        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
-        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+    public Map<String, String> getResidue0Mods(Container container) throws IOException
+    {
+        MascotConfig config = ensureMascotConfig(container);
+
+        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
+        mascotClient.setProxyURL(config.getMascotHTTPProxy());
         Map<String,String> mods = mascotClient.getResidueModsMap();
 
         if (0 == mods.size())
@@ -274,7 +279,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return mods;
     }
 
-    public Map<String, String> getResidue1Mods() throws IOException
+    public Map<String, String> getResidue1Mods(Container container) throws IOException
     {
         return null;  //no difference between static and dynamic mods in mascot 
     }
@@ -299,11 +304,11 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return false;
     }
 
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled(Container container) throws PipelineValidationException
     {
-        AppProps.Interface appProps = AppProps.getInstance();
-        String mascotServer = appProps.getMascotServer();
-        if ((!appProps.hasMascotServer() || 0==mascotServer.length()))
+        MascotConfig config = MascotConfig.findMascotConfig(container);
+        String mascotServer = config.getMascotServer();
+        if ((!config.hasMascotServer() || 0==mascotServer.length()))
             throw new PipelineValidationException("Mascot server has not been specified in site customization.");
     }
 }

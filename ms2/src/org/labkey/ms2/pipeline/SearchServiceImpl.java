@@ -159,7 +159,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                     boolean dbExists;
                     try
                     {
-                        dbExists = provider.dbExists(getSequenceRoot(), protocol.getDbNames()[0]);
+                        dbExists = provider.dbExists(getContainer(), getSequenceRoot(), protocol.getDbNames()[0]);
                     }
                     catch (IOException e)
                     {
@@ -199,7 +199,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         try
         {
-            results.setMascotTaxonomyList(provider.getTaxonomyList());
+            results.setMascotTaxonomyList(provider.getTaxonomyList(getContainer()));
         }
         catch(IOException e)
         {
@@ -220,7 +220,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         try
         {
-            results.setEnzymeMap(provider.getEnzymes());
+            results.setEnzymeMap(provider.getEnzymes(getContainer()));
         }
         catch(IOException e)
         {
@@ -241,8 +241,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         try
         {
-            results.setMod0Map(provider.getResidue0Mods());
-            results.setMod1Map(provider.getResidue1Mods());
+            results.setMod0Map(provider.getResidue0Mods(getContainer()));
+            results.setMod1Map(provider.getResidue1Mods(getContainer()));
         }
         catch(IOException e)
         {
@@ -395,18 +395,18 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             {
                 relativePath = relativePath.replaceAll(" ","%20");
                 URI uriPath = new URI(relativePath);
-                sequenceDbs =  provider.getSequenceDbDirList(new File(uriPath));
+                sequenceDbs =  provider.getSequenceDbDirList(getContainer(), new File(uriPath));
             }
             else
             {
                 defaultDbPathURI = new File(defaultDbPath).toURI();
-                sequenceDbs =  provider.getSequenceDbDirList(new File(defaultDbPathURI));
+                sequenceDbs =  provider.getSequenceDbDirList(getContainer(), new File(defaultDbPathURI));
             }          
             if(sequenceDbs == null)
             {
                 results.appendError("Could not find the default sequence database path : " + defaultDbPath);
                 defaultDbPathURI = getSequenceRoot().toURI();
-                sequenceDbs = provider.getSequenceDbDirList(new File(defaultDbPathURI));
+                sequenceDbs = provider.getSequenceDbDirList(getContainer(), new File(defaultDbPathURI));
             }
             else
             {

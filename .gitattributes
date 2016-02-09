@@ -964,6 +964,7 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-15.30-15.31.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.31-15.32.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.33-15.34.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.34-15.35.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-15.35-15.36.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-12.10.sql -text
@@ -982,6 +983,7 @@ ms2/resources/schemas/dbscripts/sqlserver/ms2-15.30-15.31.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.31-15.32.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.33-15.34.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.34-15.35.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-15.35-15.36.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-12.10.sql -text
@@ -1185,6 +1187,7 @@ ms2/src/org/labkey/ms2/pipeline/comet/setCometDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/importMSScanCounts.jsp -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotClientImpl.java -text
+ms2/src/org/labkey/ms2/pipeline/mascot/MascotConfig.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotPipelineJob.java -text

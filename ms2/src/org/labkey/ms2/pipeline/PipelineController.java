@@ -438,7 +438,7 @@ public class PipelineController extends SpringActionController
 
             try
             {
-                _provider.ensureEnabled();   // throws exception if not enabled
+                _provider.ensureEnabled(getContainer());   // throws exception if not enabled
 
                 // If not a saved protocol, create one from the information in the form.
                 if (!"new".equals(form.getProtocol()))

@@ -58,6 +58,11 @@ public class MS2PipelineProvider extends PipelineProvider
 
     class SetupWebPart extends WebPartView
     {
+        public SetupWebPart()
+        {
+            super(FrameType.DIV);
+        }
+
         @Override
         protected void renderView(Object model, PrintWriter out) throws Exception
         {

@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.TaskPipeline;
@@ -36,8 +37,9 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
         super(name, owningModule);
     }
 
-    /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server */
-    abstract public void ensureEnabled() throws PipelineValidationException;
+    /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server
+     * @param container*/
+    abstract public void ensureEnabled(Container container) throws PipelineValidationException;
 
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
 
@@ -47,5 +49,5 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
     /** @return true if this will be a full-blown search, false if it's operating on already searched-data */
     abstract public boolean isSearch();
 
-    abstract public boolean dbExists(File sequenceRoot, String dbName) throws IOException;
+    abstract public boolean dbExists(Container container, File sequenceRoot, String dbName) throws IOException;
 }

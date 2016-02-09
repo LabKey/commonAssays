@@ -127,6 +127,7 @@ import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
+import org.labkey.ms2.pipeline.mascot.MascotConfig;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.protein.AnnotationInsertion;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
@@ -4042,10 +4043,22 @@ public class MS2Controller extends SpringActionController
 
     public static class MascotSettingsForm
     {
+        private boolean _reset;
+
         private String _mascotServer;
         private String _mascotUserAccount;
         private String _mascotUserPassword;
         private String _mascotHTTPProxy;
+
+        public boolean isReset()
+        {
+            return _reset;
+        }
+
+        public void setReset(boolean reset)
+        {
+            _reset = reset;
+        }
 
         public String getMascotServer()
         {
@@ -4106,17 +4119,22 @@ public class MS2Controller extends SpringActionController
         @Override
         public boolean handlePost(MascotSettingsForm form, BindException errors) throws Exception
         {
-            WriteableAppProps props = AppProps.getWriteableInstance();
+            if (form.isReset())
+            {
+                MascotConfig.reset(getContainer());
+            }
+            else
+            {
+                MascotConfig config = MascotConfig.getWriteableMascotConfig(getContainer());
+                config.setMascotServer(form.getMascotServer());
+                config.setMascotUserAccount(form.getMascotUserAccount());
+                config.setMascotUserPassword(form.getMascotUserPassword());
+                config.setMascotHTTPProxy(form.getMascotHTTPProxy());
+                config.save();
 
-            props.setMascotServer(form.getMascotServer());
-            props.setMascotUserAccount(form.getMascotUserAccount());
-            props.setMascotUserPassword(form.getMascotUserPassword());
-            props.setMascotHTTPProxy(form.getMascotHTTPProxy());
-
-            props.save();
-
-            //write an audit log event
-            props.writeAuditLogEvent(getContainer(), getViewContext().getUser(), props.getOldProperties());
+                //write an audit log event
+                config.writeAuditLogEvent(getContainer(), getViewContext().getUser(), config.getOldProperties());
+            }
 
             return true;
         }
@@ -4124,13 +4142,23 @@ public class MS2Controller extends SpringActionController
         @Override
         public URLHelper getSuccessURL(MascotSettingsForm mascotSettingsForm)
         {
-            return PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL();
+            return getContainer().isRoot() ?
+                    PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL() :
+                    PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer());
         }
 
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL()).addChild("Mascot Server Configuration");
+            if (getViewContext().getContainer().isRoot())
+            {
+                root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+            }
+            else
+            {
+                root.addChild("Pipeline Settings", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
+            }
+            return root.addChild("Mascot Server Configuration");
         }
     }
 

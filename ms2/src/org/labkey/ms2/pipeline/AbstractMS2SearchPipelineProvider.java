@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.util.NetworkDrive;
@@ -66,7 +67,7 @@ abstract public class AbstractMS2SearchPipelineProvider
     }
 
     @Override
-    public boolean dbExists(File sequenceRoot, String db) throws IOException
+    public boolean dbExists(Container container, File sequenceRoot, String db) throws IOException
     {
         File dbFile = new File(sequenceRoot, db);
         return NetworkDrive.exists(dbFile);
@@ -84,14 +85,15 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     /** @return the list of sequence DBs in a given directory */
     @Nullable
-    abstract public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException;
+    abstract public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException;
 
-    abstract public List<String> getTaxonomyList() throws IOException;
+    abstract public List<String> getTaxonomyList(Container container) throws IOException;
 
-    /** @return enzyme name -> cut patterns */
-    abstract public Map<String, List<String>> getEnzymes() throws IOException;
+    /** @return enzyme name -> cut patterns
+     * @param container*/
+    abstract public Map<String, List<String>> getEnzymes(Container container) throws IOException;
 
-    abstract public Map<String, String> getResidue0Mods() throws IOException;
+    abstract public Map<String, String> getResidue0Mods(Container container) throws IOException;
 
-    abstract public Map<String, String> getResidue1Mods() throws IOException;
+    abstract public Map<String, String> getResidue1Mods(Container container) throws IOException;
 }

@@ -16,6 +16,7 @@
 
 package org.labkey.flow.script;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.PageFlowUtil;
@@ -30,15 +31,9 @@ import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.persist.AnalysisSerializer;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileFilter;
-import java.sql.SQLException;
 import java.util.*;
 
 public class FlowPipelineProvider extends PipelineProvider
@@ -172,7 +167,7 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
     @Override
-    public List<PipelineActionConfig> getDefaultActionConfig()
+    public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
         List<PipelineActionConfig> configs = new ArrayList<>();
 

@@ -74,7 +74,7 @@ public class LegacyCometPipelineProvider extends AbstractMS2SearchPipelineProvid
         return null;
     }
 
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled(Container container) throws PipelineValidationException
     {
         // Nothing to do.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
@@ -91,27 +91,27 @@ public class LegacyCometPipelineProvider extends AbstractMS2SearchPipelineProvid
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException {
+    public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public List<String> getTaxonomyList() throws IOException {
+    public List<String> getTaxonomyList(Container container) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("LegacyComet does not support Mascot style taxonomy.");
     }
 
-    public Map<String, List<String>> getEnzymes() throws IOException {
+    public Map<String, List<String>> getEnzymes(Container container) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public Map<String, String> getResidue0Mods() throws IOException {
+    public Map<String, String> getResidue0Mods(Container container) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public Map<String, String> getResidue1Mods() throws IOException {
+    public Map<String, String> getResidue1Mods(Container container) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }

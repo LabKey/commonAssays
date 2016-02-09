@@ -16,15 +16,11 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.labkey.api.pipeline.ParamParser;
-import org.labkey.api.settings.AppProps;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 /**
- * MascotSearchProtocolFactory class
- * <p/>
  * Created: Jun 6, 2006
- *
  * @author bmaclean
  */
 public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
@@ -53,28 +49,14 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
 
     public MascotSearchProtocol createProtocolInstance(String name, String description, String xml)
     {
-        AppProps.Interface appProps = AppProps.getInstance();
-        String mascotServer = appProps.getMascotServer();
-        String mascotHTTPProxy = appProps.getMascotHTTPProxy();
-        if (!appProps.hasMascotServer() || 0 == mascotServer.length())
-            throw new IllegalArgumentException("Mascot server has not been specified in site customization.");
-
-        MascotSearchProtocol protocol = new MascotSearchProtocol(name, description, xml);
-
-        protocol.setMascotServer(mascotServer);
-        protocol.setMascotHTTPProxy(mascotHTTPProxy);
-        return protocol;
+        return new MascotSearchProtocol(name, description, xml);
     }
 
     protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
-        String mascotServer = parser.removeInputParameter("pipeline, mascot server");
-        String mascotHTTPProxy = parser.removeInputParameter("pipeline, mascot http proxy");
+        parser.removeInputParameter("pipeline, mascot server");
+        parser.removeInputParameter("pipeline, mascot http proxy");
 
-        MascotSearchProtocol instance = (MascotSearchProtocol) super.createProtocolInstance(parser);
-
-        instance.setMascotServer(mascotServer);
-        instance.setMascotHTTPProxy(mascotHTTPProxy);
-        return instance;
+        return super.createProtocolInstance(parser);
     }
 }
