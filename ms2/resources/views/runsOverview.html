@@ -659,6 +659,11 @@ function switchForm()
     inactive = temp;
 
     showResultFilters(active);
+
+    Ext.getCmp('results-grid').destroy();
+    _panel.remove(Ext.getCmp('id' + 'Results'));
+    _panel.insert(3,getPanelSignature("Results", false, null));
+    _panel.doLayout(true, true);
 }
 
 Ext.onReady(init);
