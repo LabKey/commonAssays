@@ -177,7 +177,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         if (!(dataRowId instanceof Integer))
             return null;
         OntologyObject dataRow = OntologyManager.getOntologyObject((Integer) dataRowId);
-        if (dataRow == null)
+        if (dataRow == null || dataRow.getOwnerObjectId() == null)
             return null;
         OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
         if (dataRowParent == null)
