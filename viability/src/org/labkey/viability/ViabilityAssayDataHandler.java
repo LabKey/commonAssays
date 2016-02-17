@@ -16,28 +16,41 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpExperiment;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
+import org.labkey.api.settings.AppProps;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.data.Container;
-import org.labkey.api.security.User;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.util.Pair;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.ConversionException;
+import org.labkey.api.view.ActionURL;
 
-import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * User: kevink
@@ -373,5 +386,122 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
 
         return new Pair<>(base, extra);
+    }
+
+
+
+    public static class TestCase extends Assert
+    {
+        private File projectRoot()
+        {
+            String projectRootPath =  AppProps.getInstance().getProjectRoot();
+            if (projectRootPath == null)
+                projectRootPath = System.getProperty("user.dir") + "/..";
+            return new File(projectRootPath);
+        }
+
+        // NOTE: Running this test from within IntelliJ will fail due to ConvertHelper not registering
+        // NOTE: it's converters causing the ViabilityTsvDataHandler's TabLoader to infer types incorrectly.
+        @Test
+        public void testTsv() throws Exception
+        {
+            File projectRoot = projectRoot();
+
+            File viabilityFiles = new File(projectRoot, "sampledata/viability");
+            assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
+
+            ViabilityTsvDataHandler.Parser parser = new ViabilityTsvDataHandler.Parser(null, null, new File(viabilityFiles, "simple.tsv"));
+
+            List<Map<String, Object>> rows = parser.getResultData();
+            assertEquals("Expected 3 rows", 3, rows.size());
+
+            Map<String, Object> row = rows.get(0);
+            assertEquals(8, row.size());
+            assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("1235-5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("1235", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(null, row.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
+            assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertEquals(900, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(1000, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+
+            row = rows.get(rows.size()-1);
+            assertEquals(8, row.size());
+            assertEquals(3, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("1234-7", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("1234", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(7.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertEquals(Arrays.asList("foobar", "vial1", "vial2"), row.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
+            assertEquals(900, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(1100, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+        }
+
+        @Test
+        public void testGuava() throws Exception
+        {
+            File projectRoot = projectRoot();
+
+            File viabilityFiles = new File(projectRoot, "sampledata/viability");
+            assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
+
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "small.VIA.csv"));
+
+            List<Map<String, Object>> rows = parser.getResultData();
+            assertEquals("Expected 7 rows", 7, rows.size());
+
+            Map<String, Object> row = rows.get(0);
+            assertEquals(7, row.size());
+            assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("160450533-5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("160450533", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertTrue(Math.abs(0.845 - (Double)row.get("Viability")) < 0.0001);
+            assertEquals(31268270.5, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(37003872.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+
+            row = rows.get(rows.size()-1);
+            assertEquals(7, row.size());
+            assertEquals(34, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("159401872v5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("159401872", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertTrue(Math.abs(0.954 - (Double)row.get("Viability")) < 0.0001);
+            assertEquals(25878380.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(27126184.0, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+        }
+
+        @Test
+        public void testExpressPlus() throws Exception
+        {
+            AppProps.Interface props = AppProps.getInstance();
+            String projectRootPath =  props.getProjectRoot();
+            File projectRoot = new File(projectRootPath);
+
+            File viabilityFiles = new File(projectRoot, "sampledata/viability");
+            assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
+
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "122810.EP5.CSV"));
+
+            List<Map<String, Object>> rows = parser.getResultData();
+            assertEquals("Expected 16 rows", 16, rows.size());
+
+            Map<String, Object> row = rows.get(0);
+            assertEquals(7, row.size());
+            assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("B01", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("B01", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertFalse(row.containsKey(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertTrue(Math.abs(0.4542 - (Double)row.get("Viability")) < 0.0001);
+            assertEquals(9043848.8, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(1.9911600176133864E7, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+            assertEquals(10.0, row.get("OriginalVolume"));
+
+            // Last row
+            row = rows.get(rows.size()-1);
+            assertEquals(16, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            // NOTE: no splitting of PoolD into participant-visit
+            assertEquals("C-04", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("C-04", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+        }
     }
 }

@@ -92,9 +92,9 @@ public class ViabilityModule extends DefaultModule
     @NotNull
     public Set<Class> getIntegrationTests()
     {
-        return new HashSet<Class>(Arrays.asList(
+        return new HashSet<>(Arrays.asList(
                 ViabilityManager.TestCase.class,
-                GuavaDataHandler.TestCase.class
+                ViabilityAssayDataHandler.TestCase.class
         ));
     }
 
