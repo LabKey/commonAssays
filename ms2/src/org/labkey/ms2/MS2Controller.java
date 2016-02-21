@@ -3595,7 +3595,7 @@ public class MS2Controller extends SpringActionController
             descriptionColumn.setURLExpression(showRunDetailsURL);
             rgn.addDisplayColumn(descriptionColumn);
 
-            rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
+            rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount"));
 
             GridView gridView = new GridView(rgn, errors);
             gridView.getRenderContext().setUseContainerFilter(false);
@@ -4261,11 +4261,16 @@ public class MS2Controller extends SpringActionController
             setTitle("Proteins Containing " + peptide);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            List<Protein> proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
+            List<Protein> proteins = ProteinManager.getProteinsContainingPeptide(peptide, run.getFastaIds());
             ActionURL currentURL = getViewContext().cloneActionURL();
 
             ProteinsView view = new ProteinsView(currentURL, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, null);
-            HttpView summary = new HtmlView("<table><tr><td><span class=\"navPageHeader\">All protein sequences in FASTA file " + run.getFastaFileName() + " that contain the peptide " + peptide + "</span></td></tr></table>");
+            List<String> fastaNames = new ArrayList<>();
+            for (int i : run.getFastaIds())
+            {
+                fastaNames.add(ProteinManager.getFastaFile(i).getFilename());
+            }
+            HttpView summary = new HtmlView("<table><tr><td><span class=\"navPageHeader\">All protein sequences in FASTA file" + (run.getFastaIds().length > 1 ? "s" : "") + " " + StringUtils.join(fastaNames, ", ") + " that contain the peptide " + peptide + "</span></td></tr></table>");
             return new VBox(summary, view);
         }
 

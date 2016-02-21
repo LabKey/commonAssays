@@ -33,22 +33,18 @@ import java.util.Map;
  */
 public class FastaValidator
 {
-    private File _fastaFile;
+    /** Use a trie to get space-efficient storage */
+    private final PatriciaTrie _proteinNames = new PatriciaTrie<>(ByteArrayKeyAnalyzer.VARIABLE);
 
-
-    public FastaValidator(File fastaFile)
+    public FastaValidator()
     {
-        _fastaFile = fastaFile;
     }
 
-
-    public List<String> validate()
+    public List<String> validate(File fastaFile)
     {
-        // Use a trie to get space-efficient storage
-        Map<byte[], Object> proteinNames = new PatriciaTrie<>(ByteArrayKeyAnalyzer.VARIABLE);
         List<String> errors = new ArrayList<>();
         Format lineFormat = DecimalFormat.getIntegerInstance();
-        ProteinFastaLoader curLoader = new ProteinFastaLoader(_fastaFile);
+        ProteinFastaLoader curLoader = new ProteinFastaLoader(fastaFile);
 
         //noinspection ForLoopReplaceableByForEach
         for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
@@ -59,7 +55,7 @@ public class FastaValidator
             String lookupString = protein.getLookup().toLowerCase();
             byte[] lookup = lookupString.getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
 
-            if (proteinNames.containsKey(lookup))
+            if (_proteinNames.containsKey(lookup))
             {
                 errors.add("Line " + lineFormat.format(proteinIterator.getLastHeaderLineNum()) + ": " + lookupString + " is a duplicate protein name");
 
@@ -71,7 +67,7 @@ public class FastaValidator
             }
             else
             {
-                proteinNames.put(lookup, null);
+                _proteinNames.put(lookup, null);
             }
         }
 

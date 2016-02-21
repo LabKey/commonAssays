@@ -392,11 +392,18 @@ public abstract class MS2Importer
     }
 
 
-    private static String _updateSeqIdSql;
+    private static final String _updateSeqIdSql;
 
     static
     {
-        StringBuilder sql = new StringBuilder();
+        _updateSeqIdSql = "UPDATE " +
+                MS2Manager.getTableInfoPeptidesData() +
+                " SET SeqId = fs.SeqId\nFROM " +
+                ProteinManager.getTableInfoFastaSequences() +
+                " fs WHERE Fraction = ? AND " +
+                MS2Manager.getTableInfoPeptidesData() +
+                ".Protein = fs.LookupString AND fs.FastaId = ? AND " +
+                MS2Manager.getTableInfoPeptidesData() + ".SeqId IS NULL";
 
         /*
             UPDATE ms2.PeptidesData
@@ -405,16 +412,6 @@ public abstract class MS2Importer
 	            WHERE Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run = ?) AND
 		            ms2.PeptidesData.Protein = fs.LookupString AND fs.FastaId = ?
          */
-
-        sql.append("UPDATE ");
-        sql.append(MS2Manager.getTableInfoPeptidesData());
-        sql.append(" SET SeqId = fs.SeqId\nFROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE Fraction = ? AND ");
-        sql.append(MS2Manager.getTableInfoPeptidesData());
-        sql.append(".Protein = fs.LookupString AND fs.FastaId = ?");
-
-        _updateSeqIdSql = sql.toString();
     }
 
 
@@ -548,14 +545,23 @@ public abstract class MS2Importer
 
         for (MS2Fraction fraction : fractions)
         {
-            int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), run.getFastaId());
-            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match");
+            for (int fastaId : run.getFastaIds())
+            {
+                int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), fastaId);
+                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match for FASTA id " + fastaId);
+            }
 
-            rowCount = executor.execute(_updateSwissProtSeqIdSql, run.getFastaId(), run.getFastaId(), fraction.getFraction());
-            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database");
+            for (int fastaId : run.getFastaIds())
+            {
+                int rowCount = executor.execute(_updateSwissProtSeqIdSql, fastaId, fastaId, fraction.getFraction());
+                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database for FASTA id " + fastaId);
+            }
 
-            rowCount = executor.execute(_updateSeqIdInexactMatchSql, run.getFastaId(), run.getFastaId(), fraction.getFraction());
-            _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on inexact protein name match");
+            for (int fastaId : run.getFastaIds())
+            {
+                int rowCount = executor.execute(_updateSeqIdInexactMatchSql, fastaId, fastaId, fraction.getFraction());
+                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on inexact protein name match for FASTA id " + fastaId);
+            }
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);

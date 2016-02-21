@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
@@ -32,6 +33,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.MS2Schema;
@@ -529,7 +531,13 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         List<String> runHeaders = new ArrayList<>(3);
         runHeaders.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
         runHeaders.add("Search Engine: " + naForNull(run.getSearchEngine()) + "\tPath: " + naForNull(run.getPath()));
-        runHeaders.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(run.getFastaFileName()));
+        List<String> fastas = new ArrayList<>();
+        for (int fastaId : run.getFastaIds())
+        {
+            FastaFile fastaFile = ProteinManager.getFastaFile(fastaId);
+            fastas.add(fastaFile.getFilename());
+        }
+        runHeaders.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(StringUtils.join(fastas, ", ")));
 
         List<String> headers = new ArrayList<>();
         headers.add("Run: " + naForNull(run.getDescription()));
@@ -576,7 +584,6 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             header.append(run.getRun()).append("=");
             header.append(run.getDescription()).append("|");
             header.append(run.getFileName()).append("|");
-            header.append(run.getLoaded()).append("|");
 
             List<MS2Modification> mods = run.getModifications(MassType.Average);
 

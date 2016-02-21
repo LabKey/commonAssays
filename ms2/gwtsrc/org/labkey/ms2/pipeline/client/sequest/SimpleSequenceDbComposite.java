@@ -35,7 +35,7 @@ public class SimpleSequenceDbComposite extends SequenceDbComposite
 
     public SimpleSequenceDbComposite(Search search)
     {
-        super(search);
+        super(search, false);
     }
 
     public void setTaxonomyListBoxContents(List taxonomyList)

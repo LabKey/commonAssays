@@ -288,7 +288,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
     public void writeTaxonomy(File fileTaxonomy, String taxonName, File[] fileDatabases) throws IOException
     {
-        StringBuffer taxonomyBuffer = new StringBuffer();
+        StringBuilder taxonomyBuffer = new StringBuilder();
         taxonomyBuffer.append("<?xml version=\"1.0\"?>\n");
         taxonomyBuffer.append("<bioml label=\"x! taxon-to-file matching list\">\n");
         taxonomyBuffer.append("  <taxon label=\"").append(taxonName).append("\">\n");

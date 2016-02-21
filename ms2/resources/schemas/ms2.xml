@@ -460,14 +460,6 @@
       <ns:column columnName="Type"/>
       <ns:column columnName="SearchEngine"/>
       <ns:column columnName="MassSpecType"/>
-      <ns:column columnName="FastaId">
-          <ns:columnTitle>FASTA</ns:columnTitle>
-          <ns:fk>
-              <ns:fkColumnName>fastaid</ns:fkColumnName>
-              <ns:fkTable>fastafiles</ns:fkTable>
-              <ns:fkDbSchema>prot</ns:fkDbSchema>
-          </ns:fk>
-      </ns:column>
       <ns:column columnName="SearchEnzyme"/>
       <ns:column columnName="Deleted"/>
       <ns:column columnName="ExperimentRunLSID">
@@ -597,7 +589,6 @@
       <ns:column columnName="Type"/>
       <ns:column columnName="SearchEngine"/>
       <ns:column columnName="MassSpecType"/>
-      <ns:column columnName="FastaId"/>
       <ns:column columnName="SearchEnzyme"/>
       <ns:column columnName="Deleted"/>
       <ns:column columnName="ExperimentRunLSID"/>
@@ -2246,6 +2237,13 @@
       <ns:column columnName="SeqId"/>
       <ns:column columnName="SampleId"/>
       <ns:column columnName="DataId"/>
+    </ns:columns>
+  </ns:table>
+
+  <ns:table tableName="FastaRunMapping" tableDbType="TABLE" hidden="true">
+    <ns:columns>
+      <ns:column columnName="Run" />
+      <ns:column columnName="FastaId" />
     </ns:columns>
   </ns:table>
 

@@ -47,9 +47,12 @@ import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: billnelson@uky.edu
@@ -117,7 +120,7 @@ public class Search implements EntryPoint
     {
         if (pipelineService == null)
         {
-            pipelineService = (PipelineGWTServiceAsync) GWT.create(PipelineGWTService.class);
+            pipelineService = GWT.create(PipelineGWTService.class);
             ServiceUtil.configureEndpoint(pipelineService, "pipelineConfiguration", "pipeline");
         }
         return pipelineService;
@@ -619,7 +622,7 @@ public class Search implements EntryPoint
             String results = event.getResults();
             if(results == null)
             {
-                appendError("The LabKey server is not responding.");
+                appendError("The web server is not responding.");
             }
             else if(results.contains("SUCCESS="))
             {
@@ -715,11 +718,13 @@ public class Search implements EntryPoint
         appendError(gwtResult.getErrors());
         sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
 
-        if(inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB).length() > 0 &&
-            !inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB).equals(sequenceDbComposite.getSelectedDb()))
+        Set<String> inputDbs = new HashSet<String>(Arrays.asList(inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB).split(";")));
+        Set<String> listBoxDbs = new HashSet<String>(Arrays.asList(sequenceDbComposite.getSelectedDb().split(";")));
+
+        if(!inputDbs.isEmpty() && !inputDbs.equals(listBoxDbs))
         {
-            appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
-            + " at this fasta root.");
+            appendError("The database entered for the input XML label \"" + ParameterNames.SEQUENCE_DB + "\" cannot be found"
+            + " at this FASTA root. " + inputDbs + " vs " + listBoxDbs);
             inputXmlComposite.params.removeInputParameter(ParameterNames.SEQUENCE_DB);
             try{
                 inputXmlComposite.writeXml();

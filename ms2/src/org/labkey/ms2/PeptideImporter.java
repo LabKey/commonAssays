@@ -17,6 +17,8 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
@@ -41,6 +43,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -134,8 +137,6 @@ public abstract class PeptideImporter extends MS2Importer
 
     public void writeRunInfo(MS2Loader.PeptideFraction fraction, MS2Progress progress) throws SQLException, IOException
     {
-        String databaseLocalPath = fraction.getDatabaseLocalPath();
-
         _run = MS2Run.getRunFromTypeString(fraction.getSearchEngine(), fraction.getSearchEngineVersion());
         _scoreColumnNames = _run.getPepXmlScoreColumnNames();
 
@@ -147,22 +148,35 @@ public abstract class PeptideImporter extends MS2Importer
         m.put("MascotFile", fraction.getMascotFile());
         m.put("DistillerRawFile", fraction.getDistillerRawFile());
 
+        List<String> dbPaths = new ArrayList<>();
+
         // If path to fasta is relative, prepend current dir
-        if (! isAbsolute(databaseLocalPath))
-            databaseLocalPath = _path + "/" + databaseLocalPath;
+        for (String dbPath : fraction.getDatabaseLocalPaths())
+        {
+            if (! isAbsolute(dbPath))
+                dbPath = _path + "/" + dbPath;
+            dbPaths.add(dbPath);
+        }
 
         try
         {
-            updateRunStatus("Importing FASTA file");
-            progress.getCumulativeTimer().setCurrentTask(Tasks.ImportFASTA, databaseLocalPath);
-            int fastaId = FastaDbLoader.loadAnnotations(_path, databaseLocalPath, FastaDbLoader.UNKNOWN_ORGANISM, true, _log, _context);
+            // Clear any stale values so we can re-insert
+            new SqlExecutor(MS2Manager.getSchema()).execute(new SQLFragment("DELETE FROM " + MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run = ?", _runId));
 
-            _scoringAnalysis = new SqlSelector(ProteinManager.getSchema(),
-                    "SELECT ScoringAnalysis " +
-                            "FROM " + ProteinManager.getTableInfoFastaFiles() + " " +
-                            "WHERE FastaId = ?", fastaId).getObject(Boolean.class);
+            for (String dbPath : dbPaths)
+            {
+                updateRunStatus("Importing FASTA file");
+                progress.getCumulativeTimer().setCurrentTask(Tasks.ImportFASTA, dbPath);
+                int fastaId = FastaDbLoader.loadAnnotations(_path, dbPath, FastaDbLoader.UNKNOWN_ORGANISM, true, _log, _context);
 
-            m.put("FastaId", fastaId);
+                // Insert a row into the run/FASTA mapping table
+                new SqlExecutor(MS2Manager.getSchema()).execute(new SQLFragment("INSERT INTO " + MS2Manager.getTableInfoFastaRunMapping() + " (Run, FastaId) VALUES (?, ?)", _runId, fastaId));
+
+                _scoringAnalysis |= new SqlSelector(ProteinManager.getSchema(),
+                        "SELECT ScoringAnalysis " +
+                                "FROM " + ProteinManager.getTableInfoFastaFiles() + " " +
+                                "WHERE FastaId = ?", fastaId).getObject(Boolean.class);
+            }
         }
         finally
         {

@@ -38,7 +38,7 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
 {
     public XtandemSequenceDbComposite(Search search)
     {
-        super(search);
+        super(search, true);
 
         dirPanel.insert(refreshPanel, 1);
         refreshPanel.add(refreshButton);

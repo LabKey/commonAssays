@@ -55,11 +55,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
                 importer.importFile(info, log);
             }
         }
-        catch (SQLException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch (XMLStreamException e)
+        catch (SQLException | XMLStreamException e)
         {
             throw new ExperimentException(e);
         }

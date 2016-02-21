@@ -46,7 +46,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
 
     public MascotSequenceDbComposite(Search search)
     {
-        super(search);
+        super(search, true);
         sequenceDbLabel.setStylePrimaryName("ms-readonly");
         instance.add(sequenceDbListBox);
         taxonomyReadOnly.setStylePrimaryName("labkey-read-only");
@@ -119,17 +119,13 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
-        String sequenceDbName = " ";
+        String sequenceDbName;
         String dbWidgetName;
         String taxonomyName = "";
 
         if(readOnly)
         {
-            int nameIndex = sequenceDbListBox.getSelectedIndex();
-            if(nameIndex != -1)
-            {
-                sequenceDbName = sequenceDbListBox.getValue(nameIndex);
-            }
+            sequenceDbName = getSelectedDb();
 
             instance.remove(sequenceDbListBox);
             sequenceDbLabel.setText(sequenceDbName);

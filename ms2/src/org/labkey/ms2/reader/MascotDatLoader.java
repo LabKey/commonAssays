@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -330,7 +331,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 try
                 {
                     File databaseFile = PeptideImporter.getDatabaseFile(container, _currentLine.substring(DB_PREFIX.length()).trim(), null);
-                    fraction.setDatabaseLocalPath(databaseFile.getAbsolutePath());
+                    fraction.setDatabaseLocalPaths(Arrays.asList(databaseFile.getAbsolutePath()));
                 }
                 catch (FileNotFoundException e)
                 {
@@ -718,10 +719,10 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         readLine();
         while (!atEndOfSection())
         {
-            if (_currentLine.startsWith(FASTAFILE_PREFIX) && fraction.getDatabaseLocalPath() == null)
+            if (_currentLine.startsWith(FASTAFILE_PREFIX) && fraction.getDatabaseLocalPaths().isEmpty())
             {
                 File databaseFile = PeptideImporter.getDatabaseFile(container, null, _currentLine.substring(FASTAFILE_PREFIX.length()).trim());
-                fraction.setDatabaseLocalPath(databaseFile.getAbsolutePath());
+                fraction.setDatabaseLocalPaths(Arrays.asList(databaseFile.getAbsolutePath()));
             }
             readLine();
         }

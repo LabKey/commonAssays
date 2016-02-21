@@ -388,10 +388,8 @@ public class PipelineController extends SpringActionController
                     form.setConfigureXml(_protocol.getXml());
                     if (seqDbNames == null || seqDbNames.length == 0)
                         errors.reject(ERROR_MSG, "Protocol must specify a FASTA file.");
-                    else if (seqDbNames.length > 1)
-                        errors.reject(ERROR_MSG, "Protocol specifies multiple FASTA files.");
                     else
-                        form.setSequenceDB(seqDbNames[0]);
+                        form.setSequenceDB(seqDbNames);
                 }
                 catch (IOException eio)
                 {
@@ -449,11 +447,11 @@ public class PipelineController extends SpringActionController
                     }
                     _protocol.setDirSeqRoot(_dirSeqRoot);
                     _protocol.setDbPath(form.getSequenceDBPath());
-                    _protocol.setDbNames(new String[] {form.getSequenceDB()});
+                    _protocol.setDbNames(form.getSequenceDB());
                     PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
                             getContainer(), getUser(), form.getProtocol());
                     PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(), getContainer(),
-                            getUser(), form.getSequenceDBPath(), form.getSequenceDB());
+                            getUser(), form.getSequenceDBPath(), StringUtils.join(form.getSequenceDB(), ";"));
                 }
                 else
                 {
@@ -464,7 +462,7 @@ public class PipelineController extends SpringActionController
 
                     _protocol.setDirSeqRoot(_dirSeqRoot);
                     _protocol.setDbPath(form.getSequenceDBPath());
-                    _protocol.setDbNames(new String[] {form.getSequenceDB()});
+                    _protocol.setDbNames(form.getSequenceDB());
                     _protocol.setEmail(getUser().getEmail());
                     _protocol.validateToSave(_root);
                     if (form.isSaveProtocol())
@@ -474,7 +472,7 @@ public class PipelineController extends SpringActionController
                                 getContainer(), getUser(), form.getProtocolName());   
                     }
                     PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(),getContainer(),
-                                getUser(),form.getSequenceDBPath(), form.getSequenceDB());
+                                getUser(),form.getSequenceDBPath(), StringUtils.join(form.getSequenceDB(), ";"));
                 }
 
                 if (form.getFile().length == 0)

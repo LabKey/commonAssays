@@ -22,12 +22,24 @@
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
 <%@ page import="org.labkey.ms2.pipeline.mascot.MascotRun" %>
+<%@ page import="org.labkey.ms2.protein.fasta.FastaFile" %>
+<%@ page import="org.labkey.ms2.protein.ProteinManager" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
     Container c = getContainer();
     MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;
+
+    List<String> fastas = new ArrayList<>();
+    for (int id : run.getFastaIds())
+    {
+        FastaFile file = ProteinManager.getFastaFile(id);
+        fastas.add(file.getFilename());
+    }
 %>
 <table>
     <tr>
@@ -38,7 +50,7 @@
     <td class="labkey-form-label">Path</td><td><%=h(MS2Controller.defaultIfNull(run.getPath(), "n/a"))%></td>
     </tr><tr>
     <td class="labkey-form-label">Mass Spec Type</td><td><%=h(MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a"))%></td>
-    <td class="labkey-form-label">Fasta File</td><td><%=h(MS2Controller.defaultIfNull(run.getFastaFileName(), "n/a"))%></td>
+    <td class="labkey-form-label">Fasta File</td><td><%=h(StringUtils.join(fastas, ", "))%></td>
     </tr>
     <% if (run instanceof MascotRun) { %>
     <tr>

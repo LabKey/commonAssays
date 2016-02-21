@@ -110,6 +110,7 @@ public class ProteinGroupProteins
                 "   " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
                 "   " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
                 "   " + ProteinManager.getTableInfoFastaSequences() + " proteinseq, " +
+                "   " + MS2Manager.getTableInfoFastaRunMapping() + " frm, " +
                 "   " + MS2Manager.getTableInfoRuns() + " r, " +
                 "   " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n" +
                 "WHERE pgm.ProteinGroupId = pg.RowId " +
@@ -117,7 +118,8 @@ public class ProteinGroupProteins
                 "   AND " + extraWhereClause +
                 "   AND pg.ProteinProphetFileId = ppf.RowId" +
                 "   AND ppf.Run = r.Run" +
-                "   AND r.FastaId = proteinseq.FastaId" +
+                "   AND r.Run = frm.Run" +
+                "   AND frm.FastaId = proteinseq.FastaId" +
                 "   AND proteinseq.SeqId = pgm.SeqId" +
                 "\nORDER BY pg.GroupNumber, pg.IndistinguishableCollectionId, protseq.Length, proteinseq.LookupString";
 

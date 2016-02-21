@@ -19,6 +19,8 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.MemTracker;
@@ -48,9 +50,6 @@ public abstract class MS2Run implements Serializable
     protected String type;
     protected String searchEngine;
     protected String massSpecType;
-    protected String fastaFileName;
-    protected Date loaded;
-    protected int fastaId;
     protected String searchEnzyme;
     protected Map<MassType, List<MS2Modification>> modifications = new HashMap<>();
     protected Map<MassType, Map<String, Double>> varModifications = new HashMap<>();
@@ -65,6 +64,7 @@ public abstract class MS2Run implements Serializable
     protected int negativeHitCount;
 
     private ProteinProphetFile _proteinProphetFile;
+    private int[] _fastaIds;
 
     public MS2Run()
     {
@@ -282,6 +282,24 @@ public abstract class MS2Run implements Serializable
         this.hasPeptideProphet = hasPeptideProphet;
     }
 
+    public int[] getFastaIds()
+    {
+        if (_fastaIds == null)
+        {
+            SQLFragment sql = new SQLFragment("SELECT FastaId FROM ");
+            sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
+            sql.append(" WHERE Run = ?");
+            sql.add(getRun());
+            List<Integer> ids = new SqlSelector(MS2Manager.getSchema(), sql).getArrayList(Integer.class);
+            _fastaIds = new int[ids.size()];
+            for (int i = 0; i < _fastaIds.length; i++)
+            {
+                _fastaIds[i] = ids.get(i);
+            }
+        }
+        return _fastaIds;
+    }
+
     // CONSIDER: extend Apache ListOrderedSet (ideally) or our ArrayListMap.
     public static class ColumnNameList extends ArrayList<String>
     {
@@ -393,42 +411,6 @@ public abstract class MS2Run implements Serializable
     public void setFileName(String fileName)
     {
         this.fileName = fileName;
-    }
-
-
-    public String getFastaFileName()
-    {
-        return fastaFileName;
-    }
-
-
-    public void setFastaFileName(String fastaFileName)
-    {
-        this.fastaFileName = fastaFileName;
-    }
-
-
-    public Date getLoaded()
-    {
-        return this.loaded;
-    }
-
-
-    public void setLoaded(Date loaded)
-    {
-        this.loaded = loaded;
-    }
-
-
-    public int getFastaId()
-    {
-        return fastaId;
-    }
-
-
-    public void setFastaId(int fastaId)
-    {
-        this.fastaId = fastaId;
     }
 
 

@@ -348,16 +348,20 @@ public class SpectraCountTableInfo extends VirtualTable
                 sql.append(" ON (pm.proteinGroupId = pg.rowid)\nINNER JOIN ");
                 sql.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
                 sql.append(" ON (pgm.ProteinGroupId = pg.rowId)\nINNER JOIN ");
+                sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
+                sql.append(" ON (frm.Run = r.Run)\nINNER JOIN ");
                 sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
-                sql.append(" ON (fs.fastaid = r.fastaid AND pgm.seqid = fs.seqid)\nINNER JOIN ");
+                sql.append(" ON (fs.fastaid = frm.fastaid AND pgm.seqid = fs.seqid)\nINNER JOIN ");
                 sql.append(ProteinManager.getTableInfoSequences(), "s");
                 sql.append(" ON (fs.seqId = s.seqid)\n");
             }
             else
             {
                 sql.append(" INNER JOIN ");
+                sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
+                sql.append(" ON (frm.Run = r.Run)\n INNER JOIN ");
                 sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
-                sql.append(" ON (fs.fastaid = r.fastaid AND pd.seqid = fs.seqid)\n INNER JOIN ");
+                sql.append(" ON (fs.fastaid = frm.fastaid AND pd.seqid = fs.seqid)\n INNER JOIN ");
                 sql.append(ProteinManager.getTableInfoSequences(), "s");
                 sql.append(" ON (s.seqid = fs.seqid)\n");
             }

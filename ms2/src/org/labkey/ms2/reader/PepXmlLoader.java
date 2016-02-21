@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.reader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.MS2Modification;
@@ -63,14 +64,21 @@ public class PepXmlLoader extends MS2XmlLoader
                 {
                     String analysisType = _parser.getAttributeValue(null, "analysis");
 
-                    if (analysisType.equals("peptideprophet"))
-                        _ppSummary = PeptideProphetSummary.load(_parser);
-                    else if (XPressHandler.analysisType.equals(analysisType))
-                        _quantSummaries.add(XPressAnalysisSummary.load(_parser));
-                    else if (Q3Handler.ANALYSIS_TYPE.equals(analysisType))
-                        _quantSummaries.add(Q3AnalysisSummary.load(_parser));
-                    else if (LibraQuantHandler.ANALYSIS_TYPE.equals(analysisType))
-                        _quantSummaries.add(LibraQuantHandler.load(_parser));
+                    switch (analysisType)
+                    {
+                        case "peptideprophet":
+                            _ppSummary = PeptideProphetSummary.load(_parser);
+                            break;
+                        case XPressHandler.analysisType:
+                            _quantSummaries.add(XPressAnalysisSummary.load(_parser));
+                            break;
+                        case Q3Handler.ANALYSIS_TYPE:
+                            _quantSummaries.add(Q3AnalysisSummary.load(_parser));
+                            break;
+                        case LibraQuantHandler.ANALYSIS_TYPE:
+                            _quantSummaries.add(LibraQuantHandler.load(_parser));
+                            break;
+                    }
                 }
             }
         }
@@ -152,7 +160,7 @@ public class PepXmlLoader extends MS2XmlLoader
             _massSpecType = null;
             _searchEngine = null;
             _searchEnzyme = null;
-            _databaseLocalPath = null;
+            _databaseLocalPaths = new ArrayList<>();
 
             handleMsMsRunSummary();
 
@@ -171,7 +179,7 @@ public class PepXmlLoader extends MS2XmlLoader
                     _parser.getAttributeValue(null, "msModel"),
             };
 
-            _massSpecType = join(" ", instrument);
+            _massSpecType = StringUtils.trimToNull(StringUtils.join(instrument, " "));
         }
 
 
@@ -205,7 +213,7 @@ public class PepXmlLoader extends MS2XmlLoader
                             _dataSuffix = _dataSuffix.substring(1);
                     }
                     else if (element.equals("search_database"))
-                        _databaseLocalPath = _parser.getAttributeValue(null, "local_path");
+                        _databaseLocalPaths.add(_parser.getAttributeValue(null, "local_path"));
                     else if (element.equals("aminoacid_modification"))
                         handleModification();
                     else if (element.equals("enzymatic_search_constraint"))
@@ -602,7 +610,7 @@ public class PepXmlLoader extends MS2XmlLoader
                     _modifiedAminoAcids = new ModifiedAminoAcid[_trimmedPeptide.length()];
 
                     char[] modChars = new char[_trimmedPeptide.length()];
-                    StringBuffer pep = new StringBuffer(_trimmedPeptide);
+                    StringBuilder pep = new StringBuilder(_trimmedPeptide);
 
                     while (true)
                     {
@@ -685,27 +693,5 @@ public class PepXmlLoader extends MS2XmlLoader
                     break;
             }
         }
-    }
-
-
-    /**
-     * TODO: Replace with StringUtils.join?
-     */
-    private static String join(String delim, String[] strings)
-    {
-        if (strings == null) return null;
-        if (delim == null) delim = "";
-        StringBuffer sb = new StringBuffer();
-        for (String s : strings)
-        {
-            if (s != null)
-            {
-                sb.append(s);
-                sb.append(delim);
-            }
-        }
-        if (sb.length() <= delim.length())
-            return null;
-        return sb.substring(0, sb.length() - delim.length());
     }
 }

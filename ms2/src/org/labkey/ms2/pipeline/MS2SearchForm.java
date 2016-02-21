@@ -24,20 +24,20 @@ public class MS2SearchForm extends MS2PipelineForm
     private String protocolName = "";
     private String protocolDescription = "";
     private String sequenceDBPath = "";
-    private String sequenceDB = "";
+    private String[] sequenceDB = new String[0];
     private String configureXml = "";
     private boolean saveProtocol;
 
     private boolean runSearch = false;
 
-    public String getSequenceDB()
+    public String[] getSequenceDB()
     {
         return sequenceDB;
     }
 
-    public void setSequenceDB(String sequenceDB)
+    public void setSequenceDB(String[] sequenceDB)
     {
-        this.sequenceDB = (sequenceDB == null ? "" : sequenceDB);
+        this.sequenceDB = (sequenceDB == null ? new String[0] : sequenceDB);
     }
 
     public String getConfigureXml()

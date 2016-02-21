@@ -46,6 +46,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Peptide;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.Protein;
+import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.protein.fasta.PeptideGenerator;
 
 import java.io.ByteArrayOutputStream;
@@ -239,7 +240,7 @@ public class ProteinManager
         return protein != null ? protein.getSequence() : null;
     }
 
-    public static List<Protein> getProteinsContainingPeptide(int fastaId, MS2Peptide peptide) throws SQLException
+    public static List<Protein> getProteinsContainingPeptide(MS2Peptide peptide, int... fastaIds) throws SQLException
     {
         if ((null == peptide) || ("".equals(peptide.getTrimmedPeptide())) || (peptide.getProteinHits() < 1))
             return Collections.emptyList();
@@ -253,7 +254,7 @@ public class ProteinManager
             sql.append(" WHERE SeqId = ?");
             sql.add(peptide.getProtein());
             sql.add(peptide.getSeqId());
-    }
+        }
         else
         {
             // TODO: make search tryptic so that number that match = ProteinHits.
@@ -261,10 +262,12 @@ public class ProteinManager
             sql.append(getTableInfoSequences(), "s");
             sql.append(", ");
             sql.append(getTableInfoFastaSequences(), "fs");
-            sql.append(" WHERE fs.SeqId = s.SeqId AND fs.FastaId = ? AND ProtSequence ");
+            sql.append(" WHERE fs.SeqId = s.SeqId AND fs.FastaId IN (");
+            sql.append(StringUtils.repeat("?", ", ", fastaIds.length));
+            sql.append(") AND ProtSequence ");
             sql.append(getSqlDialect().getCharClassLikeOperator());
             sql.append(" ?" );
-            sql.add(fastaId);
+            sql.addAll(fastaIds);
             sql.add("%" + peptide.getTrimmedPeptide() + "%");
 
             //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
@@ -274,13 +277,18 @@ public class ProteinManager
         List<Protein> proteins = new SqlSelector(getSchema(), sql).getArrayList(Protein.class);
 
         if (proteins.isEmpty())
-            _log.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
+            _log.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA files " + Arrays.asList(fastaIds));
 
         return proteins;
     }
 
 
     private static final NumberFormat generalFormat = new DecimalFormat("0.0#");
+
+    public static FastaFile getFastaFile(int fastaId)
+    {
+        return new TableSelector(ProteinManager.getTableInfoFastaFiles()).getObject(fastaId, FastaFile.class);
+    }
 
     public static void addExtraFilter(SimpleFilter filter, MS2Run run, ActionURL currentUrl)
     {
@@ -467,13 +475,15 @@ public class ProteinManager
             updatePeptidesSQL.append("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SeqId = map.NewSeqId");
             updatePeptidesSQL.append("\tFROM " + MS2Manager.getTableInfoFractions() + " f \n");
             updatePeptidesSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
+            updatePeptidesSQL.append("\t, " + MS2Manager.getTableInfoFastaRunMapping() + " frm\n");
             updatePeptidesSQL.append("\t, (");
             updatePeptidesSQL.append(mappingSQL);
             updatePeptidesSQL.append(") map \n");
             updatePeptidesSQL.append("WHERE f.Fraction = " + MS2Manager.getTableInfoPeptidesData() + ".Fraction\n");
             updatePeptidesSQL.append("\tAND r.Run = f.Run\n");
+            updatePeptidesSQL.append("\tAND frm.Run = r.Run\n");
             updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
-            updatePeptidesSQL.append("\tAND r.FastaId = " + oldFastaId);
+            updatePeptidesSQL.append("\tAND frm.FastaId = " + oldFastaId);
 
             executor.execute(updatePeptidesSQL);
 
@@ -482,18 +492,20 @@ public class ProteinManager
             updateProteinsSQL.append("FROM " + MS2Manager.getTableInfoProteinGroups() + " pg\n");
             updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n");
             updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
+            updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoFastaRunMapping() + " frm\n");
             updateProteinsSQL.append("\t, (");
             updateProteinsSQL.append(mappingSQL);
             updateProteinsSQL.append(") map \n");
             updateProteinsSQL.append("WHERE " + MS2Manager.getTableInfoProteinGroupMemberships() + ".ProteinGroupId = pg.RowId\n");
             updateProteinsSQL.append("\tAND pg.ProteinProphetFileId = ppf.RowId\n");
             updateProteinsSQL.append("\tAND r.Run = ppf.Run\n");
+            updateProteinsSQL.append("\tAND frm.Run = r.Run\n");
             updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
-            updateProteinsSQL.append("\tAND r.FastaId = " + oldFastaId);
+            updateProteinsSQL.append("\tAND frm.FastaId = " + oldFastaId);
 
             executor.execute(updateProteinsSQL);
 
-            executor.execute("UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
+            executor.execute("UPDATE " + MS2Manager.getTableInfoFastaRunMapping() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
             transaction.commit();
         }
     }

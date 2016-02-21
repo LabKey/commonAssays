@@ -80,6 +80,7 @@ import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.LibraQuantResult;
@@ -178,6 +179,11 @@ public class MS2Manager
     public static TableInfo getTableInfoCompare()
     {
         return getSchema().getTable("Compare");
+    }
+
+    public static TableInfo getTableInfoFastaRunMapping()
+    {
+        return getSchema().getTable("FastaRunMapping");
     }
 
     public static TableInfo getTableInfoRuns()
@@ -404,14 +410,18 @@ public class MS2Manager
                     throw new UnsupportedOperationException();
                 }
             };
-            
-            File fastaFile = new File(run.getFastaFileName());
-            ExpData fastaData = ExperimentService.get().getExpDataByURL(fastaFile, container);
-            if (fastaData == null)
+
+            for (int fastaId : run.getFastaIds())
             {
-                fastaData = ExperimentService.get().createData(fastaFile.toURI(), source);
+                FastaFile fastaFile = ProteinManager.getFastaFile(fastaId);
+                File file = new File(fastaFile.getFilename());
+                ExpData fastaData = ExperimentService.get().getExpDataByURL(file, container);
+                if (fastaData == null)
+                {
+                    fastaData = ExperimentService.get().createData(file.toURI(), source);
+                }
+                inputDatas.put(fastaData, AbstractMS2SearchTask.FASTA_INPUT_ROLE);
             }
-            inputDatas.put(fastaData, AbstractMS2SearchTask.FASTA_INPUT_ROLE);
 
             for (MS2Fraction fraction : run.getFractions())
             {
@@ -534,7 +544,7 @@ public class MS2Manager
         List<MS2Run> runs = new ArrayList<>();
 
         try (ResultSet rs = new SqlSelector(getSchema(),
-                    "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, runs.FastaId, ff.FileName AS FastaFileName, Loaded, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount, MascotFile, DistillerRawFile FROM " + getTableInfoRuns() + " runs LEFT OUTER JOIN " + ProteinManager.getTableInfoFastaFiles() + " ff ON runs.FastaId = ff.FastaId WHERE " + whereClause,
+                    "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount, MascotFile, DistillerRawFile FROM " + getTableInfoRuns() + " runs WHERE " + whereClause,
                     params).getResultSet())
         {
             while (rs.next())
@@ -863,13 +873,15 @@ public class MS2Manager
             getTableInfoProteinGroups() + " pg, " +
             getTableInfoProteinProphetFiles() + " ppf, " +
             getTableInfoRuns() + " r, " +
+            getTableInfoFastaRunMapping() + " frm, " +
             ProteinManager.getTableInfoFastaSequences() + " fs, " +
             ProteinManager.getTableInfoSequences() + " seq " +
             "WHERE pg.RowId = pgm.ProteinGroupId " +
             "AND seq.SeqId = pgm.SeqId " +
             "AND pg.ProteinProphetFileId = ppf.RowId " +
             "AND ppf.Run = r.Run " +
-            "AND fs.FastaId = r.FastaId " +
+            "AND fs.FastaId = frm.FastaId " +
+            "AND frm.Run = r.Run " +
             "AND fs.SeqId = seq.SeqId " +
             "AND pg.GroupNumber = ? " +
             "AND pg.IndistinguishableCollectionId = ? " +
@@ -1892,7 +1904,7 @@ public class MS2Manager
         filter.addCondition(FieldKey.fromParts("FastaId"), fastaFileId);
 
         TableSelector seqIdSelector = new TableSelector(ProteinManager.getTableInfoFastaSequences(), PageFlowUtil.set("LookupString", "SeqId"), filter, null);
-        return seqIdSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
+        return seqIdSelector.fillValueMap(new CaseInsensitiveHashMap<>());
     }
 
     private static final float DEFAULT_SCORE_THRESHOLD = 13.1f;

@@ -125,6 +125,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             RecordedAction action = new RecordedAction(ACTION_NAME);
             boolean success = true;
 
+            FastaValidator validator = new FastaValidator();
             for (File sequenceFile : getJobSupport().getSequenceFiles())
             {
                 action.addInput(sequenceFile, "FASTA");
@@ -135,7 +136,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
                     continue;
                 getJob().info("Checking sequence file validity of " + sequenceFile);
 
-                success &= validateSequenceFile(sequenceFile);
+                success &= validateSequenceFile(validator, sequenceFile);
             }
 
             if (_factory._requireDecoyDatabase)
@@ -143,7 +144,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
                 for (File decoyFile : getDecoySequenceFiles(getJobSupport()))
                 {
                     getJob().info("Checking decoy file: " + decoyFile);
-                    success &= validateSequenceFile(decoyFile);
+                    success &= validateSequenceFile(validator, decoyFile);
                 }
             }
 
@@ -155,15 +156,12 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             getJob().info("");  // blank line
             return new RecordedActionSet(action);
         }
-        catch (IOException e)
+        // IllegalArgumentException is sometimes thrown by the checker.
+        catch (IOException | IllegalArgumentException e)
         {
             throw new PipelineJobException("Failed to check FASTA file(s)", e);
         }
-        // Sometimes thrown by the checker.
-        catch (IllegalArgumentException e)
-        {
-            throw new PipelineJobException("Failed to check FASTA file(s)", e);
-        }
+
     }
 
     public static List<File> getDecoySequenceFiles(MS2SearchJobSupport job) throws IOException
@@ -196,16 +194,15 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         return result;
     }
 
-    private boolean validateSequenceFile(File decoyFile)
+    private boolean validateSequenceFile(FastaValidator validator, File fastaFile)
     {
-        if (!decoyFile.exists())
+        if (!fastaFile.exists())
         {
-            getJob().error("Sequence file not found: " + decoyFile);
+            getJob().error("Sequence file not found: " + fastaFile);
             return false;
         }
 
-        FastaValidator validator = new FastaValidator(decoyFile);
-        String errors = StringUtils.join(validator.validate(), "\n");
+        String errors = StringUtils.join(validator.validate(fastaFile), "\n");
         if (errors.length() > 0)
         {
             getJob().error(errors);

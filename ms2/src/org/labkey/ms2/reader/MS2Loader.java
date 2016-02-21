@@ -63,7 +63,7 @@ public abstract class MS2Loader
         protected String _searchEngineVersion = null;
         protected String _searchEnzyme = null;
 
-        protected String _databaseLocalPath = null;
+        protected List<String> _databaseLocalPaths = new ArrayList<>();
         protected String _dataBasename;
         protected String _dataSuffix;
         protected String _spectrumPath = null;
@@ -111,12 +111,11 @@ public abstract class MS2Loader
             return _dataSuffix;
         }
 
-
-        public String getDatabaseLocalPath()
+        @NotNull
+        public List<String> getDatabaseLocalPaths()
         {
-            return _databaseLocalPath;
+            return _databaseLocalPaths;
         }
-
 
         public String getSpectrumPath()
         {
@@ -153,9 +152,9 @@ public abstract class MS2Loader
             _searchEngineVersion = searchEngineVersion;
         }
 
-        public void setDatabaseLocalPath(String databaseLocalPath)
+        public void setDatabaseLocalPaths(List<String> databaseLocalPaths)
         {
-            _databaseLocalPath = databaseLocalPath;
+            _databaseLocalPaths = databaseLocalPaths;
         }
 
         public void setSearchEnzyme(String searchEnzyme)

@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -32,24 +33,25 @@ import org.labkey.api.gwt.client.ui.ImageButton;
 
 public abstract class SequenceDbComposite extends SearchFormComposite
 {
-    protected VerticalPanel instance = new VerticalPanel();
-    protected ListBox sequenceDbPathListBox = new ListBox();
-    protected ListBox sequenceDbListBox = new ListBox(false);
-    protected Hidden sequenceDbHidden = new Hidden();
-    protected Hidden sequenceDbPathHidden = new Hidden();
-    protected Label sequenceDbLabel = new Label();
-    protected HorizontalPanel dirPanel = new HorizontalPanel();
-    protected Label statusLabel = new Label();
-    protected RefreshButton refreshButton = new RefreshButton();
-    protected HorizontalPanel refreshPanel = new HorizontalPanel();
+    protected final VerticalPanel instance = new VerticalPanel();
+    protected final ListBox sequenceDbPathListBox = new ListBox();
+    protected final ListBox sequenceDbListBox;
+    protected final Hidden sequenceDbHidden = new Hidden();
+    protected final Hidden sequenceDbPathHidden = new Hidden();
+    protected final Label sequenceDbLabel = new Label();
+    protected final HorizontalPanel dirPanel = new HorizontalPanel();
+    protected final Label statusLabel = new Label();
+    protected final RefreshButton refreshButton = new RefreshButton();
+    protected final HorizontalPanel refreshPanel = new HorizontalPanel();
     protected boolean hasDirectories;
     protected boolean foundDefaultDb;
     public static final String DB_DIR_ROOT = "<root>";
     private final Search _search;
 
-    protected SequenceDbComposite(Search search)
+    protected SequenceDbComposite(Search search, boolean allowMultipleFASTAs)
     {
         _search = search;
+        sequenceDbListBox = new ListBox(allowMultipleFASTAs);
         sequenceDbPathListBox.setVisibleItemCount(1);
         sequenceDbLabel.setStylePrimaryName("labkey-read-only");
         dirPanel.add(sequenceDbPathListBox);
@@ -185,19 +187,29 @@ public abstract class SequenceDbComposite extends SearchFormComposite
     {
         setFoundDefaultDb(false);
         if(name == null|| name.length() == 0) return;
-        int dbItemsCount = sequenceDbListBox.getItemCount();
-        if(name.indexOf("/") == 0)
+
+        Set<String> defaultDbs = new HashSet<String>();
+
+        for (String defaultDb : Arrays.asList(name.split(";")))
         {
-            name = name.substring(1);
+            if(defaultDb.indexOf("/") == 0)
+            {
+                defaultDb = defaultDb.substring(1);
+            }
+            defaultDbs.add(defaultDb);
         }
 
+        int dbItemsCount = sequenceDbListBox.getItemCount();
         for(int i = 0; i < dbItemsCount; i++)
         {
-            if(sequenceDbListBox.getValue(i).equals(name))
+            if(defaultDbs.contains(sequenceDbListBox.getValue(i)))
             {
-                sequenceDbListBox.setSelectedIndex(i);
+                sequenceDbListBox.setItemSelected(i, true);
                 setFoundDefaultDb(true);
-                break;
+            }
+            else
+            {
+                sequenceDbListBox.setItemSelected(i, false);
             }
         }
     }
@@ -221,9 +233,18 @@ public abstract class SequenceDbComposite extends SearchFormComposite
 
     public String getSelectedDb()
     {
-        int index = sequenceDbListBox.getSelectedIndex();
-        if(index == -1) return "";
-        return sequenceDbListBox.getValue(index);
+        StringBuilder sb = new StringBuilder();
+        String separator = "";
+        for (int i = 0; i < sequenceDbListBox.getItemCount(); i++)
+        {
+            if (sequenceDbListBox.isItemSelected(i))
+            {
+                sb.append(separator);
+                sb.append(sequenceDbListBox.getValue(i));
+                separator = ";";
+            }
+        }
+        return sb.toString();
     }
 
     public void addChangeListener(ChangeHandler changeHandler)
@@ -276,11 +297,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
             {
                 path = sequenceDbPathListBox.getValue(pathIndex);
             }
-            int nameIndex = sequenceDbListBox.getSelectedIndex();
-            if(nameIndex != -1)
-            {
-                sequenceDbName = sequenceDbListBox.getValue(nameIndex);
-            }
+            sequenceDbName = getSelectedDb();
             instance.remove(dirPanel);
             dbWidgetName = sequenceDbPathListBox.getName();
             sequenceDbPathHidden.setName(dbWidgetName);
@@ -389,7 +406,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
                 }
                 catch(SearchFormException e)
                 {
-                    return "Cannot set pipeline, database in XML: " + e.getMessage();
+                    return "Cannot set \"" + ParameterNames.SEQUENCE_DB + "\" in XML: " + e.getMessage();
                 }
             }
         }

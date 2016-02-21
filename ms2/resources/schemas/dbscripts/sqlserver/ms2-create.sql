@@ -23,7 +23,7 @@ CREATE VIEW prot.FastaAdmin AS
     SELECT ff.FileName, ff.FastaId, ff.Loaded, runs.Runs
     FROM prot.FastaFiles ff LEFT OUTER JOIN
         (SELECT FastaId, COUNT(Run) AS Runs
-        FROM ms2.Runs
+        FROM ms2.FastaRunMapping
         GROUP BY FastaId) runs ON runs.FastaId = ff.FastaId
 GO
 

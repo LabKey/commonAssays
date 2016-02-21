@@ -244,6 +244,18 @@ public class MS2Schema extends UserSchema
                 result.addColumn(new ExprColumn(result, "MS3ScanCount", getScanCountSqlFragment(3), JdbcType.INTEGER));
                 result.addColumn(new ExprColumn(result, "MS4ScanCount", getScanCountSqlFragment(4), JdbcType.INTEGER));
 
+                ColumnInfo fastaColumnInfo = result.wrapColumn("FastaId", result.getRealTable().getColumn("Run"));
+                fastaColumnInfo.setKeyField(false);
+                fastaColumnInfo.setFk(new MultiValuedForeignKey(new LookupForeignKey("Run")
+                {
+                    @Override
+                    public TableInfo getLookupTableInfo()
+                    {
+                        return MS2Manager.getTableInfoFastaRunMapping();
+                    }
+                }, "FastaId"));
+                fastaColumnInfo.setLabel("FASTA");
+                result.addColumn(fastaColumnInfo);
                 result.addWrapColumn(result.getRealTable().getColumn("SearchEnzyme"));
                 result.addWrapColumn(result.getRealTable().getColumn("Filename"));
                 result.addWrapColumn(result.getRealTable().getColumn("Status"));
@@ -564,7 +576,7 @@ public class MS2Schema extends UserSchema
                 {
                     SQLFragment sql = new SQLFragment();
                     sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
-                    sql.append(MS2Manager.getTableInfoRuns() + " WHERE Run IN ");
+                    sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
                     appendRunInClause(sql);
                     sql.append(")))");
 
@@ -659,7 +671,7 @@ public class MS2Schema extends UserSchema
     public void appendRunInClause(SQLFragment sql)
     {
         sql.append("(");
-        if (_runs.isEmpty())
+        if (_runs == null || _runs.isEmpty())
         {
             sql.append("-1");
         }
@@ -1340,26 +1352,29 @@ public class MS2Schema extends UserSchema
             {
                 String viewName = form.getPeptideCustomViewName(context);
                 CustomView view = QueryService.get().getCustomView(context.getUser(), context.getContainer(), context.getUser(), MS2Schema.SCHEMA_NAME, HiddenTableType.PeptidesFilter.toString(), viewName);
-                try
+                if (view != null)
                 {
-                    CustomViewInfo.FilterAndSort filterAndSort = CustomViewInfo.FilterAndSort.fromString(view.getFilterAndSort());
-                    FieldKey baseFieldKey = FieldKey.fromParts("PeptideMemberships", "PeptideId");
-                    for (FilterInfo filterInfo : filterAndSort.getFilter())
+                    try
                     {
-                        FieldKey fieldKey = FieldKey.fromParts(baseFieldKey, filterInfo.getField());
-                        Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(baseTable, Collections.singleton(fieldKey));
-                        ColumnInfo col = columns.get(fieldKey);
-                        Object value = filterInfo.getValue();
-                        if (col != null)
+                        CustomViewInfo.FilterAndSort filterAndSort = CustomViewInfo.FilterAndSort.fromString(view.getFilterAndSort());
+                        FieldKey baseFieldKey = FieldKey.fromParts("PeptideMemberships", "PeptideId");
+                        for (FilterInfo filterInfo : filterAndSort.getFilter())
                         {
-                            value = CompareType.convertParamValue(col, value);
+                            FieldKey fieldKey = FieldKey.fromParts(baseFieldKey, filterInfo.getField());
+                            Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(baseTable, Collections.singleton(fieldKey));
+                            ColumnInfo col = columns.get(fieldKey);
+                            Object value = filterInfo.getValue();
+                            if (col != null)
+                            {
+                                value = CompareType.convertParamValue(col, value);
+                            }
+                            filter.addClause(new CompareType.CompareClause(fieldKey, filterInfo.getOp(), value));
                         }
-                        filter.addClause(new CompareType.CompareClause(fieldKey, filterInfo.getOp(), value));
                     }
-                }
-                catch (URISyntaxException e)
-                {
-                    throw new UnexpectedException(e);
+                    catch (URISyntaxException e)
+                    {
+                        throw new UnexpectedException(e);
+                    }
                 }
             }
         }
@@ -1516,7 +1531,7 @@ public class MS2Schema extends UserSchema
                     {
                         SQLFragment sql = new SQLFragment();
                         sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
-                        sql.append(MS2Manager.getTableInfoRuns() + " WHERE Run IN ");
+                        sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
                         appendRunInClause(sql);
                         sql.append(")))");
 

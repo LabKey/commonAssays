@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -117,8 +118,6 @@ public class ProteinProphetImporter
             Connection connection = transaction.getConnection();
             try
             {
-                int fastaId = run.getFastaId();
-
                 String createPeptidesTempTableSQL =
                         "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + peptidesTempTableName + " ( " +
                                 "\tTrimmedPeptide VARCHAR(200) NOT NULL,\n" +
@@ -225,14 +224,20 @@ public class ProteinProphetImporter
                 proteinIndex2Stmt = connection.prepareStatement("CREATE INDEX idx_" + AliasManager.makeLegalName(proteinsTempTableName,null) + "2 ON " + proteinsTempTableName + "(ProteinGroupId, Probability)");
                 proteinIndex2Stmt.execute();
 
+                int[] fastaIds = run.getFastaIds();
+
                 String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
                         "(ProteinGroupId, Probability, SeqId) " +
                         "SELECT p.ProteinGroupId, p.Probability, s.SeqId " +
                         "   FROM " + ProteinManager.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
-                        "   WHERE s.FastaId = ? AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
+                        "   WHERE s.FastaId IN(" + StringUtils.repeat("?", ", ", fastaIds.length) + ") AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
 
                 mergeProteinStmt = connection.prepareStatement(mergeProteinSQL);
-                mergeProteinStmt.setInt(1, fastaId);
+                int index = 1;
+                for (int fastaId : fastaIds)
+                {
+                    mergeProteinStmt.setInt(index++, fastaId);
+                }
                 mergeProteinStmt.executeUpdate();
                 log.info("Finished with moving data into ms2.ProteinGroupMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
 

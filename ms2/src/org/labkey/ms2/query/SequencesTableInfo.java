@@ -270,7 +270,9 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
         sql.append(", ");
         sql.append(MS2Manager.getTableInfoRuns(), "r");
-        sql.append(" WHERE fs.FastaId = r.FastaId AND r.Deleted = ? AND r.Container IN ");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
+        sql.append(" WHERE fs.FastaId = frm.FastaId AND frm.Run = r.Run AND r.Deleted = ? AND r.Container IN ");
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {

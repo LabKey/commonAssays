@@ -153,13 +153,18 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setSelectedProtocol(protocolName);
             if (provider.isSearch())
             {
-                if (protocol.getDbNames().length > 0)
+                if (protocol.getDbNames().length == 0)
                 {
-                    results.setDefaultSequenceDb(protocol.getDbNames()[0]);
+                    _log.debug("Problem loading protocol: no database in protocol");
+                    results.appendError("Problem loading protocol: No database in protocol");
+                }
+
+                for (String dbName : protocol.getDbNames())
+                {
                     boolean dbExists;
                     try
                     {
-                        dbExists = provider.dbExists(getContainer(), getSequenceRoot(), protocol.getDbNames()[0]);
+                        dbExists = provider.dbExists(getContainer(), getSequenceRoot(), dbName);
                     }
                     catch (IOException e)
                     {
@@ -168,14 +173,10 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                     }
                     if (!dbExists)
                     {
-                        results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
+                        results.appendError("The database " + dbName + " cannot be found.");
                     }
                 }
-                else
-                {
-                    _log.debug("Problem loading protocol: no database in protocol");
-                    results.appendError("Problem loading protocol: No database in protocol");
-                }
+                results.setDefaultSequenceDb(StringUtils.join(protocol.getDbNames(), ";"));
             }
 
             PipelineService.get().rememberLastSequenceDbSetting(provider.getProtocolFactory(), getContainer(),

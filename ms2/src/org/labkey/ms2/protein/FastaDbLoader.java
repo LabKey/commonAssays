@@ -139,8 +139,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
         validate();
 
-        FastaValidator validator = new FastaValidator(_file);
-        List<String> errors = validator.validate();
+        FastaValidator validator = new FastaValidator();
+        List<String> errors = validator.validate(_file);
 
         if (!errors.isEmpty())
         {

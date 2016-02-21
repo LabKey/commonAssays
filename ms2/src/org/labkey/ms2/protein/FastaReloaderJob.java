@@ -65,7 +65,7 @@ public class FastaReloaderJob extends PipelineJob
                 // Update the SeqIds in ProteinSequences table for a previously loaded FASTA file.  This is to help fix up
                 // null SeqIds that, up until CPAS 1.4, occurred when a single mouthful contained two or more identical
                 // sequences.
-                FastaFile fasta = new TableSelector(ProteinManager.getTableInfoFastaFiles()).getObject(oldFastaId, FastaFile.class);
+                FastaFile fasta = ProteinManager.getFastaFile(oldFastaId);
                 if (fasta != null)
                 {
                     String filename = fasta.getFilename();
