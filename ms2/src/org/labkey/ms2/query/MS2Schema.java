@@ -319,6 +319,13 @@ public class MS2Schema extends UserSchema
             {
                 return ms2Schema.createSequencesTable();
             }
+        },
+        FastaRunMapping
+        {
+            public TableInfo createTable(MS2Schema ms2Schema)
+            {
+                return ms2Schema.createFastaRunMappingTable();
+            }
         };
 
         public abstract TableInfo createTable(MS2Schema ms2Schema);
@@ -779,6 +786,11 @@ public class MS2Schema extends UserSchema
     public SequencesTableInfo<MS2Schema> createSequencesTable()
     {
         return new SequencesTableInfo<>(this);
+    }
+
+    private TableInfo createFastaRunMappingTable()
+    {
+        return new FastaRunMappingTable(this);
     }
 
     public TableInfo createPeptidesTable(ContainerFilter containerFilter, MS2RunType... runTypes)

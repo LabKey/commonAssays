@@ -1338,6 +1338,7 @@ ms2/src/org/labkey/ms2/query/AbstractRunCompareView.java -text
 ms2/src/org/labkey/ms2/query/ComparePeptideTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinProphetTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinsView.java -text
+ms2/src/org/labkey/ms2/query/FastaRunMappingTable.java -text
 ms2/src/org/labkey/ms2/query/FilterView.java -text
 ms2/src/org/labkey/ms2/query/ITraqProteinQuantitationTable.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text
