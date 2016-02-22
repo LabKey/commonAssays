@@ -69,7 +69,7 @@
             <th></th>
         </tr>
         <tr>
-            <td colspan=2>Configure Mascot settings (<%=text(new HelpTopic("configAdmin").getSimpleLinkHtml("more info..."))%>)</td>
+            <td colspan=2>Configure Mascot settings (<%=text(new HelpTopic("configMascot").getSimpleLinkHtml("more info..."))%>)</td>
         </tr> <%
             if (inherited) { %>
             <tr>
