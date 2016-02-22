@@ -22,7 +22,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.LuminexAll;
-import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     {
         LuminexExcludableWellsTest init = (LuminexExcludableWellsTest)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDomainEditor assayDesigner = init._assayHelper.clickEditAssayDesign();
+        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.saveAndClose();
     }

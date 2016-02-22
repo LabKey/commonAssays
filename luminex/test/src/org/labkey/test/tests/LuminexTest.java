@@ -21,7 +21,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
@@ -157,7 +157,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             goToManageAssays();
             clickAndWait(Locator.linkWithText(TEST_ASSAY_XAR_NAME));
             _assayHelper.copyAssayDesign();
-            AssayDomainEditor assayDesigner = new AssayDomainEditor(this);
+            AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
             assayDesigner.setName(TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
@@ -178,7 +178,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
             log("Setting up Luminex assay");
 
-            AssayDomainEditor assayDesigner = new AssayDomainEditor(this);
+            AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
             assayDesigner.setName(TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 

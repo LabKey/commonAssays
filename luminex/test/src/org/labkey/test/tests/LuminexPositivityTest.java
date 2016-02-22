@@ -24,7 +24,7 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.Luminex;
 import org.labkey.test.categories.LuminexAll;
-import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
 import org.labkey.test.util.DataRegionTable;
@@ -63,7 +63,7 @@ public final class LuminexPositivityTest extends LuminexTest
 
         LuminexTest init = (LuminexTest)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDomainEditor assayDesigner = init._assayHelper.clickEditAssayDesign();
+        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(POSITIVITY_RTRANSFORM_SCRIPT_FILE);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
@@ -95,7 +95,7 @@ public final class LuminexPositivityTest extends LuminexTest
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("MyAnalyte (1)", 120, "Blank (3)"));
 
         goToTestAssayHome();
-        AssayDomainEditor assayDesigner = _assayHelper.copyAssayDesign();
+        AssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
         assayDesigner.setName(assayName);
         assayDesigner.saveAndClose();
 

@@ -19,16 +19,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
-import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.Luminex;
 import org.labkey.test.categories.LuminexAll;
-import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
-
-import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -60,7 +57,7 @@ public final class LuminexRTransformTest extends LuminexTest
 
         // add the R transform script to the assay
         init.goToTestAssayHome();
-        AssayDomainEditor assayDesigner = init._assayHelper.clickEditAssayDesign();
+        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);

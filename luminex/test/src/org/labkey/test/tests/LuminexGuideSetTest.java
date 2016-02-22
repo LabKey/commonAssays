@@ -21,7 +21,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.LuminexAll;
-import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.ListHelper;
@@ -60,7 +60,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         // add the R transform script to the assay
         goToTestAssayHome();
         _assayHelper.clickEditAssayDesign();
-        AssayDomainEditor assayDesigner = new AssayDomainEditor(this);
+        AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         _listHelper.addField(TEST_ASSAY_LUM + " Batch Fields", "CustomProtocol", "Protocol", ListHelper.ListColumnType.String);
         // save changes to assay design

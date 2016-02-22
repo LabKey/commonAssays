@@ -24,7 +24,7 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.Luminex;
 import org.labkey.test.categories.LuminexAll;
-import org.labkey.test.pages.AssayDomainEditor;
+import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.RReportHelper;
 
@@ -47,7 +47,7 @@ public class LuminexEC50Test extends LuminexTest
     {
         LuminexEC50Test init = (LuminexEC50Test)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDomainEditor assayDesigner = init._assayHelper.clickEditAssayDesign();
+        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
