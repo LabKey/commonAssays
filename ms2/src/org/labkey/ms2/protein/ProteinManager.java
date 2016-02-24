@@ -267,7 +267,10 @@ public class ProteinManager
             sql.append(") AND ProtSequence ");
             sql.append(getSqlDialect().getCharClassLikeOperator());
             sql.append(" ?" );
-            sql.addAll(fastaIds);
+            for (int fastaId : fastaIds)
+            {
+                sql.add(fastaId);
+            }
             sql.add("%" + peptide.getTrimmedPeptide() + "%");
 
             //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
