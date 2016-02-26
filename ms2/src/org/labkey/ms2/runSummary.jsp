@@ -50,7 +50,7 @@
     <td class="labkey-form-label">Path</td><td><%=h(MS2Controller.defaultIfNull(run.getPath(), "n/a"))%></td>
     </tr><tr>
     <td class="labkey-form-label">Mass Spec Type</td><td><%=h(MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a"))%></td>
-    <td class="labkey-form-label">Fasta File</td><td><%=h(StringUtils.join(fastas, ", "))%></td>
+    <td class="labkey-form-label">Fasta File<%= h(fastas.size() > 1 ? "s" : "") %></td><td><%=h(StringUtils.join(fastas, ", "))%></td>
     </tr>
     <% if (run instanceof MascotRun) { %>
     <tr>

@@ -535,6 +535,10 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         for (int fastaId : run.getFastaIds())
         {
             FastaFile fastaFile = ProteinManager.getFastaFile(fastaId);
+            if (fastaFile == null)
+            {
+                throw new IllegalStateException("Could not find FastaId " + fastaId + " referenced by run " + run.getFileName() + " - " + run.getRun());
+            }
             fastas.add(fastaFile.getFilename());
         }
         runHeaders.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(StringUtils.join(fastas, ", ")));

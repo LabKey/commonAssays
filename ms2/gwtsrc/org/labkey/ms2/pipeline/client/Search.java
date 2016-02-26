@@ -718,17 +718,21 @@ public class Search implements EntryPoint
         appendError(gwtResult.getErrors());
         sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
 
+        // Check to be sure that all of the FASTAs referenced by the saved protocol are still available
+        // (and already selected) in the FASTA list
         Set<String> inputDbs = new HashSet<String>(Arrays.asList(inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB).split(";")));
         Set<String> listBoxDbs = new HashSet<String>(Arrays.asList(sequenceDbComposite.getSelectedDb().split(";")));
 
         if(!inputDbs.isEmpty() && !inputDbs.equals(listBoxDbs))
         {
             appendError("The database entered for the input XML label \"" + ParameterNames.SEQUENCE_DB + "\" cannot be found"
-            + " at this FASTA root. " + inputDbs + " vs " + listBoxDbs);
+                + " at this FASTA root. " + inputDbs + " vs " + listBoxDbs);
             inputXmlComposite.params.removeInputParameter(ParameterNames.SEQUENCE_DB);
-            try{
+            try
+            {
                 inputXmlComposite.writeXml();
-            }catch(SearchFormException ignored){}
+            }
+            catch(SearchFormException ignored) {}
             sequenceDbComposite.setEnabled(true, true);
             return;
         }
