@@ -91,7 +91,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         _fileBrowserHelper.selectFileBrowserItem("bov_sample/");
         setupEngine();
 
-        waitForElement(Locator.xpath("//select[@name='sequenceDB']/option[.='" + DATABASE + "']"), WAIT_FOR_JAVASCRIPT);
+        waitForElement(Locator.xpath("//select[@name='sequenceDB']/option[.='" + DATABASE1 + "']"), WAIT_FOR_JAVASCRIPT);
         assertTextPresent("Minimum PeptideProphet prob", "Minimum ProteinProphet prob", "Quantitation engine");
 
         searchMS2LibraCheck();
@@ -99,7 +99,9 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         log("Set analysis parameters.");
         setFormElement(Locator.name("protocolName"), "test2");
         setFormElement(Locator.name("protocolDescription"), "This is a test protocol for Verify.");
-        selectOptionByText(Locator.name("sequenceDB"), DATABASE);
+        selectOptionByText(Locator.name("sequenceDB"), DATABASE1);
+        selectOptionByText(Locator.name("sequenceDB"), DATABASE2);
+        selectOptionByText(Locator.name("sequenceDB"), DATABASE3);
         setFormElement(Locator.name("configureXml"), "");
         waitAndClick(Locator.xpath("//a[@class='labkey-button']/span[text() = 'OK']"));
         setFormElement(Locator.name("configureXml"), INPUT_XML);

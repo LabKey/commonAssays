@@ -33,7 +33,9 @@ abstract public class MS2TestBase extends BaseWebDriverTest
     protected static final String SAMPLE_BASE_NAME = "CAexample_mini";
     protected static final String VIEW = "filterView";
     protected static final String LOG_BASE_NAME = "CAexample_mini";
-    protected static final String DATABASE = "Bovine_mini.fasta";
+    protected static final String DATABASE1 = "Bovine_mini1.fasta";
+    protected static final String DATABASE2 = "Bovine_mini2.fasta";
+    protected static final String DATABASE3 = "Bovine_mini3.fasta";
     protected static final String INPUT_XML =
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n" +
         "<bioml>\n" +

@@ -34,9 +34,13 @@ import static org.junit.Assert.*;
 @Category({DailyB.class, MS2.class, XTandem.class})
 public class XTandemTest extends AbstractXTandemTest
 {
-    protected static final String SEARCH = "gi|4689022";
-    protected static final String SEARCH_FIND = "SCHIZOSACCHAROMYCES";
-    protected static final String SEARCH_FIND_ALT = "Schizosaccharomyces";
+    protected static final String SEARCH_FASTA1 = "gi|4689022";
+    protected static final String SEARCH_FIND_FASTA1 = "SCHIZOSACCHAROMYCES";
+    protected static final String SEARCH_FIND_ALT_FASTA1 = "Schizosaccharomyces";
+    protected static final String SEARCH_FASTA2 = "gi|30089158|low_density_lipop";
+    protected static final String SEARCH_FIND_FASTA2 = "low density lipoprotein receptor-related protein 8 [Bos taurus]";
+    protected static final String SEARCH_FASTA3 = "gi|16078";
+    protected static final String SEARCH_FIND_FASTA3 = "ribosomal protein S16 (BS17)";
     protected static final String PROTOCOL = "X!Tandem analysis";
     protected static final String PEPTIDE_CROSSTAB_RADIO_PROBABILITY_ID = "peptideProphetRadioButton";
     protected static final String PEPTIDE_CROSSTAB_RADIO_PROBABILITY_VALUE = "probability";
@@ -143,26 +147,46 @@ public class XTandemTest extends AbstractXTandemTest
         assertElementPresent(Locator.linkWithText(PROTOCOL));
 
         log("Test Protein Search");
-        setFormElement(Locator.name("identifier"), SEARCH);
-        click(Locator.name("exactMatch"));
+        log("Search for a protein in the first fasta file.");
+        setFormElement(Locator.name("identifier"), SEARCH_FASTA1);
+        uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
         assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
-        assertTrue(isTextPresent(SEARCH_FIND) || isTextPresent(SEARCH_FIND_ALT));
+        assertTrue(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
 
         setFormElement(Locator.name("minimumProbability"), "2.0");
         clickButton("Search");
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
-        assertTrue(isTextPresent(SEARCH_FIND) || isTextPresent(SEARCH_FIND_ALT));
+        assertTrue(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
         assertElementNotPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
 
         setFormElement(Locator.name("identifier"), "GarbageProteinName");
         setFormElement(Locator.name("minimumProbability"), "");
         clickButton("Search");
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
-        assertTrue(!(isTextPresent(SEARCH_FIND) || isTextPresent(SEARCH_FIND_ALT)));
-        assertTextNotPresent(SEARCH_FIND);
+        assertTrue(!(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1)));
+        assertTextNotPresent(SEARCH_FIND_FASTA1);
         assertTextPresent("No data to show");
+
+        log("Search for a protein in the second fasta file.");
+        clickTab("MS2 Dashboard");
+        setFormElement(Locator.name("identifier"), SEARCH_FASTA2);
+        checkCheckbox(Locator.name("exactMatch"));
+        clickButton("Search");
+        assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
+        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
+        assertTrue(isTextPresent(SEARCH_FIND_FASTA2));
+        log("Search for a protein in the third fasta file.");
+
+        clickTab("MS2 Dashboard");
+        setFormElement(Locator.name("identifier"), SEARCH_FASTA3);
+        uncheckCheckbox(Locator.name("exactMatch"));
+        clickButton("Search");
+        assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
+        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
+        assertTrue(isTextPresent(SEARCH_FIND_FASTA3));
+
     }
 
     private void verifyPeptideDetailsPage()

@@ -242,7 +242,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "MASCOT",
                 "CAexample_mini.dat",
                 "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test3",
-                "Bovine_mini.fasta");
+                "Bovine_mini1.fasta");
 
         DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
 
@@ -269,7 +269,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         clickTab("MS2 Dashboard");
         waitForElement(Locator.id("filter-engine"));
         setFormElement(Locator.id("filter-engine"), "MASCOT");
-        setFormElement(Locator.id("filter-fasta"), "Bovine_mini.fasta");
+        setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
         click(Locator.xpath("//tr[td/div[text()='/MS2VerifyProject/ms2folder']]//div[@class='x-grid3-row-checker']"));
         click(Locator.button("Show Matching MS2 Runs"));
         waitAndClick(Locator.linkWithText("CAexample_mini.dat"));
@@ -308,7 +308,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "MASCOT",
                 "CAexample_mini_decoy.dat",
                 "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test4",
-                "Bovine_mini.fasta");
+                "Bovine_mini1.fasta");
 
         DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
         peptidesTable.ensureColumnsPresent("HitRank", "QueryNumber", "Decoy");
@@ -364,7 +364,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         clickTab("MS2 Dashboard");
         waitForElement(Locator.id("filter-engine"));
         setFormElement(Locator.id("filter-engine"), "MASCOT");
-        setFormElement(Locator.id("filter-fasta"), "Bovine_mini.fasta");
+        setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
         click(Locator.xpath("//tr[td/div[text()='/MS2VerifyProject/ms2folder']]//div[@class='x-grid3-row-checker']"));
         click(Locator.button("Show Matching MS2 Runs"));
         waitAndClick(Locator.linkWithText("CAexample_mini_decoy.dat"));

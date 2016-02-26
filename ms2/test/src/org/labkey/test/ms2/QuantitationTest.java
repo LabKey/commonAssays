@@ -52,11 +52,11 @@ public class QuantitationTest extends AbstractXTandemTest
 
         setupEngine();
 
-        waitForElement(Locator.xpath("//select[@name='sequenceDB']/option[.='" + DATABASE + "']" ), WAIT_FOR_JAVASCRIPT);
+        waitForElement(Locator.xpath("//select[@name='sequenceDB']/option[.='" + DATABASE1 + "']" ), WAIT_FOR_JAVASCRIPT);
         log("Set analysis parameters.");
         setFormElement(Locator.name("protocolName"), LIBRA_PROTOCOL_NAME);
         setFormElement(Locator.name("protocolDescription"), "Search with Libra quantitation");
-        selectOptionByText(Locator.name("sequenceDB"), DATABASE);
+        selectOptionByText(Locator.name("sequenceDB"), DATABASE1);
         setFormElement(Locator.name("configureXml"), "");
         waitAndClick(Locator.xpath("//a[@class='labkey-button']/span[text() = 'OK']"));
         setFormElement(Locator.name("configureXml"), LIBRA_INPUT_XML);
