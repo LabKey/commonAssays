@@ -87,9 +87,6 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
-        try {
-            deleteViews(VIEW); } catch (Throwable t) {}
-        try {deleteRuns(); } catch (Throwable t) {}
         cleanPipe(SEARCH_TYPE);
 
         _containerHelper.deleteProject(getProjectName(), afterTest);
