@@ -961,6 +961,7 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-13.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-14.10-14.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.10-15.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.30-15.31.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-15.30-16.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.31-15.32.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.33-15.34.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.34-15.35.sql -text
@@ -981,6 +982,7 @@ ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-13.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-14.10-14.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.10-15.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.30-15.31.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-15.30-16.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.31-15.32.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.33-15.34.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.34-15.35.sql -text
@@ -1545,6 +1547,7 @@ viability/resources/schemas/dbscripts/postgresql/obsolete/viability-14.11-14.12.
 viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-14.10-14.20.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-15.30-15.31.sql -text
+viability/resources/schemas/dbscripts/postgresql/viability-15.30-16.10.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-14.10-14.11.sql -text
 viability/resources/schemas/dbscripts/sqlserver/obsolete/viability-14.11-14.12.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.30.sql -text
