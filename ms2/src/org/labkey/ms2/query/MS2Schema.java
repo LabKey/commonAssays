@@ -246,14 +246,7 @@ public class MS2Schema extends UserSchema
 
                 ColumnInfo fastaColumnInfo = result.wrapColumn("FastaId", result.getRealTable().getColumn("Run"));
                 fastaColumnInfo.setKeyField(false);
-                fastaColumnInfo.setFk(new MultiValuedForeignKey(new LookupForeignKey("Run")
-                {
-                    @Override
-                    public TableInfo getLookupTableInfo()
-                    {
-                        return MS2Manager.getTableInfoFastaRunMapping();
-                    }
-                }, "FastaId"));
+                fastaColumnInfo.setFk(new MultiValuedForeignKey(new QueryForeignKey(ms2Schema, null, FastaRunMapping.name(), "Run", null), "FastaId"));
                 fastaColumnInfo.setLabel("FASTA");
                 result.addColumn(fastaColumnInfo);
                 result.addWrapColumn(result.getRealTable().getColumn("SearchEnzyme"));
@@ -871,7 +864,7 @@ public class MS2Schema extends UserSchema
         columns.remove(FieldKey.fromParts("CreatedBy"));
 
         columns.add(2, FieldKey.fromParts("MS2Details", "Links"));
-        columns.add(FieldKey.fromParts("Input", "FASTA"));
+        columns.add(FieldKey.fromParts("MS2Details", "FASTAId", "ShortName"));
 
         result.setDefaultVisibleColumns(columns);
         return result;

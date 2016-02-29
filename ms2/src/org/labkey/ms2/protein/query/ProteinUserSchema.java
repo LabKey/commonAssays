@@ -15,18 +15,26 @@
  */
 package org.labkey.ms2.protein.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.Sets;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.SequencesTableInfo;
@@ -264,6 +272,47 @@ public class ProteinUserSchema extends UserSchema
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaFiles());
         table.init();
+        ColumnInfo shortName = table.addWrapColumn("ShortName", table.getRealTable().getColumn("FileName"));
+        shortName.setLabel("FASTA Name");
+
+        shortName.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DataColumn(colInfo)
+                {
+                    @Override
+                    public Object getValue(RenderContext ctx)
+                    {
+                        Object result = super.getValue(ctx);
+                        if (result != null)
+                        {
+                            String s = result.toString().replace('\\', '/');
+                            int index = s.lastIndexOf('/');
+                            if (index != -1)
+                            {
+                                return s.substring(index + 1);
+                            }
+                        }
+                        return super.getValue(ctx);
+                    }
+
+                    @NotNull
+                    @Override
+                    public String getFormattedValue(RenderContext ctx)
+                    {
+                        return PageFlowUtil.filter(getDisplayValue(ctx));
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return getValue(ctx);
+                    }
+                };
+            }
+        });
         return table;
     }
 
