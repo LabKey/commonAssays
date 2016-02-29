@@ -288,7 +288,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
             assertTrue(parserError.get(0).contains("garbage"));
 
-            value = "Bovine_mini.fasta, garbage";
+            value = "Bovine_mini1.fasta, garbage";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
@@ -299,7 +299,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
             assertTrue(parserError.get(0).contains("garbage"));
 
-            value = "garbage, Bovine_mini.fasta";
+            value = "garbage, Bovine_mini1.fasta";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
