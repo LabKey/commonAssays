@@ -22,6 +22,8 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.NestableDataRegion;
+import org.labkey.api.data.NestableQueryView;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.query.CustomView;
@@ -47,6 +49,7 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.validation.BindException;
 
+import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,6 +101,40 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
 
         return settings;
+    }
+
+    @Override
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException
+    {
+        NestableQueryView queryView = createGridView(false, null, null, true);
+        FieldKey desiredFK;
+        if (queryView.getSelectedNestingOption() != null)
+        {
+            desiredFK = queryView.getSelectedNestingOption().getRowIdFieldKey();
+        }
+        else
+        {
+            desiredFK = FieldKey.fromParts("SeqId");
+        }
+
+        Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);
+        ColumnInfo desiredCol = pair.first;
+        SQLFragment sql = pair.second;
+
+        if (queryView.getSelectedNestingOption() != null)
+        {
+            SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
+            result.append(sql);
+            result.append(") x");
+            return result;
+        }
+        else
+        {
+            SQLFragment result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
+            result.append(sql);
+            result.append(") x");
+            return result;
+        }
     }
 
     public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting)

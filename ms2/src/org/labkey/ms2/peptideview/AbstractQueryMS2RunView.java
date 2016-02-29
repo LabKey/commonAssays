@@ -42,7 +42,6 @@ import org.labkey.api.view.DisplayElement;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.SpectrumIterator;
@@ -94,40 +93,6 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         return ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    @Override
-    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException
-    {
-        NestableQueryView queryView = createGridView(false, null, null, true);
-        FieldKey desiredFK;
-        if (queryView.getSelectedNestingOption() != null)
-        {
-            desiredFK = queryView.getSelectedNestingOption().getRowIdFieldKey();
-        }
-        else
-        {
-            desiredFK = FieldKey.fromString("SeqId");
-        }
-
-        Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);
-        ColumnInfo desiredCol = pair.first;
-        SQLFragment sql = pair.second;
-
-        if (queryView.getSelectedNestingOption() != null)
-        {
-            SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
-            result.append(sql);
-            result.append(") x");
-            return result;
-        }
-        else
-        {
-            SQLFragment result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
-            result.append(sql);
-            result.append(") x");
-            return result;
-        }
-    }
-
     public Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run) throws ServletException
     {
         NestableQueryView queryView = createGridView(false, null, null, true);
@@ -160,7 +125,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
     }
 
     /** Generate the SELECT SQL to get a particular FieldKey, respecting the filters and other config on the URL */
-    private Pair<ColumnInfo, SQLFragment> generateSubSelect(NestableQueryView queryView, ActionURL currentURL, @Nullable List<String> selectedIds, FieldKey desiredFK)
+    protected Pair<ColumnInfo, SQLFragment> generateSubSelect(NestableQueryView queryView, ActionURL currentURL, @Nullable List<String> selectedIds, FieldKey desiredFK)
     {
         RenderContext context = queryView.createDataView().getRenderContext();
         TableInfo tinfo = queryView.createTable();
@@ -178,7 +143,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         List<ColumnInfo> columns = new ArrayList<>();
         columns.add(desiredCol);
 
-        QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<FieldKey>());
+        QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<>());
 
         SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
         return new Pair<>(desiredCol, sql);

@@ -16,21 +16,37 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.view.*;
-import org.labkey.api.data.*;
-import org.labkey.api.query.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.Filter;
+import org.labkey.api.data.NestableDataRegion;
+import org.labkey.api.data.NestableQueryView;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryNestingOption;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
-import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
 
-import java.util.List;
-import java.util.Arrays;
+import javax.servlet.ServletException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -64,6 +80,22 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
         peptideView.setTitle("Protein Groups");
         return peptideView;
+    }
+
+    @Override
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException
+    {
+        NestableQueryView queryView = createGridView(false, null, null, true);
+        FieldKey desiredFK = FieldKey.fromParts("Proteins", "Protein", "SeqId");
+
+        Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);
+        ColumnInfo desiredCol = pair.first;
+        SQLFragment sql = pair.second;
+
+        SQLFragment result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
+        result.append(sql);
+        result.append(") x");
+        return result;
     }
 
     public class ProteinGroupQueryView extends AbstractMS2QueryView
