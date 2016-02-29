@@ -183,12 +183,6 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 throw new IOException("Failed parsing Mascot input xml '" + getJobSupport().getParametersFile() + "'.\n" +
                         "Missing required input parameter 'pipeline, database'");
             }
-            String[] databases = paramDatabase.split(";");
-            if (databases.length > 1)
-            {
-                getJob().error("Mascot does not support multiple databases searching. ("+paramDatabase+")");
-                return new RecordedActionSet();
-            }
 
             params.put("pipeline, user name", "LabKey User"); // BUGBUG: should be "pipeline, username" ?
 

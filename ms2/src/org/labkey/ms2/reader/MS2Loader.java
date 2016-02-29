@@ -24,9 +24,12 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class MS2Loader
 {
@@ -63,7 +66,7 @@ public abstract class MS2Loader
         protected String _searchEngineVersion = null;
         protected String _searchEnzyme = null;
 
-        protected List<String> _databaseLocalPaths = new ArrayList<>();
+        protected Set<String> _databaseLocalPaths = new LinkedHashSet<>();
         protected String _dataBasename;
         protected String _dataSuffix;
         protected String _spectrumPath = null;
@@ -112,7 +115,7 @@ public abstract class MS2Loader
         }
 
         @NotNull
-        public List<String> getDatabaseLocalPaths()
+        public Set<String> getDatabaseLocalPaths()
         {
             return _databaseLocalPaths;
         }
@@ -152,9 +155,9 @@ public abstract class MS2Loader
             _searchEngineVersion = searchEngineVersion;
         }
 
-        public void setDatabaseLocalPaths(List<String> databaseLocalPaths)
+        public void setDatabaseLocalPaths(Collection<String> databaseLocalPaths)
         {
-            _databaseLocalPaths = databaseLocalPaths;
+            _databaseLocalPaths = new LinkedHashSet<>(databaseLocalPaths);
         }
 
         public void setSearchEnzyme(String searchEnzyme)

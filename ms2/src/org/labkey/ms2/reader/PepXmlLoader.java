@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -160,7 +161,7 @@ public class PepXmlLoader extends MS2XmlLoader
             _massSpecType = null;
             _searchEngine = null;
             _searchEnzyme = null;
-            _databaseLocalPaths = new ArrayList<>();
+            _databaseLocalPaths = new LinkedHashSet<>();
 
             handleMsMsRunSummary();
 

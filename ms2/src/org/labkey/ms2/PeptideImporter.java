@@ -97,7 +97,7 @@ public abstract class PeptideImporter extends MS2Importer
             }
         }
 
-        throw new FileNotFoundException("Could not find FASTA file. " + (dbName == null ? "" : (MascotDatLoader.DB_PREFIX + dbName)) + " " + (fastaFileName == null ? "" : (MascotDatLoader.FASTAFILE_PREFIX + fastaFileName)));
+        throw new FileNotFoundException("Could not find FASTA file. " + (dbName == null ? "" : (MascotDatLoader.DB_PREFIX + dbName)) + " " + (fastaFileName == null ? "" : ("fastafile=" + fastaFileName)));
 
     }
 

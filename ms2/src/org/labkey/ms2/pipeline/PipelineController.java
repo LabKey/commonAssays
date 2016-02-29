@@ -451,7 +451,7 @@ public class PipelineController extends SpringActionController
                     PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
                             getContainer(), getUser(), form.getProtocol());
                     PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(), getContainer(),
-                            getUser(), form.getSequenceDBPath(), StringUtils.join(form.getSequenceDB(), ";"));
+                            getUser(), form.getSequenceDBPath(), AbstractMS2SearchProtocolFactory.joinSequenceFiles(form.getSequenceDB()));
                 }
                 else
                 {
@@ -472,7 +472,7 @@ public class PipelineController extends SpringActionController
                                 getContainer(), getUser(), form.getProtocolName());   
                     }
                     PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(),getContainer(),
-                                getUser(),form.getSequenceDBPath(), StringUtils.join(form.getSequenceDB(), ";"));
+                                getUser(),form.getSequenceDBPath(), AbstractMS2SearchProtocolFactory.joinSequenceFiles(form.getSequenceDB()));
                 }
 
                 if (form.getFile().length == 0)

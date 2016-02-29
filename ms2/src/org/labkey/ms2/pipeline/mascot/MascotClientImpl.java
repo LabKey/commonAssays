@@ -30,6 +30,7 @@ import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.client.Enzyme;
 import org.labkey.ms2.pipeline.client.CutSite;
@@ -1080,12 +1081,10 @@ public class MascotClientImpl implements SearchClient
                 {"ltol", "mascot, ltol", "default, ltol"},
                 {"showallmods", "mascot, showallmods", "default, showallmods"}
         };
-        Part [] parts = new Part[submitFields.length+4+1];
-        int i;
-        for (i=0; i<submitFields.length; i++)
+        List<Part> parts = new ArrayList<>();
+        for (String [] keys : submitFields)
         {
             int j;
-            String [] keys = submitFields[i];
             String formFieldKey = keys[0].toUpperCase();
             String formFieldValue = null;
             for (j=1; j<keys.length; j++)
@@ -1094,7 +1093,19 @@ public class MascotClientImpl implements SearchClient
                 if (null != formFieldValue)
                     break;
             }
-            parts[i] = new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue);
+            // Special case FASTA to support multiple files
+            if (formFieldValue != null && formFieldKey.equalsIgnoreCase("db"))
+            {
+                for (String db : AbstractMS2SearchProtocolFactory.splitSequenceFiles(formFieldValue))
+                {
+                    parts.add(new StringPart(formFieldKey, db));
+
+                }
+            }
+            else
+            {
+                parts.add(new StringPart(formFieldKey, (null == formFieldValue) ? "" : formFieldValue));
+            }
         }
 
         //{"tol",
@@ -1120,15 +1131,13 @@ public class MascotClientImpl implements SearchClient
         }
         else
             formFieldValue = parser.getInputParameter("search, tol");
-        parts[i] = new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue);
-        i++;
+        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
 
         formFieldKey = "MASS";
         formFieldValue = parser.getInputParameter("spectrum, fragment mass type");
         if (formFieldValue == null)
             formFieldValue = parser.getInputParameter("search, mass");
-        parts[i] = new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue);
-        i++;
+        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
 
         boolean isMonoisoptopicMass = "monoisotopic".equalsIgnoreCase(formFieldValue);
         formFieldKey = "ITOL";
@@ -1137,19 +1146,18 @@ public class MascotClientImpl implements SearchClient
         {
             formFieldValue = parser.getInputParameter("search, itol");
         }
-        parts[i] = new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue);
-        i++;
+        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
+
         formFieldKey = "ITOLU";
         formFieldValue = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error units" : "spectrum, fragment mass error units");
         if (formFieldValue == null)
             formFieldValue = parser.getInputParameter("search, itolu");
-        parts[i] = new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue);
-        i++;
+        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
 
         File queryFile = new File(analysisFile);
         getLogger().info("Submitting query file, size="+queryFile.length());
         try {
-            parts[i] = new FilePart("FILE", queryFile);
+            parts.add(new FilePart("FILE", queryFile));
         }
         catch (FileNotFoundException err)
         {
@@ -1176,7 +1184,7 @@ public class MascotClientImpl implements SearchClient
         }
 
         PostMethod post = new PostMethod(mascotRequestURL);
-        post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams()) );
+        post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), post.getParams()) );
         HttpClient client = new HttpClient();
 
         int statusCode = -1;

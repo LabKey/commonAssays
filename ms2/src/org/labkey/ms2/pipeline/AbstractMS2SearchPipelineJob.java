@@ -246,7 +246,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         String paramDatabase = getParameters().get("pipeline, database");
         if (paramDatabase != null)
         {
-            String[] databases = paramDatabase.split(";");
+            String[] databases = AbstractMS2SearchProtocolFactory.splitSequenceFiles(paramDatabase);
             for (String path : databases)
                 arrFiles.add(MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot, path));
         }

@@ -52,14 +52,14 @@ import java.util.regex.Pattern;
 public class MascotDatLoader extends MS2Loader implements AutoCloseable
 {
     public static final String DB_PREFIX = "DB=";
-    public static final String FASTAFILE_PREFIX = "fastafile=";
+    /** Match "fastafile=FASTA", "fastafile2=FASTA2", "fastafile3=FASTA3", etc */
+    public static final Pattern FASTAFILE_REGEX = Pattern.compile("fastafile\\d*=(.*)");
     public static final String ENZYME_PREFIX = "CLE=";
     public static final String ENZYME_PREFIX_LC = "cle=";
     public static final String DEFAULT_ENZYME = "trypsin";
     public static final String SEARCH_ENGINE_NAME = MS2RunType.Mascot.name().toUpperCase();
     public static final String MASCOT_FILE_PREFIX = "FILE=";
     public static final String DISTILLER_RAWFILE_PREFIX = "_DISTILLER_RAWFILE=";
-
 
     // Content-Type: multipart/mixed; boundary=gc0p4Jq0M2Yt08jU534c0p
     private static final Pattern BOUNDARY_MARKER_LINE = Pattern.compile("\\s*Content-Type: multipart/mixed; boundary=(.*)");
@@ -719,10 +719,12 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         readLine();
         while (!atEndOfSection())
         {
-            if (_currentLine.startsWith(FASTAFILE_PREFIX) && fraction.getDatabaseLocalPaths().isEmpty())
+            Matcher matcher = FASTAFILE_REGEX.matcher(_currentLine);
+            if (matcher.matches())
             {
-                File databaseFile = PeptideImporter.getDatabaseFile(container, null, _currentLine.substring(FASTAFILE_PREFIX.length()).trim());
-                fraction.setDatabaseLocalPaths(Arrays.asList(databaseFile.getAbsolutePath()));
+                String s = matcher.group(1);
+                File databaseFile = PeptideImporter.getDatabaseFile(container, null, s.trim());
+                fraction.getDatabaseLocalPaths().add(databaseFile.getAbsolutePath());
             }
             readLine();
         }
