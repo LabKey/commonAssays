@@ -236,7 +236,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
         @Test
         public void testInitDatabasesNormal() throws IOException
         {
-            String value = "Bovine_mini.fasta";
+            String value = "Bovine_mini1.fasta";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
