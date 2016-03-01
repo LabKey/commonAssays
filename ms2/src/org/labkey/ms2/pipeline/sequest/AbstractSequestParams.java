@@ -570,47 +570,6 @@ public abstract class AbstractSequestParams extends Params
             null,
             false
         ).setInputXmlLabels().setInputXmlLabels(ParameterNames.STATIC_MOD));
-
-        addProperty(new SequestParam(
-                262,                                                       //sortOrder
-                "-1",                                            //The value of the property
-                "variable_C_terminus_distance",                                // the sequest.params property name
-                "Apply based on distance from protein terminus. -1=all, N=no more than N residues from the protein terminus",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                new RealNumberParamsValidator(),
-                true
-        )).setInputXmlLabels(_variant.getParamPrefix() + ", variable_C_terminus_distance" );
-
-        addProperty(new SequestParam(
-                263,                                                       //sortOrder
-                "-1",                                            //The value of the property
-                "variable_N_terminus_distance",                                // the sequest.params property name
-                "Apply based on distance from protein terminus. -1=all, N=no more than N residues from the protein terminus",       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-                new RealNumberParamsValidator(),
-                true
-        )).setInputXmlLabels(_variant.getParamPrefix() + ", variable_N_terminus_distance" );
-
-        addProperty(new SequestParam(
-                160,                                                       //sortOrder
-                "0.0",                                            //The value of the property
-                "variable_C_terminus",                                // the sequest.params property name
-                "Apply this mass optional modification to the C-term of each peptide",                                                       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
-                null,
-                false
-        ));
-
-        addProperty(new SequestParam(
-                161,                                                       //sortOrder
-                "0.0",                                            //The value of the property
-                "variable_N_terminus",                                // the sequest.params property name
-                "Apply this mass optional modification to the N-term of each peptide",                                                       // the sequest.params comment
-                ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
-                null,
-                false
-        ));
-
     }
 
     public Collection<SequestParam> getPassThroughs()

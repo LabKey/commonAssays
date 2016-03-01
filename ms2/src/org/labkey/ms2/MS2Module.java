@@ -61,7 +61,8 @@ import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.comet.CometParamsBuilder;
+import org.labkey.ms2.pipeline.comet.Comet2014ParamsBuilder;
+import org.labkey.ms2.pipeline.comet.Comet2015ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.comet.LegacyCometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
@@ -393,9 +394,10 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     @NotNull
     public Set<Class> getIntegrationTests()
     {
-        return new HashSet<Class>(Arrays.asList(
+        return new HashSet<>(Arrays.asList(
             ThermoSequestParamsBuilder.TestCase.class,
-            CometParamsBuilder.FullParseTestCase.class
+            Comet2014ParamsBuilder.FullParseTestCase.class,
+            Comet2015ParamsBuilder.FullParseTestCase.class
         ));
     }
 
@@ -403,7 +405,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     @NotNull
     public Set<Class> getUnitTests()
     {
-        return new HashSet<Class>(Arrays.asList(
+        return new HashSet<>(Arrays.asList(
             PeptideProphetSummary.TestCase.class,
             MS2Modification.MS2ModificationTest.class,
             org.labkey.ms2.protein.fasta.PeptideTestCase.class,
@@ -422,7 +424,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             UWSequestSearchTask.TestCase.class,
             ProteinCoverageMapBuilder.TestCase.class,
             UWSequestSearchTask.TestCase.class,
-            CometParamsBuilder.LimitedParseTestCase.class,
+            Comet2014ParamsBuilder.LimitedParseTestCase.class,
+            Comet2015ParamsBuilder.LimitedParseTestCase.class,
             TPPTask.TestCase.class,
             Protein.TestCase.class,
             SequestSearchTask.TestCase.class,

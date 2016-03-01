@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -610,7 +611,7 @@ public abstract class SequestParamsBuilder
         return parserError;
     }
 
-    protected List<String> parseMods(String mods, ArrayList<Character> residues, ArrayList<String> masses)
+    protected List<String> parseMods(String mods, List<Character> residues, List<String> masses)
     {
         if (mods == null || mods.equals("")) return Collections.emptyList();
 
@@ -638,7 +639,7 @@ public abstract class SequestParamsBuilder
             }
             catch (NumberFormatException e)
             {
-                return Collections.singletonList("modification mass contained an invalid mass value (" + mass + ")");
+                return Collections.singletonList("modification mass contained an invalid mass value (" + mass + ") for residue " + residue);
             }
             if (mass.startsWith("+"))
             {
@@ -964,42 +965,79 @@ public abstract class SequestParamsBuilder
         return clean.toString();
     }
 
+    public enum PeptideTerminalModificationType
+    {
+        None, C, N
+    }
+
     protected static class ResidueMod
     {
+        private final char res;
+        @NotNull
+        private final String weight;
+        private final PeptideTerminalModificationType type;
 
-        private Character res;
-        private String weight;
+        public ResidueMod(char res, @NotNull String weight)
+        {
+            this(res, weight, PeptideTerminalModificationType.None);
+        }
 
-        public ResidueMod(Character res, String weight)
+        public ResidueMod(char res, @NotNull String weight, @NotNull PeptideTerminalModificationType type)
         {
             this.res = res;
             this.weight = weight;
+            this.type = type;
         }
 
-        public Character getRes()
+        public char getRes()
         {
             return res;
         }
 
-        public void setRes(Character res)
-        {
-            this.res = res;
-        }
-
+        @NotNull
         public String getWeight()
         {
             return weight;
         }
 
-        public void setWeight(String weight)
+        @Override
+        public boolean equals(Object o)
         {
-            this.weight = weight;
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ResidueMod that = (ResidueMod) o;
+
+            if (res != that.res) return false;
+            return weight.equals(that.weight);
         }
 
-        public boolean equals(ResidueMod o)
+        @Override
+        public int hashCode()
         {
-            if(this.res.equals(o)) return this.weight.equals(o);
-            return false;
+            int result = (int) res;
+            result = 31 * result + weight.hashCode();
+            return result;
+        }
+
+        public boolean isCTerminalProtein()
+        {
+            return res == ']';
+        }
+
+        public boolean isNTerminalProtein()
+        {
+            return res == '[';
+        }
+
+        public boolean isTerminalProtein()
+        {
+            return isCTerminalProtein() || isNTerminalProtein();
+        }
+
+        public PeptideTerminalModificationType getType()
+        {
+            return type;
         }
     }
 

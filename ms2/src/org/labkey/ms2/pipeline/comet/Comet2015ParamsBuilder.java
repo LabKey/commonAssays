@@ -43,12 +43,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Support for generating comet.params for 2015.02 and newer
  * User: jeckels
  * Date: 9/16/13
  */
-public class CometParamsBuilder extends SequestParamsBuilder
+public class Comet2015ParamsBuilder extends SequestParamsBuilder
 {
-    private static final int MAX_VARIABLE_MODIFICATIONS = 6;
+    private static final int MAX_VARIABLE_MODIFICATIONS = 9;
     private static final Map<String, Integer> COMET_ENZYME_MAP;
 
     static
@@ -70,7 +71,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
         COMET_ENZYME_MAP = Collections.unmodifiableMap(m);
     }
 
-    public CometParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
+    public Comet2015ParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
         super(sequestInputParams, sequenceRoot, SequestParams.Variant.comet);
     }
@@ -137,13 +138,13 @@ public class CometParamsBuilder extends SequestParamsBuilder
             ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
             true
         )).setInputXmlLabels(_variant.getParamPrefix() + ", max_variable_mods_in_peptide");
-        // Add 6 variable modifications
-        for (int i = 1; i <= 6; i++)
+        // Add 9 variable modifications
+        for (int i = 1; i <= MAX_VARIABLE_MODIFICATIONS; i++)
         {
             _params.addProperty(new SequestParam(
                 150 + i,                                                       //sortOrder
-                "0.0 X 0 3",                                            // default value of the property
-                "variable_mod" + i,                                // parameters file property name
+                "0.0 X 0 4 -1 0 0",                                            // default value of the property
+                "variable_mod0" + i,                                // parameters file property name
                 "",       // comment in the parameters file
                 ConverterFactory.getSequestBasicConverter(),                      
                 ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
@@ -214,16 +215,6 @@ public class CometParamsBuilder extends SequestParamsBuilder
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
         )).setInputXmlLabels("comet, use_NL_ions");
-
-        _params.addProperty(new SequestParam(
-                260,                                                       //sortOrder
-                "0",                                            // default value of the property
-                "use_sparse_matrix",                                // parameters file property name
-                "",       // comment in the parameters file
-                ConverterFactory.getSequestBasicConverter(),                      
-                ParamsValidatorFactory.getBooleanParamsValidator(),
-                false
-        ));
 
         _params.addProperty(new SequestParam(
                 440,                                                       //sortOrder
@@ -357,6 +348,36 @@ public class CometParamsBuilder extends SequestParamsBuilder
         )).setInputXmlLabels("comet, max_precursor_charge" );
 
         _params.addProperty(new SequestParam(
+                191,                                                       //sortOrder
+                "",                                            //The value of the property
+                "mass_offsets",                                // the sequest.params property name
+                "one or more mass offsets to search (values substracted from deconvoluted precursor mass)",       // the sequest.params comment
+                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                null,
+                true
+        ).setInputXmlLabels("comet, mass_offsets"));
+
+        _params.addProperty(new SequestParam(
+                192,                                                       //sortOrder
+                "0",                                            //The value of the property
+                "override_charge",                                // the sequest.params property name
+                "one or more mass offsets to search (values subtracted from deconvoluted precursor mass)",       // the sequest.params comment
+                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                null,
+                true
+        ).setInputXmlLabels("comet, override_charge"));
+
+        _params.addProperty(new SequestParam(
+                193,                                                       //sortOrder
+                "0",                                            //The value of the property
+                "require_variable_mod",                                // the sequest.params property name
+                "",       // the sequest.params comment
+                ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                null,
+                false
+        ));
+
+        _params.addProperty(new SequestParam(
             300,                                                       //sortOrder
             "0",                                            // default value of the property
             "output_outfiles",                                // parameters file property name
@@ -404,10 +425,19 @@ public class CometParamsBuilder extends SequestParamsBuilder
         _params.addProperty(new SequestParam(
             305,                                                       //sortOrder
             "0",                                            // default value of the property
-            "output_pinxmlfile",                                // parameters file property name
-            "0=no, 1=yes  write pin.xml file",       // comment in the parameters file
-            ConverterFactory.getSequestBasicConverter(),                      
+            "output_percolatorfile",                                // parameters file property name
+            "0=no, 1=yes  write Percolator tab-delimited input file",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),
             new BooleanParamsValidator(),
+            false
+        ));
+        _params.addProperty(new SequestParam(
+            306,                                                       //sortOrder
+            "",                                            // default value of the property
+            "output_suffix",                                // parameters file property name
+            "add a suffix to output base names i.e. suffix \"-C\" generates base-C.pep.xml from base.mzXML input",       // comment in the parameters file
+            ConverterFactory.getSequestBasicConverter(),
+            null,
             false
         ));
 
@@ -472,68 +502,107 @@ public class CometParamsBuilder extends SequestParamsBuilder
         throw new SequestParamsException("Unsupported enzyme: " + enzyme);
     }
 
+    private List<ResidueMod> parseMods(List<String> parserError, String paramName, PeptideTerminalModificationType type)
+    {
+        String mods = sequestInputParams.get(paramName);
+        if (mods == null || mods.equals("")) return Collections.emptyList();
+        mods = removeWhiteSpace(mods);
+        List<Character> residues = new ArrayList<>();
+        List<String> masses = new ArrayList<>();
+
+        parserError.addAll(parseMods(mods, residues, masses));
+
+        List<ResidueMod> result = new ArrayList<>();
+        for (int i = 0; i < masses.size(); i++)
+        {
+            char res = residues.get(i);
+            result.add(new ResidueMod(res, masses.get(i), type));
+        }
+        return result;
+    }
+
     @Override
     protected List<String> initDynamicTermMods(char term, String massString)
     {
-        if (term != '[' && term != ']')
-        {
-            return Collections.singletonList("Invalid terminal modification: " + term);
-        }
-
-        try
-        {
-            double mass = Double.parseDouble(massString);
-            Param termProp = _params.getParam(term == '[' ? "variable_N_terminus" : "variable_C_terminus");
-            termProp.setValue(massString);
-        }
-        catch (NumberFormatException e)
-        {
-            return Collections.singletonList("Could not parse variable terminal modification: " + massString);
-        }
-        return Collections.emptyList();
+        throw new UnsupportedOperationException("Comet treats terminal modifications similarly to non-terminal modifications");
     }
 
-    /** Comet wants separate parameters for each variable modification
-     * Up to 6 variable modifications are supported
-     * format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
-     * e.g. 79.966331 STY 0 3
+    /**
+     * Comet wants separate parameters for each variable modification
+     * Up to 9 variable modifications are supported
      * @return any errors
      */
     public List<String> initDynamicMods()
     {
-        ArrayList<ResidueMod> workList = new ArrayList<>();
+        List<String> parserError = new ArrayList<>();
+        List<ResidueMod> residueMods = new ArrayList<>();
+        residueMods.addAll(parseMods(parserError, ParameterNames.DYNAMIC_MOD, PeptideTerminalModificationType.None));
+        residueMods.addAll(parseMods(parserError, ParameterNames.DYNAMIC_C_TERM_PEPTIDE_MOD, PeptideTerminalModificationType.C));
+        residueMods.addAll(parseMods(parserError, ParameterNames.DYNAMIC_N_TERM_PEPTIDE_MOD, PeptideTerminalModificationType.N));
 
-        String mods = sequestInputParams.get(ParameterNames.DYNAMIC_MOD);
-        if (mods == null || mods.equals("")) return Collections.emptyList();
-        mods = removeWhiteSpace(mods);
-        ArrayList<Character> residues = new ArrayList<>();
-        ArrayList<String> masses = new ArrayList<>();
-
-        List<String> parserError = parseMods(mods, residues, masses);
-        if (!parserError.isEmpty()) return parserError;
-
-        for (int i = 0; i < masses.size(); i++)
+        if (residueMods.size() > MAX_VARIABLE_MODIFICATIONS)
         {
-            char res = residues.get(i);
-            if(res == '['||res == ']')
-            {
-                parserError = initDynamicTermMods(res, masses.get(i));
-                if (parserError != null && !parserError.isEmpty()) return parserError;
-            }
-            else
-            {
-                workList.add(new ResidueMod(res, masses.get(i)));
-            }
+            parserError.add("Comet accepts a max of " + MAX_VARIABLE_MODIFICATIONS + " variable modifications, but " + residueMods.size() + " modifications were requested.");
         }
-        if(workList.size() > MAX_VARIABLE_MODIFICATIONS) Collections.singletonList("Comet will only accept a max of " + MAX_VARIABLE_MODIFICATIONS + " variable modifications.");
         int index = 1;
-        for (ResidueMod mod : workList)
+        for (ResidueMod mod : residueMods)
         {
             //parse mods function tested for NumberFormatException
             float weight = Float.parseFloat(mod.getWeight());
 
-            Param modProp = _params.getParam("variable_mod" + index++);
-            modProp.setValue(weight + " " + mod.getRes() + " 0 3");
+            char residue = mod.getRes();
+
+            Param modProp = _params.getParam("variable_mod0" + index++);
+            // Default to no distance constraint
+            String distance = "-1";
+            // Default to protein N-terminus (though this is irrelevant if distance is -1)
+            String terminus = "0";
+            if (mod.isNTerminalProtein())
+            {
+                residue = 'n';
+            }
+            else if (mod.isCTerminalProtein())
+            {
+                residue = 'c';
+            }
+            else if (mod.getType() == PeptideTerminalModificationType.N)
+            {
+                String nTermDistance = sequestInputParams.get(_variant.getParamPrefix() + ", variable_N_terminus_distance");
+                terminus = "2"; // 2 = peptide N-terminus
+                if (nTermDistance != null)
+                {
+                    distance = nTermDistance;
+                }
+                else
+                {
+                    distance = "0"; //0 = only applies to terminal residue
+                }
+            }
+            else if (mod.getType() == PeptideTerminalModificationType.C)
+            {
+                String cTermDistance = sequestInputParams.get(_variant.getParamPrefix() + ", variable_C_terminus_distance");
+                terminus = "3"; // 3 = peptide C-terminus
+                if (cTermDistance != null)
+                {
+                    distance = cTermDistance;
+                }
+                else
+                {
+                    distance = "0"; //0 = only applies to terminal residue
+                }
+            }
+            String required = "0";
+            // http://comet-ms.sourceforge.net/parameters/parameters_201502/variable_mod06.php
+            // Expected params are:
+            // 1. A decimal value specifying the modification mass difference
+            // 2. The residue(s) that the modifications are possibly applied to
+            // 3. 0 means normal variable modification, non-zero indicates that ALL modifications with the same value need to be present (not supported)
+            // 4. Maximum number of this modification of a residues in a single peptide
+            // 5. Max distance from the respective terminus, as defined by #6
+            // 6. The terminus for the distance constraint
+            // 7. 0 if not forced to be present, 1 if modification is required
+            // Comet's default setting "0.0 null 0 4 -1 0 0"
+            modProp.setValue(weight + " " + residue + " 0 4 " + distance + " " + terminus + " " + required);
         }
         return parserError;
     }
@@ -542,7 +611,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
     {
         String result = super.getSequestParamsText();
 
-        return "# comet_version 2014.01 rev. 0\n" +
+        return "# comet_version 2015.02 rev. 5\n" +
                 "\n" +
                 result +
                 "\n" +
@@ -576,7 +645,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("comet, digest_mass_range", "400.0 5943.0");
             paramMap.put("spectrum, parent monoisotopic mass error units", "mmu");
-            CometParamsBuilder spb = new CometParamsBuilder(paramMap, _root);
+            Comet2015ParamsBuilder spb = new Comet2015ParamsBuilder(paramMap, _root);
             spb.initXmlValues();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("database_name ="));
@@ -600,7 +669,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("comet, decoy_search", "1");
             paramMap.put("comet, decoy_prefix", "NEW_PREFIX_");
-            CometParamsBuilder spb = new CometParamsBuilder(paramMap, _root);
+            Comet2015ParamsBuilder spb = new Comet2015ParamsBuilder(paramMap, _root);
             spb.initXmlValues();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("decoy_search = 1"));
@@ -610,14 +679,14 @@ public class CometParamsBuilder extends SequestParamsBuilder
         @Test
         public void testEnzymes() throws SequestParamsException
         {
-            CometParamsBuilder spb = new CometParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|{P}"), _root);
+            Comet2015ParamsBuilder spb = new Comet2015ParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|{P}"), _root);
             spb.initEnzymeInfo();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("search_enzyme_number = 1"));
             assertTrue(text.contains("sample_enzyme_number = 1"));
             assertTrue(text.contains("1.  Trypsin"));
 
-            spb = new CometParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|[X]"), _root);
+            spb = new Comet2015ParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|[X]"), _root);
             spb.initEnzymeInfo();
             text = spb.getSequestParamsText();
             assertTrue(text.contains("search_enzyme_number = 2"));
@@ -631,7 +700,7 @@ public class CometParamsBuilder extends SequestParamsBuilder
         @Override
         public SequestParamsBuilder createParamsBuilder()
         {
-            return new CometParamsBuilder(ip.getInputParameters(), root);
+            return new Comet2015ParamsBuilder(ip.getInputParameters(), root);
         }
 
         @Test
@@ -645,9 +714,9 @@ public class CometParamsBuilder extends SequestParamsBuilder
             if (!parserError.isEmpty()) fail(parserError);
             for (int i = 1; i <= MAX_VARIABLE_MODIFICATIONS ; i++)
             {
-                String paramName = "variable_mod" + i;
+                String paramName = "variable_mod0" + i;
                 Param sp = spb.getProperties().getParam(paramName);
-                assertEquals(paramName, "0.0 X 0 3", sp.getValue());
+                assertEquals(paramName, "0.0 X 0 4 -1 0 0", sp.getValue());
             }
         }
 
@@ -656,20 +725,27 @@ public class CometParamsBuilder extends SequestParamsBuilder
         {
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                    "<note type=\"input\" label=\"residue, potential modification mass\">+16@M,+9@C</note>" +
+                    "<note type=\"input\" label=\"residue, potential modification mass\">+16@M,+9@C,+11@[</note>" +
+                    "<note type=\"input\" label=\"refine, potential C-terminus modifications\">+17@L</note>" +
+                    "<note type=\"input\" label=\"refine, potential N-terminus modifications\">+18@B</note>" +
+                    "<note type=\"input\" label=\"comet, variable_N_terminus_distance\">8</note>" +
+                    "<note type=\"input\" label=\"comet, variable_C_terminus_distance\">9</note>" +
                 "</bioml>");
 
             List<String> parserError = spb.initDynamicMods();
             if (!parserError.isEmpty()) fail(parserError);
 
-            assertEquals("variable_mod1", "16.0 M 0 3", spb.getProperties().getParam("variable_mod1").getValue());
-            assertEquals("variable_mod2", "9.0 C 0 3", spb.getProperties().getParam("variable_mod2").getValue());
+            assertEquals("variable_mod01", "16.0 M 0 4 -1 0 0", spb.getProperties().getParam("variable_mod01").getValue());
+            assertEquals("variable_mod02", "9.0 C 0 4 -1 0 0", spb.getProperties().getParam("variable_mod02").getValue());
+            assertEquals("variable_mod03", "11.0 n 0 4 -1 0 0", spb.getProperties().getParam("variable_mod03").getValue());
+            assertEquals("variable_mod04", "17.0 L 0 4 9 3 0", spb.getProperties().getParam("variable_mod04").getValue());
+            assertEquals("variable_mod05", "18.0 B 0 4 8 2 0", spb.getProperties().getParam("variable_mod05").getValue());
 
-            for (int i = 3; i <= MAX_VARIABLE_MODIFICATIONS ; i++)
+            for (int i = 6; i <= MAX_VARIABLE_MODIFICATIONS ; i++)
             {
-                String paramName = "variable_mod" + i;
+                String paramName = "variable_mod0" + i;
                 Param sp = spb.getProperties().getParam(paramName);
-                assertEquals(paramName, "0.0 X 0 3", sp.getValue());
+                assertEquals(paramName, "0.0 X 0 4 -1 0 0", sp.getValue());
             }
         }
     }

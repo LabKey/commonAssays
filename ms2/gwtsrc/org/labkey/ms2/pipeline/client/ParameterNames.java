@@ -25,6 +25,10 @@ public class ParameterNames
 {
     public static String STATIC_MOD = "residue, modification mass";
     public static String DYNAMIC_MOD = "residue, potential modification mass";
+    /** Peptide C-terminus modifications */
+    public static String DYNAMIC_C_TERM_PEPTIDE_MOD = "refine, potential C-terminus modifications";
+    /** Peptide N-terminus modifications */
+    public static String DYNAMIC_N_TERM_PEPTIDE_MOD = "refine, potential N-terminus modifications";
     public static String ENZYME = "protein, cleavage site";
     public static String SEQUENCE_DB = "pipeline, database";
     public static String TAXONOMY = "protein, taxon";

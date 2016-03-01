@@ -29,6 +29,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.sequest.AbstractSequestSearchTaskFactory;
+import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,7 +88,18 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
 
             // Write out comet.params file
             File fileWorkParams = _wd.newFile(COMET_PARAMS);
-            CometParamsBuilder builder = new CometParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory());
+
+            // Default to 2015 params format, but allow for older setting
+            String cometVersion = getJob().getParameters().get("comet, version");
+            SequestParamsBuilder builder;
+            if (cometVersion == null || cometVersion.contains("2015"))
+            {
+                builder = new Comet2015ParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory());
+            }
+            else
+            {
+                builder = new Comet2014ParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory());
+            }
             builder.initXmlValues();
             builder.writeFile(fileWorkParams);
 
