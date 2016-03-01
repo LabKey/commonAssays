@@ -361,7 +361,7 @@ public class Comet2015ParamsBuilder extends SequestParamsBuilder
                 192,                                                       //sortOrder
                 "0",                                            //The value of the property
                 "override_charge",                                // the sequest.params property name
-                "one or more mass offsets to search (values subtracted from deconvoluted precursor mass)",       // the sequest.params comment
+                "0=no, 1=override precursor charge states, 2=ignore precursor charges outside precursor_charge range, 3=see online",       // the sequest.params comment
                 ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
                 null,
                 true
