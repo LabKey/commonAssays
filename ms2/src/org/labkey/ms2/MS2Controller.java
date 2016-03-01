@@ -914,7 +914,6 @@ public class MS2Controller extends SpringActionController
                 quantView.setFrame(WebPartView.FrameType.PORTAL);
                 result.addView(quantView);
             }
-            getPageConfig().setTemplate(PageConfig.Template.Print);
 
             result.addView(run.getAdditionalPeptideSummaryView(getViewContext(), peptide, form.getGrouping()));
 
@@ -4229,8 +4228,6 @@ public class MS2Controller extends SpringActionController
                 _protein.setLookupString(form.getProtein());
             }
 
-            getPageConfig().setTemplate(PageConfig.Template.Print);
-
             return new ProteinsView(currentURL, _run, form, Collections.singletonList(_protein), null, peptideQueryView);
         }
 
@@ -4336,7 +4333,6 @@ public class MS2Controller extends SpringActionController
             summaryView.setTitle("Protein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
-            getPageConfig().setTemplate(PageConfig.Template.Print);
             return new VBox(summaryView, view);
         }
 
