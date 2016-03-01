@@ -37,10 +37,10 @@ public class XTandemTest extends AbstractXTandemTest
     protected static final String SEARCH_FASTA1 = "gi|4689022";
     protected static final String SEARCH_FIND_FASTA1 = "SCHIZOSACCHAROMYCES";
     protected static final String SEARCH_FIND_ALT_FASTA1 = "Schizosaccharomyces";
-    protected static final String SEARCH_FASTA2 = "gi|30089158|low_density_lipop";
-    protected static final String SEARCH_FIND_FASTA2 = "low density lipoprotein receptor-related protein 8 [Bos taurus]";
-    protected static final String SEARCH_FASTA3 = "gi|16078";
-    protected static final String SEARCH_FIND_FASTA3 = "ribosomal protein S16 (BS17)";
+    protected static final String SEARCH_FASTA2 = "gi|1234567890|search_target_low_density_lipop";
+    protected static final String SEARCH_FIND_FASTA2 = "search target low density lipoprotein receptor-related protein 8 [Bos taurus]";
+    protected static final String SEARCH_FASTA3 = "gi|9876543210";
+    protected static final String SEARCH_FIND_FASTA3 = "search target ribosomal protein S16 (BS17)";
     protected static final String PROTOCOL = "X!Tandem analysis";
     protected static final String PEPTIDE_CROSSTAB_RADIO_PROBABILITY_ID = "peptideProphetRadioButton";
     protected static final String PEPTIDE_CROSSTAB_RADIO_PROBABILITY_VALUE = "probability";
@@ -177,8 +177,8 @@ public class XTandemTest extends AbstractXTandemTest
         assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA2));
-        log("Search for a protein in the third fasta file.");
 
+        log("Search for a protein in the third fasta file.");
         clickTab("MS2 Dashboard");
         setFormElement(Locator.name("identifier"), SEARCH_FASTA3);
         uncheckCheckbox(Locator.name("exactMatch"));
