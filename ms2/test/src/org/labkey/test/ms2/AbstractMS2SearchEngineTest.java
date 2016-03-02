@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 
 public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 {
+    protected boolean _useOnlyOneFasta = false;
     protected static final String TEST_ASSAY_NAME = "AutomatedTestAssay";
     private static final String ANNOTATION_RUN_NAME = "Automated Test Annotation Run";
 
@@ -100,8 +101,13 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         setFormElement(Locator.name("protocolName"), "test2");
         setFormElement(Locator.name("protocolDescription"), "This is a test protocol for Verify.");
         selectOptionByText(Locator.name("sequenceDB"), DATABASE1);
-        selectOptionByText(Locator.name("sequenceDB"), DATABASE2);
-        selectOptionByText(Locator.name("sequenceDB"), DATABASE3);
+
+        if(!_useOnlyOneFasta)
+        {
+            selectOptionByText(Locator.name("sequenceDB"), DATABASE2);
+            selectOptionByText(Locator.name("sequenceDB"), DATABASE3);
+        }
+
         setFormElement(Locator.name("configureXml"), "");
         waitAndClick(Locator.xpath("//a[@class='labkey-button']/span[text() = 'OK']"));
         setFormElement(Locator.name("configureXml"), INPUT_XML);

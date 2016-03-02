@@ -43,6 +43,8 @@ public class CometTest extends AbstractMS2SearchEngineTest
         if (test2.exists())
             fail("Pipeline files were not cleaned up; test2(" + test2.toString() + ") directory still exists");
 
+        _useOnlyOneFasta = true;
+
         basicMS2Check();
     }
 
