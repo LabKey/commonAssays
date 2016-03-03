@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.test.util;
+package org.labkey.test.util.luminex;
 
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.tests.LuminexTest;
+import org.labkey.test.tests.luminex.LuminexTest;
+import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.ExtHelper;
+import org.labkey.test.util.LogMethod;
 
 import java.io.File;
 import java.util.Calendar;

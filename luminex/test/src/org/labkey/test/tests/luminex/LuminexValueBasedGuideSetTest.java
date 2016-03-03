@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.test.tests;
+package org.labkey.test.tests.luminex;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,7 +23,7 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
-import org.labkey.test.util.LuminexGuideSetHelper;
+import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
 import java.util.Map;
 import java.util.TreeMap;

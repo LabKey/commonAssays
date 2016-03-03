@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.test.tests;
+package org.labkey.test.tests.ms2;
 
 import org.junit.Test;
 import org.labkey.test.Locator;

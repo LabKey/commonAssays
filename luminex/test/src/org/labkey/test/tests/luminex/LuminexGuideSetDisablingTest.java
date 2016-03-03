@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.test.tests;
+package org.labkey.test.tests.luminex;
 
 import com.google.common.collect.ImmutableSet;
 import org.junit.Assert;
@@ -29,7 +29,7 @@ import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ListHelper;
-import org.labkey.test.util.LuminexGuideSetHelper;
+import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;

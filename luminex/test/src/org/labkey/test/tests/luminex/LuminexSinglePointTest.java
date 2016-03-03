@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.test.tests;
+package org.labkey.test.tests.luminex;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -26,9 +26,9 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
-import org.labkey.test.pages.LeveyJenningsPlotWindow;
+import org.labkey.test.pages.luminex.LeveyJenningsPlotWindow;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.LuminexGuideSetHelper;
+import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
 import java.io.File;
 import java.util.Arrays;

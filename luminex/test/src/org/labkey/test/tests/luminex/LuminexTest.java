@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.test.tests;
+package org.labkey.test.tests.luminex;
 
 import org.junit.BeforeClass;
 import org.labkey.test.BaseWebDriverTest;

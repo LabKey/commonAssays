@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.test.tests;
+package org.labkey.test.tests.luminex;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +25,7 @@ import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.Luminex;
 import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
-import org.labkey.test.pages.SetAnalyteDefaultValuesPage;
+import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PerlHelper;
