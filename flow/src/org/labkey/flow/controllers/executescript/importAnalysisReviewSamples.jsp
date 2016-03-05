@@ -98,7 +98,7 @@
 </p>
 <% if (form.isResolving()) { %>
 <p>If a sample from the analysis couldn't be resolved or was incorrectly resolved, you may correct it by
-    selecting the approrpiate FCS file from the dropdown.  All selected rows must have a match to be imported.
+    selecting the appropriate FCS file from the dropdown.  All selected rows must have a match to be imported.
 </p>
 <% } %>
 <hr/>

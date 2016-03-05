@@ -120,7 +120,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         for (MS2ExportType exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat.name());
-            NavTree menuItem = exportAll.addMenuItem(exportFormat.toString(), null, dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
+            NavTree menuItem = exportAll.addMenuItem(exportFormat.toString(), null, dataRegion.getJavascriptFormReference() + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
             if (exportFormat.getDescription() != null)
             {
                 menuItem.setDescription(exportFormat.getDescription());
@@ -136,7 +136,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             if (exportFormat.supportsSelectedOnly())
             {
                 exportUrl.replaceParameter("exportFormat", exportFormat.name());
-                NavTree menuItem = exportSelected.addMenuItem(exportFormat.toString(), null, "if (verifySelected(" + dataRegion.getJavascriptFormReference(false) + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference(false) + ".submit(); }");
+                NavTree menuItem = exportSelected.addMenuItem(exportFormat.toString(), null, "if (verifySelected(" + dataRegion.getJavascriptFormReference() + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference() + ".submit(); }");
                 if (exportFormat.getDescription() != null)
                 {
                     menuItem.setDescription(exportFormat.getDescription());
@@ -155,7 +155,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             for (ProteinDictionaryHelpers.GoTypes goType : types)
             {
                 ActionURL url = MS2Controller.getPeptideChartURL(getContainer(), goType);
-                goButton.addMenuItem(goType.toString(), null, dataRegion.getJavascriptFormReference(false) + ".action=\"" + url.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
+                goButton.addMenuItem(goType.toString(), null, dataRegion.getJavascriptFormReference() + ".action=\"" + url.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
             }
             result.add(goButton);
         }

@@ -116,7 +116,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
                 sb.append("</script>\n");
                 sb.append("<script type='text/javascript'>\n");
-                String formRef = view.getDataRegion().getJavascriptFormReference(false);
+                String formRef = view.getDataRegion().getJavascriptFormReference();
                 sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
                 sb.append("</script>\n");
 

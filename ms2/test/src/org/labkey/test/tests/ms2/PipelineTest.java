@@ -158,7 +158,7 @@ public class PipelineTest extends PipelineWebTestBase
             log("Trying to view status info for " + sampleExp);
             // Create a fresh PipelineStatusTable every time through the loop so that we're looking at a current set
             // of cached table info
-            PipelineStatusTable statusTable = new PipelineStatusTable(this, true, true);
+            PipelineStatusTable statusTable = new PipelineStatusTable(this, true);
             statusTable.clickStatusLink(sampleExp);
             log("Now on job with URL " + getURL());
             clickButton("Retry");
