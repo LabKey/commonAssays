@@ -22,8 +22,6 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.Luminex;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
@@ -43,7 +41,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class, Luminex.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexPositivityTest extends LuminexTest
 {
     private static List<String> _analyteNames = Arrays.asList("MyAnalyte (1)", "Blank (3)");

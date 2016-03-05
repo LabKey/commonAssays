@@ -20,7 +20,6 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
@@ -36,7 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexGuideSetTest extends LuminexTest
 {
     public LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);

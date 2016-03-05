@@ -22,13 +22,12 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 
 import static org.junit.Assert.assertEquals;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexJavaTransformTest extends LuminexTest
 {
     @Override

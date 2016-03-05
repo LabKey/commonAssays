@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.test.ms2;
+package org.labkey.test.tests.ms2;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

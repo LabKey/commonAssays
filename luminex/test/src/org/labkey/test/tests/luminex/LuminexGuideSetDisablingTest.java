@@ -24,7 +24,6 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
@@ -46,7 +45,7 @@ import java.util.TreeMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexGuideSetDisablingTest extends LuminexTest
 {
     private LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);

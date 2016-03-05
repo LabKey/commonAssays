@@ -20,13 +20,12 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.LuminexAll;
 
 import java.util.List;
 
 import static org.junit.Assert.*;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexExcludedTitrationTest extends LuminexTest
 {
     private static final Locator AVAILABLE_ANALYTES_CHECKBOX = Locator.xpath("//div[@class='x-grid3-hd-inner x-grid3-hd-checker']/div[@class='x-grid3-hd-checker']");

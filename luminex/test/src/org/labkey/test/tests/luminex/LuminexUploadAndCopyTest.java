@@ -21,15 +21,13 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.Luminex;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class, Luminex.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexUploadAndCopyTest extends LuminexTest
 {
     private static final String THAW_LIST_NAME = "LuminexThawList";

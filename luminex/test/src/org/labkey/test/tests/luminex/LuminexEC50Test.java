@@ -22,8 +22,6 @@ import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.Luminex;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.RReportHelper;
@@ -34,7 +32,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class, Luminex.class})
+@Category({DailyA.class, Assays.class})
 public class LuminexEC50Test extends LuminexTest
 {
     private final String EC50_RUN_NAME = "EC50";

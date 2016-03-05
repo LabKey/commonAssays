@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.test.ms2;
+package org.labkey.test.tests.ms2;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -24,6 +24,7 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.FileBrowser;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.ms2.AbstractMS2SearchEngineTest;
 
 import java.io.File;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.test.ms2;
+package org.labkey.test.tests.ms2;
 
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -29,6 +29,7 @@ import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.Mascot;
 import org.labkey.test.credentials.Login;
+import org.labkey.test.ms2.AbstractMS2SearchEngineTest;
 import org.labkey.test.pages.ms2.MascotConfigPage;
 import org.labkey.test.pages.ms2.MascotTestPage;
 import org.labkey.test.util.DataRegionTable;
@@ -44,7 +45,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

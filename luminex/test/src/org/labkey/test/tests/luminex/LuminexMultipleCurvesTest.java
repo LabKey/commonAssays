@@ -21,8 +21,6 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.categories.Luminex;
-import org.labkey.test.categories.LuminexAll;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
 import org.openqa.selenium.WebElement;
@@ -34,7 +32,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-@Category({DailyA.class, LuminexAll.class, Assays.class, Luminex.class})
+@Category({DailyA.class, Assays.class})
 public final class LuminexMultipleCurvesTest extends LuminexTest
 {
     /**
