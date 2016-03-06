@@ -105,7 +105,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         });
 
         // Set the DetailsURL for the column using ContainerContext.
-        // By explicity setting the ContainerContext, the URL's container will point to the original flow assay data
+        // By explicitly setting the ContainerContext, the URL's container will point to the original flow assay data
         // instead of the current container (which may be a different container for flow copied-to-study datasets.)
         // If we ever make FlowProtocol work in multiple containers, we will need to pull the Container from the ResultSet instead.
         ActionURL baseURL = new ActionURL(WellController.ShowGraphAction.class, null);
