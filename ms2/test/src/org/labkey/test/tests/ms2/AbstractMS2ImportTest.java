@@ -108,7 +108,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         clickAndWait(Locator.id("viewTypeSubmitButton"));
         addUrlParameter("exportAsWebPage=true");
         DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
-        setFilter(REGION_NAME_PEPTIDES, "Scan", "Is Greater Than", "6", "Is Less Than or Equal To", "100");
+        peptidesTable.setFilter("Scan", "Is Greater Than", "6", "Is Less Than or Equal To", "100");
         peptidesTable.setSort("Scan", SortDirection.DESC);
         clickButton("Save View");
         setFormElement(Locator.name("name"), LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME);

@@ -302,7 +302,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test filters in Protein View");
         DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, this);
-        setFilter(REGION_NAME_PROTEINS, "SequenceMass", "Is Greater Than", "17000", "Is Less Than", "50000");
+        proteinsTable.setFilter("SequenceMass", "Is Greater Than", "17000", "Is Less Than", "50000");
         assertTextNotPresent("gi|15925226|30S_ribosomal_pro",
                 "gi|19703691|Nicotinate_phosph");
         proteinsTable.setFilter("Description", "Does Not Contain", "Uncharacterized conserved protein");

@@ -20,6 +20,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
+import org.labkey.test.util.DataRegionTable;
 
 import java.util.List;
 
@@ -86,8 +87,10 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
     private void verifyTitrationAnalyteExclusion(String excludedTitration, String excludedAnalyte, String exclusionMessage)
     {
-        setFilter("Data", "Description", "Equals", excludedTitration);
-        setFilter("Data", "Analyte", "Contains", excludedAnalyte);
+        DataRegionTable region = new DataRegionTable("Data", this);
+
+        region.setFilter("Description", "Equals", excludedTitration);
+        region.setFilter("Analyte", "Contains", excludedAnalyte);
         waitForElement(Locator.paginationText(1, 12, 12));
         List<List<String>> vals = getColumnValues(DATA_TABLE_NAME, "Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
@@ -127,18 +130,20 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
             }
         }
 
-        setFilter("Data", "Analyte", "Does Not Contain", excludedAnalyte);
-        setFilter("Data", "ExclusionComment", "Is Not Blank");
+        region.setFilter("Analyte", "Does Not Contain", excludedAnalyte);
+        region.setFilter("ExclusionComment", "Is Not Blank");
         waitForText("No data to show.");
 
-        clearFilter("Data", "ExclusionComment");
-        clearFilter("Data", "Analyte");
-        clearFilter("Data", "Description");
+        region.clearFilter("ExclusionComment");
+        region.clearFilter("Analyte");
+        region.clearFilter("Description");
     }
 
     private void verifyTitrationExclusion(String excludedTitration, String exclusionMessage)
     {
-        setFilter("Data", "Description", "Equals", excludedTitration);
+        DataRegionTable region = new DataRegionTable("Data", this);
+
+        region.setFilter("Description", "Equals", excludedTitration);
         waitForElement(Locator.paginationText(1, 60, 60));
         List<List<String>> vals = getColumnValues(DATA_TABLE_NAME, "Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
@@ -153,7 +158,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         String comment;
         String analyte;
 
-        for(int i=0; i<wells.size(); i++)
+        for (int i=0; i < wells.size(); i++)
         {
             well = wells.get(i);
             log("well: " + well);
@@ -167,18 +172,18 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
             analyte = analyte.substring(0, 4);
             log("Analyte: " + analyte);
 
-            if(description.equals(excludedTitration))
+            if (description.equals(excludedTitration))
             {
                 assertTrue(comment.contains(exclusionMessage));
             }
         }
 
-        setFilter("Data", "Description", "Does Not Equal", excludedTitration);
-        setFilter("Data", "ExclusionComment", "Is Not Blank");
+        region.setFilter("Description", "Does Not Equal", excludedTitration);
+        region.setFilter("ExclusionComment", "Is Not Blank");
         waitForText("No data to show.");
 
-        clearFilter("Data", "ExclusionComment");
-        clearFilter("Data", "Description");
+        region.clearFilter("ExclusionComment");
+        region.clearFilter("Description");
     }
 
 }

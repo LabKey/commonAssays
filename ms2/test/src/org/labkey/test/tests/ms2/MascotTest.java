@@ -406,9 +406,10 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         clickButton("Go");
 
         log("Test filtering and sorting");
-        setFilter("MS2Peptides", "Mass", "Is Greater Than", "1000");
+        DataRegionTable peptidesRegion = new DataRegionTable("MS2Peptides", this);
+        peptidesRegion.setFilter("Mass", "Is Greater Than", "1000");
         assertTextNotPresent(PEPTIDE);
-        setSort("MS2Peptides", "Scan", SortDirection.DESC);
+        peptidesRegion.setSort("Scan", SortDirection.DESC);
         assertTextBefore(PEPTIDE2, PEPTIDE3);
 
         log("Test Save View");
@@ -441,10 +442,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         clickButton("Go");
         assertTextPresent("(Mass > 1000)");
 
-        //Put in once bug with filters in postgres is fixed
-        //assertTextNotPresent(PEPTIDE);
-
-        setSort("MS2Compare", "Peptide", SortDirection.DESC);
+        DataRegionTable compareRegion = new DataRegionTable("MS2Compare", this);
+        compareRegion.setSort("Peptide", SortDirection.DESC);
         assertTextBefore(PEPTIDE5, PEPTIDE4);
 
         log("Navigate to folder Portal");

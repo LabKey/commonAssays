@@ -184,9 +184,10 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
                 "ListParticipant1",
                 "ListParticipant2",
                 "ListParticipant3");
-        setFilter("Data", "ParticipantID", "Equals", "ListParticipant1");
+        DataRegionTable region = new DataRegionTable("Data", this);
+        region.setFilter("ParticipantID", "Equals", "ListParticipant1");
         assertTextPresent("1.1");
-        setFilter("Data", "ParticipantID", "Equals", "ListParticipant2");
+        region.setFilter("ParticipantID", "Equals", "ListParticipant2");
         assertTextPresent("1001.2");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
@@ -197,16 +198,16 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
                 "ListParticipant2",
                 "ListParticipant3",
                 "ListParticipant4");
-        setFilter("Data", "ParticipantID", "Equals", "ListParticipant1");
+        region.setFilter("ParticipantID", "Equals", "ListParticipant1");
         assertTextPresent("1001.1");
-        setFilter("Data", "ParticipantID", "Equals", "ListParticipant2");
+        region.setFilter("ParticipantID", "Equals", "ListParticipant2");
         assertTextPresent("1001.2");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME2), longWaitForPage);
         assertTextPresent("IL-1b (1)", "9011-04");
 
-        setFilter("Data", "FI", "Equals", "20");
+        region.setFilter("FI", "Equals", "20");
         click(Locator.name(".toggle"));
         clickButton("Copy to Study");
         selectOptionByText(Locator.name("targetStudy"), "/" + TEST_ASSAY_PRJ_LUMINEX + " (" + TEST_ASSAY_PRJ_LUMINEX + " Study)");

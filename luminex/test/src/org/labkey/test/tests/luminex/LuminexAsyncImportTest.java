@@ -23,6 +23,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
 
 import java.io.File;
@@ -84,7 +85,8 @@ public final class LuminexAsyncImportTest extends LuminexTest
         uploadPositivityFile(TEST_ASSAY_LUM, "No Baseline Data", TEST_ASSAY_LUM_FILE12, "1", "3", true, false);
         assertTextPresent(TEST_ASSAY_LUM + " Upload Jobs");
         waitForPipelineJobsToFinish(6);
-        setFilter("StatusFiles", "Description", "Equals", "No Baseline Data");
+        DataRegionTable status = new DataRegionTable("StatusFiles", this);
+        status.setFilter("Description", "Equals", "No Baseline Data");
         if (isElementPresent(Locator.linkWithText("ERROR")))
         {
             clickAndWait(Locator.linkWithText("ERROR"));

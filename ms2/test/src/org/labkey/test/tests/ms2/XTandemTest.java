@@ -79,9 +79,10 @@ public class XTandemTest extends AbstractXTandemTest
         clickButton("Go");
 
         log("Test filtering and sorting");
-        setFilter("MS2Peptides", "Mass", "Is Greater Than", "1000");
+        DataRegionTable peptidesRegion = new DataRegionTable("MS2Peptides", this);
+        peptidesRegion.setFilter("Mass", "Is Greater Than", "1000");
         assertTextNotPresent(PEPTIDE);
-        setSort("MS2Peptides", "Scan", SortDirection.DESC);
+        peptidesRegion.setSort("Scan", SortDirection.DESC);
         assertTextBefore(PEPTIDE2, PEPTIDE3);
 
         log("Test Save View");
@@ -121,14 +122,13 @@ public class XTandemTest extends AbstractXTandemTest
         //Put in once bug with filters in postgres is fixed
         assertTextNotPresent(PEPTIDE);
 
-        setSort("MS2Compare", "Peptide", SortDirection.DESC);
+        DataRegionTable compareRegion = new DataRegionTable("MS2Compare", this);
+        compareRegion.setSort("Peptide", SortDirection.DESC);
         assertTextBefore(PEPTIDE5, PEPTIDE4);
-
 
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
         verifyPeptideCrosstab();
         verifyComparePeptides();
-
     }
 
     private void verifyComparePeptides()
@@ -186,7 +186,6 @@ public class XTandemTest extends AbstractXTandemTest
         assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA3));
-
     }
 
     private void verifyPeptideDetailsPage()
