@@ -174,7 +174,6 @@ public class XTandemTest extends AbstractXTandemTest
         setFormElement(Locator.name("identifier"), SEARCH_FASTA2);
         checkCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
-        assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA2));
 
@@ -183,7 +182,6 @@ public class XTandemTest extends AbstractXTandemTest
         setFormElement(Locator.name("identifier"), SEARCH_FASTA3);
         uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
-        assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA3));
     }
