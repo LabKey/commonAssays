@@ -41,7 +41,7 @@ public class MzXMLDocumentParser extends AbstractXMLDocumentParser
         }
 
         String header = new String(buf, 0, buf.length);
-        return header.indexOf("<mzXML") != -1;
+        return header.contains("<mzXML");
     }
 
     @Override

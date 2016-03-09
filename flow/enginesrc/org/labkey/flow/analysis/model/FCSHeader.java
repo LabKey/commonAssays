@@ -63,14 +63,9 @@ public class FCSHeader
     {
         _file = file;
         NetworkDrive.ensureDrive(file.getPath());
-        InputStream is = new FileInputStream(file);
-        try
+        try (InputStream is = new FileInputStream(file))
         {
             load(is);
-        }
-        finally
-        {
-            is.close();
         }
     }
 

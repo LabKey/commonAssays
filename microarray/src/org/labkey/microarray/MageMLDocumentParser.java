@@ -46,7 +46,7 @@ public class MageMLDocumentParser extends AbstractXMLDocumentParser
         }
         
         String header = new String(buf, 0, buf.length);
-        return header.indexOf("<MAGE-ML") != -1;
+        return header.contains("<MAGE-ML");
     }
 
     @Override

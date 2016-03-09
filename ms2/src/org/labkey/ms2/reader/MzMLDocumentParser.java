@@ -41,7 +41,7 @@ public class MzMLDocumentParser extends AbstractXMLDocumentParser
         }
 
         String header = new String(buf, 0, buf.length);
-        return header.indexOf("<mzML") != -1;
+        return header.contains("<mzML");
     }
 
     @Override
@@ -51,5 +51,4 @@ public class MzMLDocumentParser extends AbstractXMLDocumentParser
         result.addStopElement("spectrum");
         return result;
     }
-
 }
