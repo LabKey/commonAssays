@@ -32,6 +32,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 @Category({DailyB.class, MS2.class})
 public class LibraTest extends MS2TestBase
 {
@@ -229,8 +231,8 @@ public class LibraTest extends MS2TestBase
         _customizeViewsHelper.saveCustomView(proteinProphetView);
         checkForITRAQQuantitation();
 
-
-        assertTableCellTextEquals("dataregion_MS2Peptides", 2, "Ratio 1", "0.71");
+        DataRegionTable pepTable = new DataRegionTable("MS2Peptides", this);
+        assertEquals("Wrong ratio for peptide", "0.71", pepTable.getDataAsText(2, "Ratio 1"));
 
         Locator img = Locator.xpath("//img[contains(@id,'MS2Peptides-Handle')]");
         click(img);
