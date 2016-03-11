@@ -28,11 +28,13 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Peptide;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.Map;
@@ -126,16 +128,30 @@ public class MascotRun extends MS2Run
     @Override
     protected ModelAndView getAdditionalPeptideSummaryView(ViewContext viewContext, MS2Peptide peptide, String grouping) throws Exception
     {
-        QueryPeptideMS2RunView altPeptideView = (QueryPeptideMS2RunView) MS2RunViewType.getViewType(grouping).createView(viewContext, this);
-        SimpleFilter altPeptideFilter = new SimpleFilter(FieldKey.fromParts("scan"), peptide.getScan());
-        altPeptideFilter.addCondition(FieldKey.fromParts("fraction"), peptide.getFraction());
-        altPeptideFilter.addCondition(FieldKey.fromParts("charge"), peptide.getCharge());
+        final String title = "All Matches To This Query";
+        AbstractMS2RunView altPeptideView = MS2RunViewType.getViewType(grouping).createView(viewContext, this);
 
-        QueryPeptideMS2RunView.PeptideQueryView altPeptideGrid = (QueryPeptideMS2RunView.PeptideQueryView) altPeptideView.createGridView(altPeptideFilter);
+        if (altPeptideView instanceof QueryPeptideMS2RunView)
+        {
+            SimpleFilter altPeptideFilter = new SimpleFilter(FieldKey.fromParts("scan"), peptide.getScan());
+            altPeptideFilter.addCondition(FieldKey.fromParts("fraction"), peptide.getFraction());
+            altPeptideFilter.addCondition(FieldKey.fromParts("charge"), peptide.getCharge());
 
-        altPeptideGrid.setTitle("All Matches To This Query");
-        altPeptideGrid.addDisplayColumn(new CurrentPeptideColumn(peptide.getRowId()));
-        return altPeptideGrid;
+            QueryPeptideMS2RunView.PeptideQueryView altPeptideGrid = (QueryPeptideMS2RunView.PeptideQueryView) ((QueryPeptideMS2RunView)altPeptideView).createGridView(altPeptideFilter);
+            altPeptideGrid.setTitle(title);
+            altPeptideGrid.addDisplayColumn(new CurrentPeptideColumn(peptide.getRowId()));
+            return altPeptideGrid;
+        }
+        else
+        {
+            return new WebPartView(title) {
+                @Override
+                protected void renderView(Object model, PrintWriter out) throws Exception
+                {
+                    out.write("<div>Use the 'Standard' grouping to view this information.</div>");
+                }
+            };
+        }
     }
 
     private static final class CurrentPeptideColumn extends SimpleDisplayColumn
