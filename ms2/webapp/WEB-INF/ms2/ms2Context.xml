@@ -50,7 +50,6 @@
                 </bean>
                 <bean class="org.labkey.ms2.pipeline.tandem.XTandemToXMLTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
-                <bean class="org.labkey.ms2.pipeline.MSDaPlLoaderTask$Factory" />
                 <bean class="org.labkey.ms2.pipeline.Sqt2PinTask$Factory" />
             </list>
         </property>

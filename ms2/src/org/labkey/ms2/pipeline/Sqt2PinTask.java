@@ -30,11 +30,11 @@ import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.pipeline.cmd.TaskPath;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.util.FileType;
+import org.labkey.api.writer.PrintWriters;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,14 +60,14 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
         
         try
         {
-            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+            try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
             {
                 TaskPath targetListTP = new TaskPath(".target.list");
                 TaskPath decoyListTP = new TaskPath(".decoy.list");
                 File targetListFile = _wd.newWorkFile(WorkDirectory.Function.output, targetListTP, job.getBaseName());
                 File decoyListFile = _wd.newWorkFile(WorkDirectory.Function.output, decoyListTP, job.getBaseName());
 
-                try (BufferedWriter targetWriter = new BufferedWriter(new FileWriter(targetListFile)); BufferedWriter decoyWriter = new BufferedWriter(new FileWriter(decoyListFile)))
+                try (PrintWriter targetWriter = PrintWriters.getPrintWriter(targetListFile); PrintWriter decoyWriter = PrintWriters.getPrintWriter(decoyListFile))
                 {
                     FileType targetSQTFileType = new FileType(".sqt");
                     FileType decoySQTFileType = new FileType(".decoy.sqt");
@@ -147,8 +147,6 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
         {
             _cloneName = cloneName;
         }
-
-
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
@@ -189,5 +187,4 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
             return Collections.singletonList(getStatusName());
         }
     }
-
 }

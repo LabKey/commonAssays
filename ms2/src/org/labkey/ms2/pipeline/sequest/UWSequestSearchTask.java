@@ -30,11 +30,13 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.ToolExecutionException;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.pipeline.cmd.TaskPath;
+import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.FastaCheckTask;
 import org.labkey.ms2.pipeline.client.ParameterNames;
@@ -42,10 +44,8 @@ import org.labkey.ms2.pipeline.client.ParameterNames;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
@@ -340,7 +340,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         sequestArgs.addAll(_factory.getSequestOptions());
         sequestArgs.add(FileUtil.relativize(workingDir, fileMzXMLWork, false));
         ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
-        try (Writer writer = new FileWriter(resultsFile))
+        try (Writer writer = PrintWriters.getPrintWriter(resultsFile))
         {
             writeParams(writer, paramsFile, getJob().getLogger(), getJob().getSequenceFiles()[0], sequestVersion);
         }
@@ -363,14 +363,12 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 
         if (versionFile.exists())
         {
-            FileInputStream headerIn = new FileInputStream(versionFile);
-            try
+            try (FileInputStream headerIn = new FileInputStream(versionFile))
             {
-                return parseSequestVersion(new InputStreamReader(headerIn));
+                return parseSequestVersion(Readers.getReader(headerIn));
             }
             finally
             {
-                try { headerIn.close(); } catch (IOException ignored) {}
                 versionFile.delete();
             }
         }
@@ -430,7 +428,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
         mdif1 = mdif2 = mdif3 = mstat = ion_cutoff = 0.0f;
         N_rd_fr = N_a = N_b = N_y = N_enz = N_diff_mod = 0;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(paramsFile)))
+        try (BufferedReader reader = Readers.getReader(paramsFile))
         {
             while ((line = reader.readLine()) != null)
             {
@@ -706,7 +704,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             }
             //exit(0);
 
-            try (BufferedReader fastaReader = new BufferedReader(new FileReader(fastaFile)))
+            try (BufferedReader fastaReader = Readers.getReader(fastaFile))
             {
                 while ((line = fastaReader.readLine()) != null)
                 {
@@ -922,7 +920,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
 
     public static void main(String... args) throws Exception
     {
-        try (FileWriter writer = new FileWriter("c:/temp/headers.txt"))
+        try (Writer writer = PrintWriters.getPrintWriter(new FileOutputStream("c:/temp/headers.txt")))
         {
             writeParams(writer, new File("c:/temp/sequestProduction.params"), Logger.getLogger(UWSequestSearchTask.class), new File("c:/temp/databases/149Proteins.fsa"), "2050059");
         }
