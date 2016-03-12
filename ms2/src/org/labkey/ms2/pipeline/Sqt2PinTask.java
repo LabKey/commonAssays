@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Converts from .sqt to .pin file format, using the sqt2pin command-line tool.
+ * Used by the MacCoss proteomics analysis workflow.
  * User: jeckels
  * Date: Jun 12, 2012
  */
