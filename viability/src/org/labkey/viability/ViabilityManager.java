@@ -66,6 +66,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -336,7 +337,7 @@ public class ViabilityManager
 
 
             //
-            // update the aggregate values for rows that have specimen matches, skipping rows whoose values aren't changed.
+            // update the aggregate values for rows that have specimen matches, skipping rows whose values aren't changed.
             //
 
             SQLFragment updateFrag = new SQLFragment();
@@ -483,6 +484,11 @@ public class ViabilityManager
         Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowId));
     }
 
+    private static void deleteSpecimens(Collection<Integer> resultRowIds)
+    {
+        Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowIds, CompareType.IN));
+    }
+
     /** Delete the properties for objectID, but not the object itself. */
     private static void deleteProperties(Container c, int objectID)
     {
@@ -509,31 +515,42 @@ public class ViabilityManager
     }
 
     /** Delete all viability results that reference the ExpData. */
-    // XXX: optimize
     public static void deleteAll(List<ExpData> datas, Container c)
     {
-        List<Integer> dataIDs = new ArrayList<>(datas.size());
-        for (ExpData data : datas)
-            dataIDs.add(data.getRowId());
-
-        Map<String, Object>[] rows =
-                new TableSelector(ViabilitySchema.getTableInfoResults(),
-                        new HashSet<>(Arrays.asList("RowID", "ObjectID")),
-                        new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null).getMapArray();
-
-        int[] objectIDs = new int[rows.length];
-
-        for (int i = 0; i < rows.length; i++)
+        DbScope scope = ViabilitySchema.getSchema().getScope();
+        try (DbScope.Transaction tx = scope.ensureTransaction())
         {
-            Map<String, Object> row = rows[i];
-            Integer resultID = (Integer)row.get("RowID");
-            objectIDs[i] = ((Integer)row.get("ObjectID")).intValue();
+            List<Integer> dataIDs = new ArrayList<>(datas.size());
+            for (ExpData data : datas)
+                dataIDs.add(data.getRowId());
 
-            deleteSpecimens(resultID.intValue());
-            Table.delete(ViabilitySchema.getTableInfoResults(), resultID);
+            TableSelector ts = new TableSelector(ViabilitySchema.getTableInfoResults(),
+                    new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                    new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null);
+
+            ts.forEachMapBatch((rows) -> {
+
+                List<Integer> resultIDs = new ArrayList<>(rows.size());
+                int[] objectIDs = new int[rows.size()];
+
+                int i = 0;
+                for (Map<String, Object> row : rows)
+                {
+                    resultIDs.add(((Integer) row.get("RowID")).intValue());
+                    objectIDs[i] = ((Integer) row.get("ObjectID")).intValue();
+                    i++;
+                }
+
+                deleteSpecimens(resultIDs);
+
+                Table.delete(ViabilitySchema.getTableInfoResults(), new SimpleFilter(FieldKey.fromParts("RowId"), resultIDs, CompareType.IN));
+
+                OntologyManager.deleteOntologyObjects(c, true, objectIDs);
+
+            }, 1000);
+
+            tx.commit();
         }
-
-        OntologyManager.deleteOntologyObjects(c, true, objectIDs);
     }
 
     public static class TestCase extends Assert

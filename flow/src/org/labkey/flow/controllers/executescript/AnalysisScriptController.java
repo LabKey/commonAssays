@@ -1036,7 +1036,8 @@ public class AnalysisScriptController extends BaseFlowController
                     {
                         for (FlowRun keywordRun : keywordRuns)
                         {
-                            if (keywordRun.getExperiment().isKeywords())
+                            FlowExperiment experiment = keywordRun.getExperiment();
+                            if (experiment != null && experiment.isKeywords())
                             {
                                 form.setExistingKeywordRunId(keywordRun.getRunId());
                                 form.setKeywordDir(null);

@@ -158,7 +158,8 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
                 {
                     throw new IllegalArgumentException("More than one Bibliospec score column for " + this);
                 }
-                bibliospecScoreIndex = i;
+                // Score column indices/suffices are one-based, not zero-based
+                bibliospecScoreIndex = i + 1;
                 bibliospecScoreName = p._bibliospecScoreName;
             }
         }

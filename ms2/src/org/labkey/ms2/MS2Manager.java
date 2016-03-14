@@ -1076,7 +1076,7 @@ public class MS2Manager
             return getSpectrumFromFile(fractionId, scan);
     }
 
-    private static Pair<float[], float[]> getSpectrumFromFile(int fractionId, int scan) throws SpectrumException
+    public static Pair<float[], float[]> getSpectrumFromFile(int fractionId, int scan) throws SpectrumException
     {
         MS2Fraction fraction = MS2Manager.getFraction(fractionId);
         if (null == fraction)

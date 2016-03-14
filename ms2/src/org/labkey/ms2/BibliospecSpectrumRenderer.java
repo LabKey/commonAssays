@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.RuntimeSQLException;
@@ -43,10 +44,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Creates a Bibliospec SQLite data file based on a set of peptides/spectra
@@ -55,6 +54,8 @@ import java.util.Set;
  */
 public class BibliospecSpectrumRenderer implements SpectrumRenderer
 {
+    private static final Logger LOG = Logger.getLogger(BibliospecSpectrumRenderer.class);
+
     private final ViewContext _context;
 
     private DecimalFormat MODIFICATION_MASS_FORMAT = new DecimalFormat("0.0");
@@ -114,6 +115,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
                 // Keep track of the sequence value so that we can set foreign key values
                 int spectraCount = 0;
+                int missingSpectra = 0;
 
                 // Create the statements to insert all of the data
                 try (PreparedStatement peptidePS = connection.prepareStatement("INSERT INTO RefSpectra(peptideSeq, peptideModSeq, precursorCharge, precursorMZ, nextAA, prevAA, copies, numPeaks, retentionTime, score, scoreType, FileId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -157,7 +159,18 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             }
                             try
                             {
-                                sourceFilePS.setString(1, new File(new URI(fraction.getMzXmlURL())).getAbsolutePath());
+                                File spectraSource;
+                                if (fraction.getMzXmlURL() == null)
+                                {
+                                    // Likely a direct Mascot .dat import, with no .mzXML available. The .dat
+                                    spectraSource = new File(run.getPath());
+                                }
+                                else
+                                {
+                                    spectraSource = new File(new URI(fraction.getMzXmlURL()));
+                                }
+
+                                sourceFilePS.setString(1, spectraSource.getAbsolutePath());
                                 sourceFilePS.execute();
                                 fractionIdsIncluded.put(fraction.getFraction(), fractionIdsIncluded.size() + 1);
                             }
@@ -235,6 +248,10 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             spectraPS.setBytes(3, intensityBuffer.array());
                             spectraPS.execute();
                         }
+                        else
+                        {
+                            missingSpectra++;
+                        }
                     }
                 }
 
@@ -248,6 +265,11 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                     ps.setInt(4, 1);
                     ps.setInt(5, 3);
                     ps.execute();
+                }
+
+                if (spectraCount > 0)
+                {
+                    LOG.warn("Unable to find " + spectraCount + " when building Bibliospec library for run");
                 }
 
                 // Create the indices on the end after all the inserts are done
