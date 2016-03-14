@@ -261,7 +261,7 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
         for(String seqIdFasta : seqIds.keySet())
         {
             String[] fastaSeqHeaderItems = seqIdFasta.split("\\|");
-            String seqIdentiferMatchingExprMatrix = fastaSeqHeaderItems[2];
+            String seqIdentiferMatchingExprMatrix = fastaSeqHeaderItems.length > 2 ? fastaSeqHeaderItems[2] : fastaSeqHeaderItems[0];
             List<String> vals;
 
             if(substringsSeqId.containsKey(seqIdentiferMatchingExprMatrix))
