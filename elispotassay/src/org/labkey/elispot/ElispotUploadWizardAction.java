@@ -301,7 +301,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     {
                         // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
                         // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
-                        samplePropsValid = validatePostedProperties(entry.getValue(), errors) && samplePropsValid;
+                        samplePropsValid = validatePostedProperties(getViewContext(), entry.getValue(), errors) && samplePropsValid;
                     }
                 }
                 catch (ExperimentException e)
@@ -373,7 +373,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             {
                 // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
                 // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
-                antigenPropsValid = validatePostedProperties(entry.getValue(), errors) && antigenPropsValid;
+                antigenPropsValid = validatePostedProperties(getViewContext(), entry.getValue(), errors) && antigenPropsValid;
             }
             return antigenPropsValid;
         }
@@ -437,7 +437,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             }
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAnalyteProperties.entrySet())
             {
-                analytePropsValid = validatePostedProperties(entry.getValue(), errors) && analytePropsValid;
+                analytePropsValid = validatePostedProperties(getViewContext(), entry.getValue(), errors) && analytePropsValid;
             }
             return analytePropsValid;
         }

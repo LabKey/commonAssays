@@ -687,11 +687,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     // validate analyte domain properties
                     Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte);
-                    validatePostedProperties(properties, errors);
+                    validatePostedProperties(getViewContext(), properties, errors);
 
                     // validate analyte column properties
                     Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte);
-                    validateColumnProperties(colProperties, errors);
+                    validateColumnProperties(getViewContext(), colProperties, errors);
                 }
             }
 
