@@ -122,15 +122,13 @@ public class PipelineTest extends PipelineWebTestBase
 
         _testSetMS2.setup();
 
-        EmailRecordTable emailTable = new EmailRecordTable(this);
-        emailTable.saveRecorderState();
-        emailTable.clearAndRecord();
+        enableEmailRecorder();
         runProcessing(_testSetMS2);
 
         // Repeat to make sure retry works
-        emailTable.clearAndRecord();
+        enableEmailRecorder();
         runProcessing(_testSetMS2);
-        checkEmail(emailTable, 2);
+        checkEmail(2);
 
         // Make sure there haven't been any errors yet.
         checkErrors();
@@ -138,14 +136,14 @@ public class PipelineTest extends PipelineWebTestBase
         // Break the pipeline tools directory setting to cause errors.
         _pipelineToolsHelper.setPipelineToolsDirectory(TestFileUtils.getLabKeyRoot() + "/external/noexist");
         runProcessing(_testSetMS1);
-        checkEmail(emailTable, 4);
+        checkEmail(4);
 
         // Make sure the expected errors have been logged.
         checkExpectedErrors(4);
 
         // Test pipeline error escalation email.
         _testSetMS1.getParams()[0].validateEmailEscalation(0);
-        checkEmail(emailTable, 1);
+        checkEmail(1);
         // Fix the pipeline tools directory.
         _pipelineToolsHelper.resetPipelineToolsDirectory();
 
@@ -168,30 +166,29 @@ public class PipelineTest extends PipelineWebTestBase
         waitToComplete(_testSetMS1);
 
         // Could validate here more, but the final validation should be enough.
-        checkEmail(emailTable, 1);
+        checkEmail(1);
 
         for (PipelineTestParams tp : _testSetMS1.getParams())
             tp.setExpectError(false);
         runProcessing(_testSetMS1);
-        checkEmail(emailTable, 2);
-
-        emailTable.restoreRecorderState();
+        checkEmail(2);
     }
 
-    public void checkEmail(EmailRecordTable emailTable, int countExpect)
+    public void checkEmail(int countExpect)
     {
+        EmailRecordTable emailTable = new EmailRecordTable(this);
         int sleepCount = 0;
         // Wait up to 15 seconds for the email to be sent and show up in the table
-        while (emailTable.getDataRowCount() < countExpect && sleepCount < 3)
+        while (emailTable.getEmailCount() < countExpect && sleepCount < 3)
         {
             sleep(5000);
             refresh();
             sleepCount++;
         }
-        int count = emailTable.getDataRowCount();
+        int count = emailTable.getEmailCount();
         assertTrue("Expected " + countExpect + " notification emails, found " + count,
                 count == countExpect);
-        emailTable.clearAndRecord();
+        enableEmailRecorder();
     }
 
     private void runProcessing(PipelineTestsBase testSet)
