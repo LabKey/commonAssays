@@ -232,7 +232,7 @@ public class LibraTest extends MS2TestBase
         checkForITRAQQuantitation();
 
         DataRegionTable pepTable = new DataRegionTable("MS2Peptides", this);
-        assertEquals("Wrong ratio for peptide", "0.71", pepTable.getDataAsText(2, "Ratio 1"));
+        assertEquals("Wrong ratio for peptide", "0.71", pepTable.getDataAsText(0, "Ratio 1"));
 
         Locator img = Locator.xpath("//img[contains(@id,'MS2Peptides-Handle')]");
         click(img);
