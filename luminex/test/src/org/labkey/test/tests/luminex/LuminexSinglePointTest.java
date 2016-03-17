@@ -90,6 +90,7 @@ public class LuminexSinglePointTest extends LuminexTest
         ljp.closeWindow();
 
         addUrlParameter("_testLJQueryLimit=0");
+        tbl = new DataRegionTable("AnalyteSinglePointControl", this);
         click(tbl.link(0, 2));
         ljp.waitTillReady();
         Assert.assertEquals("Notebook1", ljp.getXTickTagElementText());
