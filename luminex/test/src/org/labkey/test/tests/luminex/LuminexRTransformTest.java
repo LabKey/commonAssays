@@ -255,7 +255,7 @@ public final class LuminexRTransformTest extends LuminexTest
         setFormElement(Locator.name("name"), assayRunId);
         uncheckCheckbox(Locator.name("subtNegativeFromAll"));
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
-        waitForText("A file with name '" + TEST_ASSAY_LUM_FILE4.getName() + "' already exists");
+        waitForElement(Locator.id("file-upload-tbl").containing(TEST_ASSAY_LUM_FILE4.getName()));
         clickButton("Next", defaultWaitForPage * 2);
 
         // uncheck all of the titration well role types
