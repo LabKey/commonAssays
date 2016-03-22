@@ -29,7 +29,7 @@ import org.labkey.test.pipeline.PipelineFolder;
 import org.labkey.test.pipeline.PipelineTestsBase;
 import org.labkey.test.pipeline.PipelineWebTestBase;
 import org.labkey.test.pipeline.PipelineTestParams;
-import org.labkey.test.util.EmailRecordTable;
+import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.ms1.params.PepMatchTestParams;
 import org.labkey.test.ms1.params.FeaturesTestParams;
