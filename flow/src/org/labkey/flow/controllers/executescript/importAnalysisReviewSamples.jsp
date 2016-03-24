@@ -131,27 +131,22 @@ if (groups.size() > 1)
 {
     %>
     <p>
-    <script>
-        function onGroupChanged(selectedGroup)
-        {
+    <script type="application/javascript">
+        function onGroupChanged(selectedGroup) {
             importedGroup = selectedGroup || "All Samples";
 
-            var dr = document.getElementById("dataregion_<%=h(SamplesConfirmGridView.DATAREGION_NAME)%>");
-            if (dr)
-            {
+            var dr = LABKEY.DataRegions[<%= PageFlowUtil.jsString(SamplesConfirmGridView.DATAREGION_NAME) %>];
+            if (dr) {
                 var group = groups[importedGroup];
-                if (group)
-                {
-                    for (var i = 0; i < samples.length; i++)
-                    {
+                if (group) {
+                    for (var i = 0; i < samples.length; i++) {
                         var sampleId = samples[i].sampleId;
                         // escape quotes
                         sampleId = sampleId.replace(/('|"|\\)/g, "\\$1");
 
                         var selected = samples[i].groups.indexOf(importedGroup) > -1;
                         var elts = document.getElementsByName("selectedSamples.rows[" + sampleId + "].selected");
-                        if (elts.length > 0)
-                        {
+                        if (elts.length > 0) {
                             var inputEl = elts[0];
                             inputEl.checked = selected;
                         }
