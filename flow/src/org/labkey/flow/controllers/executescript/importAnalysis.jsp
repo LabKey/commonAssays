@@ -19,24 +19,21 @@
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="java.util.Iterator" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
         // TODO: --Ext3-- This should be declared as part of the included views
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("clientapi/ext3"));
-        resources.add(ClientDependency.fromPath("File"));
-        resources.add(ClientDependency.fromPath("FileUploadField.js"));
-        resources.add(ClientDependency.fromPath("Ext4ClientApi"));
-        return resources;
+        dependencies.add("clientapi/ext3");
+        dependencies.add("File");
+        dependencies.add("FileUploadField.js");
+        dependencies.add("Ext4ClientApi");
     }
 %>
 <%

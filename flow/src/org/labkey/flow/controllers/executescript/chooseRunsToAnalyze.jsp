@@ -19,25 +19,22 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController"%>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsView" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
         // TODO: --Ext3-- This should be declared as part of the included views
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("clientapi/ext3"));
-        return resources;
+        dependencies.add("clientapi/ext3");
     }
 
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)

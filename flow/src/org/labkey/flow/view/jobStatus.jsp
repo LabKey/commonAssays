@@ -15,26 +15,23 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="org.labkey.flow.data.FlowStatus" %>
 <%@ page import="org.labkey.api.pipeline.PipelineStatusFile" %>
-<%@ page import="org.labkey.flow.script.FlowJob" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="java.io.File" %>
-<%@ page import="org.labkey.flow.script.ScriptJob" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
+<%@ page import="org.labkey.flow.data.FlowRun" %>
+<%@ page import="org.labkey.flow.data.FlowStatus" %>
+<%@ page import="org.labkey.flow.script.FlowJob" %>
+<%@ page import="org.labkey.flow.script.ScriptJob" %>
+<%@ page import="java.io.File" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("Ext4"));
-        return resources;
+        dependencies.add("Ext4");
     }
 %>
 <%

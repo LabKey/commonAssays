@@ -18,18 +18,15 @@
 <%@ page import="org.labkey.api.util.UniqueID"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.elispot.ElispotController" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("Ext4"));
-        resources.add(ClientDependency.fromPath("elispot/PlateSummary.js"));
-        resources.add(ClientDependency.fromPath("elispot/PlateSummary.css"));
-        return resources;
+        dependencies.add("Ext4");
+        dependencies.add("elispot/PlateSummary.js");
+        dependencies.add("elispot/PlateSummary.css");
     }
 %>
 <%

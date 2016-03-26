@@ -21,22 +21,18 @@
 */
 
 %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.luminex.LeveyJenningsForm" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("luminexLeveyJennings"));
-        resources.add(ClientDependency.fromPath("Experiment/QCFlagToggleWindow.js"));
-        resources.add(ClientDependency.fromPath("fileAddRemoveIcon.css"));
-        return resources;
+        dependencies.add("luminexLeveyJennings");
+        dependencies.add("Experiment/QCFlagToggleWindow.js");
+        dependencies.add("fileAddRemoveIcon.css");
     }
 %>
 <%

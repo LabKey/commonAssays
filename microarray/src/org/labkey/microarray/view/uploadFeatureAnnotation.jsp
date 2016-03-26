@@ -15,28 +15,25 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.data.ContainerManager" %>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.microarray.controllers.FeatureAnnotationSetController" %>
 <%@ page import="org.springframework.validation.Errors" %>
 <%@ page import="org.springframework.validation.ObjectError" %>
-<%@ page import="java.util.LinkedHashSet" %>
+<%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
-<%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("Ext4"));
-        return resources;
+        dependencies.add("Ext4");
     }
 %>
 <%

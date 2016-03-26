@@ -15,35 +15,31 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.action.NullSafeBindException" %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.Table" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="org.labkey.api.query.QueryForm" %>
+<%@ page import="org.labkey.api.query.QuerySettings" %>
 <%@ page import="org.labkey.api.query.QueryView" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ScriptOverview" %>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.labkey.flow.query.FlowSchema" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="org.labkey.api.action.NullSafeBindException" %>
-<%@ page import="org.labkey.api.query.QuerySettings" %>
 <%@ page import="org.springframework.validation.BindException" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
         // TODO: --Ext3-- This should be declared as part of the included views
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("clientapi/ext3"));
-        return resources;
+        dependencies.add("clientapi/ext3");
     }
 %>
 <%

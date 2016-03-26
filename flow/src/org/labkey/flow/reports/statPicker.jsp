@@ -19,22 +19,18 @@
 <%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.persist.AttributeCache" %>
 <%@ page import="org.labkey.flow.query.FlowPropertySet" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.flow.persist.AttributeCache" %>
-<%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("Ext3"));
-        return resources;
+        dependencies.add("Ext3");
     }
 %>
 <%

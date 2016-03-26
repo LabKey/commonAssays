@@ -33,6 +33,7 @@
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
@@ -60,18 +61,14 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("Ext3"));
-        resources.add(ClientDependency.fromPath("Flow/util.js"));
-        resources.add(ClientDependency.fromPath("TreeGrid.js"));
-        return resources;
+        dependencies.add("Ext3");
+        dependencies.add("Flow/util.js");
+        dependencies.add("TreeGrid.js");
     }
 %>
 <style type="text/css">

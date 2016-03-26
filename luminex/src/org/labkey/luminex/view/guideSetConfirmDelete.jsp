@@ -15,24 +15,21 @@
      * limitations under the License.
      */
 %>
-<%@ page import="org.labkey.luminex.LuminexController" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.data.DataRegionSelection" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="org.labkey.luminex.LuminexController" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("Ext3")); // TODO: fix rendering issue to be able to remove this dependency
-        resources.add(ClientDependency.fromPath("Ext4"));
-        resources.add(ClientDependency.fromPath("luminex/GuideSetWindow.js"));
-        return resources;
+        dependencies.add("Ext3"); // TODO: fix rendering issue to be able to remove this dependency
+        dependencies.add("Ext4");
+        dependencies.add("luminex/GuideSetWindow.js");
     }
 %>
 <%

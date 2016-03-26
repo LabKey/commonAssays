@@ -29,6 +29,7 @@
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
@@ -44,16 +45,11 @@
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
 <%@page extends="org.labkey.api.jsp.JspBase" %>
 <%!
-
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("clientapi/ext3"));
-        return resources;
+        dependencies.add("clientapi/ext3");
     }
 %>
 <%

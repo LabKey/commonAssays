@@ -32,6 +32,7 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
@@ -43,17 +44,13 @@
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.api.view.template.ClientDependency" %>
-<%@ page import="java.util.LinkedHashSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
-    public LinkedHashSet<ClientDependency> getClientDependencies()
+    public void addClientDependencies(ClientDependencies dependencies)
     {
         // TODO: --Ext3-- This should be declared as part of the included views
-        LinkedHashSet<ClientDependency> resources = new LinkedHashSet<>();
-        resources.add(ClientDependency.fromPath("clientapi/ext3"));
-        return resources;
+        dependencies.add("clientapi/ext3");
     }
 %>
 <%
