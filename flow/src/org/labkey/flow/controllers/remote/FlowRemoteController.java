@@ -33,7 +33,7 @@ import org.labkey.api.security.permissions.*;
  */
 public class FlowRemoteController extends SpringActionController
 {
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowRemoteController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowRemoteController.class);
 
     public FlowRemoteController()
     {
