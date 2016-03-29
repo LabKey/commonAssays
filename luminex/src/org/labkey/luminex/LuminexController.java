@@ -71,7 +71,6 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.FileStream;
 import org.labkey.api.util.HelpTopic;
-import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -871,7 +870,7 @@ public class LuminexController extends SpringActionController
 
         private List<GuideSet> _guideSets;
 
-        public GuideSetsDeleteBean(ReturnURLString returnUrl, String selectionKey, int protocolId, Container container, String assayName)
+        public GuideSetsDeleteBean(String returnUrl, String selectionKey, int protocolId, Container container, String assayName)
         {
             _guideSets = new ArrayList<>();
             setReturnUrl(returnUrl);

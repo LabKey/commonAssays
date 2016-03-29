@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.HString;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
@@ -73,7 +72,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
     {
         try
         {
-            HString scriptIdStr = new HString(getRequest().getParameter("scriptId"));
+            String scriptIdStr = getRequest().getParameter("scriptId");
             if (scriptIdStr == null)
             {
                 throw new NotFoundException("scriptId required");
@@ -81,7 +80,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             int scriptId = 0;
             try
             {
-                scriptId = scriptIdStr.parseInt();
+                scriptId = Integer.parseInt(scriptIdStr);
             }
             catch (NumberFormatException nfe)
             {

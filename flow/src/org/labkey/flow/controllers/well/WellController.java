@@ -42,7 +42,6 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
@@ -629,7 +628,7 @@ public class WellController extends BaseFlowController
 
         UpdateKeywordsForm()
         {
-            setReturnUrl(new ReturnURLString("begin.view"));
+            setReturnUrl("flow-well-begin.view");
         }
 
         public void setKeyword(String keyword)
