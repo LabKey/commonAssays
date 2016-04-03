@@ -136,12 +136,12 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                         File runFilePathRoot, Map<String, FlowFCSFile> resolvedFCSFiles,
                                         boolean failOnError) throws Exception
     {
-        Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
-        Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
-        Map<String, AttributeSet> resultsMap = new LinkedHashMap();
-        Map<String, Analysis> analysisMap = new LinkedHashMap();
-        Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
-        Map<Analysis, FlowScript> scripts = new HashMap();
+        Map<String, AttributeSet> keywordsMap = new LinkedHashMap<>();
+        Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap<>();
+        Map<String, AttributeSet> resultsMap = new LinkedHashMap<>();
+        Map<String, Analysis> analysisMap = new LinkedHashMap<>();
+        Map<Analysis, ScriptDocument> scriptDocs = new HashMap<>();
+        Map<Analysis, FlowScript> scripts = new HashMap<>();
         List<String> sampleLabels = new ArrayList<>(workspace.getSampleCount());
 
         if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
@@ -247,7 +247,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 return true;
 
             iSample++;
-            String description = "sample " + iSample + "/" + sampleIDs.size() + ":" + sample.getLabel();
+            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample.getLabel();
             addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
@@ -300,7 +300,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                     {
                         if (file.exists())
                         {
-                            addStatus("Generating graphs for " + description);
+                            addStatus("Generating graphs for " + description + "...");
                             List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
                                     uri, comp, analysis, analysis.getGraphs());
                             for (FCSAnalyzer.GraphResult graphResult : graphResults)
@@ -317,6 +317,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     results.setGraph(graphResult.spec, graphResult.bytes);
                                 }
                             }
+                            addStatus("Generated " + graphResults + " graphs");
                         }
                         else
                         {
