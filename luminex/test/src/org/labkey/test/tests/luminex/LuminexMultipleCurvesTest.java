@@ -19,12 +19,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
 import org.openqa.selenium.WebElement;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,7 +42,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
      *
      */
     @Test
-    public void testMultipleCurve()
+    public void testMultipleCurve() throws Exception
     {
         String name = startCreateMultipleCurveAssayRun();
 
@@ -60,7 +62,9 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         configureStandardsForAnalytes(analytesAndStandardsConfig, possibleStandards);
 
         clickButton("Save and Finish", longWaitForPage);
-        clickAndWait(Locator.linkWithText(name));
+        WebElement runLink = Locator.linkWithText(name).findElement(getDriver());
+        int runId = Integer.parseInt(WebTestHelper.parseUrlQuery(new URL(runLink.getAttribute("href"))).get("runId"));
+        clickAndWait(runLink);
 
         //edit view to show Analyte Standard
         _customizeViewsHelper.openCustomizeViewPanel();
@@ -79,7 +83,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         assertTrue("BioPlex FitProb for ENV6 (97) in plate 1, 2, or 3", isTextPresent("0.9667") || isTextPresent("0.4790"));
         assertTrue("BioPlex ResVar for ENV6 (97) in plate 1, 2, 3", isTextPresent("0.1895") || isTextPresent("0.8266"));
 
-        assertAnalytesHaveCorrectStandards(analytesAndStandardsConfig);
+        assertAnalytesHaveCorrectStandards(TEST_ASSAY_LUM, runId, analytesAndStandardsConfig);
 
         // Go to the schema browser to check out the parsed curve fits
         goToSchemaBrowser();

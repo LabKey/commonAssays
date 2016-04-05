@@ -17,6 +17,13 @@
 package org.labkey.test.tests.luminex;
 
 import org.junit.BeforeClass;
+import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.assay.Run;
+import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.Row;
+import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
@@ -31,6 +38,7 @@ import org.labkey.test.util.QCAssayScriptHelper;
 import org.labkey.test.util.RReportHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -342,18 +350,27 @@ public abstract class LuminexTest extends BaseWebDriverTest
     }
 
     @LogMethod(quiet = true)
-    protected void assertAnalytesHaveCorrectStandards(Map<String, Set<String>> expectedAnalyteStandards)
+    protected void assertAnalytesHaveCorrectStandards(String assayName, int runId, Map<String, Set<String>> expectedAnalyteStandards)
     {
-        DataRegionTable data = new DataRegionTable(DATA_TABLE_NAME, this);
-        data.showAll();
-        List<String> keyColumn = data.getColumnDataAsText("Analyte");
-        List<String> dataColumn = data.getColumnDataAsText("Standard");
-
-        for (int i = 0; i < keyColumn.size(); i++)
+        SelectRowsCommand command = new SelectRowsCommand("assay.Luminex." + assayName, "Data");
+        command.setRequiredVersion(9.1); // Needed in order to get display values of lookup columns
+        command.addFilter(new Filter("Run/RowId", runId, Filter.Operator.EQUAL));
+        Connection connection = createDefaultConnection(true);
+        SelectRowsResponse response;
+        try
         {
-            String analyte = keyColumn.get(i);
-            assertEquals(String.format("Wrong standards for analyte %s at row %d", analyte, i),
-                    expectedAnalyteStandards.get(analyte), splitStandards(dataColumn.get(i)));
+            response = command.execute(connection, getProjectName());
+        }
+        catch (IOException | CommandException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        for (Row row : response.getRowset())
+        {
+            String analyte = (String)row.getDisplayValue("Analyte");
+            assertEquals(String.format("Wrong standards for analyte %s at row %d", analyte, (Integer)row.getDisplayValue("RowId")),
+                    expectedAnalyteStandards.get(analyte), splitStandards((String)row.getDisplayValue("Analyte/Standard")));
         }
     }
 
