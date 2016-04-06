@@ -241,8 +241,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         _customizeViewsHelper.addCustomizeViewColumn("CV");
         _customizeViewsHelper.applyCustomView();
         // show all rows (> 100 in full data file)
-        clickButton("Page Size", 0);
-        clickAndWait(Locator.linkWithText("Show All"));
+        _extHelper.clickMenuButton(true, "Paging", "Show All");
 
         // check that both the raw and summary data were uploaded together
         DataRegionTable table = new DataRegionTable("Data", this);

@@ -453,7 +453,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.applyCustomView();
 
         log("Test Ignore View Filter");
-        peptidesTable.clickHeaderButton("Views", "Apply View Filter");
+        peptidesTable.clickHeaderButton("Grid Views", "Apply Grid Filter");
         assertTextPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Next AA");
@@ -461,7 +461,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore(PEPTIDE4, PEPTIDE3);
 
         log("Test Apply View Filter");
-        peptidesTable.clickHeaderButton("Views", "Apply View Filter");
+        peptidesTable.clickHeaderButton("Grid Views", "Apply Grid Filter");
         assertTextPresent("Next AA");
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
@@ -529,7 +529,7 @@ public class MS2Test extends AbstractMS2ImportTest
         popLocation();
 
         log("Test default view");
-        _extHelper.clickMenuButton("Views", "default");
+        _extHelper.clickMenuButton("Grid Views", "default");
         assertTextPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Expect",
@@ -539,7 +539,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("Next AA");
 
         log("Test load saved view");
-        peptidesTable.clickHeaderButton("Views", VIEW4);
+        peptidesTable.clickHeaderButton("Grid Views", VIEW4);
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
         assertTextNotPresent("R.GGNEESTK.T",
@@ -555,7 +555,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addCustomizeViewColumn("Fraction");
         _customizeViewsHelper.removeCustomizeViewColumn("IonPercent");
         _customizeViewsHelper.saveCustomView("");
-        peptidesTable.clickHeaderButton("Views", "default");
+        peptidesTable.clickHeaderButton("Grid Views", "default");
         assertTextPresent("Fraction");
         assertTextBefore("K.TKDYEGMQVPVK.V", "R.LGARRVSPVR.A");
         assertTextNotPresent("K.LLASMLAK.A",
@@ -570,7 +570,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("Fraction");
 
         log("Test delete view");
-        peptidesTable.clickHeaderButton("Views", VIEW4);
+        peptidesTable.clickHeaderButton("Grid Views", VIEW4);
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.deleteView();
         assertTextPresent("K.LLASMLAK.A",
@@ -923,12 +923,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("gi|34849400|gb|AAP58899.1|");
 
         log("Check default view works");
-        peptidesTable.clickHeaderButton("Views", "default");
+        peptidesTable.clickHeaderButton("Grid Views", "default");
         assertElementNotPresent(seqIdMassHeader);
         assertTextPresent("gi|34849400|");
 
         log("Check sorting");
-        peptidesTable.clickHeaderButton("Views", VIEW5);
+        peptidesTable.clickHeaderButton("Grid Views", VIEW5);
         peptidesTable.setSort("SeqId", SortDirection.ASC);
         assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
 
@@ -1169,13 +1169,13 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.TQMPAASICVNYK.G");
 
         log("Check Ignore/Apply View Filter");
-        _ext4Helper.clickExt4MenuButton(true, DataRegionTable.Locators.headerMenuButton("query", "Views"), false, "Apply View Filter");
+        _ext4Helper.clickExt4MenuButton(true, DataRegionTable.Locators.headerMenuButton("query", "Grid Views"), false, "Apply Grid Filter");
         assertTextPresent(
                 "K.EIRQRQGDDLDGLSFAELR.G",
                 "R.TQMPAASICVNYK.G",
                 "Avg XCorr");
 
-        _ext4Helper.clickExt4MenuButton(true, DataRegionTable.Locators.headerMenuButton("query", "Views"), false, "Apply View Filter");
+        _ext4Helper.clickExt4MenuButton(true, DataRegionTable.Locators.headerMenuButton("query", "Grid Views"), false, "Apply Grid Filter");
         assertTextPresent(
                 "Avg XCorr",
                 "K.EIRQRQGDDLDGLSFAELR.G");

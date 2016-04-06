@@ -60,7 +60,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
             bean.setReportType(SpectraCountRReport.TYPE);
             bean.setRedirectUrl(context.getActionURL().toString());
 
-            reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report",
+            reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R Report", "MS2 Spectra Count R Report",
                     ReportUtil.getRReportDesignerURL(context, bean), "/reports/r.gif"));
         }
         return reportDesigners;

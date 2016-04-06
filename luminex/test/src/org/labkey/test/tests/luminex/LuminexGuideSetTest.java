@@ -452,14 +452,14 @@ public final class LuminexGuideSetTest extends LuminexTest
         //	- the EC50 for GS Analyte (2) is changed to be under the Guide Set range so new QC Flag inserted for that
         excludeWellFromRun("Guide Set plate 5", "A4,B4", 3, 2);
         clickAndWait(Locator.linkContainingText("view runs"));
-        _extHelper.clickExtMenuButton(true, Locator.lkButton("Views"), "QC Flags View");
+        _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
         assertEquals("AUC, EC50-4, EC50-5, HMFI, PCV",  drt.getDataAsText(1, "QC Flags"));
 
         //3. un-exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 QC Flag for GS Analyte (2) that was inserted in the previous step is removed
         includeWellFromRun("Guide Set plate 5", "A4,B4", 4);
         clickAndWait(Locator.linkContainingText("view runs"));
-        _extHelper.clickExtMenuButton(true, Locator.lkButton("Views"), "QC Flags View");
+        _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
         assertEquals("AUC, EC50-5, HMFI, PCV",  drt.getDataAsText(1, "QC Flags"));
 
         //4. For GS Analyte (2), apply the non-current guide set to plate 5a
@@ -477,7 +477,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         assertTextPresent(newQcFlags);
         //verify new flags present in run list
         goToTestAssayHome();
-        _extHelper.clickExtMenuButton(true, Locator.lkButton("Views"), "QC Flags View");
+        _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
         assertTextPresent("AUC, EC50-4, EC50-5, HMFI, PCV");
 
         //5. For GS Analyte (2), apply the guide set for plate 5a back to the current guide set
