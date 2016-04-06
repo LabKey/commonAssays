@@ -80,13 +80,12 @@ public class QuantitationTest extends AbstractXTandemTest
 
         // Jump to the flow chart view
         clickAndWait(Locator.tagWithAttribute("a", "title", "Experiment run graph"));
-        
-        pushLocation();
+
         clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Data: " + SAMPLE_BASE_NAME + ".libra.tsv (Run Output)"));
         assertElementPresent(Locator.linkWithText("libra Protein Quantitation"));
 
         clickAndWait(Locator.linkWithText("Lineage for " + SAMPLE_BASE_NAME + ".libra.tsv"));
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "libra Peptide Quantitation"));
+        beginAt(Locator.imageMapLinkByTitle("graphmap", "libra Peptide Quantitation").findElement(getDriver()).getAttribute("href"));
         // Check to see that arguments to xinteract are showing
         assertTextPresent("-LLibraConfig1.xml-2");
     }
