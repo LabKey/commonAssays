@@ -18,115 +18,117 @@
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% String graphSize = FlowPreference.graphSize.getValue(request);
+<%!
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("internal/jQuery");
+    }
+%>
+<%
+    String graphSize = FlowPreference.graphSize.getValue(request);
     Map<String, String> sizes = new LinkedHashMap();
     sizes.put("300", "Large Graphs");
     sizes.put("200", "Medium Graphs");
     sizes.put("150", "Small Graphs");
 %>
-
-
 <script type="text/javascript">
-    var urlUpdateSize = <%=q(FlowPreference.graphSize.urlUpdate())%>;
-    var currentSize = <%=q(graphSize)%>;
-    var fullSize = 300;
-    var curImage;
-    var zoomImage;
 
-    function zoomOut()
-    {
-        zoomImage.style.visibility = "hidden";
-    }
-    document.body.onclick = function(event)
-    {
-        if (!event)
-        {
-            event = window.event;
-        }
-        var el = event.srcElement;
-        if (!el)
-            el = event.target;
-        if (!el || el.className != 'labkey-flow-graph')
-            return;
-        if (currentSize == fullSize)
-            return;
-        if (!zoomImage)
-        {
-            zoomImage = document.createElement("img");
-            document.body.appendChild(zoomImage);
-            zoomImage.style.position = "absolute";
-            zoomImage.style.border = "2px solid gray";
-            zoomImage.onclick = zoomOut;
-        }
-        var scrollTop = 0;
-        var scrollLeft = 0;
-        if (window.pageXOffset != undefined)
-        {
-            scrollLeft = window.pageXOffset;
-            scrollTop = window.pageYOffset;
-        }
-        else
-        {
-            scrollLeft = document.documentElement.scrollLeft;
-            scrollTop = document.documentElement.scrollTop;
-        }
-        var offsetX, offsetY;
-        if (event.offsetX != undefined)
-        {
-            offsetX = event.offsetX;
-            offsetY = event.offsetY;
-        }
-        else
-        {
-            offsetX = 50;
-            offsetY = 50;
+    (function($) {
+
+        var urlUpdateSize = <%=q(FlowPreference.graphSize.urlUpdate())%>;
+        var currentSize = <%=q(graphSize)%>;
+        var fullSize = 300;
+        var curImage;
+        var zoomImage;
+
+        function zoomOut() {
+            zoomImage.style.visibility = "hidden";
         }
 
-        // Don't size the zoomed image -- let it be the image's natural width/height.
-        zoomImage.style.left = (event.clientX - offsetX + scrollLeft) + "px";
-        zoomImage.style.top = (event.clientY - offsetY + scrollTop) + "px";
-        zoomImage.src = el.src;
-        zoomImage.style.visibility="visible";
-    };
-
-    function setGraphClasses(name, className)
-    {
-        var nl = document.getElementsByName(name);
-        for (var i = 0; i < nl.length; i ++)
-        {
-            nl.item(i).className = className;
-        }
-    }
-    function setGraphSize(size)
-    {
-        var unitSize = size + "px";
-
-        // resize both images and "No graph for..." span
-        var graphs  = Ext.DomQuery.select(".labkey-flow-graph");
-        for (var i = 0; i < graphs.length; i ++)
-        {
-            var graph = graphs[i];
-            graph.style.width = unitSize;
-            graph.style.height = unitSize;
-
-            // resize the parent span as well
-            var parentSpan = graph.parentNode;
-            if (parentSpan)
+        document.body.onclick = function(event) {
+            if (!event)
             {
-                parentSpan.style.width = unitSize;
-                parentSpan.style.height = unitSize;
+                event = window.event;
+            }
+            var el = event.srcElement;
+            if (!el)
+                el = event.target;
+            if (!el || el.className != 'labkey-flow-graph')
+                return;
+            if (currentSize == fullSize)
+                return;
+            if (!zoomImage)
+            {
+                zoomImage = document.createElement("img");
+                document.body.appendChild(zoomImage);
+                zoomImage.style.position = "absolute";
+                zoomImage.style.border = "2px solid gray";
+                zoomImage.onclick = zoomOut;
+            }
+            var scrollTop = 0;
+            var scrollLeft = 0;
+            if (window.pageXOffset != undefined)
+            {
+                scrollLeft = window.pageXOffset;
+                scrollTop = window.pageYOffset;
+            }
+            else
+            {
+                scrollLeft = document.documentElement.scrollLeft;
+                scrollTop = document.documentElement.scrollTop;
+            }
+            var offsetX, offsetY;
+            if (event.offsetX != undefined)
+            {
+                offsetX = event.offsetX;
+                offsetY = event.offsetY;
+            }
+            else
+            {
+                offsetX = 50;
+                offsetY = 50;
+            }
+
+            // Don't size the zoomed image -- let it be the image's natural width/height.
+            zoomImage.style.left = (event.clientX - offsetX + scrollLeft) + "px";
+            zoomImage.style.top = (event.clientY - offsetY + scrollTop) + "px";
+            zoomImage.src = el.src;
+            zoomImage.style.visibility="visible";
+        };
+
+        function setGraphClasses(name, className) {
+            var nl = document.getElementsByName(name);
+            for (var i = 0; i < nl.length; i ++) {
+                nl.item(i).className = className;
             }
         }
 
-        // update link style
-        setGraphClasses("graphSize" + currentSize, "");
-        currentSize = size;
-        setGraphClasses("graphSize" + currentSize, "labkey-selected-link");
-        // update user preference
-        document.getElementById("updateGraphSize").src = urlUpdateSize + currentSize + "&_dc=" + new Date().getTime();
-    }
+        function setGraphSize(size) {
+            var $ = jQuery;
+
+            // resize both images and "No graph for..." span
+            $('.labkey-flow-graph').each(function(i, el) {
+                var graph = $(el);
+                graph.width(size).height(size);
+                graph.parent('span').width(size).height(size);
+            });
+
+            // update link style
+            setGraphClasses("graphSize" + currentSize, "");
+            currentSize = size;
+            setGraphClasses("graphSize" + currentSize, "labkey-selected-link");
+
+            // update user preference
+            $('#updateGraphSize').attr('src', urlUpdateSize + currentSize + "&_dc=" + new Date().getTime());
+        }
+
+        // make global -- eesh
+        window.setGraphSize = setGraphSize;
+
+    })(jQuery);
 </script>
 <%
     for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
