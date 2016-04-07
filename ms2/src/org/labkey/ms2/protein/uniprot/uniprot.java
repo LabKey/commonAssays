@@ -20,15 +20,19 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.ms2.protein.ParseActions;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.XMLProteinLoader;
 import org.labkey.ms2.protein.ParseContext;
+import org.labkey.ms2.protein.ProteinManager;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
-import java.util.*;
+import java.util.Random;
 
 // Repository for routines specific to org.fhcrc.edi.protein.uniprot.uniprot parsing
 // And initial stuff to do with the root element
@@ -398,7 +402,7 @@ public class uniprot extends ParseActions
                         ")";
 
         StringBuilder initialInsertionCommand = new StringBuilder("INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
-        _dialect.appendSelectAutoIncrement(initialInsertionCommand, "InsertId");
+        _dialect.addReselect(initialInsertionCommand, "InsertId");
         _initialInsertion = c.prepareStatement(initialInsertionCommand.toString());
         String getCurrentInsertStatsCommand =
                 "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";

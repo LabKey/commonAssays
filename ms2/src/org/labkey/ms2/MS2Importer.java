@@ -609,7 +609,7 @@ public abstract class MS2Importer
         int columnCount = StringUtils.countMatches(columnNames, ",") + 1;
         String insertSql = "INSERT INTO " + MS2Manager.getTableInfoPeptidesData() + " (" + columnNames + ") VALUES (" + StringUtils.repeat("?, ", columnCount - 1) + "?)";
         StringBuilder insertWithReselectSql = new StringBuilder(insertSql);
-        MS2Manager.getSqlDialect().appendSelectAutoIncrement(insertWithReselectSql, "RowId");
+        MS2Manager.getSqlDialect().addReselect(insertWithReselectSql, "RowId");
 
         _systemLog.debug(insertSql);
         _stmt = _conn.prepareStatement(insertSql);
