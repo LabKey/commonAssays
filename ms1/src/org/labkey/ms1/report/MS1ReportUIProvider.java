@@ -19,7 +19,6 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms1.query.MS1Schema;
 
@@ -39,8 +38,8 @@ public class MS1ReportUIProvider extends DefaultReportUIProvider
 
     static
     {
-        _typeToIconMap.put(FeaturesRReport.TYPE, "/reports/r.gif");
-        _typeToIconMap.put(PeaksRReport.TYPE, "/reports/r.gif");
+        _typeToIconMap.put(FeaturesRReport.TYPE, "/reports/r_logo.svg");
+        _typeToIconMap.put(PeaksRReport.TYPE, "/reports/r_logo.svg");
     }
 
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)

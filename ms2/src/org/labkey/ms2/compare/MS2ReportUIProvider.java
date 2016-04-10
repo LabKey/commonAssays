@@ -22,7 +22,6 @@ import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 
@@ -43,8 +42,8 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
 
     static
     {
-        _typeToIconMap.put(SpectraCountRReport.TYPE, "/reports/r.gif");
-        _typeToIconMap.put(SingleMS2RunRReport.TYPE, "/reports/r.gif");
+        _typeToIconMap.put(SpectraCountRReport.TYPE, "/reports/r_logo.svg");
+        _typeToIconMap.put(SingleMS2RunRReport.TYPE, "/reports/r_logo.svg");
     }
 
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
@@ -61,7 +60,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
             bean.setRedirectUrl(context.getActionURL().toString());
 
             reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R Report", "MS2 Spectra Count R Report",
-                    ReportUtil.getRReportDesignerURL(context, bean), "/reports/r.gif"));
+                    ReportUtil.getRReportDesignerURL(context, bean), "/reports/r_logo.svg"));
         }
         return reportDesigners;
     }
