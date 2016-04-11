@@ -21,11 +21,10 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainKind;
@@ -175,14 +174,26 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         if (!(dataRowId instanceof Integer))
+        {
             return null;
-        OntologyObject dataRow = OntologyManager.getOntologyObject((Integer) dataRowId);
-        if (dataRow == null || dataRow.getOwnerObjectId() == null)
-            return null;
-        OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
-        if (dataRowParent == null)
-            return null;
-        return ExperimentService.get().getExpData(dataRowParent.getObjectURI());
+        }
+
+        RunDataRow dataRow = ElispotManager.get().getRunDataRow((Integer) dataRowId);
+        if (dataRow == null)
+        {
+            throw new IllegalStateException("No ELISpot run data row was found with RowId: " + dataRowId);
+        }
+
+        ExpRun expRun = ExperimentService.get().getExpRun(dataRow.getRunId());
+        List<ExpData> dataOutputs = expRun.getDataOutputs();
+        for (ExpData dataOutput : dataOutputs)
+        {
+            if (ElispotDataHandler.NAMESPACE.equals(dataOutput.getLSIDNamespacePrefix()))
+            {
+                return dataOutput;
+            }
+        }
+        throw new IllegalStateException("No ELISpot Experiment data row was found for RunId: " + dataRow.getRunId());
     }
 
     public String getName()
