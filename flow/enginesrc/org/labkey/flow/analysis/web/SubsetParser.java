@@ -684,7 +684,7 @@ public class SubsetParser
         }
 
         @Test
-        public void testPrecendence()
+        public void testPrecedence()
         {
             {
                 SubsetParser parser = new SubsetParser("(A|B&C)");
