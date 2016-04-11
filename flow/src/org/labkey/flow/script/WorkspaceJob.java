@@ -34,6 +34,7 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
@@ -296,7 +297,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                     ScriptAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent));
                     scriptDocs.put(analysis, scriptDoc);
 
-                    if (file != null)
+                    List<GraphSpec> graphSpecs = analysis.getGraphs();
+                    if (!graphSpecs.isEmpty() && file != null)
                     {
                         if (file.exists())
                         {
@@ -317,7 +319,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     results.setGraph(graphResult.spec, graphResult.bytes);
                                 }
                             }
-                            addStatus("Generated " + graphResults + " graphs");
+                            addStatus("Generated " + graphResults.size() + " graphs");
                         }
                         else
                         {

@@ -24,9 +24,9 @@ import java.util.*;
 
 public class Analysis extends ScriptComponent
 {
-    List<SubsetSpec> _subsets = new ArrayList();
-    List<StatisticSpec> _statistics = new ArrayList();
-    List<GraphSpec> _graphs = new ArrayList();
+    List<SubsetSpec> _subsets = new ArrayList<>();
+    List<StatisticSpec> _statistics = new ArrayList<>();
+    List<GraphSpec> _graphs = new ArrayList<>();
 
     public List<StatisticSpec> getStatistics()
     {
