@@ -127,12 +127,12 @@ public class LibraTest extends MS2TestBase
         assertTextPresent("84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
 
         // Try a TSV export
-        addUrlParameter("exportAsWebPage=true");
-        clickExportToText();
-        assertTextPresent("# Target protein: gi|34392343", "R.TDTGEPM'GR.G", "84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
+        File expFile = new DataRegionExportHelper(new DataRegionTable("SpectraCount", this)).exportText(DataRegionExportHelper.TextSeparator.TAB);
+        String tsv = TestFileUtils.getFileContents(expFile);
+        TextSearcher tsvSearcher = new TextSearcher(() -> tsv).setSearchTransformer(t -> t);
+        assertTextPresent(tsvSearcher, "# Target protein: gi|34392343", "R.TDTGEPM'GR.G", "84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
 
         // Try filtering based on a custom view using a different grouping
-        goBack();
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         click(Locator.linkWithText("Create or Edit View"));
         waitForElement(Locator.xpath("//button[text()='Save']"), WAIT_FOR_JAVASCRIPT);
@@ -149,8 +149,8 @@ public class LibraTest extends MS2TestBase
 
         // Try a TSV export
         File tsvFile = new DataRegionExportHelper(new DataRegionTable("SpectraCount", this)).exportText();
-        String tsv = TestFileUtils.getFileContents(tsvFile);
-        TextSearcher tsvSearcher = new TextSearcher(() -> tsv).setSearchTransformer(t -> t);
+        String tsvContent = TestFileUtils.getFileContents(tsvFile);
+        tsvSearcher = new TextSearcher(() -> tsvContent).setSearchTransformer(t -> t);
         assertTextPresent(tsvSearcher, "# Peptide filter: (Hyper > 250)", "-.MM'EILRGSPALSAFR.I", "R.TDTGEPM'GR.G");
         assertTextNotPresent(tsvSearcher, "R.AEGTFPGK.I", "R.ILEKSGSPER.I");
 
