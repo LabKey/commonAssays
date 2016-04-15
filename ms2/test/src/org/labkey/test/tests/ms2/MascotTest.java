@@ -23,6 +23,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestCredentials;
+import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
@@ -32,6 +33,7 @@ import org.labkey.test.credentials.Login;
 import org.labkey.test.ms2.AbstractMS2SearchEngineTest;
 import org.labkey.test.pages.ms2.MascotConfigPage;
 import org.labkey.test.pages.ms2.MascotTestPage;
+import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.TextSearcher;
@@ -425,14 +427,14 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertTextBefore(PEPTIDE2, PEPTIDE3);
 
         log("Test exporting");
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export All", 0);
-        clickAndWait(Locator.linkWithText("TSV"));
-        assertTextNotPresent(PEPTIDE);
-        assertTextBefore(PEPTIDE2, PEPTIDE3);
-        assertTextPresent(PROTEIN);
-        popLocation();
+        File expFile = new DataRegionExportHelper(new DataRegionTable("query", this))
+               .exportText(DataRegionExportHelper.TextSeparator.COMMA);
+        String tsvContents = TestFileUtils.getFileContents(expFile);
+        TextSearcher tsvSearcher = new TextSearcher(() -> tsvContents).setSearchTransformer(t -> t);
+
+        assertTextNotPresent(tsvSearcher, PEPTIDE);
+        assertTextPresentInThisOrder(tsvSearcher, PEPTIDE3);
+        assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));

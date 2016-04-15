@@ -20,12 +20,15 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
+import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.XTandem;
 import org.labkey.test.ms2.AbstractXTandemTest;
+import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.TextSearcher;
 
 import java.io.File;
 
@@ -99,16 +102,13 @@ public class XTandemTest extends AbstractXTandemTest
 
         verifyPeptideDetailsPage();
 
-
         log("Test exporting");
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export All", 0);
-        clickAndWait(Locator.xpath("//a/span[text()='TSV']"));
-        assertTextNotPresent(PEPTIDE);
-        assertTextBefore(PEPTIDE2, PEPTIDE3);
-        assertTextPresent(PROTEIN);
-        popLocation();
+        File expFile = new DataRegionExportHelper(peptidesRegion)
+                .exportText(DataRegionExportHelper.TextSeparator.TAB);
+        TextSearcher tsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(expFile)).setSearchTransformer(t -> t);
+        assertTextNotPresent(tsvSearcher, PEPTIDE);
+        assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);
+        assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));

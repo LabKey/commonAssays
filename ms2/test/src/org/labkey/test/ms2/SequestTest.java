@@ -21,12 +21,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
+import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Disabled;
-import org.labkey.test.categories.MS2;
-import org.labkey.test.categories.Sequest;
+import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.TextSearcher;
 
 import java.io.File;
 
@@ -121,14 +122,13 @@ public class SequestTest extends AbstractMS2SearchEngineTest
         assertTextBefore(PEPTIDE2, PEPTIDE3);
 
         log("Test exporting");
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export All", 0);
-        clickAndWait(Locator.linkWithText("TSV"));
-        assertTextNotPresent(PEPTIDE);
-        assertTextBefore(PEPTIDE2, PEPTIDE3);
-        assertTextPresent(PROTEIN);
-        popLocation();
+        DataRegionTable list = new DataRegionTable("query", this);
+        File expFile = new DataRegionExportHelper(list).exportText(DataRegionExportHelper.TextSeparator.TAB);
+        String tsv = TestFileUtils.getFileContents(expFile);
+        TextSearcher tsvSearcher = new TextSearcher(() -> tsv).setSearchTransformer(t -> t);
+        assertTextPresent(tsvSearcher, PEPTIDE);
+        assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);
+        assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
