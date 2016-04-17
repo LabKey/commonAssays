@@ -258,7 +258,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                 // Insert the LibInfo row with summary info
                 try (PreparedStatement ps = connection.prepareStatement("INSERT INTO LibInfo(libLSID, createTime, numSpecs, majorVersion, minorVersion) VALUES (?, ?, ?, ?, ?)"))
                 {
-                    ps.setString(1, new Lsid("spectral_library", "bibliospec").setVersion("redundant") + ":" + Lsid.encodePart(_context.getContainer().getName()));
+                    ps.setString(1, new Lsid.LsidBuilder("spectral_library", "bibliospec").setVersion("redundant") + ":" + Lsid.encodePart(_context.getContainer().getName()));
                     ps.setString(2, new SimpleDateFormat("EEE MMM HH:mm:ss yyyy").format(new Date()));
                     ps.setInt(3, spectraCount);
                     // Writing out version 1.3

@@ -2141,6 +2141,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throw new ExperimentException("Could not find a matching object factory for " + LuminexDataRow.class);
 
         Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<>();
+        Lsid.LsidBuilder builder = new Lsid.LsidBuilder(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX,"");
         for (Map<String, Object> dataMap : dataMaps)
         {
             // CONSIDER: subclass the rowFactory to ignore "titration"
@@ -2154,7 +2155,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
             if (dataRow.getLsid() == null)
             {
-                dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
+                dataRow.setLsid(builder.setObjectId(GUID.makeGUID()).toString());
             }
 
             Map.Entry<Analyte, List<LuminexDataRow>> entry = LuminexExcelParser.ensureAnalyte(analyte, sheets);

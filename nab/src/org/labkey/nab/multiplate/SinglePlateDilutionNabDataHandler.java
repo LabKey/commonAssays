@@ -215,10 +215,10 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             if (entry.getKey().getName().equals(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME))
                 virusName = entry.getValue().toString();
         }
-        Lsid dataRowLsid = new Lsid(data.getLSID());
+        Lsid.LsidBuilder dataRowLsid = new Lsid.LsidBuilder(data.getLSID());
         dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
         dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + virusName + "-" + wellGroupName);
-        return dataRowLsid;
+        return dataRowLsid.build();
     }
 
     @Override

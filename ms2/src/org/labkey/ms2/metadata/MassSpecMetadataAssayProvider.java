@@ -213,7 +213,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
             sampleSet.setName("Fractions: " + context.getProtocol().getName());
             sampleSet.setLSID(domainURI);
 
-            Lsid sampleSetLSID = new Lsid(domainURI);
+            Lsid.LsidBuilder sampleSetLSID = new Lsid.LsidBuilder(domainURI);
             sampleSetLSID.setNamespacePrefix("Sample");
             sampleSetLSID.setNamespaceSuffix(context.getProtocol().getContainer().getRowId() + "." + context.getProtocol().getName());
             sampleSetLSID.setObjectId("");

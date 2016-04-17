@@ -133,30 +133,30 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
     public static Lsid getDataRowLsid(String dataLsid, int row, int col)
     {
-        Lsid dataRowLsid = new Lsid(dataLsid);
+        Lsid.LsidBuilder dataRowLsid = new Lsid.LsidBuilder(dataLsid);
         dataRowLsid.setNamespacePrefix(ELISPOT_DATA_ROW_LSID_PREFIX);
         dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + row + ':' + col);
 
-        return dataRowLsid;
+        return dataRowLsid.build();
     }
 
     public static Lsid getAntigenRowLsid(String dataLsid, String sampleName)
     {
         assert (sampleName != null);
 
-        Lsid dataRowLsid = new Lsid(dataLsid);
+        Lsid.LsidBuilder dataRowLsid = new Lsid.LsidBuilder(dataLsid);
         dataRowLsid.setNamespacePrefix(ELISPOT_ANTIGEN_ROW_LSID_PREFIX);
         dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + sampleName);
 
-        return dataRowLsid;
+        return dataRowLsid.build();
     }
 
     public static Lsid getAntigenLsid(String antigenWellgroupName, String sampleName, int runId, String assayName, String analyte)
     {
         assert (antigenWellgroupName != null);
         assert (sampleName != null);
-        Lsid lsid = new Lsid(ELISPOT_ANTIGEN_LSID_PREFIX, assayName, "Run" + runId + "-" + antigenWellgroupName + "-" +
-                             sampleName + "-" + (null != analyte ? analyte : ""));
+        Lsid lsid = new Lsid.LsidBuilder(ELISPOT_ANTIGEN_LSID_PREFIX, assayName, "Run" + runId + "-" + antigenWellgroupName + "-" +
+                             sampleName + "-" + (null != analyte ? analyte : "")).build();
         return lsid;
     }
 

@@ -84,20 +84,16 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
 
         try
         {
+            Lsid.LsidBuilder builder = new Lsid.LsidBuilder(fractionSet.getMaterialLSIDPrefix() + "OBJECT");
             for (Map.Entry<File,Map<DomainProperty, String>> entry : mapFilesToFractionProperties.entrySet())
             {
                 // generate unique lsids for the derived samples
                 File mzxmlFile = entry.getKey();
                 String fileNameBase = mzxmlFile.getName().substring(0, (mzxmlFile.getName().lastIndexOf('.')));
                 Map<DomainProperty, String> properties = entry.getValue();
-                Lsid derivedLsid = new Lsid(fractionSet.getMaterialLSIDPrefix() + "OBJECT");
-                derivedLsid.setObjectId(GUID.makeGUID());
-                int index = 0;
-                while(ExperimentService.get().getExpMaterial(derivedLsid.toString()) != null)
-                    derivedLsid.setObjectId(derivedLsid.getObjectId() + "-" + ++index);
 
                 ExpMaterial derivedMaterial = ExperimentService.get().createExpMaterial(form.getContainer()
-                        , derivedLsid.toString(), "Fraction - " + fileNameBase);
+                        , builder.setObjectId(GUID.makeGUID()).toString(), "Fraction - " + fileNameBase);
                 derivedMaterial.setCpasType(fractionSet.getLSID());
                 // could put the fraction properties on the fraction material object or on the run.  decided to do the run
 
