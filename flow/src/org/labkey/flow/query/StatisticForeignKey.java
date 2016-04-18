@@ -68,12 +68,17 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
 
+        boolean isSpill = stat.getStatistic() == StatisticSpec.STAT.Spill;
+        boolean isComp = subset != null && subset.getPopulationName() != null && subset.getPopulationName().getName().equals("comp");
+
         // Hide spill stats by default for all tables except CompensationMatrix.
         // Hide non-spill stats from the CompensationMatrix table.
         if (_type == FlowDataType.CompensationMatrix)
-            column.setHidden(stat.getStatistic() != StatisticSpec.STAT.Spill);
+            column.setHidden(!isSpill);
+        else if (_type == FlowDataType.CompensationControl)
+            column.setHidden(!isComp);
         else
-            column.setHidden(stat.getStatistic() == StatisticSpec.STAT.Spill);
+            column.setHidden(isSpill || isComp);
         column.setLabel(stat.toShortString());
         column.setSqlTypeName("DOUBLE");
         column.setFormat("#,##0.###");
