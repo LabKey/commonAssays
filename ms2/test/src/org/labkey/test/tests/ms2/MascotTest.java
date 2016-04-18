@@ -365,17 +365,10 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         setFormElement(Locator.id("filter-engine"), "MASCOT");
         setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
         click(Locator.xpath("//tr[td/div[text()='/MS2VerifyProject/ms2folder']]//div[@class='x-grid3-row-checker']"));
-        click(Locator.button("Show Matching MS2 Runs"));
-        waitAndClick(Locator.linkWithText("CAexample_mini_decoy.dat"));
-        waitForText("Peptides");
+        clickAndWait(Locator.button("Show Matching MS2 Runs"));
+        clickAndWait(Locator.linkWithText("CAexample_mini_decoy.dat"));
 
-        checkDecoySummary();
-
-    }
-
-    private void checkDecoySummary()
-    {
-        assertTextPresent("Decoy Summary");
+        waitForText("Decoy Summary");
         //get and check values in Decoy Summary table
         List<WebElement> headers = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[@class='labkey-form-label']").toBy());
         List<WebElement> values = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[not(@class='labkey-form-label')]").toBy());
