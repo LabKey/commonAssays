@@ -19,9 +19,11 @@ package org.labkey.test.tests.ms2;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
+import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
@@ -138,19 +140,21 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test export selected");
         DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
-        addUrlParameter("exportAsWebPage=true");
         pushLocation();
         peptidesTable.checkCheckbox(0);
-        peptidesTable.clickHeaderButton("Export Selected", "TSV");
-        assertTextPresent("K.LLASMLAK.A");
-        assertTextNotPresent("R.Q^YALHVDGVGTK.A");
-        assertTextPresent("\n", 2);
+        File peptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export Selected", false, "TSV"));
+
+        TextSearcher txtSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(peptides)).setSearchTransformer(t -> t);
+        assertTextPresent(txtSearcher, "K.LLASMLAK.A");
+        assertTextNotPresent(txtSearcher, "R.Q^YALHVDGVGTK.A");
+        assertTextPresent(txtSearcher, "\n", "2");
         popLocation();
         pushLocation();
         peptidesTable.checkAllOnPage();
-        peptidesTable.clickHeaderButton("Export Selected", "AMT");
-        assertTextPresent("\n", 60);
-        assertTextPresent(
+        File allPeptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export Selected", false, "AMT"));
+        TextSearcher allPeptideSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allPeptides)).setSearchTransformer(t -> t);
+        assertTextPresent(allPeptideSearcher, "\n", "60");
+        assertTextPresent(allPeptideSearcher,
                 "Run",
                 "CalcMHPlus",
                 "RetTime",
@@ -182,20 +186,24 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test export");
         pushLocation();
-        peptidesTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Scan",
+        File allPepTSV = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher allPeptsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allPepTSV)).setSearchTransformer(t -> t);
+        assertTextPresent(allPeptsvSearcher,
+                "Scan",
                 "IonPercent",
                 "Protein",
                 "gi|4689022|ribosomal_protein_",
                 "1373.4690");
-        assertTextBefore("R.Q^YALHVDGVGTK.A", "K.LLASMLAK.A");
-        assertTextBefore("R.SLADVARR.R", "-.MELFSNELLYK.T");
-        assertTextPresent("\n", 58);
+        assertTextPresentInThisOrder(allPeptsvSearcher, "R.Q^YALHVDGVGTK.A", "K.LLASMLAK.A");
+        assertTextPresentInThisOrder(allPeptsvSearcher, "R.SLADVARR.R", "-.MELFSNELLYK.T");
+        assertTextPresent(allPeptsvSearcher, "\n", 58);
         popLocation();
-        peptidesTable.clickHeaderButton("Export All", "AMT");
-        assertTextBefore("R.Q^YALHVDGVGTK.A", "K.LLASMLAK.A");
-        assertTextPresent("Run", "Peptide");
-        assertTextPresent("\n", 60);
+
+        File allAMT = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        TextSearcher allAmtSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allAMT));
+        assertTextPresentInThisOrder(allAmtSrch, "R.Q^YALHVDGVGTK.A", "K.LLASMLAK.A");
+        assertTextPresent(allAmtSrch, "Run", "Peptide");
+        assertTextPresent(allAmtSrch, "\n", 60); // todo: verify 60 rows
         popLocation();
 
         log("Test Scan, Z, Hyper, Next, B, Y, and Expect filters");
@@ -254,9 +262,10 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent("RetTime");
 
         log("Test export");
-        addUrlParameter("exportAsWebPage=true");
-        peptidesTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Scan",
+        File peptideFilteredRows = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher pepFilteredRowsSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(peptideFilteredRows));
+        assertTextPresent(pepFilteredRowsSearcher,
+                "Scan",
                 "Run Description",
                 "Fraction Name",
                 "dMassPPM",
@@ -264,15 +273,16 @@ public class MS2Test extends AbstractMS2ImportTest
                 "SeqId",
                 "56",
                 "gi|442754|A_Chain_A,_Superoxi");
-        assertTextPresent("\n", 3);
-        assertTextBefore("R.LSSMRDSR.S", "R.GGNEESTK.T");
-        assertTextNotPresent("K.FVKKSNDVR.L");
-        goBack();
-        peptidesTable.clickHeaderButton("Export All", "AMT");
-        assertTextPresent("Run", "Peptide");
-        assertTextBefore("R.LSSMRDSR.S", "R.GGNEESTK.T");
-        assertTextNotPresent("K.FVKKSNDVR.L");
-        assertTextPresent("\n", 5);
+        assertTextPresent(pepFilteredRowsSearcher, "\n", 3);
+        assertTextPresentInThisOrder(pepFilteredRowsSearcher, "R.LSSMRDSR.S", "R.GGNEESTK.T");
+        assertTextNotPresent(pepFilteredRowsSearcher, "K.FVKKSNDVR.L");
+
+        File allAmt = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        TextSearcher allAmtSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allAmt));
+        assertTextPresent(allAmtSearcher, "Run", "Peptide");
+        assertTextPresentInThisOrder(allAmtSearcher, "R.LSSMRDSR.S", "R.GGNEESTK.T");
+        assertTextNotPresent(allAmtSearcher, "K.FVKKSNDVR.L");
+        assertTextPresent(allAmtSearcher, "\n", 5);
         popLocation();
 
         log("Test using saved view");
@@ -322,56 +332,56 @@ public class MS2Test extends AbstractMS2ImportTest
         popLocation();
 
         log("Test sorting in Protein View");
-        addUrlParameter("exportAsWebPage=true");
         proteinsTable.setSort("SequenceMass", SortDirection.ASC);
         assertTextPresent("SequenceMass ASC");
         assertTextBefore("gi|15668549|LSU_ribosomal_pro", "gi|14318169|AF379640_1_riboso");
 
         log("Test export Protein View");
-        proteinsTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Protein",
+        File proteinViewFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher proteinViewFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(proteinViewFile));
+        assertTextPresent(proteinViewFileSearcher, "Protein",
                 "Description",
                 "gi|13541159|30S_ribosomal_pro",
                 "ribosomal protein S19 [Thermoplasma volcanium]",
                 "gi|29650192|ribosomal_protein",
                 "ribosomal protein S6 [Anopheles stephensi]");
-        assertTextPresent("\n", 18);
-        assertTextBefore("gi|15668549|LSU_ribosomal_pro", "gi|14318169|AF379640_1_riboso");
+        assertTextPresent(proteinViewFileSearcher, "\n", 18);
+        assertTextPresentInThisOrder(proteinViewFileSearcher, "gi|15668549|LSU_ribosomal_pro", "gi|14318169|AF379640_1_riboso");
         goBack();
 
         log("Test export expanded view");
         selectOptionByText(Locator.name("grouping"), "Protein (Legacy)");
         checkCheckbox(Locator.checkboxByName("expanded"));
         clickAndWait(Locator.id("viewTypeSubmitButton"));
-        proteinsTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Protein",
+        File proteinsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher protFileSearch = new TextSearcher(()-> TestFileUtils.getFileContents(proteinsFile));
+        assertTextPresent(protFileSearch,
+                "Protein",
                 "IonPercent",
                 "Protein",
                 "gi|13541159|30S_ribosomal_pro",
                 "R.KVTTGR.A",
                 "gi|29650192|ribosomal_protein",
                 "R.E^PVSPWGTPAKGYR.T");
-        assertTextPresent("\n", 18);
-        assertTextBefore("gi|15668549|LSU_ribosomal_pro", "gi|14318169|AF379640_1_riboso");
+        assertTextPresent(protFileSearch, "\n", 18);
+        assertTextPresentInThisOrder(protFileSearch, "gi|14318169|AF379640_1_riboso", "gi|15668549|LSU_ribosomal_pro");
         goBack();
-        proteinsTable.clickHeaderButton("Export All", "AMT");
-        assertTextPresent("Run", "Peptide");
-        assertTextPresent("\n", 20);
-        assertTextBefore("K.TKDYEGMQVPVK.V", "R.RDYLHYLPKYNR.F");
-        assertTextNotPresent("K.LLASMLAK.A",
-                "R.KKVAIVPEPLR.K");
-        popLocation();
+        File allProtsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "AMT"));
+        TextSearcher allProtsSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allProtsFile));
+        assertTextPresent(allProtsSearcher, "Run", "Peptide");
+        assertTextPresent(allProtsSearcher, "\n", 20);
+        assertTextPresentInThisOrder(allProtsSearcher, "R.RDYLHYLPKYNR.F", "K.TKDYEGMQVPVK.V");
+        assertTextNotPresent(allProtsSearcher, "K.LLASMLAK.A", "R.KKVAIVPEPLR.K");
 
         log("Test Protein Prophet");
-        pushLocation();
         selectOptionByText(Locator.name("grouping"), "ProteinProphet (Legacy)");
         clickAndWait(Locator.id("viewTypeSubmitButton"));
         assertTextPresent("Group",
                 "Prob",
                 "Spectrum Ids",
-                "gi|4689022|ribosomal_protein_",
-                "14.06%",
-                "gi|4883902|APETALA3_homolog_R");
+                "gi|16078254|similar_to_riboso",
+                "12.71%",
+                "gi|27684893|similar_to_60S_RI");
 
         log("Test Protein Prophet with filters");
         selectOptionByText(Locator.name("viewParams"), LEGACY_PROTEIN_PROPHET_VIEW_NAME);
@@ -471,62 +481,57 @@ public class MS2Test extends AbstractMS2ImportTest
                 "SeqHits");
 
         log("Test exporting Query - Peptides grouping");
-        addUrlParameter("exportAsWebPage=true");
-        pushLocation();
         log("Test exporting in TSV");
-        peptidesTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Scan",
+        File allPeptidesFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher allPeptidesSearch = new TextSearcher(() -> TestFileUtils.getFileContents(allPeptidesFile));
+        assertTextPresent(allPeptidesSearch, "Scan",
                 "dMass",
                 "Next AA",
                 "Protein",
                 "gi|27805893|guanine_nucleotid");
-        assertTextPresent("\n", 24);
-        assertTextBefore(PEPTIDE1, PEPTIDE2);
-        assertTextBefore(PEPTIDE3, PEPTIDE4);
-        assertTextNotPresent("K.LLASMLAK.A",
+        assertTextPresent(allPeptidesSearch, "\n", 24);
+        assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE1, PEPTIDE2);
+        assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE3, PEPTIDE4);
+        assertTextNotPresent(allPeptidesSearch, "K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Expect",
                 "SeqHits");
-        popLocation();
-        pushLocation();
+
         log("Test exporting in AMT");
-        peptidesTable.clickHeaderButton("Export All", "AMT");
-        assertTextPresent("Run",
+        File allAMTFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        TextSearcher allAmtFileSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allAMTFile));
+        assertTextPresent(allAmtFileSrch, "Run",
                 "Peptide",
                 "RetTime");
-        assertTextPresent("\n", 26);
-        assertTextBefore(PEPTIDE1, PEPTIDE2);
-        assertTextBefore(PEPTIDE3, PEPTIDE4);
-        assertTextNotPresent("K.LLASMLAK.A",
+        assertTextPresent(allAmtFileSrch, "\n", 26);
+        assertTextPresentInThisOrder(allAmtFileSrch, PEPTIDE1, PEPTIDE2);
+        assertTextPresentInThisOrder(allAmtFileSrch, PEPTIDE3, PEPTIDE4);
+        assertTextNotPresent(allAmtFileSrch, "K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Protein");
-        popLocation();
 
         log("Test exporting selected in TSV");
-        pushLocation();
         peptidesTable.uncheckAll();
         peptidesTable.checkCheckbox(0);
         peptidesTable.checkCheckbox(1);
-        _extHelper.clickMenuButton("Export Selected", "TSV");
-        assertTextPresent("Next AA",
+        File selectedStuffFile = doAndWaitForDownload(() -> _extHelper.clickMenuButton(false, "Export Selected", "TSV"));
+        TextSearcher selectedStuffSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedStuffFile));
+        assertTextPresent(selectedStuffSrch, "Next AA",
                 "gi|25027045|putative_50S_ribo");
-        assertTextPresent("\n", 3);
-        assertTextBefore("K.ISNFIANNDCRYYIDAEHQKIISDEINR.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
-        assertTextNotPresent("Expect",
-                "SeqHits");
-        popLocation();
+        assertTextPresent(selectedStuffSrch, "\n", 3);
+        assertTextPresentInThisOrder(selectedStuffSrch, "K.ISNFIANNDCRYYIDAEHQKIISDEINR.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
+        assertTextNotPresent(selectedStuffSrch, "Expect", "SeqHits");
 
         log("Test exporting selected in AMT");
-        pushLocation();
         peptidesTable.uncheckAll();
         peptidesTable.checkCheckbox(0);
         peptidesTable.checkCheckbox(1);
-        _extHelper.clickMenuButton("Export Selected", "AMT");
-        assertTextPresent("Peptide");
-        assertTextPresent("\n", 5);
-        assertTextBefore("K.ISNFIANNDCRYYIDAEHQKIISDEINR.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
-        assertTextNotPresent("Next AA");
-        popLocation();
+        File selectedAmtFile = doAndWaitForDownload(() ->  _extHelper.clickMenuButton(false, "Export Selected", "AMT"));
+        TextSearcher selectedAmtSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedAmtFile));
+        assertTextPresent(selectedAmtSrch, "Peptide");
+        assertTextPresent(selectedAmtSrch, "\n", 5);
+        assertTextPresentInThisOrder(selectedAmtSrch, "K.ISNFIANNDCRYYIDAEHQKIISDEINR.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
+        assertTextNotPresent(selectedAmtSrch, "Next AA");
 
         log("Test default view");
         _extHelper.clickMenuButton("Grid Views", "default");
@@ -608,10 +613,10 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.GSDSLSDGPACKR.S");
 
         log("Test exporting from Protein Prophet view");
-        pushLocation();
         log("Test exporting in TSV");
-        peptidesTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Group",
+        File allTSVFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher allTsvSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allTSVFile));
+        assertTextPresent(allTsvSrch, "Group",
                 "Peptides",
                 "Prob",
                 "gi|4689022|",
@@ -619,24 +624,23 @@ public class MS2Test extends AbstractMS2ImportTest
                 "PepProphet",
                 "Scan",
                 "K.MLNMAKSKMHK.M");
-        assertTextPresent("\n", 6);
-        assertTextBefore("gi|16078254|ref|NP_389071.1|", "gi|18311790|ref|NP_558457.1|");
-        assertTextNotPresent("CalcMH+",
+        assertTextPresent(allTsvSrch, "\n", 6);
+        assertTextPresentInThisOrder(allTsvSrch, "gi|16078254|ref|NP_389071.1|", "gi|18311790|ref|NP_558457.1|");
+        assertTextNotPresent(allTsvSrch, "CalcMH+",
                 "K.EIRQRQGDDLDGLSFAELR.G",
                 "K.GSDSLSDGPACKR.S");
-        popLocation();
-        pushLocation();
+
         log("Test exporting in AMT");
-        peptidesTable.clickHeaderButton("Export All", "AMT");
-        assertTextPresent("Run",
+        File allAMTPepFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        TextSearcher allAMTPepSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allAMTPepFile));
+        assertTextPresent(allAMTPepSrch, "Run",
                 "Peptide",
                 "RetTime");
-        assertTextPresent("\n", 8);
-        assertTextBefore("R.KKVAIVPEPLR.K", "R.Q^YALHVDGVGTK.A");
-        assertTextNotPresent("Best Name",
+        assertTextPresent(allAMTPepSrch, "\n", 8);
+        assertTextPresentInThisOrder(allAMTPepSrch, "R.KKVAIVPEPLR.K", "R.Q^YALHVDGVGTK.A");
+        assertTextNotPresent(allAMTPepSrch, "Best Name",
                 "K.EIRQRQGDDLDGLSFAELR.G",
                 "K.GSDSLSDGPACKR.S");
-        popLocation();
 
         log("Test Query - Proteins Grouping");
         selectOptionByText(Locator.name("grouping"), "Protein Groups");
@@ -665,48 +669,46 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test exporting in Query - Protein View");
         DataRegionTable proteinGroupsTable = new DataRegionTable(REGION_NAME_PROTEINGROUPS, this);
-        pushLocation();
+
         log("Test exporting in TSV");
-        proteinGroupsTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("Sequence",
+        File proteinGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher proteinGroupSrch = new TextSearcher(() -> TestFileUtils.getFileContents(proteinGroupFile));
+        assertTextPresent(proteinGroupSrch, "Sequence",
                 "MSASELATSYSALILADEGIEIKSDKLLSLTKAANVDVEPIWATIFAKALEGKDLKELLLNIGSGAGAAPVAGGAGAPAAADGERPAEEKEEAKEEEESDEDMGFG");
-        assertTextPresent("\n", 8);
-        assertTextBefore("gi|16078254|similar_to_riboso", "gi|18311790|phosphoribosylfor");
-        assertTextNotPresent("Unique",
+        assertTextPresent(proteinGroupSrch, "\n", 8);
+        assertTextPresentInThisOrder(proteinGroupSrch, "gi|16078254|similar_to_riboso", "gi|18311790|phosphoribosylfor");
+        assertTextNotPresent(proteinGroupSrch, "Unique",
                 "gi|30089158|low_density_lipop");
-        popLocation();
 
         log("Test exporting selected and non-expanded view");
         uncheckCheckbox(Locator.checkboxByName("expanded"));
         clickAndWait(Locator.id("viewTypeSubmitButton"));
-        pushLocation();
         proteinGroupsTable.uncheckAll();
         proteinGroupsTable.checkCheckbox(0);
         proteinGroupsTable.checkCheckbox(1);
-        proteinGroupsTable.clickHeaderButton("Export Selected", "TSV");
-        assertTextBefore("0.74", "0.78");
-        assertTextPresent("\n", 3);
-        popLocation();
+        File selectedProtGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderButton("Export Selected", false, "TSV"));
+        TextSearcher selectedProtGroupSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedProtGroupFile));
+        assertTextPresentInThisOrder(selectedProtGroupSrch, "0.74", "0.78");
+        assertTextPresent(selectedProtGroupSrch, "\n", 3);
+
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
     }
 
     private void validateLegacySingleRunExport()
     {
         log("Test export");
-        addUrlParameter("exportAsWebPage=true");
-        pushLocation();
         DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
-        quantitationTable.clickHeaderButton("Export All", "AMT");
-        assertTextPresent("Run",
+        File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "AMT"));
+        TextSearcher qTableSrch = new TextSearcher(() -> TestFileUtils.getFileContents(qTableFile));
+        assertTextPresent(qTableSrch, "Run",
                 "Peptide",
                 "1318.6790",
                 "1435.6810");
-        assertTextPresent("\n", 5);
-        assertTextBefore("K.MLNMAKSKMHK.M", "R.E^VNAEDLAPGEPGR.L");
-        assertTextNotPresent("gi|27684893|similar_to_60S_RI");
+        assertTextPresent(qTableSrch, "\n", 5);
+        assertTextPresentInThisOrder(qTableSrch, "K.MLNMAKSKMHK.M", "R.E^VNAEDLAPGEPGR.L");
+        assertTextNotPresent(qTableSrch, "gi|27684893|similar_to_60S_RI");
 
         log("Test export selected in expanded view with different protein and peptide columns and sorting");
-        popLocation();
         log("Test sorting in Protein Prophet");
         quantitationTable.setSort("GroupProbability", SortDirection.ASC);
         assertTextPresent("GroupProbability ASC");
@@ -720,10 +722,10 @@ public class MS2Test extends AbstractMS2ImportTest
         selectOptionByText(Locator.name("grouping"), "ProteinProphet (Legacy)");
         checkCheckbox(Locator.checkboxByName("expanded"));
         clickAndWait(Locator.id("viewTypeSubmitButton"));
-        pushLocation();
         quantitationTable.checkCheckbox(0);
-        quantitationTable.clickHeaderButton("Export Selected", "TSV");
-        assertTextPresent("Group",
+        File qSelected = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export Selected", false, "TSV"));
+        TextSearcher qSelectedSearch = new TextSearcher(() -> TestFileUtils.getFileContents(qSelected));
+        assertTextPresent(qSelectedSearch, "Group",
                 "PP Unique",
                 "Run Description",
                 "IonPercent",
@@ -732,16 +734,15 @@ public class MS2Test extends AbstractMS2ImportTest
                 "SeqId",
                 "gi|548772|RL4_HALHA_50S_RIBOS",
                 "EVNAEDLAPGEPGR");
-        assertTextNotPresent("gi|23619029|60S_ribosomal_pro");
-        assertTextPresent("\n", 2);
-        popLocation();
+        assertTextNotPresent(qSelectedSearch, "gi|23619029|60S_ribosomal_pro");
+        assertTextPresent(qSelectedSearch, "\n", 2);
 
         log("Make sure sort is exported correctly too");
-        quantitationTable.clickHeaderButton("Export All", "TSV");
-        assertTextPresent("MLNMAKSKMHK");
-        assertTextPresent("\n", 3);
-        assertTextBefore("gi|548772|RL4_HALHA_50S_RIBOS", "gi|23619029|60S_ribosomal_pro");
-        popLocation();
+        File quantFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "TSV"));
+        TextSearcher quantSrch = new TextSearcher(() -> TestFileUtils.getFileContents(quantFile));
+        assertTextPresent(quantSrch, "MLNMAKSKMHK");
+        assertTextPresent(quantSrch, "\n", 3);
+        assertTextPresentInThisOrder(quantSrch, "gi|548772|RL4_HALHA_50S_RIBOS", "gi|23619029|60S_ribosomal_pro");
     }
 
     protected void validateSecondRun()
@@ -933,14 +934,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
 
         log("Test exporting Compare Runs in Query");
-        addUrlParameter("exportAsWebPage=true");
-        pushLocation();
-        clickExportToText();
-        assertTextPresent("Mass",
+        File compareRunExportFile = new DataRegionExportHelper(new DataRegionTable("query", this)).exportText();
+        TextSearcher compareRunExportSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(compareRunExportFile));
+        assertTextPresent(compareRunExportSearcher, "Mass",
                 "0.89");
-        assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
-        assertTextNotPresent("gi|34849400|");
-        popLocation();
+        assertTextPresentInThisOrder(compareRunExportSearcher, "gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
+        assertTextNotPresent(compareRunExportSearcher, "gi|34849400|");
 
         log("Test delete run groups");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
@@ -1025,22 +1024,21 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.EYYLLHKPPKTISSTK.D");
 
         // verify the bulk protein coverage map export
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export Protein Coverage");
-        assertTextPresent(
+        File proteinCoverageFile = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        TextSearcher coverageSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(proteinCoverageFile));
+        assertTextPresent(coverageSearcher,
                 "22001886|sp|Q963B6",
                 "29827410|ref|NP_822044.1",
                 "17508693|ref|NP_492384.1",
                 "27716987|ref|XP_233992.1",
                 "(search engine matches)");
-        assertTextNotPresent("(all matching peptides)");
-        assertTextPresent("57 Total qualifying peptides in run", 56); // two peptides have the same search engine protein
-        assertTextPresent("57 Distinct qualifying peptides in run", 56); // two peptides have the same search engine protein
-        assertTextPresent("59 Total qualifying peptides in run", 59);
-        assertTextPresent("59 Distinct qualifying peptides in run", 59);
-        assertTextPresent("peptide-marker", 117);
-        popLocation();
+        assertTextNotPresent(coverageSearcher, "(all matching peptides)");
+        assertTextPresent(coverageSearcher, "57 Total qualifying peptides in run", 56); // two peptides have the same search engine protein
+        assertTextPresent(coverageSearcher, "57 Distinct qualifying peptides in run", 56); // two peptides have the same search engine protein
+        assertTextPresent(coverageSearcher, "59 Total qualifying peptides in run", 59);
+        assertTextPresent(coverageSearcher, "59 Distinct qualifying peptides in run", 59);
+        assertTextPresent(coverageSearcher, "peptide-marker", 117);
+
 
         clickAndWait(Locator.linkWithText("Setup Compare Peptides"));
         click(Locator.radioButtonByNameAndValue("peptideFilterType", "probability"));
@@ -1053,23 +1051,21 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("K.GSDSLSDGPACKR.S");
 
         // verify the bulk protein coverage map export for the peptideProphet probability filter
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export Protein Coverage");
-        assertTextPresent(
+        File protCoverageFile = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        TextSearcher protCoverageFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(protCoverageFile));
+        assertTextPresent(protCoverageFileSearcher,
                 "4689022|emb|CAA80880.2",
                 "18311790|ref|NP_558457.1",
                 "15828808|ref|NP_326168.1",
                 "34849400|gb|AAP58899.1",
                 "(search engine matches)");
-        assertTextNotPresent(
+        assertTextNotPresent(protCoverageFileSearcher,
                 "BAB39767.1", // for peptide K.GSDSLSDGPACKR.S
                 "(all matching peptides)");
-        assertTextPresent("2 Total qualifying peptides in run", 4);
-        assertTextPresent("2 Distinct qualifying peptides in run", 4);
-        assertTextPresent("peptide-marker", 4);
-        assertTextPresent(" 1  / 1(Q^) ", 1); // TODO: how do we verify the location of the match in the coverage map table?
-        popLocation();
+        assertTextPresent(protCoverageFileSearcher, "2 Total qualifying peptides in run", 4);
+        assertTextPresent(protCoverageFileSearcher, "2 Distinct qualifying peptides in run", 4);
+        assertTextPresent(protCoverageFileSearcher, "peptide-marker", 4);
+        assertTextPresent(protCoverageFileSearcher, " 1  / 1(Q^) ", 1); // TODO: how do we verify the location of the match in the coverage map table?
 
         clickAndWait(Locator.linkWithText("Setup Compare Peptides"));
         setFormElement(Locator.input("targetProtein"), "gi|18311790|phosphoribosylfor");
@@ -1081,26 +1077,24 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.EYYLLHKPPKTISSTK.D");
 
         // verify the bulk protein coverage map export for peptideProphet filter with target protein
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export Protein Coverage");
-        assertTextPresent(
+        File peptideProphetFile = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        TextSearcher peptideProphetSearcher = new TextSearcher(()-> TestFileUtils.getFileContents(peptideProphetFile));
+        assertTextPresent(peptideProphetSearcher,
                 "18311790|ref|NP_558457.1",
                 "(all matching peptides)");
-        assertTextNotPresent(
+        assertTextNotPresent(peptideProphetSearcher,
                 "CAA80880.2", // for peptide K.EEEESDEDMGFG.-
                 "(search engine matches)");
-        assertTextPresent("(PeptideProphet &gt;= 0.9) AND (Matches sequence of ", 2);
-        assertTextPresent("Peptide Counts:", 2);
-        assertTextPresent("1 Total peptide matching sequence", 1);
-        assertTextPresent("1 Distinct peptide matching sequence", 1);
-        assertTextPresent("0 Total peptides matching sequence", 1);
-        assertTextPresent("0 Distinct peptides matching sequence", 1);
-        assertTextPresent("2 Total qualifying peptides in run", 2);
-        assertTextPresent("2 Distinct qualifying peptides in run", 2);
-        assertTextPresent("peptide-marker", 1);
-        assertTextPresent(" 1  / 1(Q^) ", 1); // TODO: how do we verify the location of the match in the coverage map table?
-        popLocation();
+        assertTextPresent(peptideProphetSearcher, "(PeptideProphet >= 0.9) AND (Matches sequence of ", 2);
+        assertTextPresent(peptideProphetSearcher, "Peptide Counts:", 2);
+        assertTextPresent(peptideProphetSearcher, "1 Total peptide matching sequence", 1);
+        assertTextPresent(peptideProphetSearcher, "1 Distinct peptide matching sequence", 1);
+        assertTextPresent(peptideProphetSearcher, "0 Total peptides matching sequence", 1);
+        assertTextPresent(peptideProphetSearcher, "0 Distinct peptides matching sequence", 1);
+        assertTextPresent(peptideProphetSearcher, "2 Total qualifying peptides in run", 2);
+        assertTextPresent(peptideProphetSearcher, "2 Distinct qualifying peptides in run", 2);
+        assertTextPresent(peptideProphetSearcher, "peptide-marker", 1);
+        assertTextPresent(peptideProphetSearcher, " 1  / 1(Q^) ", 1); // TODO: how do we verify the location of the match in the coverage map table?
 
         clickAndWait(Locator.linkWithText("Setup Compare Peptides"));
         setFormElement(Locator.input("targetProtein"), "gi|15645924|ribosomal_protein");
@@ -1116,28 +1110,26 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.EYYLLHKPPKTISSTK.D");
 
         // verify the bulk protein coverage map export for target protein
-        pushLocation();
-        addUrlParameter("exportAsWebPage=true");
-        clickButton("Export Protein Coverage");
-        assertTextPresent(
+        File bulkProteinCoverageMap = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        TextSearcher bulkProteinCoverageSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(bulkProteinCoverageMap));
+        assertTextPresent(bulkProteinCoverageSearcher,
                 "15645924|ref|NP_208103.1",
                 "(all matching peptides)");
-        assertTextNotPresent(
+        assertTextNotPresent(bulkProteinCoverageSearcher,
                 "15612296",
                 "NP_223949.1",
                 "(search engine matches)");
-        assertTextPresent("NP_208103.1", 4);
-        assertTextPresent("Peptide Counts:", 2);
-        assertTextPresent("0 Total peptides matching sequence", 1);
-        assertTextPresent("0 Distinct peptides matching sequence", 1);
-        assertTextPresent("57 Total qualifying peptides in run", 1);
-        assertTextPresent("57 Distinct qualifying peptides in run", 1);
-        assertTextPresent("2 Total peptides matching sequence", 1);
-        assertTextPresent("2 Distinct peptides matching sequence", 1);
-        assertTextPresent("59 Total qualifying peptides in run", 1);
-        assertTextPresent("59 Distinct qualifying peptides in run", 1);
-        assertTextPresent("peptide-marker", 2);
-        popLocation();
+        assertTextPresent(bulkProteinCoverageSearcher, "NP_208103.1", 4);
+        assertTextPresent(bulkProteinCoverageSearcher, "Peptide Counts:", 2);
+        assertTextPresent(bulkProteinCoverageSearcher, "0 Total peptides matching sequence", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "0 Distinct peptides matching sequence", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "57 Total qualifying peptides in run", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "57 Distinct qualifying peptides in run", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "2 Total peptides matching sequence", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "2 Distinct peptides matching sequence", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "59 Total qualifying peptides in run", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "59 Distinct qualifying peptides in run", 1);
+        assertTextPresent(bulkProteinCoverageSearcher, "peptide-marker", 2);
 
         log("Test Compare Runs using Query Peptides");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
@@ -1183,14 +1175,14 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.TQMPAASICVNYK.G");
 
         log("Test exporting in Query Peptides Comparision");
-        addUrlParameter("exportAsWebPage=true");
-        clickExportToText();
-        assertTextPresent(
+        File lastPeptideFile = new DataRegionExportHelper(new DataRegionTable("query", this)).exportText();
+        TextSearcher lastPeptideSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(lastPeptideFile));
+        assertTextPresent(lastPeptideSearcher,
                 "AVG_XCorr",
                 "K.EIRQRQGDDLDGLSFAELR.G",
                 "11.200",
                 "13.800");
-        assertTextNotPresent(
+        assertTextNotPresent(lastPeptideSearcher,
                 "R.TQMPAASICVNYK.G");
         goBack();
     }

@@ -106,7 +106,6 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         clickButton("Go");
         selectOptionByText(Locator.name("grouping"), "Peptides (Legacy)");
         clickAndWait(Locator.id("viewTypeSubmitButton"));
-        addUrlParameter("exportAsWebPage=true");
         DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesTable.setFilter("Scan", "Is Greater Than", "6", "Is Less Than or Equal To", "100");
         peptidesTable.setSort("Scan", SortDirection.DESC);
@@ -121,7 +120,6 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         clickAndWait(Locator.id("viewTypeSubmitButton"));
         DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, this);
         proteinsTable.setFilter("SequenceMass", "Is Greater Than", "20000");
-        addUrlParameter("exportAsWebPage=true");
         clickButton("Save View");
         setFormElement(Locator.name("name"), LEGACY_PROTEIN_VIEW_NAME);
         clickButton("Save View");
