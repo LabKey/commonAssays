@@ -28,6 +28,7 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.TextSearcher;
+import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 import java.util.Arrays;
@@ -698,6 +699,7 @@ public class MS2Test extends AbstractMS2ImportTest
     {
         log("Test export");
         DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
+        Ms2DataRegionExportHelper dataExportHelper = new Ms2DataRegionExportHelper(quantitationTable);
         File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "AMT"));
         TextSearcher qTableSrch = new TextSearcher(() -> TestFileUtils.getFileContents(qTableFile));
         assertTextPresent(qTableSrch, "Run",
@@ -738,7 +740,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(qSelectedSearch, "\n", 2);
 
         log("Make sure sort is exported correctly too");
-        File quantFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "TSV"));
+        File quantFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "TSV"), 1)[0];
         TextSearcher quantSrch = new TextSearcher(() -> TestFileUtils.getFileContents(quantFile));
         assertTextPresent(quantSrch, "MLNMAKSKMHK");
         assertTextPresent(quantSrch, "\n", 3);
