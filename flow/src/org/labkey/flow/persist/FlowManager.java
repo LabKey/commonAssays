@@ -288,30 +288,24 @@ public class FlowManager
     }
      */
 
-    /** Get all attributes in the container, sorted by name. */
+    /** Get all attributes in the container. */
     public Collection<FlowEntry> getAttributeEntries(@NotNull String containerId, @NotNull final AttributeType type)
     {
         //_log.info("getAttributeEntries(" + containerId + ", " + type + ")");
         TableInfo table = attributeTable(type);
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("Container"), containerId);
-        Sort sort = new Sort("Name");
-        TableSelector selector = new TableSelector(table, filter, sort);
+        TableSelector selector = new TableSelector(table, filter, null);
 
         final List<FlowEntry> entries = new ArrayList<>();
-        selector.forEachMap(new ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row) throws SQLException
-            {
-                Integer rowId = (Integer)row.get("RowId");
-                String name = (String)row.get("Name");
-                String containerId = (String)row.get("Container");
-                Integer aliasId = (Integer)row.get("Id");
-                FlowEntry entry = new FlowEntry(type, rowId, containerId, name, aliasId);
+        selector.forEachMap(row -> {
+            Integer rowId = (Integer)row.get("RowId");
+            String name = (String)row.get("Name");
+            String containerId1 = (String)row.get("Container");
+            Integer aliasId = (Integer)row.get("Id");
+            FlowEntry entry = new FlowEntry(type, rowId, containerId1, name, aliasId);
 
-                entries.add(entry);
-            }
+            entries.add(entry);
         });
 
         return Collections.unmodifiableList(entries);
@@ -756,7 +750,7 @@ public class FlowManager
             }
         });
 
-        return unused;
+        return Collections.unmodifiableList(unused);
     }
 
     public void deleteUnused(@NotNull Container c)

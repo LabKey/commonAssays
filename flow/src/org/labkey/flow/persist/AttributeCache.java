@@ -44,11 +44,11 @@ import java.util.Objects;
 /**
  * Cache of attribute names and aliases within a container.
  */
-abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
+abstract public class AttributeCache<A extends Comparable<A>, E extends AttributeCache.Entry<A, E>>
 {
     private static final Logger LOG = Logger.getLogger(AttributeCache.class);
 
-    // container id -> list of names
+    // container id -> list of names (sorted)
     private CacheLoader BY_CONTAINER_LOADER = new CacheLoader<String, List<E>>()
     {
         @Override
@@ -62,6 +62,8 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
                 // 'Load' by entry which will insert cache entries by rowid and by container+name
                 list.add(byEntry(entry));
             }
+
+            Collections.sort(list);
 
             //LOG.info("-Loaded " + _type + " by containerId: " + containerId);
             return Collections.unmodifiableList(list);
@@ -111,7 +113,7 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
     };
 
 
-    public static abstract class Entry<Q, Z extends Entry<Q, Z>>
+    public static abstract class Entry<Q extends Comparable<Q>, Z extends Entry<Q, Z>> implements Comparable<Entry<Q, Z>>
     {
         private final AttributeType _type;
         private final int _rowId;
@@ -161,6 +163,12 @@ abstract public class AttributeCache<A, E extends AttributeCache.Entry<A, E>>
         public Q getAttribute()
         {
             return _attribute;
+        }
+
+        @Override
+        public int compareTo(@NotNull Entry<Q, Z> other)
+        {
+            return getAttribute().compareTo(other.getAttribute());
         }
 
         /** Get the rowid of the aliased attribute or null if this is the preferred attribute. */

@@ -23,7 +23,7 @@ import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.io.Serializable;
 
-public class GraphSpec implements Serializable, Comparable
+public class GraphSpec implements Serializable, Comparable<GraphSpec>
 {
     final SubsetSpec _subset;
     final String[] _parameters;
@@ -99,11 +99,9 @@ public class GraphSpec implements Serializable, Comparable
         return toString().hashCode();
     }
 
-    public int compareTo(Object other)
+    @Override
+    public int compareTo(@NotNull GraphSpec graph)
     {
-        if (!(other instanceof GraphSpec))
-            return 0;
-        GraphSpec graph = (GraphSpec) other;
         int ret = SubsetSpec.compare(getSubset(), graph.getSubset());
         if (ret != 0)
             return ret;

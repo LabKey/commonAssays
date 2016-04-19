@@ -29,7 +29,7 @@ import org.labkey.api.query.FieldKey;
 
 import java.util.Collection;
 
-abstract public class AttributeForeignKey<T> extends AbstractForeignKey
+abstract public class AttributeForeignKey<T extends Comparable<T>> extends AbstractForeignKey
 {
     public StringExpression getURL(ColumnInfo parent)
     {

@@ -17,6 +17,7 @@
 package org.labkey.flow.analysis.web;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.statistics.MathStat;
@@ -35,7 +36,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StatisticSpec implements Serializable, Comparable
+public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
 {
     final SubsetSpec _subset;
     final STAT _statistic;
@@ -361,11 +362,9 @@ public class StatisticSpec implements Serializable, Comparable
         return toString().hashCode();
     }
 
-    public int compareTo(Object o)
+    @Override
+    public int compareTo(@NotNull StatisticSpec spec)
     {
-        if (!(o instanceof StatisticSpec))
-            return 0;
-        StatisticSpec spec = (StatisticSpec) o;
         int ret = SubsetSpec.compare(getSubset(), spec.getSubset());
         if (ret != 0)
             return ret;
