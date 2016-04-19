@@ -365,7 +365,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         setFormElement(Locator.id("filter-engine"), "MASCOT");
         setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
         click(Locator.xpath("//tr[td/div[text()='/MS2VerifyProject/ms2folder']]//div[@class='x-grid3-row-checker']"));
-        clickAndWait(Locator.button("Show Matching MS2 Runs"));
+        click(Locator.button("Show Matching MS2 Runs"));
         clickAndWait(Locator.linkWithText("CAexample_mini_decoy.dat"));
 
         waitForText("Decoy Summary");
