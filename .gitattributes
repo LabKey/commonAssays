@@ -1442,6 +1442,7 @@ ms2/test/src/org/labkey/test/tests/ms2/PipelineTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/SequestImportTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/XTandemShortTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/XTandemTest.java -text
+ms2/test/src/org/labkey/test/utils/ms2/Ms2DataRegionExportHelper.java -text
 ms2/test/test_ms2.iml -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text

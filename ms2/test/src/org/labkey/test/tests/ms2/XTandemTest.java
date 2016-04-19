@@ -29,6 +29,7 @@ import org.labkey.test.ms2.AbstractXTandemTest;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
+import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 
@@ -103,8 +104,8 @@ public class XTandemTest extends AbstractXTandemTest
         verifyPeptideDetailsPage();
 
         log("Test exporting");
-        File expFile = new DataRegionExportHelper(peptidesRegion)
-                .exportText(DataRegionExportHelper.TextSeparator.TAB);
+        File expFile = new Ms2DataRegionExportHelper(peptidesRegion)
+                .exportText(Ms2DataRegionExportHelper.FileDownloadType.TSV, false);
         TextSearcher tsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(expFile)).setSearchTransformer(t -> t);
         assertTextNotPresent(tsvSearcher, PEPTIDE);
         assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);
