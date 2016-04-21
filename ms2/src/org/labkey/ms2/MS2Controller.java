@@ -1650,7 +1650,6 @@ public class MS2Controller extends SpringActionController
         private String _pivotType = PivotType.run.toString();
         private String _targetProtein;
         private Integer _targetSeqId;
-        private boolean _exportAsWebPage = false;
 
         private Protein _protein;
 
@@ -1681,16 +1680,6 @@ public class MS2Controller extends SpringActionController
         public void setTargetProtein(String targetProtein)
         {
             _targetProtein = targetProtein;
-        }
-
-        public boolean isExportAsWebPage()
-        {
-            return _exportAsWebPage;
-        }
-
-        public void setExportAsWebPage(boolean exportAsWebPage)
-        {
-            _exportAsWebPage = exportAsWebPage;
         }
 
         public String getPeptideFilterType()
@@ -4643,7 +4632,7 @@ public class MS2Controller extends SpringActionController
             resp.reset();
             resp.setContentType("text/html; charset=UTF-8");
             String filename = FileUtil.makeFileNameWithTimestamp("ProteinCoverage", "htm");
-            resp.setHeader("Content-disposition", (form.isExportAsWebPage() ? "inline" : "attachment") + "; filename=\"" + filename +"\"");
+            resp.setHeader("Content-disposition", "attachment; filename=\"" + filename +"\"");
 
             PrintWriter pw = resp.getWriter();
             pw.write("<html><body>");
@@ -5506,7 +5495,6 @@ public class MS2Controller extends SpringActionController
         int fraction = 0;
         int tryptic;
         boolean expanded = false;
-        boolean exportAsWebPage;
         String grouping;
         String columns;
         String proteinColumns;
@@ -5561,16 +5549,6 @@ public class MS2Controller extends SpringActionController
         public String getGrouping()
         {
             return grouping;
-        }
-
-        public void setExportAsWebPage(boolean exportAsWebPage)
-        {
-            this.exportAsWebPage = exportAsWebPage;
-        }
-
-        public boolean isExportAsWebPage()
-        {
-            return exportAsWebPage;
         }
 
         public String getColumns()

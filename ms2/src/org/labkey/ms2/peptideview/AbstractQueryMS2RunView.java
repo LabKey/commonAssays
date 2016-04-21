@@ -226,8 +226,6 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             createRowIdFragment(selectedRows);
             getSettings().setMaxRows(Table.ALL_ROWS);
             TSVGridWriter tsvWriter = getTsvWriter();
-            if (form.isExportAsWebPage())
-                tsvWriter.setExportAsWebPage(true);
             tsvWriter.setColumnHeaderType(ColumnHeaderType.Caption);
             tsvWriter.setFileHeader(headers);
             tsvWriter.write(response);

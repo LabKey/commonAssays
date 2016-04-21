@@ -71,9 +71,9 @@ public class FeatureAnnotationSetQueryView extends QueryView
     }
 
     @Override
-    protected void populateButtonBar(DataView view, ButtonBar bar, boolean exportAsWebPage)
+    protected void populateButtonBar(DataView view, ButtonBar bar)
     {
-        super.populateButtonBar(view, bar, exportAsWebPage);
+        super.populateButtonBar(view, bar);
         ActionButton deleteButton = new ActionButton(FeatureAnnotationSetController.DeleteAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.GET);
         deleteButton.setDisplayPermission(DeletePermission.class);
         ActionURL deleteURL = new ActionURL(FeatureAnnotationSetController.DeleteAction.class, getContainer());

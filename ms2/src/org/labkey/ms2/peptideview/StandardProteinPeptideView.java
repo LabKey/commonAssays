@@ -296,8 +296,6 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         try (ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded()))
         {
-            if (form.isExportAsWebPage())
-                tw.setExportAsWebPage(true);
             tw.prepare(response);
             tw.setFileHeader(headers);
             tw.setFilenamePrefix("MS2Runs");

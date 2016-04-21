@@ -44,17 +44,8 @@ public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
         // Flush any extraneous output (e.g., <CR><LF> from JSPs)
         response.reset();
         String fileName = filenamePrefix + "_" + DateUtil.formatDateTime(new Date(), "yyyy-MM-dd-HH-mm-ss") + "." + extension;
-        if (form.isExportAsWebPage())
-        {
-            // Make it easier to test via Selenium by showing in the browser instead of forcing a file download
-            response.setContentType("text/plain; charset=UTF-8");
-            response.setHeader("Content-disposition", "inline; filename=\"" + fileName + "\"");
-        }
-        else
-        {
-            response.setContentType("text/plain");
-            response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
-        }
+        response.setContentType("text/plain");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
 
         // Get the outputstream of the servlet (always get the outputstream AFTER you've set the content-disposition and content-type)
         _out = response.getWriter();

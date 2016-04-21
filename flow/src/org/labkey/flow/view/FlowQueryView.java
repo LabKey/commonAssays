@@ -23,10 +23,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.PanelButton;
-import org.labkey.api.data.TSVGridWriter;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.portal.ProjectUrls;
@@ -225,7 +222,7 @@ public class FlowQueryView extends QueryView
         return (FlowSchema) super.getSchema();
     }
 
-    protected void populateButtonBar(DataView view, ButtonBar bar,  boolean exportAsWebPage)
+    protected void populateButtonBar(DataView view, ButtonBar bar)
     {
         if (showAnalysisFolderButton() && getSchema().getRun() == null /*&& getSchema().getScript() == null*/)
         {
@@ -260,7 +257,7 @@ public class FlowQueryView extends QueryView
             bar.add(button);
         }
 
-        super.populateButtonBar(view, bar, exportAsWebPage);
+        super.populateButtonBar(view, bar);
 
         // NOTE: Only add "Copy to Study" to FCSAnlayses wells.  This isn't a reliable way to check if the wells are FCSAnalysis wells.
         String queryName = getSettings().getQueryName();
@@ -295,9 +292,9 @@ public class FlowQueryView extends QueryView
     }
 
     @Override
-    public PanelButton createExportButton(boolean exportAsWebPage)
+    public PanelButton createExportButton()
     {
-        PanelButton panelButton = super.createExportButton(exportAsWebPage);
+        PanelButton panelButton = super.createExportButton();
 
         User user = getUser();
         if (user != null && !user.isGuest() && getSettings() != null)

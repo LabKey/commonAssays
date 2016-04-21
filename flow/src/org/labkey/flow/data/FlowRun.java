@@ -324,8 +324,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     // NOTE: This action downloads the FCS files associated with a run and not the external analysis archive zip.
     public ActionURL urlDownload()
     {
-        return urlFor(RunController.DownloadAction.class).addParameter("exportAsWebPage", "true");
-        //return urlFor(RunController.DownloadAction.class);
+        return urlFor(RunController.DownloadAction.class);
     }
 
     public String getLabel()
