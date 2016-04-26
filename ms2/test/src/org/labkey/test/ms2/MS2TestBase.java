@@ -118,9 +118,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
         clickFolder(FOLDER_NAME);
 
         clickAndWait(Locator.linkWithText("MS2 Runs"));
-        prepForPageLoad();
-        selectOptionByText(Locator.name("experimentRunFilter"), "All Runs");
-        waitForPageToLoad();
+        doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("experimentRunFilter"), "All Runs"));
         if (!isTextPresent("No data to show"))
         {
             checkCheckbox(Locator.checkboxByName(".toggle"));
