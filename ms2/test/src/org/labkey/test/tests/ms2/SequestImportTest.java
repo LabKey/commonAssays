@@ -24,7 +24,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.FileBrowser;
 import org.labkey.test.categories.MS2;
-import org.labkey.test.util.CustomizeViewsHelper;
+import org.labkey.test.components.CustomizeView;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
@@ -63,7 +63,7 @@ public class SequestImportTest extends BaseWebDriverTest
 
         // Customize the view to show the distinct and total peptide counts based on the criteria established
         // by the custom query
-        CustomizeViewsHelper viewsHelper = new CustomizeViewsHelper(new DataRegionTable("MS2ExtensionsRunGrid", this));
+        CustomizeView viewsHelper = new DataRegionTable("MS2ExtensionsRunGrid", this).getCustomizeView();
         viewsHelper.openCustomizeViewPanel();
         viewsHelper.addCustomizeViewColumn(TOTAL_PEPTIDES_FIELD_KEY);
         viewsHelper.addCustomizeViewColumn(UNIQUE_PEPTIDES_FIELD_KEY);
