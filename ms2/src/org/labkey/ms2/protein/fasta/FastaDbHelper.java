@@ -96,7 +96,7 @@ public class FastaDbHelper
     public FastaDbHelper(Connection c) throws SQLException
     {
         StringBuilder initialInsert = new StringBuilder(INITIAL_INSERTION_COMMAND);
-        _dialect.addReselect(initialInsert, "InsertId");
+        _dialect.addReselect(initialInsert, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"));
         _initialInsertionStmt = c.prepareStatement(initialInsert.toString());
         _getCurrentInsertStatsStmt = c.prepareStatement(GET_CURRENT_INSERT_STATS_COMMAND);
         _updateInsertionStmt = c.prepareStatement(UPDATE_INSERTION_COMMAND);
