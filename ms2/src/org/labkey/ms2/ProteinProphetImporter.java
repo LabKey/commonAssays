@@ -156,7 +156,7 @@ public class ProteinProphetImporter
                 proteinStmt = connection.prepareStatement("INSERT INTO " + proteinsTempTableName + " (ProteinGroupId, Probability, LookupString) VALUES (?, ?, ?)");
 
                 StringBuilder groupString = new StringBuilder("INSERT INTO " + MS2Manager.getTableInfoProteinGroups() + " (groupnumber, groupprobability, proteinprobability, indistinguishablecollectionid, proteinprophetfileid, uniquepeptidescount, totalnumberpeptides, pctspectrumids,  percentcoverage, errorrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                _dialect.addReselect(groupString, "RowId");
+                _dialect.addReselect(groupString, MS2Manager.getTableInfoProteinGroups().getColumn("RowId"));
                 groupStmt = connection.prepareStatement(groupString.toString());
 
                 iterator = reader.iterator();
