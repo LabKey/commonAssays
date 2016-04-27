@@ -14,8 +14,8 @@ function attachAnalyteNegativeControlListeners()
     var negBeadEls = document.querySelectorAll(".negative-bead-input");
     for (var i = 0; i < negBeadEls.length; i++)
     {
-        var negControlEl = getAnalyteNegativeControlEl(negBeadEls[i].name);
-        negControlEl.onchange = function(){ updateAnalyteNegativeBeadInputs(); };
+        var negControlEl = Ext4.get(getAnalyteNegativeControlEl(negBeadEls[i].name));
+        negControlEl.on('change', updateAnalyteNegativeBeadInputs);
     }
 }
 

@@ -244,7 +244,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             if (cols.size() > 0)
-                view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
+            {
+                // don't allow the "Same" checkbox options for the NegativeControl analyte property
+                boolean isCopyable = !LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName());
+
+                view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), isCopyable));
+            }
         }
 
         Map<String, String> defaultAnalyteColumnValues = form.getAnalyteColumnDefaultValues(_protocol);
