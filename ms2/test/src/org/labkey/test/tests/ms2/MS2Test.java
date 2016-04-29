@@ -148,7 +148,7 @@ public class MS2Test extends AbstractMS2ImportTest
         TextSearcher txtSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(peptides)).setSearchTransformer(t -> t);
         assertTextPresent(txtSearcher, "K.LLASMLAK.A");
         assertTextNotPresent(txtSearcher, "R.Q^YALHVDGVGTK.A");
-        assertTextPresent(txtSearcher, "\n", "2");
+        assertTextPresent(txtSearcher, "\n", 2);
         popLocation();
         pushLocation();
         peptidesTable.checkAllOnPage();
@@ -365,12 +365,14 @@ public class MS2Test extends AbstractMS2ImportTest
                 "gi|29650192|ribosomal_protein",
                 "R.E^PVSPWGTPAKGYR.T");
         assertTextPresent(protFileSearch, "\n", 18);
+        // TODO: Verify/fix these values: order changed in r43461
         assertTextPresentInThisOrder(protFileSearch, "gi|14318169|AF379640_1_riboso", "gi|15668549|LSU_ribosomal_pro");
         goBack();
         File allProtsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "AMT"));
         TextSearcher allProtsSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allProtsFile));
         assertTextPresent(allProtsSearcher, "Run", "Peptide");
         assertTextPresent(allProtsSearcher, "\n", 20);
+        // TODO: Verify/fix these values: order changed in r43461
         assertTextPresentInThisOrder(allProtsSearcher, "R.RDYLHYLPKYNR.F", "K.TKDYEGMQVPVK.V");
         assertTextNotPresent(allProtsSearcher, "K.LLASMLAK.A", "R.KKVAIVPEPLR.K");
 
@@ -380,9 +382,10 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent("Group",
                 "Prob",
                 "Spectrum Ids",
-                "gi|16078254|similar_to_riboso",
-                "12.71%",
-                "gi|27684893|similar_to_60S_RI");
+                // TODO: Verify/fix these values: changed in r43461
+                "gi|16078254|similar_to_riboso",    // gi|4689022|ribosomal_protein_
+                "12.71%",                           // 14.06%
+                "gi|27684893|similar_to_60S_RI");   // gi|4883902|APETALA3_homolog_R
 
         log("Test Protein Prophet with filters");
         selectOptionByText(Locator.name("viewParams"), LEGACY_PROTEIN_PROPHET_VIEW_NAME);
@@ -699,7 +702,6 @@ public class MS2Test extends AbstractMS2ImportTest
     {
         log("Test export");
         DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
-        Ms2DataRegionExportHelper dataExportHelper = new Ms2DataRegionExportHelper(quantitationTable);
         File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "AMT"));
         TextSearcher qTableSrch = new TextSearcher(() -> TestFileUtils.getFileContents(qTableFile));
         assertTextPresent(qTableSrch, "Run",

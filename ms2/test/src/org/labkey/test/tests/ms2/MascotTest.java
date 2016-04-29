@@ -426,7 +426,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         TextSearcher tsvSearcher = new TextSearcher(() -> tsvContents).setSearchTransformer(t -> t);
 
         assertTextNotPresent(tsvSearcher, PEPTIDE);
-        assertTextPresentInThisOrder(tsvSearcher, PEPTIDE3);
+        assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);
         assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
