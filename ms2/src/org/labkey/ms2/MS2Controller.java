@@ -4472,7 +4472,7 @@ public class MS2Controller extends SpringActionController
         // Clean up the filter to remove any columns that aren't available in this query-based Peptides view
         // The legacy views may include some columns like GeneName that aren't available, and leaving them
         // in the filter causes a SQLException
-        TableInfo peptidesTable = QueryService.get().getUserSchema(user, c, MS2Schema.SCHEMA_NAME).getTable(MS2Schema.TableType.Peptides.toString());
+        TableInfo peptidesTable = new MS2Schema(user, c).getTable(MS2Schema.TableType.Peptides.toString());
         SimpleFilter result = new SimpleFilter();
         for (SimpleFilter.FilterClause filterClause : filter.getClauses())
         {
