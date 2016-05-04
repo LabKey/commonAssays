@@ -17,16 +17,20 @@
 package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.SampleProperty;
-import org.labkey.api.study.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.study.AbstractPlateTypeHandler;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.Position;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.multiplate.HighThroughputNabDataHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -261,11 +265,11 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
-    public WellGroup.Type[] getWellGroupTypes()
+    public List<WellGroup.Type> getWellGroupTypes()
     {
-        return new WellGroup.Type[]{
+        return Arrays.asList(
                 WellGroup.Type.CONTROL, WellGroup.Type.VIRUS, WellGroup.Type.SPECIMEN,
-                WellGroup.Type.REPLICATE, WellGroup.Type.OTHER};
+                WellGroup.Type.REPLICATE, WellGroup.Type.OTHER);
     }
 
     private PlateTemplate create20Sample4VirusScreeningTemplate(PlateTemplate template, Container c, int rowCount, int colCount)

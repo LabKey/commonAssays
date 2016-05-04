@@ -32,7 +32,6 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.util.Pair;
-import org.labkey.api.view.Stats;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -116,11 +115,9 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
-    public WellGroup.Type[] getWellGroupTypes()
+    public List<WellGroup.Type> getWellGroupTypes()
     {
-        return new WellGroup.Type[]{
-                WellGroup.Type.SPECIMEN, WellGroup.Type.ANTIGEN,
-                WellGroup.Type.CONTROL};
+        return Arrays.asList(WellGroup.Type.SPECIMEN, WellGroup.Type.ANTIGEN, WellGroup.Type.CONTROL);
     }
 
     @Override
