@@ -738,6 +738,7 @@ luminex/webapp/luminex/NegativeBeadPopulation.js -text
 luminex/webapp/luminex/TitrationExclusionPanel.js -text
 luminex/webapp/luminex/WellExclusionPanel.js -text
 luminex/webapp/luminex/excluded.png -text
+luminex/webapp/luminex/exclusion.lib.xml -text
 luminex/webapp/luminex/included.png -text
 luminex/webapp/luminex/ljPlotIcon.png -text
 luminex/webapp/luminexLeveyJennings.lib.xml -text

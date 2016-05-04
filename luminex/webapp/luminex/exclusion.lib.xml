@@ -1,0 +1,12 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="luminex/BaseExclusionPanel.js"/>
+        <script path="luminex/WellExclusionPanel.js"/>
+        <script path="luminex/AnalyteExclusionPanel.js"/>
+        <script path="luminex/TitrationExclusionPanel.js"/>
+        <script path="luminex/Exclusion.css"/>
+    </library>
+    <dependencies>
+        <dependency path="Ext3"/>
+    </dependencies>
+</libraries>

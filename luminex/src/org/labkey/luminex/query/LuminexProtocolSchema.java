@@ -770,11 +770,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             public LinkedHashSet<ClientDependency> getClientDependencies()
             {
                 LinkedHashSet<ClientDependency> dependencies = super.getClientDependencies();
-                dependencies.add(ClientDependency.fromPath("luminex/BaseExclusionPanel.js"));
-                dependencies.add(ClientDependency.fromPath("luminex/WellExclusionPanel.js"));
-                dependencies.add(ClientDependency.fromPath("luminex/AnalyteExclusionPanel.js"));
-                dependencies.add(ClientDependency.fromPath("luminex/TitrationExclusionPanel.js"));
-                dependencies.add(ClientDependency.fromPath("luminex/Exclusion.css"));
+                dependencies.add(ClientDependency.fromPath("luminex/exclusion"));
                 return dependencies;
             }
         };
