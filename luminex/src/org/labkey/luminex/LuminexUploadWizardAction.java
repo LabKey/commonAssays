@@ -156,7 +156,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             vbox.addView(top);
         }
 
-        InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, Collections.<DomainProperty>emptyList(), form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
+        InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, Collections.emptyList(), form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
         view.setTitle("Analyte Properties");
         view.setTitlePopupHelp("Analyte Properties", "Each Luminex assay design defines a set of properties to track for analytes. Additionally, if multiple titrations are present in a given run, each analyte may be assigned to the appropriate set of titrations.");
 

@@ -84,7 +84,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
             {
                 List<? extends ExpMaterial> materials = sampleSet.getSamples();
                 Domain domain = sampleSet.getType();
-                List<? extends DomainProperty> properties = domain == null ? Collections.<DomainProperty>emptyList() : domain.getProperties();
+                List<? extends DomainProperty> properties = domain == null ? Collections.emptyList() : domain.getProperties();
                 // Check all of the possible barcode field names
                 for (String barcodeFieldName : barcodeFieldNames)
                 {

@@ -107,7 +107,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     {
         return new Pair<>(
             PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields"),
-            Collections.<DomainProperty, Object>emptyMap());
+            Collections.emptyMap());
     }
 
     public String getName()
@@ -146,13 +146,13 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
         Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Properties");
         dataDomain.setDescription("The user is prompted to select a MAGEML file that contains the data values. If the spot-level data within the file contains a column that matches the data column name here, it will be imported.");
-        result.add(new Pair<>(dataDomain, Collections.<DomainProperty, Object>emptyMap()));
+        result.add(new Pair<>(dataDomain, Collections.emptyMap()));
         return result;
     }
 
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
     {
-        return Collections.<AssayDataCollector>singletonList(new PipelineDataCollector());
+        return Collections.singletonList(new PipelineDataCollector());
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()

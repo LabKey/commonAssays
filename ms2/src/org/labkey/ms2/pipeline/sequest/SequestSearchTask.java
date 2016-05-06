@@ -544,7 +544,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         public void testOut2XmlAll() throws SequestParamsException
         {
             Out2XmlParams out2XmlParams = new Out2XmlParams();
-            assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.<String, String>emptyMap()));
+            assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.emptyMap()));
             assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "0")));
             assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "")));
 

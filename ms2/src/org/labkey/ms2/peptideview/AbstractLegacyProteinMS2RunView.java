@@ -145,7 +145,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         }
 
         ew.renderNewSheet();
-        ew.setHeaders(Collections.<String>emptyList());
+        ew.setHeaders(Collections.emptyList());
         ew.setCaptionRowVisible(false);
 
         for (int i = 0; i < runs.size(); i++)

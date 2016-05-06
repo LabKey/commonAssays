@@ -425,19 +425,19 @@ public class FlowManager
 
     public int ensureStatisticName(Container c, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.statistic, name, Collections.<Object>emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, AttributeType.statistic, name, Collections.emptyList(), uncache);
     }
 
 
     public int ensureKeywordName(Container c, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.keyword, name, Collections.<Object>emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, AttributeType.keyword, name, Collections.emptyList(), uncache);
     }
 
 
     public int ensureGraphName(Container c, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.graph, name, Collections.<Object>emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, AttributeType.graph, name, Collections.emptyList(), uncache);
     }
 
 

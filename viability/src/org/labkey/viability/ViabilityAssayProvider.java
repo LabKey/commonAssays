@@ -319,7 +319,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             pd.setInputLength(rdp.inputLength);
         }
 
-        return new Pair<>(resultDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(resultDomain, Collections.emptyMap());
     }
 
     @Override
@@ -450,7 +450,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             // By passing an empty set of previously uploaded files, the PreviouslyUploadedDataCollector will be added
             // to the list, but won't be visible.  The FileUploadDataCollector will be first in the list of visible
             // collectors and will therefore be selected in the AssayDataCollectorDisplayColumn's dataUpload.jsp.
-            return super.getDataCollectors(Collections.<String, File>emptyMap(), context, false);
+            return super.getDataCollectors(Collections.emptyMap(), context, false);
         }
         else
         {

@@ -138,7 +138,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
                 }
             }
 
-            _wd.acceptFilesAsOutputs(Collections.<String, TaskPath>emptyMap(), action);
+            _wd.acceptFilesAsOutputs(Collections.emptyMap(), action);
             return new RecordedActionSet(action);
         }
         catch (IOException e)

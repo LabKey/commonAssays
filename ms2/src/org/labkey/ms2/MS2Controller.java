@@ -1008,7 +1008,7 @@ public class MS2Controller extends SpringActionController
         {
             public List<NavTree> getTabList()
             {
-                return Arrays.<NavTree>asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
+                return Arrays.asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
             }
 
             public HttpView getTabView(String tabId) throws Exception

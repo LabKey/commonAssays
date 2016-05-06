@@ -182,7 +182,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     private ModelAndView getAnalyteView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, AnalyteStepHandler.NAME, form, errors);
+                "lsid", Collections.emptyList(), errorReshow, AnalyteStepHandler.NAME, form, errors);
 
         PlateAnalytePropertyHelper analyteHelper = createAnalytePropertyHelper(form);
         analyteHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
@@ -224,7 +224,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors, boolean isLastView) throws ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, AntigenStepHandler.NAME, form, errors);
+                "lsid", Collections.emptyList(), errorReshow, AntigenStepHandler.NAME, form, errors);
 
         PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
         antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);

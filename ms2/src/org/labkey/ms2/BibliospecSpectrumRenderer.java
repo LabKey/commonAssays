@@ -279,7 +279,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
             try (InputStream fIn = new FileInputStream(tempFile))
             {
-                PageFlowUtil.streamFile(_context.getResponse(), Collections.<String, String>emptyMap(), shortName + ".redundant.blib", fIn, true);
+                PageFlowUtil.streamFile(_context.getResponse(), Collections.emptyMap(), shortName + ".redundant.blib", fIn, true);
             }
         }
         catch (ClassNotFoundException e)

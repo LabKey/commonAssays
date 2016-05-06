@@ -228,7 +228,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         concProp.setFormat("0.000");
         concProp.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
 
-        return new Pair<>(dataDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(dataDomain, Collections.emptyMap());
     }
 
     @Override

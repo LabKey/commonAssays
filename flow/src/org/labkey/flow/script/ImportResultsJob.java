@@ -189,9 +189,9 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 keywordsMap,
                 sampleCompMatrixMap,
                 resultsMap,
-                Collections.<String, Analysis>emptyMap(),
-                Collections.<Analysis, ScriptDocument>emptyMap(),
-                Collections.<Analysis, FlowScript>emptyMap(),
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                Collections.emptyMap(),
                 new ArrayList<>(sampleLabels));
     }
 

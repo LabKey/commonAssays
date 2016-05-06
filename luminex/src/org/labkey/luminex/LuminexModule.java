@@ -85,7 +85,7 @@ public class LuminexModule extends DefaultModule
     @Override
     public Set<Class> getUnitTests()
     {
-        return PageFlowUtil.<Class>set(
+        return PageFlowUtil.set(
                 LuminexDataHandler.TestCase.class,
                 LuminexExcelParser.TestCase.class,
                 AssayQCFlagColumn.TestCase.class,

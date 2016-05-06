@@ -208,7 +208,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(analyteDomain, "BeadDist", "Bead Dist", PropertyType.STRING);
         addProperty(analyteDomain, "BeadCatalogNumber", "Bead Catalog Number", PropertyType.STRING);
 
-        result.add(new Pair<>(analyteDomain, Collections.<DomainProperty, Object>emptyMap()));
+        result.add(new Pair<>(analyteDomain, Collections.emptyMap()));
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Excel File Run Properties");
         excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
@@ -218,10 +218,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(excelRunDomain, "PlateID", "Plate ID", PropertyType.STRING);
         addProperty(excelRunDomain, "RP1PMTvolts", "RP1 PMT (Volts)", PropertyType.DOUBLE);
         addProperty(excelRunDomain, "RP1Target", "RP1 Target", PropertyType.STRING);
-        result.add(new Pair<>(excelRunDomain, Collections.<DomainProperty, Object>emptyMap()));
+        result.add(new Pair<>(excelRunDomain, Collections.emptyMap()));
 
         Domain resultDomain = createResultsDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_CUSTOM_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
-        result.add(new Pair<>(resultDomain, Collections.<DomainProperty, Object>emptyMap()));
+        result.add(new Pair<>(resultDomain, Collections.emptyMap()));
 
         return result;
     }

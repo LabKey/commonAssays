@@ -105,7 +105,7 @@ public class ViabilityResult
         if (extra != null)
             result.setProperties(extra);
         else
-            result.setProperties(Collections.<PropertyDescriptor, Object>emptyMap());
+            result.setProperties(Collections.emptyMap());
         return result;
     }
 

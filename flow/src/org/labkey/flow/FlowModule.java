@@ -209,7 +209,7 @@ public class FlowModule extends DefaultModule
     @Override
     public Set<Class> getIntegrationTests()
     {
-        return Collections.<Class>singleton(PersistTests.class);
+        return Collections.singleton(PersistTests.class);
     }
 
     public static String getShortProductName()

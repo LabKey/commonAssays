@@ -298,7 +298,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
                 }
                 sequestAction.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
                 _wd.discardFile(fileMzXMLWork);
-                _wd.acceptFilesAsOutputs(Collections.<String, TaskPath>emptyMap(), sequestAction);
+                _wd.acceptFilesAsOutputs(Collections.emptyMap(), sequestAction);
 
                 actions.add(sequestAction);
             }

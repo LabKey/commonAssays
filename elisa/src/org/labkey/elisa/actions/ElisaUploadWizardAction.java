@@ -118,7 +118,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     protected InsertView getConcentrationsView(ElisaRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException, ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, ConcentrationStepHandler.NAME, form, errors);
+                "lsid", Collections.emptyList(), errorReshow, ConcentrationStepHandler.NAME, form, errors);
 
         PlateConcentrationPropertyHelper concentrationsHelper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
         concentrationsHelper.addSampleColumns(view, form.getUser(), form, errorReshow);

@@ -190,7 +190,7 @@ public class MicroarrayModule extends SpringModule
             {
                 if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
                 {
-                    return Collections.<ExperimentRunType>singleton(MicroarrayRunType.INSTANCE);
+                    return Collections.singleton(MicroarrayRunType.INSTANCE);
                 }
                 return Collections.emptySet();
             }

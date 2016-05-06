@@ -156,7 +156,7 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
         celFileId.setLookup(new Lookup(null, ExpSchema.SCHEMA_NAME, "Data"));
         celFileId.setRequired(true);
 
-        return new Pair<>(dataDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(dataDomain, Collections.emptyMap());
     }
 
     @Override

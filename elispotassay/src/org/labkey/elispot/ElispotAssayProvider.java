@@ -266,7 +266,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
 
-        return new Pair<>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(antigenWellGroupDomain, Collections.emptyMap());
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createAnalyteDomain(Container c)
@@ -277,7 +277,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         analyteWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the analyte well groups");
         addProperty(analyteWellGroupDomain, "CytokineName", "Cytokine Name", PropertyType.STRING);
 
-        return new Pair<>(analyteWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(analyteWellGroupDomain, Collections.emptyMap());
     }
 
     protected Pair<Domain,Map<DomainProperty,Object>> createRunDomain(Container c, User user)

@@ -324,7 +324,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         addProperty(virusWellGroupDomain, VIRUS_NAME_PROPERTY_NAME, PropertyType.STRING);
         addProperty(virusWellGroupDomain, VIRUS_ID_PROPERTY_NAME, PropertyType.STRING);
 
-        return new Pair<>(virusWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
+        return new Pair<>(virusWellGroupDomain, Collections.emptyMap());
     }
 
     public Domain getVirusWellGroupDomain(ExpProtocol protocol)

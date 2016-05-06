@@ -463,8 +463,8 @@ public class MS2Manager
 
             expRun.setFilePathRoot(pepXMLFile.getParentFile());
             ViewBackgroundInfo info = new ViewBackgroundInfo(container, user, null);
-            expRun = ExperimentService.get().saveSimpleExperimentRun(expRun, Collections.<ExpMaterial, String>emptyMap(), inputDatas, Collections.<ExpMaterial, String>emptyMap(),
-                    outputDatas, Collections.<ExpData, String>emptyMap(), info, _log, false);
+            expRun = ExperimentService.get().saveSimpleExperimentRun(expRun, Collections.emptyMap(), inputDatas, Collections.emptyMap(),
+                    outputDatas, Collections.emptyMap(), info, _log, false);
 
             // Set the MS2 run to point at this experiment run
             run.setExperimentRunLSID(expRun.getLSID());

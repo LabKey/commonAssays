@@ -99,7 +99,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
             // a study, which is useful because it propagates the run and batch properties
             List<Map<String, Object>> dataRows = new ArrayList<>(1);
             dataRows.add(new HashMap<String, Object>());
-            return Collections.<DataType, List<Map<String, Object>>>singletonMap(MicroarrayModule.MAGE_ML_INPUT_TYPE, dataRows);
+            return Collections.singletonMap(MicroarrayModule.MAGE_ML_INPUT_TYPE, dataRows);
         }
         FileInputStream fIn = null;
         try
