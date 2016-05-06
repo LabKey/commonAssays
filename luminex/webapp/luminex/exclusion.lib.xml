@@ -7,6 +7,6 @@
         <script path="luminex/Exclusion.css"/>
     </library>
     <dependencies>
-        <dependency path="Ext3"/>
+        <dependency path="clientapi/ext3"/>
     </dependencies>
 </libraries>
