@@ -128,9 +128,14 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                Collection<String> dependencies = Collections.unmodifiableList(Arrays.asList("luminex/LeveyJenningsPlotHelpers.js", "vis/vis", "luminex/LeveyJenningsReport.css"));
+                List<String> dependencyList = new ArrayList<>();
+                dependencyList.add("clientapi/ext3");
+                dependencyList.add("vis/vis");
+                dependencyList.add("luminex/LeveyJenningsPlotHelpers.js");
+                dependencyList.add("luminex/LeveyJenningsReport.css");
+
                 // using JavaScriptDisplayColumn for dependencies
-                return new JavaScriptDisplayColumn(colInfo, dependencies, "")
+                return new JavaScriptDisplayColumn(colInfo, Collections.unmodifiableList(dependencyList), "")
                 {
                     @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException

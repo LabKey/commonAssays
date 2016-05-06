@@ -159,11 +159,11 @@ public final class LuminexRTransformTest extends LuminexTest
         DataRegionTable table;
         table = new DataRegionTable("Data", this);
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("Analyte/Properties/LotNumber");
+        _customizeViewsHelper.addCustomizeViewColumn("ANALYTE/PROPERTIES/LotNumber");
         _customizeViewsHelper.applyCustomView();
-        table.setFilter("Analyte/Properties/LotNumber", "Equals", TEST_ANALYTE_LOT_NUMBER);
+        table.setFilter("ANALYTE/PROPERTIES/LotNumber", "Equals", TEST_ANALYTE_LOT_NUMBER);
         waitForElement(Locator.paginationText(1, 40, 40));
-        table.clearFilter("Analyte/Properties/LotNumber");
+        table.clearFilter("ANALYTE/PROPERTIES/LotNumber");
     }
 
     private void verifyScriptVersions()
@@ -262,8 +262,12 @@ public final class LuminexRTransformTest extends LuminexTest
         uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         uncheckCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
 
-        // verify some UI with 2 negative controlls checked
+        // verify some UI with 2 negative controls checked
         assertElementPresent(Locator.tagWithClass("select", "negative-bead-input"), 4);
+        uncheckCheckbox(Locator.name("_analyte_" + ANALYTE1 + "_NegativeControl"));
+        uncheckCheckbox(Locator.name("_analyte_" + ANALYTE2 + "_NegativeControl"));
+        checkCheckbox(Locator.name("_analyte_" + ANALYTE3 + "_NegativeControl"));
+        checkCheckbox(Locator.name("_analyte_" + ANALYTE4 + "_NegativeControl"));
         assertElementPresent(Locator.tag("option"), 6);
         assertElementPresent(Locator.tagWithAttribute("option", "value", ANALYTE3), 2);
         assertElementPresent(Locator.tagWithAttribute("option", "value", ANALYTE4), 2);
