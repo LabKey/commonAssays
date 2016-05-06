@@ -24,10 +24,12 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExcelHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.TextSearcher;
+import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,9 +104,8 @@ public class MS2ExportTest extends AbstractMS2ImportTest
 
     private File compExcelExport()
     {
-        clickButton("Export", 0);
-        _extHelper.clickSideTab("Excel");
-        return clickAndWaitForDownload(Locator.lkButton("Export to Excel"), 1)[0];
+        DataRegionExportHelper exportHelper = new DataRegionExportHelper(new DataRegionTable("query", this));
+        return exportHelper.exportExcel(DataRegionExportHelper.ExcelFileType.XLSX);
     }
 
     private void validateBulkExport()
