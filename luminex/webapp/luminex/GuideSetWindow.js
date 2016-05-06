@@ -114,7 +114,10 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     }
                     return props;
                 },
-                dateRenderer: function(val) { return val ? new Date(val).format("Y-m-d") : null; }
+                dateRenderer: function(val)
+                {
+                    return val ? Ext4.Date.format(new Date(val), LABKEY.extDefaultDateFormat) : null;
+                }
             }
         )
     },

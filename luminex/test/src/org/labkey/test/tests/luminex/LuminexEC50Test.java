@@ -85,11 +85,11 @@ public class LuminexEC50Test extends LuminexTest
         assertTextPresent("CurveFit");
 
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("TitrationId/Name");
+        _customizeViewsHelper.addCustomizeViewColumn("TITRATIONID/Name");
         _customizeViewsHelper.applyCustomView();
 
         DataRegionTable table = new DataRegionTable("query", this);
-        table.setFilter("TitrationId/Name", "Equals One Of (example usage: a;b;c)", "Standard1;Standard2");
+        table.setFilter("TITRATIONID/Name", "Equals One Of (example usage: a;b;c)", "Standard1;Standard2");
 
         List<String> analyte = table.getColumnDataAsText("Analyte");
         List<String> formula = table.getColumnDataAsText("Curve Type");

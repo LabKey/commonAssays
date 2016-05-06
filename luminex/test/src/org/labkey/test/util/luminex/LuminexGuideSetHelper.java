@@ -260,16 +260,16 @@ public class LuminexGuideSetHelper
         _test.clickAndWait(Locator.linkContainingText("view data"));
         _test._customizeViewsHelper.openCustomizeViewPanel();
         _test._customizeViewsHelper.showHiddenItems();
-        _test._customizeViewsHelper.addCustomizeViewColumn("Analyte/RowId");
-        _test._customizeViewsHelper.addCustomizeViewColumn("Titration/RowId");
-        _test._customizeViewsHelper.addCustomizeViewColumn("GuideSet/RowId");
+        _test._customizeViewsHelper.addCustomizeViewColumn("ANALYTE/RowId");
+        _test._customizeViewsHelper.addCustomizeViewColumn("TITRATION/RowId");
+        _test._customizeViewsHelper.addCustomizeViewColumn("GUIDESET/RowId");
         _test._customizeViewsHelper.applyCustomView();
         DataRegionTable table = new DataRegionTable("query", _test);
         for (String analyte : analytes)
         {
-            table.setFilter("GuideSet/RowId", "Equals", guideSetIds.get(analyte).toString());
+            table.setFilter("GUIDESET/RowId", "Equals", guideSetIds.get(analyte).toString());
             assertEquals("Expected guide set to be assigned to " + expectedRunCount + " records", expectedRunCount, table.getDataRowCount());
-            table.clearFilter("GuideSet/RowId");
+            table.clearFilter("GUIDESET/RowId");
         }
     }
 
