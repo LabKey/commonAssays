@@ -45,7 +45,7 @@ public class MS1VennDiagramView extends VennDiagramView implements EntryPoint
     {
         if (_service == null)
         {
-            _service = (CompareServiceAsync) GWT.create(CompareService.class);
+            _service = GWT.create(CompareService.class);
             ServiceUtil.configureEndpoint(_service, "compareService");
         }
         return _service;

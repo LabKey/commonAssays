@@ -526,7 +526,7 @@ public abstract class MS2Loader
                             _totalIons *= 2;
                     }
                 }
-                _ionPercent = (float) (Rounder.round((float) _matchedIons / _totalIons, 2));
+                _ionPercent = Rounder.round((float) _matchedIons / _totalIons, 2);
             }
 
             if (getScore("expect") == null && getScore("identityscore") != null && getScore("ionscore") != null)

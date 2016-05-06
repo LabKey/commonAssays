@@ -81,7 +81,7 @@ public class GateEditor implements EntryPoint
     {
         if (_service == null)
         {
-            _service = (GateEditorServiceAsync) GWT.create(GateEditorService.class);
+            _service = GWT.create(GateEditorService.class);
             ServiceUtil.configureEndpoint(_service, "gateEditorService");
         }
         return _service;

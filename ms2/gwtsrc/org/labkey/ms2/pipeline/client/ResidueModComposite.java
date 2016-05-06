@@ -247,7 +247,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         for(Iterator it = sorted.iterator(); it.hasNext();)
         {
             String name = (String)it.next();
-            String value = (String)modMap.get(name);
+            String value = modMap.get(name);
             box.addItem(name, value);
         }
     }

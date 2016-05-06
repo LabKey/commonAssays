@@ -49,7 +49,7 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
     {
         if (_service == null)
         {
-            _service = (CompareServiceAsync) GWT.create(CompareService.class);
+            _service = GWT.create(CompareService.class);
             Map<String, String> params = new HashMap<String, String>();
             if (PropertyUtil.getServerProperty(PEPTIDES_VIEW_PARAMETER_NAME) != null)
             {

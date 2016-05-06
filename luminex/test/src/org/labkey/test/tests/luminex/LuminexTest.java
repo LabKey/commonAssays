@@ -369,7 +369,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         for (Row row : response.getRowset())
         {
             String analyte = (String)row.getDisplayValue("Analyte");
-            assertEquals(String.format("Wrong standards for analyte %s at row %d", analyte, (Integer)row.getDisplayValue("RowId")),
+            assertEquals(String.format("Wrong standards for analyte %s at row %d", analyte, row.getDisplayValue("RowId")),
                     expectedAnalyteStandards.get(analyte), splitStandards((String)row.getDisplayValue("Analyte/Standard")));
         }
     }

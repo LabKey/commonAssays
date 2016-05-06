@@ -421,7 +421,7 @@ public class FlowSchema extends UserSchema
         {
             ColumnInfo colCompensationMatrix;
             colCompensationMatrix= ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
-            colCompensationMatrix.setFk(new LookupForeignKey(null, (String) null,
+            colCompensationMatrix.setFk(new LookupForeignKey(null, null,
                     FlowTableType.CompensationMatrices.toString(),
                     "RowId", "Name") {
                 public TableInfo getLookupTableInfo()

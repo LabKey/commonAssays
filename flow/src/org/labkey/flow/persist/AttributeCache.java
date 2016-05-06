@@ -257,7 +257,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         @Override
         public KeywordEntry getAliasedEntry()
         {
-            return (KeywordEntry)super.getAliasedEntry();
+            return super.getAliasedEntry();
         }
     }
 
@@ -277,7 +277,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         @Override
         public StatisticEntry getAliasedEntry()
         {
-            return (StatisticEntry)super.getAliasedEntry();
+            return super.getAliasedEntry();
         }
     }
 
@@ -297,7 +297,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         @Override
         public GraphEntry getAliasedEntry()
         {
-            return (GraphEntry)super.getAliasedEntry();
+            return super.getAliasedEntry();
         }
     }
 

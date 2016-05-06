@@ -203,7 +203,7 @@ public class SubsetSpec implements Serializable
 
         if (_subset instanceof PopulationName)
         {
-            sb.append(((PopulationName)_subset).toString(escape, withinExpression));
+            sb.append(_subset.toString(escape, withinExpression));
         }
         else if (_subset instanceof SubsetExpression)
         {

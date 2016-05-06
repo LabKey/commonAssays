@@ -197,11 +197,11 @@ public class DensityPlot extends ContourPlot
 
         int[] xIndex = data.indexX();
         int[] indexX = data.getXIndices();
-        boolean vertInverted = ((NumberAxis) verticalAxis).isInverted();
+        boolean vertInverted = verticalAxis.isInverted();
         boolean horizInverted = false;
         if (horizontalAxis instanceof NumberAxis)
         {
-            horizInverted = ((NumberAxis) horizontalAxis).isInverted();
+            horizInverted = horizontalAxis.isInverted();
         }
         double[] arrX = data.getPossibleXValues();
         double[] arrY = data.getPossibleYValues();
