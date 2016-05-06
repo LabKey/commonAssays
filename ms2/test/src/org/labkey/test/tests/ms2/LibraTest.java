@@ -135,7 +135,7 @@ public class LibraTest extends MS2TestBase
         // Try filtering based on a custom view using a different grouping
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         click(Locator.linkWithText("Create or Edit View"));
-        waitForElement(Locator.xpath("//button[text()='Save']"), WAIT_FOR_JAVASCRIPT);
+        findButton("Save");
         _customizeViewsHelper.addCustomizeViewFilter("Hyper", "Hyper", "Is Greater Than", "250");
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptide"));
         _customizeViewsHelper.saveCustomView("HyperFilter");
