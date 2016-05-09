@@ -18,6 +18,7 @@ package org.labkey.ms2.protein.uniprot;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ParseContext;
@@ -401,9 +402,9 @@ public class uniprot extends ParseActions
                         " WHERE c.hash=" + _iTableName + ".hash AND " + _iTableName + ".genus=b.genus AND " + _iTableName + ".species=b.species AND b.orgid=c.orgid" +
                         ")";
 
-        StringBuilder initialInsertionCommand = new StringBuilder("INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
-        _dialect.addReselect(initialInsertionCommand, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"));
-        _initialInsertion = c.prepareStatement(initialInsertionCommand.toString());
+        SQLFragment initialInsertionCommand = new SQLFragment("INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
+        _dialect.addReselect(initialInsertionCommand, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"), null);
+        _initialInsertion = c.prepareStatement(initialInsertionCommand.getSQL());
         String getCurrentInsertStatsCommand =
                 "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
         _getCurrentInsertStats = c.prepareStatement(getCurrentInsertStatsCommand);

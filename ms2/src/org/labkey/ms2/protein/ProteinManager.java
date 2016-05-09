@@ -1153,7 +1153,7 @@ public class ProteinManager
     public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, boolean peptideQuery, User user)
     {
         // SELECT (TOP n) Protein, SequenceMass, etc.
-        StringBuilder proteinSql = new StringBuilder("SELECT Protein");
+        SQLFragment proteinSql = new SQLFragment("SELECT Protein");
 
         // If this query is a subselect of proteins to which we join the peptide table, we need to:
         // 1. Alias Protein to prevent SELECT and ORDER BY ambiguity after joining to the peptides table (easier to do this than to disambiguate outside the subselect)
@@ -1163,7 +1163,7 @@ public class ProteinManager
 
         proteinSql.append(", prot.Mass AS SequenceMass, COUNT(Peptide) AS Peptides, COUNT(DISTINCT Peptide) AS UniquePeptides, pep.SeqId AS sSeqId\n");
         proteinSql.append("FROM (SELECT * FROM ");
-        proteinSql.append(MS2Manager.getTableInfoPeptides());
+        proteinSql.append(MS2Manager.getTableInfoPeptides(), "peptides");
         proteinSql.append(' ');
 
         // Construct Peptide WHERE clause (no need to sort by peptide)
@@ -1175,7 +1175,7 @@ public class ProteinManager
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
 
         proteinSql.append(") pep LEFT OUTER JOIN ");
-        proteinSql.append(getTableInfoSequences());
+        proteinSql.append(getTableInfoSequences(), "sequences");
         proteinSql.append(" prot ON prot.SeqId = pep.SeqId\n");
         proteinSql.append("GROUP BY Protein, prot.Mass, pep.SeqId, prot.BestGeneName, prot.BestName, prot.Description, prot.SeqId\n");
 

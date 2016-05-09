@@ -16,6 +16,7 @@
 package org.labkey.ms2.protein.fasta;
 
 import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.AliasManager;
 import org.labkey.ms2.protein.ProteinManager;
@@ -95,9 +96,9 @@ public class FastaDbHelper
 
     public FastaDbHelper(Connection c) throws SQLException
     {
-        StringBuilder initialInsert = new StringBuilder(INITIAL_INSERTION_COMMAND);
-        _dialect.addReselect(initialInsert, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"));
-        _initialInsertionStmt = c.prepareStatement(initialInsert.toString());
+        SQLFragment initialInsert = new SQLFragment(INITIAL_INSERTION_COMMAND);
+        _dialect.addReselect(initialInsert, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"), null);
+        _initialInsertionStmt = c.prepareStatement(initialInsert.getSQL());
         _getCurrentInsertStatsStmt = c.prepareStatement(GET_CURRENT_INSERT_STATS_COMMAND);
         _updateInsertionStmt = c.prepareStatement(UPDATE_INSERTION_COMMAND);
         _finalizeInsertionStmt = c.prepareStatement(FINALIZE_INSERTION_COMMAND);

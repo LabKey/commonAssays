@@ -608,14 +608,14 @@ public abstract class MS2Importer
         String columnNames = getTableColumnNames();
         int columnCount = StringUtils.countMatches(columnNames, ",") + 1;
         String insertSql = "INSERT INTO " + MS2Manager.getTableInfoPeptidesData() + " (" + columnNames + ") VALUES (" + StringUtils.repeat("?, ", columnCount - 1) + "?)";
-        StringBuilder insertWithReselectSql = new StringBuilder(insertSql);
-        MS2Manager.getSqlDialect().addReselect(insertWithReselectSql, MS2Manager.getTableInfoPeptidesData().getColumn("RowId"));
+        SQLFragment insertWithReselectSql = new SQLFragment(insertSql);
+        MS2Manager.getSqlDialect().addReselect(insertWithReselectSql, MS2Manager.getTableInfoPeptidesData().getColumn("RowId"), null);
 
         _systemLog.debug(insertSql);
         _stmt = _conn.prepareStatement(insertSql);
 
         _systemLog.debug(insertWithReselectSql);
-        _stmtWithReselect = _conn.prepareStatement(insertWithReselectSql.toString());
+        _stmtWithReselect = _conn.prepareStatement(insertWithReselectSql.getSQL());
 
         _prophetStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoPeptideProphetData() + " (PeptideId,ProphetFVal,ProphetDeltaMass,ProphetNumTrypticTerm,ProphetNumMissedCleav) VALUES (?,?,?,?,?)");
 
