@@ -1175,8 +1175,8 @@ public class ProteinManager
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
 
         proteinSql.append(") pep LEFT OUTER JOIN ");
-        proteinSql.append(getTableInfoSequences(), "sequences");
-        proteinSql.append(" prot ON prot.SeqId = pep.SeqId\n");
+        proteinSql.append(getTableInfoSequences(), "prot");
+        proteinSql.append(" ON prot.SeqId = pep.SeqId\n");
         proteinSql.append("GROUP BY Protein, prot.Mass, pep.SeqId, prot.BestGeneName, prot.BestName, prot.Description, prot.SeqId\n");
 
         // Construct Protein HAVING clause
