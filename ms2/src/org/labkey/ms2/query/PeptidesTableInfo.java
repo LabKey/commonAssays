@@ -69,15 +69,20 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, ContainerFilter.CURRENT, MS2RunType.values());
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, ContainerFilter.CURRENT, MS2RunType.values(), false);
     }
 
     public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter, runTypes);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter, runTypes, false);
     }
 
     public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
+    {
+        this(schema, url, includeFeatureFk, containerFilter, runTypes, false);
+    }
+
+    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes, boolean highestScore)
     {
         super(MS2Manager.getTableInfoPeptidesData(), schema);
         if (runTypes != null && runTypes.length == 1)
@@ -86,6 +91,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         }
         _runTypes = runTypes;
         setContainerFilter(containerFilter);
+        if (highestScore)
+        {
+            addHighestScoreFilter();
+        }
 
         // Stick EndScan column just after Scan column
         ColumnInfo scanColumn = getRealTable().getColumn("Scan");
@@ -270,6 +279,15 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         spectrumColumn.setHidden(true);
         addColumn(spectrumColumn);
 
+        SQLFragment retentionTimeMinutesSQL = new SQLFragment("RetentionTime / 60.0");
+        ExprColumn retentionTimeMinutesColumn = new ExprColumn(this, "RetentionTimeMinutes", retentionTimeMinutesSQL, JdbcType.DECIMAL);
+        retentionTimeMinutesColumn.setFormat("#.##");
+        List<FieldKey> fieldKeys = Arrays.asList(
+                FieldKey.fromParts("RetentionTime")
+        );
+        retentionTimeMinutesColumn.setSortFieldKeys(fieldKeys);
+        addColumn(retentionTimeMinutesColumn);
+
         if (includeFeatureFk)
             addFeatureInfoColumn();
     }
@@ -326,6 +344,71 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         }
         sql.append("))");
         addCondition(sql, fractionRunFieldKey);
+    }
+
+    private void addHighestScoreFilter()
+    {
+        SQLFragment sql = new SQLFragment();
+        FieldKey fractionRunFieldKey = FieldKey.fromParts("Fraction", "Run");
+        List<MS2Run> runs = _userSchema.getRuns();
+
+        if (runs != null)
+        {
+            // check to make sure runs are all the same type, just to be sure
+
+            MS2RunType runType = null;
+            for (MS2Run run : runs)
+            {
+                if(run.getRunType() == null)
+                {
+                    throw new IllegalStateException("Run type should never be null.");
+                }
+                else
+                {
+                    if(runType == null)
+                    {
+                        runType = run.getRunType();
+                    }
+                    else
+                    {
+                        if (!run.getRunType().equals(runType))
+                            throw new IllegalStateException("Runs have different types when looking at a single run.");
+                    }
+                }
+            }
+
+            // now find index of charge column name for query
+            MS2Run run = _userSchema.getRuns().get(0);  // all run types are the same, so just get the first one
+            String[] scoreColumnNames = run.getRunType().getScoreColumnNames().split(",");
+            String chargeColumnName = run.getChargeFilterColumnName();
+            int index = -1;
+            for (int i = 0; i < scoreColumnNames.length; i++)
+            {
+                if(scoreColumnNames[i].equals(chargeColumnName))
+                {
+                    index = i;
+                    break;
+                }
+            }
+            if(index == -1)
+            {
+                throw new IllegalArgumentException("Charge column index for run not found.");
+            }
+            String databaseScoreColumn = "Score" + String.valueOf(index + 1);  // db columns are 1-indexed
+
+
+            sql.append("RowId IN (SELECT RowId FROM \n");
+            sql.append(" (SELECT RowId, row_number() OVER(PARTITION BY Peptide ORDER BY " + databaseScoreColumn + " DESC) as RowNum FROM ");
+            sql.append(MS2Manager.getTableInfoPeptidesData(), "pep");
+            sql.append(" JOIN ");
+            sql.append(MS2Manager.getTableInfoFractions(), "fra");
+            sql.append(" ON pep.Fraction = fra.Fraction WHERE fra.Run IN ");
+            _userSchema.appendRunInClause(sql);
+            sql.append(" )x\n");
+            sql.append(" WHERE RowNum = 1)");
+
+            addCondition(sql, fractionRunFieldKey);
+        }
     }
 
     private void addFeatureInfoColumn()

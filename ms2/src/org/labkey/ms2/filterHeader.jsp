@@ -21,11 +21,26 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
     User user = getUser();
+    String runChargeFilterColumnName = bean.run.getChargeFilterColumnName();
+    String grouping = getViewContext().cloneActionURL().getParameter("grouping");
+    boolean isStandardView = false;
+    if(null == grouping)
+    {
+        isStandardView = true;  // no parameter = standard
+    }
+    else
+    {
+        if(grouping.equals("query"))  // standard view
+            isStandardView = true;
+        else  // not standard, so disable checkbox (which would not work anyway)
+            isStandardView = false;
+    }
 %>
 <labkey:form method="post" action="<%=h(bean.applyViewURL)%>">
     <table>
@@ -93,7 +108,7 @@
                         </fieldset>
                     <% } %>
                 </td>
-                <td style="height: 100%">
+                <td style="height: 100%; padding-right: 1em">
                     <fieldset>
                         <legend>Minimum&nbsp;tryptic&nbsp;ends</legend>
                         <table>
@@ -104,6 +119,19 @@
                                     <input type="radio" name="tryptic"<%=checked(2 == bean.tryptic)%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
                                 </td>
                                 <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddTrypticEndsFilterButton\"") %></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </td>
+                <td style="height: 100%<% if (!isStandardView) { %>; display:none"<% } %>">
+                    <fieldset>
+                        <legend>Highest score filter</legend>
+                        <table>
+                            <tr>
+                                <td nowrap style="vertical-align: middle;">
+                                    <input type="checkbox" id="highestScore" name="highestScore"<%=checked(bean.highestScore)%> value="1">Only show highest score for <%=h(runChargeFilterColumnName)%><%=PageFlowUtil.helpPopup("Only show highest score for " + runChargeFilterColumnName, "Filter out all but highest " + runChargeFilterColumnName + " score for a peptide")%>
+                                </td>
+                                <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddHighestScoreFilterButton\"") %></td>
                             </tr>
                         </table>
                     </fieldset>

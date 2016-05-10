@@ -496,6 +496,7 @@ public class MS2Controller extends SpringActionController
             bean.viewTypes = MS2RunViewType.getTypesForRun(run);
             bean.currentViewType = MS2RunViewType.getViewType(form.getGrouping());
             bean.expanded = form.getExpanded();
+            bean.highestScore = form.getHighestScore();
 
             String chargeFilterParamName = run.getChargeFilterParamName();
             ActionURL extraFilterURL = currentURL.clone().setAction(AddExtraFilterAction.class);
@@ -505,6 +506,7 @@ public class MS2Controller extends SpringActionController
             extraFilterURL.deleteParameter("tryptic");
             extraFilterURL.deleteParameter("grouping");
             extraFilterURL.deleteParameter("expanded");
+            extraFilterURL.deleteParameter("highestScore");
             bean.extraFilterURL = extraFilterURL;
 
             bean.charge1 = defaultIfNull(currentURL.getParameter(chargeFilterParamName + "1"), "0");
@@ -542,6 +544,7 @@ public class MS2Controller extends SpringActionController
         public String charge1;
         public String charge2;
         public String charge3;
+        public boolean highestScore;
         public int tryptic;
     }
 
@@ -5363,10 +5366,17 @@ public class MS2Controller extends SpringActionController
             // Stick posted values onto showRun URL and forward.  URL shouldn't have any rawScores or tryptic (they are
             // deleted from the button URL and get posted instead).  Don't bother adding "0" since it's the default.
 
-            // Verify that charge filter scroes are valid floats and, if so, add as URL params
-            parseChargeScore(ctx, url, "1", paramName);
-            parseChargeScore(ctx, url, "2", paramName);
-            parseChargeScore(ctx, url, "3", paramName);
+            // Verify that charge filter scores are valid floats and, if so, add as URL params
+            float charge1 = parseChargeScore((String)ctx.get("charge1"));
+            float charge2 = parseChargeScore((String)ctx.get("charge2"));
+            float charge3 = parseChargeScore((String)ctx.get("charge3"));
+
+            if (charge1 != 0.0)
+                url.addParameter(paramName + "1", Formats.chargeFilter.format(charge1));
+            if (charge2 != 0.0)
+                url.addParameter(paramName + "2", Formats.chargeFilter.format(charge2));
+            if (charge3 != 0.0)
+                url.addParameter(paramName + "3", Formats.chargeFilter.format(charge3));
 
             String tryptic = (String) ctx.get("tryptic");
 
@@ -5383,16 +5393,20 @@ public class MS2Controller extends SpringActionController
                 url.addParameter("expanded", "1");
             }
 
+            if (request.getParameter("highestScore") != null)
+            {
+                url.addParameter("highestScore", "true");
+            }
+
             return url;
         }
     }
 
 
     // Parse parameter to float, returning 0 for any parsing exceptions
-    private void parseChargeScore(ViewContext ctx, ActionURL url, String digit, String paramName)
+    private float parseChargeScore(String score)
     {
         float value = 0;
-        String score = (String)ctx.get("charge" + digit);
 
         try
         {
@@ -5406,8 +5420,7 @@ public class MS2Controller extends SpringActionController
             // Can't parse... just use default
         }
 
-        if (0.0 != value)
-            url.addParameter(paramName + digit, Formats.chargeFilter.format(value));
+        return value;
     }
 
     public static class ElutionProfileForm extends DetailsForm
@@ -5488,13 +5501,14 @@ public class MS2Controller extends SpringActionController
 
         public enum PARAMS
         {
-            run, expanded, grouping
+            run, expanded, grouping, highestScore
         }
 
         int run = 0;
         int fraction = 0;
         int tryptic;
         boolean expanded = false;
+        boolean highestScore = false;
         String grouping;
         String columns;
         String proteinColumns;
@@ -5509,6 +5523,16 @@ public class MS2Controller extends SpringActionController
         public boolean getExpanded()
         {
             return this.expanded;
+        }
+
+        public void setHighestScore(boolean highestScore)
+        {
+            this.highestScore = highestScore;
+        }
+
+        public boolean getHighestScore()
+        {
+            return this.highestScore;
         }
 
         public void setRun(int run)

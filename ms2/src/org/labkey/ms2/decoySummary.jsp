@@ -42,8 +42,37 @@
     String decoyCount = nf.format(bean.getDecoyCount());
     Float desiredFdr = bean.getDesiredFdr();
 
-    ActionURL setDesiredFdrURL = getViewContext().cloneActionURL();
-    setDesiredFdrURL.deleteParameter("desiredFdr");
+    ActionURL newURL = getViewContext().cloneActionURL();
+    String ionCutoff = newURL.getParameter("MS2Peptides.Ion~gte");
+    boolean isIonCutoff;
+    if (null != ionCutoff)
+    {
+        float ionCutoffFloat = Float.parseFloat(ionCutoff);
+        if(ionCutoffFloat == bean.getScoreThreshold())  // filter is same as threshold, so check checkbox
+            isIonCutoff = true;
+        else
+            isIonCutoff = false;
+    }
+    else
+    {
+        isIonCutoff = false;
+    }
+    String grouping = newURL.getParameter("grouping");
+    boolean isStandardView = false;
+    if(null == grouping)
+    {
+        isStandardView = true;  // no parameter = standard
+    }
+    else
+    {
+        if(grouping.equals("query"))  // standard view
+            isStandardView = true;
+        else  // not standard, so disable checkbox (which would not work anyway)
+            isStandardView = false;
+    }
+
+    newURL.deleteParameter("MS2Peptides.Ion~gte");
+    newURL.deleteParameter("desiredFdr");
 %>
 <% if (null != desiredFdr && Float.compare(bean.getFdr(), desiredFdr) > 0)
 { %>
@@ -53,11 +82,12 @@
 { %>
 <span>No scores were above threshold for standard p-value. FDR is 100%.</span><br/><br/>
 <%}%>
-<labkey:form method="GET" action="<%=setDesiredFdrURL%>" name="decoySummary">
-    <% for (Pair<String, String> param : setDesiredFdrURL.getParameters())
+<labkey:form method="GET" action="<%=newURL%>" name="decoySummary">
+    <% for (Pair<String, String> param : newURL.getParameters())
     { %>
     <input type="hidden" name="<%=h(param.getKey())%>" value="<%=h(param.getValue())%>"/>
     <% } %>
+
     <table >
         <tr>
             <td class="labkey-form-label">P Value</td>
@@ -74,7 +104,7 @@
             <td style="text-align:right"><%=h(decoyCount)%></td>
             <td style="text-align:right; padding-left:10px;"><%=h(fdr)%></td>
             <td style="text-align:right">
-                <select name="desiredFdr" onchange="this.form.submit();">
+                <select name="desiredFdr" onchange="document.getElementById('ionCutoff').checked = false; this.form.submit();">
                     <%
                         List<Float> fdrOptions = new ArrayList<>(Arrays.asList(.001f, .002f, .01f, .02f, .025f, .05f, .1f));
                         fdrOptions.add(bean.getFdrAtDefaultPvalue());
@@ -87,6 +117,9 @@
                             <%=selected(Float.compare(fdrOption, (null == desiredFdr ? bean.getFdrAtDefaultPvalue() : desiredFdr)) == 0)%>><%=h(defaultFormat.format(fdrOption))%></option><%
                     } %>
                 </select>
+            </td>
+            <td style="text-align: right; padding-left:5px">
+                <label <% if (!isStandardView) { %> style="display:none"<% } %>><input type="checkbox" onclick="this.form.submit();" name="MS2Peptides.Ion~gte" id="ionCutoff"<%=checked(isIonCutoff)%> value=<%=h(bean.getScoreThreshold())%>></input>Only show Ion &gt= this threshold</label>
             </td>
         </tr>
     </table>
