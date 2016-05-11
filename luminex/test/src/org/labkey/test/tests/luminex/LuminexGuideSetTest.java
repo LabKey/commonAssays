@@ -364,19 +364,19 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText("view data"));
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.showHiddenItems();
-        _customizeViewsHelper.addCustomizeViewColumn("GuideSetId/RowId");
+        _customizeViewsHelper.addCustomizeViewColumn("GUIDESETID/RowId");
         _customizeViewsHelper.applyCustomView();
         DataRegionTable table = new DataRegionTable("query", this);
         for (int i = 0; i < analytes.length; i++)
         {
             // verify the row count, average, and standard deviation for the specified curve type's values
-            table.setFilter("GuideSetId/RowId", "Equals", guideSetIds.get(analytes[i]).toString());
+            table.setFilter("GUIDESETID/RowId", "Equals", guideSetIds.get(analytes[i]).toString());
             table.setFilter("CurveType", "Equals", curveType);
             assertEquals("Unexpected row count for guide set " + guideSetIds.get(analytes[i]).toString(), rowCounts[i], Integer.parseInt(table.getDataAsText(0, "Run Count")));
             assertEquals("Unexpected average for guide set " + guideSetIds.get(analytes[i]).toString(), averages[i],table.getDataAsText(0, averageColName));
             assertEquals("Unexpected stddev for guide set " + guideSetIds.get(analytes[i]).toString(), stdDevs[i], table.getDataAsText(0, stdDevColName));
             table.clearFilter("CurveType");
-            table.clearFilter("GuideSetId/RowId");
+            table.clearFilter("GUIDESETID/RowId");
         }
     }
 
