@@ -77,11 +77,6 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter, runTypes, false);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
-    {
-        this(schema, url, includeFeatureFk, containerFilter, runTypes, false);
-    }
-
     public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes, boolean highestScore)
     {
         super(MS2Manager.getTableInfoPeptidesData(), schema);
@@ -282,10 +277,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         SQLFragment retentionTimeMinutesSQL = new SQLFragment("RetentionTime / 60.0");
         ExprColumn retentionTimeMinutesColumn = new ExprColumn(this, "RetentionTimeMinutes", retentionTimeMinutesSQL, JdbcType.DECIMAL);
         retentionTimeMinutesColumn.setFormat("#.##");
-        List<FieldKey> fieldKeys = Arrays.asList(
-                FieldKey.fromParts("RetentionTime")
-        );
-        retentionTimeMinutesColumn.setSortFieldKeys(fieldKeys);
+        retentionTimeMinutesColumn.setSortFieldKeys(Collections.singletonList(FieldKey.fromParts("RetentionTime")));
         addColumn(retentionTimeMinutesColumn);
 
         if (includeFeatureFk)
@@ -348,13 +340,11 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     private void addHighestScoreFilter()
     {
-        SQLFragment sql = new SQLFragment();
-        FieldKey fractionRunFieldKey = FieldKey.fromParts("Fraction", "Run");
         List<MS2Run> runs = _userSchema.getRuns();
 
         if (runs != null)
         {
-            // check to make sure runs are all the same type, just to be sure
+            // check to make sure runs are all the same type, in case future code breaks this assumption
 
             MS2RunType runType = null;
             for (MS2Run run : runs)
@@ -377,26 +367,15 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 }
             }
 
+
             // now find index of charge column name for query
-            MS2Run run = _userSchema.getRuns().get(0);  // all run types are the same, so just get the first one
-            String[] scoreColumnNames = run.getRunType().getScoreColumnNames().split(",");
+            MS2Run run = runs.get(0);  // all run types are the same, so just get the first one
+            String[] scoreColumnNames = runType.getScoreColumnNames().split(",");  // all run types are the same, so re-use runType here
             String chargeColumnName = run.getChargeFilterColumnName();
-            int index = -1;
-            for (int i = 0; i < scoreColumnNames.length; i++)
-            {
-                if(scoreColumnNames[i].equals(chargeColumnName))
-                {
-                    index = i;
-                    break;
-                }
-            }
-            if(index == -1)
-            {
-                throw new IllegalArgumentException("Charge column index for run not found.");
-            }
+            int index = run.getRunType().getScoreColumnList().indexOf(FieldKey.fromParts(chargeColumnName));
             String databaseScoreColumn = "Score" + String.valueOf(index + 1);  // db columns are 1-indexed
 
-
+            SQLFragment sql = new SQLFragment();
             sql.append("RowId IN (SELECT RowId FROM \n");
             sql.append(" (SELECT RowId, row_number() OVER(PARTITION BY Peptide ORDER BY " + databaseScoreColumn + " DESC) as RowNum FROM ");
             sql.append(MS2Manager.getTableInfoPeptidesData(), "pep");
@@ -407,6 +386,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             sql.append(" )x\n");
             sql.append(" WHERE RowNum = 1)");
 
+            FieldKey fractionRunFieldKey = FieldKey.fromParts("Fraction", "Run");
             addCondition(sql, fractionRunFieldKey);
         }
     }
