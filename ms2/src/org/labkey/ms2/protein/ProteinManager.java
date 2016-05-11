@@ -1163,7 +1163,7 @@ public class ProteinManager
 
         proteinSql.append(", prot.Mass AS SequenceMass, COUNT(Peptide) AS Peptides, COUNT(DISTINCT Peptide) AS UniquePeptides, pep.SeqId AS sSeqId\n");
         proteinSql.append("FROM (SELECT * FROM ");
-        proteinSql.append(MS2Manager.getTableInfoPeptides(), "peptides");
+        proteinSql.append(MS2Manager.getTableInfoPeptides());
         proteinSql.append(' ');
 
         // Construct Peptide WHERE clause (no need to sort by peptide)
