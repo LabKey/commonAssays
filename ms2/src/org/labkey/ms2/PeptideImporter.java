@@ -65,42 +65,6 @@ public abstract class PeptideImporter extends MS2Importer
         super(context, user, c, description, fullFileName, log);
     }
 
-    public static File getDatabaseFile(Container container, String dbName, String fastaFileName) throws FileNotFoundException
-    {
-        // Try looking for the "DB" value under the FASTA root
-        if (dbName != null)
-        {
-            File file = new File(MS2PipelineManager.getSequenceDatabaseRoot(container).getPath(), dbName);
-            if (file.isFile())
-            {
-                return file;
-            }
-        }
-
-        if (fastaFileName != null)
-        {
-            // Try using the full path and see if it resolves
-            File file = new File(fastaFileName);
-            if (file.isFile())
-            {
-                return file;
-            }
-
-            // Finally, try looking for the file name in our FASTA directory
-            String[] fileNameParts = fastaFileName.split("[\\\\/]");
-            String fileName = fileNameParts[fileNameParts.length - 1];
-            file = new File(MS2PipelineManager.getSequenceDatabaseRoot(container).getPath(), fileName);
-
-            if (file.isFile())
-            {
-                return file;
-            }
-        }
-
-        throw new FileNotFoundException("Could not find FASTA file. " + (dbName == null ? "" : (MascotDatLoader.DB_PREFIX + dbName)) + " " + (fastaFileName == null ? "" : ("fastafile=" + fastaFileName)));
-
-    }
-
     public String getType()
     {
         return _run != null ? _run.getType() : null;

@@ -18,13 +18,14 @@ package org.labkey.ms2.reader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2RunType;
-import org.labkey.ms2.PeptideImporter;
 import org.labkey.ms2.SpectrumException;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -328,9 +329,10 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         {
             if (_currentLine.startsWith(DB_PREFIX))
             {
+                String dbFileName = _currentLine.substring(DB_PREFIX.length()).trim();
                 try
                 {
-                    File databaseFile = PeptideImporter.getDatabaseFile(container, _currentLine.substring(DB_PREFIX.length()).trim(), null);
+                    File databaseFile = getDatabaseFile(container, dbFileName, null);
                     fraction.setDatabaseLocalPaths(Arrays.asList(databaseFile.getAbsolutePath()));
                 }
                 catch (FileNotFoundException e)
@@ -338,6 +340,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                     // Do nothing.  If we can't find the file from the fastafile value in the header section, it will throw an exception.
                     // Note that this assumes the header comes after the parameters section, which seems to be the case (despite what the names
                     // might suggest).
+                    _log.warn("Could not find FASTA file: " + dbFileName);
                 }
             }
             else if (_currentLine.startsWith(ENZYME_PREFIX) || _currentLine.startsWith(ENZYME_PREFIX_LC))
@@ -723,7 +726,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
             if (matcher.matches())
             {
                 String s = matcher.group(1);
-                File databaseFile = PeptideImporter.getDatabaseFile(container, null, s.trim());
+                File databaseFile = getDatabaseFile(container, null, s.trim());
                 fraction.getDatabaseLocalPaths().add(databaseFile.getAbsolutePath());
             }
             readLine();
@@ -748,6 +751,75 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     {
         return eof() || _currentLine.matches(_boundaryMarker);
     }
+
+    public File getDatabaseFile(Container container, String dbName, String fastaFileName) throws FileNotFoundException
+    {
+        // Try looking for the "DB" value under the FASTA root
+        File dbRoot = MS2PipelineManager.getSequenceDatabaseRoot(container);
+        if (dbName != null)
+        {
+            // Mascot FASTA files may have been downloaded from the server into a ./mascot/X subdirectory, so seek it out
+            File file = findFile(dbRoot, dbName, 3);
+            if (file != null)
+            {
+                return file;
+            }
+        }
+
+        if (fastaFileName != null)
+        {
+            // Try using the full path and see if it resolves
+            File file = new File(fastaFileName);
+            if (file.isFile())
+            {
+                return file;
+            }
+
+            // Try looking for the file name under our FASTA directory
+            String[] fileNameParts = fastaFileName.split("[\\\\/]");
+            String fileName = fileNameParts[fileNameParts.length - 1];
+
+            // Mascot FASTA files may have been downloaded from the server into a ./mascot/X subdirectory, so seek it out
+            file = findFile(dbRoot, fileName, 3);
+            if (file != null)
+            {
+                return file;
+            }
+        }
+
+        throw new FileNotFoundException("Could not find FASTA file. " + (dbName == null ? "" : (DB_PREFIX + dbName)) + " " + (fastaFileName == null ? "" : ("fastafile=" + fastaFileName)));
+    }
+
+    @Nullable
+    /** Look for the file up to maxDepth child directories under the current directory */
+    private File findFile(File parent, String name, int maxDepth)
+    {
+        // Stop looking, we've exceeded our maximum recursive depth
+        if (maxDepth == 0)
+        {
+            return null;
+        }
+
+        File f = new File(parent, name);
+        if (f.isFile())
+        {
+            return f;
+        }
+        File[] children = parent.listFiles(File::isDirectory);
+        if (children != null)
+        {
+            for (File child : children)
+            {
+                f = findFile(child, name, maxDepth - 1);
+                if (f != null)
+                {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
 
     public class DatPeptide extends Peptide
     {
