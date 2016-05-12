@@ -370,9 +370,8 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
             // now find index of charge column name for query
             MS2Run run = runs.get(0);  // all run types are the same, so just get the first one
-            String[] scoreColumnNames = runType.getScoreColumnNames().split(",");  // all run types are the same, so re-use runType here
             String chargeColumnName = run.getChargeFilterColumnName();
-            int index = run.getRunType().getScoreColumnList().indexOf(FieldKey.fromParts(chargeColumnName));
+            int index = runType.getScoreColumnList().indexOf(FieldKey.fromParts(chargeColumnName));  // all run types are the same, so re-use runType
             String databaseScoreColumn = "Score" + String.valueOf(index + 1);  // db columns are 1-indexed
 
             SQLFragment sql = new SQLFragment();
