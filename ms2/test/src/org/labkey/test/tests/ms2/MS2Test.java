@@ -916,7 +916,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.saveCustomView(VIEW5);
 
         DataRegionTable peptidesTable = new DataRegionTable("query", this);
-        Locator seqIdMassHeader = DataRegionTable.Locators.columnHeader("query", "SeqId/Mass");
+        Locator seqIdMassHeader = DataRegionTable.Locators.columnHeader("query", "SEQID/Mass");
         log("Make sure the filtering and new columns worked");
         assertElementPresent(seqIdMassHeader);
         assertTextNotPresent("gi|34849400|gb|AAP58899.1|");
