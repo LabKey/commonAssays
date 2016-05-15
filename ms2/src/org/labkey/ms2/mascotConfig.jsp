@@ -46,7 +46,7 @@
             var mascotForm = document.forms['mascottest'];
             if (preferenceForm.mascotServer.value.length == 0)
             {
-                alert("Please specify your mascot server before testing.");
+                alert("Please specify your Mascot server before testing.");
                 try {preferenceForm.mascotServer.focus();} catch(x){}
                 return;
             }
@@ -81,7 +81,7 @@
             </tr>
         <% } %>
         <tr>
-            <td class="labkey-form-label">Mascot server</td>
+            <td class="labkey-form-label">Mascot server URL<%= helpPopup("Mascot server URL", "Should start with http:// or https://")%></td>
             <td><input type="text" name="mascotServer" size="64" value="<%=h(mascotConfig.getMascotServer())%>"></td>
         </tr>
         <tr>
