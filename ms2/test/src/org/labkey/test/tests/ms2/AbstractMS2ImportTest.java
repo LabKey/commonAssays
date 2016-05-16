@@ -49,6 +49,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected static final String LEGACY_PROTEIN_PROPHET_VIEW_NAME = "legacyProteinProphetView";
     protected static final String VIEW4 = "queryView1";
     protected static final String VIEW5 = "queryView2";
+    protected static final String VIEW6 = "queryView3";
     protected static final String PEPTIDE1 = "K.GSDSLSDGPACKR.S";
     protected static final String PEPTIDE2 = "R.TIDPVIAR.K";
     protected static final String PEPTIDE3 = "K.HVSGKIIGFFY.-";

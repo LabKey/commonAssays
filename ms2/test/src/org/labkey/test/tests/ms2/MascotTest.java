@@ -16,6 +16,7 @@
 
 package org.labkey.test.tests.ms2;
 
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -383,6 +384,37 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertEquals("Incorrect FDR % in Decoy Summary", "0.00%", decoySummary.get("FDR"));
 
         // TODO: Would be good to test the functionality of the "Adjust FDR To" dropdown, but we may still have further tweaking on this UI to do pending client feedback.
+
+        DataRegionTable drt = new DataRegionTable("MS2Peptides", this);
+        drt.setFilter("Peptide", "Equals", "R.KPLAPK.K");
+        drt.setSort("Ion", SortDirection.DESC);
+        Assert.assertTrue(drt.getDataRowCount() > 1);
+
+        String greatest = drt.getDataAsText(0, "Ion");
+        String secondGreatest = drt.getDataAsText(1, "Ion");
+
+        //Apply filter
+        checkCheckbox(Locator.checkboxByName("highestScore"));
+        clickAndWait(Locator.id("AddHighestScoreFilterButton"));
+        Assert.assertEquals(drt.getDataRowCount(), 1);
+
+        String filteredIonValue = drt.getDataAsText(0, "Ion");
+        Assert.assertEquals("", filteredIonValue, greatest);
+        Assert.assertNotEquals("", filteredIonValue, secondGreatest);
+
+        checkCheckbox(Locator.checkboxById("ionCutoff"));
+        waitForElement(Locator.tagContainingText("div","(Ion >= 13.1)"));
+        Assert.assertEquals(drt.getDataRowCount(), 0);
+
+        selectOptionByText(Locator.tagWithName("select", "desiredFdr"),"1.0%");
+        assertNotChecked(Locator.checkboxById("ionCutoff"));  //Changing the FDR causes checkbox to uncheck
+        assertElementNotPresent(Locator.tagContainingText("div","(Ion >= 13.1)"));
+
+        //Re-filter with new Ion Cutoff value
+        checkCheckbox(Locator.checkboxById("ionCutoff"));
+        Assert.assertEquals(drt.getDataRowCount(), 1);
+        drt.clearFilter("Peptide");
+        Assert.assertEquals(drt.getDataRowCount(), 20);
     }
 
     protected void setupEngine()

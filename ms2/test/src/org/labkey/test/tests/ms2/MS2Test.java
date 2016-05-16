@@ -16,6 +16,7 @@
 
 package org.labkey.test.tests.ms2;
 
+import org.junit.Assert;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
@@ -28,7 +29,6 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.TextSearcher;
-import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 import java.util.Arrays;
@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Category({MS2.class, DailyA.class})
 public class MS2Test extends AbstractMS2ImportTest
@@ -817,6 +817,21 @@ public class MS2Test extends AbstractMS2ImportTest
 
         validateCompare();
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+
+        String retTimeColumn = "RetentionTime";
+        String retMinsColumn = "RetentionTimeMinutes";
+
+        clickAndWait(Locator.linkWithText("drt/CAexample_mini (DRT2)"));
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addCustomizeViewColumn(retTimeColumn);
+        _customizeViewsHelper.addCustomizeViewColumn(retMinsColumn);
+        _customizeViewsHelper.saveCustomView(VIEW6);
+
+        DataRegionTable drt = new DataRegionTable("MS2Peptides", this);
+        int row = drt.getRowIndex("Peptide","K.KLYNEELK.A");
+        Double retTime = Double.parseDouble( drt.getDataAsText(row, retTimeColumn));
+        Double retTimeMinutes = Double.parseDouble(drt.getDataAsText(row, retMinsColumn));
+        Assert.assertEquals( retTime/60, retTimeMinutes, 0.01);
     }
 
     private void validateRunGroups()
