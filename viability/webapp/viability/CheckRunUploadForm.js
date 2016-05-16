@@ -56,7 +56,7 @@ function checkRunUploadForm(form)
         LABKEY.setDirty(false);
     else {
         // user canceled so reactivate the form buttons by removing their style labkey-disabled-button
-        Ext4.get(Ext4.DomQuery.select('table tbody tr td div span a'), form).removeCls("labkey-disabled-button");
+        Ext4.get(Ext4.DomQuery.select('a[@class*=labkey-disabled-button]:contains(Save)'), form).removeCls("labkey-disabled-button");
     }
     return submit;
 }
