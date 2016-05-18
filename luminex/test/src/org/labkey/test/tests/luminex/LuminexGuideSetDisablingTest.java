@@ -293,21 +293,11 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 
     private void clickGuideSetDetailsByComment(String comment)
     {
-        boolean found = false;
-        DataRegionTable drt = new DataRegionTable("GuideSet", this);
-        for (int i=0; i < drt.getDataRowCount(); i++)
-            if (drt.getDataAsText(i, "Comment").equals(comment))
-            {
-                // NOTE: cannot use column name here because it works on column labels and there is no label here
-                click(drt.link(i,1));
-                found = true;
-            }
-
-        if (!found)
-            Assert.fail("There is no GuideSet with that comment. Check the value of the comment and try again.");
-        else
-            waitForElement(TABLE_LOCATOR);
-
+        DataRegionTable drt = new DataRegionTable("GuideSet", getDriver());
+        int row = drt.getRowIndex("Comment", comment);
+        Assert.assertTrue("There is no GuideSet with the comment: " + comment, row >= 0);
+        drt.link(row, 1).click();
+        waitForElement(TABLE_LOCATOR);
     }
 
     private void validateGuideSetRunDetails(String type, String controlType)

@@ -40,10 +40,10 @@ public class LuminexSinglePointTest extends LuminexTest
 {
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
 
-    private final String file1 = "01-11A12-IgA-Biotin.xls";
-    private final String file2 = "02-14A22-IgA-Biotin.xls";
-    private final String file3 = "03-31A82-IgA-Biotin.xls";
-    private final String file4 = "04-17A32-IgA-Biotin.xls";
+    private static final String file1 = "01-11A12-IgA-Biotin.xls";
+    private static final String file2 = "02-14A22-IgA-Biotin.xls";
+    private static final String file3 = "03-31A82-IgA-Biotin.xls";
+    private static final String file4 = "04-17A32-IgA-Biotin.xls";
 
     @BeforeClass
     public static void configurePerl()
@@ -74,7 +74,7 @@ public class LuminexSinglePointTest extends LuminexTest
         _extHelper.clickExtMenuButton(true, Locator.tagWithText("a", "view qc report"), "view single point control qc report");
         waitForText("Average Fi Bkgd");
 
-        DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", this);
+        DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
         tbl.setFilter("Analyte", "Equals", "ENV1 (31)");
         tbl.setSort("SinglePointControl/Run/Name", SortDirection.ASC);
         Assert.assertEquals("27.0", tbl.getDataAsText(0, "Average Fi Bkgd"));
@@ -83,15 +83,15 @@ public class LuminexSinglePointTest extends LuminexTest
         LeveyJenningsPlotWindow ljp = new LeveyJenningsPlotWindow(this);
 
         // check LJ plots column
-        click(tbl.link(0, 2));
+        tbl.link(0, 2).click();
         ljp.waitTillReady();
         Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
         Assert.assertEquals(Arrays.asList("Notebook1", "Notebook2"), ljp.getXAxis());
         ljp.closeWindow();
 
         addUrlParameter("_testLJQueryLimit=0");
-        tbl = new DataRegionTable("AnalyteSinglePointControl", this);
-        click(tbl.link(0, 2));
+        tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
+        tbl.link(0, 2).click();
         ljp.waitTillReady();
         Assert.assertEquals("Notebook1", ljp.getXTickTagElementText());
         Assert.assertEquals(Arrays.asList("Notebook1"), ljp.getXAxis());
@@ -152,7 +152,7 @@ public class LuminexSinglePointTest extends LuminexTest
     {
         goToTestAssayHome();
         _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), "view single point control qc report");
-        DataRegionTable table = new DataRegionTable("AnalyteSinglePointControl", this);
+        DataRegionTable table = new DataRegionTable("AnalyteSinglePointControl", getDriver());
         table.setFilter("Analyte", "Equals", "ENV1 (31)");
         clickAndWait(Locator.linkContainingText("graph"));
     }
