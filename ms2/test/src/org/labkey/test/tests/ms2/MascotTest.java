@@ -16,7 +16,6 @@
 
 package org.labkey.test.tests.ms2;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -388,7 +387,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         DataRegionTable drt = new DataRegionTable("MS2Peptides", this);
         drt.setFilter("Peptide", "Equals", "R.KPLAPK.K");
         drt.setSort("Ion", SortDirection.DESC);
-        Assert.assertTrue(drt.getDataRowCount() > 1);
+        assertTrue("Not enough results to test filtering", drt.getDataRowCount() > 1);
 
         String greatest = drt.getDataAsText(0, "Ion");
         String secondGreatest = drt.getDataAsText(1, "Ion");
@@ -396,25 +395,26 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         //Apply filter
         checkCheckbox(Locator.checkboxByName("highestScore"));
         clickAndWait(Locator.id("AddHighestScoreFilterButton"));
-        Assert.assertEquals(drt.getDataRowCount(), 1);
+        assertEquals("Too many results ", 1, drt.getDataRowCount());
 
         String filteredIonValue = drt.getDataAsText(0, "Ion");
-        Assert.assertEquals("", filteredIonValue, greatest);
-        Assert.assertNotEquals("", filteredIonValue, secondGreatest);
+        assertEquals("Highest ion value not shown", greatest, filteredIonValue);
 
         checkCheckbox(Locator.checkboxById("ionCutoff"));
         waitForElement(Locator.tagContainingText("div","(Ion >= 13.1)"));
-        Assert.assertEquals(drt.getDataRowCount(), 0);
+        assertEquals("All results should be filtered", 0, drt.getDataRowCount());
 
         selectOptionByText(Locator.tagWithName("select", "desiredFdr"),"1.0%");
         assertNotChecked(Locator.checkboxById("ionCutoff"));  //Changing the FDR causes checkbox to uncheck
-        assertElementNotPresent(Locator.tagContainingText("div","(Ion >= 13.1)"));
+        assertElementNotPresent("Filter was not removed from grid", Locator.tagContainingText("div","(Ion >= 13.1)"));
 
         //Re-filter with new Ion Cutoff value
         checkCheckbox(Locator.checkboxById("ionCutoff"));
-        Assert.assertEquals(drt.getDataRowCount(), 1);
+        assertEquals("IonCutoff incorrectly applied", 1, drt.getDataRowCount());
         drt.clearFilter("Peptide");
-        Assert.assertEquals(drt.getDataRowCount(), 20);
+        assertEquals("Unexpected number of results for IonCutoff filter", 20, drt.getDataRowCount());
+        drt.clearFilter("Ion");  //reset filter
+        drt.clearSort("Ion");
     }
 
     protected void setupEngine()

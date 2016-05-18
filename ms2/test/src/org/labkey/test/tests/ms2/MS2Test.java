@@ -16,7 +16,6 @@
 
 package org.labkey.test.tests.ms2;
 
-import org.junit.Assert;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
@@ -831,7 +830,11 @@ public class MS2Test extends AbstractMS2ImportTest
         int row = drt.getRowIndex("Peptide","K.KLYNEELK.A");
         Double retTime = Double.parseDouble( drt.getDataAsText(row, retTimeColumn));
         Double retTimeMinutes = Double.parseDouble(drt.getDataAsText(row, retMinsColumn));
-        Assert.assertEquals( retTime/60, retTimeMinutes, 0.01);
+
+        Double eRetTime = 16.95;
+        Double eRetTimeMinutes = 0.28;
+        List<Double> eTimes = Arrays.asList(eRetTime, eRetTimeMinutes);
+        assertEquals("Wrong retention times", eTimes, Arrays.asList(retTime, retTimeMinutes));
     }
 
     private void validateRunGroups()
