@@ -85,11 +85,11 @@ public class LuminexEC50Test extends LuminexTest
         assertTextPresent("CurveFit");
 
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("TITRATIONID/Name");
+        _customizeViewsHelper.addCustomizeViewColumn("TitrationId/Name");
         _customizeViewsHelper.applyCustomView();
 
-        DataRegionTable table = new DataRegionTable("query", this);
-        table.setFilter("TITRATIONID/Name", "Equals One Of (example usage: a;b;c)", "Standard1;Standard2");
+        DataRegionTable table = new DataRegionTable("query", getDriver());
+        table.setFilter("TitrationId/Name", "Equals One Of (example usage: a;b;c)", "Standard1;Standard2");
 
         List<String> analyte = table.getColumnDataAsText("Analyte");
         List<String> formula = table.getColumnDataAsText("Curve Type");
@@ -153,7 +153,7 @@ public class LuminexEC50Test extends LuminexTest
         // expect to already be viewing CurveFit query
         assertTextPresent("CurveFit");
 
-        table = new DataRegionTable("query", this);
+        table = new DataRegionTable("query", getDriver());
         table.setFilter("FailureFlag", "Equals", "true");
 
         // expect one 4PL curve fit failure (for Standard1 - ENV6 (97))

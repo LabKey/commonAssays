@@ -139,7 +139,7 @@ public class MS2Test extends AbstractMS2ImportTest
         clickAndWait(Locator.id("viewTypeSubmitButton"));
 
         log("Test export selected");
-        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
         pushLocation();
         peptidesTable.checkCheckbox(0);
         File peptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export Selected", false, "TSV"));
@@ -311,7 +311,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("K.LLASMLAK.A");
 
         log("Test filters in Protein View");
-        DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, this);
+        DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, getDriver());
         proteinsTable.setFilter("SequenceMass", "Is Greater Than", "17000", "Is Less Than", "50000");
         assertTextNotPresent("gi|15925226|30S_ribosomal_pro",
                 "gi|19703691|Nicotinate_phosph");
@@ -393,7 +393,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "Scan DESC");
         assertTextNotPresent("gi|30089158|low_density_lipop");
 
-        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
+        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, getDriver());
         quantitationTable.setFilter("PercentCoverage", "Is Not Blank", null);
         assertTextNotPresent("gi|13442951|MAIL");
         assertTextPresent("(GroupProbability > 0.7) AND (PercentCoverage is not blank)");
@@ -671,7 +671,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "gi|30089158|low_density_lipop");
 
         log("Test exporting in Query - Protein View");
-        DataRegionTable proteinGroupsTable = new DataRegionTable(REGION_NAME_PROTEINGROUPS, this);
+        DataRegionTable proteinGroupsTable = new DataRegionTable(REGION_NAME_PROTEINGROUPS, getDriver());
 
         log("Test exporting in TSV");
         File proteinGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderButton("Export All", false, "TSV"));
@@ -700,7 +700,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void validateLegacySingleRunExport()
     {
         log("Test export");
-        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
+        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, getDriver());
         File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "AMT"));
         TextSearcher qTableSrch = new TextSearcher(() -> TestFileUtils.getFileContents(qTableFile));
         assertTextPresent(qTableSrch, "Run",
@@ -790,7 +790,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Return to run and set a filter");
         popLocation();
-        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
         peptidesTable.setFilter("Scan", "Is Less Than", "25");
         address = getAttribute(Locator.linkWithText("gi|15645924|ribosomal_protein"), "href");
         pushLocation();
@@ -826,7 +826,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addCustomizeViewColumn(retMinsColumn);
         _customizeViewsHelper.saveCustomView(VIEW6);
 
-        DataRegionTable drt = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable drt = new DataRegionTable("MS2Peptides", getDriver());
         int row = drt.getRowIndex("Peptide","K.KLYNEELK.A");
         Double retTime = Double.parseDouble( drt.getDataAsText(row, retTimeColumn));
         Double retTimeMinutes = Double.parseDouble(drt.getDataAsText(row, retMinsColumn));
@@ -905,7 +905,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(RUN_GROUP1_NAME2,
                 RUN_GROUP2_NAME,
                 DEFAULT_EXPERIMENT);
-        checkDataRegionCheckbox("XTandemSearchRuns", 1);
+        new DataRegionTable("XTandemSearchRuns", getDriver()).checkCheckbox(1);
         clickButton("Remove");
 
         assertTextPresent("DRT2");
@@ -915,7 +915,7 @@ public class MS2Test extends AbstractMS2ImportTest
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
 
         log("Test that the compare run groups works");
-        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", this);
+        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", getDriver());
         searchRunsTable.checkAllOnPage();
         _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "ProteinProphet");
         clickButton("Compare");
@@ -933,8 +933,8 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addCustomizeViewFilter("SeqId/Mass", "Protein Mass", "Is Less Than", "30000");
         _customizeViewsHelper.saveCustomView(VIEW5);
 
-        DataRegionTable peptidesTable = new DataRegionTable("query", this);
-        Locator seqIdMassHeader = DataRegionTable.Locators.columnHeader("query", "SEQID/Mass");
+        DataRegionTable peptidesTable = new DataRegionTable("query", getDriver());
+        Locator seqIdMassHeader = DataRegionTable.Locators.columnHeader("query", "SeqId/Mass");
         log("Make sure the filtering and new columns worked");
         assertElementPresent(seqIdMassHeader);
         assertTextNotPresent("gi|34849400|gb|AAP58899.1|");
@@ -950,7 +950,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
 
         log("Test exporting Compare Runs in Query");
-        File compareRunExportFile = new DataRegionExportHelper(new DataRegionTable("query", this)).exportText();
+        File compareRunExportFile = new DataRegionExportHelper(new DataRegionTable("query", getDriver())).exportText();
         TextSearcher compareRunExportSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(compareRunExportFile));
         assertTextPresent(compareRunExportSearcher, "Mass",
                 "0.89");
@@ -960,7 +960,7 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Test delete run groups");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
         clickAndWait(Locator.linkWithText("Run Groups"));
-        checkAllOnPage("RunGroupWide");
+        new DataRegionTable("RunGroupWide", getDriver()).checkAll();
         clickButton("Delete");
         clickButton("Confirm Delete");
         assertTextNotPresent(RUN_GROUP1_NAME2,
@@ -1027,7 +1027,7 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Test Compare MS2 Runs");
 
         log("Test Compare Peptides using Query");
-        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", this);
+        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", getDriver());
         searchRunsTable.checkAllOnPage();
         _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Peptide");
         click(Locator.radioButtonByNameAndValue("peptideFilterType", "none"));
@@ -1149,7 +1149,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Compare Runs using Query Peptides");
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
-        DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", this);
+        DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", getDriver());
         ms2Runs.checkAll();
         ms2Runs.clickHeaderButton("Compare", "Peptide");
         checkRadioButton(Locator.radioButtonByNameAndValue("peptideFilterType", "none"));
@@ -1191,7 +1191,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.TQMPAASICVNYK.G");
 
         log("Test exporting in Query Peptides Comparision");
-        File lastPeptideFile = new DataRegionExportHelper(new DataRegionTable("query", this)).exportText();
+        File lastPeptideFile = new DataRegionExportHelper(new DataRegionTable("query", getDriver())).exportText();
         TextSearcher lastPeptideSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(lastPeptideFile));
         assertTextPresent(lastPeptideSearcher,
                 "AVG_XCorr",
@@ -1283,7 +1283,7 @@ public class MS2Test extends AbstractMS2ImportTest
         waitForElementWithRefresh(Locator.linkContainingText(PROTOCOL_NAME), WAIT_FOR_JAVASCRIPT);
         waitAndClick(Locator.linkContainingText(PROTOCOL_NAME));
         waitForElement(Locator.linkWithText("K.LLASMLAK.A"));
-        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
         List<String> peptides = peptidesTable.getColumnDataAsText("Peptide");
         assertEquals(Arrays.asList("K.LLASMLAK.A", "R.Q^YALHVDGVGTK.A", "R.EFAEVVSKIRR.S", "A.KKVVAVIK.L", "K.ELQAAQAR.L", "R.EYDTSKIEAAIWK.E", "K.TEGVIPSR.E", "R.LGRHPNK.A", "K.LLASMLAK.A", "R.Q^YALHVDGVGTK.A", "R.EFAEVVSKIRR.S", "A.KKVVAVIK.L", "K.ELQAAQAR.L", "R.EYDTSKIEAAIWK.E", "K.TEGVIPSR.E", "R.LGRHPNK.A"), peptides);
     }

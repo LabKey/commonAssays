@@ -159,11 +159,11 @@ public final class LuminexRTransformTest extends LuminexTest
         DataRegionTable table;
         table = new DataRegionTable("Data", this);
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("ANALYTE/PROPERTIES/LotNumber");
+        _customizeViewsHelper.addCustomizeViewColumn("Analyte/Properties/LotNumber");
         _customizeViewsHelper.applyCustomView();
-        table.setFilter("ANALYTE/PROPERTIES/LotNumber", "Equals", TEST_ANALYTE_LOT_NUMBER);
+        table.setFilter("Analyte/Properties/LotNumber", "Equals", TEST_ANALYTE_LOT_NUMBER);
         waitForElement(Locator.paginationText(1, 40, 40));
-        table.clearFilter("ANALYTE/PROPERTIES/LotNumber");
+        table.clearFilter("Analyte/Properties/LotNumber");
     }
 
     private void verifyScriptVersions()

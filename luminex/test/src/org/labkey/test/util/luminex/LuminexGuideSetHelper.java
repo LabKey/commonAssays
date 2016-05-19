@@ -71,7 +71,7 @@ public class LuminexGuideSetHelper
         _test.selectQuery("assay.Luminex." + assayName, "AnalyteTitration");
         _test.waitForText("view data");
         _test.clickAndWait(Locator.linkContainingText("view data"));
-        DataRegionTable table = new DataRegionTable("query", _test);
+        DataRegionTable table = new DataRegionTable("query", _test.getDriver());
         table.setFilter("GuideSet/Created", "Is Not Blank", "");
         // check that the table contains one row that reads "No data to show."
         assertEquals("Expected no guide set assignments", 0, table.getDataRowCount());
@@ -260,16 +260,16 @@ public class LuminexGuideSetHelper
         _test.clickAndWait(Locator.linkContainingText("view data"));
         _test._customizeViewsHelper.openCustomizeViewPanel();
         _test._customizeViewsHelper.showHiddenItems();
-        _test._customizeViewsHelper.addCustomizeViewColumn("ANALYTE/RowId");
-        _test._customizeViewsHelper.addCustomizeViewColumn("TITRATION/RowId");
-        _test._customizeViewsHelper.addCustomizeViewColumn("GUIDESET/RowId");
+        _test._customizeViewsHelper.addCustomizeViewColumn("Analyte/RowId");
+        _test._customizeViewsHelper.addCustomizeViewColumn("Titration/RowId");
+        _test._customizeViewsHelper.addCustomizeViewColumn("GuideSet/RowId");
         _test._customizeViewsHelper.applyCustomView();
-        DataRegionTable table = new DataRegionTable("query", _test);
+        DataRegionTable table = new DataRegionTable("query", _test.getDriver());
         for (String analyte : analytes)
         {
-            table.setFilter("GUIDESET/RowId", "Equals", guideSetIds.get(analyte).toString());
+            table.setFilter("GuideSet/RowId", "Equals", guideSetIds.get(analyte).toString());
             assertEquals("Expected guide set to be assigned to " + expectedRunCount + " records", expectedRunCount, table.getDataRowCount());
-            table.clearFilter("GUIDESET/RowId");
+            table.clearFilter("GuideSet/RowId");
         }
     }
 
@@ -284,7 +284,7 @@ public class LuminexGuideSetHelper
         _test._customizeViewsHelper.showHiddenItems();
         _test._customizeViewsHelper.addCustomizeViewColumn("RowId");
         _test._customizeViewsHelper.applyCustomView();
-        DataRegionTable table = new DataRegionTable("query", _test);
+        DataRegionTable table = new DataRegionTable("query", _test.getDriver());
         table.setFilter("CurrentGuideSet", "Equals", "true");
         guideSetIds.put(table.getDataAsText(0, "Analyte Name"), Integer.parseInt(table.getDataAsText(0, "Row Id")));
         guideSetIds.put(table.getDataAsText(1, "Analyte Name"), Integer.parseInt(table.getDataAsText(1, "Row Id")));
