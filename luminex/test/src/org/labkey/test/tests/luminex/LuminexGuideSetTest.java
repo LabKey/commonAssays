@@ -59,7 +59,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         // add the R transform script to the assay
         goToTestAssayHome();
         _assayHelper.clickEditAssayDesign();
-        AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
+        AssayDesignerPage assayDesigner = new AssayDesignerPage(getDriver());
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         _listHelper.addField(TEST_ASSAY_LUM + " Batch Fields", "CustomProtocol", "Protocol", ListHelper.ListColumnType.String);
         // save changes to assay design
@@ -274,7 +274,7 @@ public final class LuminexGuideSetTest extends LuminexTest
     private boolean verifyRunFileAssociations(int index)
     {
         // verify that the PDF of curves file was generated along with the xls file and the Rout file
-        DataRegionTable table = new DataRegionTable("Runs", this);
+        DataRegionTable table = new DataRegionTable("Runs", getDriver());
         table.setFilter("Name", "Equals", "Guide Set plate " + index);
         clickAndWait(Locator.tagWithAttribute("img", "src", "/labkey/Experiment/images/graphIcon.gif"));
         clickAndWait(Locator.linkWithText("Text View"));
@@ -364,19 +364,19 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText("view data"));
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.showHiddenItems();
-        _customizeViewsHelper.addCustomizeViewColumn("GUIDESETID/RowId");
+        _customizeViewsHelper.addCustomizeViewColumn("GuideSetId/RowId");
         _customizeViewsHelper.applyCustomView();
-        DataRegionTable table = new DataRegionTable("query", this);
+        DataRegionTable table = new DataRegionTable("query", getDriver());
         for (int i = 0; i < analytes.length; i++)
         {
             // verify the row count, average, and standard deviation for the specified curve type's values
-            table.setFilter("GUIDESETID/RowId", "Equals", guideSetIds.get(analytes[i]).toString());
+            table.setFilter("GuideSetId/RowId", "Equals", guideSetIds.get(analytes[i]).toString());
             table.setFilter("CurveType", "Equals", curveType);
             assertEquals("Unexpected row count for guide set " + guideSetIds.get(analytes[i]).toString(), rowCounts[i], Integer.parseInt(table.getDataAsText(0, "Run Count")));
             assertEquals("Unexpected average for guide set " + guideSetIds.get(analytes[i]).toString(), averages[i],table.getDataAsText(0, averageColName));
             assertEquals("Unexpected stddev for guide set " + guideSetIds.get(analytes[i]).toString(), stdDevs[i], table.getDataAsText(0, stdDevColName));
             table.clearFilter("CurveType");
-            table.clearFilter("GUIDESETID/RowId");
+            table.clearFilter("GuideSetId/RowId");
         }
     }
 
@@ -446,7 +446,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _customizeViewsHelper.addCustomizeViewColumn("QCFlags");
         _customizeViewsHelper.saveCustomView("QC Flags View");
 
-        DataRegionTable drt = new DataRegionTable("Runs", this);
+        DataRegionTable drt = new DataRegionTable("Runs", getDriver());
 
         //2. exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 for GS Analyte (2) is changed to be under the Guide Set range so new QC Flag inserted for that
