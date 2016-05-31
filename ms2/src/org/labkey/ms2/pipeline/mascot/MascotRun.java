@@ -36,7 +36,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -126,7 +125,7 @@ public class MascotRun extends MS2Run
     }
 
     @Override
-    protected ModelAndView getAdditionalPeptideSummaryView(ViewContext viewContext, MS2Peptide peptide, String grouping) throws Exception
+    protected ModelAndView getAdditionalPeptideSummaryView(ViewContext viewContext, MS2Peptide peptide, String grouping)
     {
         final String title = "All Matches To This Query";
         AbstractMS2RunView altPeptideView = MS2RunViewType.getViewType(grouping).createView(viewContext, this);
@@ -158,7 +157,7 @@ public class MascotRun extends MS2Run
     {
         private final Long _currentPeptideId;
 
-        public CurrentPeptideColumn(long currentPeptideId) throws SQLException
+        public CurrentPeptideColumn(long currentPeptideId)
         {
             _currentPeptideId = currentPeptideId;
             setCaption("Current View");
