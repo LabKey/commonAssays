@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2;
 
-import org.apache.commons.collections15.MultiMap;
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.view.JspView;
 import org.labkey.ms2.protein.IdentifierType;
@@ -56,7 +56,7 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
     {
         int seqId = protein.getSeqId();
 
-        MultiMap<String, String> identifiers = ProteinManager.getIdentifiersFromId(seqId);
+        MultiValuedMap<String, String> identifiers = ProteinManager.getIdentifiersFromId(seqId);
 
         /* collect header info */
         String SeqName = protein.getBestName(); // ProteinManager.getSeqParamFromId("BestName", seqId);

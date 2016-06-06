@@ -18,8 +18,8 @@ package org.labkey.ms2.protein;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.collections15.MultiMap;
-import org.apache.commons.collections15.multimap.MultiHashMap;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -1433,9 +1433,9 @@ public class ProteinManager
         return sql;
     }
 
-    public static MultiMap<String, String> getIdentifiersFromId(int seqid)
+    public static MultiValuedMap<String, String> getIdentifiersFromId(int seqid)
     {
-        final MultiMap<String, String> map = new MultiHashMap<>();
+        final MultiValuedMap<String, String> map = new ArrayListValuedHashMap<>();
 
         new SqlSelector(getSchema(),
                 "SELECT T.name AS name, I.identifier\n" +
@@ -1643,7 +1643,7 @@ public class ProteinManager
                     continue;
 
                 Protein p = getProtein(id);
-                MultiMap<String, String> map = getIdentifiersFromId(id);
+                MultiValuedMap<String, String> map = getIdentifiersFromId(id);
                 StringBuilder sb = new StringBuilder();
                 sb.append(p.getBestName()).append("\n");
                 sb.append(p.getDescription()).append("\n");
