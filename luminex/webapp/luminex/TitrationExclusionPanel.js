@@ -80,6 +80,12 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             autoLoad : true,
             listeners : {
                 load : function(store, records){
+                    // from r44407, multi valued fields come back as arrays. the LABKEY.ext.Store concats this back together
+                    // so use the json displayValue (which is a comma separate list of the values) instead
+                    Ext.each(records, function(record) {
+                        record.set('Analytes/RowId', record.json['Analytes/RowId'].displayValue);
+                    });
+
                     titrationsGridStore.load();
                 },
                 titrationgridloaded : function()
