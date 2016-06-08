@@ -16,9 +16,9 @@
 
 package org.labkey.ms2;
 
+import org.apache.commons.collections4.OrderedMap;
+import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.log4j.Logger;
-import org.apache.commons.collections15.OrderedMap;
-import org.apache.commons.collections15.map.ListOrderedMap;
 import org.labkey.api.util.Formats;
 
 /**
@@ -137,6 +137,6 @@ public class CumulativeTimer
 
     public interface TimerTask
     {
-        public String getAction();
+        String getAction();
     }
 }

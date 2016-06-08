@@ -15,10 +15,9 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.commons.collections15.FactoryUtils;
-import org.apache.commons.collections15.MapUtils;
+import org.apache.commons.collections4.FactoryUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.labkey.flow.analysis.model.ISampleInfo;
-import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
 
 import java.util.Collections;
@@ -39,7 +38,7 @@ public class SelectedSamples
 
     // form posted values
     // workspace sample id -> resolved info
-    private Map<String, ResolvedSample> _rows = MapUtils.lazyMap(new HashMap<String, ResolvedSample>(), FactoryUtils.instantiateFactory(ResolvedSample.class));
+    private Map<String, ResolvedSample> _rows = MapUtils.lazyMap(new HashMap<>(), FactoryUtils.instantiateFactory(ResolvedSample.class));
 
     public static class ResolvedSample
     {
