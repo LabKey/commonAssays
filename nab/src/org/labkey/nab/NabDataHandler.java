@@ -17,6 +17,7 @@
 package org.labkey.nab;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionSummary;
@@ -297,6 +298,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     /**
      * Translate a well location value, e.g. "B04", into a (row, column) pair of coordinates.
      */
+    @Nullable
     protected Pair<Integer, Integer> getWellLocation(File dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(locationColumnHeader);

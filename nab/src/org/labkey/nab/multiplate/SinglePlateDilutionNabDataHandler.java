@@ -116,6 +116,10 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 // plus one for the current row, plus one for the header row:
                 int line = plateCount * wellsPerPlate + wellCount + 2;
                 Pair<Integer, Integer> location = getWellLocation(dataFile, LOCATION_COLUMNN_HEADER, template.getRows(), template.getColumns(), rowData, line);
+                if (location == null)
+                {
+                    throw createParseError(dataFile, "No well location information was found in the datafile");
+                }
                 int plateRow = location.getKey();
                 int plateCol = location.getValue();
 
