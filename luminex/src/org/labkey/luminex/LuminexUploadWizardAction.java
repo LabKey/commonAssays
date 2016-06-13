@@ -56,6 +56,7 @@ import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewServlet;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
 import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
@@ -303,7 +304,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         if (errorReshow)
-            view.setInitialValues(getViewContext().getRequest().getParameterMap());
+            view.setInitialValues(ViewServlet.adjustAndValidateParameterMap(getViewContext().getRequest().getParameterMap()));
 
         view.getDataRegion().setHorizontalGroups(false);
         view.getDataRegion().setGroupHeadings(Arrays.asList(analyteNames));
@@ -820,7 +821,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private boolean hasAnalytePropertyInRequestParams(LuminexRunUploadForm form, String analyteName, ColumnInfo col)
     {
-        return form.getRequest().getParameterMap().containsKey(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
+        return ViewServlet.adjustAndValidateParameterMap(form.getRequest().getParameterMap()).containsKey(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
     }
 
     @Override
