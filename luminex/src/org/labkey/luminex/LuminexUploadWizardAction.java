@@ -304,7 +304,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         if (errorReshow)
-            view.setInitialValues(ViewServlet.adjustAndValidateParameterMap(getViewContext().getRequest().getParameterMap()));
+            view.setInitialValues(ViewServlet.adaptParameterMap(getViewContext().getRequest().getParameterMap()));
 
         view.getDataRegion().setHorizontalGroups(false);
         view.getDataRegion().setGroupHeadings(Arrays.asList(analyteNames));
@@ -821,7 +821,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private boolean hasAnalytePropertyInRequestParams(LuminexRunUploadForm form, String analyteName, ColumnInfo col)
     {
-        return ViewServlet.adjustAndValidateParameterMap(form.getRequest().getParameterMap()).containsKey(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
+        return form.getRequest().getParameterMap().containsKey(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, col.getName()));
     }
 
     @Override
