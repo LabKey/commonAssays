@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.mascot;
 
+import org.apache.commons.beanutils.converters.BooleanConverter;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -32,12 +33,32 @@ import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.client.Enzyme;
-import org.labkey.ms2.pipeline.client.CutSite;
 import org.labkey.ms2.pipeline.SearchFormUtil;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import org.labkey.ms2.pipeline.client.CutSite;
+import org.labkey.ms2.pipeline.client.Enzyme;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 
 /**
@@ -1138,6 +1159,13 @@ public class MascotClientImpl implements SearchClient
         if (formFieldValue == null)
             formFieldValue = parser.getInputParameter("search, mass");
         parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
+
+        // Decoy controlled by "mascot, decoy", submitted as "1" or nothing at all
+        formFieldValue = parser.getInputParameter("mascot, decoy");
+        if (formFieldValue != null && ((Boolean)new BooleanConverter().convert(Boolean.class, formFieldValue)).booleanValue())
+        {
+            parts.add(new StringPart("DECOY", "1"));
+        }
 
         boolean isMonoisoptopicMass = "monoisotopic".equalsIgnoreCase(formFieldValue);
         formFieldKey = "ITOL";
