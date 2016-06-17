@@ -69,6 +69,7 @@ import org.labkey.api.util.Formats;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
@@ -860,6 +861,19 @@ public class MS2Manager
             }
             if (endsWithExtOrExtDotGZ(name2,rawSuffix) && !endsWithExtOrExtDotGZ(name1,rawSuffix))
             {
+                return runs[0];
+            }
+
+            // Check if we have both an dat file and pepXML file
+            PepXMLFileType ft = new PepXMLFileType();
+            if (name1.endsWith(".dat") && ft.isType(runs[1].getFileName()))
+            {
+                // Prefer the pepXML
+                return runs[1];
+            }
+            if (name2.endsWith(".dat") && ft.isType(runs[0].getFileName()))
+            {
+                // Prefer the pepXML
                 return runs[0];
             }
         }

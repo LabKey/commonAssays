@@ -32,7 +32,9 @@ import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: adam
@@ -42,6 +44,16 @@ import java.util.List;
 public class ResultSetSpectrumIterator implements SpectrumIterator
 {
     protected ResultSet _rs;
+
+    /** Cache the last 100 spectra loaded, especially useful for Mascot where there many be multiple hits per spectra */
+    private Map<Pair<Integer, Integer>, Pair<float[], float[]>> _lruCache = new LinkedHashMap<Pair<Integer, Integer>, Pair<float[], float[]>>()
+    {
+        /** This method is called just after a new entry has been added */
+        public boolean removeEldestEntry(Map.Entry eldest)
+        {
+            return size() > 100;
+        }
+    };
 
     protected ResultSetSpectrumIterator()
     {
@@ -126,7 +138,13 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
                 {
                     int fraction = _rs.getInt("Fraction");
                     int scan = _rs.getInt("Scan");
-                    _pair = MS2Manager.getSpectrumFromFile(fraction, scan);
+                    Pair<Integer, Integer> key = new Pair<>(fraction, scan);
+                    _pair = _lruCache.get(key);
+                    if (_pair == null)
+                    {
+                        _pair = MS2Manager.getSpectrumFromFile(fraction, scan);
+                        _lruCache.put(key, _pair);
+                    }
                 }
             }
             catch (SQLException e)
