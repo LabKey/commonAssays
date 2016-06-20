@@ -16,6 +16,7 @@
 package org.labkey.ms2;
 
 import org.apache.commons.io.FilenameUtils;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 
 /**
@@ -23,6 +24,14 @@ import org.labkey.api.exp.api.ExpData;
  */
 public class MascotDatExperimentDataHandler extends PepXmlExperimentDataHandler
 {
+    private static final String IMPORT_DAT_RESULTS = "mascot, import dat results";
+
+    @Override
+    protected boolean shouldImport(ExpData data, XarContext context)
+    {
+        return context.getJob() == null || !"false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_DAT_RESULTS));
+    }
+
     public Priority getPriority(ExpData data)
     {
         if (data != null && data.getFile() != null && FilenameUtils.isExtension(data.getFile().getName(), "dat"))

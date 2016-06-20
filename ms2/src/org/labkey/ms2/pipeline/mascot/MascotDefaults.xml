@@ -16,6 +16,9 @@
   <note type="input" label="search, protocol description">cluster protocol</note>
         <note>A general description of this protocol</note>
 
+  <note type="input" label="mascot, import dat results">false</note>
+        <note>Skip direct import of Mascot .dat search results by default, relying on pepXML import</note>
+
   <note type="input" label="mascot, peptide_charge">1+, 2+ and 3+</note>
         <note>See http://www.matrixscience.com/help/search_field_help.html#TWO</note>
 

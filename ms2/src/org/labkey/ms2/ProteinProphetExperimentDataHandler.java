@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -33,6 +34,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static org.labkey.ms2.PepXmlExperimentDataHandler.IMPORT_PROPHET_RESULTS;
+
 /**
  * User: jeckels
  * Date: Feb 22, 2006
@@ -44,8 +47,14 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         return null;
     }
 
-    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
+        if (context.getJob() != null && "false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_PROPHET_RESULTS)))
+        {
+            log.info("Skipping import of file " + dataFile);
+            return;
+        }
+
         try
         {
             ExpRun run = data.getRun();

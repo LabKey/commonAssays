@@ -15,27 +15,29 @@
  */
 package org.labkey.ms2;
 
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.*;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.AbstractExperimentDataHandler;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
-import org.labkey.api.util.PepXMLFileType;
-import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * User: jeckels
@@ -43,13 +45,26 @@ import java.util.Arrays;
  */
 public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 {
+    public static final String IMPORT_PROPHET_RESULTS = "pipeline, import prophet results";
+
     public DataType getDataType()
     {
         return null;
     }
 
-    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    protected boolean shouldImport(ExpData data, XarContext context)
     {
+        return context.getJob() == null || !"false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_PROPHET_RESULTS));
+    }
+
+    public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
+    {
+        if (!shouldImport(data, context))
+        {
+            log.info("Skipping import of file " + dataFile);
+            return;
+        }
+
         ExpRun expRun = data.getRun();
         // We need to no-op if this file is one of the intermediate pep.xml files
         // that are produced in the fraction case.
