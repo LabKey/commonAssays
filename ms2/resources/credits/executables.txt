@@ -1,5 +1,4 @@
 The following executable files are optionally installed by the LabKey Server Graphical Windows Installer.
-They are also shipped in the zip download used for manual Windows installations.
 
 {table}
 Filename|Component|Version|Source|License|LabKey Dev|Purpose
