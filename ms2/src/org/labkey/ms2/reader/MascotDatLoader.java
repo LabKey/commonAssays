@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -186,6 +187,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     private String _currentLine = null;
     private Section _currentSection = null;
     private Integer _currentQueryNum = null;
+
     private long _charactersRead = 0L; // used for indicating progress; not exact, but probably close enough
 
     private Set<Section> _loadedSections = new HashSet<>();
@@ -280,17 +282,25 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     }
 
     /**
-     * Seek to a specific query section within the file
-     * @param scan query number
-     *
+     * Seek to a specific query section within the file based on the requested scan number
      */
-    public boolean findQueryByNumber(@NotNull Integer scan) throws IOException
+    public boolean findByScanNumber(int scan) throws IOException
     {
-        //Integer seekQueryNum = Integer.valueOf(scan);
         while (findSection())
         {
-            if (Section.QUERY.equals(getCurrentSection()) && scan.equals(_currentQueryNum))
-                return true;
+            if (Section.QUERY.equals(getCurrentSection()))
+            {
+                // Burn lines until we find a scan or hit the end of the section
+                while (!atEndOfSection())
+                {
+                    Pair<Integer, Integer> scans = getScanInfo();
+                    if (scans != null && scans.getKey().intValue() == scan)
+                    {
+                        return true;
+                    }
+                    readLine();
+                }
+            }
         }
         return false;
     }
@@ -506,10 +516,10 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     /**
      * Used for on-demand spectrum loading from the file, not for database storage
      */
-    public Pair<float[], float[]> loadSpectrum(int queryNum) throws SpectrumException, IOException
+    public Pair<float[], float[]> loadSpectrum(int scan) throws SpectrumException, IOException
     {
-        if (!findQueryByNumber(queryNum))
-            throw new SpectrumException("Can't find requested scan: " + queryNum);
+        if (!findByScanNumber(scan))
+            throw new SpectrumException("Can't find requested scan: " + scan);
 
         readLine();
         while (!atEndOfSection())
@@ -531,12 +541,12 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 }
                 catch (Exception e)
                 {
-                    throw new SpectrumException("Dat file spectrum information is corrupted for scan: " + queryNum);
+                    throw new SpectrumException("Dat file spectrum information is corrupted for scan: " + scan);
                 }
             }
             readLine();
         }
-        throw new SpectrumException("Spectrum information not found for scan: " + queryNum);
+        throw new SpectrumException("Spectrum information not found for scan: " + scan);
     }
 
     public void loadSummary(Map<Integer, DatPeptide> peptides, boolean decoys) throws IOException
@@ -599,6 +609,36 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         return peptide;
     }
 
+    @Nullable
+    /** @return start and end scan numbers for the current query section */
+    private Pair<Integer, Integer> getScanInfo() throws UnsupportedEncodingException
+    {
+        if (_currentLine.startsWith(QUERY_TITLE_PREFIX))
+        {
+            String title = URLDecoder.decode(_currentLine.substring(QUERY_TITLE_PREFIX.length()), "UTF-8");
+            Matcher matcher = QUERY_TITLE_SCAN_REGEX.matcher(title);
+            if (matcher.find())
+            {
+                return new Pair<>(Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM)), Integer.parseInt(matcher.group(END_SCAN_GROUP_NUM)));
+            }
+            else
+            {
+                matcher = SPECTRUM_SCANS_REGEX.matcher(title);
+                if (matcher.find())
+                {
+                    int scan = Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM));
+                    return new Pair<>(scan, scan);
+                }
+            }
+        }
+        else if (_currentLine.startsWith(QUERY_SCANS_PREFIX)) // N.B. This line is not parsed in the Mascot2XML code, but it seems a good place to get the start scan data; the syntax is unknown for multiple scans, though
+        {
+            int scan = Integer.parseInt(_currentLine.substring(QUERY_SCANS_PREFIX.length()));
+            return new Pair<>(scan, scan);
+        }
+        return null;
+    }
+
     /**
      * Load the query section, which applies to both peptides and decoys, and all hit ranks. Make one pass to fill in for both
      * peptides and the decoy peptides at same time. Note, this is a bit inefficient if it turns out there are no decoy peptides
@@ -613,31 +653,18 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         String title = null;
         while (!atEndOfSection())
         {
+            Pair<Integer, Integer> scans = getScanInfo();
+            if (scans != null)
+            {
+                peptide.setScan(scans.getKey());
+                peptide.setEndScan(scans.getValue());
+            }
             if (_currentLine.startsWith(QUERY_TITLE_PREFIX))
             {
                 title = URLDecoder.decode(_currentLine.substring(QUERY_TITLE_PREFIX.length()), "UTF-8");
-                Matcher matcher = QUERY_TITLE_SCAN_REGEX.matcher(title);
-                if (matcher.find())
-                {
-                    peptide.setScan(Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM)));
-                    peptide.setEndScan(Integer.parseInt(matcher.group(END_SCAN_GROUP_NUM)));
-                }
-                else
-                {
-                    matcher = SPECTRUM_SCANS_REGEX.matcher(title);
-                    if (matcher.find())
-                    {
-                        peptide.setScan(Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM)));
-                        peptide.setEndScan(peptide.getScan());
-                    }
-                }
             }
-            else if (_currentLine.startsWith(QUERY_SCANS_PREFIX)) // N.B. This line is not parsed in the Mascot2XML code, but it seems a good place to get the start scan data; the syntax is unknown for multiple scans, though
-            {
-                peptide.setScan(Integer.parseInt(_currentLine.substring(QUERY_SCANS_PREFIX.length())));
-                peptide.setEndScan(peptide.getScan());
-            }
-            else if (_currentLine.startsWith(QUERY_RETENTION_TIME_PREFIX)) // N.B. This line is not parsed in the Mascot2Xml code, but it seems a reasonable place to get the retention time
+
+            if (_currentLine.startsWith(QUERY_RETENTION_TIME_PREFIX)) // N.B. This line is not parsed in the Mascot2Xml code, but it seems a reasonable place to get the retention time
             {
                 peptide.setRetentionTime(Double.parseDouble(_currentLine.substring(QUERY_RETENTION_TIME_PREFIX.length())));
             }
