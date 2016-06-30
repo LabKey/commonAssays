@@ -46,7 +46,7 @@ public class ViabilityModule extends DefaultModule
 
     public double getVersion()
     {
-        return 16.10;
+        return 16.20;
     }
 
     public boolean hasScripts()
@@ -72,13 +72,6 @@ public class ViabilityModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(new GuavaDataHandler());
         AssayService.get().registerAssayProvider(new ViabilityAssayProvider());
         SpecimenService.get().registerSpecimenChangeListener(new ViabilitySpecimenChangeListener());
-    }
-
-    @NotNull
-    @Override
-    public Collection<String> getSummary(Container c)
-    {
-        return Collections.emptyList();
     }
 
     @Override

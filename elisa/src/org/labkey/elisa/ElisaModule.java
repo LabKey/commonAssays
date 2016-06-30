@@ -19,7 +19,7 @@ package org.labkey.elisa;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.CodeOnlyModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
@@ -29,24 +29,12 @@ import org.labkey.api.view.WebPartFactory;
 import java.util.Collection;
 import java.util.Collections;
 
-public class ElisaModule extends DefaultModule
+public class ElisaModule extends CodeOnlyModule
 {
     @Override
     public String getName()
     {
         return "Elisa";
-    }
-
-    @Override
-    public double getVersion()
-    {
-        return 16.10;
-    }
-
-    @Override
-    public boolean hasScripts()
-    {
-        return false;
     }
 
     @NotNull
