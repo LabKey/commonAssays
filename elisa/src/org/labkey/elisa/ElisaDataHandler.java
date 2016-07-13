@@ -93,19 +93,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
-    {
-        try
-        {
-            importRows(data, context.getUser(), run, context.getProtocol(), context.getProvider(), dataMap);
-        }
-        catch (ValidationException e)
-        {
-            throw new ExperimentException(e.toString(), e);
-        }
-    }
-
-    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         List<Map<String, Object>> results = new ArrayList<>();
