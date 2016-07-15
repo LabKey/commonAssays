@@ -142,14 +142,14 @@ public class FlowSchema extends UserSchema
 
     public FlowSchema(ViewContext context)
     {
-        this(context.getUser(), context.getContainer(), context.getActionURL(), context.getRequest());
+        this(context.getUser(), context.getContainer(), context.getActionURL(), context.getRequest(), context.getContainer());
     }
 
-    public FlowSchema(User user, Container container, @Nullable ActionURL url, @Nullable HttpServletRequest request)
+    public FlowSchema(User user, Container container, @Nullable ActionURL url, @Nullable HttpServletRequest request, Container actionContainer)
     {
         this(user, container, FlowProtocol.getForContainer(container));
-        setExperiment(FlowExperiment.fromURL(url, request));
-        setRun(FlowRun.fromURL(url));
+        setExperiment(FlowExperiment.fromURL(url, request, actionContainer, getUser()));
+        setRun(FlowRun.fromURL(url, actionContainer, getUser()));
 //        setScript(FlowScript.fromURL(url, request));
     }
 
@@ -177,11 +177,11 @@ public class FlowSchema extends UserSchema
 //        }
 
         if (null == _experiment)
-            setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
+            setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest(),context.getContainer(), getUser()));
 //        if (null == _script)
 //            setScript(FlowScript.fromURL(context.getActionURL(), context.getRequest()));
         if (null == _run)
-            setRun(FlowRun.fromURL(context.getActionURL()));
+            setRun(FlowRun.fromURL(context.getActionURL(), context.getContainer(), getUser()));
     }
 
     private FlowSchema(User user, Container container, FlowProtocol protocol)

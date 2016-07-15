@@ -27,11 +27,13 @@ import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.property.SystemProperty;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
 import org.labkey.flow.controllers.FlowParam;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -124,11 +126,14 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     }
 
 
-    public void checkContainer(ActionURL url) throws NotFoundException
+    public void checkContainer(Container actionContainer, User user, ActionURL actionURL) throws NotFoundException
     {
-        if (!getContainer().getParsedPath().equals(url.getParsedPath()))
+        if (!getContainer().equals(actionContainer))
         {
-            throw new NotFoundException("Wrong container");
+            if (getContainer().hasPermission(user, ReadPermission.class))
+                throw new RedirectException(actionURL.clone().setContainer(getContainer()));
+            else
+                throw new NotFoundException("Flow object does not exist in this folder");
         }
     }
 

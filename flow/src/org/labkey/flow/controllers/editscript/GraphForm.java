@@ -102,6 +102,6 @@ public class GraphForm extends EditScriptForm
 
     public FlowWell getWell()
     {
-        return FlowWell.fromURL(getViewContext().getActionURL(), getRequest());
+        return FlowWell.fromURL(getViewContext().getActionURL(), getRequest(), getViewContext().getContainer(), getUser());
     }
 }

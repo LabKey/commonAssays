@@ -230,12 +230,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return new FlowRun(run);
     }
 
-    static public FlowRun fromURL(ActionURL url)
+    static public FlowRun fromURL(ActionURL url, Container actionContainer, User user)
     {
-        return fromURL(url, null);
+        return fromURL(url, null, actionContainer, user);
     }
 
-    static public FlowRun fromURL(ActionURL url, HttpServletRequest request)
+    static public FlowRun fromURL(ActionURL url, HttpServletRequest request, Container actionContainer, User user)
     {
         int runid = getIntParam(url, request, FlowParam.runId);
         if (0 == runid)
@@ -243,7 +243,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         FlowRun ret = fromRunId(runid);
         if (ret != null)
         {
-            ret.checkContainer(url);
+            ret.checkContainer(actionContainer, user, url);
         }
         return ret;
     }

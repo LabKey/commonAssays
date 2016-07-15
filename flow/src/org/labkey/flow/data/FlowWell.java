@@ -17,6 +17,7 @@
 package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpDataRunInput;
@@ -72,12 +73,12 @@ public class FlowWell extends FlowDataObject
         return wells;
     }
 
-    static public FlowWell fromURL(ActionURL url)
+    static public FlowWell fromURL(ActionURL url, Container actionContainer, User user)
     {
-        return fromURL(url, null);
+        return fromURL(url, null, actionContainer, user);
     }
 
-    static public FlowWell fromURL(ActionURL url, HttpServletRequest request)
+    static public FlowWell fromURL(ActionURL url, HttpServletRequest request, Container actionContainer, User user)
     {
         int wellId = getIntParam(url, request, FlowParam.wellId);
         if (wellId == 0)
@@ -85,7 +86,7 @@ public class FlowWell extends FlowDataObject
         FlowWell ret = fromWellId(wellId);
         if (null == ret)
             return null;
-        ret.checkContainer(url);
+        ret.checkContainer(actionContainer, user, url);
         return ret;
     }
 

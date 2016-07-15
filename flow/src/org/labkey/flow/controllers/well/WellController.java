@@ -113,7 +113,7 @@ public class WellController extends BaseFlowController
 
     public FlowWell getWell()
     {
-        return FlowWell.fromURL(getActionURL(), getRequest());
+        return FlowWell.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
     }
 
     public Page getPage(String name)
@@ -302,7 +302,7 @@ public class WellController extends BaseFlowController
                 if (!(obj instanceof FlowWell))
                     return null;
                 well = (FlowWell) obj;
-                well.checkContainer(getActionURL());
+                well.checkContainer(getContainer(), getUser(), getActionURL());
             }
 
             String graph = getParam(FlowParam.graph);

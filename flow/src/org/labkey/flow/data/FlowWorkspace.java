@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
@@ -71,17 +72,17 @@ public class FlowWorkspace extends FlowDataObject
         return new FlowWorkspace(data);
     }
 
-    static public FlowWorkspace fromURL(ActionURL url)
+    static public FlowWorkspace fromURL(ActionURL url, Container actionContainer, User user)
     {
-        return fromURL(url, null);
+        return fromURL(url, null, actionContainer, user);
     }
 
-    static public FlowWorkspace fromURL(ActionURL url, HttpServletRequest request)
+    static public FlowWorkspace fromURL(ActionURL url, HttpServletRequest request, Container actionContainer, User user)
     {
         FlowWorkspace ret = FlowWorkspace.fromWorkspaceId(getIntParam(url, request, FlowParam.workspaceId));
         if (ret == null || ret.getExpObject() == null)
             return null;
-        ret.checkContainer(url);
+        ret.checkContainer(actionContainer, user, url);
         return ret;
     }
     public FlowWorkspace(ExpData data)

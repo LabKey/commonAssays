@@ -154,7 +154,7 @@ public class CompensationController extends BaseFlowController
 
         public ModelAndView getView(ViewForm form, BindException errors) throws Exception
         {
-            _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
+            _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (_comp == null)
                 throw new NotFoundException("Compensation Matrix not found");
 
@@ -191,7 +191,7 @@ public class CompensationController extends BaseFlowController
 
         public ModelAndView getView(ViewForm form, BindException errors) throws Exception
         {
-            _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
+            _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             return FormPage.getView(CompensationController.class, form, "showCompensation.jsp");
         }
 
@@ -219,7 +219,7 @@ public class CompensationController extends BaseFlowController
 
         public ModelAndView getConfirmView(ViewForm form, BindException errors) throws Exception
         {
-            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
+            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (null == comp)
             {
                 throw new NotFoundException();
@@ -229,7 +229,7 @@ public class CompensationController extends BaseFlowController
 
         public boolean handlePost(ViewForm viewForm, BindException errors) throws Exception
         {
-            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
+            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (null == comp)
             {
                 throw new NotFoundException();

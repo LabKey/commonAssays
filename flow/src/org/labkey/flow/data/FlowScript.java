@@ -69,9 +69,9 @@ public class FlowScript extends FlowDataObject
         return new FlowScript(data);
     }
 
-    static public FlowScript fromURL(ActionURL url)
+    static public FlowScript fromURL(ActionURL url, Container actionContainer, User user)
     {
-        return fromURL(url, null);
+        return fromURL(url, null, actionContainer, user);
     }
 
     static public FlowScript fromName(Container container, String name)
@@ -80,12 +80,12 @@ public class FlowScript extends FlowDataObject
     }
 
 
-    static public FlowScript fromURL(ActionURL url, HttpServletRequest request)
+    static public FlowScript fromURL(ActionURL url, HttpServletRequest request, Container actionContainer, User user)
     {
         FlowScript ret = FlowScript.fromScriptId(getIntParam(url, request, FlowParam.scriptId));
         if (ret == null || ret.getExpObject() == null)
             return null;
-        ret.checkContainer(url);
+        ret.checkContainer(actionContainer, user, url);
         return ret;
     }
 

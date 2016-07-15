@@ -63,13 +63,13 @@ public abstract class BaseFlowController extends SpringActionController
 
     protected FlowScript getScript()
     {
-        return FlowScript.fromURL(getActionURL(), getRequest());
+        return FlowScript.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
     }
 
     public FlowRun getRun()
     {
         FlowRun ret;
-        ret = FlowRun.fromURL(getActionURL());
+        ret = FlowRun.fromURL(getActionURL(), getContainer(), getUser());
         return ret;
     }
 

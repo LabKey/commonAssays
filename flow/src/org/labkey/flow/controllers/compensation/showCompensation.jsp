@@ -55,7 +55,7 @@
 %>
 <script type="text/javascript" src="<%=getContextPath()%>/Flow/util.js"></script>
 <%
-    final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getActionURL(), request);
+    final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getActionURL(), request, getContainer(), getUser());
     if (null == flowComp)
     {
         %><span class="labkey-error">compensation matrix definition not found</span><%

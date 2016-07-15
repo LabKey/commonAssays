@@ -122,7 +122,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            script = FlowScript.fromURL(getActionURL(), getRequest());
+            script = FlowScript.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (script == null)
             {
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));

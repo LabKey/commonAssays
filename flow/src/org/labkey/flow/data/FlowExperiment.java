@@ -182,12 +182,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowWorkspaceExperimentName;
     }
 
-    static public FlowExperiment fromURL(ActionURL url)
+    static public FlowExperiment fromURL(ActionURL url, Container actionContainer, User user)
     {
-        return fromURL(url, null);
+        return fromURL(url, null, actionContainer, user);
     }
 
-    static public FlowExperiment fromURL(ActionURL url, HttpServletRequest request)
+    static public FlowExperiment fromURL(ActionURL url, HttpServletRequest request, Container actionContainer, User user)
     {
         int expid = getIntParam(url, request, FlowParam.experimentId);
         if (0 == expid)
@@ -197,7 +197,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         {
             return null;
         }
-        ret.checkContainer(url);
+        ret.checkContainer(actionContainer,user,url);
         return ret;
     }
 

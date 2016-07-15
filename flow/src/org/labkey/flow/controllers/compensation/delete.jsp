@@ -18,7 +18,7 @@
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), request); %>
+<% FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), request, getContainer(), getUser()); %>
 <p>Are you sure you want to delete this compensation matrix?<br>
     <a href="<%=h(comp.urlShow())%>"><%=h(comp.getName())%></a>
 </p>

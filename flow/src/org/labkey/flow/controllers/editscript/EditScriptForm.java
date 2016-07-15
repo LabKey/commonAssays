@@ -93,12 +93,12 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             }
             _runCount = flowObject.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());
-            _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest());
+            _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest(), getViewContext().getContainer(), getUser());
             if (_run != null)
             {
                 FlowPreference.editScriptRunId.setValue(getRequest(), Integer.toString(_run.getRunId()));
             }
-            _comp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), getRequest());
+            _comp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), getRequest(), getContainer(), getUser());
             if (_comp != null)
             {
                 FlowPreference.editScriptCompId.setValue(getRequest(), Integer.toString(_comp.getRowId()));

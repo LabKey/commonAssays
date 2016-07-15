@@ -56,11 +56,11 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return null;
     }
 
-    static public FlowCompensationMatrix fromURL(ActionURL url, HttpServletRequest request)
+    static public FlowCompensationMatrix fromURL(ActionURL url, HttpServletRequest request, Container actionContainer, User user)
     {
         FlowCompensationMatrix ret = fromCompId(getIntParam(url, request, FlowParam.compId));
         if (ret != null)
-            ret.checkContainer(url);
+            ret.checkContainer(actionContainer, user, url);
         return ret;
     }
 
