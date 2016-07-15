@@ -140,7 +140,7 @@ public class RunController extends BaseFlowController
             experiment = form.getExperiment();
 //            script = form.getScript();
 
-            experiment.checkContainer(getContainer(), getUser(), getActionURL());
+            checkContainer(experiment);
 
             return new JspView<>(RunController.class, "showRuns.jsp", form, errors);
         }
@@ -504,7 +504,7 @@ public class RunController extends BaseFlowController
             if (run == null)
                 throw new NotFoundException("run not found");
 
-            run.checkContainer(getContainer(), getUser(), getActionURL());
+            checkContainer(run);
 
             return new JspView<>(RunController.class, "moveToWorkspace.jsp", form, errors);
         }
@@ -556,7 +556,7 @@ public class RunController extends BaseFlowController
         public ModelAndView getView(MoveToAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
             run = form.getRun();
-            run.checkContainer(getContainer(), getUser(), getActionURL());
+            checkContainer(run);
             return new JspView<>(RunController.class, "moveToAnalysis.jsp", form, errors);
         }
 

@@ -73,6 +73,14 @@ public abstract class BaseFlowController extends SpringActionController
         return ret;
     }
 
+    public void checkContainer(FlowObject obj)
+    {
+        if (obj != null)
+        {
+            obj.checkContainer(getContainer(),getUser(),getActionURL());
+        }
+    }
+
     protected ActionURL executeScript(FlowJob job) throws Exception, PipelineValidationException
     {
         FlowProtocol.ensureForContainer(getUser(), job.getContainer());
