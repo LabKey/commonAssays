@@ -62,8 +62,8 @@
             }
             %>
             <td width="70" style="text-align:center;color:<%=text(futureStep ? "silver" : "black")%>" valign="top">
-                <span style="font-size:1.1em;font-weight:<%=text(currentStep ? "bold":"normal")%>;"><%=step.getNumber()%></span><br/>
-                <span style="font-weight:<%=text(currentStep ? "bold":"normal")%>"><%=h(step.getTitle())%></span>
+                <span style="font-size:1.1em;font-family:<%=text(currentStep ? "Roboto-Bold":"Roboto")%>;"><%=step.getNumber()%></span><br/>
+                <span style="font-family:<%=text(currentStep ? "Roboto-Bold":"Roboto")%>"><%=h(step.getTitle())%></span>
                 <%--
                 <labkey:form name="step_<%=step.name()%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="step" value="<%=step.getNumber()-1%>">
