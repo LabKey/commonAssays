@@ -24,6 +24,7 @@
             <column columnName="RowId"/>
             <column columnName="LSID"/>
             <column columnName="Name"/>
+            <column columnName="BeadNumber"/>
             <column columnName="DataId"/>
             <column columnName="FitProb"/>
             <column columnName="ResVar"/>

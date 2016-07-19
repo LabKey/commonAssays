@@ -681,7 +681,7 @@ public class LuminexExcelParser
             if (parser == null) return;
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
             assertEquals("Wrong number of analytes", 5, m.size());
-            validateAnalyte(m.keySet(), "ENV6 (97)", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
+            validateAnalyte(m.keySet(), "ENV6", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
             for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
             {
                 assertEquals("Wrong number of data rows", 34, entry.getValue().size());
@@ -717,7 +717,7 @@ public class LuminexExcelParser
             
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
             assertEquals("Wrong number of analytes", 2, m.size());
-            validateAnalyte(m.keySet(), "GS Analyte (1)", null, null, null);
+            validateAnalyte(m.keySet(), "GS Analyte A", null, null, null);
             for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
             {
                 assertEquals("Wrong number of data rows", 11, entry.getValue().size());
