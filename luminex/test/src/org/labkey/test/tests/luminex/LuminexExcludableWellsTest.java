@@ -102,8 +102,8 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertTextPresent("exclude all for single well", 2);
         assertTextPresent("exclude single analyte for single well", 1);
         assertTextPresentInThisOrder("S3", "C2", "X25");
-        assertTextPresent("ENV7 (93)", 3);
-        assertTextPresent("ENV6 (97)", 3);
+        assertTextPresent("ENV7", 3);
+        assertTextPresent("ENV6", 3);
         assertTextPresentInThisOrder("C3", "E2", "E1");
     }
 

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -30,6 +31,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -130,6 +132,11 @@ public class AnalyteTable extends AbstractLuminexTable
         colProperty.setShownInInsertView(false);
         colProperty.setShownInUpdateView(false);
         addColumn(colProperty);
+
+        SQLFragment analyteBeadNameSQL = new SQLFragment("CONCAT("+ ExprColumn.STR_TABLE_ALIAS +".name, ' (',  "+ ExprColumn.STR_TABLE_ALIAS +".beadNumber, ')')");
+        ExprColumn analyteBeadNameCol = new ExprColumn(this, "AnalyteWithBead", analyteBeadNameSQL, JdbcType.VARCHAR);
+        addColumn(analyteBeadNameCol);
+        analyteBeadNameCol.setReadOnly(true);
     }
 
     @Override

@@ -75,7 +75,7 @@ public class LuminexSinglePointTest extends LuminexTest
         waitForText("Average Fi Bkgd");
 
         DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
-        tbl.setFilter("Analyte", "Equals", "ENV1 (31)");
+        tbl.setFilter("Analyte", "Equals", "ENV1");
         tbl.setSort("SinglePointControl/Run/Name", SortDirection.ASC);
         Assert.assertEquals("27.0", tbl.getDataAsText(0, "Average Fi Bkgd"));
         Assert.assertEquals("30.0", tbl.getDataAsText(1, "Average Fi Bkgd"));
@@ -153,7 +153,7 @@ public class LuminexSinglePointTest extends LuminexTest
         goToTestAssayHome();
         _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), "view single point control qc report");
         DataRegionTable table = new DataRegionTable("AnalyteSinglePointControl", getDriver());
-        table.setFilter("Analyte", "Equals", "ENV1 (31)");
+        table.setFilter("Analyte", "Equals", "ENV1");
         clickAndWait(Locator.linkContainingText("graph"));
     }
 

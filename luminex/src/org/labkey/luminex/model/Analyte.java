@@ -30,6 +30,7 @@ public class Analyte
     private int _dataId;
     private String _lsid;
     private String _name;
+    private String _beadNumber;
     private String _sheetName;
     private Double _fitProb;
     private Double _resVar;
@@ -45,9 +46,10 @@ public class Analyte
     {
     }
 
-    public Analyte(String name)
+    public Analyte(String name, String beadNumber)
     {
         _name = name;
+        _beadNumber = beadNumber;
         _sheetName = name;
     }
 
@@ -169,6 +171,16 @@ public class Analyte
     public void setLsid(String lsid)
     {
         _lsid = lsid;
+    }
+
+    public String getBeadNumber()
+    {
+        return _beadNumber;
+    }
+
+    public void setBeadNumber(String beadNumber)
+    {
+        _beadNumber = beadNumber;
     }
 
     public LuminexWellGroup buildWellGroup(List<LuminexDataRow> dataRows)

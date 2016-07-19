@@ -31,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 
 public class LuminexGuideSetHelper
 {
-    public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte (1)", "GS Analyte (2)"};
+    public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte A", "GS Analyte B"};
     private static Map<Integer, String> timestamps = new HashMap<>();
     LuminexTest _test;
     

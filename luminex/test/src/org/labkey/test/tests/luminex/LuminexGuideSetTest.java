@@ -135,7 +135,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText(TEST_ASSAY_LUM));
         excludeWellFromRun("Guide Set plate 5", "A6,B6", 2, 1);
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         assertTextPresent("28040.51");
     }
 
@@ -207,7 +207,7 @@ public final class LuminexGuideSetTest extends LuminexTest
     {
         String colValuePrefix = "NETWORK";
 
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         // check that all 5 runs are present in the grid by clicking on them
         for (int i = 1; i <= 5; i++)
         {
@@ -233,7 +233,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         String colNetworkPrefix = "NETWORK";
         String colProtocolPrefix = "PROTOCOL";
 
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         // check that all 5 runs are present in the grid by clicking on them
         for (int i = 1; i <= 5; i++)
         {
@@ -265,7 +265,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 
     private void applyLogYAxisScale()
     {
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         _extHelper.selectComboBoxItem(Locator.xpath("//input[@id='scale-combo-box']/.."), "Log");
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
     }
@@ -289,11 +289,11 @@ public final class LuminexGuideSetTest extends LuminexTest
 
     private void createInitialGuideSets()
     {
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (1)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte A");
         _guideSetHelper.createGuideSet(true);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1", "allRunsRow_0"}, "Analyte 1", true);
 
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         _guideSetHelper.createGuideSet(true);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1"}, "Analyte 2", true);
 
@@ -308,12 +308,12 @@ public final class LuminexGuideSetTest extends LuminexTest
     {
 
         // remove a run from the current guide set
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         clickButtonContainingText("Edit", 0);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"guideRunSetRow_0"}, GUIDE_SET_5_COMMENT, false);
 
         // create a new guide set for the second analyte so that we can test the apply guide set
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         _guideSetHelper.createGuideSet(false);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1", "allRunsRow_2", "allRunsRow_3"}, "create new analyte 2 guide set with 3 runs", true);
 
@@ -384,7 +384,7 @@ public final class LuminexGuideSetTest extends LuminexTest
     private void verifyLeveyJenningsPlots()
     {
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
 
         // check 4PL ec50 trending plot
         click(Locator.tagWithText("span", "EC50 - 4PL"));
@@ -449,23 +449,23 @@ public final class LuminexGuideSetTest extends LuminexTest
         DataRegionTable drt = new DataRegionTable("Runs", getDriver());
 
         //2. exclude wells A4, B4 from plate 5a for both analytes
-        //	- the EC50 for GS Analyte (2) is changed to be under the Guide Set range so new QC Flag inserted for that
+        //	- the EC50 for GS Analyte B is changed to be under the Guide Set range so new QC Flag inserted for that
         excludeWellFromRun("Guide Set plate 5", "A4,B4", 3, 2);
         clickAndWait(Locator.linkContainingText("view runs"));
         _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
         assertEquals("AUC, EC50-4, EC50-5, HMFI, PCV",  drt.getDataAsText(1, "QC Flags"));
 
         //3. un-exclude wells A4, B4 from plate 5a for both analytes
-        //	- the EC50 QC Flag for GS Analyte (2) that was inserted in the previous step is removed
+        //	- the EC50 QC Flag for GS Analyte B that was inserted in the previous step is removed
         includeWellFromRun("Guide Set plate 5", "A4,B4", 4);
         clickAndWait(Locator.linkContainingText("view runs"));
         _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
         assertEquals("AUC, EC50-5, HMFI, PCV",  drt.getDataAsText(1, "QC Flags"));
 
-        //4. For GS Analyte (2), apply the non-current guide set to plate 5a
+        //4. For GS Analyte B, apply the non-current guide set to plate 5a
         //	- QC Flags added for EC50 and HMFI
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         String newQcFlags = "AUC, EC50-4, EC50-5, HMFI";
         assertTextNotPresent(newQcFlags);
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, false);
@@ -480,14 +480,14 @@ public final class LuminexGuideSetTest extends LuminexTest
         _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
         assertTextPresent("AUC, EC50-4, EC50-5, HMFI, PCV");
 
-        //5. For GS Analyte (2), apply the guide set for plate 5a back to the current guide set
+        //5. For GS Analyte B, apply the guide set for plate 5a back to the current guide set
         //	- the EC50 and HMFI QC Flags that were added in step 4 are removed
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, true);
         assertTextNotPresent(newQcFlags);
 
-        //6. Create new Guide Set for GS Analyte (2) that includes plate 5 (but not plate 5a)
+        //6. Create new Guide Set for GS Analyte B that includes plate 5 (but not plate 5a)
         //	- the AUC QC Flag for plate 5 is removed
         Locator.XPathLocator aucLink =  Locator.xpath("//a[contains(text(),'AUC')]");
         waitForElement(aucLink);
@@ -496,15 +496,15 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1"}, "Guide set includes plate 5", true);
         assertEquals("Wrong count for AUC flag links", aucCount-1, (getElementCount(aucLink)));
 
-        //7. Switch to GS Analyte (1), and edit the current guide set to include plate 3
+        //7. Switch to GS Analyte A, and edit the current guide set to include plate 3
         //	- the QC Flag for plate 3 (the run included) and the other plates (4, 5, and 5a) are all removed as all values are within the guide set ranges
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (1)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte A");
         assertExpectedAnalyte1QCFlagsPresent();
         clickButtonContainingText("Edit", 0);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_3"}, "edited analyte 1", false);
         assertQCFlagsNotPresent();
 
-        //8. Edit the GS Analyte (1) guide set and remove plate 3
+        //8. Edit the GS Analyte A guide set and remove plate 3
         //	- the QC Flags for plates 3, 4, 5, and 5a return (HMFI for all 4 and AUC for plates 4, 5, and 5a)
         removePlate3FromGuideSet();
         assertExpectedAnalyte1QCFlagsPresent();
@@ -538,7 +538,7 @@ public final class LuminexGuideSetTest extends LuminexTest
     private void importPlateFiveAgain()
     {
         //1. upload plate 5 again with the same isotype and conjugate (plate 5a)
-        //	- QC flags inserted for AUC for both analytes and HMFI for GS Analyte (1)
+        //	- QC flags inserted for AUC for both analytes and HMFI for GS Analyte A
 
         goToTestAssayHome();
         clickButton("Import Data");
@@ -562,7 +562,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         createAndImpersonateUser(editor, "Editor");
 
         beginAt(ljUrl);
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         assertTextPresent("Apply Guide Set");
         stopImpersonating();
         deleteUsers(true, editor);
@@ -570,7 +570,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         createAndImpersonateUser(reader, "Reader");
 
         beginAt(ljUrl);
-        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte (2)");
+        _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         assertTextPresent("Levey-Jennings Reports", "Standard1");
         assertTextNotPresent("Apply Guide Set");
         stopImpersonating();

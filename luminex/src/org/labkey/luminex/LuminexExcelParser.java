@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,9 +88,11 @@ public class LuminexExcelParser
     private void parseFile() throws ExperimentException
     {
         if (_parsed) return;
+        Set<String> analyteNames = new HashSet<>();
 
         for (File dataFile : _dataFiles)
         {
+            analyteNames.clear();
             try
             {
                 Workbook workbook = ExcelFactory.create(dataFile);
@@ -103,8 +106,16 @@ public class LuminexExcelParser
                         continue;
                     }
 
-                    String analyteName = sheet.getSheetName();
-                    Map.Entry<Analyte, List<LuminexDataRow>> analyteEntry = ensureAnalyte(new Analyte(analyteName), _sheets);
+                    String analyteName = analyteNameFromName(sheet.getSheetName());
+                    String beadNumber = beadNumberFromName(sheet.getSheetName());
+
+                    // verify the each tab has a unique analyte name for the workbook
+                    if (!analyteNames.contains(analyteName))
+                        analyteNames.add(analyteName);
+                    else
+                        throw new ExperimentException("All sheets in the data file must have a unique analyte name in the tab label. The analyte name excludes the bead number portion of the label.");
+
+                    Map.Entry<Analyte, List<LuminexDataRow>> analyteEntry = ensureAnalyte(new Analyte(analyteName, beadNumber), _sheets);
                     Analyte analyte = analyteEntry.getKey();
                     List<LuminexDataRow> dataRows = analyteEntry.getValue();
 
@@ -277,7 +288,7 @@ public class LuminexExcelParser
         {
             // Need to check both the name of the sheet (which might have been truncated) and the full
             // name of all analytes already parsed to see if we have a match
-            if (analyte.getName().equals(entry.getKey().getName()) || analyte.getName().equals(entry.getKey().getSheetName()))
+            if (analyte.getName().equals(entry.getKey().getName()) || analyte.getName().equals(analyteNameFromName(entry.getKey().getSheetName())))
             {
                 matchingAnalyte = entry.getKey();
                 dataRows = entry.getValue();
@@ -382,7 +393,8 @@ public class LuminexExcelParser
                 else if ("Analyte".equalsIgnoreCase(propName))
                 {
                     // Sheet names may have been truncated, so set the name based on the full value within the sheet
-                    analyte.setName(value);
+                    analyte.setName(analyteNameFromName(value));
+                    analyte.setBeadNumber(beadNumberFromName(value));
                 }
 
                 DomainProperty pd = excelProps.get(propName);
@@ -465,7 +477,7 @@ public class LuminexExcelParser
                 }
                 if (colNames.size() <= col)
                 {
-                    throw new ExperimentException("Unable to find header for cell " + ExcelFactory.getCellLocationDescription(col, row.getRowNum(), sheet.getSheetName()) + ". This is likely not a supported Luminex file format.");
+                    throw new ExperimentException("Unable to find header for cell " + ExcelFactory.getCellLocationDescription(col, row.getRowNum(), analyteNameFromName(sheet.getSheetName())) + ". This is likely not a supported Luminex file format.");
                 }
                 String columnName = colNames.get(col);
 
@@ -622,6 +634,42 @@ public class LuminexExcelParser
     public void setImported(boolean imported)
     {
         _imported = imported;
+    }
+
+    /**
+     * Parses out the analyte name from the name/bead number conjugate
+     */
+    private static String analyteNameFromName(String name)
+    {
+        if (name != null)
+        {
+            int idx1 = name.lastIndexOf('(');
+            int idx2 = name.lastIndexOf(')');
+
+            if (idx1 != -1 && idx2 != -1 && (idx1 < idx2))
+            {
+                return name.substring(0, idx1-1).trim();
+            }
+        }
+        return name;
+    }
+
+    /**
+     * Parses out the bead number from the analyte name/bead number conjugate
+     */
+    private static String beadNumberFromName(String name)
+    {
+        if (name != null)
+        {
+            int idx1 = name.lastIndexOf('(');
+            int idx2 = name.lastIndexOf(')');
+
+            if (idx1 != -1 && idx2 != -1 && (idx1 < idx2))
+            {
+                return name.substring(idx1+1, idx2).trim();
+            }
+        }
+        return name;
     }
 
     public static class TestCase extends Assert

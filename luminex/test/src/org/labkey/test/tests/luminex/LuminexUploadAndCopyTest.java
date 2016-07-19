@@ -175,12 +175,12 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         log("Check that upload worked");
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME), longWaitForPage*3);
-        assertTextPresent("Hu IL-1b (32)");
+        assertTextPresent("Hu IL-1b");
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME3));
         assertTextPresent(
-                "IL-1b (1)",
+                "IL-1b",
                 "ListParticipant1",
                 "ListParticipant2",
                 "ListParticipant3");
@@ -193,7 +193,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME4));
         assertTextPresent(
-                "IL-1b (1)",
+                "IL-1b",
                 "ListParticipant1",
                 "ListParticipant2",
                 "ListParticipant3",
@@ -205,7 +205,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM + " Runs"));
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM_RUN_NAME2), longWaitForPage);
-        assertTextPresent("IL-1b (1)", "9011-04");
+        assertTextPresent("IL-1b", "9011-04");
 
         region.setFilter("FI", "Equals", "20");
         click(Locator.name(".toggle"));

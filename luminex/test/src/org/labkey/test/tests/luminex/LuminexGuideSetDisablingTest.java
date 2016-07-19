@@ -56,8 +56,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
             TestFileUtils.getSampleData("Luminex/04-17A32-IgA-Biotin.xls")
     };
     private static final String GUIDE_SET_WINDOW_NAME = "Guide Set Parameter Details";
-    private static final String RUN_BASED_ANALYTE = "ENV1 (31)";
-    private static final String VALUE_BASED_ANALYTE = "ENV2 (41)";
+    private static final String RUN_BASED_ANALYTE = "ENV1";
+    private static final String VALUE_BASED_ANALYTE = "ENV2";
     private static final String[] NETWORKS = new String[]{"NETWORK2", "NETWORK3", "NETWORK4", "NETWORK1"};
     private static final String RUN_BASED_COMMENT = "LuminexGuideSetDisablingTest "+RUN_BASED_ANALYTE;
     private static final String VALUE_BASED_COMMENT = "LuminexGuideSetDisablingTest "+VALUE_BASED_ANALYTE;
@@ -153,7 +153,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     @Test
     public void verifyQCFlagsDisabledOnImport()
     {
-        String analyte = "ENV5 (58)";
+        String analyte = "ENV5";
         String comment = "verifyQCFlagsDisabledOnImport";
 
         // first create NEW guide set
@@ -348,14 +348,14 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     {
         clickDeleteOnGuideSetWithComment(RUN_BASED_COMMENT);
 
-        assertTextPresent("LuminexGuideSetDisablingTest ENV1 (31)",
+        assertTextPresent("LuminexGuideSetDisablingTest ENV1",
                 "Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
 
         clickButton("Confirm Delete");
 
         clickDeleteOnGuideSetWithComment(VALUE_BASED_COMMENT);
 
-        assertTextPresent("LuminexGuideSetDisablingTest ENV2 (41)",
+        assertTextPresent("LuminexGuideSetDisablingTest ENV2",
                 "Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
 
         clickButton("Confirm Delete");

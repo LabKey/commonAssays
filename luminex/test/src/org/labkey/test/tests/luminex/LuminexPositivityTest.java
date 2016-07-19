@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 @Category({DailyA.class, Assays.class})
 public final class LuminexPositivityTest extends LuminexTest
 {
-    private static List<String> _analyteNames = Arrays.asList("MyAnalyte (1)", "Blank (3)");
+    private static List<String> _analyteNames = Arrays.asList("MyAnalyte", "Blank");
     private int _expectedThresholdValue = 100;
     private int _newThresholdValue = 100;
     private Boolean _expectedNegativeControlValue = false;
@@ -88,9 +88,9 @@ public final class LuminexPositivityTest extends LuminexTest
         File badDefaults = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues_bad.tsv");
         File noAnalytes = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues_bad_only_analytes.tsv");
         Set<SetAnalyteDefaultValuesPage.AnalyteDefault> expectedDefaults = new HashSet<>();
-        expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Analyte1", "Blank (3)"));
-        expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Blank (3)", 110));
-        expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("MyAnalyte (1)", 120, "Blank (3)"));
+        expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Analyte1", "Blank"));
+        expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Blank", 110));
+        expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("MyAnalyte", 120, "Blank"));
 
         goToTestAssayHome();
         AssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();

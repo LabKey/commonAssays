@@ -160,7 +160,7 @@ public class LuminexEC50Test extends LuminexTest
         table.setFilter("CurveType", "Equals", "Four Parameter");
         assertEquals("Expected one Four Parameter curve fit failure flag", 1, table.getDataRowCount());
         List<String> values = table.getColumnDataAsText("Analyte");
-        assertTrue("Unexpected analyte for Four Parameter curve fit failure", values.size() == 1 && values.get(0).equals("ENV6 (97)"));
+        assertTrue("Unexpected analyte for Four Parameter curve fit failure", values.size() == 1 && values.get(0).equals("ENV6"));
         table.clearFilter("CurveType");
 
         // expect four 5PL curve fit failures

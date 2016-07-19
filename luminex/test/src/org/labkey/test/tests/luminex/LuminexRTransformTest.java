@@ -32,10 +32,10 @@ import static org.junit.Assert.assertNotNull;
 public final class LuminexRTransformTest extends LuminexTest
 {
     private static final String TEST_ANALYTE_LOT_NUMBER = "ABC 123";
-    private static final String ANALYTE1 = "MyAnalyte (1)";
-    private static final String ANALYTE2 = "MyAnalyte (2)";
-    private static final String ANALYTE3 = "Blank (3)";
-    private static final String ANALYTE4 = "MyNegative (4)";
+    private static final String ANALYTE1 = "MyAnalyte";
+    private static final String ANALYTE2 = "MyAnalyte B";
+    private static final String ANALYTE3 = "Blank";
+    private static final String ANALYTE4 = "MyNegative";
 
     private static final String[] RTRANS_FIBKGDNEG_VALUES = {"-50.5", "-70.0", "25031.5", "25584.5", "391.5", "336.5", "263.8", "290.8",
             "35.2", "35.2", "63.0", "71.0", "-34.0", "-33.0", "-29.8", "-19.8", "-639.8", "-640.2", "26430.8", "26556.2", "-216.2", "-204.2", "-158.5",

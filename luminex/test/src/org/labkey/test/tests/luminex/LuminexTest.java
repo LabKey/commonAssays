@@ -331,8 +331,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected String[] getListOfAnalytesMultipleCurveData()
     {
         //TODO:  make this a dynamic list, acquired from the current data set, rather than hardcoded
-        return new String[] {"ENV6 (97)", "ENV7 (93)", "ENV4 (26)",
-                        "ENV5 (58)", "Blank (53)"};
+        return new String[] {"ENV6", "ENV7", "ENV4",
+                        "ENV5", "Blank"};
     }
 
 
@@ -388,7 +388,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3);
         clickButton("Next");
-        setNegativeBeads("Blank ");
+        setNegativeBeads("Blank");
     }
 
     private void setNegativeBeads(String negBeadPrefix)
