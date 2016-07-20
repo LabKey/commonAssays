@@ -145,7 +145,7 @@ public class LuminexExcelParser
                         boolean hasMoreRows;
                         do
                         {
-                            LuminexDataRow dataRow = createDataRow(sheet, colNames, row, dataFile);
+                            LuminexDataRow dataRow = createDataRow(analyte, sheet, colNames, row, dataFile);
 
                             if (dataRow.getDescription() != null)
                             {
@@ -460,7 +460,7 @@ public class LuminexExcelParser
         return row;
     }
 
-    private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx, File dataFile) throws ExperimentException
+    private LuminexDataRow createDataRow(Analyte analyte, Sheet sheet, List<String> colNames, int rowIdx, File dataFile) throws ExperimentException
     {
         LuminexDataRow dataRow = new LuminexDataRow();
         dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
@@ -606,6 +606,15 @@ public class LuminexExcelParser
                     else if ("Sampling Errors".equalsIgnoreCase(columnName))
                     {
                         dataRow.setSamplingErrors(StringUtils.trimToNull(value));
+                    }
+                    else if ("Analyte".equalsIgnoreCase(columnName))
+                    {
+                        // validate that all analyte names match the property value for this sheet
+                        String analyteName = analyteNameFromName(StringUtils.trimToNull(value));
+                        if (!analyte.getName().equals(analyteName))
+                        {
+                            throw new ExperimentException("The analyte name for this data row : " + analyteName + " did not match the expected name of: " + analyte.getName());
+                        }
                     }
                 }
                 catch (NumberFormatException e)

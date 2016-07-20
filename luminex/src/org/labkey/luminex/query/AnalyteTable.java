@@ -137,6 +137,8 @@ public class AnalyteTable extends AbstractLuminexTable
         ExprColumn analyteBeadNameCol = new ExprColumn(this, "AnalyteWithBead", analyteBeadNameSQL, JdbcType.VARCHAR);
         addColumn(analyteBeadNameCol);
         analyteBeadNameCol.setReadOnly(true);
+
+        addColumn(wrapColumn(getRealTable().getColumn("BeadNumber")));
     }
 
     @Override
