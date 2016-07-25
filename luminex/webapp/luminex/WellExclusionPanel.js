@@ -19,7 +19,7 @@ function wellExclusionWindow(assayId, runId, dataId, description, type)
                     title: 'Exclude Replicate Group from Analysis',
                     layout:'fit',
                     width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
-                    height: Ext.getBody().getViewSize().height > 595 ? 555 : Ext.getBody().getViewSize().height * .75,
+                    height: Ext.getBody().getViewSize().height > 595 ? 560 : Ext.getBody().getViewSize().height * .75,
                     padding: 15,
                     modal: true,
                     closeAction:'close',
