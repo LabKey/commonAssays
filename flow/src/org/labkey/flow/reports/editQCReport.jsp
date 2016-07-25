@@ -28,6 +28,7 @@
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
+    @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("clientapi/ext3");

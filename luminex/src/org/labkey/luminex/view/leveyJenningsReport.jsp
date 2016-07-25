@@ -28,6 +28,7 @@
 <%@ page import="org.labkey.luminex.LeveyJenningsForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
+    @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("luminexLeveyJennings");

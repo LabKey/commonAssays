@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.elispot.ElispotController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
+    @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("Ext4");

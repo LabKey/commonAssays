@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
+    @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("Ext3");
