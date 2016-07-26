@@ -522,10 +522,13 @@ public class LuminexExcelParser
                     else if ("Well".equalsIgnoreCase(columnName))
                     {
                         String trimmedValue = StringUtils.trimToNull(value);
-                        trimmedValue = trimmedValue.replaceAll("\\s+", ",");
-                        dataRow.setWell(trimmedValue);
-                        boolean summary = trimmedValue != null && trimmedValue.contains(",");
-                        dataRow.setSummary(summary);
+                        if (trimmedValue != null)
+                        {
+                            trimmedValue = trimmedValue.replaceAll("\\s+", ",");
+                            dataRow.setWell(trimmedValue);
+                            boolean summary = trimmedValue != null && trimmedValue.contains(",");
+                            dataRow.setSummary(summary);
+                        }
                     }
                     else if ("%CV".equalsIgnoreCase(columnName))
                     {
@@ -613,7 +616,7 @@ public class LuminexExcelParser
                         String analyteName = analyteNameFromName(StringUtils.trimToNull(value));
                         if (!analyte.getName().equals(analyteName))
                         {
-                            throw new ExperimentException("The analyte name for this data row : " + analyteName + " did not match the expected name of: " + analyte.getName());
+                            throw new ExperimentException("The analyte name for this data row : '" + analyteName + "' did not match the expected name of: '" + analyte.getName() + "'");
                         }
                     }
                 }
@@ -657,7 +660,7 @@ public class LuminexExcelParser
 
             if (idx1 != -1 && idx2 != -1 && (idx1 < idx2))
             {
-                return name.substring(0, idx1-1).trim();
+                return name.substring(0, idx1).trim();
             }
         }
         return name;
