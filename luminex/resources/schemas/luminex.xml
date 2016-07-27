@@ -210,7 +210,9 @@
             <column columnName="Description"/>
             <column columnName="PTID"/>
             <column columnName="VisitID"/>
-            <column columnName="Date"/>
+            <column columnName="Date">
+                <formatString>Date</formatString>
+            </column>
             <column columnName="FIString"/>
             <column columnName="FI">
                 <formatString>0.0</formatString>
