@@ -134,6 +134,7 @@ public class LuminexEC50Test extends LuminexTest
         Double[] FiveParameterEC50maxs = {112.85, 486.5,  36469.5,  21075.29, 7826.90, 32211.67, 45012.09, 112.85, 0.43771, 0.03967};
         table.setFilter("CurveType", "Equals", "Five Parameter");
         table.setFilter("EC50", "Is Not Blank", "");
+        table.setSort("EC50", SortDirection.ASC);
         table.setSort("AnalyteId", SortDirection.ASC);
         table.setSort("TitrationId", SortDirection.ASC);
         ec50 = table.getColumnDataAsText("EC50");
