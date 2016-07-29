@@ -133,7 +133,9 @@ public class AnalyteTable extends AbstractLuminexTable
         colProperty.setShownInUpdateView(false);
         addColumn(colProperty);
 
-        SQLFragment analyteBeadNameSQL = new SQLFragment("CONCAT("+ ExprColumn.STR_TABLE_ALIAS +".name, ' (',  "+ ExprColumn.STR_TABLE_ALIAS +".beadNumber, ')')");
+        String beadNumberField = ExprColumn.STR_TABLE_ALIAS + ".beadNumber";
+        String beadNumber = "CASE WHEN ("+beadNumberField+" is not null and replace("+beadNumberField+",' ','') <> '') THEN CONCAT(' (', "+beadNumberField+",')') END";
+        SQLFragment analyteBeadNameSQL = new SQLFragment("CONCAT(" + ExprColumn.STR_TABLE_ALIAS + ".name," + beadNumber + ")");
         ExprColumn analyteBeadNameCol = new ExprColumn(this, "AnalyteWithBead", analyteBeadNameSQL, JdbcType.VARCHAR);
         addColumn(analyteBeadNameCol);
         analyteBeadNameCol.setReadOnly(true);
