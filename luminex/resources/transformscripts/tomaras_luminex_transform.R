@@ -15,9 +15,10 @@
 #  - 1.1.20140526 : Issue 20458: Lab wants positivity displayed next to each dilution
 #  - 1.2.20140612 : Issue 20548: Display multiple duplicate baseline positivity errors at once instead of just the first
 #  - 2.0.20140718 : Changes for LabKey 14.3: FI-Bkgd-Neg instead of FI-Bkgd-Blank
+#  - 3.0.20160729 : Validate that analyte bead numbers are non-null
 #
 # Author: Cory Nathe, LabKey
-labTransformVersion = "2.0.20140718";
+labTransformVersion = "3.0.20160729";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -384,6 +385,16 @@ writeErrorOrWarning <- function(type, msg, stopExecution)
     }
 }
 
+verifyBeadNumbers <- function(runData)
+{
+    # verify that there are non null bead numbers present for the run data
+    nullBeads <- subset(runData, is.null(beadNumber) | is.na(beadNumber))
+    if (nrow(nullBeads) > 0)
+    {
+        writeErrorOrWarning("error", "Error: An analyte name with no bead number was found.", TRUE);
+    }
+}
+
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
 run.props = readRunPropertiesFile();
@@ -395,6 +406,9 @@ error.file = getRunPropertyValue("errorsFile");
 
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
+
+# validate that we have bead numbers for all rows
+verifyBeadNumbers(run.data)
 
 # read in the analyte information (to get the mapping from analyte to standard/titration)
 analyte.data.file = getRunPropertyValue("analyteData");
