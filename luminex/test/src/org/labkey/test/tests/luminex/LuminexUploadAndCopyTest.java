@@ -236,9 +236,11 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickAndWait(Locator.linkWithText("raw and summary"), longWaitForPage);
         // make sure the Summary, StdDev, and DV columns are visible
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("Summary");
-        _customizeViewsHelper.addCustomizeViewColumn("StdDev");
-        _customizeViewsHelper.addCustomizeViewColumn("CV");
+        _customizeViewsHelper.addColumn("StdDev");
+        _customizeViewsHelper.addColumn("CV");
+        _customizeViewsHelper.addColumn("Summary");
+        _customizeViewsHelper.addColumn("ANALYTE/ANALYTEWITHBEAD");
+        _customizeViewsHelper.addColumn("ANALYTE/BEADNUMBER");
         _customizeViewsHelper.applyCustomView();
         // show all rows (> 100 in full data file)
         _extHelper.clickMenuButton(true, "Paging", "Show All");
@@ -259,12 +261,16 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         assertEquals("Unexpected number of data rows for Analyte1", 36, table.getDataRowCount());
 
         // check the StdDev and % CV for a few samples
-        checkStdDevAndCV("Analyte1", "S10", 3, "0.35", "9.43%");
-        checkStdDevAndCV("Analyte2", "S4", 3, "3.18", "4.80%");
-        checkStdDevAndCV("Analyte3", "S8", 3, "1.77", "18.13%");
+        String analyte = "Analyte1";
+        String analyteWithBead= analyte + " (1)";
+        checkStdDevAndCV(analyte, "S10", 3, "0.35", "9.43%", "1", analyteWithBead);
+        analyte = "Analyte2";
+        checkStdDevAndCV(analyte, "S4", 3, "3.18", "4.80%", " ", analyte);
+        analyte = "Analyte3";
+        checkStdDevAndCV(analyte, "S8", 3, "1.77", "18.13%", " ", analyte);
     }
 
-    private void checkStdDevAndCV(String analyte, String type, int rowCount, String stddev, String cv)
+    private void checkStdDevAndCV(String analyte, String type, int rowCount, String stddev, String cv, String beadNumber, String analyteWithBead)
     {
         DataRegionTable table = new DataRegionTable("Data", this);
         table.setFilter("Analyte", "Equals", analyte);
@@ -274,6 +280,8 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         {
             assertEquals("Wrong StdDev", stddev, table.getDataAsText(i, "StdDev"));
             assertEquals("Wrong %CV", cv, table.getDataAsText(i, "CV"));
+            assertEquals("Wrong %ANALYTEWITHBEAD", analyteWithBead, table.getDataAsText(i, "Analyte With Bead"));
+            assertEquals("Wrong %BEADNUMBER", beadNumber, table.getDataAsText(i, "Bead Number"));
         }
         table.clearFilter("Type");
         table.clearFilter("Analyte");
