@@ -681,7 +681,7 @@ public class LuminexExcelParser
                 return name.substring(idx1+1, idx2).trim();
             }
         }
-        return name;
+        return null;
     }
 
     public static class TestCase extends Assert
