@@ -46,6 +46,8 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.nab.NabUrls;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
@@ -56,6 +58,7 @@ import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -75,6 +78,7 @@ import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
@@ -156,6 +160,26 @@ public class NabAssayController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class RepairCrossPlateDilutionAction extends SimpleViewAction
+    {
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+
+        @Override
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            Module module = ModuleLoader.getInstance().getModule("Nab");
+            NabUpgradeCode upgradeCode = new NabUpgradeCode();
+            upgradeCode.repairCrossPlateDilutionData(ModuleLoader.getInstance().getModuleContext(module));
+
+            return new HtmlView("NAb cross plate dilution repair complete");
         }
     }
 
