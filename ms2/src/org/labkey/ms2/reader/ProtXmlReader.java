@@ -318,7 +318,7 @@ public class ProtXmlReader
                                         _iTraqQuantRatio.setError8(Double.parseDouble(parser.getAttributeValue(null, "error")));
                                         break;
                                     default:
-                                        throw new IllegalStateException("Invalid iTRAQ index: " + index);
+                                        throw new IllegalStateException("Invalid iTRAQ index: " + index + ". Supported values are 1-8.");
                                 }
                                 index++;
                             }
