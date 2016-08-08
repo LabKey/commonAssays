@@ -75,7 +75,6 @@ Ext4.define('LABKEY.elisa.RunDataPanel', {
                 scope   : this,
                 success : function(r) {
 
-                    console.log(r);
                     var wp = new LABKEY.QueryWebPart({
                         schemaName  : this.schemaName,
                         queryName   : r.queryName,

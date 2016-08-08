@@ -95,11 +95,13 @@
             allowShare      : <%=c.hasPermission(user, ShareReportPermission.class)%>,
             isDeveloper     : <%=user.isDeveloper()%>,
             hideSave        : <%=user.isGuest()%>,
+            hideViewData    : true,
             autoColumnYName  : <%=q(form.getAutoColumnYName() != null ? form.getAutoColumnYName() : null)%>,
             autoColumnXName  : <%=q(form.getAutoColumnXName() != null ? form.getAutoColumnXName() : null)%>,
             defaultNumberFormat: eval(<%=q(numberFormatFn)%>),
             allowEditMode   : <%=!user.isGuest() && c.hasPermission(user, UpdatePermission.class)%>,
-            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>}
+            curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>},
+            defaultTitleFn  : function(){ return 'Calibration Curve '; }
         }));
 
         items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {
