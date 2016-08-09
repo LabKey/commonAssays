@@ -234,6 +234,13 @@ public class ProteinManager
                 hashSequence(sequence), organismId).getObject(Protein.class);
     }
 
+    public static List<Protein> getProtein(String sequence)
+    {
+        return new SqlSelector(getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE Hash = ?",
+                hashSequence(sequence)).getArrayList(Protein.class);
+    }
+
     public static String getProteinSequence(int seqId)
     {
         Protein protein = getProtein(seqId);

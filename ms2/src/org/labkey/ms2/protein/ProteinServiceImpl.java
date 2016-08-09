@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * User: jeckels
@@ -143,6 +144,22 @@ public class ProteinServiceImpl implements ProteinService
     public String getProteinSequence(int seqId)
     {
         return ProteinManager.getProteinSequence(seqId);
+    }
+
+    @Override
+    public Integer getProteinSeqId(String sequence, int organismId)
+    {
+        org.labkey.ms2.Protein protein = ProteinManager.getProtein(sequence, organismId);
+        return protein != null ? protein.getSeqId() : null;
+    }
+
+    @Override
+    public List<Integer> getProteinSeqId(String sequence)
+    {
+        return ProteinManager.getProtein(sequence)
+                .stream()
+                .map(org.labkey.ms2.Protein::getSeqId)
+                .collect(Collectors.toList());
     }
 
     public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()
