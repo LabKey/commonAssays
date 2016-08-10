@@ -460,7 +460,63 @@ public abstract class MS2Importer
         _updateSwissProtSeqIdSql = sql.toString();
     }
 
-    private static String _updateSeqIdInexactMatchSql;
+    private static final String _updateSeqIdEndOfLookupStringSql;
+
+    static
+    {
+        /*
+        UPDATE ms2.PeptidesData
+        SET SeqId = x.SeqId
+        FROM
+            ( SELECT
+                MIN(fs.SeqId) AS SeqId,
+                COUNT(Distinct fs.SeqId) AS MatchCount,
+                Protein
+            FROM
+                prot.FastaSequences fs
+            INNER JOIN
+                (SELECT Protein FROM ms2.PeptidesData where Fraction=?) pd
+            ON
+                fs.FastaId = ? AND
+                pd.Protein = SUBSTRING(LookupString, LENGTH(LookupString) - POSITION('|' in REVERSE(LookupString)) + 2)
+             GROUP BY Protein
+        ) X
+        WHERE
+            x.MatchCount = 1 AND
+            ms2.PeptidesData.SeqId IS NULL AND
+            ms2.PeptidesData.Protein = x.Protein AND
+            ms2.PeptidesData.Fraction = ?
+        */
+
+        SQLFragment sql = new SQLFragment();
+        sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
+        sql.append("    SET SeqId = x.SeqId\n");
+        sql.append("    FROM\n");
+        sql.append("       ( SELECT\n");
+        sql.append("                MIN(fs.SeqId) AS SeqId,\n");
+        sql.append("                COUNT(Distinct fs.SeqId) AS MatchCount,\n");
+        sql.append("                Protein\n");
+        sql.append("            FROM\n");
+        sql.append("                ").append(ProteinManager.getTableInfoFastaSequences(), "fs").append("\n");
+        sql.append("            INNER JOIN\n");
+        sql.append("                (SELECT Protein FROM ").append(MS2Manager.getTableInfoPeptidesData(), "pd").append(" WHERE Fraction=?) pd\n");
+        sql.append("            ON\n");
+        sql.append("                fs.FastaId = ? AND\n");
+//        sql.append("                pd.Protein = SUBSTRING(LookupString, ").append(MS2Manager.getSqlDialect().getVarcharLengthFunction()).append("(LookupString) - ").append(MS2Manager.getSchema().getSqlDialect().getStringIndexOfFunction(new SQLFragment("'|'"), new SQLFragment("REVERSE(LookupString)"))).append(" + 2)\n");
+        sql.append("                pd.Protein = ");
+        sql.append(MS2Manager.getSqlDialect().getSubstringFunction(new SQLFragment("LookupString"), new SQLFragment(MS2Manager.getSqlDialect().getVarcharLengthFunction()).append("(LookupString) - ").append(MS2Manager.getSchema().getSqlDialect().getStringIndexOfFunction(new SQLFragment("'|'"), new SQLFragment("REVERSE(LookupString)"))).append(" + 2"), new SQLFragment("500"))).append("\n");
+        sql.append("             GROUP BY Protein\n");
+        sql.append("        ) X\n");
+        sql.append("        WHERE\n");
+        sql.append("            x.MatchCount = 1 AND\n");
+        sql.append("            ms2.PeptidesData.SeqId IS NULL AND\n");
+        sql.append("            ms2.PeptidesData.Protein = x.Protein AND\n");
+        sql.append("            ms2.PeptidesData.Fraction = ?");
+
+        _updateSeqIdEndOfLookupStringSql = sql.getSQL();
+    }
+
+    private static final String _updateSeqIdInexactMatchSql;
 
     static
     {
@@ -555,6 +611,12 @@ public abstract class MS2Importer
             {
                 int rowCount = executor.execute(_updateSwissProtSeqIdSql, fastaId, fastaId, fraction.getFraction());
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database for FASTA id " + fastaId);
+            }
+
+            for (int fastaId : run.getFastaIds())
+            {
+                int rowCount = executor.execute(_updateSeqIdEndOfLookupStringSql, fraction.getFraction(), fastaId, fraction.getFraction());
+                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on trailing FASTA header line for FASTA id " + fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
