@@ -142,7 +142,7 @@ public class MS2Test extends AbstractMS2ImportTest
         DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
         pushLocation();
         peptidesTable.checkCheckbox(0);
-        File peptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export Selected", false, "TSV"));
+        File peptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export Selected", false, "TSV"));
 
         TextSearcher txtSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(peptides)).setSearchTransformer(t -> t);
         assertTextPresent(txtSearcher, "K.LLASMLAK.A");
@@ -151,7 +151,7 @@ public class MS2Test extends AbstractMS2ImportTest
         popLocation();
         pushLocation();
         peptidesTable.checkAllOnPage();
-        File allPeptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export Selected", false, "AMT"));
+        File allPeptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export Selected", false, "AMT"));
         TextSearcher allPeptideSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allPeptides)).setSearchTransformer(t -> t);
         assertTextPresent(allPeptideSearcher, "\n", "60");
         assertTextPresent(allPeptideSearcher,
@@ -186,7 +186,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test export");
         pushLocation();
-        File allPepTSV = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        File allPepTSV = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher allPeptsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allPepTSV)).setSearchTransformer(t -> t);
         assertTextPresent(allPeptsvSearcher,
                 "Scan",
@@ -199,7 +199,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(allPeptsvSearcher, "\n", 58);
         popLocation();
 
-        File allAMT = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        File allAMT = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher allAmtSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allAMT));
         assertTextPresentInThisOrder(allAmtSrch, "R.Q^YALHVDGVGTK.A", "K.LLASMLAK.A");
         assertTextPresent(allAmtSrch, "Run", "Peptide");
@@ -262,7 +262,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent("RetTime");
 
         log("Test export");
-        File peptideFilteredRows = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        File peptideFilteredRows = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher pepFilteredRowsSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(peptideFilteredRows));
         assertTextPresent(pepFilteredRowsSearcher,
                 "Scan",
@@ -277,7 +277,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresentInThisOrder(pepFilteredRowsSearcher, "R.LSSMRDSR.S", "R.GGNEESTK.T");
         assertTextNotPresent(pepFilteredRowsSearcher, "K.FVKKSNDVR.L");
 
-        File allAmt = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        File allAmt = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher allAmtSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allAmt));
         assertTextPresent(allAmtSearcher, "Run", "Peptide");
         assertTextPresentInThisOrder(allAmtSearcher, "R.LSSMRDSR.S", "R.GGNEESTK.T");
@@ -337,7 +337,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore("gi|15668549|LSU_ribosomal_pro", "gi|14318169|AF379640_1_riboso");
 
         log("Test export Protein View");
-        File proteinViewFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "TSV"));
+        File proteinViewFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher proteinViewFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(proteinViewFile));
         assertTextPresent(proteinViewFileSearcher, "Protein",
                 "Description",
@@ -353,7 +353,7 @@ public class MS2Test extends AbstractMS2ImportTest
         selectOptionByText(Locator.name("grouping"), "Protein (Legacy)");
         checkCheckbox(Locator.checkboxByName("expanded"));
         clickAndWait(Locator.id("viewTypeSubmitButton"));
-        File proteinsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "TSV"));
+        File proteinsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher protFileSearch = new TextSearcher(()-> TestFileUtils.getFileContents(proteinsFile));
         assertTextPresent(protFileSearch,
                 "Protein",
@@ -367,7 +367,7 @@ public class MS2Test extends AbstractMS2ImportTest
         // TODO: Verify/fix these values: order changed in r43461
         assertTextPresentInThisOrder(protFileSearch, "gi|14318169|AF379640_1_riboso", "gi|15668549|LSU_ribosomal_pro");
         goBack();
-        File allProtsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderButton("Export All", false, "AMT"));
+        File allProtsFile = doAndWaitForDownload(() -> proteinsTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher allProtsSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(allProtsFile));
         assertTextPresent(allProtsSearcher, "Run", "Peptide");
         assertTextPresent(allProtsSearcher, "\n", 20);
@@ -466,7 +466,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.applyCustomView();
 
         log("Test Ignore View Filter");
-        peptidesTable.clickHeaderButton("Grid Views", "Apply Grid Filter");
+        peptidesTable.clickHeaderMenu("Grid Views", "Apply Grid Filter");
         assertTextPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Next AA");
@@ -474,7 +474,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore(PEPTIDE4, PEPTIDE3);
 
         log("Test Apply View Filter");
-        peptidesTable.clickHeaderButton("Grid Views", "Apply Grid Filter");
+        peptidesTable.clickHeaderMenu("Grid Views", "Apply Grid Filter");
         assertTextPresent("Next AA");
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
@@ -485,7 +485,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test exporting Query - Peptides grouping");
         log("Test exporting in TSV");
-        File allPeptidesFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        File allPeptidesFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher allPeptidesSearch = new TextSearcher(() -> TestFileUtils.getFileContents(allPeptidesFile));
         assertTextPresent(allPeptidesSearch, "Scan",
                 "dMass",
@@ -501,7 +501,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "SeqHits");
 
         log("Test exporting in AMT");
-        File allAMTFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        File allAMTFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher allAmtFileSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allAMTFile));
         assertTextPresent(allAmtFileSrch, "Run",
                 "Peptide",
@@ -547,7 +547,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("Next AA");
 
         log("Test load saved view");
-        peptidesTable.clickHeaderButton("Grid Views", VIEW4);
+        peptidesTable.clickHeaderMenu("Grid Views", VIEW4);
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
         assertTextNotPresent("R.GGNEESTK.T",
@@ -563,7 +563,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addCustomizeViewColumn("Fraction");
         _customizeViewsHelper.removeCustomizeViewColumn("IonPercent");
         _customizeViewsHelper.saveCustomView("");
-        peptidesTable.clickHeaderButton("Grid Views", "default");
+        peptidesTable.clickHeaderMenu("Grid Views", "default");
         assertTextPresent("Fraction");
         assertTextBefore("K.TKDYEGMQVPVK.V", "R.LGARRVSPVR.A");
         assertTextNotPresent("K.LLASMLAK.A",
@@ -578,7 +578,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("Fraction");
 
         log("Test delete view");
-        peptidesTable.clickHeaderButton("Grid Views", VIEW4);
+        peptidesTable.clickHeaderMenu("Grid Views", VIEW4);
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.deleteView();
         assertTextPresent("K.LLASMLAK.A",
@@ -617,7 +617,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test exporting from Protein Prophet view");
         log("Test exporting in TSV");
-        File allTSVFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "TSV"));
+        File allTSVFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher allTsvSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allTSVFile));
         assertTextPresent(allTsvSrch, "Group",
                 "Peptides",
@@ -634,7 +634,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.GSDSLSDGPACKR.S");
 
         log("Test exporting in AMT");
-        File allAMTPepFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderButton("Export All", false, "AMT"));
+        File allAMTPepFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher allAMTPepSrch = new TextSearcher(() -> TestFileUtils.getFileContents(allAMTPepFile));
         assertTextPresent(allAMTPepSrch, "Run",
                 "Peptide",
@@ -674,7 +674,7 @@ public class MS2Test extends AbstractMS2ImportTest
         DataRegionTable proteinGroupsTable = new DataRegionTable(REGION_NAME_PROTEINGROUPS, getDriver());
 
         log("Test exporting in TSV");
-        File proteinGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderButton("Export All", false, "TSV"));
+        File proteinGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher proteinGroupSrch = new TextSearcher(() -> TestFileUtils.getFileContents(proteinGroupFile));
         assertTextPresent(proteinGroupSrch, "Sequence",
                 "MSASELATSYSALILADEGIEIKSDKLLSLTKAANVDVEPIWATIFAKALEGKDLKELLLNIGSGAGAAPVAGGAGAPAAADGERPAEEKEEAKEEEESDEDMGFG");
@@ -689,7 +689,7 @@ public class MS2Test extends AbstractMS2ImportTest
         proteinGroupsTable.uncheckAll();
         proteinGroupsTable.checkCheckbox(0);
         proteinGroupsTable.checkCheckbox(1);
-        File selectedProtGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderButton("Export Selected", false, "TSV"));
+        File selectedProtGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderMenu("Export Selected", false, "TSV"));
         TextSearcher selectedProtGroupSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedProtGroupFile));
         assertTextPresentInThisOrder(selectedProtGroupSrch, "0.74", "0.78");
         assertTextPresent(selectedProtGroupSrch, "\n", 3);
@@ -701,7 +701,7 @@ public class MS2Test extends AbstractMS2ImportTest
     {
         log("Test export");
         DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, getDriver());
-        File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "AMT"));
+        File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher qTableSrch = new TextSearcher(() -> TestFileUtils.getFileContents(qTableFile));
         assertTextPresent(qTableSrch, "Run",
                 "Peptide",
@@ -726,7 +726,7 @@ public class MS2Test extends AbstractMS2ImportTest
         checkCheckbox(Locator.checkboxByName("expanded"));
         clickAndWait(Locator.id("viewTypeSubmitButton"));
         quantitationTable.checkCheckbox(0);
-        File qSelected = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export Selected", false, "TSV"));
+        File qSelected = doAndWaitForDownload(() -> quantitationTable.clickHeaderMenu("Export Selected", false, "TSV"));
         TextSearcher qSelectedSearch = new TextSearcher(() -> TestFileUtils.getFileContents(qSelected));
         assertTextPresent(qSelectedSearch, "Group",
                 "PP Unique",
@@ -741,7 +741,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(qSelectedSearch, "\n", 2);
 
         log("Make sure sort is exported correctly too");
-        File quantFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderButton("Export All", false, "TSV"), 1)[0];
+        File quantFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderMenu("Export All", false, "TSV"), 1)[0];
         TextSearcher quantSrch = new TextSearcher(() -> TestFileUtils.getFileContents(quantFile));
         assertTextPresent(quantSrch, "MLNMAKSKMHK");
         assertTextPresent(quantSrch, "\n", 3);
@@ -940,12 +940,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("gi|34849400|gb|AAP58899.1|");
 
         log("Check default view works");
-        peptidesTable.clickHeaderButton("Grid Views", "default");
+        peptidesTable.clickHeaderMenu("Grid Views", "default");
         assertElementNotPresent(seqIdMassHeader);
         assertTextPresent("gi|34849400|");
 
         log("Check sorting");
-        peptidesTable.clickHeaderButton("Grid Views", VIEW5);
+        peptidesTable.clickHeaderMenu("Grid Views", VIEW5);
         peptidesTable.setSort("SeqId", SortDirection.ASC);
         assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
 
@@ -1151,7 +1151,7 @@ public class MS2Test extends AbstractMS2ImportTest
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
         DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", getDriver());
         ms2Runs.checkAll();
-        ms2Runs.clickHeaderButton("Compare", "Peptide");
+        ms2Runs.clickHeaderMenu("Compare", "Peptide");
         checkRadioButton(Locator.radioButtonByNameAndValue("peptideFilterType", "none"));
         setFormElement(Locator.name("targetProtein"), "");
         clickButton("Compare");

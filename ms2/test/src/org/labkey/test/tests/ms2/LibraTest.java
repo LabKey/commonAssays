@@ -217,7 +217,7 @@ public class LibraTest extends MS2TestBase
 
     private void proteinProphetTest()
     {
-        DataRegionTable.findDataRegion(this).clickHeaderButton("Grid Views", "ProteinProphet");
+        DataRegionTable.findDataRegion(this).clickHeaderMenu("Grid Views", "ProteinProphet");
 
         waitForElement(Locator.lkButton("Grid Views"), WAIT_FOR_JAVASCRIPT);
         _customizeViewsHelper.openCustomizeViewPanel();

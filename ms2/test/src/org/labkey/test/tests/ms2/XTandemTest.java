@@ -26,7 +26,6 @@ import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.XTandem;
 import org.labkey.test.ms2.AbstractXTandemTest;
-import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
 import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
@@ -115,7 +114,7 @@ public class XTandemTest extends AbstractXTandemTest
         clickAndWait(Locator.linkWithText("MS2 Dashboard"));
         DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", this);
         ms2Runs.checkAll();
-        ms2Runs.clickHeaderButton("Compare", true, "Peptide (Legacy)");
+        ms2Runs.clickHeaderMenu("Compare", true, "Peptide (Legacy)");
         selectOptionByText(Locator.name("viewParams"), VIEW);
         clickButton("Compare");
         assertTextPresent("(Mass > 1000.0)");
