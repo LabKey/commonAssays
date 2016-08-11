@@ -163,14 +163,21 @@
 		</ns:columns>
 	</ns:table>
 	<ns:table tableName="Organisms" tableDbType="TABLE">
+		<ns:description>Contains a row per organism known to this server installation.</ns:description>
 		<ns:columns>
-			<ns:column columnName="OrgId"/>
+			<ns:column columnName="OrgId">
+				<ns:isKeyField>true</ns:isKeyField>
+			</ns:column>
 			<ns:column columnName="CommonName"/>
 			<ns:column columnName="Genus"/>
 			<ns:column columnName="Species"/>
 			<ns:column columnName="Comments"/>
-			<ns:column columnName="IdentId"/>
-			<ns:column columnName="Deleted"/>
+			<ns:column columnName="IdentId">
+				<ns:isHidden>true</ns:isHidden>
+			</ns:column>
+			<ns:column columnName="Deleted">
+				<ns:isHidden>true</ns:isHidden>
+			</ns:column>
 		</ns:columns>
 	</ns:table>
 	<ns:table tableName="Sequences" tableDbType="TABLE">

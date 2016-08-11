@@ -69,19 +69,15 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
     public SequencesTableInfo(SchemaType schema)
     {
         super(ProteinManager.getTableInfoSequences(), schema);
+        setPublicSchemaName(ProteinUserSchema.NAME);
         setTitleColumn("BestName");
         wrapAllColumns(true);
 
-        getColumn("OrgId").setFk(new LookupForeignKey("OrgId", "Description")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return new OrganismTableInfo(_userSchema);
-            }
-        });
+        getColumn("OrgId").setFk(new QueryForeignKey(ProteinUserSchema.NAME, schema.getContainer(), null, schema.getUser(), ProteinUserSchema.TableType.Organisms.name(), null, null));
 
         addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
-        getColumn("SourceId").setHidden(true);
+        getColumn("Source").setFk(new QueryForeignKey(schema, null, ProteinUserSchema.TableType.InfoSources.name(), null, null));
+        removeColumn(getColumn("SourceId"));
 
         ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _userSchema.getContainer());
         url.addParameter("seqId", "${SeqId}");
@@ -174,6 +170,19 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         cols.add(FieldKey.fromParts("OrgId"));
         setDefaultVisibleColumns(cols);
 
+    }
+
+    @Override
+    protected ColumnInfo resolveColumn(String name)
+    {
+        ColumnInfo col = super.resolveColumn(name);
+        if (col != null)
+            return col;
+
+        if (name.equalsIgnoreCase("SourceId"))
+            return super.getColumn("Source");
+
+        return null;
     }
 
     public void addPeptideAggregationColumns()

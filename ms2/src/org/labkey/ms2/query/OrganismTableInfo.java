@@ -22,6 +22,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.UserSchema;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.query.ProteinUserSchema;
 
 /**
  * User: jeckels
@@ -32,6 +33,7 @@ public class OrganismTableInfo extends FilteredTable<UserSchema>
     public OrganismTableInfo(UserSchema schema)
     {
         super(ProteinManager.getTableInfoOrganisms(), schema);
+        setPublicSchemaName(ProteinUserSchema.NAME);
 
         wrapAllColumns(true);
 

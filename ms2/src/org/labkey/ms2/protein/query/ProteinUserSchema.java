@@ -28,7 +28,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.DefaultSchema;
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.SimpleUserSchema;
@@ -37,6 +36,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.query.OrganismTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
 
 import java.util.Set;
@@ -140,6 +140,13 @@ public class ProteinUserSchema extends UserSchema
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
                 return schema.createInfoSourcesTable(name);
+            }
+        },
+        Organisms {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createOrganisms(name);
             }
         },
         Sequences {
@@ -261,6 +268,11 @@ public class ProteinUserSchema extends UserSchema
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTermSynonym());
         table.init();
         return table;
+    }
+
+    protected TableInfo createOrganisms(String name)
+    {
+        return new OrganismTableInfo(this);
     }
 
     protected SequencesTableInfo<ProteinUserSchema> createSequences(String name)
