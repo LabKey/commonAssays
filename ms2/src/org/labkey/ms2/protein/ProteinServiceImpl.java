@@ -70,6 +70,11 @@ public class ProteinServiceImpl implements ProteinService
         return ProteinManager.ensureProtein(sequence, organism, name, description);
     }
 
+    public int ensureProtein(String sequence, int orgId, String name, String description)
+    {
+        return ProteinManager.ensureProtein(sequence, orgId, name, description);
+    }
+
     private String guessOrganism(String sequence, String organism, String name, String description)
     {
         String fullHeader = getWholeHeader(name, description);

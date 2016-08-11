@@ -25,7 +25,26 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.ResultSetCollapser;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableResultSet;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
@@ -526,6 +545,16 @@ public class ProteinManager
         return protein.getSeqId();
     }
 
+    public static int ensureProtein(String sequence, int orgId, String name, String description)
+    {
+        Organism organism = new TableSelector(getTableInfoOrganisms()).getObject(orgId, Organism.class);
+        if (organism == null)
+            throw new IllegalArgumentException("Organism " + orgId + " does not exist");
+
+        Protein protein = ensureProteinInDatabase(sequence, organism, name, description);
+        return protein.getSeqId();
+    }
+
     private static Protein ensureProteinInDatabase(String sequence, String organismName, String name, String description)
     {
         String genus = FastaDbLoader.extractGenus(organismName);
@@ -541,6 +570,11 @@ public class ProteinManager
             organism = Table.insert(null, getTableInfoOrganisms(), organism);
         }
 
+        return ensureProteinInDatabase(sequence, organism, name, description);
+    }
+
+    private static Protein ensureProteinInDatabase(String sequence, Organism organism, String name, String description)
+    {
         Protein protein = getProtein(sequence, organism.getOrgId());
         if (protein == null)
         {
