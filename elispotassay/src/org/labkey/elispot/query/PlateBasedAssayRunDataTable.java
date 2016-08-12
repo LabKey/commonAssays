@@ -94,14 +94,13 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
                 if (hasMaterialSpecimenPropertyColumnDecorator && propertyCol.getFk() instanceof PropertyForeignKey)
                 {
                     ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(provider, protocol, schema));
+                    propertyCol.setDisplayColumnFactory(ColumnInfo.NOLOOKUP_FACTORY);
                 }
                 propertyCol.setHidden(false);
                 materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
                 return materials;
             }
         });
-
-
 
         ExprColumn runIdColumn = new ExprColumn(this, RUN_ID_COLUMN_NAME, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
         ColumnInfo addedRunIdColumn = addColumn(runIdColumn);
