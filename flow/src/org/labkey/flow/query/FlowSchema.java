@@ -667,7 +667,7 @@ public class FlowSchema extends UserSchema
             return _expData.getContainer();
         }
 
-        public void setContainerFilter(ContainerFilter filter)
+        public void setContainerFilter(@NotNull ContainerFilter filter)
         {
             checkLocked();
             _expData.setContainerFilter(filter);
@@ -1016,7 +1016,7 @@ public class FlowSchema extends UserSchema
             assert type == _type;
         }
 
-        public void setContainerFilter(ContainerFilter filter)
+        public void setContainerFilter(@NotNull ContainerFilter filter)
         {
             checkLocked();
             _expData.setContainerFilter(filter);
