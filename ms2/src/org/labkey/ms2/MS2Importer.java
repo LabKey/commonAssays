@@ -502,9 +502,10 @@ public abstract class MS2Importer
         sql.append("                (SELECT Protein FROM ").append(MS2Manager.getTableInfoPeptidesData(), "pd").append(" WHERE Fraction=?) pd\n");
         sql.append("            ON\n");
         sql.append("                fs.FastaId = ? AND\n");
-//        sql.append("                pd.Protein = SUBSTRING(LookupString, ").append(MS2Manager.getSqlDialect().getVarcharLengthFunction()).append("(LookupString) - ").append(MS2Manager.getSchema().getSqlDialect().getStringIndexOfFunction(new SQLFragment("'|'"), new SQLFragment("REVERSE(LookupString)"))).append(" + 2)\n");
         sql.append("                pd.Protein = ");
-        sql.append(MS2Manager.getSqlDialect().getSubstringFunction(new SQLFragment("LookupString"), new SQLFragment(MS2Manager.getSqlDialect().getVarcharLengthFunction()).append("(LookupString) - ").append(MS2Manager.getSchema().getSqlDialect().getStringIndexOfFunction(new SQLFragment("'|'"), new SQLFragment("REVERSE(LookupString)"))).append(" + 2"), new SQLFragment("500"))).append("\n");
+        // LookupString is a VARCHAR(200), so grabbing 200 characters ensures that we get the full substring we want
+        // without needing to calculate the specific length
+        sql.append(MS2Manager.getSqlDialect().getSubstringFunction(new SQLFragment("LookupString"), new SQLFragment(MS2Manager.getSqlDialect().getVarcharLengthFunction()).append("(LookupString) - ").append(MS2Manager.getSchema().getSqlDialect().getStringIndexOfFunction(new SQLFragment("'|'"), new SQLFragment("REVERSE(LookupString)"))).append(" + 2"), new SQLFragment("200"))).append("\n");
         sql.append("             GROUP BY Protein\n");
         sql.append("        ) X\n");
         sql.append("        WHERE\n");
