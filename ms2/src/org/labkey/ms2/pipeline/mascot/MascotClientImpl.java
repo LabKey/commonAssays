@@ -344,11 +344,8 @@ public class MascotClientImpl implements SearchClient
         return returns;
     }
 
-    public int downloadDB(String localDB, String db, String release, String hash, long filesize, long timestamp)
+    public void downloadDB(String localDB, String db, String release, String hash, long filesize, long timestamp) throws IOException
     {
-        errorCode = 0;
-        errorString = "";
-
         FileOutputStream fOut;
         try
         {
@@ -356,11 +353,8 @@ public class MascotClientImpl implements SearchClient
         }
         catch (FileNotFoundException e)
         {
-            errorCode = 1;
-            errorString = "Fail to open "+localDB+", "+e.getMessage();
-            return 1;
+            throw new IOException("Fail to open "+localDB, e);
         }
-
 
         try (PrintWriter writer = new PrintWriter(fOut))
         {
@@ -381,11 +375,10 @@ public class MascotClientImpl implements SearchClient
                             chunkSize = result.substring(nPos1 + 5, nPos2);
                         }
                     }
+
                     if ("".equals(chunkSize))
                     {
-                        errorCode = 2;
-                        errorString = "Fail to parse chunk size";
-                        break;
+                        throw new IOException("Fail to parse chunk size when attempting to download DB " + db);
                     }
 
                     int nBytes = result.length() - (nPos2 + 1);
@@ -401,16 +394,13 @@ public class MascotClientImpl implements SearchClient
                     }
                     else
                     {
-                        errorCode = 3;
-                        errorString = "Chunk size " + chunkSize + " greater than read size " + nBytes;
-                        break;
+                        throw new IOException("Chunk size " + chunkSize + " greater than read size " + nBytes);
                     }
 
                 }
                 else
                 {
                     // there was some problem, we bail out
-                    errorCode = 1;
                     StringBuilder sb = new StringBuilder();
                     int nPos1 = result.indexOf("\n");
                     if (-1 != nPos1)
@@ -423,13 +413,10 @@ public class MascotClientImpl implements SearchClient
                         if (-1 != nPos1) sb.append(",");
                         sb.append(result.substring(nPos1 + 1, nPos2 - 1));
                     }
-                    errorString = sb.toString();
-                    break;
+                    throw new IOException(sb.toString());
                 }
             }
         }
-
-        return errorCode;
     }
 
     public String downloadDBChunk(String db, String release, long offset, String hash, long filesize, long timestamp)
@@ -1255,25 +1242,29 @@ public class MascotClientImpl implements SearchClient
             //for Mascot version 2.2.03
             //final String endOfUploadMarker = "Finished uploading search details and file...";
             final String endOfUploadMarker = "Finished uploading search details";
-            BufferedReader in = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream()));
-            String str;
-            while ((str = in.readLine()) != null)
+            StringBuilder response = new StringBuilder();
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream())))
             {
-                //getLogger().info("Mascot Server: "+str);
-                if (str.contains(endOfUploadMarker))
+                String str;
+                while ((str = in.readLine()) != null)
                 {
-                    uploadFinished = true;
-                    getLogger().info("Mascot search task status: query upload completed");
-                    //WCH: we cannot break for Mascot on Windows platform
-                    //break;
+                    response.append(str);
+                    response.append('\n');
+                    //getLogger().info("Mascot Server: "+str);
+                    if (str.contains(endOfUploadMarker))
+                    {
+                        uploadFinished = true;
+                        getLogger().info("Mascot search task status: query upload completed");
+                        //WCH: we cannot break for Mascot on Windows platform
+                        //break;
+                    }
                 }
             }
-            in.close();
             if (!uploadFinished)
             {
             	getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
             			queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-            			Integer.toString(attempt+1) + ".\n" + "Mascot output: " + post.getResponseBodyAsString());
+            			Integer.toString(attempt+1) + ".\n" + "Mascot output: " + response.toString());
             }
         }
         catch (IOException err)

@@ -321,18 +321,14 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             if (toDownloadDB)
             {
                 getJob().info("Starting download of database "+sequenceRelease+"...");
-                iReturn = mascotClient.downloadDB(localDB.getCanonicalPath(),
+                mascotClient.downloadDB(localDB.getCanonicalPath(),
                         sequenceDB, sequenceRelease, smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
-                if (iReturn != 0)
-                    throw new IOException("Failed to download " + sequenceDB + " from Mascot server");
-                else
-                {
-                    getJob().info("Database "+sequenceRelease+" downloaded");
-                    getJob().info("Saving its checksums...");
-                    saveLocalMascotFileHash(localDBHash.getCanonicalPath(),
-                            smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
-                    getJob().info("Checksums saved.");
-                }
+
+                getJob().info("Database "+sequenceRelease+" downloaded");
+                getJob().info("Saving its checksums...");
+                saveLocalMascotFileHash(localDBHash.getCanonicalPath(),
+                        smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
+                getJob().info("Checksums saved.");
             }
 
             // 2. translate Mascot result file to pep.xml format
