@@ -99,6 +99,3 @@ ALTER TABLE viability.results ADD SpecimenMatches VARCHAR(1000);
 ALTER TABLE viability.results ADD OriginalCells INT;
 
 ALTER TABLE viability.results ADD TargetStudy ENTITYID;
-
--- Schedule the viability aggregates to be updated after startup
-EXEC core.executeJavaUpgradeCode 'updateViabilityTargetStudy';

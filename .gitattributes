@@ -1591,7 +1591,6 @@ viability/src/org/labkey/viability/ViabilitySchema.java -text
 viability/src/org/labkey/viability/ViabilityServiceImpl.java -text
 viability/src/org/labkey/viability/ViabilitySpecimenChangeListener.java -text
 viability/src/org/labkey/viability/ViabilityTsvDataHandler.java -text
-viability/src/org/labkey/viability/ViabilityUpgradeCode.java -text
 viability/src/org/labkey/viability/data/MultiSpecimenPropertyColumnDecorator.java -text
 viability/src/org/labkey/viability/data/MultiValueInputColumn.java -text
 viability/webapp/viability/CheckRunUploadForm.js -text
