@@ -799,7 +799,7 @@ public class FlowManager
     }
 
     /**
-     * Get a usage count for an attribute and it's aliases.
+     * Get a usage count for an attribute and its aliases.
      */
     public Map<Integer, Number> getUsageCount(AttributeType type, int rowId)
     {
@@ -826,7 +826,7 @@ public class FlowManager
     }
 
     /**
-     * Get usages for an attribute, excluding it's aliases.
+     * Get usages for an attribute, excluding its aliases.
      */
     public Collection<FlowDataObject> getUsages(AttributeType type, int rowId)
     {
@@ -867,7 +867,7 @@ public class FlowManager
     }
 
     /**
-     * Get usages for an attribute and it's aliases.
+     * Get usages for an attribute and its aliases.
      */
     public Map<Integer, Collection<FlowDataObject>> getAllUsages(AttributeType type, int rowId)
     {

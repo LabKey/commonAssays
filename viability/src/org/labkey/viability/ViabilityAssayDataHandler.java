@@ -401,7 +401,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
 
         // NOTE: Running this test from within IntelliJ will fail due to ConvertHelper not registering
-        // NOTE: it's converters causing the ViabilityTsvDataHandler's TabLoader to infer types incorrectly.
+        // NOTE: its converters causing the ViabilityTsvDataHandler's TabLoader to infer types incorrectly.
         @Test
         public void testTsv() throws Exception
         {

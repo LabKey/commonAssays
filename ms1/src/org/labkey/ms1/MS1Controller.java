@@ -340,7 +340,7 @@ public class MS1Controller extends SpringActionController
             if(-1 == form.getFeatureId())
                 return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getContainer()));
 
-            //get the feature and ensure that it is valid and that it's ExpRun is valid
+            //get the feature and ensure that it is valid and that its ExpRun is valid
             //and that it exists within the current container
             Feature feature = form.getFeature();
             if(null == feature)
@@ -438,7 +438,7 @@ public class MS1Controller extends SpringActionController
             url.addParameter("rowIndex", 1);
 
             //add a filter for MS2 scan so that the showPeptide view will know to enable or
-            //disable it's <<prev and next>> buttons based on how many peptides were actually
+            //disable its <<prev and next>> buttons based on how many peptides were actually
             //matched.
             return HttpView.redirect(url + "&MS2Peptides.Scan~eq=" + feature.getMs2Scan() + "&MS2Peptides.Charge~eq=" + feature.getMs2Charge());
         }

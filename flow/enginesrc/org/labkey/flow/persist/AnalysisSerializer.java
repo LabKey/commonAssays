@@ -65,7 +65,7 @@ import java.util.zip.ZipFile;
  * Reads/writes a directory of stats and graphs suitable for interchange with R and LabKey.
  *
  * Top-level statistics.tsv and graphs.tsv files.  The graphs.tsv may contain relative paths
- * to images.  By convention, each sample should get it's own directory of graphs.
+ * to images.  By convention, each sample should get its own directory of graphs.
  * <pre>
  * +-&lt;root&gt;/
  *   |- run-level numbers and plots?

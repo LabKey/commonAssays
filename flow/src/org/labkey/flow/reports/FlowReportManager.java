@@ -295,7 +295,7 @@ public class FlowReportManager
     }
 
     // All results have ownerObjectId set to the report's ontology object in the container
-    // so we can just delete that object and it's children to remove all results.
+    // so we can just delete that object and its children to remove all results.
     public static void deleteReportResults(FlowReport report, Container container)
     {
         // Delete all owned objects of the report's exp.object
