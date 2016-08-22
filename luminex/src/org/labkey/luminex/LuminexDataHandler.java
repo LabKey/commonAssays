@@ -1728,15 +1728,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             LuminexOORIndicator fiOORType = determineOutOfRange(dataRow.getFiString());
             dataRow.setFiOORIndicator(fiOORType.getOORIndicator(dataRow.getFiString(), dataRows, fiGetter));
-            dataRow.setFi(fiOORType.getValue(dataRow.getFiString(), dataRows, fiGetter, analyte));
+            if (fiOORType != LuminexOORIndicator.IN_RANGE) // NOTE: don't need to reset the value if it is in range, see LuminexExcelParser.getCellDoubleValue
+                dataRow.setFi(fiOORType.getValue(dataRow.getFiString(), dataRows, fiGetter, analyte));
 
             LuminexOORIndicator fiBackgroundOORType = determineOutOfRange(dataRow.getFiBackgroundString());
             dataRow.setFiBackgroundOORIndicator(fiBackgroundOORType.getOORIndicator(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter));
-            dataRow.setFiBackground(fiBackgroundOORType.getValue(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter, analyte));
+            if (fiOORType != LuminexOORIndicator.IN_RANGE) // NOTE: don't need to reset the value if it is in range, see LuminexExcelParser.getCellDoubleValue
+                dataRow.setFiBackground(fiBackgroundOORType.getValue(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter, analyte));
 
             LuminexOORIndicator stdDevOORType = determineOutOfRange(dataRow.getStdDevString());
             dataRow.setStdDevOORIndicator(stdDevOORType.getOORIndicator(dataRow.getStdDevString(), dataRows, stdDevGetter));
-            dataRow.setStdDev(stdDevOORType.getValue(dataRow.getStdDevString(), dataRows, stdDevGetter, analyte));
+            if (fiOORType != LuminexOORIndicator.IN_RANGE) // NOTE: don't need to reset the value if it is in range, see LuminexExcelParser.getCellDoubleValue
+                dataRow.setStdDev(stdDevOORType.getValue(dataRow.getStdDevString(), dataRows, stdDevGetter, analyte));
 
             LuminexOORIndicator obsConcOORType = determineOutOfRange(dataRow.getObsConcString());
             dataRow.setObsConcOORIndicator(obsConcOORType.getOORIndicator(dataRow.getObsConcString(), dataRows, obsConcGetter));
@@ -1799,7 +1802,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             LuminexOORIndicator concInRangeOORType = determineOutOfRange(dataRow.getConcInRangeString());
             dataRow.setConcInRangeOORIndicator(concInRangeOORType.getOORIndicator(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
-            dataRow.setConcInRange(concInRangeOORType.getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
+            if (fiOORType != LuminexOORIndicator.IN_RANGE) // NOTE: don't need to reset the value if it is in range, see LuminexExcelParser.getCellDoubleValue
+                dataRow.setConcInRange(concInRangeOORType.getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
         }
     }
 

@@ -37,7 +37,7 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
 {
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
 
-    private final String[] UPDATED_EXPECTED_FLAGS = {"AUC, EC50-5, PCV", "", "", "", "PCV"};
+    private final String[] UPDATED_EXPECTED_FLAGS = {"AUC, PCV", "", "", "", "PCV"};
 
     @BeforeClass
     public static void updateAssayDefinition()
@@ -64,7 +64,7 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         _guideSetHelper.verifyGuideSetsApplied(TEST_ASSAY_LUM, guideSetIds, LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES, 5);
         verifyQCFlags(TEST_ASSAY_LUM, LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[0], LuminexGuideSetTest.INITIAL_EXPECTED_FLAGS);
         verifyQCReport();
-        udpateGuideSets();
+        updateGuideSets();
         verifyQCFlags(TEST_ASSAY_LUM, LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[1], UPDATED_EXPECTED_FLAGS);
         verifyGuideSetCurveFitEmpty(TEST_ASSAY_LUM);
     }
@@ -75,28 +75,30 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
 
         Map<String, Double> metricInputs = new TreeMap<>();
 
+        // equivalent to Run-based guide set with Guide Set plate 1 and Guide Set plate 2 runs selected
         _guideSetHelper.setUpLeveyJenningsGraphParams(LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[0]);
         _guideSetHelper.createGuideSet(true);
-        metricInputs.put("EC504PLAverage", 179.78);
-        metricInputs.put("EC504PLStdDev", 22.21);
-        metricInputs.put("EC505PLAverage", 253.25);
-        metricInputs.put("EC505PLStdDev", 16.98);
-        metricInputs.put("AUCAverage", 8701.38);
-        metricInputs.put("AUCStdDev", 466.81);
+        metricInputs.put("EC504PLAverage", 179.60);
+        metricInputs.put("EC504PLStdDev", 22.48);
+        metricInputs.put("EC505PLAverage", 249.04);
+        metricInputs.put("EC505PLStdDev", 12.41);
+        metricInputs.put("AUCAverage", 8701.37);
+        metricInputs.put("AUCStdDev", 466.82);
         metricInputs.put("MaxFIAverage", 11457.15);
         metricInputs.put("MaxFIStdDev", 549.21);
         String guideSetComment1 = "Analyte 1";
         _guideSetHelper.editValueBasedGuideSet(metricInputs, guideSetComment1, true);
         _guideSetHelper.applyGuideSetToRun(new String[]{"NETWORK1", "NETWORK2"}, guideSetComment1, true);
 
+        // equivalent to Run-based guide set with Guide Set plate 1 and Guide Set plate 2 runs selected
         _guideSetHelper.setUpLeveyJenningsGraphParams(LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[1]);
         _guideSetHelper.createGuideSet(true);
         metricInputs.put("EC504PLAverage", 43426.10);
-        metricInputs.put("EC504PLStdDev", 794.95);
-        metricInputs.put("EC505PLAverage", 40349.13);
-        metricInputs.put("EC505PLStdDev", 3084.91);
-        metricInputs.put("AUCAverage", 80851.83);
-        metricInputs.put("AUCStdDev", 6523.08);
+        metricInputs.put("EC504PLStdDev", 794.96);
+        metricInputs.put("EC505PLAverage", 45242.19);
+        metricInputs.put("EC505PLStdDev", 10007.113);
+        metricInputs.put("AUCAverage", 80851.74);
+        metricInputs.put("AUCStdDev", 6523.05);
         metricInputs.put("MaxFIAverage", 30992.25);
         metricInputs.put("MaxFIStdDev", 2083.49);
         String guideSetComment2 = "Analyte 2";
@@ -113,7 +115,7 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         waitForText("No data to show");
     }
 
-    private void udpateGuideSets()
+    private void updateGuideSets()
     {
         Map<String, Double> metricInputs = new TreeMap<>();
 
@@ -122,19 +124,20 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         _guideSetHelper.setUpLeveyJenningsGraphParams(LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[0]);
         clickButtonContainingText("Edit", 0);
         metricInputs.put("EC505PLAverage", 325.0);
-        metricInputs.put("EC505PLStdDev", 35.0);
+        metricInputs.put("EC505PLStdDev", 40.0);
         metricInputs.put("AUCAverage", 7800.0);
         metricInputs.put("MaxFIAverage", 10200.0);
         _guideSetHelper.editValueBasedGuideSet(metricInputs, "Analyte 1", false);
 
+        // equivalent to Run-based guide set with Guide Set plate 2, Guide Set plate 3, and Guide Set plate 4 runs selected
         _guideSetHelper.setUpLeveyJenningsGraphParams(LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[1]);
         _guideSetHelper.createGuideSet(false);
-        metricInputs.put("EC504PLAverage", 42158.22);
-        metricInputs.put("EC504PLStdDev", 4833.76);
-        metricInputs.put("EC505PLAverage", 40987.31);
-        metricInputs.put("EC505PLStdDev", 4280.84);
-        metricInputs.put("AUCAverage", 85268.04);
-        metricInputs.put("AUCStdDev", 738.55);
+        metricInputs.put("EC504PLAverage", 42158.38);
+        metricInputs.put("EC504PLStdDev", 4833.95);
+        metricInputs.put("EC505PLAverage", 44249.59);
+        metricInputs.put("EC505PLStdDev", 8084.973);
+        metricInputs.put("AUCAverage", 85267.94);
+        metricInputs.put("AUCStdDev", 738.53);
         metricInputs.put("MaxFIAverage", 32507.27);
         metricInputs.put("MaxFIStdDev", 189.83);
         String guideSetComment = "New Analyte 2";

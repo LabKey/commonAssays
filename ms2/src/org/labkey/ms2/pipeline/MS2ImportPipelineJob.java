@@ -52,7 +52,14 @@ public class MS2ImportPipelineJob extends PipelineJob
         _runInfo = runInfo;
 
         String basename = FileUtil.getBaseName(_file, 2);
-        setLogFile(FT_LOG.newFile(_file.getParentFile(), basename));
+
+        // Use the PipeRoot to resolve the desired location for the .log file, which may
+        // not be in the same directory as the imported file if there is a supplemental pipeline
+        // directory configured. See issue 27440.
+        String relativePath = getPipeRoot().relativePath(_file.getParentFile());
+        relativePath += File.separator + FT_LOG.getName(_file.getParentFile(), basename);
+        File logFile = getPipeRoot().resolvePath(relativePath);
+        setLogFile(logFile);
 
         // If there is an existing status file, make sure this job does not
         // overwrite the original provider.  Both Comet and X!Tandem legacy

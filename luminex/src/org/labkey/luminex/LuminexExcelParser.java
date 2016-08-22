@@ -488,12 +488,12 @@ public class LuminexExcelParser
                     if ("FI".equalsIgnoreCase(columnName))
                     {
                         dataRow.setFiString(StringUtils.trimToNull(value));
-                        dataRow.setFi(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                        dataRow.setFi(getCellDoubleValue(cell, value));
                     }
                     else if ("FI - Bkgd".equalsIgnoreCase(columnName))
                     {
                         dataRow.setFiBackgroundString(StringUtils.trimToNull(value));
-                        dataRow.setFiBackground(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                        dataRow.setFiBackground(getCellDoubleValue(cell, value));
                     }
                     else if ("Type".equalsIgnoreCase(columnName))
                     {
@@ -532,7 +532,7 @@ public class LuminexExcelParser
                     }
                     else if ("%CV".equalsIgnoreCase(columnName))
                     {
-                        Double doubleValue = LuminexDataHandler.determineOutOfRange(value).getValue(value);
+                        Double doubleValue = getCellDoubleValue(cell, value);
                         if (doubleValue != null)
                         {
                             // We store the values as 1 == 100%, so translate from the Excel file's values
@@ -556,28 +556,28 @@ public class LuminexExcelParser
                     else if ("Std Dev".equalsIgnoreCase(columnName))
                     {
                         dataRow.setStdDevString(StringUtils.trimToNull(value));
-                        dataRow.setStdDev(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                        dataRow.setStdDev(getCellDoubleValue(cell, value));
                     }
                     else if ("Exp Conc".equalsIgnoreCase(columnName))
                     {
-                        dataRow.setExpConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                        dataRow.setExpConc(getCellDoubleValue(cell, value));
                     }
                     else if ("Obs Conc".equalsIgnoreCase(columnName))
                     {
                         dataRow.setObsConcString(StringUtils.trimToNull(value));
-                        dataRow.setObsConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                        dataRow.setObsConc(getCellDoubleValue(cell, value));
                     }
                     else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
                     {
                         if (!value.equals("***"))
                         {
-                            dataRow.setObsOverExp(parseDouble(value));
+                            dataRow.setObsOverExp(getCellDoubleValue(cell, value));
                         }
                     }
                     else if ("Conc in Range".equalsIgnoreCase(columnName))
                     {
                         dataRow.setConcInRangeString(StringUtils.trimToNull(value));
-                        dataRow.setConcInRange(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                        dataRow.setConcInRange(getCellDoubleValue(cell, value));
                     }
                     else if ("Ratio".equalsIgnoreCase(columnName))
                     {
@@ -595,7 +595,7 @@ public class LuminexExcelParser
                         {
                             dilutionValue = dilutionValue.substring("1:".length());
                         }
-                        Double dilution = parseDouble(dilutionValue);
+                        Double dilution = getCellDoubleValue(cell, dilutionValue);
                         if (dilution != null && dilution.doubleValue() == 0.0)
                         {
                             throw new ExperimentException("Dilution values must not be zero");
@@ -627,6 +627,20 @@ public class LuminexExcelParser
             }
         }
         return dataRow;
+    }
+
+    private Double getCellDoubleValue(Cell cell, String value)
+    {
+        // Issue 27424: if the value is not blank and a valid number, use cell.getNumericCellValue()
+        LuminexOORIndicator oorIndicator = LuminexDataHandler.determineOutOfRange(value);
+        if (oorIndicator == LuminexOORIndicator.IN_RANGE && ExcelFactory.isCellNumeric(cell))
+        {
+            return cell.getNumericCellValue();
+        }
+        else
+        {
+            return oorIndicator.getValue(value);
+        }
     }
 
     private Double parseDouble(String value)

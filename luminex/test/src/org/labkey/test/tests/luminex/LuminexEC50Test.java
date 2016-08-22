@@ -130,7 +130,7 @@ public class LuminexEC50Test extends LuminexTest
 
         // check that the 5PL parameters are within the expected ranges (note: exact values can change based on R 32-bit vs R 64-bit)
         // NOTE: the first two EC50s will be significantly different on Mac due to machine episolon. The test is adjusted for this, as these are "blanks" and thus provide the noisiest answers.
-        Double[] FiveParameterEC50mins = {107.64, 460.75, 36465.56, 21075.08, 7826.89, 32211.66, 44975.52, 107.64, 0.4199,  0.03962};
+        Double[] FiveParameterEC50mins = {107.64, 460.75, 36465.56, 21075.08, 7826.89, 32211.66, 44972.77, 107.64, 0.4199,  0.03962};
         Double[] FiveParameterEC50maxs = {112.85, 486.5,  36469.5,  21075.29, 7826.90, 32211.67, 45012.09, 112.85, 0.43771, 0.03967};
         table.setFilter("CurveType", "Equals", "Five Parameter");
         table.setFilter("EC50", "Is Not Blank", "");
