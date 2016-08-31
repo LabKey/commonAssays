@@ -168,7 +168,11 @@ generateDateLabels <- function(dates)
 
 # full date at new month, day only otherwise
     formats <- c("%Y-%m-%d","%d");
-    labelFormats <- formats[1+c(FALSE, format(tickDates[2:(length-1)],"%Y-%m") == format(tickDates[1:(length-2)],"%Y-%m"))]
+    if (length > 2) {
+        labelFormats <- formats[1+c(FALSE, format(tickDates[2:(length-1)],"%Y-%m") == format(tickDates[1:(length-2)],"%Y-%m"))]
+    } else {
+        labelFormats <- formats
+    }
     labels = format(tickDates, labelFormats)
     data.frame(ticks=ticks, labels=labels)
 }
