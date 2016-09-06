@@ -31,8 +31,8 @@ import org.labkey.test.pipeline.PipelineWebTestBase;
 import org.labkey.test.pipeline.PipelineTestParams;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.util.PipelineStatusTable;
-import org.labkey.test.ms1.params.PepMatchTestParams;
-import org.labkey.test.ms1.params.FeaturesTestParams;
+import org.labkey.test.params.ms1.PepMatchTestParams;
+import org.labkey.test.params.ms1.FeaturesTestParams;
 import org.labkey.test.util.PipelineToolsHelper;
 
 import java.util.Arrays;
