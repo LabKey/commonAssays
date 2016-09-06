@@ -36,6 +36,7 @@ import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.assay.nab.view.MultiGraphAction;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.statistics.StatsService;
@@ -49,6 +50,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.nab.NabUrls;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -179,7 +181,8 @@ public class NabAssayController extends SpringActionController
             NabUpgradeCode upgradeCode = new NabUpgradeCode();
             upgradeCode.repairCrossPlateDilutionData(ModuleLoader.getInstance().getModuleContext(module));
 
-            return new HtmlView("NAb cross plate dilution repair complete");
+            ActionURL url = PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getSharedContainer());
+            throw new RedirectException(url);
         }
     }
 

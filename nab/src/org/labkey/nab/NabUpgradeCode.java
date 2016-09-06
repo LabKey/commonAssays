@@ -22,7 +22,6 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DeferredUpgrade;
 import org.labkey.api.data.SimpleFilter;
@@ -186,7 +185,7 @@ public class NabUpgradeCode implements UpgradeCode
                             run.getName() + ") in container '" + run.getContainer().getPath() +
                             "'. Deleted from file system? Run details will not be available. Continuing upgrade for other runs.", job);
                 }
-                catch (ExperimentException | SQLException e)
+                catch (ExperimentException e)
                 {
                     warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
                             run.getContainer().getPath() + "' failed to upgrade due to exception: " +
@@ -197,6 +196,11 @@ public class NabUpgradeCode implements UpgradeCode
                     }
                     warn("", job);
                 }
+                catch (SQLException e)
+                {
+                    throw new RuntimeException(e);
+                }
+
 
                 if ((runCount % 500) == 0)
                 {
@@ -218,7 +222,6 @@ public class NabUpgradeCode implements UpgradeCode
 
     }
 
-    // Invoked by nab-16.20-16.21.sql
     @SuppressWarnings({"UnusedDeclaration"})
     @DeferredUpgrade
     public void repairCrossPlateDilutionData(final ModuleContext context)
@@ -227,47 +230,83 @@ public class NabUpgradeCode implements UpgradeCode
         {
             try
             {
-                _log.info("Starting repair of NAb cross plate dilution runs.");
-                Set<ExpProtocol> protocols = new HashSet<>();   // protocols may be accessible by more than one container
-                for (Container container : ContainerManager.getAllChildren(ContainerManager.getRoot()))
-                {
-                    if (null != container)
-                    {
-                        for (ExpProtocol protocol : AssayService.get().getAssayProtocols(container))
-                            protocols.add(protocol);
-                    }
-                }
+                Container c = ContainerManager.getSharedContainer();
+                ViewBackgroundInfo info = new ViewBackgroundInfo(c, context.getUpgradeUser(), PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(c));
+                NabCrossPlateDilutionRepairJob job = new NabCrossPlateDilutionRepairJob("NAb Upgrade Provider", info, PipelineService.get().findPipelineRoot(c));
 
-                int protocolCount = 0;
-                int runCount = 0;
-                DbSchema schema = DilutionManager.getSchema();
-                User upgradeUser = new LimitedUser(UserManager.getGuestUser(), new int[0], Collections.singleton(RoleManager.getRole(SiteAdminRole.class)), false);
-                for (ExpProtocol protocol : protocols)
-                {
-                    AssayProvider provider = AssayService.get().getProvider(protocol);
-                    if (provider instanceof CrossPlateDilutionNabAssayProvider)
-                    {
-                        protocolCount++;
-                        try (DbScope.Transaction transaction = DilutionManager.getSchema().getScope().ensureTransaction())
-                        {
-                            // delete the old dilution and well data, then regenerate with the fixed algorithm
-                            Set<Integer> runIds = protocol.getExpRuns().stream().map((Function<ExpRun, Integer>) ExpObject::getRowId).collect(Collectors.toSet());
-                            runCount += runIds.size();
-                            SimpleFilter runFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RunId"), runIds));
-                            Table.delete(DilutionManager.getTableInfoWellData(), runFilter);
-                            Table.delete(DilutionManager.getTableInfoDilutionData(), runFilter);
-
-                            populateWellData(upgradeUser, protocol, (NabAssayProvider)provider, null);
-                            transaction.commit();
-                        }
-                    }
-                }
-                _log.info("Completed repair of NAb cross plate dilution runs. Protocols processed : " + protocolCount + " runs processed : " + runCount);
+                PipelineService.get().queueJob(job);
             }
             catch (Exception e)
             {
                 _log.error("Cross Plate dilution data repair failed", e);
             }
+        }
+    }
+
+    private static class NabCrossPlateDilutionRepairJob extends PipelineJob
+    {
+        public static final String PROCESSING_STATUS = "Processing";
+
+        public NabCrossPlateDilutionRepairJob(String provider, ViewBackgroundInfo info, PipeRoot root) throws IOException, SQLException
+        {
+            super(provider, info, root);
+
+            File logFile = File.createTempFile("nabCrossPlateDilutionRepair", ".log", root.getRootPath());
+            setLogFile(logFile);
+        }
+
+        @Override
+        public URLHelper getStatusHref()
+        {
+            return null;
+        }
+
+        @Override
+        public String getDescription()
+        {
+            return "Repairing NAb cross plate dilution runs.";
+        }
+
+        public void run()
+        {
+            setStatus(PROCESSING_STATUS, "Job started at: " + DateUtil.nowISO());
+            info("Starting repair of NAb cross plate dilution runs.");
+            Set<ExpProtocol> protocols = new HashSet<>();   // protocols may be accessible by more than one container
+            for (Container container : ContainerManager.getAllChildren(ContainerManager.getRoot()))
+            {
+                if (null != container)
+                {
+                    for (ExpProtocol protocol : AssayService.get().getAssayProtocols(container))
+                        protocols.add(protocol);
+                }
+            }
+
+            int protocolCount = 0;
+            int runCount = 0;
+            User upgradeUser = new LimitedUser(UserManager.getGuestUser(), new int[0], Collections.singleton(RoleManager.getRole(SiteAdminRole.class)), false);
+            for (ExpProtocol protocol : protocols)
+            {
+                AssayProvider provider = AssayService.get().getProvider(protocol);
+                if (provider instanceof CrossPlateDilutionNabAssayProvider)
+                {
+                    info("Attempting to repair runs for protocol: " + protocol.getName());
+                    protocolCount++;
+                    try (DbScope.Transaction transaction = DilutionManager.getSchema().getScope().ensureTransaction())
+                    {
+                        // delete the old dilution and well data, then regenerate with the fixed algorithm
+                        Set<Integer> runIds = protocol.getExpRuns().stream().map((Function<ExpRun, Integer>) ExpObject::getRowId).collect(Collectors.toSet());
+                        runCount += runIds.size();
+                        SimpleFilter runFilter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RunId"), runIds));
+                        Table.delete(DilutionManager.getTableInfoWellData(), runFilter);
+                        Table.delete(DilutionManager.getTableInfoDilutionData(), runFilter);
+
+                        populateWellData(upgradeUser, protocol, (NabAssayProvider)provider, this);
+                        transaction.commit();
+                    }
+                }
+            }
+            info("Completed repair of NAb cross plate dilution runs. Protocols processed : " + protocolCount + " runs processed : " + runCount);
+            setStatus(TaskStatus.complete, "Job finished at: " + DateUtil.nowISO());
         }
     }
 }
