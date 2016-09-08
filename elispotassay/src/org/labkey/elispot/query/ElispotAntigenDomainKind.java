@@ -73,7 +73,7 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<PropertyStorageSpec> getBaseProperties()
+    public Set<PropertyStorageSpec> getBaseProperties(Domain domain)
     {
         return _baseFields;
     }

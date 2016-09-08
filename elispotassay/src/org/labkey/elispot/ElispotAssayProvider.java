@@ -254,7 +254,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
 
         // Add properties for all required fields
         DomainKind domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
-        for (PropertyStorageSpec propSpec : domainKind.getBaseProperties())
+        for (PropertyStorageSpec propSpec : domainKind.getBaseProperties(null))
         {
             DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec);
             prop.setShownInInsertView(false);
@@ -314,7 +314,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         runProperties.add(READER_PROPERTY_NAME);
 
         Set<String> requiredAntigenProps = new HashSet<>();
-        for (PropertyStorageSpec propSpec : PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME).getBaseProperties())
+        for (PropertyStorageSpec propSpec : PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME).getBaseProperties(null))
             requiredAntigenProps.add(propSpec.getName());
         domainMap.put(ASSAY_DOMAIN_ANTIGEN_WELLGROUP, requiredAntigenProps);
         return domainMap;

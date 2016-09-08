@@ -651,7 +651,7 @@ public class ElispotUpgradeCode implements UpgradeCode
                 {
                     // Ensure base properties are there
                     boolean addedProperty = false;
-                    for (PropertyStorageSpec propertyStorageSpec : domain.getDomainKind().getBaseProperties())
+                    for (PropertyStorageSpec propertyStorageSpec : domain.getDomainKind().getBaseProperties(domain))
                         if (null == domain.getPropertyByName(propertyStorageSpec.getName()))
                         {
                             DomainProperty domainProperty = domain.addProperty(propertyStorageSpec);

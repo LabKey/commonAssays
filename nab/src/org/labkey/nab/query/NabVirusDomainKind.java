@@ -25,7 +25,6 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.nab.NabAssayProvider;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -60,7 +59,7 @@ public class NabVirusDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<PropertyStorageSpec> getBaseProperties()
+    public Set<PropertyStorageSpec> getBaseProperties(Domain domain)
     {
         return _baseFields;
     }
@@ -93,7 +92,7 @@ public class NabVirusDomainKind extends AssayDomainKind
     {
         Set<String> names = getAssayReservedPropertyNames();
 
-        for (PropertyStorageSpec spec : getBaseProperties())
+        for (PropertyStorageSpec spec : getBaseProperties(domain))
             names.add(spec.getName());
 
         return names;
