@@ -79,9 +79,9 @@ public class CustomAnnotationSchema extends UserSchema
     public TableInfo createTable(String name)
     {
         CustomAnnotationSet annotationSet = getAnnotationSets().get(name);
-        if (annotationSet == null)
-            return super.getTable(name);
+        if (annotationSet != null)
+            return new CustomAnnotationTable(annotationSet, this, _includeSequences);
 
-        return new CustomAnnotationTable(annotationSet, this, _includeSequences);
+        return null;
     }
 }
