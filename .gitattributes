@@ -1537,8 +1537,6 @@ nab/src/org/labkey/nab/NabUploadWizardAction.java -text
 nab/src/org/labkey/nab/NabVirusFilePropertyHelper.java -text
 nab/src/org/labkey/nab/NabVirusPropertyHelper.java -text
 nab/src/org/labkey/nab/PlateParserTests.java -text
-nab/src/org/labkey/nab/RunMetadata.java -text
-nab/src/org/labkey/nab/RunSettings.java -text
 nab/src/org/labkey/nab/SinglePlateNabAssayRun.java -text
 nab/src/org/labkey/nab/SinglePlateNabDataHandler.java -text
 nab/src/org/labkey/nab/StudyNabGraphAction.java -text

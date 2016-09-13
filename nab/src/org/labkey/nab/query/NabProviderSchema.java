@@ -18,8 +18,11 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.SampleInfoMethod;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.EnumTableInfo;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.module.Module;
@@ -30,9 +33,8 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.api.assay.dilution.SampleInfo;
 
-import java.util.*;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -92,7 +94,7 @@ public class NabProviderSchema extends DilutionProviderSchema
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<SampleInfo.Method> result = new EnumTableInfo<>(SampleInfo.Method.class, this, "List of possible sample preparation methods for the NAb assay.", false);
+            EnumTableInfo<SampleInfoMethod> result = new EnumTableInfo<>(SampleInfoMethod.class, this, "List of possible sample preparation methods for the NAb assay.", false);
             result.setPublicSchemaName(SCHEMA_NAME);
             result.setPublicName(SAMPLE_PREPARATION_METHOD_TABLE_NAME);
             return result;
