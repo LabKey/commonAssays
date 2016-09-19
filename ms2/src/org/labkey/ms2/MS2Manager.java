@@ -54,7 +54,6 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.XarSource;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -1934,6 +1933,8 @@ public class MS2Manager
         private Float desiredFdr;
         private float fdrAtDefaultPvalue;
         private float pValue;
+        private final List<Float> fdrOptions = new ArrayList(Arrays.asList(.001f, .002f, .01f, .02f, .025f, .05f, .1f));
+        private final Map<Float, Float> fdrOptionToThresholdMap = new HashMap<Float, Float>(fdrOptions.size() + 1);  // may add one option during processing
 
         public int getTargetCount()
         {
@@ -2038,6 +2039,16 @@ public class MS2Manager
         {
             pValue = (float)Math.pow(10, (scoreThreshold / -10 ));
         }
+
+        public List<Float> getFdrOptions()
+        {
+            return fdrOptions;
+        }
+
+        public Map<Float, Float> getFdrOptionToThresholdMap()
+        {
+            return fdrOptionToThresholdMap;
+        }
     }
 
 
@@ -2090,8 +2101,6 @@ public class MS2Manager
 //            fullMap.get(row.getScoreThreshold()).setValue(defaultFormat.format(fullFdr)) ;
 //        }
 
-        DecoySummaryBean result = new DecoySummaryBean();
-        DecoySummaryBean bestResultOverThreshold = new DecoySummaryBean();
         int targetTotal = 0;
         int decoyTotal = 0;
 
@@ -2136,26 +2145,35 @@ public class MS2Manager
                 break;
             }
         }
-        result.setFdrAtDefaultPvalue(defaultPvalueResult.getFdr());
 
-        if (null == desiredFdr) // this is also the result we're looking for
+        DecoySummaryBean result = new DecoySummaryBean();
+
+        result.fdrOptions.add(defaultPvalueResult.getFdr());
+        Collections.sort(result.fdrOptions);
+        boolean useDefaultFdr = (null == desiredFdr) || (Float.compare(desiredFdr, new Float(defaultPvalueResult.getFdr())) == 0);  // no selection, or default FDR
+
+        if (useDefaultFdr)
         {
             result.setValues(defaultPvalueResult, true);
         }
-        else
+        for (Float fdrOption : result.fdrOptions)  // need to look at all FDR options for ionCutoff (even though result only uses at most one) to fill in hash map properly
         {
+            DecoySummaryBean tempResult = new DecoySummaryBean();
+            DecoySummaryBean bestResultOverThreshold = new DecoySummaryBean();
+            tempResult.setFdrAtDefaultPvalue(defaultPvalueResult.getFdr());
+
             for (DecoySummaryBean row : scores)
             {
                 if (row.getDecoyCount() > 0) // TODO: FDR == 0 allowed? Maybe if target count is sufficiently high?
                 {
-                    if (Float.compare(row.getFdr(), desiredFdr) < 1) // We're still getting closer to the highest FDR we'll allow
+                    if (Float.compare(row.getFdr(), fdrOption) < 1) // We're still getting closer to the highest FDR we'll allow
                     {
-                        if (!result.isResult() || Float.compare(row.getFdr(), result.getFdr()) > 0)
+                        if (!tempResult.isResult() || Float.compare(row.getFdr(), tempResult.getFdr()) > 0)
                         {
-                            result.setValues(row, false);
+                            tempResult.setValues(row, false);
                         }
                     }
-                    else if (result.isResult()) // We went one too far, the previous row was the best result without going over
+                    else if (tempResult.isResult()) // We went one too far, the previous row was the best result without going over
                         break;
                         // Also keep track of the best we've seen that exceeds the desired FDR
                     else if (Float.compare(row.getFdr(), bestResultOverThreshold.getFdr()) < 0 || !bestResultOverThreshold.isResult())
@@ -2164,10 +2182,22 @@ public class MS2Manager
                     }
                 }
             }
-            if (!result.isResult() && bestResultOverThreshold.isResult())
-                result.setValues(bestResultOverThreshold, false);
 
-            result.setDesiredFdr(desiredFdr);
+            if (!tempResult.isResult() && bestResultOverThreshold.isResult())
+                tempResult.setValues(bestResultOverThreshold, false);
+
+            // done processing, so add threshold to hash map and (possibly) values to returned result
+
+            if (Float.compare(fdrOption, new Float(defaultPvalueResult.getFdr())) == 0)
+                result.getFdrOptionToThresholdMap().put(fdrOption, DEFAULT_SCORE_THRESHOLD);
+            else
+                result.getFdrOptionToThresholdMap().put(fdrOption, tempResult.getScoreThreshold());
+            if (!useDefaultFdr && (Float.compare(fdrOption, desiredFdr) == 0))
+                // if not using default FDR, and fdrOption is the selected value, then populate result for real
+            {
+                result.setValues(tempResult, false);
+                result.setDesiredFdr(desiredFdr);
+            }
         }
 
         return result;

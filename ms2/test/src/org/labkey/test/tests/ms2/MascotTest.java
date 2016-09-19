@@ -400,16 +400,12 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         String filteredIonValue = drt.getDataAsText(0, "Ion");
         assertEquals("Highest ion value not shown", greatest, filteredIonValue);
 
-        checkCheckbox(Locator.checkboxById("ionCutoff"));
+        checkCheckbox(Locator.checkboxById("isIonCutoff"));
         waitForElement(Locator.tagContainingText("div","(Ion >= 13.1)"));
         assertEquals("All results should be filtered", 0, drt.getDataRowCount());
 
         selectOptionByText(Locator.tagWithName("select", "desiredFdr"),"1.0%");
-        assertNotChecked(Locator.checkboxById("ionCutoff"));  //Changing the FDR causes checkbox to uncheck
-        assertElementNotPresent("Filter was not removed from grid", Locator.tagContainingText("div","(Ion >= 13.1)"));
-
-        //Re-filter with new Ion Cutoff value
-        checkCheckbox(Locator.checkboxById("ionCutoff"));
+        assertChecked(Locator.checkboxById("isIonCutoff"));
         assertEquals("IonCutoff incorrectly applied", 1, drt.getDataRowCount());
         drt.clearFilter("Peptide");
         assertEquals("Unexpected number of results for IonCutoff filter", 20, drt.getDataRowCount());
