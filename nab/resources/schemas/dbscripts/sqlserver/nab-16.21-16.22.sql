@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
--- note : nab-16.20-nab-16.21 was backported to release 16.2 to fix issue : 27040
--- when scripts are consolidated for 16.3 we will need to account for both 16.20-16.30 and 16.21-16.30 upgrade paths
-CREATE INDEX IDX_WellData_DilutionDataId ON nab.wellData(dilutionDataId);
-EXEC core.executeJavaUpgradeCode 'repairCrossPlateDilutionData';
+-- conditionally create the index, this is necessary because the index creation did not exist initially
+-- in script: nab-16.20-16.21 but was added later to fix issue 27040
+CREATE PROCEDURE nab.ensureIndex AS
+  BEGIN
+    IF NOT EXISTS(SELECT * FROM sys.indexes WHERE name = 'IDX_WellData_DilutionDataId')
+      BEGIN
+        execute('CREATE INDEX IDX_WellData_DilutionDataId ON nab.wellData(dilutionDataId)');
+      END
+  END;
+GO
+
+EXEC nab.ensureIndex
+GO
+
+DROP PROCEDURE nab.ensureIndex
+GO

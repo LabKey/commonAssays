@@ -13,4 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+-- note : nab-16.20-nab-16.21 was backported to release 16.2 to fix issue : 27040
+-- when scripts are consolidated for 16.3 we will need to account for both 16.20-16.30 and 16.21-16.30 upgrade paths
+CREATE INDEX IDX_WellData_DilutionDataId ON nab.wellData(dilutionDataId);
 SELECT core.executeJavaUpgradeCode('repairCrossPlateDilutionData');
