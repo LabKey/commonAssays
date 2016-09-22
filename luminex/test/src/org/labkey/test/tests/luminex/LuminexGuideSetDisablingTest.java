@@ -172,6 +172,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("MFICheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
         click(SAVE_BTN);
+        waitForElementToDisappear(Locator.checkboxByName("EC504PLCheckBox"), 500);
 
         _guideSetHelper.importGuideSetRun(TEST_ASSAY_LUM, TestFileUtils.getSampleData("Luminex/plate 3_IgA-Biot (Standard1).xls"));
 
