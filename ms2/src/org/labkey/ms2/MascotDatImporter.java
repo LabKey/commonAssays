@@ -157,7 +157,9 @@ public class MascotDatImporter extends PeptideImporter
 
     private void writePeptides(Map<Integer, MascotDatLoader.DatPeptide> peptides, boolean decoys) throws SQLException
     {
-        _log.info("Writing " + (decoys ? "decoy " : "") + "peptides data");
+        _log.info("Writing data for " + peptides.size() + " " + (decoys ? "decoy " : "") + "peptides");
+        int complete = 0;
+        int index = 0;
         for (MascotDatLoader.DatPeptide peptide : peptides.values())
         {
             // There can be some data for peptides that were not found. e.g., a scan may only have a corresponding peptide or decoy peptide,
@@ -172,6 +174,13 @@ public class MascotDatImporter extends PeptideImporter
                     higherHitRank.setDerivedFieldValues();
                     write(higherHitRank, null);
                 }
+            }
+            index++;
+            int newComplete = (int)(((float)index / (float)peptides.size()) * 100.0);
+            if (newComplete != complete)
+            {
+                _log.info("Writing MS/MS" + (decoys ? " decoy" : "") + " results is " + newComplete + "% complete");
+                complete = newComplete;
             }
         }
 
