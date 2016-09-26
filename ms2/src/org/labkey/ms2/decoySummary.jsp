@@ -91,18 +91,23 @@
     <table >
         <tr>
             <td class="labkey-form-label">P Value</td>
+            <td style="text-align:right;"><%=h(pVal)%></td>
+            <td style="padding-left: 1em"></td>
             <td class="labkey-form-label">Ion Threshold</td>
-            <td class="labkey-form-label">In Target</td>
-            <td class="labkey-form-label">In Decoy</td>
-            <td class="labkey-form-label" style="padding-left:10px;">FDR</td>
-            <td class="labkey-form-label">Adjust FDR To</td>
+            <td style="text-align:right" id="ionThresholdValue"><%=h(bean.getScoreThreshold())%></td>
         </tr>
         <tr>
-            <td style="text-align:right"><%=h(pVal)%></td>
-            <td style="text-align:right"><%=h(bean.getScoreThreshold())%></td>
-            <td style="text-align:right"><%=h(targetCount)%></td>
-            <td style="text-align:right"><%=h(decoyCount)%></td>
-            <td style="text-align:right; padding-left:10px;"><%=h(fdr)%></td>
+            <td class="labkey-form-label">In Target</td>
+            <td style="text-align:right" id="inTargetValue"><%=h(targetCount)%></td>
+            <td></td>
+            <td class="labkey-form-label">In Decoy</td>
+            <td style="text-align:right" id="inDecoyValue"><%=h(decoyCount)%></td>
+        </tr>
+        <tr>
+            <td class="labkey-form-label">FDR</td>
+            <td style="text-align:right" id="fdrValue"><%=h(fdr)%></td>
+            <td></td>
+            <td class="labkey-form-label">Adjust FDR To</td>
             <td style="text-align:right">
                 <select name="desiredFdr" id="desiredFdr" onchange="if(document.getElementById('isIonCutoff').checked) {setFilterParameter(this.value)} this.form.submit();">
                     <%
@@ -116,7 +121,9 @@
                     } %>
                 </select>
             </td>
-            <td style="text-align: right; padding-left:5px">
+        </tr>
+        <tr>
+            <td colspan="4">
                 <label <% if (!isStandardView) { %> style="display:none"<% } %>><input type="checkbox" onclick="if(this.checked) {setFilterParameter(document.getElementById('desiredFdr').value)} this.form.submit();"
                        name="isIonCutoff" id="isIonCutoff"<%=checked(isIonCutoff)%> value="true"></input>Only show Ion &gt= this threshold</label>
             </td>

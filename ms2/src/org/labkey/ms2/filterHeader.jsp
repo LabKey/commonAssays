@@ -43,7 +43,7 @@
     }
 %>
 <labkey:form method="post" action="<%=h(bean.applyViewURL)%>">
-    <table>
+    <table id="ms2RunViewConfig">
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
             <td valign=bottom><%= button("Go").submit(true) %></td>
@@ -69,7 +69,7 @@
 <labkey:form method="post" id="extraFilter" action="<%=h(bean.extraFilterURL)%>">
     <table>
         <tr>
-            <td style="height: 100%; padding-right: 1em">
+            <td style="height: 100%; padding-right: 1em" id="ms2RunGrouping">
                 <fieldset>
                     <legend>Grouping</legend>
                     <table class="labkey-data-region">
@@ -93,7 +93,7 @@
 
             if (bean.currentViewType.supportsExtraFilters())
             { %>
-                <td style="height: 100%; padding-right: 1em">
+                <td style="height: 100%; padding-right: 1em" id="ms2RunChargeScoreFilter">
                     <% if (bean.run.getChargeFilterColumnName() != null) { %>
                         <fieldset>
                             <legend><%=h(bean.run.getChargeFilterColumnName())%> charge filter</legend>
@@ -108,7 +108,7 @@
                         </fieldset>
                     <% } %>
                 </td>
-                <td style="height: 100%; padding-right: 1em">
+                <td style="height: 100%; padding-right: 1em" id="ms2RunMinimumTrypticEnds">
                     <fieldset>
                         <legend>Minimum&nbsp;tryptic&nbsp;ends</legend>
                         <table>
@@ -123,7 +123,7 @@
                         </table>
                     </fieldset>
                 </td>
-                <td style="height: 100%<% if (!isStandardView) { %>; display:none"<% } %>">
+                <td id="ms2RunHighestScoreFilter" style="height: 100%<% if (!isStandardView) { %>; display:none"<% } %>">
                     <fieldset>
                         <legend>Highest score filter</legend>
                         <table>

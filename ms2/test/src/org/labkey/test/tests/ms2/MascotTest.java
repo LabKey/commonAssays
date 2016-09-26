@@ -377,10 +377,10 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         {
             decoySummary.put(headers.get(i).getText(), values.get(i).getText());
         }
-        assertEquals("Incorrect Identity Threshold in Decoy Summary", "13.1", decoySummary.get("Ion Threshold"));
-        assertEquals("Incorrect In Target count in Decoy Summary", "3", decoySummary.get("In Target"));
-        assertEquals("Incorrect In Decoy count in Decoy Summary", "0", decoySummary.get("In Decoy"));
-        assertEquals("Incorrect FDR % in Decoy Summary", "0.00%", decoySummary.get("FDR"));
+        assertEquals("Incorrect Identity Threshold in Decoy Summary", "13.1", getDriver().findElement(Locator.id("ionThresholdValue").toBy()).getText());
+        assertEquals("Incorrect In Target count in Decoy Summary", "3", getDriver().findElement(Locator.id("inTargetValue").toBy()).getText());
+        assertEquals("Incorrect In Decoy count in Decoy Summary", "0", getDriver().findElement(Locator.id("inDecoyValue").toBy()).getText());
+        assertEquals("Incorrect FDR % in Decoy Summary", "0.00%", getDriver().findElement(Locator.id("fdrValue").toBy()).getText());
 
         // TODO: Would be good to test the functionality of the "Adjust FDR To" dropdown, but we may still have further tweaking on this UI to do pending client feedback.
 

@@ -97,6 +97,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GWTView;
 import org.labkey.api.view.GridView;
+import org.labkey.api.view.HBox;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -430,7 +431,6 @@ public class MS2Controller extends SpringActionController
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
 
-            vBox.addView(run.getAdditionalRunSummaryView(form));
 
             List<Pair<String, String>> sqlSummaries = new ArrayList<>();
             SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run);
@@ -440,7 +440,10 @@ public class MS2Controller extends SpringActionController
             filterBox.setFrame(WebPartView.FrameType.PORTAL);
             filterBox.setTitle("View");
 
-            vBox.addView(filterBox);
+            HBox box = new HBox();
+            box.addView(filterBox);
+            box.addView(run.getAdditionalRunSummaryView(form));
+            vBox.addView(box);
 
             vBox.addView(grid);
             _run = run;

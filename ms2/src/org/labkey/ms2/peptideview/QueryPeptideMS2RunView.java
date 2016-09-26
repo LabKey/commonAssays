@@ -146,7 +146,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         PeptideQueryView peptideView = new PeptideQueryView(schema, settings, expanded, allowNesting);
 
-        peptideView.setTitle("Peptides");
+        peptideView.setTitle("Peptides and Proteins");
         return peptideView;
     }
 
