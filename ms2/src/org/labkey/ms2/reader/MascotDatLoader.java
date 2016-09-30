@@ -126,7 +126,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     //      q1_p1_terms=K,I
     // OR, for multiple protein matches
     //      q1_p5_terms=R,I:R,I
-    private static final Pattern PEPTIDE_LINE2 = Pattern.compile("q(\\d+)_p(\\d+)_terms=([^,]*),([^:]*)(:([^,]*),([^:]*))*");
+    private static final Pattern PEPTIDE_LINE2 = Pattern.compile("q(\\d+)_p(\\d+)_terms=([^,]*),([^:]*)(:([^,]*?),([^:]*?))*");
     private static final int PEPTIDE_TERMS_PREVIOUS_AA_GROUP_NUM = 3;
     private static final int PEPTIDE_TERMS_NEXT_AA_GROUP_NUM = 4;
 
