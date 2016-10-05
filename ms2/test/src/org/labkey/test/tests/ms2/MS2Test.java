@@ -32,12 +32,14 @@ import org.labkey.test.util.TextSearcher;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.labkey.test.Locator.NBSP;
 
 @Category({MS2.class, DailyA.class})
 public class MS2Test extends AbstractMS2ImportTest
@@ -233,7 +235,8 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("R.QPNSGPYKK.Q");
         peptidesTable.setFilter("Expect", "Is Greater Than", "1.2");
         assertTextNotPresent("K.FVKKSNDVR.L");
-        assertTextPresent("(Scan > 6) AND (Scan <= 100) AND (Charge = 2) AND (Hyper >= 14.6) AND (Next <> 9.5) AND (B < 11.6) AND (Y < 11.3) AND (Expect > 1.2)");
+        Set<String> expectedFilters = new HashSet<>(Arrays.asList("(Scan > 6)", "(Scan <= 100)", "(Charge = 2)", "(Hyper >= 14.6)", "(Next <> 9.5)", "(B < 11.6)", "(Y < 11.3)", "(Expect > 1.2)"));
+        assertEquals("Wrong peptide filters", expectedFilters, getFilters(ViewType.peptide));
 
         log("Test spectrum page");
         assertElementPresent(Locator.linkWithText("R.LSSMRDSR.S"));
@@ -253,7 +256,7 @@ public class MS2Test extends AbstractMS2ImportTest
         goBack();
 
         log("Verify still filtered.");
-        assertTextPresent("(Scan > 6) AND (Scan <= 100) AND (Charge = 2) AND (Hyper >= 14.6) AND (Next <> 9.5) AND (B < 11.6) AND (Y < 11.3) AND (Expect > 1.2)");
+        assertEquals("Wrong peptide filters", expectedFilters, getFilters(ViewType.peptide));
 
         log("Test pick peptide columns");
         clickButton("Pick Peptide Columns");
@@ -306,9 +309,11 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent("Description",
                 "Coverage",
                 "Best Gene Name",
-                "(Scan > 6) AND (Scan <= 100) AND (+1:Hyper >= 11.0, +2:Hyper >= 13.0, +3:Hyper >= 14.0)",
                 "Scan DESC");
         assertTextNotPresent("K.LLASMLAK.A");
+        assertEquals("Wrong protein filters",
+                new HashSet<>(Arrays.asList("(Scan > 6)", "(Scan <= 100)", "(+1:Hyper >= 11.0, +2:Hyper >= 13.0, +3:Hyper >= 14.0)")),
+                getFilters(ViewType.peptide));
 
         log("Test filters in Protein View");
         DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, getDriver());
@@ -317,16 +322,19 @@ public class MS2Test extends AbstractMS2ImportTest
                 "gi|19703691|Nicotinate_phosph");
         proteinsTable.setFilter("Description", "Does Not Contain", "Uncharacterized conserved protein");
         assertTextNotPresent("Uncharacterized conserved protein [Thermoplasma acidophilum]");
-        assertTextPresent("(SequenceMass > 17000) AND (SequenceMass < 50000) AND (Description DOES NOT CONTAIN Uncharacterized conserved protein)");
+        assertEquals("Wrong protein filters",
+                new HashSet<>(Arrays.asList("(SequenceMass > 17000)", "(SequenceMass < 50000)", "(Description DOES NOT CONTAIN Uncharacterized conserved protein)")),
+                getFilters(ViewType.protein));
 
         log("Test Single Protein View");
-        assertElementPresent(Locator.linkContainingText("gi|13541159|30S_ribosomal_pro"));
         String href = getAttribute(Locator.linkContainingText("gi|13541159|30S_ribosomal_pro"), "href");
         pushLocation();
         beginAt(href);
 
         log("Verify peptides.");
-        assertTextPresent("gi|13541159|ref|NP_110847.1|", "(Scan > 6) AND (Scan <= 100) AND (+1:Hyper >= 11.0, +2:Hyper >= 13.0, +3:Hyper >= 14.0)");
+        assertEquals("Wrong protein filters",
+            new HashSet<>(Arrays.asList("(Matches sequence of gi|13541159|ref|NP_110847.1|)", "(Scan > 6)", "(Scan <= 100)", "(+1:Hyper >= 11.0, +2:Hyper >= 13.0, +3:Hyper >= 14.0)")),
+            getFilters(ViewType.peptide));
 
         log("Return to run.");
         popLocation();
@@ -389,14 +397,16 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Test Protein Prophet with filters");
         selectOptionByText(Locator.name("viewParams"), LEGACY_PROTEIN_PROPHET_VIEW_NAME);
         clickButton("Go");
-        assertTextPresent("(Scan > 6) AND (Scan <= 100)",
-                "Scan DESC");
+        assertEquals("Wrong peptide filters", new HashSet<>(Arrays.asList("(Scan > 6)", "(Scan <= 100)")), getFilters(ViewType.peptide));
+        assertEquals("Wrong peptide sort", Arrays.asList("Scan DESC"), getSorts(ViewType.peptide));
         assertTextNotPresent("gi|30089158|low_density_lipop");
 
         DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, getDriver());
         quantitationTable.setFilter("PercentCoverage", "Is Not Blank", null);
         assertTextNotPresent("gi|13442951|MAIL");
-        assertTextPresent("(GroupProbability > 0.7) AND (PercentCoverage is not blank)");
+        assertEquals("Wrong protein group filters",
+                new HashSet<>(Arrays.asList("(GroupProbability > 0.7)", "(PercentCoverage is not blank)")),
+                getFilters(ViewType.proteinGroup));
 
         validateLegacySingleRunExport();
 
@@ -1294,5 +1304,43 @@ public class MS2Test extends AbstractMS2ImportTest
             return;
         File rootDir = new File(PIPELINE_PATH);
         delete(new File(rootDir, ".labkey/protocols/rollup/Protocol Rollup 1.xml"));
+    }
+
+    //TODO: Create MS2RunView component for this stuff
+    public Set<String> getFilters(ViewType type)
+    {
+        String filter = Locator.tag("td").withText(type + NBSP + "Filter:").followingSibling("td").findElement(getDriver()).getText().trim();
+        return new HashSet<>(Arrays.asList(filter.split(" +AND +")));
+    }
+
+    public List<String> getSorts(ViewType type)
+    {
+        String peptideFilter = Locator.tag("td").withText(type + NBSP + "Sort:").followingSibling("td").findElement(getDriver()).getText().trim();
+        return Arrays.asList(peptideFilter.split(" +, +"));
+    }
+
+    public enum ViewType
+    {
+        peptide{
+            @Override
+            public String toString()
+            {
+                return "Peptide";
+            }
+        },
+        protein{
+            @Override
+            public String toString()
+            {
+                return "Protein";
+            }
+        },
+        proteinGroup{
+            @Override
+            public String toString()
+            {
+                return "Protein" + NBSP + "Group";
+            }
+        };
     }
 }
