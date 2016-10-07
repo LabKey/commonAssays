@@ -333,9 +333,9 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Verify peptides.");
         assertTextPresent("gi|13541159|ref|NP_110847.1|");
-        assertEquals("Wrong protein filters",
-            new HashSet<>(Arrays.asList("(Scan > 6)", "(Scan <= 100)", "(+1:Hyper >= 11.0, +2:Hyper >= 13.0, +3:Hyper >= 14.0)")),
-            getFilters(ViewType.peptide));
+        final HashSet<String> missingFilters = new HashSet<>(Arrays.asList("(Scan > 6)", "(Scan <= 100)", "(+1:Hyper >= 11.0, +2:Hyper >= 13.0, +3:Hyper >= 14.0)"));
+        missingFilters.removeAll(getFilters(ViewType.peptide));
+        assertTrue("Missing protein filters: " + missingFilters, missingFilters.isEmpty());
 
         log("Return to run.");
         popLocation();
