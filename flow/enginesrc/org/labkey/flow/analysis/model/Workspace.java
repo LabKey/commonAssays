@@ -106,7 +106,23 @@ public abstract class Workspace implements IWorkspace, Serializable
         if (name != null && name.toLowerCase().endsWith(".jo"))
             throw new FlowException("Mac FlowJo .jo workspaces not supported; save the workspace as xml before importing");
 
-        Document doc = WorkspaceParser.parseXml(stream);
+        Document doc;
+        try
+        {
+            doc = WorkspaceParser.parseXml(stream);
+        }
+        catch (org.xml.sax.SAXParseException e)
+        {
+            boolean isNotXmlFile = e.getColumnNumber() == 1 && e.getLineNumber() == 1;
+            if(isNotXmlFile)
+            {
+                throw new FlowException("Please import a FlowJo workspace xml or wsp file");
+            }
+            else
+            {
+                throw e;
+            }
+        }
         Element elDoc = doc.getDocumentElement();
 //        System.err.println("DOCUMENT SIZE: " + debugComputeSize(elDoc));
 
