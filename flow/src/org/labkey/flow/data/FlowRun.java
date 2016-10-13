@@ -18,30 +18,40 @@ package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.attachments.AttachmentParent;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpExperiment;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.controllers.run.RunController;
-import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.script.FlowAnalyzer;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
@@ -377,20 +387,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return ret.toArray(new FlowRun[ret.size()]);
     }
 
-    static public FlowRun findMostRecent(Container container, FlowProtocolStep step)
-    {
-        FlowRun[] runs = getRunsForContainer(container, step);
-        FlowRun max = null;
-        for (FlowRun run : runs)
-        {
-            if (max == null)
-                max = run;
-            else
-                max = max.getExperimentRun().getModified().before(run.getExperimentRun().getModified()) ? run : max;
-        }
-        return max;
-    }
-
     static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot)
     {
         return getRunsForPath(container, step, runFilePathRoot, NAME_COMPARATOR);
@@ -476,99 +472,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         }
         rs.close();
         return ret.toArray(new FlowFCSFile[0]);
-    }
-
-    private void addMatchingWell(Map<Integer, String> map, String label, SampleCriteria criteria, FlowWell[] wells, FCSKeywordData[] datas)
-    {
-        for (int i = 0; i < datas.length; i ++)
-        {
-            FCSKeywordData data = datas[i];
-            if (data == null)
-                continue;
-
-            if (criteria.matches(data))
-            {
-                FlowWell well = wells[i];
-                if (map.containsKey(well.getWellId()))
-                    return;
-                label += " (" + well.getName() + ")";
-                map.put(well.getRowId(), label);
-                return;
-            }
-        }
-    }
-
-    public Map<Integer, String> getWells(FlowProtocol protocol, ScriptComponent scriptComponent, FlowProtocolStep step) throws Exception
-    {
-        FlowWell[] wells = getWells(true);
-        Map<Integer, String> ret = new LinkedHashMap();
-        if (step == FlowProtocolStep.calculateCompensation)
-        {
-            CompensationCalculation calc = (CompensationCalculation) scriptComponent;
-            FCSKeywordData[] keywordData = new FCSKeywordData[wells.length];
-            for (int i = 0; i < keywordData.length; i ++)
-            {
-                keywordData[i] = FCSAnalyzer.get().readAllKeywords(FlowAnalyzer.getFCSRef(wells[i]));
-            }
-            for (int i = 0; i < calc.getChannelCount(); i ++)
-            {
-                CompensationCalculation.ChannelInfo info = calc.getChannelInfo(i);
-                addMatchingWell(ret, info.getName() + "+", info.getPositive().getCriteria(), wells, keywordData);
-                addMatchingWell(ret, info.getName() + "-", info.getNegative().getCriteria(), wells, keywordData);
-            }
-            for (FlowWell well : wells)
-            {
-                if (ret.containsKey(well.getRowId()))
-                    continue;
-                ret.put(well.getRowId(), well.getName());
-            }
-        }
-        else
-        {
-            if (protocol != null)
-            {
-                FlowWell[] wellsToBeAnalyzed = getFCSFilesToBeAnalyzed(protocol, scriptComponent.getSettings());
-                for (FlowWell well : wellsToBeAnalyzed)
-                {
-                    ret.put(well.getRowId(), protocol.getFCSAnalysisName(well));
-                }
-            }
-            for (FlowWell well : wells)
-            {
-                if (ret.containsKey(well.getRowId()))
-                    continue;
-                ret.put(well.getRowId(), well.getName());
-            }
-        }
-        return ret;
-    }
-
-    public void moveToWorkspace(User user)
-    {
-        try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
-        {
-            ExpRun run = getExperimentRun();
-            for (ExpExperiment experiment : run.getExperiments())
-            {
-                experiment.removeRun(user, getExperimentRun());
-            }
-            FlowExperiment workspace = FlowExperiment.ensureWorkspace(user, getContainer());
-            workspace.getExperiment().addRuns(user, run);
-            transaction.commit();
-        }
-        finally
-        {
-            FlowManager.get().flowObjectModified();
-        }
-    }
-
-    public boolean isInWorkspace()
-    {
-        List<? extends ExpExperiment> experiments = getExperimentRun().getExperiments();
-        if (experiments.size() != 1)
-            return false;
-        FlowExperiment flowExperiment = new FlowExperiment(experiments.get(0));
-        return flowExperiment.isWorkspace();
     }
 
     public FlowTableType getDefaultQuery()

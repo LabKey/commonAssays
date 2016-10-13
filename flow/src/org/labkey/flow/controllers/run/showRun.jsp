@@ -34,12 +34,10 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunForm" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
 <%@ page import="org.labkey.flow.data.FlowProperty" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
@@ -87,25 +85,7 @@
     include(view, out);
 
     // UNDONE: link to audit log for keyword changes
-
-    if (getContainer().hasPermission(getUser(), UpdatePermission.class) &&
-        (run.getStep() == FlowProtocolStep.analysis || run.isInWorkspace()))
-    {
-        if (run.isInWorkspace()) { %>
-            <p>
-                This run is in the workspace.<br>
-                <labkey:link href="<%=run.urlFor(ScriptController.GateEditorAction.class)%>" text="Edit Gates on Individual Wells" /><br>
-                When you are finished editing the gates, you can recalculate the statistics and move this run back into an analysis.<br>
-                <labkey:link href="<%=run.urlFor(RunController.MoveToAnalysisAction.class)%>" text="Finish editing gates" />
-            </p>
-        <% } else { %>
-            <p>
-                You can modify the gates on individual FCS files in this run.<br>
-                <labkey:link href="<%=run.urlFor(RunController.MoveToWorkspaceAction.class)%>" text="Move this run to the workspace" /><br>
-            </p>
-    <% } 
-    }
-%><p><%
+ %><p><%
 
     if (comp != null)
     {

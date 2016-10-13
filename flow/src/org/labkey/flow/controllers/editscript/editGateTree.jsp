@@ -31,7 +31,6 @@
 <labkey:errors/>
 <p>
     Use this page to rename populations.  To delete a population, delete its name.<br>
-    Use the <a href="<%=formAction(ScriptController.GateEditorAction.class)%>">edit gates</a> page to define new populations.
 </p>
 <labkey:form action="<%=formAction(ScriptController.EditGateTreeAction.class)%>" method="POST">
     <%

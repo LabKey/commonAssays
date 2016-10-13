@@ -52,7 +52,6 @@ import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
-import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
@@ -126,7 +125,6 @@ public class FlowModule extends DefaultModule
         addController("flow-well", WellController.class);
         addController("flow-compensation", CompensationController.class);
         addController("flow-protocol", ProtocolController.class);
-        addController("flow-remote", FlowRemoteController.class);
         addController("flow-reports", ReportsController.class);
 
         addController("flow-attribute", AttributeController.class);

@@ -316,7 +316,6 @@
                                     '<div><a href="<%=script.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>">Upload FlowJo Compensation</a></div>',
                                 <% } %>
                                 <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.analysis)%>"><%=text(canEditScript ? "Edit" : "View")%> Gate Definitions</a></div>',
                                     '<div><a href="<%=script.urlFor(ScriptController.EditAnalysisAction.class)%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
                                     <% if (canEditScript) { %>
                                         '<div><a href="<%=script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',

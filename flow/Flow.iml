@@ -22,7 +22,6 @@
     </orderEntry>
     <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="FlowEngine" />
-    <orderEntry type="module" module-name="FlowGWT" />
     <orderEntry type="module-library">
       <library name="schemas">
         <CLASSES>
@@ -34,4 +33,3 @@
     </orderEntry>
   </component>
 </module>
-

@@ -23,18 +23,7 @@
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%!
-    String subsetLink(String subset)
-    {
-        if (StringUtils.isEmpty(subset))
-        {
-            return "Ungated";
-        }
-        ActionURL ret = form.getFlowScript().urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.calculateCompensation);
-        ret.addParameter("subset", subset);
-        return "<a href=\"" + h(ret) + "\">" + h(subset) + "</a>";
-    }
-%>
+
 
 <labkey:errors/>
 <%  CompensationCalculationDef calc = compensationCalculationDef();
@@ -53,10 +42,10 @@
     <tr><td><%=h(channel)%></td>
         <td><%=h(form.positiveKeywordName[i])%></td>
         <td><%=h(form.positiveKeywordValue[i])%></td>
-        <td><%=text(subsetLink(form.positiveSubset[i]))%></td>
+        <td><%=text(h(form.positiveSubset[i]))%></td>
         <td><%=h(form.negativeKeywordName[i])%></td>
         <td><%=h(form.negativeKeywordValue[i])%></td>
-        <td><%=text(subsetLink(form.negativeSubset[i]))%></td>
+        <td><%=text(h(form.negativeSubset[i]))%></td>
     </tr>
     <% } %>
 </table>
@@ -66,7 +55,6 @@
         This compensation calculation may be edited in a number of ways:<br>
         <labkey:link text="Upload a FlowJo workspace" href="<%=form.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>" /><br>
         <labkey:link text="Switch keywords or gates" href="<%=form.urlFor(ScriptController.ChooseCompensationRunAction.class)%>" /><br>
-        <labkey:link text="Move or define gates" href="<%=form.getFlowScript().urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.calculateCompensation)%>" /><br>
         <labkey:link href="<%=form.getFlowScript().urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
         <labkey:link href="<%=form.urlFor(AnalysisScriptController.BeginAction.class)%>" text="Script main page" />
     </p>

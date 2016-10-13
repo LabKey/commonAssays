@@ -223,19 +223,6 @@ public class ScriptOverview extends Overview
             }
             ret.addAction(action);
         }
-        Action actionEditGates = new Action(_canEdit ? "Edit gate definitions" :
-                "View gate definitions", _script.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.analysis));
-        if (hasStep)
-        {
-            actionEditGates.setExplanatoryHTML("You can use the online gate editor");
-        }
-        else
-        {
-            actionEditGates.setExplanatoryHTML("You can also define the analysis from scratch using the online gate editor.");
-        }
-
-        ret.addAction(actionEditGates);
-
         if (hasStep)
         {
             Action actionStats = new Action(_canEdit ? "Choose which statistics and graphs should be calculated" :
