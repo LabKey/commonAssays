@@ -169,7 +169,7 @@ public class WorkspaceData implements Serializable
                 else if (path.endsWith(".zip"))
                 {
                     // Extract external analysis zip into pipeline
-                    File tempDir = pipeRoot.resolvePath("unzip");
+                    File tempDir = pipeRoot.resolvePath(PipelineService.UNZIP_DIR);
                     if (tempDir.exists() && !FileUtil.deleteDir(tempDir))
                         throw new IOException("Failed to delete temp directory");
 
