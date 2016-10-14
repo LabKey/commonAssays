@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.SpectrumException;
@@ -670,10 +671,15 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
             }
             readLine();
         }
+        if (peptide.getScan() == null && title != null)
+        {
+            _log.debug("Scan for peptide " + peptide.getTrimmedPeptide() + " in query " + _currentQueryNum + " not found.  Parsing from title.");
+            findScanFromTitle(title, peptide);
+        }
+
         if (peptide.getScan() == null)
         {
-            _log.debug("Scan for peptide " + peptide.getTrimmedPeptide() + " in query " + _currentQueryNum + " not found.  Title parsing may be necessary.");
-            findScanFromTitle(title, peptide);
+            throw new IllegalArgumentException("Unable to determine scan number for peptide " + peptide.getTrimmedPeptide() + " in query " + _currentQueryNum + " - title = " + title);
         }
 
         DatPeptide decoyPeptide = initDatPeptide(decoyPeptides, _currentQueryNum, true);
