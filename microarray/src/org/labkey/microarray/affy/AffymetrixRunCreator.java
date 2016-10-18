@@ -28,6 +28,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
@@ -103,7 +104,11 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                     {
                         // Issue 17798:Support relative paths for Affy import
                         // If the filePath + fileName does not work, then filePath may be relative to the directory of the uploaded excel file.
-                        celFile = Paths.get(excelFile.getParent()).resolve(filePath).resolve(fileName).normalize().toFile();
+                        if(null != ((AssayRunUploadForm) context).getSelectedDataCollector())
+                        {
+                            celFile = Paths.get(((AssayRunUploadForm) context).getSelectedDataCollector().getRoot(excelData.getRun(), excelFile)
+                                    .getAbsolutePath()).resolve(filePath).resolve(fileName).normalize().toFile();
+                        }
                     }
 
                     if (!celFile.exists())

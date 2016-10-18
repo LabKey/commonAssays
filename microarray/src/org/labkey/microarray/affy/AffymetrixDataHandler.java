@@ -172,7 +172,10 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
 
         if (!path.toFile().exists())
         {
-            path = Paths.get(dataFile.getParent()).resolve(celFilePath).resolve(celFileName).normalize();
+            // This gets the pipeline root several levels above the temp directory. We don't have context this far down
+            // the pipeline so just hard coding this. If this is an issue we can update interfaces and classes necessary
+            // to pass through the context and then call getRoot() on the collector.
+            path = Paths.get(dataFile.getParentFile().getParentFile().getParentFile().getParent()).resolve(celFilePath).resolve(celFileName).normalize();
         }
 
         String absolutePath = path.toString();
