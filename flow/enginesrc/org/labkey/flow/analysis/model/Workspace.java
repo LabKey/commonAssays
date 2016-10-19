@@ -114,13 +114,15 @@ public abstract class Workspace implements IWorkspace, Serializable
         catch (org.xml.sax.SAXParseException e)
         {
             boolean isNotXmlFile = e.getColumnNumber() == 1 && e.getLineNumber() == 1;
-            if(isNotXmlFile)
+            if (isNotXmlFile)
             {
                 throw new FlowException("Please import a FlowJo workspace xml or wsp file");
             }
             else
             {
-                throw e;
+                throw new FlowException("The selected file is invalid at line " +
+                        e.getLineNumber() + ", column " + e.getColumnNumber() +
+                        ". " + e.getMessage());
             }
         }
         Element elDoc = doc.getDocumentElement();
