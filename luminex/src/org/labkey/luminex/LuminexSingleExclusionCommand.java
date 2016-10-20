@@ -15,14 +15,16 @@
  */
 package org.labkey.luminex;
 
+import org.apache.commons.lang3.StringUtils;
+import org.labkey.luminex.model.Analyte;
 import org.springframework.validation.Errors;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/**
- * Created by cnathe on 10/9/14.
- */
 public class LuminexSingleExclusionCommand
 {
     private String _command;
@@ -30,9 +32,33 @@ public class LuminexSingleExclusionCommand
     private Integer _dataId;
     private String _description;
     private String _type;
-    private String _analyteRowIds;
-    private String _analyteNames;
+    private List<String> _analyteRowIds = new ArrayList<>();
+    private List<String> _analyteNames = new ArrayList<>();
     private String _comment;
+
+//TODO: these are currently ignored on insert  Issue #28261
+//    private Integer _createdBy;
+//    private Timestamp _created;
+//
+//    public Timestamp getCreated()
+//    {
+//        return _created;
+//    }
+//
+//    public void setCreated(Timestamp created)
+//    {
+//        _created = created;
+//    }
+//
+//    public Integer getCreatedBy()
+//    {
+//        return _createdBy;
+//    }
+//
+//    public void setCreatedBy(Integer createdBy)
+//    {
+//        _createdBy = createdBy;
+//    }
 
     public Integer getKey()
     {
@@ -76,22 +102,23 @@ public class LuminexSingleExclusionCommand
 
     public String getAnalyteRowIds()
     {
-        return _analyteRowIds;
+        return String.join(",", _analyteRowIds);
     }
 
     public void setAnalyteRowIds(String analyteRowIds)
     {
-        _analyteRowIds = analyteRowIds;
+        _analyteRowIds = StringUtils.isNotBlank(analyteRowIds) ?
+                Arrays.asList(analyteRowIds.split(",")) : new ArrayList<>();
     }
-
     public String getAnalyteNames()
     {
-        return _analyteNames;
+        return String.join(",",_analyteNames);
     }
 
     public void setAnalyteNames(String analyteNames)
     {
-        _analyteNames = analyteNames;
+        _analyteNames = StringUtils.isNotBlank(analyteNames) ?
+                Arrays.asList(analyteNames.split(",")) : new ArrayList<>();
     }
 
     public String getComment()
@@ -122,6 +149,11 @@ public class LuminexSingleExclusionCommand
         row.put("DataId", getDataId());
         row.put("Comment", getComment());
         row.put("AnalyteId/RowId", getAnalyteRowIds());
+
+//TODO: these are currently ignored on insert Issue #28261
+//        row.put("CreatedBy", getCreatedBy());
+//        row.put("Created", getCreated());
+
         return row;
     }
 
@@ -132,5 +164,11 @@ public class LuminexSingleExclusionCommand
         {
             errors.reject(null, "Invalid command provided for exclusion: " + getCommand());
         }
+    }
+
+    public void addAnalyte(Analyte analyte)
+    {
+        _analyteNames.add(analyte.getName());
+        _analyteRowIds.add(String.valueOf(analyte.getRowId()));
     }
 }

@@ -17,13 +17,10 @@ package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.MultiValuedRenderContext;
@@ -53,6 +50,7 @@ import org.labkey.api.study.assay.AssayRunDatabaseContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.UnauthorizedException;
+import org.labkey.luminex.LuminexManager;
 import org.labkey.luminex.LuminexRunCreator;
 
 import java.io.IOException;
@@ -110,44 +108,37 @@ public class WellExclusionTable extends AbstractExclusionTable
         wellSQL.append(joinSQL);
         wellSQL.append(") x");
         ExprColumn wellsCol = new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL, ","), JdbcType.VARCHAR);
-        wellsCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        wellsCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
         {
             @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
             {
-                return new DataColumn(colInfo)
+                Object o = getDisplayValue(ctx);
+                out.write(null == o ? "&nbsp;" : PageFlowUtil.filter(o.toString()));
+            }
+
+            @Override
+            public Object getDisplayValue(RenderContext ctx)
+            {
+                Object result = getValue(ctx);
+                if (null != result)
                 {
-                    @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                    {
-                        Object o = getDisplayValue(ctx);
-                        out.write(null == o ? "&nbsp;" : PageFlowUtil.filter(o.toString()));
-                    }
+                    // get the list of unique wells (by splitting the concatenated string)
+                    TreeSet<String> uniqueWells = new TreeSet<>();
+                    uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMITER_REGEX)));
 
-                    @Override
-                    public Object getDisplayValue(RenderContext ctx)
+                    // put the unique wells back into a comma separated string
+                    StringBuilder sb = new StringBuilder();
+                    String comma = "";
+                    for (String well : uniqueWells)
                     {
-                        Object result = getValue(ctx);
-                        if (null != result)
-                        {
-                            // get the list of unique wells (by splitting the concatenated string)
-                            TreeSet<String> uniqueWells = new TreeSet<>();
-                            uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMITER_REGEX)));
-
-                            // put the unique wells back into a comma separated string
-                            StringBuilder sb = new StringBuilder();
-                            String comma = "";
-                            for (String well : uniqueWells)
-                            {
-                                sb.append(comma);
-                                sb.append(well);
-                                comma = ",";
-                            }
-                            result = sb.toString();
-                        }
-                        return result;
+                        sb.append(comma);
+                        sb.append(well);
+                        comma = ",";
                     }
-                };
+                    result = sb.toString();
+                }
+                return result;
             }
         });
         addColumn(wellsCol);
@@ -276,7 +267,8 @@ public class WellExclusionTable extends AbstractExclusionTable
                     try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
                         List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, configParameters, extraScriptContext);
-                        rerunTransformScripts(errors);
+                        if(extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
+                            rerunTransformScripts(errors);
                         if (errors.hasErrors())
                         {
                             throw errors;
@@ -302,7 +294,8 @@ public class WellExclusionTable extends AbstractExclusionTable
                     {
                         List<Map<String, Object>> result = super.deleteRows(user, container, keys, configParameters, extraScriptContext);
                         BatchValidationException errors = new BatchValidationException();
-                        rerunTransformScripts(errors);
+                        if(extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
+                            rerunTransformScripts(errors);
                         if (errors.hasErrors())
                         {
                             throw errors;
@@ -324,7 +317,9 @@ public class WellExclusionTable extends AbstractExclusionTable
                     {
                         List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, configParameters, extraScriptContext);
                         BatchValidationException errors = new BatchValidationException();
-                        rerunTransformScripts(errors);
+                        if(extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
+                            rerunTransformScripts(errors);
+
                         if (errors.hasErrors())
                         {
                             throw errors;

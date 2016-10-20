@@ -34,9 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Cory on 10/13/14.
- */
 public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
 {
     private Integer _assayId;
@@ -140,7 +137,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
     public void validate(Errors errors)
     {
         // verify that the tableName is a valid exclusion type enum
-        if (getTableName() == null || !EnumUtils.isValidEnum(LuminexExclusionPipelineJob.ExclusionType.class, getTableName()))
+        if (getTableName() == null || !EnumUtils.isValidEnum(LuminexManager.ExclusionType.class, getTableName()))
         {
             errors.reject(null, "Invalid tableName provided for exclusion: " + getTableName());
         }

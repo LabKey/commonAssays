@@ -18,6 +18,7 @@ package org.labkey.luminex;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -28,12 +29,10 @@ import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
@@ -45,7 +44,6 @@ import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.DataType;
@@ -60,7 +58,6 @@ import org.labkey.api.exp.query.ExpQCFlagTable;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
@@ -152,6 +149,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     public static final int SINGLE_POINT_CONTROL_SUMMARY_COUNT = 1;
     public static final int SINGLE_POINT_CONTROL_RAW_COUNT = 2;
+    private static final int DELETE_BATCH_SIZE = 200;
 
     @Override
     public DataType getDataType()
@@ -1952,30 +1950,39 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-
     public void beforeDeleteData(List<ExpData> data) throws ExperimentException
     {
         List<Integer> ids = new ArrayList<>();
-        for (ExpData expData : data)
-        {
-            ids.add(expData.getRowId());
+        data.forEach(d -> ids.add(d.getRowId()));
+        ListUtils.partition(ids, DELETE_BATCH_SIZE).forEach(this::deleteDatas);
+    }
 
-            if (ids.size() > 200)
-            {
-                deleteDatas(ids);
-                ids.clear();
-            }
-        }
-        if (!ids.isEmpty())
-        {
-            deleteDatas(ids);
-        }
+    /**
+     * Delete all exclusions for a set of Ids
+     * @param dataIds Set of Ids to remove exclusions for
+     */
+    private void cleanUpExclusions(List<Integer> dataIds, final SQLFragment idSQL, final SqlExecutor executor)
+    {
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
+                " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
+                " WHERE DataId ").append(idSQL).append(")"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
+                " WHERE DataId ").append(idSQL));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
+                " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
+                " WHERE RowId ").append(idSQL).append("))"));
+        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
+                " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
+                " WHERE RowId ").append(idSQL).append("))"));
     }
 
     private void deleteDatas(List<Integer> dataIds)
     {
         SQLFragment idSQL = new SQLFragment();
         OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds);
+
         // Clean up data row properties
         SqlExecutor executor = new SqlExecutor(LuminexProtocolSchema.getSchema());
         executor.execute(new SQLFragment("DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
@@ -1997,19 +2004,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 " WHERE DataId ").append(idSQL));
 
         // Clean up exclusions
-        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
-                " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
-                " WHERE DataId ").append(idSQL).append(")"));
-        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
-                " WHERE DataId ").append(idSQL));
-        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusionAnalyte() +
-                " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
-                " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
-                " WHERE RowId ").append(idSQL).append("))"));
-        executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoRunExclusion() +
-                " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
-                " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
-                " WHERE RowId ").append(idSQL).append("))"));
+        cleanUpExclusions(dataIds, idSQL, executor);
 
         // Clean up curve fits
         executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +
@@ -2064,74 +2059,30 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Set<String> titrations = parser.getTitrations();
 
-        Set<Object> excludedWells = getExcludedWellKeys(run, protocol, info);
+        // either the run's RowId (for the re-run transform script case) or the replaced run's RowId (in the re-import run case)
+        Integer runId = LuminexManager.get().getRunRowIdForUploadContext(run, ((AssayUploadXarContext)context).getContext());
+
+        Set<String> excludedWells = LuminexManager.get().getWellExclusionKeysForRun(runId, protocol, info.getContainer(), info.getUser());
 
         for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
-                handleParticipantResolver(dataRow, resolver, new LinkedHashMap<ExpMaterial, String>(), true);
+                handleParticipantResolver(dataRow, resolver, new LinkedHashMap<>(), true);
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
-                // Merge in whether it's been excluded or not.
+
+                // Merge in whether or not the data row is excluded via a "well exclusion".
                 // We write out all the wells, excluded or not, but the transform script can choose to ignore them
-                dataMap.put(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedWells.contains(createKey(entry.getKey().getName(), dataRow.getDataFile(), dataRow.getWell())));
+                String dataRowWellKey = LuminexManager.get().createWellExclusionKey(dataRow.getDataFile(), entry.getKey().getName(), dataRow.getDescription(), dataRow.getType());
+                dataMap.put(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedWells.contains(dataRowWellKey));
+
                 dataRows.add(dataMap);
             }
         }
         datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
         return datas;
-    }
-
-    /**
-     * Check the database to see if any wells have been excluded so that we can pass the info to the transform script.
-     * If the run is in the process of being inserted, nothing's been excluded, but there's no harm in looking. 
-     */
-    private Set<Object> getExcludedWellKeys(ExpRun run, ExpProtocol protocol, ViewBackgroundInfo info)
-    {
-        AssayProvider provider = AssayService.get().getProvider(protocol);
-        if (!(provider instanceof LuminexAssayProvider))
-            throw new NotFoundException("Luminex assay provider not found");
-
-        LuminexProtocolSchema schema = new LuminexProtocolSchema(info.getUser(), info.getContainer(), (LuminexAssayProvider)provider, protocol, null);
-        LuminexDataTable table = new LuminexDataTable(schema);
-
-        final Set<Object> excludedWells = new HashSet<>();
-
-        // Well, data file, and analyte are sufficient to identify which wells from the Excel file need to be
-        // marked as excluded
-        FieldKey wellFK = FieldKey.fromParts("Well");
-        FieldKey dataNameFK = FieldKey.fromParts("Data", "Name");
-        FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
-
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(wellFK, dataNameFK, analyteFK));
-
-        final String wellAlias = cols.get(wellFK).getAlias();
-        final String dataNameAlias = cols.get(dataNameFK).getAlias();
-        final String analyteNameAlias = cols.get(analyteFK).getAlias();
-
-        SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), run.getRowId());
-        filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_GROUP_COMMENT, CompareType.CONTAINS);
-        new TableSelector(table, cols.values(), filter, null).forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row) throws SQLException
-            {
-                String well = (String)row.get(wellAlias);
-                String dataName = (String)row.get(dataNameAlias);
-                String analyteName = (String)row.get(analyteNameAlias);
-                excludedWells.add(createKey(analyteName, dataName, well));
-            }
-        });
-
-        return excludedWells;
-    }
-
-    /** Create a simple object to use as a key, combining the three properties */
-    private Object createKey(String analyteName, String dataFileName, String well)
-    {
-        return Arrays.asList(analyteName, dataFileName, well);
     }
 
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMaps) throws ExperimentException

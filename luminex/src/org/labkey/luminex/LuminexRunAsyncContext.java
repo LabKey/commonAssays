@@ -46,6 +46,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
     private List<Titration> _titrations;
     private List<SinglePointControl> _singlePointControls;
+    private Boolean _retainExclusions;
 
     private transient Map<String, Map<DomainProperty, String>> _analyteProperties;
     private transient Map<String, Map<ColumnInfo, String>> _analyteColumnProperties;
@@ -66,6 +67,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         }
         _titrations = originalContext.getTitrations();
         _singlePointControls = originalContext.getSinglePointControls();
+        _retainExclusions = originalContext.getRetainExclusions();
     }
 
     @Override
@@ -102,9 +104,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             if(titrationByAnalyteArray.length > 0)
             {
                 logger.info("\t\tUses Titrations:");
-                for(int i = 0; i < titrationByAnalyteArray.length; i++)
+                for (Object aTitrationByAnalyteArray : titrationByAnalyteArray)
                 {
-                    logger.info("\t\t\t*"+titrationByAnalyteArray[i]);
+                    logger.info("\t\t\t*" + aTitrationByAnalyteArray);
                 }
             }
         }
@@ -200,6 +202,12 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             _parser = new LuminexExcelParser(getProtocol(), getUploadedData().values());
         }
         return _parser;
+    }
+
+    @Override
+    public boolean getRetainExclusions()
+    {
+        return _retainExclusions;
     }
 
     /** Convert to a map that can be serialized - ColumnInfo can't be */

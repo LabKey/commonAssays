@@ -18,9 +18,6 @@ package org.labkey.luminex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
@@ -30,13 +27,11 @@ import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.DefaultAssayRunCreator;
 import org.labkey.luminex.model.Analyte;
-import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.util.List;
 import java.util.Map;
@@ -64,9 +59,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
         synchronized (LOCK_OBJECT)
         {
             LuminexRunContext context = (LuminexRunContext)uploadContext;
-
             batch = super.saveExperimentRun(context, batch, run, forceSaveBatchProps);
-
             Container container = context.getContainer();
 
             // Save the analyte properties
@@ -75,7 +68,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
             {
                 int dataId = output.getRowId();
 
-                for (Analyte analyte : getAnalytes(dataId))
+                for (Analyte analyte : LuminexManager.get().getAnalytes(dataId))
                 {
                     Map<DomainProperty, String> properties = context.getAnalyteProperties(analyte.getName());
 
@@ -98,7 +91,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
         return batch;
     }
 
-    private void handleReRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, ExpRun run)
+    private void handleReRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, ExpRun run) throws ValidationException
     {
         if (uploadContext.getReRunId() != null)
         {
@@ -111,6 +104,9 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
                 run.setCreatedBy(replacedRun.getCreatedBy());
                 run.save(uploadContext.getUser());
 
+                if (uploadContext instanceof LuminexRunContext && ((LuminexRunContext)uploadContext).getRetainExclusions())
+                    LuminexManager.get().retainExclusions(uploadContext.getUser(), uploadContext.getContainer(), replacedRun, run, getProvider());
+
                 // Delete the old run, which has been replaced
                 if (replacedRun.getContainer().hasPermission(uploadContext.getUser(), DeletePermission.class))
                 {
@@ -118,11 +114,6 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
                 }
             }
         }
-    }
-
-    private Analyte[] getAnalytes(int dataRowId)
-    {
-        return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes(), new SimpleFilter(FieldKey.fromParts("DataId"), dataRowId), new Sort("RowId")).getArray(Analyte.class);
     }
 
     private void removeExistingAnalyteProperties(Container container, Analyte analyte) throws ExperimentException

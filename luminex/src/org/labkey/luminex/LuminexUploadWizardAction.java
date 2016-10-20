@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -31,15 +32,12 @@ import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
@@ -50,20 +48,19 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.luminex.model.Analyte;
-import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
-import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
-import org.labkey.luminex.query.NegativeBeadDisplayColumnGroup;
+import org.labkey.luminex.model.LuminexDataRow;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
+import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
 import org.labkey.luminex.query.LuminexProtocolSchema;
+import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
+import org.labkey.luminex.query.NegativeBeadDisplayColumnGroup;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -80,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Adds Analyte Properties as third wizard step, handles analyte and titration definition input view UI and post, saves
@@ -119,32 +117,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         if (reRun != null)
         {
-            // In the case of a re-run, check if the old run has any exclusions. If so, warn the user that
-            // they won't be carried over to the new run.
-            long exclusionCount = new TableSelector(LuminexProtocolSchema.getTableInfoRunExclusion(), new SimpleFilter(FieldKey.fromParts("RunId"), form.getReRunId()), null).getRowCount();
-            exclusionCount += new TableSelector(LuminexProtocolSchema.getTableInfoWellExclusion(), new SimpleFilter(FieldKey.fromParts("DataId", "RunId"), form.getReRunId()), null).getRowCount();
+            JspView exclusionWarning = addExclusionWarning(form, analyteNames);
 
-            if (exclusionCount > 0)
-            {
-                StringBuilder sb = new StringBuilder("<span class=\"labkey-error\">The run you are replacing has ");
-                if (exclusionCount == 1)
-                {
-                    sb.append("one exclusion");
-                }
-                else
-                {
-                    sb.append(exclusionCount);
-                    sb.append(" exclusions");
-                }
-                sb.append(", which will not be carried over to the replacement run. You may want to review the ");
-                ActionURL url = new ActionURL(LuminexController.ExcludedDataAction.class, form.getContainer());
-                url.addParameter("rowId", form.getRowId());
-                sb.append(PageFlowUtil.textLink("exclusions report", url));
-                sb.append("before proceeding.</span>");
-                HtmlView warningView = new HtmlView(sb.toString());
-                warningView.setTitle("Exclusion Warning");
-                vbox.addView(warningView);
-            }
+            //Only add if present
+            if(exclusionWarning != null)
+                vbox.addView(exclusionWarning);
         }
 
         // if there are titrations or single point controls in the uploaded data, show the well role definition section
@@ -160,6 +137,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         InsertView view = createInsertView(LuminexProtocolSchema.getTableInfoAnalytes(), lsidColumn, Collections.emptyList(), form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
         view.setTitle("Analyte Properties");
         view.setTitlePopupHelp("Analyte Properties", "Each Luminex assay design defines a set of properties to track for analytes. Additionally, if multiple titrations are present in a given run, each analyte may be assigned to the appropriate set of titrations.");
+
+        //Needed to get/set the RetainExclusion checkbox value from the exclusionWarning jsp above
+        view.getDataRegion().addHiddenFormField("retainExclusions", String.valueOf(form.getRetainExclusions()));
 
         for (String analyte : analyteNames)
             view.getDataRegion().addHiddenFormField("analyteNames", analyte);
@@ -220,19 +200,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                     ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getUser(), getContainer());
                     info.setName(inputName);
-                    info.setDisplayColumnFactory(new DisplayColumnFactory()
+                    info.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
                     {
                         @Override
-                        public DisplayColumn createRenderer(ColumnInfo colInfo)
+                        public String getFormFieldName(RenderContext ctx)
                         {
-                            return new DataColumn(colInfo)
-                            {
-                                @Override
-                                public String getFormFieldName(RenderContext ctx)
-                                {
-                                    return inputName;
-                                }
-                            };
+                            return inputName;
                         }
                     });
                     cols.add(info.getRenderer());
@@ -496,6 +469,37 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return vbox;
     }
 
+    @Nullable
+    private JspView addExclusionWarning(LuminexRunUploadForm form, String[] analyteNames) throws ExperimentException
+    {
+        long exclusionCount = LuminexManager.get().getExclusionCount(form.getReRunId());
+
+        // In the case of a re-run, check if the old run has any exclusions.
+        // If so, ask the user if they should be carried over
+        if (exclusionCount > 0)
+        {
+            form.setExclusionCount(exclusionCount);
+
+            //Get the possible values for each piece of the Exclusion key
+            LuminexExcelParser parser = form.getParser();
+            Set<String> fileNames = new HashSet<>();
+            form.getUploadedData().values().forEach(file -> fileNames.add(file.getName()));
+            Set<String> cellTypes = new HashSet<>();
+            parser.getSheets().values().forEach(datRowList ->
+                    cellTypes.addAll(datRowList.stream().map(LuminexDataRow::getType).collect(Collectors.toList())));
+
+            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, cellTypes, parser.getTitrations());
+            form.setLostExclusions(exclusionCount - retainedCount);
+
+            JspView<LuminexRunUploadForm> warningView = new JspView<>("/org/labkey/luminex/view/exclusionWarning.jsp", form);
+            warningView.setTitle("Exclusion Warning");
+
+            return warningView;
+        }
+
+        return null;
+    }
+
     private String getShowStandardCheckboxColumnName(Titration standard)
     {
         String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, standard);
@@ -510,36 +514,28 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private DisplayColumnFactory createAnalytePropertyDisplayColumnFactory(final String inputName, final String displayName)
     {
-        return new DisplayColumnFactory()
+        return colInfo -> new DataColumn(colInfo)
         {
             @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            public String getFormFieldName(RenderContext ctx)
             {
-                return new DataColumn(colInfo)
-                {
-                    @Override
-                    public String getFormFieldName(RenderContext ctx)
-                    {
-                        return inputName;
-                    }
+                return inputName;
+            }
 
-                    @Override
-                    public void renderTitle(RenderContext ctx, Writer out) throws IOException
-                    {
-                        out.write(displayName);
-                    }
+            @Override
+            public void renderTitle(RenderContext ctx, Writer out) throws IOException
+            {
+                out.write(displayName);
+            }
 
-                    @Override
-                    public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
-                    {
-                        out.write("<td class='labkey-form-label'>");
-                        renderTitle(ctx, out);
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
-                        out.write(PageFlowUtil.helpPopup(displayName, sb.toString()));
-                        out.write("</td>");
-                    }
-                };
+            @Override
+            public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+            {
+                out.write("<td class='labkey-form-label'>");
+                renderTitle(ctx, out);
+                String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
+                out.write(PageFlowUtil.helpPopup(displayName, sb));
+                out.write("</td>");
             }
         };
     }
@@ -736,7 +732,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                     defaultAnalyteColumnValues.save();
 
-                    // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
+                    // save the default values for the analyte standards/titrations information in 2 categories: well roles and titrations
                     PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
                             getUser(), getContainer(), _protocol.getName() + ": Well Role", true);
 

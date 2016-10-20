@@ -33,17 +33,22 @@ import java.util.Set;
  */
 public interface LuminexRunContext extends AssayRunUploadContext<LuminexAssayProvider>
 {
-    public String[] getAnalyteNames();
+    String[] getAnalyteNames();
 
-    public Map<DomainProperty, String> getAnalyteProperties(String analyteName);
+    Map<DomainProperty, String> getAnalyteProperties(String analyteName);
 
-    public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName);
+    Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName);
 
-    public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException;
+    Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException;
 
-    public List<Titration> getTitrations() throws ExperimentException;
+    List<Titration> getTitrations() throws ExperimentException;
 
-    public List<SinglePointControl> getSinglePointControls() throws ExperimentException;
+    List<SinglePointControl> getSinglePointControls() throws ExperimentException;
 
-    public LuminexExcelParser getParser() throws ExperimentException;
+    LuminexExcelParser getParser() throws ExperimentException;
+
+    default boolean getRetainExclusions()
+    {
+        return false;
+    }
 }

@@ -54,6 +54,40 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 {
     private String[] _analyteNames;
     private LuminexExcelParser _parser;
+    private Boolean _retainExclusions = true;
+    private long _exclusionCount;
+    private long _lostExclusions;
+    
+    public long getLostExclusions()
+    {
+        return _lostExclusions;
+    }
+
+    public void setLostExclusions(long lostExclusions)
+    {
+        _lostExclusions = lostExclusions;
+    }
+
+    public void setRetainExclusions(Boolean retainExclusions)
+    {
+        this._retainExclusions = retainExclusions != null ? retainExclusions : false;
+    }
+
+    @Override
+    public boolean getRetainExclusions()
+    {
+        return _retainExclusions != null && _retainExclusions.booleanValue();
+    }
+
+    public void setExclusionCount(long exclusionCount)
+    {
+        _exclusionCount = exclusionCount;
+    }
+
+    public long getExclusionCount()
+    {
+        return _exclusionCount;
+    }
 
     public String[] getAnalyteNames()
     {
@@ -253,11 +287,10 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             SinglePointControl singlePointControl = new SinglePointControl();
             singlePointControl.setName(singlePointControlName);
             String propertyName = LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControlName);
-            if (getViewContext().getRequest().getParameter(propertyName) != "")
+            if (StringUtils.isNotBlank(getViewContext().getRequest().getParameter(propertyName)))
             {
                 result.add(singlePointControl);
             }
-
         }
         return result;
     }
