@@ -242,7 +242,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
      * Build up a SQLFragment that filters identifiers based on a set of possible values. Passing in an empty
      * list will result in no matches
      */
-    /*package*/ static SQLFragment getIdentifierClause(List<String> params, String columnName, boolean exactMatch)
+    /*package*/ static SQLFragment getIdentifierClause(List<String> params, String columnName, MS2Controller.MatchCriteria matchCriteria)
     {
         SQLFragment sqlFragment = new SQLFragment();
         String separator = "";
@@ -255,7 +255,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         {
             sqlFragment.append(separator);
             sqlFragment.append(columnName);
-            if (exactMatch)
+            if (MS2Controller.MatchCriteria.EXACT == matchCriteria)
             {
                 sqlFragment.append(" = ?");
                 sqlFragment.add(param);
@@ -263,7 +263,12 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
             else
             {
                 sqlFragment.append(" LIKE ?");
-                sqlFragment.add(param + "%");
+                if (MS2Controller.MatchCriteria.SUFFIX == matchCriteria)
+                    sqlFragment.add("%" + param);
+                else if (MS2Controller.MatchCriteria.SUBSTRING == matchCriteria)
+                    sqlFragment.add("%" + param + "%");
+                else
+                    sqlFragment.add(param + "%");
             }
             separator = " OR ";
         }
@@ -297,7 +302,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         addCondition(sql);
     }
 
-    public void addProteinNameFilter(String identifier, boolean exactMatch)
+    public void addProteinNameFilter(String identifier, MS2Controller.MatchCriteria matchCriteria)
     {
         List<String> params = getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
@@ -305,25 +310,25 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoSequences(), "s");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "s.BestName", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "s.BestName", matchCriteria));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations(), "a");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", matchCriteria));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.lookupstring", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.lookupstring", matchCriteria));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", matchCriteria));
         sql.append("\n");
         sql.append(")");
         addCondition(sql);

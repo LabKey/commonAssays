@@ -43,6 +43,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
@@ -1558,6 +1559,7 @@ public class MS2Controller extends SpringActionController
     {
         private String _targetProtein;
         private String _targetURL;
+        private String _targetProteinMatchCriteria;
 
         public String getTargetProtein()
         {
@@ -1577,6 +1579,16 @@ public class MS2Controller extends SpringActionController
         public void setTargetURL(String targetURL)
         {
             _targetURL = targetURL;
+        }
+
+        public String getTargetProteinMatchCriteria()
+        {
+            return _targetProteinMatchCriteria;
+        }
+
+        public void setTargetProteinMatchCriteria(String targetProteinMatchCriteria)
+        {
+            _targetProteinMatchCriteria = targetProteinMatchCriteria;
         }
     }
 
@@ -1603,7 +1615,7 @@ public class MS2Controller extends SpringActionController
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             SequencesTableInfo tableInfo = schema.createSequencesTable();
-            tableInfo.addProteinNameFilter(form.getTargetProtein(), false);
+            tableInfo.addProteinNameFilter(form.getTargetProtein(), MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria()));
 
             Map<Protein, ActionURL> proteinsWithURLs = new LinkedHashMap<>();
 
@@ -2941,7 +2953,7 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (form.isRestrictProteins())
                 {
                     sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
@@ -2968,7 +2980,7 @@ public class MS2Controller extends SpringActionController
                     }
                     else
                     {
-                        table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                        table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                     }
                     table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
 
@@ -3143,7 +3155,7 @@ public class MS2Controller extends SpringActionController
             {
                 MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
                 SequencesTableInfo tableInfo = schema.createSequencesTable();
-                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch());
+                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {
                     tableInfo.addContainerCondition(_context.getContainer(), _context.getUser(), true);
@@ -6614,4 +6626,44 @@ public class MS2Controller extends SpringActionController
             return root.addChild("Load MS scan counts");
         }
     }
+
+    public enum MatchCriteria
+    {
+        EXACT("Exact"), PREFIX("Prefix"), SUFFIX("Suffix"), SUBSTRING("Substring");
+
+        private String label;
+
+        private static final Map<String, MatchCriteria> _criteriaMap = new CaseInsensitiveHashMap<>();
+        MatchCriteria(String label)
+        {
+            this.label = label;
+        }
+
+        static
+        {
+            for (MatchCriteria criteria : MatchCriteria.values())
+            {
+                if (criteria != null)
+                    _criteriaMap.put(criteria.getLabel(), criteria);
+            }
+        }
+
+        public String getLabel()
+        {
+            return label;
+        }
+
+        public void setLabel(String label)
+        {
+            this.label = label;
+        }
+
+        public static MatchCriteria getMatchCriteria(String label)
+        {
+            if (label == null)
+                return null;
+            return _criteriaMap.get(label);
+        }
+    }
+
 }

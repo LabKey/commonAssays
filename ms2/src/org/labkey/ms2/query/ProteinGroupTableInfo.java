@@ -398,7 +398,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         addCondition(sql);
     }
     
-    public void addProteinNameFilter(String identifier, boolean exactMatch)
+    public void addProteinNameFilter(String identifier, MS2Controller.MatchCriteria matchCriteria)
     {
         List<String> params = SequencesTableInfo.getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
@@ -409,19 +409,19 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations(), "a");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", matchCriteria));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.LookupString", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.LookupString", matchCriteria));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", exactMatch));
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", matchCriteria));
         sql.append("\n");
         sql.append("))");
         addCondition(sql);

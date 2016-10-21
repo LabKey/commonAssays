@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.api.util.GUID" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -30,6 +31,14 @@
     LABKEY.requiresCss("ProteinCoverageMap.css");
     LABKEY.requiresScript("util.js")
 </script>
+
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("clientapi/ext3");
+    }
+%>
 
 <%
     JspView<Map<Protein, ActionURL>> view = (JspView<Map<Protein, ActionURL>>) HttpView.currentView();
@@ -48,9 +57,10 @@
                 ajaxURL.addParameter("seqId", entry.getKey().getSeqId());
                 autoLoadProp.put("url", ajaxURL.toString());
                 props.put("autoLoad", autoLoadProp);
+                props.put("leftPlacement", true);
                 props.put("target", divId); %>
 
-                <div></div><span id="<%= h(divId) %>"><a href="<%= h(entry.getValue()) %>"><%= h(entry.getKey().getBestName())%></a></span></div>
+                <div></div><span id="<%= h(divId) %>"></span><span><a href="<%= h(entry.getValue()) %>"><%= h(entry.getKey().getBestName())%></a></span></div>
 
                 <script type="text/javascript">
                     Ext.onReady(function () {
