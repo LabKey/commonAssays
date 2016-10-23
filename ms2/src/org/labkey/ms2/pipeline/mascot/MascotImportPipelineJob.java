@@ -43,6 +43,8 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
     public void run()
     {
+        // Clear out any previous errors
+        setErrors(0);
         if (!setStatus("INITIALIZING"))
         {
             return;
