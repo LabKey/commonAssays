@@ -194,7 +194,9 @@ public class LuminexManager
 
     public Analyte[] getAnalytes(int dataRowId)
     {
-        return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes(), new SimpleFilter(FieldKey.fromParts("DataId"), dataRowId), new Sort("RowId")).getArray(Analyte.class);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("DataId"), dataRowId);
+        Sort sort = new Sort("RowId");
+        return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes(), filter, sort).getArray(Analyte.class);
     }
 
     public List<Analyte> getAnalytes(ExpRun run)
@@ -207,6 +209,7 @@ public class LuminexManager
                         FieldKey.fromParts("DataId"), o.getRowId()), new Sort("RowId")
                 ).getCollection(Analyte.class)
             ));
+
         return analytes;
     }
 
@@ -214,7 +217,6 @@ public class LuminexManager
     {
         long exclusionCount = new TableSelector(LuminexProtocolSchema.getTableInfoRunExclusion(), new SimpleFilter(FieldKey.fromParts("RunId"), rowId), null).getRowCount();
         exclusionCount += new TableSelector(LuminexProtocolSchema.getTableInfoWellExclusion(), new SimpleFilter(FieldKey.fromParts("DataId", "RunId"), rowId), null).getRowCount();
-
         return exclusionCount;
     }
 
@@ -237,9 +239,8 @@ public class LuminexManager
 
     private LuminexSingleExclusionCommand generateExclusionCommands(Map<String, Object> oldExclusion, Integer dataFileId)
     {
-        String commandType = "insert";
         LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
-        command.setCommand(commandType);
+        command.setCommand("insert");
         command.setDescription((String) oldExclusion.get("Description"));
         command.setType((String) oldExclusion.get("type"));
         command.setComment((String) oldExclusion.get("comment"));
@@ -256,10 +257,7 @@ public class LuminexManager
     {
         //Get full list of exclusions expanded per analyte
         SQLFragment sql = new SQLFragment();
-        sql.append(
-            "SELECT ea.AnalyteId\n" +
-            "    , e.*\n" +
-            "FROM ")
+        sql.append("SELECT ea.AnalyteId, e.* FROM ")
             .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "e").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "ea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
@@ -281,7 +279,7 @@ public class LuminexManager
         exclusions.forEach(exclusion ->
         {
             Analyte analyte = analyteMap.get(exclusion.get("AnalyteId"));
-            if(analyte != null)
+            if (analyte != null)
             {
                 //generate insertion command
                 LuminexSingleExclusionCommand command = generateExclusionCommands(exclusion, null);
@@ -297,10 +295,7 @@ public class LuminexManager
     {
         //Get full list of exclusions by analyte
         SQLFragment sql = new SQLFragment();
-        sql.append(
-                "SELECT ea.AnalyteId\n" +
-                "    , e.*\n" +
-                "FROM ")
+        sql.append("SELECT ea.AnalyteId, e.* FROM ")
             .append(LuminexProtocolSchema.getTableInfoRunExclusion(), "e").append(",")
             .append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "ea")
             .append(" WHERE e.RunId = ea.RunId")
@@ -316,7 +311,8 @@ public class LuminexManager
 
         Map<String, LuminexSingleExclusionCommand> replacementCommands = new HashMap<>();
         //Map existing exclusions to new input files
-        exclusions.forEach(exclusion -> {
+        exclusions.forEach(exclusion ->
+        {
             Integer dataId = (Integer)exclusion.get("DataId");
 
             //If existing file has corresponding new file
@@ -326,22 +322,16 @@ public class LuminexManager
                 Analyte newAnalyte = analyteMap.get(Integer.valueOf(exclusion.get("AnalyteId").toString()));
 
                 //if file does not have a corresponding Analyte
-                if(newAnalyte == null)
+                if (newAnalyte == null)
                     return;
 
                 //Get existing command
-                String key = createExclusionCommandKey(
-                        file.getName(),
-                        (String) exclusion.get("Description"),
-                        (String) exclusion.get("type"));
-
+                String key = createExclusionCommandKey(file.getName(), (String) exclusion.get("Description"), (String) exclusion.get("type"));
                 LuminexSingleExclusionCommand command = replacementCommands.get(key);
                 if (command == null)
                 {
                     //generate/update insertion command
-                    command = generateExclusionCommands(exclusion,
-                            file.getRowId()
-                    );
+                    command = generateExclusionCommands(exclusion, file.getRowId());
                     replacementCommands.put(key, command);
                 }
 
@@ -363,8 +353,7 @@ public class LuminexManager
     private Long getRetainedRunExclusionCount(Integer replacedRunId, Set<String> analyteNames)
     {
         SQLFragment sql = new SQLFragment();
-        sql.append( "SELECT COUNT(DISTINCT re.RunId)\n" +
-                "    FROM ")
+        sql.append( "SELECT COUNT(DISTINCT re.RunId) FROM ")
                 .append(LuminexProtocolSchema.getTableInfoRunExclusion(), "re").append(",")
                 .append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "rea").append(",")
                 .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
@@ -381,16 +370,15 @@ public class LuminexManager
     public Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> titrations)
     {
         SQLFragment sql = new SQLFragment();
-        sql.append( "SELECT COUNT(DISTINCT we.RowId)\n" +
-                "    FROM ")
+        sql.append( "SELECT COUNT(DISTINCT we.RowId) FROM ")
             .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(",")
             .append(ExperimentService.get().getTinfoData(), "d")
             .append(" WHERE we.RowId = wea.WellExclusionId AND ")
-                .append("wea.AnalyteId = a.RowId AND ")
-                .append("we.DataId = d.RowId AND ")
-                .append("d.RunId = ?").add(replacedRunId);
+            .append("wea.AnalyteId = a.RowId AND ")
+            .append("we.DataId = d.RowId AND ")
+            .append("d.RunId = ?").add(replacedRunId);
 
         //Add filename filter
         appendInClause(sql, "d.Name ", fileNames).append("\n");
@@ -410,7 +398,7 @@ public class LuminexManager
     private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set)
     {
         //Add filename filter
-        if(set != null && set.size() > 0)
+        if (set != null && set.size() > 0)
         {
             sql.append(" AND ").append(columnExpression);
             OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(sql, set);
@@ -430,8 +418,7 @@ public class LuminexManager
 
         try
         {
-            //Copy WellExclusions
-            //Copy TitrationExclusions
+            //Copy WellExclusions and TitrationExclusions
             createExclusions(user, container, wellExclusionCommands, run.getRowId(), ExclusionType.WellExclusion, run.getProtocol(), provider, false, null);
 
             //Copy AnalyteExclusions
@@ -461,7 +448,7 @@ public class LuminexManager
         Map<Integer, Analyte> results = new HashMap<>();
         newAnalytes.forEach(analyte ->
         {
-            if(analyteNameMap.containsKey(analyte.getName()))
+            if (analyteNameMap.containsKey(analyte.getName()))
             {
                 results.put(analyteNameMap.get(analyte.getName()), analyte);
             }
@@ -470,13 +457,15 @@ public class LuminexManager
         return results;
     }
 
-    public void createExclusions(User user, Container c, Collection<LuminexSingleExclusionCommand> commands, Integer runId, ExclusionType _exclusionType, ExpProtocol protocol, AssayProvider assayProvider, boolean rerunTransform, Logger logger) throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
+    public void createExclusions(User user, Container c, Collection<LuminexSingleExclusionCommand> commands, Integer runId,
+                                 ExclusionType _exclusionType, ExpProtocol protocol, AssayProvider assayProvider,
+                                 boolean rerunTransform, Logger logger)
+    throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
     {
         if (logger == null)
             logger = _log;
 
-        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, c,
-            (LuminexAssayProvider)assayProvider, protocol, null);
+        LuminexProtocolSchema schema = new LuminexProtocolSchema(user, c, (LuminexAssayProvider)assayProvider, protocol, null);
 
         TableInfo tableInfo = schema.getTable(_exclusionType.getTableName());
         if (tableInfo != null)
@@ -506,7 +495,7 @@ public class LuminexManager
                     switch (command.getCommand())
                     {
                         case "insert":
-                            results = qus.insertRows(user, c, rows, errors, options, additionalContext );
+                            results = qus.insertRows(user, c, rows, errors, options, additionalContext);
                             logVerb = " inserted into ";
                             break;
                         case "update":
@@ -537,7 +526,7 @@ public class LuminexManager
     public Integer getRunRowIdForUploadContext(ExpRun run, AssayRunUploadContext context)
     {
         //If not a rerun just use current run's id
-        if(context.getReRunId() == null)
+        if (context.getReRunId() == null)
             return run.getRowId();
 
         return (context instanceof LuminexRunContext && ((LuminexRunContext) context).getRetainExclusions()) ?

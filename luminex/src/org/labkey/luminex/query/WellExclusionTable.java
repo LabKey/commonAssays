@@ -267,12 +267,13 @@ public class WellExclusionTable extends AbstractExclusionTable
                     try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
                         List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, configParameters, extraScriptContext);
-                        if(extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
+
+                        if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
                             rerunTransformScripts(errors);
+
                         if (errors.hasErrors())
-                        {
                             throw errors;
-                        }
+
                         transaction.commit();
                         return result;
                     }
@@ -293,13 +294,14 @@ public class WellExclusionTable extends AbstractExclusionTable
                     try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
                         List<Map<String, Object>> result = super.deleteRows(user, container, keys, configParameters, extraScriptContext);
+
                         BatchValidationException errors = new BatchValidationException();
-                        if(extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
+                        if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
                             rerunTransformScripts(errors);
+
                         if (errors.hasErrors())
-                        {
                             throw errors;
-                        }
+
                         transaction.commit();
                         return result;
                     }
@@ -316,14 +318,14 @@ public class WellExclusionTable extends AbstractExclusionTable
                     try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
                         List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, configParameters, extraScriptContext);
+
                         BatchValidationException errors = new BatchValidationException();
-                        if(extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
+                        if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
                             rerunTransformScripts(errors);
 
                         if (errors.hasErrors())
-                        {
                             throw errors;
-                        }
+
                         transaction.commit();
                         return result;
                     }

@@ -78,7 +78,10 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         try
         {
             setStatus(TaskStatus.running, getJobInfo());
-            LuminexManager.get().createExclusions(getInfo().getUser(), getInfo().getContainer(), _form.getCommands(), _form.getRunId(), _exclusionType, _form.getProtocol(getContainer()), getAssayProvider(), true, getLogger());
+            LuminexManager.get().createExclusions(
+                getInfo().getUser(), getInfo().getContainer(), _form.getCommands(), _form.getRunId(),
+                _exclusionType, _form.getProtocol(getContainer()), getAssayProvider(), true, getLogger()
+            );
 
             setStatus(TaskStatus.complete, getJobInfo());
         }
