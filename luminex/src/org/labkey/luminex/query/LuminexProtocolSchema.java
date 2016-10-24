@@ -349,6 +349,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
         ret.addColumn(ExpDataTable.Column.LSID).setHidden(true);
+        ret.addColumn(ExpDataTable.Column.DataFileUrl).setHidden(true);
         ret.addColumn(ExpDataTable.Column.SourceProtocolApplication).setHidden(true);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);

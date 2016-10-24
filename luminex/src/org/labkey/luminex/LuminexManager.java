@@ -546,21 +546,22 @@ public class LuminexManager
         LuminexDataTable table = new LuminexDataTable(schema);
 
         // data file, analyte, description, and type are needed to match an existing run exclusion to data from an Excel file row
-        FieldKey dataNameFK = FieldKey.fromParts("Data", "Name");
+        FieldKey dataFileUrlFK = FieldKey.fromParts("Data", "DataFileUrl");
         FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
         FieldKey descriptionFK = FieldKey.fromParts("Description");
         FieldKey typeFK = FieldKey.fromParts("Type");
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(dataNameFK, analyteFK, descriptionFK, typeFK));
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(dataFileUrlFK, analyteFK, descriptionFK, typeFK));
 
         SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), runId);
         filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_GROUP_COMMENT, CompareType.STARTS_WITH);
         new TableSelector(table, cols.values(), filter, null).forEachMap(row ->
         {
-            String dataName = (String)row.get(cols.get(dataNameFK).getAlias());
+            String dataFileUrl = (String)row.get(cols.get(dataFileUrlFK).getAlias());
+            String dataFileName = dataFileUrl.substring(dataFileUrl.lastIndexOf("/") + 1);
             String analyteName = (String)row.get(cols.get(analyteFK).getAlias());
             String description = (String)row.get(cols.get(descriptionFK).getAlias());
             String type = (String)row.get(cols.get(typeFK).getAlias());
-            excludedWellKeys.add(createWellExclusionKey(dataName, analyteName, description, type));
+            excludedWellKeys.add(createWellExclusionKey(dataFileName, analyteName, description, type));
         });
 
         return excludedWellKeys;
