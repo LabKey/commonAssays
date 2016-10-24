@@ -1239,7 +1239,7 @@ public class FlowManager
 
         // count(fcsfile)
         TableInfo table = schema.getTable(FlowTableType.FCSFiles);
-        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
 
         // filter to those wells that were imported from a Keywords run
@@ -1262,7 +1262,7 @@ public class FlowManager
         FlowSchema schema = new FlowSchema(user, container);
 
         TableInfo table = schema.getTable(FlowTableType.FCSFiles);
-        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Sample", "Name"), null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
 
@@ -1283,7 +1283,7 @@ public class FlowManager
         filter.addCondition(FieldKey.fromParts("FCSFileCount"), 0, CompareType.NEQ);
         filter.addCondition(FieldKey.fromParts("ProtocolStep"), "Keywords", CompareType.EQUAL);
         TableInfo table = schema.getTable(FlowTableType.Runs);
-        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         Aggregate.Result result = agg.get("RowId").get(0);
