@@ -536,6 +536,7 @@ luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-14.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.20-14.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-14.30-15.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-16.20-16.21.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-16.20-16.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-16.21-16.22.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-11.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-12.10.sql -text
@@ -915,6 +916,7 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-14.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.10-15.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-15.30-16.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-16.20-16.21.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-16.20-16.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-12.10.sql -text
@@ -1431,6 +1433,7 @@ nab/resources/schemas/dbscripts/postgresql/nab-14.20-14.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.10-15.20.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-15.20-15.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-16.20-16.21.sql -text
+nab/resources/schemas/dbscripts/postgresql/nab-16.20-16.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-16.21-16.22.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-0.00-13.10.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-11.10-11.20.sql -text
