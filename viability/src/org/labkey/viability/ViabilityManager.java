@@ -525,7 +525,7 @@ public class ViabilityManager
                 dataIDs.add(data.getRowId());
 
             TableSelector ts = new TableSelector(ViabilitySchema.getTableInfoResults(),
-                    new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
                     new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null);
 
             ts.forEachMapBatch((rows) -> {
@@ -584,10 +584,10 @@ public class ViabilityManager
             _data.setRun(_run);
             _data.save(user);
 
-            _propertyA = new PropertyDescriptor("viability-juni-propertyA", PropertyType.STRING.getTypeUri(), "propertyA", c);
+            _propertyA = new PropertyDescriptor("viability-juni-propertyA", PropertyType.STRING, "propertyA", c);
             OntologyManager.insertPropertyDescriptor(_propertyA);
 
-            _propertyB = new PropertyDescriptor("viability-juni-propertyB", PropertyType.BOOLEAN.getTypeUri(), "propertyB", c);
+            _propertyB = new PropertyDescriptor("viability-juni-propertyB", PropertyType.BOOLEAN, "propertyB", c);
             OntologyManager.insertPropertyDescriptor(_propertyB);
         }
 
@@ -604,7 +604,7 @@ public class ViabilityManager
 
             Map<String, Object>[] rows = new TableSelector(
                     ViabilitySchema.getTableInfoResults(),
-                    new HashSet<>(Arrays.asList("RowID", "ObjectID")),
+                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
                     new SimpleFilter(FieldKey.fromParts("PoolID"), "xxx-", CompareType.STARTS_WITH), null).getMapArray();
 
             for (Map<String, Object> row : rows)

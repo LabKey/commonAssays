@@ -205,14 +205,14 @@ public class PositivityFlowReport extends FilterFlowReport
         Collection<PropertyDescriptor> ret = new ArrayList<>();
 
         Container shared = ContainerManager.getSharedContainer();
-        PropertyDescriptor response = new PropertyDescriptor(null, PropertyType.INTEGER.getTypeUri(), "Response", shared);
+        PropertyDescriptor response = new PropertyDescriptor(null, PropertyType.INTEGER, "Response", shared);
         ret.add(response);
 
-        PropertyDescriptor rawP = new PropertyDescriptor(null, PropertyType.DOUBLE.getTypeUri(), "Raw P", shared);
+        PropertyDescriptor rawP = new PropertyDescriptor(null, PropertyType.DOUBLE, "Raw P", shared);
         rawP.setImportAliasesSet(Collections.singleton("raw_p"));
         ret.add(rawP);
 
-        PropertyDescriptor adjP = new PropertyDescriptor(null, PropertyType.DOUBLE.getTypeUri(), "Adjusted P", shared);
+        PropertyDescriptor adjP = new PropertyDescriptor(null, PropertyType.DOUBLE, "Adjusted P", shared);
         adjP.setImportAliasesSet(Collections.singleton("adj_p"));
         ret.add(adjP);
 
