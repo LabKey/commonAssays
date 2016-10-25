@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Handles HTTP POSTs from upload wizard to get analyte properties and titrations, handles gettting default
+ * Handles HTTP POSTs from upload wizard to get analyte properties and titrations, handles getting default
  * values for analyte domain and standard properties.
  * User: jeckels
  * Date: Aug 8, 2007
@@ -54,7 +54,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 {
     private String[] _analyteNames;
     private LuminexExcelParser _parser;
-    private boolean _retainExclusions = false;
+    private boolean _retainExclusions;
     private long _exclusionCount;
     private long _lostExclusions;
     
@@ -70,7 +70,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 
     public void setRetainExclusions(boolean retainExclusions)
     {
-        this._retainExclusions = retainExclusions;
+        _retainExclusions = retainExclusions;
     }
 
     @Override
