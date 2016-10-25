@@ -1961,8 +1961,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
      * Delete all exclusions for a set of Ids
      * @param dataIds Set of Ids to remove exclusions for
      */
-    private void cleanUpExclusions(List<Integer> dataIds, final SQLFragment idSQL, final SqlExecutor executor)
+    private void cleanUpExclusions(List<Integer> dataIds, final SqlExecutor executor)
     {
+        SQLFragment idSQL = new SQLFragment();
+        OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds);
+
         executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoWellExclusionAnalyte() +
                 " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexProtocolSchema.getTableInfoWellExclusion() +
                 " WHERE DataId ").append(idSQL).append(")"));
@@ -2004,7 +2007,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 " WHERE DataId ").append(idSQL));
 
         // Clean up exclusions
-        cleanUpExclusions(dataIds, idSQL, executor);
+        cleanUpExclusions(dataIds, executor);
 
         // Clean up curve fits
         executor.execute(new SQLFragment("DELETE FROM " + LuminexProtocolSchema.getTableInfoCurveFit() +

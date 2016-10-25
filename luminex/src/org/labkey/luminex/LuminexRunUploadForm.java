@@ -54,7 +54,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 {
     private String[] _analyteNames;
     private LuminexExcelParser _parser;
-    private Boolean _retainExclusions = true;
+    private boolean _retainExclusions = false;
     private long _exclusionCount;
     private long _lostExclusions;
     
@@ -68,15 +68,15 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         _lostExclusions = lostExclusions;
     }
 
-    public void setRetainExclusions(Boolean retainExclusions)
+    public void setRetainExclusions(boolean retainExclusions)
     {
-        this._retainExclusions = retainExclusions != null ? retainExclusions : false;
+        this._retainExclusions = retainExclusions;
     }
 
     @Override
     public boolean getRetainExclusions()
     {
-        return _retainExclusions != null && _retainExclusions.booleanValue();
+        return _retainExclusions;
     }
 
     public void setExclusionCount(long exclusionCount)

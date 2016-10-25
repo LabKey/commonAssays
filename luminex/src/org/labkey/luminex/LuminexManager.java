@@ -220,7 +220,7 @@ public class LuminexManager
         return exclusionCount;
     }
 
-    public Map<Integer, ExpData> getReplacementInputMap(ExpRun replacedRun, ExpRun run)
+    private Map<Integer, ExpData> getReplacementInputMap(ExpRun replacedRun, ExpRun run)
     {
         //Map old data inputs to new based on filename
         //NOTE: exclusions in renamed/new files will be dropped
@@ -270,25 +270,32 @@ public class LuminexManager
         return new SqlSelector(getSchema(), sql).getMapCollection();
     }
 
-    private Collection<LuminexSingleExclusionCommand> generateRunExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<Integer, Analyte> analyteMap, int replacedRunId)
+    private LuminexSingleExclusionCommand generateRunExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<Integer, Analyte> analyteMap, int replacedRunId)
     {
         Collection<Map<String, Object>> exclusions = getRunExclusions(inputIdMap.keySet(), replacedRunId);
 
-        List<LuminexSingleExclusionCommand> replacementCommands = new ArrayList<>();
-        //Map existing exclusions to new input files
-        exclusions.forEach(exclusion ->
+        if (exclusions != null && exclusions.size() >0)
         {
-            Analyte analyte = analyteMap.get(exclusion.get("AnalyteId"));
-            if (analyte != null)
-            {
-                //generate insertion command
-                LuminexSingleExclusionCommand command = generateExclusionCommands(exclusion, null);
-                command.addAnalyte(analyte);
-                replacementCommands.add(command);
-            }
-        });
+            LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
+            command.setCommand("insert");
 
-        return replacementCommands;
+            //Map existing exclusions to new input files
+            exclusions.forEach(exclusion ->
+            {
+                command.setComment((String) exclusion.get("comment")); //Should be the same
+
+                Analyte analyte = analyteMap.get(exclusion.get("AnalyteId"));
+                if (analyte != null)
+                {
+                    //generate insertion command
+                    command.addAnalyte(analyte);
+                }
+            });
+
+            return command;
+        }
+
+        return null;
     }
 
     private Collection<Map<String,Object>> getRunExclusions(Set<Integer> integers, int replacedRunId)
@@ -367,7 +374,7 @@ public class LuminexManager
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
 
-    public Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> titrations)
+    private Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> titrations)
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT COUNT(DISTINCT we.RowId) FROM ")
@@ -414,15 +421,17 @@ public class LuminexManager
         Map<Integer, Analyte> analyteMap = getAnalyteMap(replacedRun, run);
 
         Collection<LuminexSingleExclusionCommand> wellExclusionCommands = generateWellExclusionCommands(inputIdMap, analyteMap);
-        Collection<LuminexSingleExclusionCommand> runExclusionCommands = generateRunExclusionCommands(inputIdMap, analyteMap, replacedRun.getRowId());
+        LuminexSingleExclusionCommand runExclusionCommands = generateRunExclusionCommands(inputIdMap, analyteMap, replacedRun.getRowId());
 
         try
         {
             //Copy WellExclusions and TitrationExclusions
-            createExclusions(user, container, wellExclusionCommands, run.getRowId(), ExclusionType.WellExclusion, run.getProtocol(), provider, false, null);
+            if(wellExclusionCommands != null)
+                createExclusions(user, container, wellExclusionCommands, run.getRowId(), ExclusionType.WellExclusion, run.getProtocol(), provider, false, null);
 
             //Copy AnalyteExclusions
-            createExclusions(user, container, runExclusionCommands, run.getRowId(), ExclusionType.RunExclusion, run.getProtocol(), provider, false, null);
+            if (runExclusionCommands != null)
+                createExclusions(user, container, Collections.singletonList(runExclusionCommands), run.getRowId(), ExclusionType.RunExclusion, run.getProtocol(), provider, false, null);
         }
         catch (SQLException|QueryUpdateServiceException|DuplicateKeyException|InvalidKeyException e)
         {
