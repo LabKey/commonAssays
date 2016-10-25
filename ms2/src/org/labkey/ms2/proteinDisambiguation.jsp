@@ -56,9 +56,9 @@
             alert("Please choose at least one applicable protein!");
             return false;
         }
-        else if (checkedCount > 100)
+        else if (checkedCount > 500)
         {
-            alert("Exceeded maximum number of selection of 100.");
+            alert("Exceeded maximum number of selection of 500.");
             return false;
         }
         return true;
@@ -86,17 +86,7 @@
     else { %>
         Multiple proteins match your search. Please choose the applicable protein(s) below.<br>
 
-<form action="<%=baseUrl%>" method="get" onsubmit="return validate();">
-<%
-    for (String paramName : params)
-    {
-        String paramVal = baseUrl.getParameter(paramName);
-%>
-        <input type="hidden" name="<%=h(paramName)%>" value="<%=h(paramVal)%>" />
-<%
-    }
-%>
-
+<form action="<%=baseUrl%>" method="post" onsubmit="return validate();">
     <div style="margin-top: 10px;"><input type=checkbox name=checkall checked id=checkallproteins style="margin-right: 12px;" onclick="checkAll();">All</div>
     <%
         for (Protein protein : proteins) {
