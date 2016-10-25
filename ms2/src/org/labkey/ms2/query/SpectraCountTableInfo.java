@@ -161,7 +161,7 @@ public class SpectraCountTableInfo extends VirtualTable
         if (config.isGroupedByPeptide())
         {
             ColumnInfo indexColumn;
-            if (form != null && form.getTargetSeqId() != null)
+            if (form != null && form.getTargetSeqIds() != null && form.getTargetSeqIds().size() > 0)
             {
                 SQLFragment indexSQL = new SQLFragment(getSqlDialect().getStringIndexOfFunction(new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ProtSequence")));
                 indexColumn = new ExprColumn(this, "PeptideIndex", indexSQL, JdbcType.INTEGER);
@@ -181,7 +181,7 @@ public class SpectraCountTableInfo extends VirtualTable
         }
 
         ExprColumn proteinColumn;
-        if (_config.isGroupedByProtein() || (form != null && form.getTargetSeqId() != null))
+        if (_config.isGroupedByProtein() || (form != null && form.getTargetSeqIds() != null && form.getTargetSeqIds().size() > 0))
         {
             proteinColumn = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
             defaultCols.add(FieldKey.fromParts(proteinColumn.getName()));
@@ -267,7 +267,7 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", ").append(protSequenceSQL).append(" AS ProtSequence");
             sql.append(", MIN(fs.LookupString) AS FastaName");
         }
-        else if (_form != null && _form.getTargetSeqId() != null)
+        else if (_form != null && _form.getTargetSeqIds() != null && _form.getTargetSeqIds().size() > 0)
         {
             sql.append(", s.SeqId\n");
             sql.append(", ").append(protSequenceSQL).append(" AS ProtSequence\n");
@@ -318,7 +318,7 @@ public class SpectraCountTableInfo extends VirtualTable
         SQLFragment peptidesSQL;
         if (_form != null && _form.isCustomViewPeptideFilter())
         {
-            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys, _form.getTargetSeqId());
+            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys, _form.getTargetSeqIds());
         }
         else
         {
@@ -327,9 +327,9 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 filter.addCondition(FieldKey.fromParts("PeptideProphet"), _form.getPeptideProphetProbability(), CompareType.GTE);
             }
-            if (_form != null && _form.getTargetSeqId() != null)
+            if (_form != null && _form.getTargetSeqIds() != null && _form.getTargetSeqIds().size() > 0)
             {
-                filter.addClause(new ProteinManager.SequenceFilter(_form.getTargetSeqId()));
+                filter.addClause(ProteinManager.getSequencesFilter(_form.getTargetSeqIds()));
             }
             peptidesSQL = _ms2Schema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
@@ -366,12 +366,12 @@ public class SpectraCountTableInfo extends VirtualTable
                 sql.append(" ON (s.seqid = fs.seqid)\n");
             }
         }
-        else if (_form != null && _form.getTargetSeqId() != null)
+        else if (_form != null && _form.getTargetSeqIds() != null && _form.getTargetSeqIds().size() > 0)
         {
             sql.append("INNER JOIN ");
             sql.append(ProteinManager.getTableInfoSequences(), "s");
-            sql.append(" ON (s.SeqId = ?)\n");
-            sql.add(_form.getTargetSeqId());
+            sql.append(" ON (s.SeqId IN ?)\n");
+            sql.add("(" + _form.getTargetSeqIdsStr() + ")");
         }
 
         if (_ms2Schema.getRuns() != null)
@@ -402,7 +402,7 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(", ");
             sql.append(protSequenceSQL);
         }
-        else if (_form != null && _form.getTargetSeqId() != null)
+        else if (_form != null && _form.getTargetSeqIds() != null && _form.getTargetSeqIds().size() > 0)
         {
             sql.append(", s.SeqId");
             sql.append(", ");

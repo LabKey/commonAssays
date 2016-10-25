@@ -1545,7 +1545,7 @@ public class MS2Controller extends SpringActionController
         spectraConfig,
         pivotType,
         targetProtein,
-        targetSeqId,
+        targetSeqIds,
         targetProteinMsg,
         targetURL
       }
@@ -1617,29 +1617,27 @@ public class MS2Controller extends SpringActionController
             SequencesTableInfo tableInfo = schema.createSequencesTable();
             tableInfo.addProteinNameFilter(form.getTargetProtein(), MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria()));
 
-            Map<Protein, ActionURL> proteinsWithURLs = new LinkedHashMap<>();
+            ActionURL targetURL = new ActionURL(form.getTargetURL());
+            targetURL.addParameters(params);
 
             // Track all of the unique sequences
             Set<String> sequences = new HashSet<>();
+            List<Protein> proteins = new TableSelector(tableInfo, null, new Sort("BestName")).getArrayList(Protein.class);
+            Pair<ActionURL, List<Protein>> actionWithProteins = new Pair<>(targetURL, proteins);
 
-            for (Protein protein : new TableSelector(tableInfo, null, new Sort("BestName")).getArrayList(Protein.class))
-            {
+            for (Protein protein : proteins)
                 sequences.add(protein.getSequence());
-
-                ActionURL targetURL = new ActionURL(form.getTargetURL());
-                targetURL.addParameters(params);
-                targetURL.addParameter(PeptideFilteringFormElements.targetSeqId, protein.getSeqId());
-                proteinsWithURLs.put(protein, targetURL);
-            }
 
             // If we only have one sequence, we don't need to prompt the user to choose a specific protein, we can just
             // grab the first one
             if (sequences.size() == 1)
             {
-                throw new RedirectException(proteinsWithURLs.values().iterator().next());
+                ActionURL proteinUrl = targetURL.clone();
+                proteinUrl.addParameter(PeptideFilteringFormElements.targetSeqIds, proteins.get(0).getSeqId());
+                throw new RedirectException(proteinUrl);
             }
 
-            return new JspView<>("/org/labkey/ms2/proteinDisambiguation.jsp", proteinsWithURLs);
+            return new JspView<>("/org/labkey/ms2/proteinDisambiguation.jsp", actionWithProteins);
         }
 
         @Override
@@ -1667,28 +1665,46 @@ public class MS2Controller extends SpringActionController
         private boolean _normalizeProteinGroups;
         private String _pivotType = PivotType.run.toString();
         private String _targetProtein;
-        private Integer _targetSeqId;
+        private List<Integer> _targetSeqIds;
 
-        private Protein _protein;
+        private List<Protein> _proteins;
 
-        public Protein lookupProtein()
+        public List<Protein> lookupProteins()
         {
-            if (_protein == null && _targetSeqId != null)
+            if (_proteins == null && _targetSeqIds != null)
             {
-                _protein = ProteinManager.getProtein(_targetSeqId.intValue());
+                _proteins = new ArrayList<>();
+                for (Integer targetSeqId : _targetSeqIds)
+                {
+                    _proteins.add(ProteinManager.getProtein(targetSeqId.intValue()));
+                }
             }
-            return _protein;
+            return _proteins;
         }
 
-        public Integer getTargetSeqId()
+        public List<Integer> getTargetSeqIds()
         {
-            return _targetSeqId;
+            return _targetSeqIds;
         }
 
-        public void setTargetSeqId(Integer targetSeqId)
+        public void setTargetSeqIds(List<Integer> targetSeqIds)
         {
-            _targetSeqId = targetSeqId;
+            _targetSeqIds = targetSeqIds;
         }
+
+
+        public String getTargetSeqIdsStr()
+        {
+            String sep = "";
+            StringBuilder builder = new StringBuilder();
+            for (Integer id : _targetSeqIds)
+            {
+                builder.append(sep).append(id.toString());
+                sep = ",";
+            }
+            return builder.toString();
+        }
+
 
         public String getTargetProtein()
         {
@@ -1826,17 +1842,30 @@ public class MS2Controller extends SpringActionController
 
         public void appendPeptideFilterDescription(StringBuilder title, ViewContext context)
         {
-            if (null != lookupProtein() && null != getTargetProtein())
+            if (null != lookupProteins() && lookupProteins().size() > 0 && null != getTargetProtein())
             {
                 title.append("Protein ");
                 title.append(getTargetProtein());
-                // Show both whath the user searched for, and what they resolved it to
-                if (!lookupProtein().getBestName().equals(getTargetProtein()))
+
+                boolean exactMatch = true;
+                for (Protein lookup : lookupProteins())
                 {
-                    title.append(" (");
-                    title.append(lookupProtein().getBestName());
-                    title.append(")");
+                    // Show both what the user searched for, and what they resolved it to
+                    if (!lookup.getBestName().equals(getTargetProtein()))
+                    {
+                        if (exactMatch)
+                        {
+                            title.append(" (");
+                            exactMatch = false;
+                        }
+
+                        title.append(lookup.getBestName());
+                        title.append(",  ");
+                    }
+
                 }
+                if (!exactMatch)
+                    title.append(")");
                 title.append(",  ");
             }
              if (isPeptideProphetFilter() && getPeptideProphetProbability() != null)
@@ -2380,9 +2409,9 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
                 setupURL.addParameter(PeptideFilteringFormElements.spectraConfig, _form.getSpectraConfig());
                 setupURL.addParameter(PeptideFilteringFormElements.targetProtein, _form.getTargetProtein());
-                if (_form.getTargetSeqId() != null)
+                if (_form.getTargetSeqIds() != null)
                 {
-                    setupURL.addParameter(PeptideFilteringFormElements.targetSeqId, _form.getTargetSeqId());
+                    setupURL.addParameter(PeptideFilteringFormElements.targetSeqIds, _form.getTargetSeqIdsStr());
                 }
 
                 root.addChild("Spectra Count Options", setupURL);
@@ -4593,26 +4622,28 @@ public class MS2Controller extends SpringActionController
                 targetURL.deleteParameter(PEPTIDES_FILTER_VIEW_NAME);
 
             // add URL parameters that should be used in the peptide fitler
-            targetURL.replaceParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, form.getTargetSeqId() != null ? "true" : "false");
+            targetURL.replaceParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, form.getTargetSeqIds() != null ? "true" : "false");
             if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
                 targetURL.addParameter(MS2Manager.getDataRegionNamePeptides() + ".PeptideProphet~gte", form.getPeptideProphetProbability().toString());
 
             boolean showAllPeptides = ProteinManager.showAllPeptides(targetURL, getUser());
 
-            // if we have a target protein, then use that seqId with the run list for the export
-            SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size()];
-            if (form.getTargetSeqId() != null)
+            // if we have target proteins, then use the seqId with the run list for the export
+            SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size() * (form.getTargetSeqIds().size())];
+            if (form.getTargetSeqIds() != null && form.getTargetSeqIds().size() > 0)
             {
-                targetProteinClause = new ProteinManager.SequenceFilter(form.getTargetSeqId());
-
+                targetProteinClause = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
                 int index = 0;
-                for (MS2Run run : runs)
+                for (Integer targetSeqId : form.getTargetSeqIds())
                 {
-                    SeqRunIdPair pair = new SeqRunIdPair();
-                    pair.setSeqId(form.getTargetSeqId());
-                    pair.setRun(run.getRun());
-                    idPairs[index] = pair;
-                    index++;
+                    for (MS2Run run : runs)
+                    {
+                        SeqRunIdPair pair = new SeqRunIdPair();
+                        pair.setSeqId(targetSeqId);
+                        pair.setRun(run.getRun());
+                        idPairs[index] = pair;
+                        index++;
+                    }
                 }
             }
             // otherwise, query to get the run/seqId pairs for the comparison filters

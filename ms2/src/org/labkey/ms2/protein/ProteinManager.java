@@ -1119,6 +1119,17 @@ public class ProteinManager
         }
     }
 
+    public static SimpleFilter.FilterClause getSequencesFilter(List<Integer> targetSeqIds)
+    {
+        SimpleFilter.FilterClause[] proteinClauses = new SimpleFilter.FilterClause[targetSeqIds.size()];
+        int seqIndex = 0;
+        for (Integer targetSeqId : targetSeqIds)
+        {
+            proteinClauses[seqIndex++] = (new ProteinManager.SequenceFilter(targetSeqId));
+        }
+        return new SimpleFilter.OrClause(proteinClauses);
+    }
+
     public static class ProteinGroupFilter extends SimpleFilter.FilterClause
     {
         int _groupNum;

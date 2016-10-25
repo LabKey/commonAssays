@@ -945,14 +945,14 @@ public class MS2Schema extends UserSchema
         return sql;
     }
 
-    public SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys, Integer targetSeqId)
+    public SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys, List<Integer> targetSeqIds)
     {
         QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.PeptidesFilter.toString());
         SimpleFilter filter = new SimpleFilter();
 
-        if (targetSeqId != null)
+        if (targetSeqIds != null && targetSeqIds.size() > 0)
         {
-            filter.addCondition(new ProteinManager.SequenceFilter(targetSeqId));
+            filter.addCondition(ProteinManager.getSequencesFilter(targetSeqIds));
         }
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
@@ -1409,10 +1409,10 @@ public class MS2Schema extends UserSchema
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts( "Run"));
         ActionURL linkUrlOnRunColuumn;
         // if matching on a single target protein, go straight to the Protein Details page in "all peptides" mode
-        if ((form != null) && (form.getTargetSeqId()!=null))
+        if ((form != null) && (form.getTargetSeqIds()!=null) && form.getTargetSeqIds().size() == 1)
         {
             linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
-            linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqId());
+            linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqIds().get(0));
             linkUrlOnRunColuumn.addParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
             linkUrlOnRunColuumn.addParameter("protein", form.getTargetProtein());
             if (form.isCustomViewPeptideFilter()  && form.getPeptideCustomViewName(context) != null)
@@ -1427,7 +1427,7 @@ public class MS2Schema extends UserSchema
         }
         else
         {
-            // in all oather cases do the uusual thing of linking to the MS2 show run page
+            // in all oather cases do the usual thing of linking to the MS2 show run page
             linkUrlOnRunColuumn = MS2Controller.getShowRunURL(getUser(), getContainer());
         }
         colDim.setUrl(linkUrlOnRunColuumn.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
@@ -1514,9 +1514,9 @@ public class MS2Schema extends UserSchema
             baseTable.addCondition(whereSQL, FieldKey.fromParts("RowId"));
         }
 
-        if (form != null && form.getTargetSeqId() != null)
+        if (form != null && form.getTargetSeqIds() != null && form.getTargetSeqIds().size() > 0)
         {
-            filt = new ProteinManager.SequenceFilter(form.getTargetSeqId());
+            filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
         else

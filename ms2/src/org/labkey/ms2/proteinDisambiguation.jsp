@@ -19,17 +19,50 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.Protein" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.util.GUID" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <script type="text/javascript">
     LABKEY.requiresCss("ProteinCoverageMap.css");
-    LABKEY.requiresScript("util.js")
+    LABKEY.requiresScript("util.js");
+
+    function checkAll() {
+        debugger;
+        var checked = document.getElementById('checkallproteins').checked;
+        var cbs = document.getElementsByName('targetSeqIds');
+        for(var i=0; i < cbs.length; i++) {
+            if(cbs[i].type == 'checkbox') {
+                cbs[i].checked = checked;
+            }
+        }
+    }
+
+    function validate() {
+        var cbs = document.getElementsByName('targetSeqIds'), checkedCount = 0;
+        for(var i=0; i < cbs.length; i++) {
+            if(cbs[i].type == 'checkbox' && cbs[i].checked) {
+                checkedCount++;
+            }
+        }
+        if (checkedCount == 0)
+        {
+            alert("Please choose at least one applicable protein!");
+            return false;
+        }
+        else if (checkedCount > 100)
+        {
+            alert("Exceeded maximum number of selection of 100.");
+            return false;
+        }
+        return true;
+    }
 </script>
 
 <%!
@@ -41,33 +74,67 @@
 %>
 
 <%
-    JspView<Map<Protein, ActionURL>> view = (JspView<Map<Protein, ActionURL>>) HttpView.currentView();
-    Map<Protein, ActionURL> proteins = view.getModelBean();
+    JspView<Pair<ActionURL, List<Protein>>> view = (JspView<Pair<ActionURL, List<Protein>>>) HttpView.currentView();
+    Pair<ActionURL, List<Protein>> actionWithProteins = view.getModelBean();
+    List<Protein> proteins = actionWithProteins.second;
+    ActionURL baseUrl = actionWithProteins.first;
+    Set<String> params = baseUrl.getParameterMap().keySet();
 
     if (proteins.isEmpty()) { %>
         No proteins match. Please try another name. <%
     }
     else { %>
-        Multiple proteins match your search. Please choose one below. <%
-            for (Map.Entry<Protein, ActionURL> entry : proteins.entrySet()) {
-                String divId = GUID.makeGUID();
-                JSONObject props = new JSONObject().put("width", 450).put("title", "Protein Details");
-                JSONObject autoLoadProp = new JSONObject();
-                ActionURL ajaxURL = new ActionURL(MS2Controller.ShowProteinAJAXAction.class, getContainer());
-                ajaxURL.addParameter("seqId", entry.getKey().getSeqId());
-                autoLoadProp.put("url", ajaxURL.toString());
-                props.put("autoLoad", autoLoadProp);
-                props.put("leftPlacement", true);
-                props.put("target", divId); %>
+        Multiple proteins match your search. Please choose the applicable protein(s) below.<br>
 
-                <div></div><span id="<%= h(divId) %>"></span><span><a href="<%= h(entry.getValue()) %>"><%= h(entry.getKey().getBestName())%></a></span></div>
+<form action="<%=baseUrl%>" method="get" onsubmit="return validate();">
+<%
+    for (String paramName : params)
+    {
+        String paramVal = baseUrl.getParameter(paramName);
+%>
+        <input type="hidden" name="<%=h(paramName)%>" value="<%=h(paramVal)%>" />
+<%
+    }
+%>
 
-                <script type="text/javascript">
-                    Ext.onReady(function () {
-                        new LABKEY.ext.CalloutTip( <%= text(props.toString()) %> );
-                    });
-                </script><%
+    <div style="margin-top: 10px;"><input type=checkbox name=checkall checked id=checkallproteins style="margin-right: 12px;" onclick="checkAll();">All</div>
+    <%
+        for (Protein protein : proteins) {
+            String divId = GUID.makeGUID();
+            JSONObject props = new JSONObject().put("width", 450).put("title", "Protein Details");
+            JSONObject autoLoadProp = new JSONObject();
+            ActionURL ajaxURL = new ActionURL(MS2Controller.ShowProteinAJAXAction.class, getContainer());
+            ajaxURL.addParameter("seqId", protein.getSeqId());
+            autoLoadProp.put("url", ajaxURL.toString());
+            props.put("autoLoad", autoLoadProp);
+            props.put("leftPlacement", true);
+            props.put("target", divId);
+
+            ActionURL proteinUrl = baseUrl.clone();
+            proteinUrl.addParameter(MS2Controller.PeptideFilteringFormElements.targetSeqIds, protein.getSeqId());
+
+    %>
+
+    <div>
+        <input type=checkbox name=targetSeqIds value="<%= h(protein.getSeqId())%>" checked>
+
+        <span id="<%= h(divId) %>"></span>
+        <span><a href="<%= h(proteinUrl) %>"><%= h(protein.getBestName())%></a></span>
+    </div>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            new LABKEY.ext.CalloutTip( <%= text(props.toString()) %> );
+        });
+    </script>
+
+<%
             }
+%>
+<br>
+<%= button("Done").submit(true) %>
+</form>
+<%
     }
 %>
 
