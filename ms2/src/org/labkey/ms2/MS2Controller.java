@@ -4629,7 +4629,8 @@ public class MS2Controller extends SpringActionController
             boolean showAllPeptides = ProteinManager.showAllPeptides(targetURL, getUser());
 
             // if we have target proteins, then use the seqId with the run list for the export
-            SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size() * (form.getTargetSeqIds().size())];
+            int seqIdCount = form.getTargetSeqIds() == null ? 0 : form.getTargetSeqIds().size();
+            SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size() * seqIdCount];
             if (form.getTargetSeqIds() != null && form.getTargetSeqIds().size() > 0)
             {
                 targetProteinClause = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
