@@ -1914,6 +1914,26 @@ public class MS2Controller extends SpringActionController
         {
             _pivotType = pivotType;
         }
+
+        public void appendTargetSeqIdsClause(SQLFragment sql)
+        {
+            sql.append("(");
+            if (_targetSeqIds == null || _targetSeqIds.isEmpty())
+            {
+                sql.append("-1");
+            }
+            else
+            {
+                String separator = "";
+                for (Integer id : _targetSeqIds)
+                {
+                    sql.append(separator);
+                    separator = ", ";
+                    sql.append(id);
+                }
+            }
+            sql.append(")");
+        }
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -4631,7 +4651,7 @@ public class MS2Controller extends SpringActionController
             // if we have target proteins, then use the seqId with the run list for the export
             int seqIdCount = form.getTargetSeqIds() == null ? 0 : form.getTargetSeqIds().size();
             SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size() * seqIdCount];
-            if (form.getTargetSeqIds() != null && form.getTargetSeqIds().size() > 0)
+            if (form.getTargetSeqIds() != null && !form.getTargetSeqIds().isEmpty())
             {
                 targetProteinClause = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
                 int index = 0;
