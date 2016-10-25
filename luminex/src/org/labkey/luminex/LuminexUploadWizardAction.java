@@ -491,6 +491,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, cellTypes, parser.getTitrations());
             form.setLostExclusions(exclusionCount - retainedCount);
 
+            form.setRetainExclusions(true); //Default to true
             JspView<LuminexRunUploadForm> warningView = new JspView<>("/org/labkey/luminex/view/exclusionWarning.jsp", form);
             warningView.setTitle("Exclusion Warning");
 

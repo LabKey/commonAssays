@@ -42,7 +42,7 @@
 
     <div style="margin-left: 25px;">
         <%--default to checked--%>
-        <label><input type="checkbox" name="retainExclusions" <%=checked(true)%> onchange="retainExclusionsChanged(this)" />
+        <label><input type="checkbox" name="retainExclusions" <%=checked(bean.getRetainExclusions())%> onchange="retainExclusionsChanged(this)" />
             <%=text("Retain matched exclusion" + (exclusionCount == 1 ? "" :"s"))%></label><br/>
     </div>
     <br/><%
