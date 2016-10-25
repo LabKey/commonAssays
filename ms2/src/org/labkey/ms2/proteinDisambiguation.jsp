@@ -25,7 +25,6 @@
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.util.Pair" %>
-<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -34,7 +33,6 @@
     LABKEY.requiresScript("util.js");
 
     function checkAll() {
-        debugger;
         var checked = document.getElementById('checkallproteins').checked;
         var cbs = document.getElementsByName('targetSeqIds');
         for(var i=0; i < cbs.length; i++) {
@@ -78,7 +76,6 @@
     Pair<ActionURL, List<Protein>> actionWithProteins = view.getModelBean();
     List<Protein> proteins = actionWithProteins.second;
     ActionURL baseUrl = actionWithProteins.first;
-    Set<String> params = baseUrl.getParameterMap().keySet();
 
     if (proteins.isEmpty()) { %>
         No proteins match. Please try another name. <%
