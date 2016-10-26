@@ -148,7 +148,8 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                     + " FROM Data AS x "
                     + " WHERE x.Data.Run.RowId = " + this.runId + " AND x.Type = '" + this.type + "' "
-                    + " AND x.Description " + (this.description ? " = '" + this.description + "'" : " IS NULL"),
+                    + " AND x.Description " + (this.description ? " = '" + this.description + "'" : " IS NULL")
+                    + " ORDER BY x.Analyte.Name",
                 schemaName: this.protocolSchemaName,
                 autoLoad: true,
                 listeners: {
