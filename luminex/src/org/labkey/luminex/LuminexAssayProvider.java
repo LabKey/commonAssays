@@ -351,19 +351,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         String currentRunId = viewContext.getRequest().getParameter("Data.Data/Run/RowId~eq");
 
         // add header link for the Excluded Data Report
-        ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.ExcludedDataAction.class);
-        if (containerFilter != null && containerFilter.getType() != null)
-        {
-            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
-            url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
-            url.addParameter(protocol.getName() + " TitrationExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
-        }
-        if (null != currentRunId)
-        {
-            url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
-            url.addParameter("RunExclusion.RunId~eq", currentRunId);
-            url.addParameter("TitrationExclusion.DataId/Run/RowId~eq", currentRunId);
-        }
+        ActionURL url = getExcludedReportUrl(viewContext.getContainer(), protocol, containerFilter, currentRunId);
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
         /*
@@ -406,6 +394,27 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         return result;
     }
+
+    public static ActionURL getExcludedReportUrl(Container container, ExpProtocol protocol, ContainerFilter containerFilter, String currentRunId)
+    {
+        // add header link for the Excluded Data Report
+        ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexController.ExcludedDataAction.class);
+        if (containerFilter != null && containerFilter.getType() != null)
+        {
+            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " TitrationExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+        }
+        if (null != currentRunId)
+        {
+            url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
+            url.addParameter("RunExclusion.RunId~eq", currentRunId);
+            url.addParameter("TitrationExclusion.DataId/Run/RowId~eq", currentRunId);
+        }
+
+        return url;
+    }
+
 
     @Override
     public void deleteProtocol(ExpProtocol protocol, User user) throws ExperimentException
