@@ -94,9 +94,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                     var id;
                     for(var i = 0; i < records.length; i++)
                     {
+                        var analyteRowIds = records[i].get('Analytes/RowId');
                         id = combinedStore.findExact('Name', records[i].data.Description);
-                        this.preAnalyteRowIds[id] = records[i].get('Analytes/RowId');
-                        this.preExcludedIds[id] = records[i].get('Analytes/RowId').split(",");
+                        this.preAnalyteRowIds[id] = analyteRowIds;
+                        this.preExcludedIds[id] = ("" + analyteRowIds).split(",");
                         this.comments[id] = records[i].get('Comment');
                     }
                 },
@@ -182,7 +183,10 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
                         id = store.findExact('Name', titrationExclusionStore.getAt(i).data.Description);
                         if(id >= 0)
                         {
-                            this.present[id] = titrationExclusionStore.getAt(i).get("Analytes/RowId").split(",").length;
+                            // coerce to string so that we can attempt to split by comma and space
+                            var analyteRowIds = "" + titrationExclusionStore.getAt(i).get("Analytes/RowId");
+
+                            this.present[id] = analyteRowIds.split(",").length;
                             titrationExclusionStore.getAt(i).set('present', this.present[id]);
                             titrationExclusionStore.getAt(i).commit();
                         }
@@ -261,7 +265,8 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Titration.Name AS Titration, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                        + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId,
+                        + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId
+                        + " ORDER BY x.Titration.Name, x.Analyte.Name",
                 schemaName: this.protocolSchemaName,
                 autoLoad: true,
                 sortInfo: {

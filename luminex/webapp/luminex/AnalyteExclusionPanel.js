@@ -81,7 +81,8 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
             headerStyle: 'font-weight: normal; background-color: #ffffff',            
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                    + " FROM Data AS x WHERE x.Data.Run.RowId = " + this.runId,
+                    + " FROM Data AS x WHERE x.Data.Run.RowId = " + this.runId
+                    + " ORDER BY x.Analyte.Name",
                 schemaName: this.protocolSchemaName,
                 autoLoad: true,
                 listeners: {
