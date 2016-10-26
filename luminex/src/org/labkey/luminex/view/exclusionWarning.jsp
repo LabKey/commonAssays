@@ -22,6 +22,8 @@
 <%@ page import="org.labkey.luminex.LuminexController" %>
 <%@ page import="org.labkey.luminex.LuminexRunUploadForm" %>
 <%@ page import="org.labkey.api.util.StringUtilsLabKey" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.study.assay.AssayUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -46,8 +48,16 @@
             <%=text("Retain matched exclusion" + (exclusionCount == 1 ? "" :"s"))%></label><br/>
     </div>
     <br/><%
-        ActionURL url = new ActionURL(LuminexController.ExcludedDataAction.class, bean.getContainer());
-        url.addParameter("rowId", bean.getRowId());
+        ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(bean.getContainer(), bean.getProtocol(), LuminexController.ExcludedDataAction.class);
+
+        Integer currentRunId = bean.getReRunId();
+        if (null != currentRunId)
+        {
+            url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
+            url.addParameter("RunExclusion.RunId~eq", currentRunId);
+            url.addParameter("TitrationExclusion.DataId/Run/RowId~eq", currentRunId);
+        }
+
     %>Please review the <%=textLink("exclusions report", url, true)%>for more information.
 </span>
 
