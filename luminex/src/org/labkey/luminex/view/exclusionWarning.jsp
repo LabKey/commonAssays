@@ -57,7 +57,7 @@
     {
         var hiddenEl = getHiddenFormElement(el.name);
         if (hiddenEl != null)
-            hiddenEl.value = el.checked ? "true" : "";
+            hiddenEl.value = el.checked;
     }
 
     //Depends on getHiddenFormElement from titrationWellRoles.jsp
