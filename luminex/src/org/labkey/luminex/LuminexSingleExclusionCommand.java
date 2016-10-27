@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.luminex.model.Analyte;
 import org.springframework.validation.Errors;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,29 +37,28 @@ public class LuminexSingleExclusionCommand
     private List<String> _analyteNames = new ArrayList<>();
     private String _comment;
 
-//TODO: these are currently ignored on insert  Issue #28261
-//    private Integer _createdBy;
-//    private Timestamp _created;
-//
-//    public Timestamp getCreated()
-//    {
-//        return _created;
-//    }
-//
-//    public void setCreated(Timestamp created)
-//    {
-//        _created = created;
-//    }
-//
-//    public Integer getCreatedBy()
-//    {
-//        return _createdBy;
-//    }
-//
-//    public void setCreatedBy(Integer createdBy)
-//    {
-//        _createdBy = createdBy;
-//    }
+    private Integer _createdBy;
+    private Timestamp _created;
+
+    public Timestamp getCreated()
+    {
+        return _created;
+    }
+
+    public void setCreated(Timestamp created)
+    {
+        _created = created;
+    }
+
+    public Integer getCreatedBy()
+    {
+        return _createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy)
+    {
+        _createdBy = createdBy;
+    }
 
     public Integer getKey()
     {
@@ -149,10 +149,8 @@ public class LuminexSingleExclusionCommand
         row.put("DataId", getDataId());
         row.put("Comment", getComment());
         row.put("AnalyteId/RowId", getAnalyteRowIds());
-
-//TODO: these are currently ignored on insert Issue #28261
-//        row.put("CreatedBy", getCreatedBy());
-//        row.put("Created", getCreated());
+        row.put("CreatedBy", getCreatedBy());
+        row.put("Created", getCreated());
 
         return row;
     }

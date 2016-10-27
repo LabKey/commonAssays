@@ -38,6 +38,7 @@ import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -226,9 +227,12 @@ public class LuminexManager
         //NOTE: exclusions in renamed/new files will be dropped
         Map<String, Integer> oldInputs = new HashMap<>();
         Map<Integer, ExpData> inputIdMap = new HashMap<>(); //key: oldId
-        replacedRun.getDataOutputs().forEach(o -> oldInputs.put(o.getName(), o.getRowId()));
+        replacedRun.getDataOutputs().forEach(o ->  {
+            oldInputs.put(o.getName(), o.getRowId());
+            oldInputs.put(o.getFile().getName(), o.getRowId());
+        });
         run.getDataOutputs().stream()
-                .filter(o -> oldInputs.containsKey(o.getName()))
+                .filter(o -> oldInputs.containsKey(o.getFile().getName()))
                 .forEach( newFile ->{
                     Integer oldId = oldInputs.get(newFile.getName());
                     inputIdMap.put(oldId, newFile);
@@ -245,16 +249,17 @@ public class LuminexManager
         command.setType((String) oldExclusion.get("type"));
         command.setComment((String) oldExclusion.get("comment"));
         command.setDataId(dataFileId);
-
-//        TODO: these are currently ignored  Issue #28261
-//        command.setCreated((Timestamp) oldExclusion.get("created"));
-//        command.setCreatedBy((Integer) oldExclusion.get("createdBy"));
+        command.setCreated((Timestamp) oldExclusion.get("created"));
+        command.setCreatedBy((Integer) oldExclusion.get("createdBy"));
 
         return command;
     }
 
     private Collection<Map<String, Object>> getWellExclusions(Set<Integer> dataIds)
     {
+        if(dataIds == null || dataIds.size() == 0)
+            return null;
+
         //Get full list of exclusions expanded per analyte
         SQLFragment sql = new SQLFragment();
         sql.append("SELECT ea.AnalyteId, e.* FROM ")
@@ -274,28 +279,27 @@ public class LuminexManager
     {
         Collection<Map<String, Object>> exclusions = getRunExclusions(inputIdMap.keySet(), replacedRunId);
 
-        if (exclusions != null && exclusions.size() >0)
+        if (exclusions == null || exclusions.size() <= 0)
+            return null;
+
+        LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
+        command.setCommand("insert");
+
+        //Map existing exclusions to new input files
+        exclusions.forEach(exclusion ->
         {
-            LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
-            command.setCommand("insert");
+            command.setComment((String) exclusion.get("comment")); //Should be the same
 
-            //Map existing exclusions to new input files
-            exclusions.forEach(exclusion ->
+            Analyte analyte = analyteMap.get(exclusion.get("AnalyteId"));
+            if (analyte != null)
             {
-                command.setComment((String) exclusion.get("comment")); //Should be the same
+                //generate insertion command
+                command.addAnalyte(analyte);
+            }
+        });
 
-                Analyte analyte = analyteMap.get(exclusion.get("AnalyteId"));
-                if (analyte != null)
-                {
-                    //generate insertion command
-                    command.addAnalyte(analyte);
-                }
-            });
+        return command;
 
-            return command;
-        }
-
-        return null;
     }
 
     private Collection<Map<String,Object>> getRunExclusions(Set<Integer> integers, int replacedRunId)
@@ -315,6 +319,8 @@ public class LuminexManager
     private Collection<LuminexSingleExclusionCommand> generateWellExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<Integer, Analyte> analyteMap)
     {
         Collection<Map<String, Object>> exclusions = getWellExclusions(inputIdMap.keySet());
+        if(exclusions == null)
+            return null;
 
         Map<String, LuminexSingleExclusionCommand> replacementCommands = new HashMap<>();
         //Map existing exclusions to new input files
@@ -369,7 +375,7 @@ public class LuminexManager
                 .append(" AND re.RunId = ? ").add(replacedRunId);
 
         //Add analyte filter
-        appendInClause(sql, "a.Name ", analyteNames).append("\n");
+        appendInClause(sql, "a.Name ", analyteNames, "\n");
 
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
@@ -388,27 +394,28 @@ public class LuminexManager
             .append("d.RunId = ?").add(replacedRunId);
 
         //Add filename filter
-        appendInClause(sql, "d.Name ", fileNames).append("\n");
+        appendInClause(sql, "d.Name ", fileNames, "\n");
 
         //Add analyte filter
-        appendInClause(sql, "a.Name ", analyteNames).append("\n");
+        appendInClause(sql, "a.Name ", analyteNames, "\n");
 
         //Add titration filter
-        appendInClause(sql, "(we.Description IS NULL OR we.Description ", titrations).append(")\n");
+        appendInClause(sql, "(we.Description IS NULL OR we.Description ", titrations, "\n");
 
         //Add type filter: Null is for titrations
-        appendInClause(sql, "(we.type IS NULL OR we.type ", types).append(")\n");
+        appendInClause(sql, "(we.type IS NULL OR we.type ", types, ")\n");
 
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
 
-    private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set)
+    private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set, String closeOutString)
     {
         //Add filename filter
         if (set != null && set.size() > 0)
         {
             sql.append(" AND ").append(columnExpression);
             OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(sql, set);
+            sql.append(closeOutString);
         }
 
         return sql;

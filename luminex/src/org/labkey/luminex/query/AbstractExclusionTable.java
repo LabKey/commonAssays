@@ -73,6 +73,9 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         getColumn("Created").setLabel("Excluded At");
         getColumn("CreatedBy").setLabel("Excluded By");
         getColumn("Comment").setLabel("Reason for Exclusion");
+
+        //Needed to retain original creator of exclusions on reimport.
+        getColumn("CreatedBy").setReadOnly(false);
     }
 
     @Override
@@ -197,6 +200,26 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
             checkPermissions(user, rowMap, InsertPermission.class);
             Map<String, Object> result = super.insertRow(user, container, rowMap);
 
+            String createdByKey = "CreatedBy";
+            String createdKey = "Created";
+
+            if(rowMap.get(createdByKey) != null)
+            {
+                //Inserts set the CreatedBy/Created fields, set them to original values
+                Map<String, Object> copy = new HashMap<>();
+                copy.putAll(result);
+                copy.put(createdByKey, rowMap.get(createdByKey));
+                copy.put(createdKey, rowMap.get(createdKey));
+
+                try
+                {
+                    result = super.updateRow(user, container, copy, result, false, true);
+                }
+                catch (InvalidKeyException e)
+                {
+                    throw new QueryUpdateServiceException("Unable to retain created/created by values", e);
+                }
+            }
             // Be sure that the RowId is now included in the map
             rowMap.putAll(result);
             insertAnalytes(rowMap);
