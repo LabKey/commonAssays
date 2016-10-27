@@ -16,6 +16,7 @@
 package org.labkey.luminex.query;
 
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -128,7 +129,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         protected Set<Integer> getAnalyteIds(Map<String, Object> rowMap)
         {
             Object ids = rowMap.get("AnalyteId/RowId");
-            if (ids != null)
+            if (ids != null && StringUtils.trimToNull(ids.toString()) != null)
             {
                 Set<Integer> result = new HashSet<>();
                 String[] idStrings = ids.toString().split(",");

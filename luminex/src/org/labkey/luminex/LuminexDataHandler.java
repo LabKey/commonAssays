@@ -927,6 +927,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // Keep track of the curve fits that should be part of this run
             List<CurveFit> newCurveFits = new ArrayList<>();
 
+            // TODO this seems to be dependent on which data file the analyte record was associated with
             String stdCurve = analyte.getStdCurve();
             if (stdCurve != null)
             {

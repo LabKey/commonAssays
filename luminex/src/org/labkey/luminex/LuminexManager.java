@@ -31,6 +31,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.luminex.model.Analyte;
@@ -298,8 +299,7 @@ public class LuminexManager
             }
         });
 
-        return command;
-
+        return !command.getAnalyteRowIds().isEmpty() ? command : null;
     }
 
     private Collection<Map<String,Object>> getRunExclusions(Set<Integer> integers, int replacedRunId)
@@ -573,7 +573,7 @@ public class LuminexManager
         new TableSelector(table, cols.values(), filter, null).forEachMap(row ->
         {
             String dataFileUrl = (String)row.get(cols.get(dataFileUrlFK).getAlias());
-            String dataFileName = dataFileUrl.substring(dataFileUrl.lastIndexOf("/") + 1);
+            String dataFileName = PageFlowUtil.decode(dataFileUrl.substring(dataFileUrl.lastIndexOf("/") + 1));
             String analyteName = (String)row.get(cols.get(analyteFK).getAlias());
             String description = (String)row.get(cols.get(descriptionFK).getAlias());
             String type = (String)row.get(cols.get(typeFK).getAlias());
