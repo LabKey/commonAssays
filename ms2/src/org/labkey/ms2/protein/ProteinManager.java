@@ -1095,7 +1095,7 @@ public class ProteinManager
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
-            sqlf.append(dialect.getStringIndexOfFunction(new SQLFragment("TrimmedPeptide"), new SQLFragment("?", _sequence)));
+            sqlf.append(dialect.getStringIndexOfFunction(new SQLFragment("TrimmedPeptide"), new SQLFragment("(SELECT ProtSequence FROM prot.Sequences WHERE SeqId = ?)", _seqid)));
             sqlf.append( " > 0 ");
             return sqlf;
         }

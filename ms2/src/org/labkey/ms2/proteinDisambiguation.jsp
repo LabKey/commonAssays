@@ -54,9 +54,9 @@
             alert("Please choose at least one applicable protein!");
             return false;
         }
-        else if (checkedCount > 500)
+        else if (checkedCount > 1900)
         {
-            alert("Exceeded maximum number of selection of 500.");
+            alert("Exceeded maximum number of selection of 1900.");
             return false;
         }
         return true;
