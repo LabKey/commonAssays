@@ -400,7 +400,7 @@ public class LuminexManager
         appendInClause(sql, "a.Name ", analyteNames, "\n");
 
         //Add titration filter
-        appendInClause(sql, "(we.Description IS NULL OR we.Description ", titrations, "\n");
+        appendInClause(sql, "(we.Description IS NULL OR we.Description ", titrations, ")\n");
 
         //Add type filter: Null is for titrations
         appendInClause(sql, "(we.type IS NULL OR we.type ", types, ")\n");
