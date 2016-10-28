@@ -25,6 +25,7 @@ import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
@@ -67,6 +68,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.labkey.flow.data.AttributeType.keyword;
 
 public class FlowManager
 {
@@ -431,7 +434,7 @@ public class FlowManager
 
     public int ensureKeywordName(Container c, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.keyword, name, Collections.emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, keyword, name, Collections.emptyList(), uncache);
     }
 
 
@@ -449,7 +452,7 @@ public class FlowManager
 
     public int ensureKeywordNameAndAliases(Container c, String name, Iterable<? extends Object> aliases, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.keyword, name, aliases, uncache);
+        return ensureAttributeNameAndAliases(c, keyword, name, aliases, uncache);
     }
 
 
@@ -502,32 +505,61 @@ public class FlowManager
     public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean uncache)
     {
         //_log.info("ensureAlias(" + type + ", " + rowId + ", " + aliasName + ")");
-        FlowEntry entry = getAttributeEntry(type, rowId);
-        if (entry == null)
-            throw new IllegalArgumentException("Attribute not found");
-
-        if (entry.isAlias())
-            throw new IllegalArgumentException("Can't create alias of an alias");
-
-        int newEntryId = 0;
-        try
+        try (DbScope.Transaction tx = getSchema().getScope().ensureTransaction())
         {
-            newEntryId = ensureAttributeName(entry._containerId, type, aliasName, entry._rowId);
-        }
-        finally
-        {
-            if (uncache)
+            FlowEntry entry = getAttributeEntry(type, rowId);
+            if (entry == null)
+                throw new IllegalArgumentException("Attribute not found");
+
+            if (entry.isAlias())
+                throw new IllegalArgumentException("Can't create alias of an alias");
+
+            // Find existing attribute for the provided alias name
+            FlowEntry existing = getAttributeEntry(entry._containerId, type, aliasName);
+            if (existing != null)
             {
-                // uncache parent
-                AttributeCache.uncache(entry);
+                if (entry.equals(existing))
+                    return;
 
-                if (newEntryId > 0)
+                // If this existing entry doesn't have any aliases, we can make this existing entry an alias of the entry.
+                if (existing.isAlias())
+                    throw new IllegalArgumentException("The " + type.name() + " attribute '" + aliasName + "' is already an alias of '" + getAttributeEntry(type, existing._aliasId)._name + "'");
+
+                if (!getAliases(type, existing._rowId).isEmpty())
+                    throw new IllegalArgumentException("The " + type.name() + " attribute '" + aliasName + "' has aliases and can't be made an alias of '" + entry._name + "'");
+
+                // update usages of the existing attribute to point at the new parent, keeping the original attribute id the same
+                updateAttributeValuesPreferredId(existing._containerId, type, existing._rowId, entry._rowId);
+
+                // parent the existing entry to the other attribute
+                Container c = ContainerManager.getForId(existing._containerId);
+                updateAttribute(c, type, existing._rowId, existing._name, rowId, uncache);
+            }
+            else
+            {
+                int newEntryId = 0;
+                try
                 {
-                    // uncache new alias
-                    FlowEntry newEntry = getAttributeEntry(type, newEntryId);
-                    AttributeCache.uncache(newEntry);
+                    newEntryId = ensureAttributeName(entry._containerId, type, aliasName, entry._rowId);
+                }
+                finally
+                {
+                    if (uncache)
+                    {
+                        // uncache parent
+                        AttributeCache.uncache(entry);
+
+                        if (newEntryId > 0)
+                        {
+                            // uncache new alias
+                            FlowEntry newEntry = getAttributeEntry(type, newEntryId);
+                            AttributeCache.uncache(newEntry);
+                        }
+                    }
                 }
             }
+
+            tx.commit();
         }
     }
 
@@ -578,6 +610,40 @@ public class FlowManager
                 }
             }
         }
+    }
+
+    // Update any attribute usages of the current rowId to the new rowId, keeping the original id the same
+    private int updateAttributeValuesPreferredId(@NotNull String containerId, @NotNull AttributeType type, int currentRowId, int newRowId)
+    {
+        TableInfo attrTable = attributeTable(type);
+        TableInfo valueTable = valueTable(type);
+        String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
+        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
+
+        // Check that the existing entry and the entry being aliased aren't both present on a single object
+        // to avoid violating the primary key constraint. For flow.keyword the pk_keyword covers (objectid, keywordid)
+        SQLFragment check = new SQLFragment()
+                .append("SELECT *\n")
+                .append("FROM (\n")
+                .append("  SELECT ObjectId, COUNT(*) AS usages\n")
+                .append("  FROM ").append(valueTable, "v").append("\n")
+                .append("  INNER JOIN flow.object obj ON v.objectId = obj.rowId\n")
+                .append("  WHERE obj.container = ?\n").add(containerId)
+                .append("    AND v.").append(valueTableAttrIdColumn).append(" IN (").append(currentRowId).append(", ").append(newRowId).append(")").append("\n")
+                .append("  GROUP BY v.objectId\n")
+                .append(") X\n")
+                .append("WHERE X.usages > 1");
+        long objectsWithBothAttrsCount = new SqlSelector(getSchema(), check).getRowCount();
+        if (objectsWithBothAttrsCount > 0)
+            throw new IllegalArgumentException("There are objects that have both attributes: " + objectsWithBothAttrsCount);
+
+        SQLFragment sql = new SQLFragment()
+                .append("UPDATE ").append(valueTable)
+                .append(" SET ").append(valueTableAttrIdColumn)
+                .append(" = ").append(newRowId)
+                .append(" WHERE ").append(valueTableAttrIdColumn).append(" = ").append(currentRowId);
+
+        return new SqlExecutor(getSchema()).execute(sql);
     }
 
 

@@ -411,4 +411,127 @@ public class PersistTests
         assertEquals(0, unused.size());
     }
 
+    @Test
+    public void ensureAlias() throws Exception
+    {
+        ExpData data = ExperimentService.get().createData(c, FlowDataType.FCSFile, this.getClass().getSimpleName());
+        URI dataFileURI = new URI("file:///attributes.flowdata.xml");
+        data.setDataFileURI(dataFileURI);
+        data.save(user);
+
+        AttributeSet set = new AttributeSet(ObjectType.fcsKeywords, dataFileURI);
+
+        // create 'keyword1' with 'value1' and an alias of 'keyword1-alias' to 'keyword1'
+        set.setKeyword("keyword1", "value1");
+        set.addKeywordAlias("keyword1", "keyword1-alias");
+
+        // create 'keyword2' with 'value2' and an alias 'keyword2-alias' to 'keyword2'
+        set.setKeyword("keyword2", "value2");
+        set.addKeywordAlias("keyword2", "keyword2-alias");
+
+        // create 'keyword3' with 'value3' and no aliases
+        set.setKeyword("keyword3", "value3");
+
+        AttributeSetHelper.save(set, user, data);
+
+        AttrObject obj = FlowManager.get().getAttrObject(data);
+        assertNotNull(obj);
+
+        // create 'keyword4' and 'keyword5' that are not used by the data
+        FlowManager.get().ensureKeywordName(c, "keyword4", true);
+        FlowManager.get().ensureKeywordName(c, "keyword5", true);
+
+        // attempt to create alias for nonexistent keyword
+        try
+        {
+            FlowManager.get().ensureAlias(AttributeType.keyword, -1, "keyword2", true);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e)
+        {
+            assertEquals("Attribute not found", e.getMessage());
+        }
+
+        FlowManager.FlowEntry keyword1 = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword1");
+        FlowManager.FlowEntry keyword1_alias = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword1-alias");
+
+        // attempt to create alias of an alias
+        try
+        {
+            assertTrue(keyword1_alias.isAlias());
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1_alias._rowId, "keyword2", true);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e)
+        {
+            assertEquals("Can't create alias of an alias", e.getMessage());
+        }
+
+        // attempt to create alias of an existing keyword that is an alias
+        try
+        {
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword2-alias", true);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e)
+        {
+            assertEquals("The keyword attribute 'keyword2-alias' is already an alias of 'keyword2'", e.getMessage());
+        }
+
+        // attempt to create alias of an existing keyword that is has aliases
+        try
+        {
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword2", true);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e)
+        {
+            assertEquals("The keyword attribute 'keyword2' has aliases and can't be made an alias of 'keyword1'", e.getMessage());
+        }
+
+        // attempt to create alias of existing keyword; both the alias and the aliased have a value on the same data object
+        try
+        {
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword3", true);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e)
+        {
+            assertEquals("There are objects that have both attributes: 1", e.getMessage());
+        }
+
+        // verify we can create an alias from an existing, unused keyword
+        {
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword4", true);
+            FlowManager.FlowEntry keyword1mod = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword1");
+            Collection<FlowManager.FlowEntry> aliases = FlowManager.get().getAliases(keyword1mod);
+            assertEquals(2, aliases.size());
+            assertTrue("Expected to see 'keyword1-alias' as an alias", aliases.stream().anyMatch(e -> e._name.equals("keyword1-alias")));
+            assertTrue("Expected to see 'keyword4' as an alias", aliases.stream().anyMatch(e -> e._name.equals("keyword4")));
+        }
+
+        // verify we can create an alias from an existing, used keyword, if the aliased name is not used
+        {
+            FlowManager.FlowEntry keyword5 = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword5");
+            assertFalse(keyword5.isAlias());
+            assertTrue(FlowManager.get().getAliases(keyword5).isEmpty());
+
+            FlowManager.FlowEntry keyword3 = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword3");
+            assertFalse(keyword3.isAlias());
+            assertTrue(FlowManager.get().getAliases(keyword3).isEmpty());
+
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword5._rowId, "keyword3", true);
+
+            FlowManager.FlowEntry keyword5mod = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword5");
+            assertFalse(keyword5mod.isAlias());
+            Collection<FlowManager.FlowEntry> aliases = FlowManager.get().getAliases(keyword5mod);
+            assertEquals(1, aliases.size());
+            assertTrue("Expected to see 'keyword3' as an alias", aliases.stream().anyMatch(e -> e._name.equals("keyword3")));
+
+            FlowManager.FlowEntry keyword3mod = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword3");
+            assertTrue(keyword3mod.isAlias());
+            assertTrue(FlowManager.get().getAliases(keyword3mod).isEmpty());
+        }
+  }
+
 }

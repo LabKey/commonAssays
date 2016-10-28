@@ -29,6 +29,9 @@
     ActionURL returnURL = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));
 %>
 
+Create alias for <%=h(entry.getType().name())%> <%=h(entry.getName())%>
+<p>
+
 <labkey:errors/>
 <labkey:form action="<%=editURL%>" method="post">
     <table>
