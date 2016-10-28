@@ -484,11 +484,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             LuminexExcelParser parser = form.getParser();
             Set<String> fileNames = new HashSet<>();
             form.getUploadedData().values().forEach(file -> fileNames.add(file.getName()));
-            Set<String> cellTypes = new HashSet<>();
+            Set<String> wellTypes = new HashSet<>();
             parser.getSheets().values().forEach(datRowList ->
-                    cellTypes.addAll(datRowList.stream().map(LuminexDataRow::getType).collect(Collectors.toList())));
+                    wellTypes.addAll(datRowList.stream().map(LuminexDataRow::getType).collect(Collectors.toList())));
 
-            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, cellTypes, parser.getTitrations());
+            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, wellTypes, parser.getTitrations());
             form.setLostExclusions(exclusionCount - retainedCount);
 
             form.setRetainExclusions(true); //Default to true

@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex;
 
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
@@ -278,8 +277,9 @@ public class LuminexManager
 
         //Get full list of exclusions expanded per analyte
         SQLFragment sql = new SQLFragment();
-        sql.append("SELECT ea.AnalyteId, e.* FROM ")
-            .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "e").append(",")
+        sql.append("SELECT a.Name AS AnalyteName\n")
+            .append(", e.* \n")
+            .append("FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "e").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "ea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
             .append(" WHERE e.RowId = ea.WellExclusionId ")
@@ -291,11 +291,11 @@ public class LuminexManager
         return new SqlSelector(getSchema(), sql).getMapCollection();
     }
 
-    private LuminexSingleExclusionCommand generateRunExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<Integer, Analyte> analyteMap, int replacedRunId)
+    private LuminexSingleExclusionCommand generateRunExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<String, Analyte> analyteMap, int replacedRunId)
     {
         Collection<Map<String, Object>> exclusions = getRunExclusions(inputIdMap.keySet(), replacedRunId);
 
-        if (exclusions == null || exclusions.size() <= 0)
+        if (exclusions.size() <= 0)
             return null;
 
         LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
@@ -306,7 +306,7 @@ public class LuminexManager
         {
             command.setComment((String) exclusion.get("comment")); //Should be the same
 
-            Analyte analyte = analyteMap.get(exclusion.get("AnalyteId"));
+            Analyte analyte = analyteMap.get(exclusion.get("AnalyteName"));
             if (analyte != null)
             {
                 //generate insertion command
@@ -321,40 +321,46 @@ public class LuminexManager
     {
         //Get full list of exclusions by analyte
         SQLFragment sql = new SQLFragment();
-        sql.append("SELECT ea.AnalyteId, e.* FROM ")
+        sql.append("SELECT a.Name AS AnalyteName, e.* FROM ")
             .append(LuminexProtocolSchema.getTableInfoRunExclusion(), "e").append(",")
-            .append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "ea")
-            .append(" WHERE e.RunId = ea.RunId")
+            .append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "ea").append(",")
+            .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
+            .append(" WHERE e.RunId = ea.RunId ")
+            .append(" AND ea.AnalyteId = a.RowId")
             .append(" AND e.RunId = ?")
             .add(replacedRunId);
 
         return new SqlSelector(getSchema(), sql).getMapCollection();
     }
 
-    private Collection<LuminexSingleExclusionCommand> generateWellExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<Integer, Analyte> analyteMap)
+    private Collection<LuminexSingleExclusionCommand> generateWellExclusionCommands(Integer newRunId, LuminexRunContext context, Map<Integer, ExpData> inputIdMap, Map<String, Analyte> analyteMap)
     {
         Collection<Map<String, Object>> exclusions = getWellExclusions(inputIdMap.keySet());
         if(exclusions == null)
             return null;
 
+        Set<String> wellKeys = getWellKeysForRun(newRunId, context.getProtocol(), context.getContainer(), context.getUser(), false);
         Map<String, LuminexSingleExclusionCommand> replacementCommands = new HashMap<>();
         //Map existing exclusions to new input files
         exclusions.forEach(exclusion ->
         {
             Integer dataId = (Integer)exclusion.get("DataId");
+            String dataFileName = inputIdMap.get(dataId).getName();
+            String analyteName = (String)exclusion.get("AnalyteName");
+            String description = (String)exclusion.get("Description");
+            String type = (String)exclusion.get("Type");
 
-            //If existing file has corresponding new file
-            if (inputIdMap.containsKey(dataId))
+            if (wellKeys.contains(createWellExclusionKey(dataFileName, analyteName, description, type)))
             {
                 ExpData file = inputIdMap.get(dataId);
-                Analyte newAnalyte = analyteMap.get(Integer.valueOf(exclusion.get("AnalyteId").toString()));
+                Analyte newAnalyte = analyteMap.get(analyteName);
 
                 //if file does not have a corresponding Analyte
                 if (newAnalyte == null)
                     return;
 
                 //Get existing command
-                String key = createExclusionCommandKey(file.getName(), (String) exclusion.get("Description"), (String) exclusion.get("type"));
+                String key = createExclusionCommandKey(dataFileName, description, type);
                 LuminexSingleExclusionCommand command = replacementCommands.get(key);
                 if (command == null)
                 {
@@ -436,24 +442,26 @@ public class LuminexManager
         return sql;
     }
 
-    public void retainExclusions(User user, Container container, ExpRun replacedRun, ExpRun run, LuminexAssayProvider provider) throws ValidationException
+    public void retainExclusions(LuminexRunContext uploadContext, ExpRun replacedRun, ExpRun run) throws ValidationException
     {
         //Map existing Files & analytes to new run
         Map<Integer, ExpData> inputIdMap = getReplacementInputMap(replacedRun, run);
-        Map<Integer, Analyte> analyteMap = getAnalyteMap(replacedRun, run);
+        Map<String, Analyte> analyteMap = getAnalyteMap(replacedRun, run);
 
-        Collection<LuminexSingleExclusionCommand> wellExclusionCommands = generateWellExclusionCommands(inputIdMap, analyteMap);
+        Collection<LuminexSingleExclusionCommand> wellExclusionCommands = generateWellExclusionCommands(run.getRowId(), uploadContext, inputIdMap, analyteMap);
         LuminexSingleExclusionCommand runExclusionCommands = generateRunExclusionCommands(inputIdMap, analyteMap, replacedRun.getRowId());
 
         try
         {
             //Copy WellExclusions and TitrationExclusions
             if(wellExclusionCommands != null)
-                createExclusions(user, container, wellExclusionCommands, run.getRowId(), ExclusionType.WellExclusion, run.getProtocol(), provider, false, null);
+                createExclusions(uploadContext.getUser(), uploadContext.getContainer(), wellExclusionCommands, run.getRowId(),
+                        ExclusionType.WellExclusion, run.getProtocol(), uploadContext.getProvider(), false, null);
 
             //Copy AnalyteExclusions
             if (runExclusionCommands != null)
-                createExclusions(user, container, Collections.singletonList(runExclusionCommands), run.getRowId(), ExclusionType.RunExclusion, run.getProtocol(), provider, false, null);
+                createExclusions(uploadContext.getUser(), uploadContext.getContainer(), Collections.singletonList(runExclusionCommands),
+                        run.getRowId(), ExclusionType.RunExclusion, run.getProtocol(), uploadContext.getProvider(), false, null);
         }
         catch (SQLException|QueryUpdateServiceException|DuplicateKeyException|InvalidKeyException e)
         {
@@ -470,20 +478,11 @@ public class LuminexManager
 
     }
 
-    private Map<Integer,Analyte> getAnalyteMap(ExpRun replacedRun, ExpRun run)
+    private Map<String, Analyte> getAnalyteMap(ExpRun replacedRun, ExpRun run)
     {
-        List<Analyte> replacedAnalytes = getAnalytes(replacedRun);
-        Map<String, Integer> analyteNameMap = new HashedMap<>();
-        replacedAnalytes.forEach(a -> analyteNameMap.put(a.getName(), a.getRowId()));
         List<Analyte> newAnalytes = getAnalytes(run);
-        Map<Integer, Analyte> results = new HashMap<>();
-        newAnalytes.forEach(analyte ->
-        {
-            if (analyteNameMap.containsKey(analyte.getName()))
-            {
-                results.put(analyteNameMap.get(analyte.getName()), analyte);
-            }
-        });
+        Map<String, Analyte> results = new HashMap<>();
+        newAnalytes.forEach(analyte -> results.put(analyte.getName(), analyte));
 
         return results;
     }
@@ -507,7 +506,6 @@ public class LuminexManager
                 Map<Enum, Object> options = new HashMap<>();
                 options.put(QueryUpdateService.ConfigParameters.Logger, logger);
 
-                //TODO: not sure if this is appropriate use...
                 Map<String, Object> additionalContext = Collections.singletonMap(RERUN_TRANSFORM, rerunTransform);
 
                 for (LuminexSingleExclusionCommand command : commands)
@@ -567,6 +565,11 @@ public class LuminexManager
 
     public Set<String> getWellExclusionKeysForRun(Integer runId, ExpProtocol protocol, Container container, User user)
     {
+        return getWellKeysForRun(runId, protocol, container, user, true);
+    }
+
+    private Set<String> getWellKeysForRun(Integer runId, ExpProtocol protocol, Container container, User user, boolean onlyExcludedWells)
+    {
         Set<String> excludedWellKeys = new HashSet<>();
 
         AssayProvider provider = AssayService.get().getProvider(protocol);
@@ -584,7 +587,9 @@ public class LuminexManager
         Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(dataFileUrlFK, analyteFK, descriptionFK, typeFK));
 
         SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), runId);
-        filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_GROUP_COMMENT, CompareType.STARTS_WITH);
+        if(onlyExcludedWells)
+            filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_GROUP_COMMENT, CompareType.STARTS_WITH);
+
         new TableSelector(table, cols.values(), filter, null).forEachMap(row ->
         {
             String dataFileUrl = (String)row.get(cols.get(dataFileUrlFK).getAlias());

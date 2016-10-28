@@ -105,7 +105,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
                 run.save(uploadContext.getUser());
 
                 if (uploadContext instanceof LuminexRunContext && ((LuminexRunContext)uploadContext).getRetainExclusions())
-                    LuminexManager.get().retainExclusions(uploadContext.getUser(), uploadContext.getContainer(), replacedRun, run, getProvider());
+                    LuminexManager.get().retainExclusions((LuminexRunContext)uploadContext, replacedRun, run);
 
                 // Delete the old run, which has been replaced
                 if (replacedRun.getContainer().hasPermission(uploadContext.getUser(), DeletePermission.class))
