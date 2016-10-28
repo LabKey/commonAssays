@@ -1,7 +1,6 @@
-<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
 /*
- * Copyright (c) 2005-2016 Fred Hutchinson Cancer Research Center
+ * Copyright (c) 2004-2016 Fred Hutchinson Cancer Research Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
