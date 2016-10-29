@@ -458,4 +458,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         return true;
     }
+
+    public static Domain getExcelRunDomain(ExpProtocol protocol)
+    {
+        return AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+    }
 }

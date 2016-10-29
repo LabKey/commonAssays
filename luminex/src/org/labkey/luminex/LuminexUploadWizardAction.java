@@ -65,6 +65,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -480,10 +481,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             form.setExclusionCount(exclusionCount);
 
-            //Get the possible values for each piece of the Exclusion key
+            //Get Filename from the Run filename property
+            Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain( form.getProtocol());
             LuminexExcelParser parser = form.getParser();
             Set<String> fileNames = new HashSet<>();
-            form.getUploadedData().values().forEach(file -> fileNames.add(file.getName()));
+            for (File file : form.getUploadedData().values())
+                fileNames.add(parser.getExcelRunProps(file).get(excelRunDomain.getPropertyByName("Filename")));
+
+            //Get well types from the run files
             Set<String> wellTypes = new HashSet<>();
             parser.getSheets().values().forEach(datRowList ->
                     wellTypes.addAll(datRowList.stream().map(LuminexDataRow::getType).collect(Collectors.toList())));

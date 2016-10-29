@@ -311,7 +311,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Map<ExpMaterial, String> inputMaterials = new LinkedHashMap<>();
             ParticipantVisitResolver resolver = findParticipantVisitResolver(expRun, user, provider);
 
-            Domain excelRunDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+            Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain(protocol);
             if (excelRunDomain == null)
             {
                 throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());

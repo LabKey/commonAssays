@@ -35,7 +35,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.NumberUtilsLabKey;
 import org.labkey.api.util.Pair;
@@ -76,7 +75,7 @@ public class LuminexExcelParser
 
     public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
     {
-        this(AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN), dataFiles);
+        this(LuminexAssayProvider.getExcelRunDomain(protocol), dataFiles);
     }
 
     private LuminexExcelParser(Domain excelRunDomain, Collection<File> dataFiles)

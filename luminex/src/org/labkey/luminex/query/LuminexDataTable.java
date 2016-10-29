@@ -347,7 +347,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         {
             defaultCols.add(new FieldKey(_provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), prop.getName()));
         }
-        for (DomainProperty prop : AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN).getProperties())
+        for (DomainProperty prop : LuminexAssayProvider.getExcelRunDomain(protocol).getProperties())
         {
             defaultCols.add(new FieldKey(dataColumn.getFieldKey(), prop.getName()));
         }
