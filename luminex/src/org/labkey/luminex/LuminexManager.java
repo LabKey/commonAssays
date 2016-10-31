@@ -363,7 +363,7 @@ public class LuminexManager
             String description = (String)exclusion.get("Description");  // == null for Blank control wells
             String type = (String)exclusion.get("Type"); // == null for titration exclusions
 
-            if (wellKeys.contains(createWellExclusionKey(dataFileName, analyteName, description, type)))
+            if (wellKeys.contains(createWellKey(dataFileName, analyteName, description, type)))
             {
                 //Get existing command
                 String key = createExclusionCommandKey(dataFileName, description, type);
@@ -621,7 +621,7 @@ public class LuminexManager
             String analyteName = (String)row.get(cols.get(analyteFK).getAlias());
             String description = (String)row.get(cols.get(descriptionFK).getAlias());
             String type = (String)row.get(cols.get(typeFK).getAlias());
-            excludedWellKeys.add(createWellExclusionKey(dataFileName, analyteName, description, type));
+            excludedWellKeys.add(createWellKey(dataFileName, analyteName, description, type));
         });
 
         return excludedWellKeys;
@@ -634,14 +634,14 @@ public class LuminexManager
     }
 
     /** Refine the key object with the individual analyte */
-    public String createWellExclusionKey(String dataFileName, String analyteName, String description, String type)
+    public String createWellKey(String dataFileName, String analyteName, String description, String type)
     {
-        return getTitrationKey(dataFileName, analyteName, description) + "|" + type;
+        return getTitrationKey(dataFileName, analyteName, description) + type;
     }
 
     private String getTitrationKey(String dataFileName, String analyteName, String description)
     {
-        return dataFileName + "|" + analyteName + "|" + description;
+        return dataFileName + "|" + analyteName + "|" + description + "|";
     }
 
     private String getFileNameKey(ExpProtocol protocol, ExpData o)

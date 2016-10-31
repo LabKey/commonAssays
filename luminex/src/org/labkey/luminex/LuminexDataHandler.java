@@ -2080,7 +2080,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 // Merge in whether or not the data row is excluded via a "well exclusion".
                 // We write out all the wells, excluded or not, but the transform script can choose to ignore them
-                String dataRowWellKey = LuminexManager.get().createWellExclusionKey(fileNameProperty, entry.getKey().getName(), dataRow.getDescription(), dataRow.getType());
+                String dataRowWellKey = LuminexManager.get().createWellKey(fileNameProperty, entry.getKey().getName(), dataRow.getDescription(), dataRow.getType());
                 dataMap.put(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedWells.contains(dataRowWellKey));
 
                 dataRows.add(dataMap);
