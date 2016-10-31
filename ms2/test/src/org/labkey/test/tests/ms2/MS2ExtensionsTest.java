@@ -23,7 +23,6 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
     protected static final String MS2EXTENSIONS_DATAREGION_NAME = "MS2ExtensionsRunGrid";
     protected static final String MULTI_PROTEIN_MSG = "Multiple proteins match your search. Please choose the applicable proteins below";
     protected static final String NO_PROTEIN_MSG = "No proteins match. Please try another name.";
-    protected static Locator compareButton = Locator.XPathLocator.linkWithSpan("Compare Peptides");
     protected static Locator.XPathLocator matchCriteriaComo = Locator.tagWithName("select", "targetProteinMatchCriteria");
     protected static Locator.XPathLocator targetProteinInput = Locator.input("targetProtein");
     protected static Locator.XPathLocator matchedProteinCheckbox = Locator.input("targetSeqIds");
@@ -55,7 +54,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         compareWithCriteria("Prefix");
 
         waitForText(MULTI_PROTEIN_MSG);
-        int proteinCounts = getElementCount(matchedProteinCheckbox);
+        int proteinCounts = matchedProteinCheckbox.findElements(getDriver()).size();
         assertTrue("No matched proteins found for \"" + SEARCH_STRING + "\" with match criteria \"Prefix\"", proteinCounts > 1);
         clickButton("Continue");
 
@@ -65,7 +64,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
 
         log("Verify protein search with match criteria of Substring");
         compareWithCriteria("Substring");
-        int proteinCountsSubString = getElementCount(matchedProteinCheckbox);
+        int proteinCountsSubString = matchedProteinCheckbox.findElements(getDriver()).size();
         assertTrue("Wrong number of proteins found for \"" + SEARCH_STRING + "\" with match criteria \"Substring\"", proteinCounts == proteinCountsSubString);
 
         log("Verify protein search with match criteria of Suffix");
@@ -78,14 +77,13 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
     {
         clickFolder(MS2_FOLDER_NAME);
 
-        sleep(1000);
+        targetProteinInput.waitForElement(getDriver(), 1000);
         setFormElement(targetProteinInput, SEARCH_STRING);
         selectOptionByText(matchCriteriaComo, matchCriteria);
         DataRegionTable runsTable = new DataRegionTable(MS2EXTENSIONS_DATAREGION_NAME, getDriver());
         runsTable.checkAll();
         sleep(1000);
-        click(compareButton);
-        sleep(1000);
+        clickButton("Compare Peptides");
     }
 
     private void cleanPipeline()
