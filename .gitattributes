@@ -1393,6 +1393,7 @@ ms2/test/src/org/labkey/test/tests/ms2/AbstractMS2ImportTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/CometTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/LibraTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MS2ExportTest.java -text
+ms2/test/src/org/labkey/test/tests/ms2/MS2ExtensionsTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MS2GZTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MS2Test.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MascotTest.java -text
