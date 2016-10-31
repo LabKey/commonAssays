@@ -21,7 +21,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
     protected static final String MS2_FOLDER_NAME = "ms2folder";
     protected static final String SEARCH_STRING = "gi|11";
     protected static final String MS2EXTENSIONS_DATAREGION_NAME = "MS2ExtensionsRunGrid";
-    protected static final String MULTI_PROTEIN_MSG = "Multiple proteins match your search. Please choose the applicable protein(s) below";
+    protected static final String MULTI_PROTEIN_MSG = "Multiple proteins match your search. Please choose the applicable proteins below";
     protected static final String NO_PROTEIN_MSG = "No proteins match. Please try another name.";
     protected static Locator compareButton = Locator.XPathLocator.linkWithSpan("Compare Peptides");
     protected static Locator.XPathLocator matchCriteriaComo = Locator.tagWithName("select", "targetProteinMatchCriteria");
@@ -57,7 +57,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         waitForText(MULTI_PROTEIN_MSG);
         int proteinCounts = getElementCount(matchedProteinCheckbox);
         assertTrue("No matched proteins found for \"" + SEARCH_STRING + "\" with match criteria \"Prefix\"", proteinCounts > 1);
-        clickButton("Done");
+        clickButton("Continue");
 
         waitForText("Compare Peptides: Protein gi|11");
         DataRegionTable compDetailTable = new DataRegionTable("query", getDriver());

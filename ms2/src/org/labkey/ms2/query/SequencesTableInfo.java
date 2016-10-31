@@ -238,44 +238,6 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         return result;
     }
 
-    /**
-     * Build up a SQLFragment that filters identifiers based on a set of possible values. Passing in an empty
-     * list will result in no matches
-     */
-    /*package*/ static SQLFragment getIdentifierClause(List<String> params, String columnName, MS2Controller.MatchCriteria matchCriteria)
-    {
-        SQLFragment sqlFragment = new SQLFragment();
-        String separator = "";
-        sqlFragment.append("(");
-        if (params.isEmpty())
-        {
-            sqlFragment.append("1 = 2");
-        }
-        for (String param : params)
-        {
-            sqlFragment.append(separator);
-            sqlFragment.append(columnName);
-            if (MS2Controller.MatchCriteria.EXACT == matchCriteria)
-            {
-                sqlFragment.append(" = ?");
-                sqlFragment.add(param);
-            }
-            else
-            {
-                sqlFragment.append(" LIKE ?");
-                if (MS2Controller.MatchCriteria.SUFFIX == matchCriteria)
-                    sqlFragment.add("%" + param);
-                else if (MS2Controller.MatchCriteria.SUBSTRING == matchCriteria)
-                    sqlFragment.add("%" + param + "%");
-                else
-                    sqlFragment.add(param + "%");
-            }
-            separator = " OR ";
-        }
-        sqlFragment.append(")");
-        return sqlFragment;
-    }
-
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
         List<Container> containers = ContainerManager.getAllChildren(c, u);
@@ -310,25 +272,25 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoSequences(), "s");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "s.BestName", matchCriteria));
+        sql.append(matchCriteria.getIdentifierClause(params, "s.BestName"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations(), "a");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", matchCriteria));
+        sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.lookupstring", matchCriteria));
+        sql.append(matchCriteria.getIdentifierClause(params, "fs.lookupstring"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
         sql.append(" WHERE ");
-        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", matchCriteria));
+        sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
         sql.append("\n");
         sql.append(")");
         addCondition(sql);

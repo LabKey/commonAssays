@@ -81,7 +81,7 @@
         No proteins match. Please try another name. <%
     }
     else { %>
-        Multiple proteins match your search. Please choose the applicable protein(s) below.<br>
+        Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
 <form action="<%=baseUrl%>" method="post" onsubmit="return validate();">
     <div style="margin-top: 10px;"><input type=checkbox name=checkall checked id=checkallproteins style="margin-right: 12px;" onclick="checkAll();">All</div>
@@ -119,7 +119,7 @@
             }
 %>
 <br>
-<%= button("Done").submit(true) %>
+<%= button("Continue").submit(true) %>&nbsp;<%=generateBackButton("Cancel")%>
 </form>
 <%
     }

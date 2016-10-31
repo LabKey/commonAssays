@@ -1514,7 +1514,7 @@ public class MS2Schema extends UserSchema
             baseTable.addCondition(whereSQL, FieldKey.fromParts("RowId"));
         }
 
-        if (form != null && form.getTargetSeqIds() != null && !form.getTargetSeqIds().isEmpty())
+        if (form != null && form.hasTargetSeqIds())
         {
             filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));

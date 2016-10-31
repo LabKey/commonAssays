@@ -1669,6 +1669,7 @@ public class MS2Controller extends SpringActionController
 
         private List<Protein> _proteins;
 
+        @Nullable
         public List<Protein> lookupProteins()
         {
             if (_proteins == null && _targetSeqIds != null)
@@ -1682,6 +1683,7 @@ public class MS2Controller extends SpringActionController
             return _proteins;
         }
 
+        @Nullable
         public List<Integer> getTargetSeqIds()
         {
             return _targetSeqIds;
@@ -1695,14 +1697,7 @@ public class MS2Controller extends SpringActionController
 
         public String getTargetSeqIdsStr()
         {
-            String sep = "";
-            StringBuilder builder = new StringBuilder();
-            for (Integer id : _targetSeqIds)
-            {
-                builder.append(sep).append(id.toString());
-                sep = ",";
-            }
-            return builder.toString();
+            return StringUtils.join(_targetSeqIds, ", ");
         }
 
 
@@ -1847,25 +1842,15 @@ public class MS2Controller extends SpringActionController
                 title.append("Protein ");
                 title.append(getTargetProtein());
 
-                boolean exactMatch = true;
+                List<String> bestNames = new ArrayList<>();
                 for (Protein lookup : lookupProteins())
                 {
                     // Show both what the user searched for, and what they resolved it to
                     if (!lookup.getBestName().equals(getTargetProtein()))
-                    {
-                        if (exactMatch)
-                        {
-                            title.append(" (");
-                            exactMatch = false;
-                        }
-
-                        title.append(lookup.getBestName());
-                        title.append(",  ");
-                    }
-
+                        bestNames.add(lookup.getBestName());
                 }
-                if (!exactMatch)
-                    title.append(")");
+                if (!bestNames.isEmpty())
+                    title.append(" (").append(StringUtils.join(bestNames, ", ")).append(")");
                 title.append(",  ");
             }
              if (isPeptideProphetFilter() && getPeptideProphetProbability() != null)
@@ -1924,15 +1909,14 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                String separator = "";
-                for (Integer id : _targetSeqIds)
-                {
-                    sql.append(separator);
-                    separator = ", ";
-                    sql.append(id);
-                }
+                sql.append(StringUtils.join(_targetSeqIds, ", "));
             }
             sql.append(")");
+        }
+
+        public boolean hasTargetSeqIds()
+        {
+            return _targetSeqIds != null && !_targetSeqIds.isEmpty();
         }
     }
 
@@ -4651,7 +4635,7 @@ public class MS2Controller extends SpringActionController
             // if we have target proteins, then use the seqId with the run list for the export
             int seqIdCount = form.getTargetSeqIds() == null ? 0 : form.getTargetSeqIds().size();
             SeqRunIdPair[] idPairs = new SeqRunIdPair[runs.size() * seqIdCount];
-            if (form.getTargetSeqIds() != null && !form.getTargetSeqIds().isEmpty())
+            if (form.hasTargetSeqIds())
             {
                 targetProteinClause = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
                 int index = 0;
@@ -6681,7 +6665,43 @@ public class MS2Controller extends SpringActionController
 
     public enum MatchCriteria
     {
-        EXACT("Exact"), PREFIX("Prefix"), SUFFIX("Suffix"), SUBSTRING("Substring");
+        EXACT("Exact")
+                {
+                    @Override
+                    public void appendMatchClause(SQLFragment sqlFragment, String param)
+                    {
+                        sqlFragment.append(" = ?");
+                        sqlFragment.add(param);
+                    }
+                },
+        PREFIX("Prefix")
+                {
+                    @Override
+                    public void appendMatchClause(SQLFragment sqlFragment, String param)
+                    {
+                        sqlFragment.append(" LIKE ?");
+                        sqlFragment.add(param + "%");
+                    }
+                },
+        SUFFIX("Suffix")
+                {
+                    @Override
+                    public void appendMatchClause(SQLFragment sqlFragment, String param)
+                    {
+                        sqlFragment.append(" LIKE ?");
+                        sqlFragment.add("%" + param);
+                    }
+                },
+        SUBSTRING("Substring")
+                {
+                    @Override
+                    public void appendMatchClause(SQLFragment sqlFragment, String param)
+                    {
+                        sqlFragment.append(" LIKE ?");
+                        sqlFragment.add("%" + param + "%");
+                    }
+                };
+
 
         private String label;
 
@@ -6715,6 +6735,34 @@ public class MS2Controller extends SpringActionController
             if (label == null)
                 return null;
             return _criteriaMap.get(label);
+        }
+
+        public void appendMatchClause(SQLFragment sqlFragment, String param)
+        {
+        }
+
+        /**
+         * Build up a SQLFragment that filters identifiers based on a set of possible values. Passing in an empty
+         * list will result in no matches
+         */
+        public SQLFragment getIdentifierClause(List<String> params, String columnName)
+        {
+            SQLFragment sqlFragment = new SQLFragment();
+            String separator = "";
+            sqlFragment.append("(");
+            if (params.isEmpty())
+            {
+                sqlFragment.append("1 = 2");
+            }
+            for (String param : params)
+            {
+                sqlFragment.append(separator);
+                sqlFragment.append(columnName);
+                appendMatchClause(sqlFragment, param);
+                separator = " OR ";
+            }
+            sqlFragment.append(")");
+            return sqlFragment;
         }
     }
 
