@@ -28,6 +28,7 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -52,6 +53,7 @@ import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -648,5 +650,10 @@ public class LuminexManager
         return (String) o.getProperty(excelRunDomain.getPropertyByName("Filename"));
     }
 
-
+    public String getFileNameKey(ExpProtocol protocol, File dataFile) throws ExperimentException
+    {
+        LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
+        Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain(protocol);
+        return parser.getExcelRunProps(dataFile).get(excelRunDomain.getPropertyByName("Filename"));
+    }
 }

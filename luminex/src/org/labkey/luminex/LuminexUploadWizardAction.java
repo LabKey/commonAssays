@@ -482,11 +482,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             form.setExclusionCount(exclusionCount);
 
             //Get Filename from the Run filename property
-            Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain( form.getProtocol());
             LuminexExcelParser parser = form.getParser();
             Set<String> fileNames = new HashSet<>();
             for (File file : form.getUploadedData().values())
-                fileNames.add(parser.getExcelRunProps(file).get(excelRunDomain.getPropertyByName("Filename")));
+                fileNames.add(LuminexManager.get().getFileNameKey(form.getProtocol(), file));
 
             //Get well types from the run files
             Set<String> wellTypes = new HashSet<>();
