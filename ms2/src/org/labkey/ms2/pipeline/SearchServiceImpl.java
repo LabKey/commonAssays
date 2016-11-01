@@ -90,7 +90,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             throw new NotFoundException("No pipeline root configured for " + getContainer().getPath());
         }
-        return MS2PipelineManager.getSequenceDatabaseRoot(pipeRoot.getContainer());
+        return MS2PipelineManager.getSequenceDatabaseRoot(pipeRoot.getContainer(), true);
     }
 
     public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String path, String[] fileNames)
