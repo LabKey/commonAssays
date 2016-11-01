@@ -6680,7 +6680,7 @@ public class MS2Controller extends SpringActionController
                     public void appendMatchClause(SQLFragment sqlFragment, String param)
                     {
                         sqlFragment.append(" LIKE ?");
-                        sqlFragment.add(param + "%");
+                        sqlFragment.add(ProteinManager.getSqlDialect().encodeLikeOpSearchString(param) + "%");
                     }
                 },
         SUFFIX("Suffix")
@@ -6689,7 +6689,7 @@ public class MS2Controller extends SpringActionController
                     public void appendMatchClause(SQLFragment sqlFragment, String param)
                     {
                         sqlFragment.append(" LIKE ?");
-                        sqlFragment.add("%" + param);
+                        sqlFragment.add("%" + ProteinManager.getSqlDialect().encodeLikeOpSearchString(param));
                     }
                 },
         SUBSTRING("Substring")
@@ -6698,7 +6698,7 @@ public class MS2Controller extends SpringActionController
                     public void appendMatchClause(SQLFragment sqlFragment, String param)
                     {
                         sqlFragment.append(" LIKE ?");
-                        sqlFragment.add("%" + param + "%");
+                        sqlFragment.add("%" + ProteinManager.getSqlDialect().encodeLikeOpSearchString(param) + "%");
                     }
                 };
 
