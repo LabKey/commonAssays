@@ -326,7 +326,7 @@ public class PipelineController extends SpringActionController
             if (_root == null || !_root.isValid())
                 throw new NotFoundException();
 
-            _dirSeqRoot = MS2PipelineManager.getSequenceDatabaseRoot(_root.getContainer());
+            _dirSeqRoot = MS2PipelineManager.getSequenceDatabaseRoot(_root.getContainer(), false);
 
             if (form.getPath() == null)
             {
@@ -673,7 +673,7 @@ public class PipelineController extends SpringActionController
             ConfigureSequenceDB page = (ConfigureSequenceDB) FormPage.get(
                     PipelineController.class, form, "ConfigureSequenceDB.jsp");
 
-            File fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer());
+            File fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer(), false);
             if (fileRoot == null)
                 page.setLocalPathRoot("");
             else

@@ -1427,7 +1427,7 @@ public class MS2Schema extends UserSchema
         }
         else
         {
-            // in all oather cases do the usual thing of linking to the MS2 show run page
+            // in all other cases do the usual thing of linking to the MS2 show run page
             linkUrlOnRunColuumn = MS2Controller.getShowRunURL(getUser(), getContainer());
         }
         colDim.setUrl(linkUrlOnRunColuumn.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);

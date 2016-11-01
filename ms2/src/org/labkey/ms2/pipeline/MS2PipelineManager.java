@@ -165,9 +165,9 @@ public class MS2PipelineManager
     }
 
 
-    public static File getSequenceDatabaseRoot(Container container)
+    public static File getSequenceDatabaseRoot(Container container, boolean includeParentContainers)
     {
-        PipeRoot dbRoot = PipelineService.get().getPipelineRootSetting(container, SEQUENCE_DB_ROOT_TYPE);
+        PipeRoot dbRoot = includeParentContainers ? PipelineService.get().findPipelineRoot(container, SEQUENCE_DB_ROOT_TYPE) : PipelineService.get().getPipelineRootSetting(container, SEQUENCE_DB_ROOT_TYPE);
         if (dbRoot == null)
         {
             // return default root

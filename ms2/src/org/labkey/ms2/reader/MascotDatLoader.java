@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.SpectrumException;
@@ -788,7 +787,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     public File getDatabaseFile(Container container, String dbName, String fastaFileName) throws FileNotFoundException
     {
         // Try looking for the "DB" value under the FASTA root
-        File dbRoot = MS2PipelineManager.getSequenceDatabaseRoot(container);
+        File dbRoot = MS2PipelineManager.getSequenceDatabaseRoot(container, true);
         if (dbName != null)
         {
             // Mascot FASTA files may have been downloaded from the server into a ./mascot/X subdirectory, so seek it out
