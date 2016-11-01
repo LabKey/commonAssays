@@ -91,13 +91,13 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         if (ics == null)
             return new SQLFragment("NULL");
 
-        String junctionTable = _schema.getBackgroundJunctionTableName(_schema.getContainer());
+        SQLFragment junctionTable = _schema.getBackgroundJunctionFromSql("J", _schema.getContainer());
         if (null == junctionTable)
             return new SQLFragment("NULL");
 
         SQLFragment ret = new SQLFragment(
                 "(SELECT AVG(flow.Statistic.Value)\n" +
-                        "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg\n" +
+                        "FROM flow.Statistic INNER JOIN ").append(junctionTable).append(" ON flow.Statistic.ObjectId = J.bg\n" +
                         "WHERE J.fg = ").append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS).getSQL()).append(" AND flow.Statistic.StatisticId = " + attrId + ")");
 
         //SQLFragment ret = new SQLFragment("(SELECT AVG(flow.Statistic.Value)\n");

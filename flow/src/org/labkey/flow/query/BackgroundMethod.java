@@ -52,12 +52,12 @@ public class BackgroundMethod extends AbstractTableMethodInfo
         if (ics == null)
             return new SQLFragment("NULL");
 
-        String junctionTable = _schema.getBackgroundJunctionTableName(_schema.getContainer());
+        SQLFragment junctionTable = _schema.getBackgroundJunctionFromSql("J",_schema.getContainer());
         if (junctionTable == null)
             return new SQLFragment("NULL");
         
         SQLFragment ret = new SQLFragment("(SELECT AVG(flow.Statistic.Value) ");
-        ret.append("FROM flow.Statistic INNER JOIN ").append(junctionTable).append(" J ON flow.Statistic.ObjectId = J.bg ");
+        ret.append("FROM flow.Statistic INNER JOIN ").append(junctionTable).append(" ON flow.Statistic.ObjectId = J.bg ");
         ret.append("INNER JOIN flow.StatisticAttr ON flow.statistic.statisticid = flow.StatisticAttr.id AND flow.StatisticAttr.name = ");
         ret.append(arguments[0]);
         ret.append("\nWHERE J.fg = " + tableAlias + ".Background");

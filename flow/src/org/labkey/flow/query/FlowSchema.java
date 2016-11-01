@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -65,6 +66,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
@@ -96,12 +98,13 @@ import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -110,6 +113,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
 
 public class FlowSchema extends UserSchema
@@ -940,7 +944,6 @@ public class FlowSchema extends UserSchema
         {
             assert _container != null;
             assert _container.getId().equals(getContainer().getId());
-            String name = getFastFlowObjectTableName(_container, _type.getObjectType().getTypeId());
 
             SQLFragment where = new SQLFragment();
             SQLFragment filter = _filter.getSQLFragment(getSqlDialect());
@@ -976,7 +979,7 @@ public class FlowSchema extends UserSchema
             SQLFragment sqlFlowData;
             sqlFlowData = new SQLFragment("\n-- <" + this.getClass().getSimpleName() + " name='" + _type.getName() + "'>\n");
             sqlFlowData.append("SELECT * FROM ");
-            sqlFlowData.append(name);
+            sqlFlowData.append(getFastFlowObjectFromSql("_", _container, _type.getObjectType().getTypeId()));
             sqlFlowData.append(where);
             sqlFlowData.append("\n-- </" + this.getClass().getSimpleName() + ">\n");
             return sqlFlowData;
@@ -1848,54 +1851,51 @@ public class FlowSchema extends UserSchema
      * need better notification of changes per container
      */
 
-    private Map<String, TempTableToken> instanceCache = new HashMap<>();
-    private static final Cache<String, TempTableToken> staticCache = CacheManager.getSharedCache();
+//    private static final Map<String, MaterializedQueryHelper> fastflowCache = new LinkedHashMap<String, MaterializedQueryHelper>(100,0.6F,true)
+//    {
+//        @Override
+//        protected boolean removeEldestEntry(Map.Entry<String, MaterializedQueryHelper> eldest)
+//        {
+//            return eldest.getValue().lastUsed + CacheManager.MINUTE < HeartBeat.currentTimeMillis();
+//        }
+//    };
+    private static final StringKeyCache<MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(CacheManager.UNLIMITED,CacheManager.HOUR, "fast flow objects");
+
+    private static final ContainerManager.ContainerListener containerListener = new ContainerManager.ContainerListener()
+    {
+        @Override
+        public void containerDeleted(Container c, User user)
+        {
+            fastflowCache.removeUsingPrefix(c.getId() + "/");
+        }
+
+        @Override public void containerCreated(Container c, User user) { }
+        @Override public void containerMoved(Container c, Container oldParent, User user) { }
+        @NotNull @Override public Collection<String> canMove(Container c, Container newParent, User user) { return null; }
+        @Override public void propertyChange(PropertyChangeEvent evt) { }
+    };
 
     // Returns fully qualified "schema.table" name
-    String getFastFlowObjectTableName(Container c, int typeid)
+    SQLFragment getFastFlowObjectFromSql(String tableAlias, Container c, int typeid)
     {
-        boolean tx = FlowManager.get().getSchema().getScope().isTransactionActive();
-        HttpServletRequest r = HttpView.currentRequest();
-        String tkey = "" + FlowManager.get().flowObjectModificationCount.get();
-        String attr = FlowSchema.class.getName() + "." + typeid + "." + tkey + ".flow.object$" + c.getId();
+        String attr = c.getId() + "/flow.object/" + typeid;
+        MaterializedQueryHelper helper = fastflowCache.get(attr);
+        if (null == helper)
+        {
+            helper = createFastFlowObjectHelper(c, typeid);
+            fastflowCache.put(attr, helper);
+        }
 
-        TempTableToken tok = instanceCache.get(attr);
-        if (tok != null)
-            return tok.name;
-        tok = r == null ? null : (TempTableToken)r.getAttribute(attr);
-        if (tok != null)
-        {
-            instanceCache.put(attr, tok);
-            return tok.name;
-        }
-        if (!tx)
-            tok = staticCache.get(attr);
-        if (tok == null)
-        {
-            Pair<String, String> pair = createFastFlowObjectTableName(c, typeid);
-            String fullName = pair.first;
-            String tableName = pair.second;
-            tok = new TempTableToken(fullName);
-            TempTableTracker.track(tableName, tok);
-            if (!tx)
-                staticCache.put(attr, tok, 30 * CacheManager.MINUTE);
-        }
-        instanceCache.put(attr, tok);
-        if (null != r)
-            r.setAttribute(attr, tok);
-        return tok.name;
+        return helper.getFromSql(tableAlias, null);
     }
 
 
     /** CONSIDER JOIN ObjectId from exp.Objects */
-    Pair<String, String> createFastFlowObjectTableName(Container c, int typeid)
+    MaterializedQueryHelper createFastFlowObjectHelper(Container c, int typeid)
     {
         DbSchema flow = FlowManager.get().getSchema();
-        SqlExecutor executor = new SqlExecutor(flow);
-        String shortName = "flowObject$" + GUID.makeHash();
-        String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
 
-        executor.execute(
+        SQLFragment select = new SQLFragment(
                 "SELECT \n" +
                 "    exp.data.RowId,\n" +
                 "    exp.data.LSID,\n" +
@@ -1914,68 +1914,42 @@ public class FlowSchema extends UserSchema
                 "    flow.object.scriptid,\n" +
                 "    flow.object.uri,\n" +
                 "    exp.RunList.ExperimentId\n" +
-                        "INTO " + name + "\n" +
                 "FROM exp.data\n" +
                 "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
-                "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
-                "WHERE flow.Object.container = ? and TypeId = ?",
-                c.getId(), typeid);
+                "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n");
+        select.append(" WHERE flow.Object.container = ").append(c).append(" AND TypeId = ").append(String.valueOf(typeid));
+        List<String> indexes = Arrays.asList(
+                "CREATE INDEX ix_rowid_${NAME} ON temp.${NAME} (RowId);\n",
+                "CREATE INDEX ix_objid_${NAME} ON temp.${NAME} (ObjectId);"
+        );
 
-        String create =
-//                    "CREATE INDEX ix_" + shortName + " ON " + name + " (TypeId,ExperimentId);\n" +
-                "CREATE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
-                "CREATE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
-        executor.execute(create);
-
-        return Pair.of(name, shortName);
+        Supplier<String> uptodate = () -> String.valueOf(FlowManager.get().flowObjectModificationCount.get());
+        return MaterializedQueryHelper.create("ffo",flow.getScope(),
+                select,
+                uptodate,
+                indexes,
+                30 * CacheManager.MINUTE);
     }
 
 
-    // Returns fully qualified "schema.table" name
-    String getBackgroundJunctionTableName(Container c)
+    SQLFragment getBackgroundJunctionFromSql(String tableAlias, Container c)
     {
-        TempTableToken tok = null;
-        boolean tx = FlowManager.get().getSchema().getScope().isTransactionActive();
-        HttpServletRequest r = HttpView.currentRequest();
-        String tkey = "" + FlowManager.get().flowObjectModificationCount.get();
-        String attr = FlowSchema.class.getName() + "." + tkey + ".flow.bgjunction$" + c.getId();
+        String attr =  c.getId() + "/bgjunction";
+        MaterializedQueryHelper helper = fastflowCache.get(attr);
+        if (null == helper)
+        {
+            helper = createBackgroundJunctionHelper(c);
+            fastflowCache.put(attr, helper);
+        }
 
-        tok = instanceCache.get(attr);
-        if (tok != null)
-            return tok.name;
-        tok = r == null ? null : (TempTableToken)r.getAttribute(attr);
-        if (tok != null)
-        {
-            instanceCache.put(attr, tok);
-            return tok.name;
-        }
-        if (!tx)
-            tok = staticCache.get(attr);
-        if (tok == null)
-        {
-            Pair<String, String> pair = createBackgroundJunctionTableName(c);
-            if (null == pair)
-                return null;
-            String fullName = pair.first;
-            String tableName = pair.second;
-            tok = new TempTableToken(fullName);
-            TempTableTracker.track(tableName, tok);
-            if (!tx)
-                staticCache.put(attr, tok, 10 * CacheManager.MINUTE);
-        }
-        instanceCache.put(attr, tok);
-        if (null != r)
-            r.setAttribute(attr, tok);
-        return tok.name;
+        if (null == helper)
+            return null;
+        return helper.getFromSql(tableAlias, null);
     }
 
-
-    Pair<String, String> createBackgroundJunctionTableName(Container c)
+    MaterializedQueryHelper createBackgroundJunctionHelper(Container c)
     {
-        long begin = System.currentTimeMillis();
         DbSchema flow = FlowManager.get().getSchema();
-        String shortName = "flowJunction$" + GUID.makeHash();
-        String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
 
         ICSMetadata ics = _protocol.getICSMetadata();
         if (!ics.hasCompleteBackground())
@@ -2026,7 +2000,7 @@ public class FlowSchema extends UserSchema
         SQLFragment fgSQL = Table.getSelectSQL(fg, fgFields, null, null);
 
         SQLFragment selectInto = new SQLFragment();
-        selectInto.append("SELECT F.objectid as fg, B.objectid as bg INTO " + name + "\n");
+        selectInto.append("SELECT F.objectid as fg, B.objectid as bg ");
         selectInto.append("FROM (").append(fgSQL).append(") AS F INNER JOIN (").append(bgSQL).append(") AS B");
         selectInto.append(" ON " );
         String and = "";
@@ -2038,13 +2012,18 @@ public class FlowSchema extends UserSchema
             selectInto.append("F.").append(fgMap.get(m).getAlias()).append("=B.").append(bgMap.get(m).getAlias());
             and = " AND ";
         }
-        new SqlExecutor(flow).execute(selectInto);
-        String create =
-                "CREATE INDEX ix_" + shortName + "_fg ON " + name + " (fg);\n" +
-                "CREATE INDEX ix_" + shortName + "_bg ON " + name + " (bg);\n";
-        new SqlExecutor(flow).execute(create);
 
-        long end = System.currentTimeMillis();
-        return Pair.of(name, shortName);
+        SQLFragment select = new SQLFragment(selectInto);
+        List<String> indexes = Arrays.asList(
+                "CREATE INDEX ix_fg_${NAME} ON temp.${NAME} (fg);\n",
+                "CREATE INDEX ix_bg_${NAME} ON temp.${NAME} (bg);\n"
+        );
+
+        Supplier<String> uptodate = () -> String.valueOf(FlowManager.get().flowObjectModificationCount.get());
+        return MaterializedQueryHelper.create("fbg",flow.getScope(),
+                select,
+                uptodate,
+                indexes,
+                30 * CacheManager.MINUTE);
     }
 }
