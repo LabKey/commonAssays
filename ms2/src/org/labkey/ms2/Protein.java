@@ -699,14 +699,14 @@ public class Protein
                     if (_sequence.startsWith(peptide.substring(1)))
                         ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(peptide)));
                     else
-                        _log.error("Can't find " + peptide + " at start of sequence");
+                        _log.debug("Can't find " + peptide + " at start of sequence");
                 }
                 else if (peptide.charAt(peptide.length() - 1) == '-')
                 {
                     if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
                         ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2, uniqueMap.get(peptide)));
                     else
-                        _log.error("Can't find " + peptide + " at end of sequence");
+                        _log.debug("Can't find " + peptide + " at end of sequence");
                 }
                 else
                 {
@@ -714,7 +714,7 @@ public class Protein
 
                     if (start <= -1)
                     {
-                        _log.error("Can't find " + peptide + " in middle of sequence");
+                        _log.debug("Can't find " + peptide + " in middle of sequence");
                         continue;
                     }
 

@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 
 import java.sql.ResultSet;
@@ -33,6 +34,9 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
 {
     private ColumnInfo _groupingColumn;
     private ColumnInfo _peptideColumn;
+
+    private static final Logger LOG = Logger.getLogger(PeptideAggregrationDisplayColumn.class);
+    private boolean _loggedError = false;
 
     public PeptideAggregrationDisplayColumn(ColumnInfo groupingColumn, ColumnInfo peptideColumn, String caption)
     {
@@ -59,6 +63,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
             {
                 sb.append("Could not resolve 'SeqId' column, please be sure it is part of any custom queries. ");
             }
+            logError(sb.toString());
             return sb.toString();
         }
 
@@ -68,6 +73,12 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         boolean closeRS = false;
         try
         {
+            if (originalRS.getType() != ResultSet.TYPE_SCROLL_INSENSITIVE)
+            {
+                logError("Cannot determine value in this usage context - ResultSet cannot be scrolled backward");
+                return -1;
+            }
+
             // Unwrap ResultSet as needed - issue 25207
             if (originalRS instanceof ResultsImpl)
             {
@@ -123,6 +134,15 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
                 {
                 }
             }
+        }
+    }
+
+    private void logError(String message)
+    {
+        if (!_loggedError)
+        {
+            _loggedError = true;
+            LOG.warn("For column '" + getName() + "', " + message);
         }
     }
 
