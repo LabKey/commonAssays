@@ -59,4 +59,14 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
     {
         _groupedRS = groupedRS;
     }
+
+    @Override
+    public void close()
+    {
+        super.close();
+        if (_groupedRS != null)
+        {
+            try { _groupedRS.close(); } catch (SQLException ignored) {}
+        }
+    }
 }

@@ -46,32 +46,37 @@ public class StandardProteinExcelWriter extends AbstractProteinExcelWriter
         protein.setSequence((String) ctx.get("Sequence"));
 
         List<String> peptides = new ArrayList<>();
-        ResultSet nestedRS = _groupedRS.getNextResultSet();
-
-        while (nestedRS.next())
-            peptides.add(nestedRS.getString(getPeptideIndex()));
-
-        // If expanded view, back up to the first peptide in this group
-        if (_expanded)
-            nestedRS.beforeFirst();
-
-        String[] peptideArray = new String[peptides.size()];
-        protein.setPeptides(peptides.toArray(peptideArray));
-
-        // Calculate amino acid coverage and add to the rowMap for AACoverageColumn to see
-        ctx.put("AACoverage", protein.getAAPercent());
-
-        super.renderGridRow(sheet, ctx, columns);
-
-        // If expanded, output the peptides
-        if (_expanded)
+        try (ResultSet nestedRS =  _groupedRS.getNextResultSet())
         {
-            _nestedExcelWriter.setCurrentRow(getCurrentRow());
-            _nestedExcelWriter.renderGrid(sheet, nestedRS);
-            setCurrentRow(_nestedExcelWriter.getCurrentRow());
+            while (nestedRS.next())
+                peptides.add(nestedRS.getString(getPeptideIndex()));
+
+            // If expanded view, back up to the first peptide in this group
+            if (_expanded)
+                nestedRS.beforeFirst();
+
+            String[] peptideArray = new String[peptides.size()];
+            protein.setPeptides(peptides.toArray(peptideArray));
+
+            // Calculate amino acid coverage and add to the rowMap for AACoverageColumn to see
+            ctx.put("AACoverage", protein.getAAPercent());
+
+            super.renderGridRow(sheet, ctx, columns);
+
+            // If expanded, output the peptides
+            if (_expanded)
+            {
+                _nestedExcelWriter.setCurrentRow(getCurrentRow());
+                _nestedExcelWriter.renderGrid(sheet, nestedRS);
+                setCurrentRow(_nestedExcelWriter.getCurrentRow());
+            }
+            else
+            {
+                // Burn the rest of the rows
+                //noinspection StatementWithEmptyBody
+                while (nestedRS.next());
+            }
         }
-        else
-            nestedRS.close();
     }
 
     private int getPeptideIndex() throws SQLException

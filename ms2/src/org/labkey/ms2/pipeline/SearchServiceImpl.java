@@ -294,7 +294,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             try
             {
                 File dirSequenceRoot = getSequenceRoot();
-                sequenceDbPaths =  provider.getSequenceDbPaths(dirSequenceRoot);
+                sequenceDbPaths = provider.getSequenceDbPaths(dirSequenceRoot);
                 if(sequenceDbPaths == null) throw new IOException("Fasta directory not found.");
                 if(provider.remembersDirectories())
                 {

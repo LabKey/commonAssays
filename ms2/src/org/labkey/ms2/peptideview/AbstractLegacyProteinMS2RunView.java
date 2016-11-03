@@ -150,19 +150,26 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
         for (int i = 0; i < runs.size(); i++)
         {
-            if (includeHeaders && runs.size() > 1)
+            try
             {
-                headers = new ArrayList<>();
+                if (includeHeaders && runs.size() > 1)
+                {
+                    headers = new ArrayList<>();
 
-                if (i > 0)
-                    headers.add("");
+                    if (i > 0)
+                        headers.add("");
 
-                headers.add(runs.get(i).getDescription());
-                ew.setHeaders(headers);
+                    headers.add(runs.get(i).getDescription());
+                    ew.setHeaders(headers);
+                }
+
+                setUpExcelProteinGrid(ew, form.getExpanded(), form.getColumns(), runs.get(i), where);
+                ew.renderCurrentSheet();
             }
-
-            setUpExcelProteinGrid(ew, form.getExpanded(), form.getColumns(), runs.get(i), where);
-            ew.renderCurrentSheet();
+            finally
+            {
+                ew.close();
+            }
         }
 
         OutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs", ew.getDocumentType());

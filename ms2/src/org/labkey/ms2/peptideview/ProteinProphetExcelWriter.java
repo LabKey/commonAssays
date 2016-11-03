@@ -38,8 +38,8 @@ public class ProteinProphetExcelWriter extends AbstractProteinExcelWriter
     @Override
     protected void renderGridRow(Sheet sheet, RenderContext ctx, List<ExcelColumn> columns) throws SQLException, MaxRowsExceededException
     {
-        ResultSet nestedRS = _groupedRS.getNextResultSet();
-        try
+
+        try (ResultSet nestedRS = _groupedRS.getNextResultSet())
         {
             int totalFilteredPeptides = 0;
             Set<String> uniqueFilteredPeptides = new HashSet<>();
@@ -65,12 +65,10 @@ public class ProteinProphetExcelWriter extends AbstractProteinExcelWriter
             }
             else
             {
+                // Burn the rest of the rows
+                //noinspection StatementWithEmptyBody
                 while (nestedRS.next());
             }
-        }
-        finally
-        {
-            if (nestedRS != null) { try { nestedRS.close(); } catch (SQLException e) {} }
         }
     }
 }
