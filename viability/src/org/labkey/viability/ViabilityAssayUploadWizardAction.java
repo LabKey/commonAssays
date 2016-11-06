@@ -108,31 +108,31 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             @Override
             protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
             {
-                InsertView view = getResultsView(form, false, errors);
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("\n");
-                sb.append("<script type='text/javascript'>\n");
-                sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
-                sb.append("</script>\n");
-                sb.append("<script type='text/javascript'>\n");
-                String formRef = view.getDataRegion().getJavascriptFormReference();
-                sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
-                sb.append("</script>\n");
-
-                VBox vbox = new VBox();
-                vbox.addView(new HtmlView("<style type='text/css'>input { font-family: monospace; }</style>"));
-                vbox.addView(view);
-                vbox.addView(new HtmlView(sb.toString()));
-                return vbox;
+                return getResultsView(form, false, errors);
             }
         };
     }
 
 
-    protected InsertView getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
+    protected ModelAndView getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
-        return _getResultsView(form, errorReshow, errors);
+        InsertView view = _getResultsView(form, errorReshow, errors);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        sb.append("<script type='text/javascript'>\n");
+        sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
+        sb.append("</script>\n");
+        sb.append("<script type='text/javascript'>\n");
+        String formRef = view.getDataRegion().getJavascriptFormReference();
+        sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
+        sb.append("</script>\n");
+
+        VBox vbox = new VBox();
+        vbox.addView(new HtmlView("<style type='text/css'>input { font-family: monospace; }</style>"));
+        vbox.addView(view);
+        vbox.addView(new HtmlView(sb.toString()));
+        return vbox;
     }
 
     @Override

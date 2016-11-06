@@ -1615,7 +1615,8 @@ public class MS2Controller extends SpringActionController
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             SequencesTableInfo tableInfo = schema.createSequencesTable();
-            tableInfo.addProteinNameFilter(form.getTargetProtein(), MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria()));
+            MatchCriteria matchCriteria = MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria());
+            tableInfo.addProteinNameFilter(form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
 
             ActionURL targetURL = new ActionURL(form.getTargetURL());
             targetURL.addParameters(params);
@@ -6730,6 +6731,7 @@ public class MS2Controller extends SpringActionController
             this.label = label;
         }
 
+        @Nullable
         public static MatchCriteria getMatchCriteria(String label)
         {
             if (label == null)

@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -264,7 +265,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         addCondition(sql);
     }
 
-    public void addProteinNameFilter(String identifier, MS2Controller.MatchCriteria matchCriteria)
+    public void addProteinNameFilter(String identifier, @NotNull MS2Controller.MatchCriteria matchCriteria)
     {
         List<String> params = getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();

@@ -36,6 +36,11 @@
     {
         // TODO: --Ext3-- This should be declared as part of the included views
         dependencies.add("clientapi/ext3");
+        // TODO: ColumnAnalyticsProvider dependencies should be coming from the ChooseRunsView data region
+        dependencies.add("vis/vis");
+        dependencies.add("vis/ColumnVisualizationAnalytics.js");
+        dependencies.add("vis/ColumnVisualizationAnalytics.css");
+        dependencies.add("query/ColumnQueryAnalytics.js");
     }
 
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)

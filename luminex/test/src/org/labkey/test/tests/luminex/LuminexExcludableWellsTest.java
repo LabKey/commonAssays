@@ -238,7 +238,8 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     {
         String exclusionPrefix = "Excluded for analyte: ";
         String comment ="Changed for all analytes";
-        excludeAnalyteForRun(analyte, true, comment, jobCount, MULTIPLE_CURVE_ASSAY_RUN_NAME);
+        excludeAnalyteForRun(analyte, true, comment);
+        verifyExclusionPipelineJobComplete(jobCount, "INSERT analyte exclusion", MULTIPLE_CURVE_ASSAY_RUN_NAME, comment);
 
         DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
         table.setFilter("ExclusionComment", "Equals", exclusionPrefix + comment);

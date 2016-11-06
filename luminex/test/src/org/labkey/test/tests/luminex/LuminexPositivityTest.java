@@ -190,14 +190,19 @@ public final class LuminexPositivityTest extends LuminexTest
 
         // now we exclude the analytes in the remaining run to test that version of the baseline visit query
         waitAndClickAndWait(Locator.linkWithText(runToKeep));
-        excludeAnalyteForRun(_analyteNames.get(0), true, "", 2, runToKeep);
+        excludeAnalyteForRun(_analyteNames.get(0), true, "");
+        verifyExclusionPipelineJobComplete(2, "INSERT analyte exclusion", runToKeep, "");
+
         setPositivityThresholdParams(100, 99);
         uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 1", TEST_ASSAY_LUM_FILE12, "1", "3", false, false);
         checkPositivityValues("positive", 0, new String[0]);
         checkPositivityValues("negative", 0, new String[0]);
         clickAndWait(Locator.linkWithText("view runs"));
         waitAndClickAndWait(Locator.linkWithText(runToKeep));
-        excludeAnalyteForRun(_analyteNames.get(0), false, "", 3, runToKeep);
+        excludeAnalyteForRun(_analyteNames.get(0), false, "");
+        _extHelper.waitForExtDialog("Warning");
+        _extHelper.clickExtButton("Warning", "Yes", 0);
+        verifyExclusionPipelineJobComplete(3, "DELETE analyte exclusion", runToKeep, "");
 
         // now we actual test the case of getting baseline visit data from a previously uploaded run
         setPositivityThresholdParams(99, 98);

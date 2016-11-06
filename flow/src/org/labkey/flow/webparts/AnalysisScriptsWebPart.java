@@ -63,6 +63,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         FlowQuerySettings settings = (FlowQuerySettings)getSchema().getSettings(wp, portalCtx);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(false);
+        settings.setSchemaName(FlowSchema.SCHEMANAME);
         settings.setQueryName(FlowTableType.AnalysisScripts.toString());
         setSettings(settings);
         

@@ -29,9 +29,6 @@ import static org.junit.Assert.*;
 @Category({DailyA.class, Assays.class})
 public final class LuminexExcludedTitrationTest extends LuminexTest
 {
-    private static final Locator AVAILABLE_ANALYTES_CHECKBOX = Locator.xpath("//div[@class='x-grid3-hd-inner x-grid3-hd-checker']/div[@class='x-grid3-hd-checker']");
-    private static final Locator COMMENT_LOCATOR = Locator.xpath("//input[@id='comment']") ;
-
     /**
      * test of titration exclusion- the ability to exclude certain titrations and add a comment as to why
      * preconditions: LUMINEX project and assay list exist.  Having the Multiple Curve data will speed up execution
@@ -47,41 +44,16 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addCustomizeViewColumn("ExclusionComment");
         _customizeViewsHelper.applyCustomView();
-        excludeTitration("Sample 1");
-        excludeAnalyteWithinTitration("Sample 2", "ENV6");
-    }
 
-    private void excludeTitration(String titration)
-    {
-        clickButton("Exclude Titration","Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions" );
-        waitForElement(Locator.xpath("//td/div").withText(titration));
-        click(Locator.xpath("//td/div").withText(titration));
-        waitForElement(AVAILABLE_ANALYTES_CHECKBOX);
-        click(AVAILABLE_ANALYTES_CHECKBOX);
+        String titration = "Sample 1";
         String exclusionMessage =  "excluding all analytes for titration " + titration;
-        setFormElement(COMMENT_LOCATOR, exclusionMessage);
-        sleep(1000); // short wait for Save button to enable
-        clickButton("Save", 0);
-        _extHelper.waitForExtDialog("Confirm Exclusions", WAIT_FOR_JAVASCRIPT);
-        clickButtonContainingText("Yes", 0);
-        verifyExclusionPipelineJobComplete(2, "INSERT titration exclusion (" + titration + ")", MULTIPLE_CURVE_ASSAY_RUN_NAME, exclusionMessage);
+        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, 2);
         verifyTitrationExclusion(titration, exclusionMessage);
-    }
 
-    private void excludeAnalyteWithinTitration(String titration, String analyte)
-    {
-        clickButton("Exclude Titration","Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions" );
-        waitForElement(Locator.xpath("//td/div").withText(titration));
-        click(Locator.xpath("//td/div").withText(titration));
-        waitForElement(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
-        click(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
-        String exclusionMessage =  "excluding " + analyte + " analyte for titration " + titration;
-        setFormElement(COMMENT_LOCATOR, exclusionMessage);
-        sleep(1000);
-        clickButton("Save", 0);
-        _extHelper.waitForExtDialog("Confirm Exclusions", WAIT_FOR_JAVASCRIPT);
-        clickButtonContainingText("Yes", 0);
-        verifyExclusionPipelineJobComplete(3, "INSERT titration exclusion (" + titration + ")", MULTIPLE_CURVE_ASSAY_RUN_NAME, exclusionMessage);
+        titration = "Sample 2";
+        String analyte = "ENV6";
+        exclusionMessage =  "excluding " + analyte + " analyte for titration " + titration;
+        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, 3, analyte);
         verifyTitrationAnalyteExclusion(titration, analyte, exclusionMessage);
     }
 

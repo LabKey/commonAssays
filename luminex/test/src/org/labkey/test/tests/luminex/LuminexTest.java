@@ -16,10 +16,10 @@
 
 package org.labkey.test.tests.luminex;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
-import org.labkey.remoteapi.assay.Run;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.Row;
 import org.labkey.remoteapi.query.SelectRowsCommand;
@@ -47,7 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.labkey.test.util.ListHelper.ListColumnType;
 
 public abstract class LuminexTest extends BaseWebDriverTest
@@ -89,6 +90,12 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected static final String EXCLUDE_COMMENT_FIELD = "comment";
     protected static final String MULTIPLE_CURVE_ASSAY_RUN_NAME = "multipleCurvesTestRun";
     protected static final String SAVE_CHANGES_BUTTON = "Save";
+
+    //TODO: move to control
+    protected static final String EXCLUDE_ALL_BUTTON = "excludeall";
+    protected static final String EXCLUDE_SELECTED_BUTTON = "excludeselected";
+    private static final Locator AVAILABLE_ANALYTES_CHECKBOX = Locator.xpath("//div[@class='x-grid3-hd-inner x-grid3-hd-checker']/div[@class='x-grid3-hd-checker']");
+    private static final Locator COMMENT_LOCATOR = Locator.xpath("//input[@id='comment']") ;
 
     public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -261,7 +268,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         }
     }
 
-    public void excludeAnalyteForRun(String analyte, boolean firstExclusion, String comment, int jobCount, String runName)
+    public void excludeAnalyteForRun(String analyte, boolean firstExclusion, String comment)
     {
         clickButtonContainingText("Exclude Analytes", 0);
         _extHelper.waitForExtDialog("Exclude Analytes from Analysis");
@@ -272,18 +279,61 @@ public abstract class LuminexTest extends BaseWebDriverTest
         setFormElement(Locator.id(EXCLUDE_COMMENT_FIELD), comment);
         waitForElement(Locator.xpath("//table[@id='saveBtn' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
 
-        if (!firstExclusion)
+        clickButton(SAVE_CHANGES_BUTTON, 0);
+    }
+
+    /**
+     * From the results table of a run will set a well type/wellRole as excluded
+     */
+    protected void excludeWell(String wellName, String type, String description, String exclusionComment, String... analytes)
+    {
+        DataRegionTable table = new DataRegionTable("Data", this.getWrappedDriver());
+        table.setFilter("Type", "Equals", type);
+        table.setFilter("Description", "Equals", description);
+        clickExclusionMenuIconForWell(wellName);
+        setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), exclusionComment);
+
+        if(analytes == null || analytes.length == 0)
         {
-            clickButton(SAVE_CHANGES_BUTTON, 0);
-            _extHelper.waitForExtDialog("Warning");
-            _extHelper.clickExtButton("Warning", "Yes", 0);
-            verifyExclusionPipelineJobComplete(jobCount, "DELETE analyte exclusion", runName, comment);
+            click(Locator.radioButtonById(EXCLUDE_ALL_BUTTON));
         }
         else
         {
-            clickButton(SAVE_CHANGES_BUTTON, 0);
-            verifyExclusionPipelineJobComplete(jobCount, "INSERT analyte exclusion", runName, comment);
+            click(Locator.radioButtonById(EXCLUDE_SELECTED_BUTTON));
+
+            for (String analyte : analytes)
+            {
+                if (StringUtils.isNotBlank(analyte))
+                    clickExcludeAnalyteCheckBox(analyte);
+            }
         }
+        clickButton(SAVE_CHANGES_BUTTON, 0);
+    }
+
+    protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobId, String...analytes)
+    {
+        clickButton("Exclude Titration","Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions" );
+        waitForElement(Locator.xpath("//td/div").withText(titration));
+        click(Locator.xpath("//td/div").withText(titration));
+        if(analytes == null || analytes.length == 0)
+        {
+            waitForElement(AVAILABLE_ANALYTES_CHECKBOX);
+            click(AVAILABLE_ANALYTES_CHECKBOX);
+        }
+        else
+        {
+            for(String analyte:analytes)
+            {
+                waitForElement(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
+                click(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
+            }
+        }
+        setFormElement(COMMENT_LOCATOR, exclusionMessage);
+        sleep(1000);
+        clickButton("Save", 0);
+        _extHelper.waitForExtDialog("Confirm Exclusions", WAIT_FOR_JAVASCRIPT);
+        clickButtonContainingText("Yes", 0);
+        verifyExclusionPipelineJobComplete(pipelineJobId, "INSERT titration exclusion (" + titration + ")", runName, exclusionMessage);
     }
 
     /**
@@ -443,6 +493,19 @@ public abstract class LuminexTest extends BaseWebDriverTest
             String fieldName = ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD + (index++);
             setFormElement(Locator.name(fieldName), additionalFile);
         }
+    }
+
+    /*Note: Do not use for multiple file replacement*/
+    protected void replaceFileInAssayRun(File original, File newFile)
+    {
+        //Add spot for new file
+        click(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
+        //remove old file
+        click(Locator.xpath("//tr[td/span/text() = '" + original.getName() + "']" +
+                "/td/a[contains(@class, 'labkey-file-remove-icon-enabled')]"));
+
+        String fieldName = ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD;
+        setFormElement(Locator.name(fieldName), newFile);
     }
 
     /**
