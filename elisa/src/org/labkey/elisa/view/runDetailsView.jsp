@@ -85,7 +85,6 @@
 
         items.push(Ext4.create('LABKEY.ext4.GenericChartPanel', {
             height          : 500,
-            border          : true,
             schemaName      : <%=q(form.getSchemaName() != null ? form.getSchemaName() : null) %>,
             queryName       : <%=q(form.getQueryName() != null ? form.getQueryName() : null) %>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
