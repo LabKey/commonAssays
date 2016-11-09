@@ -44,53 +44,60 @@ public class LibraQuantHandler extends PepXmlAnalysisResultHandler
             if (parser.isStartElement() && parser.getLocalName().equals("intensity"))
             {
                 String channel = parser.getAttributeValue(null, "channel");
-                if ("1".equals(channel))
+                switch (channel)
                 {
-                    result.setTargetMass1(getTargetMass(parser));
-                    result.setAbsoluteIntensity1(getAbsoluteMass(parser));
-                    result.setNormalized1(getNormalized(parser));
-                }
-                if ("2".equals(channel))
-                {
-                    result.setTargetMass2(getTargetMass(parser));
-                    result.setAbsoluteIntensity2(getAbsoluteMass(parser));
-                    result.setNormalized2(getNormalized(parser));
-                }
-                if ("3".equals(channel))
-                {
-                    result.setTargetMass3(getTargetMass(parser));
-                    result.setAbsoluteIntensity3(getAbsoluteMass(parser));
-                    result.setNormalized3(getNormalized(parser));
-                }
-                if ("4".equals(channel))
-                {
-                    result.setTargetMass4(getTargetMass(parser));
-                    result.setAbsoluteIntensity4(getAbsoluteMass(parser));
-                    result.setNormalized4(getNormalized(parser));
-                }
-                if ("5".equals(channel))
-                {
-                    result.setTargetMass5(getTargetMass(parser));
-                    result.setAbsoluteIntensity5(getAbsoluteMass(parser));
-                    result.setNormalized5(getNormalized(parser));
-                }
-                if ("6".equals(channel))
-                {
-                    result.setTargetMass6(getTargetMass(parser));
-                    result.setAbsoluteIntensity6(getAbsoluteMass(parser));
-                    result.setNormalized6(getNormalized(parser));
-                }
-                if ("7".equals(channel))
-                {
-                    result.setTargetMass7(getTargetMass(parser));
-                    result.setAbsoluteIntensity7(getAbsoluteMass(parser));
-                    result.setNormalized7(getNormalized(parser));
-                }
-                if ("8".equals(channel))
-                {
-                    result.setTargetMass8(getTargetMass(parser));
-                    result.setAbsoluteIntensity8(getAbsoluteMass(parser));
-                    result.setNormalized8(getNormalized(parser));
+                    case "1":
+                        result.setTargetMass1(getTargetMass(parser));
+                        result.setAbsoluteIntensity1(getAbsoluteMass(parser));
+                        result.setNormalized1(getNormalized(parser));
+                        break;
+                    case "2":
+                        result.setTargetMass2(getTargetMass(parser));
+                        result.setAbsoluteIntensity2(getAbsoluteMass(parser));
+                        result.setNormalized2(getNormalized(parser));
+                        break;
+                    case "3":
+                        result.setTargetMass3(getTargetMass(parser));
+                        result.setAbsoluteIntensity3(getAbsoluteMass(parser));
+                        result.setNormalized3(getNormalized(parser));
+                        break;
+                    case "4":
+                        result.setTargetMass4(getTargetMass(parser));
+                        result.setAbsoluteIntensity4(getAbsoluteMass(parser));
+                        result.setNormalized4(getNormalized(parser));
+                        break;
+                    case "5":
+                        result.setTargetMass5(getTargetMass(parser));
+                        result.setAbsoluteIntensity5(getAbsoluteMass(parser));
+                        result.setNormalized5(getNormalized(parser));
+                        break;
+                    case "6":
+                        result.setTargetMass6(getTargetMass(parser));
+                        result.setAbsoluteIntensity6(getAbsoluteMass(parser));
+                        result.setNormalized6(getNormalized(parser));
+                        break;
+                    case "7":
+                        result.setTargetMass7(getTargetMass(parser));
+                        result.setAbsoluteIntensity7(getAbsoluteMass(parser));
+                        result.setNormalized7(getNormalized(parser));
+                        break;
+                    case "8":
+                        result.setTargetMass8(getTargetMass(parser));
+                        result.setAbsoluteIntensity8(getAbsoluteMass(parser));
+                        result.setNormalized8(getNormalized(parser));
+                        break;
+                    case "9":
+                        result.setTargetMass9(getTargetMass(parser));
+                        result.setAbsoluteIntensity9(getAbsoluteMass(parser));
+                        result.setNormalized9(getNormalized(parser));
+                        break;
+                    case "10":
+                        result.setTargetMass10(getTargetMass(parser));
+                        result.setAbsoluteIntensity10(getAbsoluteMass(parser));
+                        result.setNormalized10(getNormalized(parser));
+                        break;
+                    default:
+                        throw new IllegalStateException("Invalid iTRAQ index: " + channel + ". Supported values are 1-10.");
                 }
             }
         }

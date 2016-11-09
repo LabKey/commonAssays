@@ -93,63 +93,88 @@
             <a href="#Peptides">Peptides</a>
         </td>
     </tr>
-
+</table>
 <%
 // display the Libra quantitation ratio values, if applicable
 if (libra != null)
 {
 %>
-    <tr><td colspan="8">&nbsp;</td></tr>
-    <tr><td colspan="8" style="font-size:110%;font-weight:bold;">iTRAQ Quantitation</td></tr>
+<br/>
+<table>
+    <tr>
+        <td class="labkey-form-label">iTRAQ/TMT Channel</td>
+        <td class="labkey-form-label">Ratio</td>
+        <td class="labkey-form-label">Error</td>
+    </tr>
     <% if (libra.getRatio1() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 1</td><td><%= h(floatFormat.format(libra.getRatio1())) %></td><td />
-        <td class="labkey-form-label">Error 1</td><td><%= h(floatFormat.format(libra.getError1())) %></td>
+            <td align="right">1</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio1())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError1())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio2() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 2</td><td><%= h(floatFormat.format(libra.getRatio2())) %></td><td />
-        <td class="labkey-form-label">Error 2</td><td><%= h(floatFormat.format(libra.getError2())) %></td>
+            <td align="right">2</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio2())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError2())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio3() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 3</td><td><%= h(floatFormat.format(libra.getRatio3())) %></td><td />
-        <td class="labkey-form-label">Error 3</td><td><%= h(floatFormat.format(libra.getError3())) %></td>
+            <td align="right">3</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio3())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError3())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio4() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 4</td><td><%= h(floatFormat.format(libra.getRatio4())) %></td><td />
-        <td class="labkey-form-label">Error 4</td><td><%= h(floatFormat.format(libra.getError4())) %></td>
+            <td align="right">4</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio4())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError4())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio5() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 5</td><td><%= h(floatFormat.format(libra.getRatio5())) %></td><td />
-        <td class="labkey-form-label">Error 5</td><td><%= h(floatFormat.format(libra.getError5())) %></td>
+            <td align="right">5</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio5())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError5())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio6() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 6</td><td><%= h(floatFormat.format(libra.getRatio6())) %></td><td />
-        <td class="labkey-form-label">Error 6</td><td><%= h(floatFormat.format(libra.getError6())) %></td>
+            <td align="right">6</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio6())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError6())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio7() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 7</td><td><%= h(floatFormat.format(libra.getRatio7())) %></td><td />
-        <td class="labkey-form-label">Error 7</td><td><%= h(floatFormat.format(libra.getError7())) %></td>
+            <td align="right">7</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio7())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError7())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio8() != null) { %>
         <tr>
-        <td class="labkey-form-label">Ratio 8</td><td><%= h(floatFormat.format(libra.getRatio8())) %></td><td />
-        <td class="labkey-form-label">Error 8</td><td><%= h(floatFormat.format(libra.getError8())) %></td>
+            <td align="right">8</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio8())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError8())) %></td>
         </tr>
     <% } %>
-<%
-}
-%>
+    <% if (libra.getRatio9() != null) { %>
+        <tr>
+            <td align="right">9</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio9())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError9())) %></td>
+        </tr>
+    <% } %>
+    <% if (libra.getRatio10() != null) { %>
+        <tr>
+            <td align="right">10</td>
+            <td align="right"><%= h(floatFormat.format(libra.getRatio10())) %></td>
+            <td align="right"><%= h(floatFormat.format(libra.getError10())) %></td>
+        </tr>
+    <% } %>
 </table>
+<% } %>

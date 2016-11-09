@@ -2064,6 +2064,24 @@
           <ns:columnTitle>Error 8</ns:columnTitle>
           <ns:formatString>0.00</ns:formatString>
       </ns:column>
+
+      <ns:column columnName="Ratio9">
+          <ns:columnTitle>Ratio 9</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error9">
+          <ns:columnTitle>Error 9</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio10">
+          <ns:columnTitle>Ratio 10</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error10">
+          <ns:columnTitle>Error 10</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
     </ns:columns>
     <ns:description>Contains a row for every protein with quantitation data in this folder.</ns:description>
   </ns:table>
@@ -2200,6 +2218,32 @@
       </ns:column>
       <ns:column columnName="Normalized8">
           <ns:columnTitle>Normalized 8</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass9">
+          <ns:columnTitle>Target Mass 9</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteIntensity9">
+          <ns:columnTitle>Absolute Intensity 9</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized9">
+          <ns:columnTitle>Normalized 9</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass10">
+          <ns:columnTitle>Target Mass 10</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteIntensity10">
+          <ns:columnTitle>Absolute Intensity 10</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized10">
+          <ns:columnTitle>Normalized 10</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
     </ns:columns>

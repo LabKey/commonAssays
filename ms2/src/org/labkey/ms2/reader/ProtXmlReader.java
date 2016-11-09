@@ -317,8 +317,16 @@ public class ProtXmlReader
                                         _iTraqQuantRatio.setRatio8(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
                                         _iTraqQuantRatio.setError8(Double.parseDouble(parser.getAttributeValue(null, "error")));
                                         break;
+                                    case 9:
+                                        _iTraqQuantRatio.setRatio9(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError9(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 10:
+                                        _iTraqQuantRatio.setRatio10(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError10(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
                                     default:
-                                        throw new IllegalStateException("Invalid iTRAQ index: " + index + ". Supported values are 1-8.");
+                                        throw new IllegalStateException("Invalid iTRAQ index: " + index + ". Supported values are 1-10.");
                                 }
                                 index++;
                             }

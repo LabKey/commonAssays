@@ -63,7 +63,7 @@
             out.println("    " + textLink("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl));
         }
     }
-    out.print(ctx.modificationHref);
+    out.print(text(ctx.modificationHref));
 %>
 
     </td></tr>
@@ -111,55 +111,91 @@
             {
 %>
             <br/>
-            <table width="100%">
-                <tr><td colspan="6" style="font-size:110%;font-weight:bold;">iTRAQ Quantitation</td></tr>
-
+            <table>
+                <tr>
+                    <td class="labkey-form-label">iTRAQ/TMT Channel</td>
+                    <td class="labkey-form-label">Target Mass</td>
+                    <td class="labkey-form-label">Normalized</td>
+                    <td class="labkey-form-label">Absolute Intensity</td>
+                </tr>
                 <% if (libra.getNormalized1() != null) { %>
                     <tr>
-                    <td class="labkey-form-label" width="85px">Normalized 1</td><td width="95px"><%= Formats.f3.format(libra.getNormalized1()) %></td>
-                    <td class="labkey-form-label" width="140px">Absolute Intensity 1</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity1()) %></td>
+                        <td align="right">1</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass1())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized1())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity1())) %></td>
                     </tr>
                 <% } %>
                 <% if (libra.getNormalized2() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 2</td><td><%= Formats.f3.format(libra.getNormalized2()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 2</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity2()) %></td>
+                        <td align="right">2</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass2())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized2())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity2())) %></td>
                     </tr>
                 <% } %>
                 <% if (libra.getNormalized3() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 3</td><td><%= Formats.f3.format(libra.getNormalized3()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 3</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity3()) %></td>
+                        <td align="right">3</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass3())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized3())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity3())) %></td>
                     </tr>
                     <% } %>
                 <% if (libra.getNormalized4() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 4</td><td><%= Formats.f3.format(libra.getNormalized4()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 4</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity4()) %></td>
+                        <td align="right">4</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass4())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized4())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity4())) %></td>
                     </tr>
                 <% } %>
                 <% if (libra.getNormalized5() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 5</td><td><%= Formats.f3.format(libra.getNormalized5()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 5</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity5()) %></td>
+                        <td align="right">5</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass5())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized5())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity5())) %></td>
                     </tr>
                 <% } %>
                 <% if (libra.getNormalized6() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 6</td><td><%= Formats.f3.format(libra.getNormalized6()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 6</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity6()) %></td>
+                        <td align="right">6</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass6())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized6())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity6())) %></td>
                     </tr>
                 <% } %>
                 <% if (libra.getNormalized7() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 7</td><td><%= Formats.f3.format(libra.getNormalized7()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 7</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity7()) %></td>
+                        <td align="right">7</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass7())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized7())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity7())) %></td>
                     </tr>
                 <% } %>
                 <% if (libra.getNormalized8() != null) { %>
                     <tr>
-                    <td class="labkey-form-label">Normalized 8</td><td><%= Formats.f3.format(libra.getNormalized8()) %></td>
-                    <td class="labkey-form-label">Absolute Intensity 8</td><td><%= Formats.f3.format(libra.getAbsoluteIntensity8()) %></td>
+                        <td align="right">8</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass8())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized8())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity8())) %></td>
+                    </tr>
+                <% } %>
+                <% if (libra.getNormalized9() != null) { %>
+                    <tr>
+                        <td align="right">9</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass9())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized9())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity9())) %></td>
+                    </tr>
+                <% } %>
+                <% if (libra.getNormalized10() != null) { %>
+                    <tr>
+                        <td align="right">10</td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getTargetMass10())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getNormalized10())) %></td>
+                        <td align="right"><%= h(Formats.f3.format(libra.getAbsoluteIntensity10())) %></td>
                     </tr>
                 <% } %>
             </table>
@@ -224,7 +260,7 @@ for (org.labkey.ms2.MS2Modification mod : run.getModifications(org.labkey.ms2.Ma
 {
     if (!mod.getVariable())
     { %>
-        <%= staticModIndex == 0 ? "" : "," %>staticMods[<%= staticModIndex++%>] = { modMass: <%= Formats.f4.format(mod.getMassDiff()) %>, aminoAcid: <%= PageFlowUtil.jsString(mod.getAminoAcid())%>}<%
+        <%= h(staticModIndex == 0 ? "" : ",") %>staticMods[<%= staticModIndex++%>] = { modMass: <%= h(Formats.f4.format(mod.getMassDiff())) %>, aminoAcid: <%= PageFlowUtil.jsString(mod.getAminoAcid())%>}<%
     }
 }
 %>
@@ -245,7 +281,7 @@ for (int i = 0; i < trimmedWithMods.length(); i++)
         Double varModWeight=run.getVarModifications(MassType.Average).get(trimmedWithMods.substring(i - 1, i + 1));
         if (varModWeight != null)
         { %>
-            varMods[<%= varModIndex++ %>] = {index: <%= aaIndex %>, modMass: <%= Formats.f4.format(varModWeight) %>, aminoAcid: '<%= trimmedWithMods.charAt(i - 1)%>'}; <%
+            varMods[<%= varModIndex++ %>] = {index: <%= aaIndex %>, modMass: <%= h(Formats.f4.format(varModWeight)) %>, aminoAcid: '<%= trimmedWithMods.charAt(i - 1)%>'}; <%
         }
     }
 }
@@ -271,7 +307,7 @@ var peaks = [
         }
         else
         { %>
-            <%= (firstPeak ? "" : ",") %> [<%= mzs[i]%>, <%= intensities[i]%>]<%
+            <%= h(firstPeak ? "" : ",") %> [<%= mzs[i]%>, <%= intensities[i]%>]<%
             firstPeak = false;
         }
     } %>
@@ -285,7 +321,7 @@ for (Map.Entry<String,java.util.List<Pair<Float,Float>>> customHit : customHits.
     boolean firstCustomPeak = true;
     for (Pair<Float,Float> peak : customHit.getValue())
     { %>
-        <%= firstCustomPeak ? "" : ", "%><% firstCustomPeak = false; %>[<%= Formats.f4.format(peak.getKey())%>, <%= Formats.f4.format(peak.getValue())%>] <%
+        <%= h(firstCustomPeak ? "" : ", ") %><% firstCustomPeak = false; %>[<%= h(Formats.f4.format(peak.getKey())) %>, <%= h(Formats.f4.format(peak.getValue())) %>] <%
     } %>
 ], color: "green"}; <%
 } %>

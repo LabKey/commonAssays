@@ -161,8 +161,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                         "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity5, 0) + " +
                         "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity6, 0) + " +
                         "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity7, 0) + " +
-                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity8, 0))");
-                for (int i = 1; i <= 8; i++)
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity8, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity9, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity10, 0))");
+                for (int i = 1; i <= 10; i++)
                 {
                     SQLFragment sql = new SQLFragment("CASE WHEN (");
                     sql.append(sumSQL);

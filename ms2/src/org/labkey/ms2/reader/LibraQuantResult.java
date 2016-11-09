@@ -50,6 +50,12 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
     private Double _targetMass8;
     private Double _absoluteIntensity8;
     private Double _normalized8;
+    private Double _targetMass9;
+    private Double _absoluteIntensity9;
+    private Double _normalized9;
+    private Double _targetMass10;
+    private Double _absoluteIntensity10;
+    private Double _normalized10;
 
     public Double getTargetMass1()
     {
@@ -291,6 +297,66 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _normalized8 = normalized8;
     }
 
+    public Double getTargetMass9()
+    {
+        return _targetMass9;
+    }
+
+    public void setTargetMass9(Double targetMass9)
+    {
+        _targetMass9 = targetMass9;
+    }
+
+    public Double getAbsoluteIntensity9()
+    {
+        return _absoluteIntensity9;
+    }
+
+    public void setAbsoluteIntensity9(Double absoluteIntensity9)
+    {
+        _absoluteIntensity9 = absoluteIntensity9;
+    }
+
+    public Double getNormalized9()
+    {
+        return _normalized9;
+    }
+
+    public void setNormalized9(Double normalized9)
+    {
+        _normalized9 = normalized9;
+    }
+
+    public Double getTargetMass10()
+    {
+        return _targetMass10;
+    }
+
+    public void setTargetMass10(Double targetMass10)
+    {
+        _targetMass10 = targetMass10;
+    }
+
+    public Double getAbsoluteIntensity10()
+    {
+        return _absoluteIntensity10;
+    }
+
+    public void setAbsoluteIntensity10(Double absoluteIntensity10)
+    {
+        _absoluteIntensity10 = absoluteIntensity10;
+    }
+
+    public Double getNormalized10()
+    {
+        return _normalized10;
+    }
+
+    public void setNormalized10(Double normalized10)
+    {
+        _normalized10 = normalized10;
+    }
+
     @Override
     public String getAnalysisType()
     {
@@ -503,6 +569,56 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
             importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
 
+        if (getTargetMass9() != null)
+        {
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass9());
+        }
+        else
+        {
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+        }
+        if (getAbsoluteIntensity9() != null)
+        {
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity9());
+        }
+        else
+        {
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+        }
+        if (getNormalized9() != null)
+        {
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized9());
+        }
+        else
+        {
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+        }
+
+        if (getTargetMass10() != null)
+        {
+            importer._iTraqQuantStmt.setDouble(index++, getTargetMass10());
+        }
+        else
+        {
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+        }
+        if (getAbsoluteIntensity10() != null)
+        {
+            importer._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity10());
+        }
+        else
+        {
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+        }
+        if (getNormalized10() != null)
+        {
+            importer._iTraqQuantStmt.setDouble(index++, getNormalized10());
+        }
+        else
+        {
+            importer._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
+        }
+
         importer._iTraqQuantStmt.executeUpdate();
     }
 
@@ -539,6 +655,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         if (_targetMass8 != null && Math.abs(mz - _targetMass8.doubleValue()) < tolerance)
         {
             return "iTRAQ Channel 8";
+        }
+        if (_targetMass9 != null && Math.abs(mz - _targetMass9.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 9";
+        }
+        if (_targetMass10 != null && Math.abs(mz - _targetMass10.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 10";
         }
         return null;
     }

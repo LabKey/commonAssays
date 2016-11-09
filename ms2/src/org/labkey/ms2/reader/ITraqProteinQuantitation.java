@@ -39,6 +39,10 @@ public class ITraqProteinQuantitation extends AbstractProteinQuantitation
     private Double _error7;
     private Double _ratio8;
     private Double _error8;
+    private Double _ratio9;
+    private Double _error9;
+    private Double _ratio10;
+    private Double _error10;
 
     public Double getRatio1()
     {
@@ -198,5 +202,45 @@ public class ITraqProteinQuantitation extends AbstractProteinQuantitation
     public void setError8(Double error8)
     {
         _error8 = error8;
+    }
+
+    public Double getRatio9()
+    {
+        return _ratio9;
+    }
+
+    public void setRatio9(Double ratio9)
+    {
+        _ratio9 = ratio9;
+    }
+
+    public Double getError9()
+    {
+        return _error9;
+    }
+
+    public void setError9(Double error9)
+    {
+        _error9 = error9;
+    }
+
+    public Double getRatio10()
+    {
+        return _ratio10;
+    }
+
+    public void setRatio10(Double ratio10)
+    {
+        _ratio10 = ratio10;
+    }
+
+    public Double getError10()
+    {
+        return _error10;
+    }
+
+    public void setError10(Double error10)
+    {
+        _error10 = error10;
     }
 }
