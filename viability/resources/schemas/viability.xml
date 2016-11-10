@@ -16,91 +16,91 @@
  * limitations under the License.
 
  -->
-<ns:tables xmlns:ns="http://labkey.org/data/xml">
+<tables xmlns="http://labkey.org/data/xml">
 
-    <ns:table tableName="ResultSpecimens" tableDbType="TABLE">
-        <ns:columns>
-            <ns:column columnName="ResultID">
-            </ns:column>
-            <ns:column columnName="SpecimenID">
-                <ns:isReadOnly>true</ns:isReadOnly>
-                <ns:isHidden>true</ns:isHidden>
-            </ns:column>
-            <ns:column columnName="SpecimenIndex">
-                <ns:isKeyField>true</ns:isKeyField>
-                <ns:isReadOnly>true</ns:isReadOnly>
-                <ns:isHidden>true</ns:isHidden>
-            </ns:column>
-        </ns:columns>
-    </ns:table>
+    <table tableName="ResultSpecimens" tableDbType="TABLE">
+        <columns>
+            <column columnName="ResultID">
+            </column>
+            <column columnName="SpecimenID">
+                <isReadOnly>true</isReadOnly>
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="SpecimenIndex">
+                <isKeyField>true</isKeyField>
+                <isReadOnly>true</isReadOnly>
+                <isHidden>true</isHidden>
+            </column>
+        </columns>
+    </table>
 
-    <ns:table tableName="Results" tableDbType="TABLE">
-        <ns:pkColumnName>RowID</ns:pkColumnName>
-        <ns:titleColumn>PoolID</ns:titleColumn>
-        <ns:columns>
-            <ns:column columnName="RowID">
-                <ns:isKeyField>true</ns:isKeyField>
-                <ns:isAutoInc>true</ns:isAutoInc>
-                <ns:isReadOnly>true</ns:isReadOnly>
-                <ns:isHidden>true</ns:isHidden>
-            </ns:column>
-            <ns:column columnName="Container">
-                <ns:fk>
-                    <ns:fkDbSchema>core</ns:fkDbSchema>
-                    <ns:fkTable>Containers</ns:fkTable>
-                    <ns:fkColumnName>entityid</ns:fkColumnName>
-                </ns:fk>
-            </ns:column>
-            <ns:column columnName="ProtocolID">
-                <ns:fk>
-                    <ns:fkDbSchema>exp</ns:fkDbSchema>
-                    <ns:fkTable>Protocol</ns:fkTable>
-                    <ns:fkColumnName>RowID</ns:fkColumnName>
-                </ns:fk>
-            </ns:column>
-            <ns:column columnName="RunID">
-                <ns:isHidden>true</ns:isHidden>
-                <ns:fk>
-                    <ns:fkDbSchema>exp</ns:fkDbSchema>
-                    <ns:fkTable>experimentrun</ns:fkTable>
-                    <ns:fkColumnName>RowID</ns:fkColumnName>
-                </ns:fk>
-            </ns:column>
-            <ns:column columnName="DataID">
-                <ns:fk>
-                    <ns:fkDbSchema>exp</ns:fkDbSchema>
-                    <ns:fkTable>Data</ns:fkTable>
-                    <ns:fkColumnName>RowID</ns:fkColumnName>
-                </ns:fk>
-            </ns:column>
-            <ns:column columnName="ObjectID">
-                <ns:fk>
-                    <ns:fkDbSchema>exp</ns:fkDbSchema>
-                    <ns:fkTable>Object</ns:fkTable>
-                    <ns:fkColumnName>ObjectID</ns:fkColumnName>
-                </ns:fk>
-            </ns:column>
+    <table tableName="Results" tableDbType="TABLE">
+        <pkColumnName>RowID</pkColumnName>
+        <titleColumn>PoolID</titleColumn>
+        <columns>
+            <column columnName="RowID">
+                <isKeyField>true</isKeyField>
+                <isAutoInc>true</isAutoInc>
+                <isReadOnly>true</isReadOnly>
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="Container">
+                <fk>
+                    <fkDbSchema>core</fkDbSchema>
+                    <fkTable>Containers</fkTable>
+                    <fkColumnName>entityid</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="ProtocolID">
+                <fk>
+                    <fkDbSchema>exp</fkDbSchema>
+                    <fkTable>Protocol</fkTable>
+                    <fkColumnName>RowID</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="RunID">
+                <isHidden>true</isHidden>
+                <fk>
+                    <fkDbSchema>exp</fkDbSchema>
+                    <fkTable>experimentrun</fkTable>
+                    <fkColumnName>RowID</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="DataID">
+                <fk>
+                    <fkDbSchema>exp</fkDbSchema>
+                    <fkTable>Data</fkTable>
+                    <fkColumnName>RowID</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="ObjectID">
+                <fk>
+                    <fkDbSchema>exp</fkDbSchema>
+                    <fkTable>Object</fkTable>
+                    <fkColumnName>ObjectID</fkColumnName>
+                </fk>
+            </column>
 
-            <ns:column columnName="SampleNum"/>
-            <ns:column columnName="ParticipantID"/>
-            <ns:column columnName="VisitID"/>
-            <ns:column columnName="Date"/>
+            <column columnName="SampleNum"/>
+            <column columnName="ParticipantID"/>
+            <column columnName="VisitID"/>
+            <column columnName="Date"/>
 
-            <ns:column columnName="PoolID"/>
-            <ns:column columnName="TotalCells"/>
-            <ns:column columnName="ViableCells"/>
+            <column columnName="PoolID"/>
+            <column columnName="TotalCells"/>
+            <column columnName="ViableCells"/>
 
             <!-- calculated specimen aggregates -->
-            <ns:column columnName="SpecimenAggregatesUpdated"/>
-            <ns:column columnName="SpecimenCount"/>
-            <ns:column columnName="SpecimenMatchCount"/>
-            <ns:column columnName="SpecimenIDs"/>
-            <ns:column columnName="SpecimenMatches"/>
-            <ns:column columnName="OriginalCells"/>
+            <column columnName="SpecimenAggregatesUpdated"/>
+            <column columnName="SpecimenCount"/>
+            <column columnName="SpecimenMatchCount"/>
+            <column columnName="SpecimenIDs"/>
+            <column columnName="SpecimenMatches"/>
+            <column columnName="OriginalCells"/>
 
             <!-- copied TargetStudy column -->
-            <ns:column columnName="TargetStudy"/>
-        </ns:columns>
-    </ns:table>
+            <column columnName="TargetStudy"/>
+        </columns>
+    </table>
 
-</ns:tables>
+</tables>

@@ -16,78 +16,78 @@
  * limitations under the License.
 
  -->
- <ns:tables xmlns:ns="http://labkey.org/data/xml">
+ <tables xmlns="http://labkey.org/data/xml">
 
-  <ns:table tableName="statistic" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="objectid"/>
-      <ns:column columnName="statisticid"/>
-      <ns:column columnName="value"/>
-      <ns:column columnName="originalstatisticid"/>
-    </ns:columns>
-  </ns:table>
-  <ns:table tableName="statisticattr" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="rowid"/>
-      <ns:column columnName="container"/>
-      <ns:column columnName="name"/>
-      <ns:column columnName="id"/>
-    </ns:columns>
-  </ns:table>
+  <table tableName="statistic" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid"/>
+      <column columnName="statisticid"/>
+      <column columnName="value"/>
+      <column columnName="originalstatisticid"/>
+    </columns>
+  </table>
+  <table tableName="statisticattr" tableDbType="TABLE">
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="container"/>
+      <column columnName="name"/>
+      <column columnName="id"/>
+    </columns>
+  </table>
 
-  <ns:table tableName="graph" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="objectid"/>
-      <ns:column columnName="graphid"/>
-      <ns:column columnName="data"/>
-      <ns:column columnName="originalgraphid"/>
-    </ns:columns>
-  </ns:table>
-  <ns:table tableName="graphattr" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="rowid"/>
-      <ns:column columnName="container"/>
-      <ns:column columnName="name"/>
-      <ns:column columnName="id"/>
-    </ns:columns>
-  </ns:table>
+  <table tableName="graph" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid"/>
+      <column columnName="graphid"/>
+      <column columnName="data"/>
+      <column columnName="originalgraphid"/>
+    </columns>
+  </table>
+  <table tableName="graphattr" tableDbType="TABLE">
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="container"/>
+      <column columnName="name"/>
+      <column columnName="id"/>
+    </columns>
+  </table>
 
-  <ns:table tableName="keyword" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="objectid"/>
-      <ns:column columnName="keywordid"/>
-      <ns:column columnName="value"/>
-      <ns:column columnName="originalkeywordid"/>
-    </ns:columns>
-  </ns:table>
-  <ns:table tableName="keywordattr" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="rowid"/>
-      <ns:column columnName="container"/>
-      <ns:column columnName="name"/>
-      <ns:column columnName="id"/>
-    </ns:columns>
-  </ns:table>
+  <table tableName="keyword" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid"/>
+      <column columnName="keywordid"/>
+      <column columnName="value"/>
+      <column columnName="originalkeywordid"/>
+    </columns>
+  </table>
+  <table tableName="keywordattr" tableDbType="TABLE">
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="container"/>
+      <column columnName="name"/>
+      <column columnName="id"/>
+    </columns>
+  </table>
 
-  <ns:table tableName="object" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="rowid"/>
-      <ns:column columnName="container"/>
-      <ns:column columnName="dataid"/>
-      <ns:column columnName="typeid"/>
-      <ns:column columnName="uri"/>
-      <ns:column columnName="compid"/>
-      <ns:column columnName="scriptid"/>
-      <ns:column columnName="fcsid"/>
-    </ns:columns>
-  </ns:table>
+  <table tableName="object" tableDbType="TABLE">
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="container"/>
+      <column columnName="dataid"/>
+      <column columnName="typeid"/>
+      <column columnName="uri"/>
+      <column columnName="compid"/>
+      <column columnName="scriptid"/>
+      <column columnName="fcsid"/>
+    </columns>
+  </table>
 
-  <ns:table tableName="script" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="rowid"/>
-      <ns:column columnName="objectid"/>
-      <ns:column columnName="text"/>
-    </ns:columns>
-  </ns:table>
+  <table tableName="script" tableDbType="TABLE">
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="objectid"/>
+      <column columnName="text"/>
+    </columns>
+  </table>
 
-</ns:tables>
+</tables>
