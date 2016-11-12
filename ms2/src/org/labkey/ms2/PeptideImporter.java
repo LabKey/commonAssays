@@ -294,9 +294,6 @@ public abstract class PeptideImporter extends MS2Importer
             {
                 rs = MS2Manager.getSqlDialect().executeWithResults(_stmtWithReselect);
 
-                if (null == rs)
-                    throw new IllegalArgumentException("No peptideID reselected after peptide insert");
-
                 if (!rs.next())
                     throw new IllegalArgumentException("No peptideID found in result set");
 

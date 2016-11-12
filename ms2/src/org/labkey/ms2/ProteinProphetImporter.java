@@ -473,11 +473,6 @@ public class ProteinProphetImporter
 
         ResultSet rs = _dialect.executeWithResults(groupStmt);
 
-        if (null == rs)
-        {
-            throw new SQLException("Expected a result set with the new group's rowId");
-        }
-
         int groupId;
 
         try

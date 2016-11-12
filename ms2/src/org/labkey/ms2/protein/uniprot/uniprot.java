@@ -95,19 +95,10 @@ public class uniprot extends ParseActions
                 _initialInsertion.setString(2, getComment());
                 _initialInsertion.setTimestamp(3, new java.sql.Timestamp(new java.util.Date().getTime()));
 
-                ResultSet idrs = _dialect.executeWithResults(_initialInsertion);
-
-                if (null != idrs)
+                try (ResultSet idrs = _dialect.executeWithResults(_initialInsertion))
                 {
-                    try
-                    {
-                        idrs.next();
-                        setCurrentInsertId(idrs.getInt(1));
-                    }
-                    finally
-                    {
-                        idrs.close();
-                    }
+                    idrs.next();
+                    setCurrentInsertId(idrs.getInt(1));
                 }
 
                 context.getConnection().commit();

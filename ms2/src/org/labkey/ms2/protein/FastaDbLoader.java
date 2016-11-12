@@ -203,7 +203,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
             try (ResultSet rs = ProteinManager.getSqlDialect().executeWithResults(fdbu._initialInsertionStmt))
             {
-                if (null != rs && rs.next())
+                if (rs.next())
                     currentInsertId = rs.getInt(1);
             }
         }
