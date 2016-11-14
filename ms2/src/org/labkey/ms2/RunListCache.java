@@ -60,7 +60,7 @@ public class RunListCache
             throw new RunListException(NO_RUNS_MESSAGE);
         }
         
-        Set<String> stringIds = DataRegionSelection.getSelected(ctx, true);
+        Set<String> stringIds = DataRegionSelection.getSelected(ctx, selectionKey, true, true);
 
         if (stringIds.isEmpty())
         {
