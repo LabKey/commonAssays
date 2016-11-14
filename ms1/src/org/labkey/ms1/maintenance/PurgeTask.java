@@ -29,26 +29,24 @@ import org.labkey.ms1.MS1Manager;
  */
 public class PurgeTask implements MaintenanceTask
 {
-    private transient Logger _log = Logger.getLogger(PurgeTask.class);
-
-    public void run()
+    public void run(Logger log)
     {
         long msStart = System.currentTimeMillis();
-        _log.info("MS1 Purge Task starting cycle...");
+        log.info("MS1 Purge Task starting cycle...");
 
         MS1Manager mgr = MS1Manager.get();
 
         Integer fileId = mgr.getNextPurgeFile();
         while(null != fileId)
         {
-            _log.info("Purging MS1 file id " + fileId + "...");
+            log.info("Purging MS1 file id " + fileId + "...");
             mgr.purgeFile(fileId);
-            _log.info("MS1 file id " + fileId + " successfully purged.");
+            log.info("MS1 file id " + fileId + " successfully purged.");
 
             fileId = mgr.getNextPurgeFile();
         }
 
-        _log.info("MS1 Purge Task finished cycle in " + String.valueOf((System.currentTimeMillis() - msStart) / 1000) + " seconds.");
+        log.info("MS1 Purge Task finished cycle in " + String.valueOf((System.currentTimeMillis() - msStart) / 1000) + " seconds.");
     }
 
     public String getDescription()

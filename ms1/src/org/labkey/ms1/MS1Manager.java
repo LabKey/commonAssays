@@ -24,7 +24,6 @@ import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
@@ -83,7 +82,7 @@ public class MS1Manager
     {
         if(null == _purgeThread || _purgeThread.getState() == Thread.State.TERMINATED)
         {
-            _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");
+            _purgeThread = new Thread(() -> new PurgeTask().run(_log), "MS1 Purge Task");
             _purgeThread.start();
         }
     }
