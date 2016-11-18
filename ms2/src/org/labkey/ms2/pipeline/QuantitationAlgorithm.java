@@ -115,7 +115,7 @@ public enum QuantitationAlgorithm
                 throw new PipelineJobException("Libra configuration files containing a space are not supported");
             }
             LibraProtocolFactory factory = new LibraProtocolFactory();
-            File result = factory.getProtocolFile(root, libraConfigName);
+            File result = factory.getProtocolFile(root, libraConfigName, false);
             if (!NetworkDrive.exists(result))
             {
                 throw new PipelineJobException("Libra config file does not exist: " + result);

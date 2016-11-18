@@ -270,7 +270,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         PipeRoot root = getPipelineRoot();
 
-        String[] protocols = provider.getProtocolFactory().getProtocolNames(root, root.resolvePath(path));
+        String[] protocols = provider.getProtocolFactory().getProtocolNames(root, root.resolvePath(path), false);
         for(String protName:protocols)
         {
             if(!protName.equals("default"))
