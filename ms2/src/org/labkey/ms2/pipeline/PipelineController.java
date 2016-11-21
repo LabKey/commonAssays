@@ -379,7 +379,7 @@ public class PipelineController extends SpringActionController
                     }
                     else
                     {
-                        _protocol = protocolFactory.load(_root, protocolName);
+                        _protocol = protocolFactory.load(_root, protocolName, false);
                     }
 
                     form.setProtocolName(_protocol.getName());

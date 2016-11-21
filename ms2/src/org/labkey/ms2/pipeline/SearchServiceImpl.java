@@ -135,7 +135,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 }
                 else
                 {
-                    protocol = protocolFactory.load(root, protocolName);
+                    protocol = protocolFactory.load(root, protocolName, false);
                 }
             }
         }
