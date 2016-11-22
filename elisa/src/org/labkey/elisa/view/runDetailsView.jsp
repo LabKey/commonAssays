@@ -58,7 +58,7 @@
     }
     numberFormatFn = ExtUtil.toExtNumberFormatFn(numberFormat);
 
-    String renderId = "generic-report-div-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
+    String renderId = "chart-wizard-report-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
 
     ActionURL filterUrl = ctx.cloneActionURL().deleteParameters();
     filterUrl.addFilter(QueryView.DATAREGIONNAME_DEFAULT, FieldKey.fromParts("Run", "RowId"), CompareType.EQUAL, form.getRunId());
@@ -89,7 +89,6 @@
             queryName       : <%=q(form.getQueryName() != null ? form.getQueryName() : null) %>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
             renderType      : <%=q(form.getRenderType())%>,
-            id              : <%=q(form.getComponentId())%>,
             baseUrl         : <%=q(baseUrl.getLocalURIString())%>,
             allowShare      : <%=c.hasPermission(user, ShareReportPermission.class)%>,
             isDeveloper     : <%=user.isDeveloper()%>,
