@@ -50,12 +50,6 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         }
     }
 
-    @NotNull
-    public ExpSampleSet getSampleSet()
-    {
-        return _sampleSet;
-    }
-
     public List<String> getSampleNames()
     {
         return _names;
@@ -64,19 +58,6 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
     protected File getObject(int index, Map<DomainProperty, String> sampleProperties) throws DuplicateMaterialException
     {
         return _files.get(index);
-    }
-
-    public String determineMaterialName(Map<DomainProperty, String> sampleProperties)
-    {
-        String separator = "";
-        StringBuilder sb = new StringBuilder();
-        for (DomainProperty pd : getNamePDs())
-        {
-            sb.append(separator);
-            separator = "-";
-            sb.append(sampleProperties.get(pd));
-        }
-        return sb.toString();
     }
 
     protected boolean isCopyable(DomainProperty pd)
