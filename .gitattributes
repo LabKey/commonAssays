@@ -1,4 +1,5 @@
 * text=auto !eol
+/build.gradle -text
 cbcassay/CBCAssay.iml -text
 cbcassay/data/ex_20081016_131859.small.dat -text
 cbcassay/data/ex_20090115_jul08BAD.dat -text
@@ -167,6 +168,7 @@ elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
 elispotassay/webapp/elispot/PlateSummary.css -text
 elispotassay/webapp/elispot/PlateSummary.js -text
 flow/FlowEngine.iml -text
+flow/build.gradle -text
 flow/build.xml -text
 flow/enginesrc/org/labkey/flow/Main.java -text
 flow/enginesrc/org/labkey/flow/analysis/chart/DataFrameXYDataset.java -text
@@ -692,6 +694,7 @@ luminex/webapp/luminex/exclusion.lib.xml -text
 luminex/webapp/luminex/included.png -text
 luminex/webapp/luminex/ljPlotIcon.png -text
 luminex/webapp/luminexLeveyJennings.lib.xml -text
+microarray/build.gradle -text
 microarray/gwtsrc/org/labkey/microarray/designer/MicroarrayAssayDesigner.gwt.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayAssayDesigner.java -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayDesignerMainPanel.java -text
@@ -780,6 +783,7 @@ microarray/webapp/WEB-INF/microarray/microarrayContext.xml -text
 ms1/MS1-API.iml -text
 ms1/api-src/org/labkey/api/ms1/MS1Service.java -text
 ms1/api-src/org/labkey/api/ms1/MS1Urls.java -text
+ms1/build.gradle -text
 ms1/gwtsrc/org/labkey/ms1/MS1VennDiagramView.gwt.xml -text
 ms1/gwtsrc/org/labkey/ms1/client/CompareService.java -text
 ms1/gwtsrc/org/labkey/ms1/client/CompareServiceAsync.java -text
@@ -852,6 +856,7 @@ ms2/MS2-API.iml -text
 ms2/api-src/org/labkey/api/ms2/MS2Service.java -text
 ms2/api-src/org/labkey/api/ms2/MS2Urls.java -text
 ms2/api-src/org/labkey/api/ms2/SearchClient.java -text
+ms2/build.gradle -text
 ms2/gwtsrc/org/labkey/ms2/MS2VennDiagramView.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareService.java -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareServiceAsync.java -text

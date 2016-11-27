@@ -1,0 +1,39 @@
+import org.labkey.gradle.util.BuildUtils
+
+sourceSets {
+    engine {
+        java {
+            srcDirs = ['./enginesrc']
+        }
+        output.classesDir = "${project.buildDir}/enginesrc-classes"
+    }
+}
+
+dependencies {
+    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: ":server:modules:flow", depProjectConfig: 'xmlSchema')
+    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: ":server:api")
+    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: ":server:internal")
+    engineCompile "org.labkey:labkey-client-api:${project.version}"
+    engineCompile 'org.apache.tomcat:jsp-api'
+    engineCompile 'org.apache.tomcat:jasper'
+    engineCompile project.files(project.tasks.schemasJar)
+
+    compile sourceSets.engine.output
+    jspCompile sourceSets.engine.output
+    BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: ":server:modules:flow", depProjectConfig: 'xmlSchema')
+}
+
+project.task("engineJar",
+        group: "Build",
+        type: Jar,
+        description: "produce jar file for flow engine source",
+        {
+            classifier "engine"
+            from project.sourceSets['engine'].output.classesDir
+            baseName "${project.name}_engine"
+            destinationDir = project.file(project.labkey.explodedModuleLibDir)
+        })
+
+project.tasks.engineJar.dependsOn(project.engineClasses)
+project.tasks.assemble.dependsOn(project.tasks.engineJar)
+project.tasks.module.dependsOn(project.tasks.engineJar)
