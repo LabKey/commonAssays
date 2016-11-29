@@ -356,6 +356,12 @@ public abstract class FilterFlowReport extends FlowReport
                 filter.addCondition("A/" + key.toString(), f.value, CompareType.getByURLKey(f.op));
                 fieldKeys.add(key);
             }
+            else if ("fieldkey".equals(f.type))
+            {
+                FieldKey key = FieldKey.fromParts(f.property);
+                filter.addCondition("A/" + key.toString(), f.value, CompareType.getByURLKey(f.op));
+                fieldKeys.add(key);
+            }
         }
 
         QuerySchema flow = new FlowSchema(context);

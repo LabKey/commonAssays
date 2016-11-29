@@ -92,7 +92,7 @@ abstract public class FlowReport extends AbstractReport
 
         if (reportName == null || reportName.length() == 0)
         {
-            errors.rejectValue(ERROR_MSG, "Report name is requied");
+            errors.rejectValue(ERROR_MSG, "Report name is required");
             return;
         }
 
