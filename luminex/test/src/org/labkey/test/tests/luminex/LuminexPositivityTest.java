@@ -16,6 +16,7 @@
 package org.labkey.test.tests.luminex;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
@@ -69,7 +70,7 @@ public final class LuminexPositivityTest extends LuminexTest
         assayDesigner.saveAndClose();
     }
 
-    @Test
+    @Test @Ignore //TODO: 28604: LuminexPositivityTest.testPositivity times out on TeamCity
     public void testPositivity()
     {
         test3xFoldChange();
