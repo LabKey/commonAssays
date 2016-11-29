@@ -947,7 +947,6 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-15.36-15.37.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-14.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.10-15.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-15.30-16.10.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-16.10-16.11.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-16.10-16.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-16.20-16.21.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-16.20-16.30.sql -text
@@ -971,6 +970,7 @@ ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-15.33-15.34.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-15.34-15.35.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-15.35-15.36.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-15.36-15.37.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-16.10-16.11.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-drop.sql -text
 ms2/resources/schemas/ms2.xml -text
 ms2/resources/schemas/prot.xml -text
