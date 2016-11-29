@@ -96,7 +96,7 @@ public class ElispotUpgradeCode implements UpgradeCode
     // Map Run to AntigenLsids
     private static class RunMap extends HashMap<Integer, AntigenLsidMap> {}
 
-    // invoked by elispotlk-15.10-15.12.sql
+    // invoked by elispotlk-15.10-15.20.sql
     @SuppressWarnings({"UnusedDeclaration"})
     public static void migrateToElispotTables(ModuleContext moduleContext)
     {

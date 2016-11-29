@@ -69,7 +69,7 @@ public class NabUpgradeCode implements UpgradeCode
 {
     private static final Logger _log = Logger.getLogger(NabUpgradeCode.class);
 
-    // Invoked by nab-15.21-15.22.sql
+    // Invoked by nab-15.20-15.30.sql
     @SuppressWarnings({"UnusedDeclaration"})
     @DeferredUpgrade
     public void upgradeDilutionAssayWithNewTables(final ModuleContext context)
@@ -230,6 +230,7 @@ public class NabUpgradeCode implements UpgradeCode
 
     }
 
+    // Invoked by nab-16.20-16.30.sql
     @SuppressWarnings({"UnusedDeclaration"})
     @DeferredUpgrade
     public void repairCrossPlateDilutionData(final ModuleContext context)
