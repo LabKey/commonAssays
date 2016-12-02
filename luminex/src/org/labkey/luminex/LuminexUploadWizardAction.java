@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.SpringActionController;
@@ -54,7 +55,6 @@ import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.luminex.model.Analyte;
-import org.labkey.luminex.model.LuminexDataRow;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
 import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
@@ -78,7 +78,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * Adds Analyte Properties as third wizard step, handles analyte and titration definition input view UI and post, saves
@@ -489,10 +488,18 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             //Get well types from the run files
             Set<String> wellTypes = new HashSet<>();
+            Set<String> descriptions = new HashSet<>();
             parser.getSheets().values().forEach(datRowList ->
-                    wellTypes.addAll(datRowList.stream().map(LuminexDataRow::getType).collect(Collectors.toList())));
+                    datRowList.forEach(row ->
+                    {
+                        if (StringUtils.isNotBlank(row.getType()))
+                            wellTypes.add(row.getType());
+                        if (StringUtils.isNotBlank(row.getDescription()))
+                            descriptions.add(row.getDescription());
+                    })
+            );
 
-            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, wellTypes, parser.getTitrations());
+            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, wellTypes, descriptions);
             form.setLostExclusions(exclusionCount - retainedCount);
 
             form.setRetainExclusions(true); //Default to true

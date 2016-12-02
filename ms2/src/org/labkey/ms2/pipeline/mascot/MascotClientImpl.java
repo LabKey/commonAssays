@@ -1120,54 +1120,49 @@ public class MascotClientImpl implements SearchClient
         //   max{"spectrum, parent monoisotopic mass error plus",
         //     "spectrum, parent monoisotopic mass error minus"}, or
         //  "search, tol"}
-        String formFieldKey = "TOL";
-        String formFieldValue;
-        String formFieldValue1 = parser.getInputParameter("spectrum, parent monoisotopic mass error plus");
-        String formFieldValue2 = parser.getInputParameter("spectrum, parent monoisotopic mass error minus");
-        if (formFieldValue1 != null || formFieldValue2 != null)
+        String parentMassErrorPlus = parser.getInputParameter("spectrum, parent monoisotopic mass error plus");
+        String parentMassErrorMinus = parser.getInputParameter("spectrum, parent monoisotopic mass error minus");
+        String parentMassError;
+        if (parentMassErrorPlus != null || parentMassErrorMinus != null)
         {
-            if (formFieldValue1 != null && formFieldValue2 != null)
+            if (parentMassErrorPlus != null && parentMassErrorMinus != null)
             {
-                float float1 = Float.valueOf(formFieldValue1);
-                float float2 = Float.valueOf(formFieldValue2);
-                formFieldValue = (float1 > float2) ? formFieldValue1 : formFieldValue2;
+                float float1 = Float.valueOf(parentMassErrorPlus);
+                float float2 = Float.valueOf(parentMassErrorMinus);
+                parentMassError = (float1 > float2) ? parentMassErrorPlus : parentMassErrorMinus;
             }
-            else if (formFieldValue1 != null)
-                formFieldValue = formFieldValue1;
+            else if (parentMassErrorPlus != null)
+                parentMassError = parentMassErrorPlus;
             else
-                formFieldValue = formFieldValue2;
+                parentMassError = parentMassErrorMinus;
         }
         else
-            formFieldValue = parser.getInputParameter("search, tol");
-        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
+            parentMassError = parser.getInputParameter("search, tol");
+        parts.add(new StringPart("TOL", (null==parentMassError)?"":parentMassError));
 
-        formFieldKey = "MASS";
-        formFieldValue = parser.getInputParameter("spectrum, fragment mass type");
-        if (formFieldValue == null)
-            formFieldValue = parser.getInputParameter("search, mass");
-        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
+        String massType = parser.getInputParameter("spectrum, fragment mass type");
+        if (massType == null)
+            massType = parser.getInputParameter("search, mass");
+        parts.add(new StringPart("MASS", (null==massType)?"":massType));
+        boolean isMonoisoptopicMass = "monoisotopic".equalsIgnoreCase(massType);
+        String fragmentMassError = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error" : "spectrum, fragment mass error");
+        if (fragmentMassError == null)
+        {
+            fragmentMassError = parser.getInputParameter("search, itol");
+        }
+        parts.add(new StringPart("ITOL", (null==fragmentMassError)?"":fragmentMassError));
+
+        String fragmentMassErrorUnits = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error units" : "spectrum, fragment mass error units");
+        if (fragmentMassErrorUnits == null)
+            fragmentMassErrorUnits = parser.getInputParameter("search, itolu");
+        parts.add(new StringPart("ITOLU", (null==fragmentMassErrorUnits)?"":fragmentMassErrorUnits));
 
         // Decoy controlled by "mascot, decoy", submitted as "1" or nothing at all
-        formFieldValue = parser.getInputParameter("mascot, decoy");
-        if (formFieldValue != null && ((Boolean)new BooleanConverter().convert(Boolean.class, formFieldValue)).booleanValue())
+        String decoyValue = parser.getInputParameter("mascot, decoy");
+        if (decoyValue != null && ((Boolean)new BooleanConverter().convert(Boolean.class, decoyValue)).booleanValue())
         {
             parts.add(new StringPart("DECOY", "1"));
         }
-
-        boolean isMonoisoptopicMass = "monoisotopic".equalsIgnoreCase(formFieldValue);
-        formFieldKey = "ITOL";
-        formFieldValue = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error" : "spectrum, fragment mass error");
-        if (formFieldValue == null)
-        {
-            formFieldValue = parser.getInputParameter("search, itol");
-        }
-        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
-
-        formFieldKey = "ITOLU";
-        formFieldValue = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error units" : "spectrum, fragment mass error units");
-        if (formFieldValue == null)
-            formFieldValue = parser.getInputParameter("search, itolu");
-        parts.add(new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue));
 
         File queryFile = new File(analysisFile);
         getLogger().info("Submitting query file, size="+queryFile.length());

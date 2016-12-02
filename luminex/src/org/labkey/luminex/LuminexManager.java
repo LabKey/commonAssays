@@ -400,9 +400,9 @@ public class LuminexManager
         return replacementCommands.values();
     }
 
-    public Long getRetainedExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> titrations)
+    public Long getRetainedExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> descriptions)
     {
-        Long result = getRetainedWellExclusionCount(replacedRunId, analyteNames, fileNames, types, titrations);
+        Long result = getRetainedWellExclusionCount(replacedRunId, analyteNames, fileNames, types, descriptions);
         result += getRetainedRunExclusionCount(replacedRunId, analyteNames);
         return result;
     }
@@ -424,7 +424,7 @@ public class LuminexManager
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
 
-    private Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> titrations)
+    private Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> descriptions)
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT COUNT(DISTINCT we.RowId) FROM ")
@@ -446,7 +446,7 @@ public class LuminexManager
         appendInClause(sql, "a.Name ", analyteNames, "\n");
 
         //Add titration filter
-        appendInClause(sql, "(we.Description IS NULL OR we.Description ", titrations, ")\n");
+        appendInClause(sql, "(we.Description IS NULL OR we.Description ", descriptions, ")\n");
 
         //Add type filter: Null is for titrations
         appendInClause(sql, "(we.type IS NULL OR we.type ", types, ")\n");

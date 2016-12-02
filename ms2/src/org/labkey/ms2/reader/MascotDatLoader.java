@@ -633,8 +633,16 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         }
         else if (_currentLine.startsWith(QUERY_SCANS_PREFIX)) // N.B. This line is not parsed in the Mascot2XML code, but it seems a good place to get the start scan data; the syntax is unknown for multiple scans, though
         {
-            int scan = Integer.parseInt(_currentLine.substring(QUERY_SCANS_PREFIX.length()));
-            return new Pair<>(scan, scan);
+            String scanValue = _currentLine.substring(QUERY_SCANS_PREFIX.length());
+            String[] scans = scanValue.split("-");
+            if (scans.length < 1 || scans.length > 2)
+            {
+                throw new NumberFormatException("Could not parse scan number: " + scanValue);
+            }
+            // Some Mascot files have a range for scans. See issue 28505
+            int startScan = Integer.parseInt(scans[0]);
+            int endScan = scans.length == 1 ? startScan : Integer.parseInt(scans[1]);
+            return new Pair<>(startScan, endScan);
         }
         return null;
     }
@@ -666,7 +674,14 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
 
             if (_currentLine.startsWith(QUERY_RETENTION_TIME_PREFIX)) // N.B. This line is not parsed in the Mascot2Xml code, but it seems a reasonable place to get the retention time
             {
-                peptide.setRetentionTime(Double.parseDouble(_currentLine.substring(QUERY_RETENTION_TIME_PREFIX.length())));
+                String retentionTime = _currentLine.substring(QUERY_RETENTION_TIME_PREFIX.length());
+                if (retentionTime.contains("-"))
+                {
+                    // Some Mascot files have a range for retention times when the match spans multiple scans. We only support
+                    // a single retention time, so throw away the end of the range. See issue 28505
+                    retentionTime = retentionTime.split("-")[0];
+                }
+                peptide.setRetentionTime(Double.parseDouble(retentionTime));
             }
             readLine();
         }
