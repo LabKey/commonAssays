@@ -93,7 +93,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             int plateNumber = 1;
             List<Plate> plates = new ArrayList<>(matrices.size());
             for (double[][] matrix : matrices)
-                plates.add(PlateService.get().createPlate(template, matrix, PlateService.NO_RUNID, plateNumber++));
+                plates.add(PlateService.get().createPlate(template, matrix, null, PlateService.NO_RUNID, plateNumber++));
 
             return plates;
         }
@@ -127,7 +127,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         List<Plate> plates = new ArrayList<>(matrices.size());
         for (Map.Entry<Integer, double[][]> matrix : matrices.entrySet())
         {
-            Plate plate = PlateService.get().createPlate(template, matrix.getValue(), run.getRowId(), matrix.getKey());
+            Plate plate = PlateService.get().createPlate(template, matrix.getValue(), null, run.getRowId(), matrix.getKey());
             plate.setProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, plateToVirusMap.get(matrix.getKey()));
             plates.add(plate);
         }

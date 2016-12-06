@@ -149,7 +149,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;
                 if (++wellCount == wellsPerPlate)
                 {
-                    Plate plate = PlateService.get().createPlate(template, wellValues, PlateService.NO_RUNID, plateCount + 1);
+                    Plate plate = PlateService.get().createPlate(template, wellValues, null, PlateService.NO_RUNID, plateCount + 1);
                     plate.setProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, plateToVirusMap.get(plateCount));
 
                     plates.add(plate);
