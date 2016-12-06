@@ -1446,6 +1446,7 @@ nab/resources/schemas/dbscripts/postgresql/nab-15.20-15.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-16.20-16.21.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-16.20-16.30.sql -text
 nab/resources/schemas/dbscripts/postgresql/nab-16.21-16.22.sql -text
+nab/resources/schemas/dbscripts/postgresql/nab-16.30-16.31.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-0.00-13.10.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-0.00-13.20.sql -text
 nab/resources/schemas/dbscripts/postgresql/obsolete/nab-11.10-11.20.sql -text
@@ -1465,6 +1466,7 @@ nab/resources/schemas/dbscripts/sqlserver/nab-15.20-15.30.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-16.20-16.21.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-16.20-16.30.sql -text
 nab/resources/schemas/dbscripts/sqlserver/nab-16.21-16.22.sql -text
+nab/resources/schemas/dbscripts/sqlserver/nab-16.30-16.31.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-0.00-13.10.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-0.00-13.20.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-11.10-11.20.sql -text

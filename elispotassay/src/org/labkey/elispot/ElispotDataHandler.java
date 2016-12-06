@@ -241,7 +241,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             if (method == ElispotAssayProvider.DetectionMethodType.COLORIMETRIC)
             {
                 double[][] cellValues = reader.loadFile(template, dataFile);
-                plateMap.put(new ColorimetricPlateInfo(), PlateService.get().createPlate(template, cellValues));
+                plateMap.put(new ColorimetricPlateInfo(), PlateService.get().createPlate(template, cellValues, null));
             }
             else if (method == ElispotAssayProvider.DetectionMethodType.FLUORESCENT)
             {
@@ -251,7 +251,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(entry.getKey());
                     if (plateInfo != null)
                     {
-                        plateMap.put(plateInfo, PlateService.get().createPlate(template, entry.getValue()));
+                        plateMap.put(plateInfo, PlateService.get().createPlate(template, entry.getValue(), null));
                     }
                 }
             }

@@ -111,7 +111,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             {
                 PlateTemplate template = ((PlateBasedAssayProvider)provider).getPlateTemplate(container, protocol);
                 double[][] cellValues = reader.loadFile(template, dataFile);
-                Plate plate = PlateService.get().createPlate(template, cellValues);
+                Plate plate = PlateService.get().createPlate(template, cellValues, null);
 
                 // collect the standards from the control group so we can calculate the calibration curve
                 List<? extends WellGroup> controlGroups = plate.getWellGroups(WellGroup.Type.CONTROL);

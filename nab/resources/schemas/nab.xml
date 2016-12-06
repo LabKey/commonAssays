@@ -91,6 +91,7 @@
             <column columnName="Container">
                 <isHidden>true</isHidden>
             </column>
+            <column columnName="Excluded"/>
         </columns>
     </table>
     <table tableName="DilutionData" tableDbType="TABLE">
