@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-/* viability-0.00-9.30.sql */
-
 CREATE SCHEMA viability;
 GO
 
 CREATE TABLE viability.Results
 (
     RowID INT IDENTITY(1,1) NOT NULL,
+    RunID INT NOT NULL,
     Container EntityID NOT NULL,
     ProtocolID INT NOT NULL,
     DataID INT NOT NULL,
@@ -37,11 +36,20 @@ CREATE TABLE viability.Results
     TotalCells INT NOT NULL,
     ViableCells INT NOT NULL,
 
+    SpecimenAggregatesUpdated DATETIME,  -- Last date the specimen aggregates were updated
+    SpecimenCount INT,                   -- Count of specimens in the result row
+    SpecimenIDs VARCHAR(1000),           -- Concatenated list of Specimen IDs
+    SpecimenMatchCount INT,              -- Count of specimens matched in the target study. Calculated in ViabilityManager.updateSpecimenAggregates()
+    SpecimenMatches VARCHAR(1000),       -- Concatenated list of matched Specimen IDs in the target study. Calculated in ViabilityManager.updateSpecimenAggregates()
+    OriginalCells INT,                   -- Sum of cell counts in the matched Specimen vials in the target study.  Calculated in ViabilityManager.updateSpecimenAggregates()
+    TargetStudy ENTITYID,
+
     CONSTRAINT PK_Viability_Results PRIMARY KEY (RowID),
     CONSTRAINT FK_Results_Container FOREIGN KEY (Container) REFERENCES core.Containers (EntityID),
     CONSTRAINT FK_Results_ProtocolID FOREIGN KEY (ProtocolID) REFERENCES exp.Protocol (RowID),
     CONSTRAINT FK_Viability_DataID FOREIGN KEY (DataID) REFERENCES exp.Data(RowId),
-    CONSTRAINT FK_Viability_ObjectID FOREIGN KEY (ObjectID) REFERENCES exp.Object(ObjectId)
+    CONSTRAINT FK_Viability_ObjectID FOREIGN KEY (ObjectID) REFERENCES exp.Object(ObjectId),
+    CONSTRAINT FK_Results_RunID FOREIGN KEY (RunID) REFERENCES exp.ExperimentRun (RowID)
 );
 CREATE INDEX IDX_Results_Container_ProtocolID ON viability.Results(Container, ProtocolID);
 
@@ -55,47 +63,3 @@ CREATE TABLE viability.ResultSpecimens
     CONSTRAINT UQ_Viability_ResultSpecimens_ResultIDSpecimenID UNIQUE (ResultID, SpecimenID),
     CONSTRAINT FK_ResultSpecimens_ResultID FOREIGN KEY (ResultID) REFERENCES viability.Results(RowId)
 );
-
-/* viability-14.10-14.20.sql */
-
--- Add runid column
-ALTER TABLE viability.results ADD runid INT;
-GO
-
-UPDATE viability.results SET runid = (SELECT d.RunID FROM exp.data d WHERE d.RowID = DataID);
-
-ALTER TABLE viability.results
-  ALTER COLUMN runid INT NOT NULL;
-
-ALTER TABLE viability.results
-  ADD CONSTRAINT fk_results_runid FOREIGN KEY (runid) REFERENCES exp.experimentrun (rowid);
-
-
--- Last date the specimen aggregates were updated
-ALTER TABLE viability.results ADD SpecimenAggregatesUpdated DATETIME;
-
--- Count of specimens in the result row
-ALTER TABLE viability.results ADD SpecimenCount INT;
-GO
-
-UPDATE viability.results SET SpecimenCount =
-    (SELECT COUNT(RS.specimenid) FROM viability.resultspecimens RS WHERE RowID = RS.ResultID);
-
--- Concatenated list of Specimen IDs
-ALTER TABLE viability.results ADD SpecimenIDs VARCHAR(1000);
-GO
-
-UPDATE viability.results SET SpecimenIDs =
-    (SELECT core.GROUP_CONCAT_DS(SpecimenId, ',', 1) FROM viability.ResultSpecimens RS WHERE RowID = RS.ResultID);
-
-
--- Count of specimens matched in the target study.  Calculated in ViabilityManager.updateSpecimenAggregates()
-ALTER TABLE viability.results ADD SpecimenMatchCount INT;
-
--- Concatenated list of matched Specimen IDs in the target study.  Calculated in ViabilityManager.updateSpecimenAggregates()
-ALTER TABLE viability.results ADD SpecimenMatches VARCHAR(1000);
-
--- Sum of cell counts in the matched Specimen vials in the target study.  Calculated in ViabilityManager.updateSpecimenAggregates()
-ALTER TABLE viability.results ADD OriginalCells INT;
-
-ALTER TABLE viability.results ADD TargetStudy ENTITYID;
