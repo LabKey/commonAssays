@@ -310,7 +310,11 @@ public class LuminexManager
         //Map existing exclusions to new input files
         exclusions.forEach(exclusion ->
         {
-            command.setComment((String) exclusion.get("comment")); //Should be the same
+            //Should be the same for all exclusions
+            command.setComment((String) exclusion.get("comment"));
+            command.setCreated((Timestamp) exclusion.get("created"));
+            command.setCreatedBy((Integer) exclusion.get("createdBy"));
+
 
             Analyte analyte = analyteMap.get(exclusion.get("AnalyteName"));
             if (analyte != null)
