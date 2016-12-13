@@ -587,7 +587,7 @@ if (getRun() != null)
 %></p><%
 
     DiscussionService.Service service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
             getViewContext(),
             well.getLSID(),
             well.urlShow(),

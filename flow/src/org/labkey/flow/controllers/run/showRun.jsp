@@ -118,7 +118,7 @@
 
 
     DiscussionService.Service service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
             getViewContext(),
             run.getLSID(),
             run.urlShow(),

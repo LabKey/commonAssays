@@ -93,7 +93,7 @@ The analysis section describes which gates in the analysis, as well as the stati
 
 <%
     DiscussionService.Service service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
             context,
             script.getLSID(),
             script.urlShow(),
