@@ -377,4 +377,11 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     {
         return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.FILE_BASED};
     }
+
+    @Nullable
+    @Override
+    public ActionURL getAssayQCRunURL(Container container, ExpRun run)
+    {
+        return new ActionURL(NabAssayController.QCDataAction.class, container).addParameter("rowId", run.getRowId());
+    }
 }

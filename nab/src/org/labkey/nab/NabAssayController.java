@@ -21,12 +21,22 @@ import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.SimpleApiJsonForm;
+import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.assay.nab.RenderAssayBean;
 import org.labkey.api.assay.nab.RenderAssayForm;
 import org.labkey.api.assay.nab.view.DilutionGraphAction;
@@ -34,19 +44,25 @@ import org.labkey.api.assay.nab.view.GraphSelectedAction;
 import org.labkey.api.assay.nab.view.GraphSelectedBean;
 import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.assay.nab.view.MultiGraphAction;
+import org.labkey.api.assay.nab.view.RunDetailOptions;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
+import org.labkey.api.assay.nab.view.RunDetailsHeaderView;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.nab.NabUrls;
@@ -59,6 +75,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -67,9 +84,16 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.Position;
+import org.labkey.api.study.TimepointType;
+import org.labkey.api.study.Visit;
+import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
@@ -77,23 +101,31 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.Portal;
 import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
+import ucar.nc2.util.HashMapLRU;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -101,6 +133,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * User: jeckels
@@ -710,5 +744,181 @@ public class NabAssayController extends SpringActionController
         {
             return _date;
         }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class QCDataAction extends SimpleViewAction<RenderAssayBean>
+    {
+        @Override
+        public ModelAndView getView(RenderAssayBean form, BindException errors) throws Exception
+        {
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run == null)
+            {
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+            }
+
+            try
+            {
+                DilutionAssayRun assay = _getNabAssayRun(run, form.getFitTypeEnum(), getUser());
+
+                form.setContext(getViewContext());
+                form.setAssay(assay);
+
+                return new JspView<RenderAssayBean>("/org/labkey/nab/view/nabQC.jsp", form);
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                return new SimpleErrorView(errors);
+            }
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Review/QC NAb Data");
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class GetQCControlInfoAction extends ApiAction<RenderAssayBean>
+    {
+        public ApiResponse execute(RenderAssayBean form, BindException errors) throws Exception
+        {
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run == null)
+            {
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+            }
+
+            try
+            {
+                DilutionAssayRun assay = _getNabAssayRun(run, form.getFitTypeEnum(), getUser());
+                List<Map<String, Object>> plates = new ArrayList<>();
+
+                // serialize the plates
+                plates.addAll(assay.getPlates().stream().map(NabAssayController.this::serializePlate).collect(Collectors.toList()));
+                response.put("plates", plates);
+
+                List<Map<String, Object>> dilutionSummaries = new ArrayList<>();
+                response.put("dilutionSummaries", dilutionSummaries);
+                for (DilutionAssayRun.SampleResult sampleResult : assay.getSampleResults())
+                {
+                    DilutionSummary summary = sampleResult.getDilutionSummary();
+                    Map<String, Object> summaryMap = serializeDilutionSummary(form, summary);
+
+                    ActionURL graphUrl = PageFlowUtil.urlProvider(NabUrls.class).urlGraph(getContainer());
+                    graphUrl.addParameter("rowId", form.getRowId())
+                        .addParameter("maxSamples", 1);
+
+                    summaryMap.put("graphUrl", graphUrl.getLocalURIString());
+
+                    dilutionSummaries.add(summaryMap);
+                }
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+            }
+
+            return response;
+        }
+    }
+
+    private Map<String, Object> serializePlate(Plate plate)
+    {
+        Map<String, Object> o = new HashMap<>();
+        List<String> columnLabel = new ArrayList<>();
+
+        o.put("plateName", "Plate " + plate.getPlateNumber());
+        o.put("columnLabel", columnLabel);
+
+        WellGroup virusGroup = plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.VIRUS_CONTROL_SAMPLE);
+        WellGroup cellGroup = plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.CELL_CONTROL_SAMPLE);
+
+        Set<Integer> colPos = new TreeSet<>();
+        Set<Integer> rowPos = new TreeSet<>();
+        List<Integer> colOrder = new ArrayList<>();
+        for (Position position : virusGroup.getPositions())
+        {
+            colPos.add(position.getColumn());
+            rowPos.add(position.getRow());
+        }
+        colOrder.addAll(colPos);
+        colPos.clear();
+        for (Position position : cellGroup.getPositions())
+        {
+            colPos.add(position.getColumn());
+            rowPos.add(position.getRow());
+        }
+
+        colOrder.addAll(colPos);
+        for (Integer col : colOrder)
+        {
+            columnLabel.add(String.valueOf(col+1));
+        }
+
+        List<List<Map<String, Object>>> rows = new ArrayList<>();
+        o.put("rows", rows);
+        for (Integer row : rowPos)
+        {
+            List<Map<String, Object>> r = new ArrayList<>();
+            for (Integer col : colOrder)
+            {
+                Map<String, Object> well = new HashMap<>();
+
+                well.put("col", col);
+                well.put("row", row);
+                well.put("value", plate.getWell(row, col).getValue());
+                r.add(well);
+            }
+            rows.add(r);
+        }
+        return o;
+    }
+
+    private Map<String, Object> serializeDilutionSummary(RenderAssayBean form, DilutionSummary summary) throws FitFailedException
+    {
+        Map<String, Object> o = new HashMap<>();
+        DecimalFormat shortDecFormat = new DecimalFormat("0.###");
+
+        o.put("name", summary.getFirstWellGroup().getName());
+        o.put("methodLabel", summary.getMethod().getAbbreviation());
+        o.put("neutLabel", form.getNeutralizationAbrev());
+
+        List<Map<String, Object>> dilutions = new ArrayList<>();
+        o.put("dilutions", dilutions);
+
+        for (WellData data : summary.getWellData())
+        {
+            Map<String, Object> row = new HashMap<>();
+            dilutions.add(row);
+
+            row.put("dilution", shortDecFormat.format(data.getDilution()));
+            row.put("neut", Luc5Assay.percentString(summary.getPercent(data)));
+            row.put("neutPlusMinus", Luc5Assay.percentString(summary.getPlusMinus(data)));
+            row.put("sampleName", summary.getFirstWellGroup().getName());
+
+            if (data instanceof WellGroup)
+            {
+                Plate plate = data.getPlate();
+                List<Map<String, Object>> wells = new ArrayList<>();
+                row.put("wells", wells);
+                for (Position pos : ((WellGroup)data).getPositions())
+                {
+                    Map<String, Object> well = new HashMap<>();
+
+                    well.put("col", pos.getColumn());
+                    well.put("row", pos.getRow());
+                    well.put("value", plate.getWell(pos.getRow(), pos.getColumn()).getValue());
+                    well.put("plateNum", plate.getPlateNumber());
+
+                    wells.add(well);
+                }
+            }
+        }
+        return o;
     }
 }
