@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.StringExpression;
+import org.labkey.data.xml.StringExpressionType;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -94,5 +95,13 @@ public class ProteinStringExpression implements StringExpression, Cloneable
     public JdbcType getJdbcParameterType()
     {
         return JdbcType.VARCHAR;
+    }
+
+    @Override
+    public StringExpressionType toXML()
+    {
+        StringExpressionType xurl = StringExpressionType.Factory.newInstance();
+        xurl.setStringValue(_localURI);
+        return xurl;
     }
 }
