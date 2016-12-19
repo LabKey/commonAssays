@@ -149,27 +149,33 @@ public class LuminexController extends SpringActionController
 
             AssayView result = new AssayView();
             LuminexProtocolSchema schema = new LuminexProtocolSchema(getUser(), getContainer(), (LuminexAssayProvider)provider, _protocol, null);
-            QuerySettings runsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME);
-            QueryView runsView = createQueryView(runsSetting, schema, errors);
-            runsView.setTitle("Excluded Analytes");
-            runsView.setTitlePopupHelp("Excluded Analytes", "Shows all of the analytes that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
-            result.setupViews(runsView, false, form.getProvider(), form.getProtocol());
 
-            QuerySettings titrationsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.TITRATION_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.TITRATION_EXCLUSION_TABLE_NAME);
-            QueryView titrationsView = createQueryView(titrationsSetting, schema, errors);
-            titrationsView.setTitle("Excluded Titrations");
-            titrationsView.setTitlePopupHelp("Excluded Titrations", "Shows all of the titrations that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
-            result.addView(titrationsView);
+            String queryName = LuminexProtocolSchema.RUN_EXCLUSION_TABLE_NAME;
+            result.setupViews(getExcludedQueryView(schema, queryName, "Analyte", errors), false, form.getProvider(), form.getProtocol());
 
-            QuerySettings wellsSetting = new QuerySettings(getViewContext(), LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME, LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME);
-            QueryView wellsView = createQueryView(wellsSetting, schema, errors);
-            wellsView.setTitle("Excluded Wells");
-            wellsView.setTitlePopupHelp("Excluded Wells", "Shows all of the wells that have been marked as excluded in individual runs in this folder. Data may be marked as excluded from the results views.");
-            result.addView(wellsView);
+            queryName = LuminexProtocolSchema.TITRATION_EXCLUSION_TABLE_NAME;
+            result.addView(getExcludedQueryView(schema, queryName, "Titration", errors));
+
+            queryName = LuminexProtocolSchema.SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME;
+            result.addView(getExcludedQueryView(schema, queryName, "Singlepoint Unknown", errors));
+
+            queryName = LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME;
+            result.addView(getExcludedQueryView(schema, queryName, "Well", errors));
 
             setHelpTopic(new HelpTopic("excludeAnalytes"));
 
             return result;
+        }
+
+        private QueryView getExcludedQueryView(LuminexProtocolSchema schema, String queryName, String noun, BindException errors)
+        {
+            QuerySettings settings = new QuerySettings(getViewContext(), queryName, queryName);
+            QueryView view = createQueryView(settings, schema, errors);
+            view.setTitle("Excluded " + noun + "s");
+            String helpText = "Shows all of the " + noun.toLowerCase() + "s that have been marked as excluded in "
+                    + "individual runs in this folder. Data may be marked as excluded from the results views.";
+            view.setTitlePopupHelp("Excluded " + noun + "s", helpText);
+            return view;
         }
 
         private QueryView createQueryView(QuerySettings settings, UserSchema schema, BindException errors)

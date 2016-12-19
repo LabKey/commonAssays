@@ -6,8 +6,8 @@
 
 Ext.namespace('LABKEY');
 
-// function called onclick of Exclusion Toggle to open the well exclusion window 
-function wellExclusionWindow(assayId, runId, dataId, description, type)
+// function called onclick of Exclusion Toggle to open the well exclusion window
+function openExclusionsWellWindow(assayId, runId, dataId, description, type)
 {
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
@@ -24,7 +24,7 @@ function wellExclusionWindow(assayId, runId, dataId, description, type)
                     modal: true,
                     closeAction:'close',
                     bodyStyle: 'background-color: white;',
-                    items: new LABKEY.WellExclusionPanel({
+                    items: new LABKEY.Exclusions.WellPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
                         runId: runId,
@@ -49,7 +49,7 @@ function wellExclusionWindow(assayId, runId, dataId, description, type)
 }
 
 /**
- * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
+ * Class to display panel for selecting which analytes for a given replicate group to exclude from a Luminex run
  * @params protocolSchemaName = the encoded protocol schema name to use (based on the assay design name)
  * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
@@ -57,13 +57,13 @@ function wellExclusionWindow(assayId, runId, dataId, description, type)
  * @params description = description for the selected replicate group
  * @params type = type for the selected replicate group (i.e. S1, C2, X3, etc.)
  */
-LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
+LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
     constructor : function(config){
         // check that the config properties needed are present
         if (!config.dataId || !config.type)
             throw "You must specify the following: dataId, and type!";
 
-        LABKEY.WellExclusionPanel.superclass.constructor.call(this, config);
+        LABKEY.Exclusions.WellPanel.superclass.constructor.call(this, config);
     },
 
     initComponent : function() {
@@ -75,7 +75,7 @@ LABKEY.WellExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         ];
         this.queryExistingExclusions('WellExclusion', filterArray, 'RowId,Comment,Analytes/RowId');
 
-        LABKEY.WellExclusionPanel.superclass.initComponent.call(this);
+        LABKEY.Exclusions.WellPanel.superclass.initComponent.call(this);
     },
 
     setupWindowPanelItems: function()

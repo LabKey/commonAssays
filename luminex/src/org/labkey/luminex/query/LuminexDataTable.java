@@ -74,6 +74,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     public static final String EXCLUSION_WELL_GROUP_COMMENT = "Excluded for well replicate group";
     public static final String EXCLUSION_ANALYTE_COMMENT = "Excluded for analyte";
     public static final String EXCLUSION_TITRATION_COMMENT = "Excluded for titration";
+    public static final String EXCLUSION_SINGLEPOINT_UNKNOWN_COMMENT = "Excluded for singlepoint unknown";
 
     public static final Map<String, String> REMAPPED_SCHEMA_COLUMNS;
 
@@ -228,66 +229,20 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey(_userSchema));
 
-        SQLFragment repGroupCaseStatement = new SQLFragment();
-        repGroupCaseStatement.append("(CASE WHEN we.Comment IS NOT NULL THEN ");
-        repGroupCaseStatement.append(getSqlDialect().concatenate(new SQLFragment("': '"), new SQLFragment("we.Comment")));
-        repGroupCaseStatement.append(" ELSE '' END)");
-
-        SQLFragment analyteCaseStatement = new SQLFragment();
-        analyteCaseStatement.append("(CASE WHEN re.Comment IS NOT NULL THEN ");
-        analyteCaseStatement.append(getSqlDialect().concatenate(new SQLFragment("': '"), new SQLFragment("re.Comment")));
-        analyteCaseStatement.append(" ELSE '' END)");
-
-        SQLFragment exclusionUnionSQL = new SQLFragment();
-        exclusionUnionSQL.append("SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_WELL_GROUP_COMMENT + "'"), repGroupCaseStatement));
-        exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
-        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we");
-        exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea");
-        exclusionUnionSQL.append(" WHERE we.RowId = wea.WellExclusionId AND ");
-        exclusionUnionSQL.append(" (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL)) AND ");
-        exclusionUnionSQL.append("(we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL)) AND ");
-        exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
-        exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
-        exclusionUnionSQL.append(" UNION SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_ANALYTE_COMMENT + "'"), analyteCaseStatement));
-        exclusionUnionSQL.append(" AS Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
-        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoRunExclusion(), "re");
-        exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "rea");
-        exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(ExperimentService.get().getTinfoData(), "d");
-        exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
-        exclusionUnionSQL.append(" WHERE re.RunId = rea.RunId AND re.RunId = pa.RunId AND pa.RowId = d.SourceApplicationId AND d.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId AND ");
-        exclusionUnionSQL.append("(rea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
-        exclusionUnionSQL.append(" UNION SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_TITRATION_COMMENT + "'"), repGroupCaseStatement));
-        exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
-        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we");
-        exclusionUnionSQL.append(", ");
-        exclusionUnionSQL.append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea");
-        exclusionUnionSQL.append(" WHERE we.RowId = wea.WellExclusionId AND ");
-        exclusionUnionSQL.append(" (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL)) AND ");
-        exclusionUnionSQL.append("(we.Type IS NULL) AND ");
-        exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
-        exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
-
-        SQLFragment excludedSQL = new SQLFragment("CASE WHEN (SELECT COUNT(*) FROM (");
-        excludedSQL.append(exclusionUnionSQL);
-        excludedSQL.append(") x) = 0 THEN ? ELSE ? END ");
-        excludedSQL.add(Boolean.FALSE);
-        excludedSQL.add(Boolean.TRUE);
+        SQLFragment excludedSQL = new SQLFragment("CASE WHEN (SELECT COUNT(*) FROM (")
+            .append(getExclusionsUnionSQL())
+            .append(") x) = 0 THEN ? ELSE ? END ")
+            .add(Boolean.FALSE)
+            .add(Boolean.TRUE);
         ExprColumn exclusionColumn = new ExprColumn(this, FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedSQL, JdbcType.BOOLEAN);
         exclusionColumn.setFormat("yes;no;");
         addColumn(exclusionColumn);
 
         // Issue 21823: use the max comment, i.e. if we have a well replicate group and an analyte exclusion for a row
-        // we want to know the lowest level exclusion. Order will be Well Replicate Group, Titration, Analyte.
-        SQLFragment exclusionCommentSQL = new SQLFragment("(SELECT MAX(Comment) FROM (");
-        exclusionCommentSQL.append(exclusionUnionSQL);
-        exclusionCommentSQL.append(") x)");
+        // we want to know the lowest level exclusion. Order will be Well Replicate Group, Singlepoint Unknown, Titration, Analyte.
+        SQLFragment exclusionCommentSQL = new SQLFragment("(SELECT MAX(Comment) FROM (")
+            .append(getExclusionsUnionSQL())
+            .append(") x)");
         ExprColumn exclusionReasonColumn = new ExprColumn(this, EXCLUSION_COMMENT_COLUMN_NAME, exclusionCommentSQL, JdbcType.VARCHAR);
         addColumn(exclusionReasonColumn);
 
@@ -367,6 +322,65 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         SQLFragment containerFilter = new SQLFragment("Container = ?");
         containerFilter.add(_userSchema.getContainer().getId());
         addCondition(containerFilter, FieldKey.fromParts("Container"));
+    }
+
+    private SQLFragment getExclusionsUnionSQL()
+    {
+        SQLFragment wellExclusionBase = new SQLFragment("we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ")
+            .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(", ")
+            .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea")
+            .append("\nWHERE we.RowId = wea.WellExclusionId");
+
+        SQLFragment dataIdWhereClause = new SQLFragment("\n AND (we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL))");
+        SQLFragment analyteIdWhereClause = new SQLFragment("\n AND (wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
+
+        SQLFragment analyteCaseStatement = new SQLFragment()
+            .append("(CASE WHEN re.Comment IS NOT NULL THEN ")
+            .append(getSqlDialect().concatenate(new SQLFragment("': '"), new SQLFragment("re.Comment")))
+            .append(" ELSE '' END)");
+
+        SQLFragment repGroupCaseStatement = new SQLFragment()
+            .append("(CASE WHEN we.Comment IS NOT NULL THEN ")
+            .append(getSqlDialect().concatenate(new SQLFragment("': '"), new SQLFragment("we.Comment")))
+            .append(" ELSE '' END)");
+
+        SQLFragment exclusionUnionSQL = new SQLFragment()
+            /* Analyte Exclusions */
+            .append(" SELECT ")
+            .append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_ANALYTE_COMMENT + "'"), analyteCaseStatement)).append(" AS Comment, ")
+            .append("\nre.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ")
+            .append(LuminexProtocolSchema.getTableInfoRunExclusion(), "re").append(", ")
+            .append(LuminexProtocolSchema.getTableInfoRunExclusionAnalyte(), "rea").append(", ")
+            .append(ExperimentService.get().getTinfoData(), "d").append(", ")
+            .append(ExperimentService.get().getTinfoProtocolApplication(), "pa")
+            .append("\nWHERE re.RunId = rea.RunId AND re.RunId = pa.RunId AND pa.RowId = d.SourceApplicationId AND d.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId")
+            .append("\nAND (rea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)")
+            /* Titration Exclusions */
+            .append("\nUNION SELECT ")
+            .append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_TITRATION_COMMENT + "'"), repGroupCaseStatement)).append(" AS Comment, ")
+            .append(wellExclusionBase)
+            .append("\n AND (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL))")
+            .append("\n AND (we.Type IS NULL)")
+            .append("\n AND (we.Dilution IS NULL)")
+            .append(dataIdWhereClause).append(analyteIdWhereClause)
+            /* Singlepoint Unknown Exclusions */
+            .append("\nUNION SELECT ")
+            .append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_SINGLEPOINT_UNKNOWN_COMMENT + "'"), repGroupCaseStatement)).append(" AS Comment, ")
+            .append(wellExclusionBase)
+            .append("\n AND (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL))")
+            .append("\n AND (we.Type IS NULL)")
+            .append("\n AND (we.Dilution = " + ExprColumn.STR_TABLE_ALIAS + ".Dilution OR (we.Dilution IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Dilution IS NULL))")
+            .append(dataIdWhereClause).append(analyteIdWhereClause)
+            /* Well Exclusions */
+            .append("\nUNION SELECT ")
+            .append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_WELL_GROUP_COMMENT + "'"), repGroupCaseStatement)).append(" AS Comment, ")
+            .append(wellExclusionBase)
+            .append("\n AND (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL))")
+            .append("\n AND (we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL))")
+            .append("\n AND (we.Dilution IS NULL)")
+            .append(dataIdWhereClause).append(analyteIdWhereClause);
+
+        return exclusionUnionSQL;
     }
 
     @Override

@@ -6,8 +6,11 @@
 
 Ext.namespace('LABKEY');
 
+if (!LABKEY.Exclusions)
+    LABKEY.Exclusions = {};
+
 // function called onclick of 'Exclude Analytes' button to open the run exclusion window 
-function analyteExclusionWindow(assayId, runId)
+function openExclusionsAnalyteWindow(assayId, runId)
 {
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
@@ -24,7 +27,7 @@ function analyteExclusionWindow(assayId, runId)
                     modal: true,
                     closeAction:'close',
                     bodyStyle: 'background-color: white;',
-                    items: new LABKEY.AnalyteExclusionPanel({
+                    items: new LABKEY.Exclusions.AnalytePanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
                         runId: runId,
@@ -46,18 +49,18 @@ function analyteExclusionWindow(assayId, runId)
 }
 
 /**
- * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
+ * Class to display panel for selecting which analytes to exclude from a Luminex run
  * @params protocolSchemaName = the encoded protocol schema name to use (based on the assay design name)
  * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
  */
-LABKEY.AnalyteExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
+LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     initComponent : function() {
         // query the RunExclusion table to see if there are any existing exclusions for this run
         this.queryExistingExclusions('RunExclusion', [LABKEY.Filter.create('runId', this.runId)], 'RunId,Comment,Analytes/RowId');
 
-        LABKEY.AnalyteExclusionPanel.superclass.initComponent.call(this);
+        LABKEY.Exclusions.AnalytePanel.superclass.initComponent.call(this);
     },
 
     setupWindowPanelItems: function()

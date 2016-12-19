@@ -6,7 +6,10 @@
 
 Ext.namespace('LABKEY');
 
-LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
+if (!LABKEY.Exclusions)
+    LABKEY.Exclusions = {};
+
+LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 
     constructor : function(config){
         // check that the config properties needed are present
@@ -26,7 +29,7 @@ LABKEY.BaseExclusionPanel = Ext.extend(Ext.Panel, {
         });
 
         this.addEvents('closeWindow');
-        LABKEY.BaseExclusionPanel.superclass.constructor.call(this, config);
+        LABKEY.Exclusions.BasePanel.superclass.constructor.call(this, config);
     },
 
     queryExistingExclusions : function(queryName, filterArray, columns) {

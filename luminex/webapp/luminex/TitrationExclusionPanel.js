@@ -6,8 +6,8 @@
 
 Ext.namespace('LABKEY');
 
-// function called onclick of 'Exclude Analytes' button to open the run exclusion window 
-function titrationExclusionWindow(assayId, runId)
+// function called onclick of 'Exclude Titrations' menu button to open the exclusion window
+function openExclusionsTitrationWindow(assayId, runId)
 {
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
@@ -24,7 +24,7 @@ function titrationExclusionWindow(assayId, runId)
                     modal: true,
                     closeAction:'close',
                     bodyStyle: 'background-color: white;',
-                    items: new LABKEY.TitrationExclusionPanel({
+                    items: new LABKEY.Exclusions.TitrationPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
                         runId: runId,
@@ -46,12 +46,12 @@ function titrationExclusionWindow(assayId, runId)
 }
 
 /**
- * Class to display panel for selecting which analytes for a given replicate group to exlude from a Luminex run
+ * Class to display panel for selecting which titrations to exclude from a Luminex run
  * @params protocolSchemaName = the encoded protocol schema name to use (based on the assay design name)
  * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
  */
-LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
+LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     initComponent : function() {
         this.excluded = [];
@@ -61,7 +61,7 @@ LABKEY.TitrationExclusionPanel = Ext.extend(LABKEY.BaseExclusionPanel, {
         this.preExcludedIds = [];
         this.preAnalyteRowIds = [];
 
-        LABKEY.TitrationExclusionPanel.superclass.initComponent.call(this);
+        LABKEY.Exclusions.TitrationPanel.superclass.initComponent.call(this);
 
         this.setupWindowPanelItems();
     },

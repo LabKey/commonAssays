@@ -351,7 +351,7 @@ public final class LuminexPositivityTest extends LuminexTest
     private void checkPositivityValues(String type, int numExpected, String[] positivityWells)
     {
         // verify that we are already on the Data results view
-        assertElementPresent(Locator.tagWithText("span", "Exclude Analytes"));
+        assertElementPresent(Locator.tagWithText("span", "Exclusions"));
 
         assertTextPresent(type, numExpected);
 

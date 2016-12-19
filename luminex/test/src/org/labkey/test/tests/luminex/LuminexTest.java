@@ -270,7 +270,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public void excludeAnalyteForRun(String analyte, boolean firstExclusion, String comment)
     {
-        clickButtonContainingText("Exclude Analytes", 0);
+        _extHelper.clickMenuButton(false, "Exclusions", "Exclude Analytes");
         _extHelper.waitForExtDialog("Exclude Analytes from Analysis");
         if (!firstExclusion)
             waitForText("Uncheck analytes to remove exclusions");
@@ -312,21 +312,18 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobId, String...analytes)
     {
-        clickButton("Exclude Titration","Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions" );
-        waitForElement(Locator.xpath("//td/div").withText(titration));
-        click(Locator.xpath("//td/div").withText(titration));
-        if(analytes == null || analytes.length == 0)
+        _extHelper.clickMenuButton(false, "Exclusions", "Exclude Titrations");
+        _extHelper.waitForExtDialog("Exclude Titrations from Analysis");
+        assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions"));
+        waitAndClick(Locator.xpath("//td/div").withText(titration));
+        if (analytes == null || analytes.length == 0)
         {
-            waitForElement(AVAILABLE_ANALYTES_CHECKBOX);
-            click(AVAILABLE_ANALYTES_CHECKBOX);
+            waitAndClick(AVAILABLE_ANALYTES_CHECKBOX);
         }
         else
         {
-            for(String analyte:analytes)
-            {
-                waitForElement(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
-                click(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
-            }
+            for (String analyte : analytes)
+                waitAndClick(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
         }
         setFormElement(COMMENT_LOCATOR, exclusionMessage);
         sleep(1000);

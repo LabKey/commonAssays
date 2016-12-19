@@ -540,6 +540,7 @@ luminex/resources/schemas/dbscripts/postgresql/luminex-14.30-15.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-16.20-16.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-16.20-16.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-16.21-16.22.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-16.30-16.31.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-11.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-12.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-13.30.sql -text
@@ -562,6 +563,7 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-14.30-15.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-16.20-16.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-16.20-16.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-16.21-16.22.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-16.30-16.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-11.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-13.30.sql -text
@@ -689,6 +691,7 @@ luminex/webapp/luminex/LeveyJenningsTrackingDataPanel.js -text
 luminex/webapp/luminex/LeveyJenningsTrendPlotPanel.js -text
 luminex/webapp/luminex/ManageGuideSetPanel.js -text
 luminex/webapp/luminex/NegativeBeadPopulation.js -text
+luminex/webapp/luminex/SinglepointUnknownExclusionPanel.js -text
 luminex/webapp/luminex/TitrationExclusionPanel.js -text
 luminex/webapp/luminex/WellExclusionPanel.js -text
 luminex/webapp/luminex/excluded.png -text

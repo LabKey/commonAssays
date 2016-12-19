@@ -94,7 +94,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
         if (canEdit)
         {
-            out.write("<a onclick=\"wellExclusionWindow(" + _protocolId + ", " + runId + ", " + dataId + ", "
+            out.write("<a onclick=\"openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", "
                 + (description == null ? null : "'" + description + "'") + ", '" + type + "');\">");
         }
 

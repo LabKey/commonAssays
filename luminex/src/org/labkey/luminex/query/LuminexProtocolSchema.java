@@ -20,7 +20,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -32,6 +31,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -63,6 +63,7 @@ import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.luminex.LuminexAssayProvider;
@@ -97,6 +98,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     public static final String DATA_FILE_TABLE_NAME = "DataFile";
     public static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";
     public static final String TITRATION_EXCLUSION_TABLE_NAME = "TitrationExclusion";
+    public static final String SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME = "SinglepointUnknownExclusion";
     public static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
     public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
     public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
@@ -128,6 +130,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.add(DATA_FILE_TABLE_NAME);
         result.add(WELL_EXCLUSION_TABLE_NAME);
         result.add(TITRATION_EXCLUSION_TABLE_NAME);
+        result.add(SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME);
         result.add(RUN_EXCLUSION_TABLE_NAME);
         result.add(CURVE_FIT_TABLE_NAME);
         result.add(GUIDE_SET_TABLE_NAME);
@@ -166,14 +169,17 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             {
                 return createAnalyteTable(true);
             }
+
             if (TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createTitrationTable(true);
             }
+
             if (GUIDE_SET_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createGuideSetTable(true);
             }
+
             if (ANALYTE_TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 AnalyteTitrationTable result = createAnalyteTitrationTable(true);
@@ -185,6 +191,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 result.addCondition(filter, FieldKey.fromParts("RunId"));
                 return result;
             }
+
             if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 ExpDataTable result = createDataFileTable();
@@ -193,20 +200,26 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 result.addCondition(filter, FieldKey.fromParts("RowId"));
                 return result;
             }
+
             if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createWellExclusionTable(true);
                 result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.NONBLANK));
+                result.removeColumn(new ColumnInfo("Dilution"));
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
                 return result;
             }
-            if(TITRATION_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
+
+            if (TITRATION_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createWellExclusionTable(true);
                 result.setName(TITRATION_EXCLUSION_TABLE_NAME);
-                result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK));
+                SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
+                exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.ISBLANK);
+                result.addCondition(exclusionFilter);
+                result.removeColumn(new ColumnInfo("Dilution"));
                 result.removeColumn(new ColumnInfo("Type"));
                 result.removeColumn(new ColumnInfo("Wells"));
                 result.removeColumn(new ColumnInfo("Well Role"));
@@ -215,6 +228,23 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
                 return result;
             }
+
+            if (SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                FilteredTable result = createWellExclusionTable(true);
+                result.setName(SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME);
+                SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
+                exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.NONBLANK);
+                result.addCondition(exclusionFilter);
+                result.removeColumn(new ColumnInfo("Type"));
+                result.removeColumn(new ColumnInfo("Wells"));
+                result.removeColumn(new ColumnInfo("Well Role"));
+                SQLFragment filter = new SQLFragment("DataId");
+                filter.append(createDataFilterInClause());
+                result.addCondition(filter, FieldKey.fromParts("DataId"));
+                return result;
+            }
+
             if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 CurveFitTable result = createCurveFitTable(true);
@@ -226,10 +256,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 result.addCondition(filter, FieldKey.fromParts("RunId"));
                 return result;
             }
+
             if (GUIDE_SET_CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createGuideSetCurveFitTable();
             }
+
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createRunExclusionTable(true);
@@ -243,27 +275,33 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 result.addCondition(filter, FieldKey.fromParts("RunId"));
                 return result;
             }
+
             if (ANALYTE_TITRATION_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createAnalyteTitrationQCFlagTable();
             }
+
             if (ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createAnalyteSinglePointControlQCFlagTable();
             }
+
             if (CV_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createCVQCFlagTable();
             }
+
             if (SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createSinglePointControlTable(true);
             }
+
             if (ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createAnalyteSinglePointControlTable(true);
             }
         }
+
         return super.createProviderTable(tableType);
     }
 
@@ -572,6 +610,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return getSchema().getTable(TITRATION_EXCLUSION_TABLE_NAME);
     }
 
+    public static TableInfo getTableInfoSinglepointUnknownExclusion()
+    {
+        return getSchema().getTable(SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME);
+    }
+
     public static TableInfo getTableInfoWellExclusionAnalyte()
     {
         return getSchema().getTable(WELL_EXCLUSION_ANALYTE_TABLE_NAME);
@@ -768,28 +811,35 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 DataView result = super.createDataView();
                 String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
 
-                // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
+                // if showing controls and user is viewing data results for a single run, add the Exclusions menu button to button bar
                 if (showControls() && runId != null && NumberUtils.isDigits(runId))
                 {
-                    ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
-                    excludeAnalytes.setScript("analyteExclusionWindow(" + getProtocol().getRowId() + ", " + runId + ");");
-                    excludeAnalytes.setDisplayPermission(UpdatePermission.class);
+                    MenuButton exclusionsMenu = new MenuButton("Exclusions");
+                    exclusionsMenu.setDisplayPermission(UpdatePermission.class);
 
+                    NavTree excludeAnalytes = new NavTree("Exclude Analytes");
+                    excludeAnalytes.setScript("openExclusionsAnalyteWindow(" + getProtocol().getRowId() + ", " + runId + ");");
+                    exclusionsMenu.addMenuItem(excludeAnalytes);
+
+                    // query to see if we have any non-Standard titrations in this run
                     SimpleFilter f = new SimpleFilter();
                     f.addCondition(FieldKey.fromParts("Standard"), false, CompareType.EQUAL);
                     f.addCondition(FieldKey.fromParts("Run"), Integer.parseInt(runId), CompareType.EQUAL);
                     TableSelector tbs = new TableSelector(getSchema().getTable("Titration"), f, null);
-
                     long rows = tbs.getRowCount();
-                    ActionButton excludeTitration = new ActionButton("Exclude Titration");
-                    if(rows == 0)
-                        excludeTitration.setVisible(false);
-                    excludeTitration.setScript("titrationExclusionWindow(" + getProtocol().getRowId() + ", " + runId + ");");
-                    excludeTitration.setDisplayPermission(UpdatePermission.class);
+                    if (rows > 0)
+                    {
+                        NavTree excludeTitration = new NavTree("Exclude Titrations");
+                        excludeTitration.setScript("openExclusionsTitrationWindow(" + getProtocol().getRowId() + ", " + runId + ");");
+                        exclusionsMenu.addMenuItem(excludeTitration);
+                    }
+
+                    NavTree excludeSinglepointUnknowns = new NavTree("Exclude Singlepoint Unknowns");
+                    excludeSinglepointUnknowns.setScript("openExclusionsSinglepointUnknownWindow(" + getProtocol().getRowId() + ", " + runId + ");");
+                    exclusionsMenu.addMenuItem(excludeSinglepointUnknowns);
 
                     ButtonBar buttonBar = new ButtonBar(result.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
-                    buttonBar.add(excludeAnalytes);
-                    buttonBar.add(excludeTitration);
+                    buttonBar.add(exclusionsMenu);
                     result.getDataRegion().setButtonBar(buttonBar, DataRegion.MODE_GRID);
                 }
                 return result;
