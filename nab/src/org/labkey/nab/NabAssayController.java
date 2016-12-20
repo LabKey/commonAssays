@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.CustomApiForm;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleErrorView;
@@ -72,6 +73,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.reports.model.ViewCategory;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.RequiresPermission;
@@ -148,7 +150,7 @@ public class NabAssayController extends SpringActionController
             GetStudyNabGraphURLAction.class,
             StudyNabGraphAction.class,
             GetStudyNabRunsAction.class
-        );
+    );
 
     public NabAssayController()
     {
@@ -718,7 +720,9 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    /** Avoid serializing the NAb run, since many of its child objects aren't serializable themselves */
+    /**
+     * Avoid serializing the NAb run, since many of its child objects aren't serializable themselves
+     */
     public static class NAbRunWrapper implements Serializable
     {
         private transient DilutionAssayRun _run;
@@ -804,6 +808,7 @@ public class NabAssayController extends SpringActionController
 
                 List<Map<String, Object>> dilutionSummaries = new ArrayList<>();
                 response.put("dilutionSummaries", dilutionSummaries);
+                int sampleNum = 0;
                 for (DilutionAssayRun.SampleResult sampleResult : assay.getSampleResults())
                 {
                     DilutionSummary summary = sampleResult.getDilutionSummary();
@@ -811,7 +816,8 @@ public class NabAssayController extends SpringActionController
 
                     ActionURL graphUrl = PageFlowUtil.urlProvider(NabUrls.class).urlGraph(getContainer());
                     graphUrl.addParameter("rowId", form.getRowId())
-                        .addParameter("maxSamples", 1);
+                            .addParameter("maxSamples", 1)
+                            .addParameter("firstSample", sampleNum++);
 
                     summaryMap.put("graphUrl", graphUrl.getLocalURIString());
 
@@ -827,13 +833,21 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    /**
+     * Serializes plate information for both control wells and the raw plate data
+     *
+     * @param plate
+     * @return
+     */
     private Map<String, Object> serializePlate(Plate plate)
     {
         Map<String, Object> o = new HashMap<>();
         List<String> columnLabel = new ArrayList<>();
 
         o.put("plateName", "Plate " + plate.getPlateNumber());
-        o.put("columnLabel", columnLabel);
+        Map<String, Object> controls = new HashMap<>();
+        o.put("controls", controls);
+        controls.put("columnLabel", columnLabel);
 
         WellGroup virusGroup = plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.VIRUS_CONTROL_SAMPLE);
         WellGroup cellGroup = plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.CELL_CONTROL_SAMPLE);
@@ -857,11 +871,11 @@ public class NabAssayController extends SpringActionController
         colOrder.addAll(colPos);
         for (Integer col : colOrder)
         {
-            columnLabel.add(String.valueOf(col+1));
+            columnLabel.add(String.valueOf(col + 1));
         }
 
         List<List<Map<String, Object>>> rows = new ArrayList<>();
-        o.put("rows", rows);
+        controls.put("rows", rows);
         for (Integer row : rowPos)
         {
             List<Map<String, Object>> r = new ArrayList<>();
@@ -869,12 +883,45 @@ public class NabAssayController extends SpringActionController
             {
                 Map<String, Object> well = new HashMap<>();
 
+                well.put("plate", plate.getPlateNumber());
                 well.put("col", col);
+                well.put("rowlabel", (char) ('A' + row));
                 well.put("row", row);
                 well.put("value", plate.getWell(row, col).getValue());
                 r.add(well);
             }
             rows.add(r);
+        }
+
+        // serialize all raw data from the plate
+        Map<String, Object> rawData = new HashMap<>();
+        List<List<Map<String, Object>>> data = new ArrayList<>();
+        List<String> colLabels = new ArrayList<>();
+
+        o.put("rawdata", rawData);
+        rawData.put("data", data);
+        rawData.put("columnLabel", colLabels);
+
+        for (int col = 0; col < plate.getColumns(); col++)
+        {
+            colLabels.add(String.valueOf(col + 1));
+        }
+
+        for (int rowIdx = 0; rowIdx < plate.getRows(); rowIdx++)
+        {
+            List<Map<String, Object>> row = new ArrayList<>();
+            data.add(row);
+            for (int col = 0; col < plate.getColumns(); col++)
+            {
+                Map<String, Object> well = new HashMap<>();
+
+                well.put("plate", plate.getPlateNumber());
+                well.put("col", col);
+                well.put("rowlabel", (char) ('A' + rowIdx));
+                well.put("row", rowIdx);
+                well.put("value", plate.getWell(rowIdx, col).getValue());
+                row.add(well);
+            }
         }
         return o;
     }
@@ -884,7 +931,10 @@ public class NabAssayController extends SpringActionController
         Map<String, Object> o = new HashMap<>();
         DecimalFormat shortDecFormat = new DecimalFormat("0.###");
 
-        o.put("name", summary.getFirstWellGroup().getName());
+        String sampleName = summary.getMaterialKey().getDisplayString(RunDetailOptions.DataIdentifier.Specimen);
+        if (sampleName == null)
+            sampleName = summary.getFirstWellGroup().getName();
+        o.put("name", sampleName);
         o.put("methodLabel", summary.getMethod().getAbbreviation());
         o.put("neutLabel", form.getNeutralizationAbrev());
 
@@ -899,19 +949,20 @@ public class NabAssayController extends SpringActionController
             row.put("dilution", shortDecFormat.format(data.getDilution()));
             row.put("neut", Luc5Assay.percentString(summary.getPercent(data)));
             row.put("neutPlusMinus", Luc5Assay.percentString(summary.getPlusMinus(data)));
-            row.put("sampleName", summary.getFirstWellGroup().getName());
+            row.put("sampleName", sampleName);
 
             if (data instanceof WellGroup)
             {
                 Plate plate = data.getPlate();
                 List<Map<String, Object>> wells = new ArrayList<>();
                 row.put("wells", wells);
-                for (Position pos : ((WellGroup)data).getPositions())
+                for (Position pos : ((WellGroup) data).getPositions())
                 {
                     Map<String, Object> well = new HashMap<>();
 
                     well.put("col", pos.getColumn());
                     well.put("row", pos.getRow());
+                    well.put("rowlabel", (char) ('A' + pos.getRow()));
                     well.put("value", plate.getWell(pos.getRow(), pos.getColumn()).getValue());
                     well.put("plateNum", plate.getPlateNumber());
 
@@ -920,5 +971,38 @@ public class NabAssayController extends SpringActionController
             }
         }
         return o;
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class SaveQCControlInfoAction extends ApiAction<QCControlInfo>
+    {
+        @Override
+        public Object execute(QCControlInfo form, BindException errors) throws Exception
+        {
+            return null;
+        }
+    }
+
+    public static class QCControlInfo implements CustomApiForm
+    {
+        private List<Map<String, Object>> _exclusions = new ArrayList<>();
+
+        @Override
+        public void bindProperties(Map<String, Object> props)
+        {
+            Object excludedProp = props.get("excluded");
+            if (excludedProp != null)
+            {
+                for (JSONObject excluded : ((JSONArray) excludedProp).toJSONObjectArray())
+                {
+                    Map<String, Object> exclusion = new HashMap<>();
+
+                    exclusion.put("row", excluded.getInt("row"));
+                    exclusion.put("col", excluded.getInt("col"));
+                    exclusion.put("plate", excluded.getInt("plate"));
+                    _exclusions.add(exclusion);
+                }
+            }
+        }
     }
 }

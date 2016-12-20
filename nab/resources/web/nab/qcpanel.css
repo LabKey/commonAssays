@@ -1,0 +1,30 @@
+/*
+ * Copyright (c) 2012-2015 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+div.plate-columnlabel {
+    width : 53px;
+    height : 40px;
+    text-align : center;
+}
+
+div.plate-rowlabel {
+    width : 45px;
+    height : 40px;
+    text-align : center;
+}
+
+div.plate-well-td-div {
+    border : 1px solid gray;
+    width : 49px;
+    height : 35px;
+    vertical-align : middle;
+    text-align : center;
+    background-color : #AAAAAA;
+}
+
+a.labkey-cls-spotcount, a.labkey-cls-activity, a.labkey-cls-intensity, a.labkey-cls-spotsize {
+    color : white;
+}

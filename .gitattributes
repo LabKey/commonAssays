@@ -1484,6 +1484,7 @@ nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-15.20-15.21.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-15.21-15.22.sql -text
 nab/resources/schemas/dbscripts/sqlserver/obsolete/nab-15.22-15.23.sql -text
 nab/resources/schemas/nab.xml -text
+nab/resources/web/nab/qcpanel.css -text
 nab/resources/web/nab/qcpanel.js -text
 nab/resources/web/nabqc.lib.xml -text
 nab/src/org/labkey/nab/AbstractNabManager.java -text
