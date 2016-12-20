@@ -314,8 +314,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         _extHelper.clickMenuButton(false, "Exclusions", "Exclude Titrations");
         _extHelper.waitForExtDialog("Exclude Titrations from Analysis");
-        assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions"));
-        waitAndClick(Locator.xpath("//td/div").withText(titration));
+        assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a replicate group, singlepoint unknown, "
+                + "or at the assay level will not be re-included by changes in titration exclusions."));
+
+        waitAndClick(Locator.tagWithClass("div", "x-grid3-cell-inner").withText(titration));
         if (analytes == null || analytes.length == 0)
         {
             waitAndClick(AVAILABLE_ANALYTES_CHECKBOX);

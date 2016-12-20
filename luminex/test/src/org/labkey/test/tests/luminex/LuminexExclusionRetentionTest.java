@@ -132,7 +132,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         assertTextNotPresent(wellNonMatchTypeComment);
         assertTextNotPresent(wellNonMatchDescriptionComment);
         assertTextNotPresent(changedAnalyte);
-        assertTextPresent("No data to show.", 2);
+        assertTextPresent("No data to show.", 3);
     }
 
     @Test
@@ -152,7 +152,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextPresent(titrationMatchComment);
         assertTextPresent(matchingAnalyte);
-        assertTextPresent("No data to show.", 2);
+        assertTextPresent("No data to show.", 3);
 
         goToTestAssayHome();
         clickAndWait(Locator.linkContainingText(RUN_NAME));
@@ -167,7 +167,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextNotPresent(titrationMatchComment);
         assertTextNotPresent(matchingAnalyte);
-        assertTextPresent("No data to show.", 3);
+        assertTextPresent("No data to show.", 4);
     }
 
     @Test
@@ -189,7 +189,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextNotPresent(analyteNonMatchComment);
-        assertTextPresent("No data to show.", 3);
+        assertTextPresent("No data to show.", 4);
 
         goToTestAssayHome();
         clickAndWait(Locator.linkContainingText(RUN_NAME));
@@ -206,7 +206,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextPresent(analyteMatchComment);
         assertTextNotPresent(analyteNonMatchComment);
-        assertTextPresent("No data to show.", 2);
+        assertTextPresent("No data to show.", 3);
     }
 
     private void reimportAndReplaceRunFile(File replacedFile, File newFile, String titrationName)

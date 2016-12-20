@@ -18,7 +18,7 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
                     cls: 'extContainer',
                     title: 'Exclude Replicate Group from Analysis',
                     layout:'fit',
-                    width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
+                    width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
                     height: Ext.getBody().getViewSize().height > 595 ? 560 : Ext.getBody().getViewSize().height * .75,
                     padding: 15,
                     modal: true,
@@ -80,7 +80,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     setupWindowPanelItems: function()
     {
-        this.addHeaderPanel('Analytes excluded for a titration or at the assay level will not be re-included by changes in replicate group exclusions');
+        this.addHeaderPanel('Analytes excluded for a singlepoint unknown, titration, or at the assay level will not be re-included by changes in replicate group exclusions.');
 
         // radio group for selecting "exclude all" or "exclude selected"
         this.add(new Ext.form.FormPanel({
@@ -189,7 +189,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             colModel: new Ext.grid.ColumnModel({
                 columns: [
                     selMod,
-                    {header: 'Available Analytes', sortable: false, dataIndex: 'Name', menuDisabled: true}
+                    {header: 'Analyte Name', sortable: false, dataIndex: 'Name', menuDisabled: true}
                 ]
             }),
             viewConfig: {

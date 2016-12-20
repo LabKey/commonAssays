@@ -21,7 +21,7 @@ function openExclusionsAnalyteWindow(assayId, runId)
                     cls: 'extContainer',
                     title: 'Exclude Analytes from Analysis',
                     layout:'fit',
-                    width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
+                    width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
                     height: Ext.getBody().getViewSize().height > 500 ? 460 : Ext.getBody().getViewSize().height * .75,
                     padding: 15,
                     modal: true,
@@ -65,7 +65,7 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     setupWindowPanelItems: function()
     {
-        this.addHeaderPanel('Analytes excluded for a replicate group or titration will not be re-included by changes in assay level exclusions');
+        this.addHeaderPanel('Analytes excluded for a replicate group, singlepoint unknown, or titration will not be re-included by changes in assay level exclusions.');
 
         var selMod = this.getGridCheckboxSelectionModel();
 
@@ -111,7 +111,7 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             colModel: new Ext.grid.ColumnModel({
                 columns: [
                     selMod,
-                    {header: 'Available Analytes', sortable: false, dataIndex: 'Name', menuDisabled: true}
+                    {header: 'Analyte Name', sortable: false, dataIndex: 'Name', menuDisabled: true}
                 ]
             }),
             autoExpandColumn: 'Name',

@@ -401,14 +401,16 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexController.ExcludedDataAction.class);
         if (containerFilter != null && containerFilter.getType() != null)
         {
-            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
             url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " SinglepointUnknownExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
             url.addParameter(protocol.getName() + " TitrationExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
         if (null != currentRunId)
         {
-            url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
             url.addParameter("RunExclusion.RunId~eq", currentRunId);
+            url.addParameter("WellExclusion.DataId/Run/RowId~eq", currentRunId);
+            url.addParameter("SinglepointUnknownExclusion.DataId/Run/RowId~eq", currentRunId);
             url.addParameter("TitrationExclusion.DataId/Run/RowId~eq", currentRunId);
         }
 

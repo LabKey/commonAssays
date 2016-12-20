@@ -2,9 +2,9 @@
     <library compileInProductionMode="false">
         <script path="luminex/BaseExclusionPanel.js"/>
         <script path="luminex/WellExclusionPanel.js"/>
-        <script path="luminex/AnalyteExclusionPanel.js"/>
-        <script path="luminex/TitrationExclusionPanel.js"/>
         <script path="luminex/SinglepointUnknownExclusionPanel.js"/>
+        <script path="luminex/TitrationExclusionPanel.js"/>
+        <script path="luminex/AnalyteExclusionPanel.js"/>
         <script path="luminex/Exclusion.css"/>
     </library>
     <dependencies>

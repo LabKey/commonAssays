@@ -18,7 +18,7 @@ function openExclusionsTitrationWindow(assayId, runId)
                     cls: 'extContainer',
                     title: 'Exclude Titrations from Analysis',
                     layout:'fit',
-                    width: Ext.getBody().getViewSize().width < 490 ? Ext.getBody().getViewSize().width * .9 : 440,
+                    width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
                     height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
                     padding: 15,
                     modal: true,
@@ -51,379 +51,259 @@ function openExclusionsTitrationWindow(assayId, runId)
  * @params assayId = the assay design RowId
  * @params runId = runId for the selected replicate group
  */
-LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
+LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnknownPanel, {
 
-    initComponent : function() {
-        this.excluded = [];
-        this.comments = [];
-        this.excludedDataIds = [];
-        this.present = [];
-        this.preExcludedIds = [];
-        this.preAnalyteRowIds = [];
+    DISPLAY_NOUN : 'Titration',
 
-        LABKEY.Exclusions.TitrationPanel.superclass.initComponent.call(this);
+    HEADER_TXT : 'Analytes excluded for a replicate group, singlepoint unknown, or at the assay level will not be '
+                    + 're-included by changes in titration exclusions.',
 
-        this.setupWindowPanelItems();
+    ITEM_RECORD_KEY : 'Name',
+
+    EXCLUSION_TABLE_NAME : 'TitrationExclusion',
+
+    EXCLUSION_INCLUDES_DILUTION : false,
+
+    getExclusionsStore : function()
+    {
+        if (!this.exclusionsStore)
+        {
+            this.exclusionsStore = new LABKEY.ext.Store({
+                schemaName: this.protocolSchemaName,
+                queryName: this.EXCLUSION_TABLE_NAME,
+                columns: 'Description,Analytes/RowId,RowId,Comment, DataId/Run',
+                filterArray : [
+                    LABKEY.Filter.create('DataId/Run', this.runId, LABKEY.Filter.Types.EQUALS)
+                ],
+                autoLoad : true,
+                listeners : {
+                    scope : this,
+                    load : function(store, records){
+                        // from r44407, multi valued fields come back as arrays. the LABKEY.ext.Store concats this back together
+                        // so use the json displayValue (which is a comma separate list of the values) instead
+                        Ext.each(records, function(record) {
+                            record.set('Analytes/RowId', record.json['Analytes/RowId'].displayValue);
+                        });
+
+                        this.getDistinctItemGridStore().load();
+                    },
+                    distinctitemgridloaded : function()
+                    {
+                        var records = this.exclusionsStore.data.items;
+                        var id;
+                        for (var i = 0; i < records.length; i++)
+                        {
+                            var analyteRowIds = records[i].get('Analytes/RowId');
+                            id = this.getCombinedItemAnalytesStore().findExact(this.ITEM_RECORD_KEY, records[i].get('Description'));
+                            this.preAnalyteRowIds[id] = analyteRowIds;
+                            this.preExcludedIds[id] = ("" + analyteRowIds).split(",");
+                            this.comments[id] = records[i].get('Comment');
+                        }
+                    }
+                }
+            });
+        }
+
+        return this.exclusionsStore;
     },
 
-    setupWindowPanelItems: function()
+    getDistinctItemGridStore : function()
     {
-        this.addHeaderPanel('Analytes excluded for a replicate group or at the assay level will not be re-included by changes in titration exclusions');
-
-        var titrationExclusionStore = new LABKEY.ext.Store({
-            schemaName: this.protocolSchemaName,
-            queryName: 'TitrationExclusion',
-            columns: 'Description,Analytes/RowId,RowId,Comment, DataId/Run',
-            filterArray : [
-                    LABKEY.Filter.create('DataId/Run', this.runId, LABKEY.Filter.Types.EQUALS)
-            ],
-            autoLoad : true,
-            listeners : {
-                load : function(store, records){
-                    // from r44407, multi valued fields come back as arrays. the LABKEY.ext.Store concats this back together
-                    // so use the json displayValue (which is a comma separate list of the values) instead
-                    Ext.each(records, function(record) {
-                        record.set('Analytes/RowId', record.json['Analytes/RowId'].displayValue);
-                    });
-
-                    titrationsGridStore.load();
-                },
-                titrationgridloaded : function()
-                {
-                    var records = titrationExclusionStore.data.items;
-                    var id;
-                    for(var i = 0; i < records.length; i++)
+        if (!this.distinctItemGridStore)
+        {
+            this.distinctItemGridStore = new LABKEY.ext.Store({
+                schemaName: this.protocolSchemaName,
+                sql : 'SELECT DISTINCT x.Titration.Name, x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId '
+                    + 'FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Titration.Standard != true '
+                    + 'AND x.Data.Run.RowId = ' + this.runId,
+                sort: this.ITEM_RECORD_KEY,
+                listeners : {
+                    scope : this,
+                    load : function(store, records)
                     {
-                        var analyteRowIds = records[i].get('Analytes/RowId');
-                        id = combinedStore.findExact('Name', records[i].data.Description);
-                        this.preAnalyteRowIds[id] = analyteRowIds;
-                        this.preExcludedIds[id] = ("" + analyteRowIds).split(",");
-                        this.comments[id] = records[i].get('Comment');
-                    }
-                },
-                scope : this
-            }
-        });
-
-        var selMod = this.getGridCheckboxSelectionModel();
-
-        this.titrationSelMod = new Ext.grid.RowSelectionModel({
-            singleSelect : true,
-            header : 'Available Titrations',
-            listeners : {
-                rowdeselect : function(tsl, rowId, record)
-                {
-                    this.excluded[rowId] = selMod.getSelections();
-                    this.excluded[rowId].name = record.data.Name;
-                    this.comments[rowId] = Ext.getCmp('comment').getValue();
-                    this.present[rowId] = selMod.getSelections().length;
-                    record.set('Present', this.present[rowId]);
-                    this.excludedDataIds[rowId] = record.data.DataId;
-                },
-                rowselect : function(tsl, rowId, record)
-                {
-                    availableAnalytesGrid.getStore().clearFilter();
-                    availableAnalytesGrid.getStore().filter({property: 'Titration', value: record.data.Name, exactMatch: true});
-                    availableAnalytesGrid.setDisabled(false);
-
-                    selMod.suspendEvents(false);
-                    if(typeof this.preExcludedIds[rowId] === 'object')
-                    {
-                        selMod.clearSelections();
-                        Ext.each(this.preExcludedIds[rowId], function(analyte){
-                            var index = availableAnalytesGrid.getStore().findBy(function(rec, id){
-                                return rec.get('Titration') == record.data.Name && rec.get('RowId') == analyte;
-                            });
-                            availableAnalytesGrid.getSelectionModel().selectRow(index, true);
-                        });
-                        var id = titrationExclusionStore.findExact('Description', record.data.Name);
-                        this.preExcludedIds[rowId] = titrationExclusionStore.getAt(id).data.RowId;
-                    }
-                    else if(this.excluded[rowId])
-                    {
-                        selMod.selectRecords(this.excluded[rowId], false);
-                    }
-                    else
-                    {
-                        selMod.clearSelections();
-                    }
-                    selMod.resumeEvents();
-
-                    if(this.comments[rowId])
-                    {
-                        Ext.getCmp('comment').setValue(this.comments[rowId]);
-                    }
-                    else
-                    {
-                        Ext.getCmp('comment').setValue('');
-                    }
-                },
-                scope : this
-            }
-
-        });
-
-        // grid of avaialble/excluded titrations
-        var gridData = [];
-        var titrationsGridStore = new LABKEY.ext.Store({
-            schemaName: this.protocolSchemaName,
-            sql : 'SELECT DISTINCT x.Titration.Name, x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId ' +
-                    'FROM Data AS x '+
-                    'WHERE x.Titration IS NOT NULL AND x.Titration.Standard != true AND x.Data.Run.RowId = ' + this.runId,
-            sortInfo: {
-                field: 'Name',
-                direction: 'ASC'
-            },
-            listeners : {
-                load : function(store, records)
-                {
-                    var id;
-                    for(var i = 0; i < titrationExclusionStore.getCount(); i++)
-                    {
-                        id = store.findExact('Name', titrationExclusionStore.getAt(i).data.Description);
-                        if(id >= 0)
+                        var id;
+                        for (var i = 0; i < this.getExclusionsStore().getCount(); i++)
                         {
-                            // coerce to string so that we can attempt to split by comma and space
-                            var analyteRowIds = "" + titrationExclusionStore.getAt(i).get("Analytes/RowId");
+                            id = store.findExact(this.ITEM_RECORD_KEY, this.getExclusionsStore().getAt(i).get('Description'));
+                            if (id >= 0)
+                            {
+                                // coerce to string so that we can attempt to split by comma and space
+                                var analyteRowIds = "" + this.getExclusionsStore().getAt(i).get("Analytes/RowId");
 
-                            this.present[id] = analyteRowIds.split(",").length;
-                            titrationExclusionStore.getAt(i).set('present', this.present[id]);
-                            titrationExclusionStore.getAt(i).commit();
+                                this.present[id] = analyteRowIds.split(",").length;
+                                this.getExclusionsStore().getAt(i).set('Present', this.present[id]);
+                                this.getExclusionsStore().getAt(i).commit();
+                            }
                         }
-                    }
-                    for(i = 0; i < records.length; i++)
-                    {
-                        gridData[i] = [];
-                        for(var index in records[i].data)
+
+                        var gridData = [];
+                        for (i = 0; i < records.length; i++)
                         {
-                            gridData[i].push(records[i].get(index));
+                            gridData[i] = [];
+                            for (var index in records[i].data)
+                                gridData[i].push(records[i].get(index));
+                            gridData[i].push(this.present[i]);
                         }
-                        gridData[i].push(this.present[i]);
+                        this.getCombinedItemAnalytesStore().loadData(gridData);
+
+                        this.getExclusionsStore().fireEvent('distinctitemgridloaded');
                     }
+                }
+            });
+        }
 
-                    combinedStore.loadData(gridData);
-                    titrationExclusionStore.fireEvent('titrationgridloaded');
+        return this.distinctItemGridStore;
+    },
 
+    getCombinedItemAnalytesStore : function()
+    {
+        if (!this.combinedItemAnalytesStore)
+        {
+            this.combinedItemAnalytesStore = new Ext.data.ArrayStore({
+                fields : [this.ITEM_RECORD_KEY, 'DataId', 'RunId', 'Present']
+            });
+        }
+
+        return this.combinedItemAnalytesStore;
+    },
+
+    getAvailableItemsGrid : function()
+    {
+        if (!this.availableItemsGrid)
+        {
+            this.availableItemsGrid = new Ext.grid.GridPanel({
+                style: 'padding: 10px 0;',
+                title: "Select a " + this.DISPLAY_NOUN + " to view a list of available analytes.",
+                headerStyle: 'font-weight: normal; background-color: #ffffff',
+                store: this.getCombinedItemAnalytesStore(),
+                colModel: new Ext.grid.ColumnModel({
+                    columns: [
+                        this.getItemRowSelectionModel(),
+                        {
+                            xtype : 'templatecolumn',
+                            header : 'Exclusions',
+                            tpl : this.getExclusionsColumnTemplate()
+                        }
+                    ]
+                }),
+                autoExpandColumn: this.ITEM_RECORD_KEY,
+                viewConfig: {
+                    forceFit: true
                 },
-                scope : this
-            }
-        });
+                sm: this.getItemRowSelectionModel(),
+                anchor: '100%',
+                height: 165,
+                frame: false,
+                loadMask: true
+            });
+        }
 
-        var combinedStore = new Ext.data.ArrayStore({
-            fields : ['Name', 'DataId', 'RunId', 'Present']
-        });
+        return this.availableItemsGrid;
+    },
 
-        var _tpl = new Ext.XTemplate(
-                '<span>{[this.getPresentValue(values.Present)]}</span>',
-                {
-                    getPresentValue : function(x) {
-                        if(x != ''){
-                            var val = x + ' analytes excluded';
+    getItemRowSelectionModel : function()
+    {
+        if (!this.itemRowSelectionModel)
+        {
+            this.itemRowSelectionModel = new Ext.grid.RowSelectionModel({
+                singleSelect : true,
+                header : 'Titration',
+                listeners : {
+                    scope : this,
+                    rowdeselect : function(tsl, rowId, record)
+                    {
+                        this.excluded[rowId] = this.getGridCheckboxSelModel().getSelections();
+                        this.excluded[rowId][this.ITEM_RECORD_KEY] = record.get(this.ITEM_RECORD_KEY);
+                        this.comments[rowId] = Ext.getCmp('comment').getValue();
+                        this.present[rowId] = this.getGridCheckboxSelModel().getSelections().length;
+                        record.set('Present', this.present[rowId]);
+                        this.excludedDataIds[rowId] = record.get('DataId');
+                    },
+                    rowselect : function(tsl, rowId, record)
+                    {
+                        this.getAvailableAnalytesGrid().getStore().clearFilter();
+                        this.getAvailableAnalytesGrid().getStore().filter({property: 'Titration', value: record.get(this.ITEM_RECORD_KEY), exactMatch: true});
+                        this.getAvailableAnalytesGrid().setDisabled(false);
+
+                        this.getGridCheckboxSelModel().suspendEvents(false);
+                        if (typeof this.preExcludedIds[rowId] === 'object')
+                        {
+                            this.getGridCheckboxSelModel().clearSelections();
+                            Ext.each(this.preExcludedIds[rowId], function(analyte){
+                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id){
+                                    return rec.get('Titration') == record.get(this.ITEM_RECORD_KEY) && rec.get('RowId') == analyte;
+                                }, this);
+                                this.getAvailableAnalytesGrid().getSelectionModel().selectRow(index, true);
+                            }, this);
+                            var id = this.getExclusionsStore().findExact('Description', record.get(this.ITEM_RECORD_KEY));
+                            this.preExcludedIds[rowId] = this.getExclusionsStore().getAt(id).get('RowId');
+                        }
+                        else if (this.excluded[rowId])
+                        {
+                            this.getGridCheckboxSelModel().selectRecords(this.excluded[rowId], false);
                         }
                         else
-                            var val = '';
-                        return val;
+                        {
+                            this.getGridCheckboxSelModel().clearSelections();
+                        }
+                        this.getGridCheckboxSelModel().resumeEvents();
+
+                        if (this.comments[rowId])
+                            Ext.getCmp('comment').setValue(this.comments[rowId]);
+                        else
+                            Ext.getCmp('comment').setValue('');
                     }
                 }
-        );
-        _tpl.compile();
 
-        this.availableTitrationsGrid = new Ext.grid.GridPanel({
-            id: 'titrationGrid',
-            style: 'padding-top: 10px;',
-            title: "Select a titration to view a list of available analytes",
-            headerStyle: 'font-weight: normal; background-color: #ffffff',
-            store: combinedStore,
-            colModel: new Ext.grid.ColumnModel({
-                columns: [
-                    this.titrationSelMod,
-                    {
-                        xtype : 'templatecolumn',
-                        header : 'Exclusions',
-                        tpl : _tpl
-                    }
-                ]
-            }),
-            autoExpandColumn: 'Name',
-            viewConfig: {
-                forceFit: true
-            },
-            sm: this.titrationSelMod,
-            anchor: '100%',
-            height: 165,
-            frame: false,
-            loadMask: true
-        });
+            });
+        }
 
-        this.add(this.availableTitrationsGrid);
-
-        // grid of avaialble/excluded analytes
-        var availableAnalytesGrid = new Ext.grid.GridPanel({
-            id: 'availableanalytes',
-            style: 'padding-top: 10px;',
-            title: "Select the checkbox next to the analytes within the selected titration to be excluded",
-            headerStyle: 'font-weight: normal; background-color: #ffffff',
-            store:  new LABKEY.ext.Store({
-                sql: "SELECT DISTINCT x.Titration.Name AS Titration, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                        + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId
-                        + " ORDER BY x.Titration.Name, x.Analyte.Name",
-                schemaName: this.protocolSchemaName,
-                autoLoad: true,
-                sortInfo: {
-                    field: 'Name',
-                    direction: 'ASC'
-                }
-            }),
-            colModel: new Ext.grid.ColumnModel({
-                defaults: {
-                    sortable: false,
-                    menuDisabled: true
-                },
-                columns: [
-                    selMod,
-                    {header: 'Available Analytes', dataIndex: 'Name'},
-                    {header: 'Titration', dataIndex: 'Titration', hidden: true}
-                ]
-            }),
-            autoExpandColumn: 'Name',
-            viewConfig: {
-                forceFit: true
-            },
-            sm: selMod,
-            anchor: '100%',
-            height: 165,
-            frame: false,
-            disabled : true,
-            loadMask: true
-        });
-        this.add(availableAnalytesGrid);
-
-        this.addCommentPanel();
-
-        this.addStandardButtons();
-
-        this.doLayout();
-
-        this.queryForRunAssayId();
+        return this.itemRowSelectionModel;
     },
 
-    toggleSaveBtn : function(sm, grid){
-        grid.getFooterToolbar().findById('saveBtn').enable();
-    },
-
-    insertUpdateExclusions: function() {
-        var index = this.availableTitrationsGrid.getStore().indexOf(this.titrationSelMod.getSelected());
-        this.titrationSelMod.fireEvent('rowdeselect', this.titrationSelMod, index, this.titrationSelMod.getSelected());
-        this.openConfirmWindow();
-    },
-
-    getExcludedString : function()
+    getAvailableAnalytesGrid : function()
     {
-        var retString = '';
-
-        for (var i = 0; i < this.present.length; i++)
+        if (!this.availableAnalytesGrid)
         {
-            // issue 21431
-            if (this.present[i] == undefined)
-                continue;
-
-            if(!(this.preExcludedIds[i] == undefined && this.present[i] == 0))
-            {
-                if(this.present[i] != 1)
-                    retString += this.availableTitrationsGrid.getStore().getAt(i).get('Name') + ': ' + this.present[i] + ' analytes excluded.<br>';
-                else
-                    retString += this.availableTitrationsGrid.getStore().getAt(i).get('Name') + ': ' + this.present[i] + ' analyte excluded.<br>';
-            }
-        }
-        return retString;
-    },
-
-    openConfirmWindow : function(){
-        var excludedMessage = this.getExcludedString();
-        if(excludedMessage == '')
-        {
-            this.fireEvent('closeWindow');
-        }
-        else
-        {
-            Ext.Msg.show({
-                title:'Confirm Exclusions',
-                msg: 'Please verify the excluded analytes for the following titrations. Continue?<br><br> ' + excludedMessage,
-                buttons: Ext.Msg.YESNO,
-                fn: function(button){
-                    if(button == 'yes'){
-                        this.insertUpdateTitrationExclusions();
-                    }
+            this.availableAnalytesGrid = new Ext.grid.GridPanel({
+                title: "Select the checkbox next to the analytes within the selected " + this.DISPLAY_NOUN.toLowerCase() + " to be excluded.",
+                headerStyle: 'font-weight: normal; background-color: #ffffff',
+                store:  new LABKEY.ext.Store({
+                    schemaName: this.protocolSchemaName,
+                    sql: "SELECT DISTINCT x.Titration.Name AS Titration, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
+                        + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId,
+                    sort: 'Titration/Name,Analyte/Name',
+                    autoLoad: true
+                }),
+                colModel: new Ext.grid.ColumnModel({
+                    defaults: {
+                        sortable: false,
+                        menuDisabled: true
+                    },
+                    columns: [
+                        this.getGridCheckboxSelModel(),
+                        {header: 'Analyte Name', dataIndex: 'Name'},
+                        {header: 'Titration', dataIndex: 'Titration', hidden: true}
+                    ]
+                }),
+                autoExpandColumn: 'Name',
+                viewConfig: {
+                    forceFit: true
                 },
-                icon: Ext.MessageBox.QUESTION,
-                scope : this
+                sm: this.getGridCheckboxSelModel(),
+                anchor: '100%',
+                height: 165,
+                frame: false,
+                disabled : true,
+                loadMask: true
             });
         }
+
+        return this.availableAnalytesGrid;
     },
 
-    insertUpdateTitrationExclusions: function(){
-
-        this.mask("Saving titration exclusions...");
-
-        var commands = [];
-        for (var index = 0; index < this.excluded.length; index++)
-        {
-            var dataId = this.excludedDataIds[index];
-            var analytesForExclusion = this.excluded[index];
-            if (analytesForExclusion == undefined)
-                continue;
-
-            // generage a comma delim string of the analyte Ids to exclude
-            var analyteRowIds = "";
-            var analyteNames = "";
-            var sep = "";
-            Ext.each(analytesForExclusion, function(record){
-                analyteRowIds += sep.trim() + record.data.RowId;
-                analyteNames += sep + record.data.Name;
-                sep = ", ";
-            });
-
-            // determine if this is an insert, update, or delete
-            var command = "insert";
-            if (this.preExcludedIds[index] != undefined)
-                command = analyteRowIds != "" ? "update" : "delete";
-
-            // issue 21551: don't insert an exclusion w/out any analytes
-            if (command == "insert" && analyteRowIds == "")
-                continue;
-
-            // don't call update if no change to analyte selection for a given titration
-            if (this.preAnalyteRowIds[index] == analyteRowIds)
-                continue;
-
-            // config of data to save for a single titration exclusion
-            var commandConfig = {
-                command: command,
-                key: this.preExcludedIds[index], // this will be undefined for the insert case
-                dataId: dataId,
-                description: analytesForExclusion.name,
-                analyteRowIds: (analyteRowIds != "" ? analyteRowIds : null),
-                analyteNames: (analyteNames != "" ? analyteNames : null), // for logging purposes only
-                comment: this.comments[index]
-            };
-
-            commands.push(commandConfig);
-        }
-
-        if (commands.length > 0)
-        {
-            var config = {
-                assayId: this.assayId,
-                tableName: 'TitrationExclusion',
-                runId: this.runId,
-                commands: commands
-            };
-
-            this.saveExclusions(config, 'titration');
-        }
-        else
-        {
-            this.unmask();
-        }
+    getExcludedStringKey : function(record)
+    {
+        return record.get(this.ITEM_RECORD_KEY);
     }
 });

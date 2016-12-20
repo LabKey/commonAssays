@@ -98,7 +98,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextPresent("multipleCurvesTestRun", 4);
         assertTextPresent("Changed for all analytes");
-        assertTextPresent("No data to show.", 1);
+        assertTextPresent("No data to show.", 2); // no titration or singlepoint unknown exclusions
         assertTextPresent("exclude all for single well", 2);
         assertTextPresent("exclude single analyte for single well", 1);
         assertTextPresentInThisOrder("S3", "C2", "X25");
