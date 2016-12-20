@@ -37,16 +37,16 @@ public class Ms2DataRegionExportHelper extends DataRegionExportHelper
     {
         if (null != exportSelected && exportSelected)
         {
-            return getTest().doAndWaitForDownload(() -> getDataRegionTable().clickHeaderMenu("Export Selected", false, fileType.toString()));
+            return getWrapper().doAndWaitForDownload(() -> getDataRegionTable().clickHeaderMenu("Export Selected", false, fileType.toString()));
         }
         else
         {
-            return getTest().doAndWaitForDownload(() -> getDataRegionTable().clickHeaderMenu("Export All", false, fileType.toString()));
+            return getWrapper().doAndWaitForDownload(() -> getDataRegionTable().clickHeaderMenu("Export All", false, fileType.toString()));
         }
 
     }
 
-    public static enum FileDownloadType
+    public enum FileDownloadType
     {
         EXCEL("Excel"),
         TSV("TSV"),
