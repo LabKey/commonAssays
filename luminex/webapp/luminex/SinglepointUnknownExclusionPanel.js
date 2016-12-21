@@ -141,7 +141,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                 schemaName: this.protocolSchemaName,
                 sql: 'SELECT DISTINCT (x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, x.Description, x.Dilution, '
                     + 'x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId '
-                    + 'FROM Data AS x WHERE x.Description IS NOT NULL AND x.Dilution IS NOT NULL AND x.WellRole = \'Unknown\' '
+                    + 'FROM Data AS x WHERE x.Description IS NOT NULL AND x.Dilution IS NOT NULL AND x.Titration IS NULL AND x.WellRole = \'Unknown\' '
                     + 'AND x.Data.Run.RowId = ' + this.runId,
                 sort: 'Description,Dilution',
                 listeners: {
@@ -337,9 +337,9 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                     schemaName: this.protocolSchemaName,
                     sql: "SELECT DISTINCT (x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, x.Description, x.Dilution, "
                         + "x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
-                        + " FROM Data AS x WHERE x.Description IS NOT NULL AND x.Dilution IS NOT NULL AND x.WellRole = \'Unknown\'"
+                        + " FROM Data AS x WHERE x.Description IS NOT NULL AND x.Dilution IS NOT NULL AND x.Titration IS NULL AND x.WellRole = \'Unknown\'"
                         + " AND x.Data.Run.RowId = " + this.runId,
-                    sort: 'Description,Dilution,Analyte/Name',
+                    sort: 'Description,Dilution,Name',
                     autoLoad: true
                 }),
                 colModel: new Ext.grid.ColumnModel({

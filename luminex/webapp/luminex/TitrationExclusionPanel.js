@@ -272,7 +272,7 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                     schemaName: this.protocolSchemaName,
                     sql: "SELECT DISTINCT x.Titration.Name AS Titration, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                         + " FROM Data AS x WHERE x.Titration IS NOT NULL AND x.Data.Run.RowId = " + this.runId,
-                    sort: 'Titration/Name,Analyte/Name',
+                    sort: 'Titration,Name',
                     autoLoad: true
                 }),
                 colModel: new Ext.grid.ColumnModel({
