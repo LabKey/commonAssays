@@ -332,7 +332,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         clickButton("Save", 0);
         _extHelper.waitForExtDialog("Confirm Exclusions", WAIT_FOR_JAVASCRIPT);
         clickButtonContainingText("Yes", 0);
-        verifyExclusionPipelineJobComplete(pipelineJobId, "INSERT titration exclusion (" + titration + ")", runName, exclusionMessage);
+        verifyExclusionPipelineJobComplete(pipelineJobId, "INSERT titration exclusion (Description: " + titration + ")", runName, exclusionMessage);
     }
 
     /**

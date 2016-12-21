@@ -488,18 +488,22 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             //Get well types from the run files
             Set<String> wellTypes = new HashSet<>();
+            Set<Double> dilutions = new HashSet<>();
             Set<String> descriptions = new HashSet<>();
             parser.getSheets().values().forEach(datRowList ->
                     datRowList.forEach(row ->
                     {
                         if (StringUtils.isNotBlank(row.getType()))
                             wellTypes.add(row.getType());
+                        if (row.getDilution() != null)
+                            dilutions.add(row.getDilution());
                         if (StringUtils.isNotBlank(row.getDescription()))
                             descriptions.add(row.getDescription());
                     })
             );
 
-            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)), fileNames, wellTypes, descriptions);
+            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(),
+                    new HashSet<>(Arrays.asList(analyteNames)), fileNames, wellTypes, dilutions, descriptions);
             form.setLostExclusions(exclusionCount - retainedCount);
 
             form.setRetainExclusions(true); //Default to true

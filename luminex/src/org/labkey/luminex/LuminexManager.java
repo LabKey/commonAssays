@@ -105,9 +105,8 @@ public class LuminexManager
                 String info = getDescription().toLowerCase();
                 if (command != null)
                 {
-                    info = command.getCommand().toUpperCase() + " " + info + " ("
-                            + (command.getDescription() == null ? "" : "Description: " + command.getDescription() + ", ")
-                            + "Type: " + command.getType() + ")";
+                    info = command.getCommand().toUpperCase() + " " + info
+                            + " (Description: " + command.getDescription() + ", Type: " + command.getType() + ")";
                 }
 
                 return info;
@@ -121,6 +120,41 @@ public class LuminexManager
                 {
                     row = form.getBaseRowMap();
                     row.put("Type", form.getType());
+                }
+                row.put("RowId", form.getKey());
+                return row;
+            }
+        },
+        SinglepointUnknownExclusion("Singlepoint Unknown Exclusion")
+        {
+            @Override
+            public String getTableName()
+            {
+                return "WellExclusion";
+            }
+
+            @Override
+            public String getInfo(@Nullable LuminexSingleExclusionCommand command)
+            {
+                // for singlepoint unknown exclusions, null command means that we have > 1 command in this job
+                String info = "MULTIPLE " + getDescription().toLowerCase() + "s";
+                if (command != null)
+                {
+                    info = command.getCommand().toUpperCase() + " " + getDescription().toLowerCase()
+                            + " (Description: " + command.getDescription() + ", Dilution: " + command.getDilution() + ")";
+                }
+
+                return info;
+            }
+
+            @Override
+            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly)
+            {
+                Map<String, Object> row = new HashMap<>();
+                if (!keysOnly)
+                {
+                    row = form.getBaseRowMap();
+                    row.put("Dilution", form.getDilution());
                 }
                 row.put("RowId", form.getKey());
                 return row;
@@ -142,7 +176,7 @@ public class LuminexManager
                 if (command != null)
                 {
                     info = command.getCommand().toUpperCase() + " " + getDescription().toLowerCase()
-                            + " (" + command.getDescription() + ")";
+                            + " (Description: " + command.getDescription() + ")";
                 }
 
                 return info;
@@ -261,13 +295,13 @@ public class LuminexManager
     {
         LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
         command.setCommand("insert");
+        command.setDataId(dataFileId);
         command.setDescription((String) oldExclusion.get("Description"));
+        command.setDilution(oldExclusion.get("dilution") != null ? Double.parseDouble(oldExclusion.get("dilution").toString()) : null);
         command.setType((String) oldExclusion.get("type"));
         command.setComment((String) oldExclusion.get("comment"));
-        command.setDataId(dataFileId);
         command.setCreated((Timestamp) oldExclusion.get("created"));
         command.setCreatedBy((Integer) oldExclusion.get("createdBy"));
-
         return command;
     }
 
@@ -365,48 +399,45 @@ public class LuminexManager
 
             String dataFileName = getFileNameKey(context.getProtocol(), inputIdMap.get(dataId));
             String description = (String)exclusion.get("Description");  // == null for Blank control wells
-            String type = (String)exclusion.get("Type"); // == null for titration exclusions
+            String type = (String)exclusion.get("Type"); // == null for singlepoint unknown and titration exclusions
+            Double dilution = exclusion.get("Dilution") != null ? Double.parseDouble(exclusion.get("Dilution").toString()) : null; // == null for well replicate group and titration exclusions
 
-            if (wellKeys.contains(createWellKey(dataFileName, analyteName, description, type)))
+            //Get existing command
+            String key = createExclusionCommandKey(dataFileName, description, type, dilution);
+            LuminexSingleExclusionCommand command = replacementCommands.get(key);
+
+            if (command == null)
             {
-                //Get existing command
-                String key = createExclusionCommandKey(dataFileName, description, type);
-                LuminexSingleExclusionCommand command = replacementCommands.get(key);
-                if (command == null)
-                {
-                    //generate/update insertion command
-                    command = generateExclusionCommands(exclusion, file.getRowId());
-                    replacementCommands.put(key, command);
-                }
+                boolean isTitrationTypeExclusion = dilution == null && type == null;
+                boolean isSinglepointUnknownExclusion = dilution != null && type == null;
+                boolean isWellReplicateGroupTypeExclusion = dilution == null && type != null;
+                boolean hasWellKeyMatch = false;
 
-                //Add analyte to command
-                command.addAnalyte(newAnalyte);
+                if (isTitrationTypeExclusion)
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileName, analyteName, description)));
+                else if (isSinglepointUnknownExclusion)
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileName, analyteName, description)) && k.endsWith("|" + dilution));
+                else if (isWellReplicateGroupTypeExclusion)
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileName, analyteName, description, type)));
+
+                if (hasWellKeyMatch)
+                    command = generateExclusionCommands(exclusion, file.getRowId());
             }
-            else if (type == null) //Titration exclusionS
+
+            //Add analyte if at least one matching Well was found
+            if (command != null)
             {
-                //Get existing command
-                String key = createExclusionCommandKey(dataFileName, description, type);
-                LuminexSingleExclusionCommand command = replacementCommands.get(key);
-                if (command == null && wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileName,analyteName,description))))
-                {
-                    //generate/update insertion command
-                    command = generateExclusionCommands(exclusion, file.getRowId());
-                    replacementCommands.put(key, command);
-                }
-
-                //Add analyte if at least one matching Well was found
-                if(command != null)
-                    command.addAnalyte(newAnalyte);
-
+                command.addAnalyte(newAnalyte);
+                replacementCommands.put(key, command);
             }
         });
 
         return replacementCommands.values();
     }
 
-    public Long getRetainedExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> descriptions)
+    public Long getRetainedExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<Double> dilutions, Set<String> descriptions)
     {
-        Long result = getRetainedWellExclusionCount(replacedRunId, analyteNames, fileNames, types, descriptions);
+        Long result = getRetainedWellExclusionCount(replacedRunId, analyteNames, fileNames, types, dilutions, descriptions);
         result += getRetainedRunExclusionCount(replacedRunId, analyteNames);
         return result;
     }
@@ -428,7 +459,7 @@ public class LuminexManager
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
 
-    private Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<String> descriptions)
+    private Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<Double> dilutions, Set<String> descriptions)
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT COUNT(DISTINCT we.RowId) FROM ")
@@ -452,7 +483,10 @@ public class LuminexManager
         //Add titration filter
         appendInClause(sql, "(we.Description IS NULL OR we.Description ", descriptions, ")\n");
 
-        //Add type filter: Null is for titrations
+        //Add dilution filter: Null is for well replicate group and titration exclusions
+        appendInClause(sql, "(we.dilution IS NULL OR we.dilution ", dilutions, ")\n");
+
+        //Add type filter: Null is for singlepoint unknowns and titration exclusions
         appendInClause(sql, "(we.type IS NULL OR we.type ", types, ")\n");
 
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
@@ -482,15 +516,19 @@ public class LuminexManager
 
         try
         {
-            //Copy WellExclusions and TitrationExclusions
-            if(wellExclusionCommands != null)
+            //Copy WellExclusions, SinglepointUnknownExclusions, and TitrationExclusions
+            if (wellExclusionCommands != null)
+            {
                 createExclusions(uploadContext.getUser(), uploadContext.getContainer(), wellExclusionCommands, run.getRowId(),
-                        ExclusionType.WellExclusion, run.getProtocol(), uploadContext.getProvider(), false, null);
+                        null, run.getProtocol(), uploadContext.getProvider(), false, null);
+            }
 
             //Copy AnalyteExclusions
             if (runExclusionCommands != null)
+            {
                 createExclusions(uploadContext.getUser(), uploadContext.getContainer(), Collections.singletonList(runExclusionCommands),
                         run.getRowId(), ExclusionType.RunExclusion, run.getProtocol(), uploadContext.getProvider(), false, null);
+            }
         }
         catch (SQLException|QueryUpdateServiceException|DuplicateKeyException|InvalidKeyException e)
         {
@@ -517,7 +555,7 @@ public class LuminexManager
     }
 
     public void createExclusions(User user, Container c, Collection<LuminexSingleExclusionCommand> commands, Integer runId,
-                                 ExclusionType _exclusionType, ExpProtocol protocol, AssayProvider assayProvider,
+                                 @Nullable ExclusionType baseExclusionType, ExpProtocol protocol, AssayProvider assayProvider,
                                  boolean rerunTransform, Logger logger)
     throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
     {
@@ -526,7 +564,13 @@ public class LuminexManager
 
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, c, (LuminexAssayProvider)assayProvider, protocol, null);
 
-        TableInfo tableInfo = schema.getTable(_exclusionType.getTableName());
+        // if the baseExclusionType is null, default to the WellExclusion table
+        TableInfo tableInfo;
+        if (baseExclusionType != null)
+            tableInfo = schema.getTable(baseExclusionType.getTableName());
+        else
+            tableInfo = schema.getTable(ExclusionType.WellExclusion.getTableName());
+
         if (tableInfo != null)
         {
             QueryUpdateService qus = tableInfo.getUpdateService();
@@ -544,10 +588,15 @@ public class LuminexManager
                     BatchValidationException errors = new BatchValidationException();
                     List<Map<String, Object>> results;
 
-                    logger.info("Starting " + command.getCommand() + " " +  _exclusionType.getDescription().toLowerCase());
+                    // if the baseExclusionType is null, determine the type based on the command details
+                    ExclusionType exclusionType = baseExclusionType;
+                    if (exclusionType == null)
+                        exclusionType = command.getExclusionType();
 
-                    rows.add(_exclusionType.getRowMap(command, runId, false));
-                    keys.add(_exclusionType.getRowMap(command, runId, true));
+                    logger.info("Starting " + command.getCommand() + " " +  exclusionType.getDescription().toLowerCase());
+
+                    rows.add(exclusionType.getRowMap(command, runId, false));
+                    keys.add(exclusionType.getRowMap(command, runId, true));
 
                     String logVerb;
                     switch (command.getCommand())
@@ -575,7 +624,7 @@ public class LuminexManager
                         throw errors;
                     }
 
-                    logger.info("Finished " + command.getCommand() + " " +  _exclusionType.getDescription().toLowerCase());
+                    logger.info("Finished " + command.getCommand() + " " +  exclusionType.getDescription().toLowerCase());
                 }
             }
         }
@@ -608,12 +657,13 @@ public class LuminexManager
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, container, (LuminexAssayProvider)provider, protocol, null);
         LuminexDataTable table = new LuminexDataTable(schema);
 
-        // data file, analyte, description, and type are needed to match an existing run exclusion to data from an Excel file row
+        // data file, analyte, description, dilution, and type are needed to match an existing exclusion to data from an Excel file row
         FieldKey dataFileFK = FieldKey.fromParts("Data", "FileName");
         FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
         FieldKey descriptionFK = FieldKey.fromParts("Description");
         FieldKey typeFK = FieldKey.fromParts("Type");
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(dataFileFK, analyteFK, descriptionFK, typeFK));
+        FieldKey dilutionFK = FieldKey.fromParts("Dilution");
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(dataFileFK, analyteFK, descriptionFK, dilutionFK, typeFK));
 
         SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), runId);
         if(onlyExcludedWells)
@@ -625,22 +675,30 @@ public class LuminexManager
             String analyteName = (String)row.get(cols.get(analyteFK).getAlias());
             String description = (String)row.get(cols.get(descriptionFK).getAlias());
             String type = (String)row.get(cols.get(typeFK).getAlias());
-            excludedWellKeys.add(createWellKey(dataFileName, analyteName, description, type));
+            Object dilutionObj = row.get(cols.get(dilutionFK).getAlias());
+            Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
+
+            excludedWellKeys.add(createWellKey(dataFileName, analyteName, description, type, dilution));
         });
 
         return excludedWellKeys;
     }
 
     /** Create a simple object to use as a key, combining the three properties */
-    public String createExclusionCommandKey(String dataFileName, String description, String type)
+    private String createExclusionCommandKey(String dataFileName, String description, String type, Double dilution)
     {
-        return dataFileName  + "|" + description + "|" + type;
+        return dataFileName  + "|" + description + "|" + type + "|" + dilution;
     }
 
     /** Refine the key object with the individual analyte */
-    public String createWellKey(String dataFileName, String analyteName, String description, String type)
+    public String createWellKey(String dataFileName, String analyteName, String description, String type, Double dilution)
     {
-        return getTitrationKey(dataFileName, analyteName, description) + type;
+        return getReplicateGroupKey(dataFileName, analyteName, description, type) + dilution;
+    }
+
+    private String getReplicateGroupKey(String dataFileName, String analyteName, String description, String type)
+    {
+        return getTitrationKey(dataFileName, analyteName, description) + type + "|";
     }
 
     private String getTitrationKey(String dataFileName, String analyteName, String description)

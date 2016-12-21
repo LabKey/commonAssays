@@ -66,6 +66,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
             command.setDataId(getIntPropIfExists(commandJSON, "dataId"));
             command.setDescription(getStringPropIfExists(commandJSON, "description"));
             command.setType(getStringPropIfExists(commandJSON, "type"));
+            command.setDilution(getDoublePropIfExists(commandJSON, "dilution"));
             command.setAnalyteRowIds(getStringPropIfExists(commandJSON, "analyteRowIds"));
             command.setAnalyteNames(getStringPropIfExists(commandJSON, "analyteNames"));
             command.setComment(getStringPropIfExists(commandJSON, "comment"));
@@ -111,6 +112,11 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
     private Integer getIntPropIfExists(JSONObject json, String propName)
     {
         return json.containsKey(propName) ? json.getInt(propName) : null;
+    }
+
+    private Double getDoublePropIfExists(JSONObject json, String propName)
+    {
+        return json.containsKey(propName) ? json.getDouble(propName) : null;
     }
 
     public ExpProtocol getProtocol(Container c)

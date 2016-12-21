@@ -106,6 +106,8 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         getLogger().info("Description: " + propertyNullToBlank(exclusion.getDescription()));
         if (exclusion.getType() != null)
             getLogger().info("Type: " + exclusion.getType());
+        if (exclusion.getDilution() != null)
+            getLogger().info("Dilution: " + exclusion.getDilution());
         getLogger().info("Analytes: " + propertyNullToBlank(exclusion.getAnalyteNames()));
         getLogger().info("Comment: " + propertyNullToBlank(exclusion.getComment()));
         getLogger().info("----- End Exclusion Properties -----");

@@ -32,6 +32,7 @@ public class LuminexSingleExclusionCommand
     private Integer _key;
     private Integer _dataId;
     private String _description;
+    private Double _dilution;
     private String _type;
     private List<String> _analyteRowIds = new ArrayList<>();
     private List<String> _analyteNames = new ArrayList<>();
@@ -88,6 +89,16 @@ public class LuminexSingleExclusionCommand
     public void setDescription(String description)
     {
         _description = description;
+    }
+
+    public Double getDilution()
+    {
+        return _dilution;
+    }
+
+    public void setDilution(Double dilution)
+    {
+        _dilution = dilution;
     }
 
     public String getType()
@@ -168,5 +179,15 @@ public class LuminexSingleExclusionCommand
     {
         _analyteNames.add(analyte.getName());
         _analyteRowIds.add(String.valueOf(analyte.getRowId()));
+    }
+
+    public LuminexManager.ExclusionType getExclusionType()
+    {
+        if (getType() == null && getDilution() == null)
+            return LuminexManager.ExclusionType.TitrationExclusion;
+        else if (getDilution() != null)
+            return LuminexManager.ExclusionType.SinglepointUnknownExclusion;
+        else
+            return LuminexManager.ExclusionType.WellExclusion;
     }
 }
