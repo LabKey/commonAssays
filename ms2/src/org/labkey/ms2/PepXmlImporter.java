@@ -179,7 +179,7 @@ public class PepXmlImporter extends PeptideImporter
             // pipeline will be
             File pepXmlDir = new File(_path);
             File mzXMLFile = null;
-            massSpecDataFileType FT_MZXML = new  massSpecDataFileType();
+            massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             if (pepXmlDir.getParentFile() != null && pepXmlDir.getParentFile().getParentFile() != null)
             {
                 mzXMLFile = FT_MZXML.getFile(pepXmlDir.getParentFile().getParentFile(), newFilename);
