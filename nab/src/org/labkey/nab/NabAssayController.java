@@ -28,16 +28,20 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.CustomApiForm;
 import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.SimpleApiJsonForm;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.dilution.DilutionDataRow;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.assay.nab.Luc5Assay;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.nab.RenderAssayBean;
 import org.labkey.api.assay.nab.RenderAssayForm;
 import org.labkey.api.assay.nab.view.DilutionGraphAction;
@@ -47,23 +51,30 @@ import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.assay.nab.view.MultiGraphAction;
 import org.labkey.api.assay.nab.view.RunDetailOptions;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
-import org.labkey.api.assay.nab.view.RunDetailsHeaderView;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.nab.NabUrls;
@@ -73,11 +84,9 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.reports.model.ViewCategory;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -86,16 +95,13 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
-import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
-import org.labkey.api.study.TimepointType;
-import org.labkey.api.study.Visit;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
@@ -103,31 +109,27 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
-import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
-import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.view.Portal;
 import org.labkey.api.view.RedirectException;
-import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.WebPartFactory;
+import org.labkey.nab.query.NabDataLinkDisplayColumn;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
-import ucar.nc2.util.HashMapLRU;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -750,12 +752,30 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    public static class NabQCForm extends RenderAssayBean
+    {
+        private boolean _edit = true;
+
+        public boolean isEdit()
+        {
+            return _edit;
+        }
+
+        public void setEdit(boolean edit)
+        {
+            _edit = edit;
+        }
+    }
+
     @RequiresPermission(ReadPermission.class)
-    public class QCDataAction extends SimpleViewAction<RenderAssayBean>
+    public class QCDataAction extends SimpleViewAction<NabQCForm>
     {
         @Override
-        public ModelAndView getView(RenderAssayBean form, BindException errors) throws Exception
+        public ModelAndView getView(NabQCForm form, BindException errors) throws Exception
         {
+            if (!getContainer().hasPermission(getUser(), AdminPermission.class))
+                form.setEdit(false);
+
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
             {
@@ -785,10 +805,10 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(AdminPermission.class)
-    public class GetQCControlInfoAction extends ApiAction<RenderAssayBean>
+    @RequiresPermission(ReadPermission.class)
+    public class GetQCControlInfoAction extends ApiAction<NabQCForm>
     {
-        public ApiResponse execute(RenderAssayBean form, BindException errors) throws Exception
+        public ApiResponse execute(NabQCForm form, BindException errors) throws Exception
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
@@ -976,33 +996,351 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SaveQCControlInfoAction extends ApiAction<QCControlInfo>
     {
+        ExpRun _run;
+
         @Override
-        public Object execute(QCControlInfo form, BindException errors) throws Exception
+        public void validateForm(QCControlInfo form, Errors errors)
         {
-            return null;
+            _run = ExperimentService.get().getExpRun(form.getRunId());
+            if (_run == null)
+            {
+                errors.reject(ERROR_MSG, "NAb Run " + form.getRunId() + " does not exist.");
+            }
         }
+
+        @Override
+        public ApiResponse execute(QCControlInfo form, BindException errors) throws Exception
+        {
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            DbSchema schema = DilutionManager.getSchema();
+            DbScope scope = schema.getScope();
+            ExpRun run = ExperimentService.get().getExpRun(form.getRunId());
+
+            if (run != null)
+            {
+                ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
+                AssayProvider provider = AssayService.get().getProvider(protocol);
+
+                if (provider instanceof DilutionAssayProvider)
+                {
+                    DilutionDataHandler handler = ((DilutionAssayProvider)provider).getDataHandler();
+                    if (handler instanceof NabDataHandler)
+                    {
+                        NabDataHandler dataHandler = (NabDataHandler)handler;
+                        try (DbScope.Transaction transaction = scope.ensureTransaction())
+                        {
+                            // clear all well exclusions for this run
+                            SQLFragment sql = new SQLFragment("UPDATE ").append(DilutionManager.getTableInfoWellData(), "").
+                                    append(" SET excluded = false WHERE runid = ?");
+                            sql.addAll(form.getRunId());
+                            new SqlExecutor(schema).execute(sql);
+
+                            Set<String> excludedWells = new HashSet<>();
+                            Collection<Integer> wellRowIds = new HashSet<>();
+
+                            for (WellExclusion well : form.getExclusions())
+                            {
+                                excludedWells.add(NabAssayController.getKey(well.getPlate(), well.getRow(), well.getCol()));
+                            }
+
+                            // get the rowid's for the wells to exclude
+                            for (WellDataRow wellData : DilutionManager.getWellDataRows(_run))
+                            {
+                                if (excludedWells.contains(getKey(wellData)))
+                                {
+                                    wellRowIds.add(wellData.getRowId());
+                                }
+                            }
+
+                            // set the updated well exclusions and create the QC flags
+                            if (!wellRowIds.isEmpty())
+                            {
+                                SQLFragment update = new SQLFragment("UPDATE ").append(DilutionManager.getTableInfoWellData(), "").
+                                        append(" SET excluded = true WHERE rowid ");
+                                schema.getSqlDialect().appendInClauseSql(update, wellRowIds);
+                                new SqlExecutor(schema).execute(update);
+                            }
+
+                            // update the dilutiondata tables to reflect the exclusions
+                            List<Map<String, Object>> dilutionRows = new ArrayList<>();
+                            List<Map<String, Object>> wellRows = new ArrayList<>();
+                            dataHandler.recalculateWellData(protocol, run, getUser(), dilutionRows, wellRows);
+
+                            // get the primary keys for the existing dilution rows
+                            Map<String, DilutionDataRow> existingDilution = new CaseInsensitiveHashMap<>();
+                            SimpleFilter filter = SimpleFilter.createContainerFilter(getContainer());
+                            filter.addCondition(FieldKey.fromParts("runId"), form.getRunId());
+                            for (DilutionDataRow row : new TableSelector(DilutionManager.getTableInfoDilutionData(), filter, null).getArrayList(DilutionDataRow.class))
+                                existingDilution.put(getDilutionKey(row), row);
+
+                            for (Map<String, Object> row : dilutionRows)
+                            {
+                                String key = getDilutionKey(row);
+                                if (existingDilution.containsKey(key))
+                                {
+                                    DilutionDataRow current = existingDilution.get(key);
+                                    Table.update(getUser(), DilutionManager.getTableInfoDilutionData(), row, current.getRowId());
+                                }
+                            }
+
+                            // update nabspecimen and cutoffs to reflect the exclusions
+                            List<Map<String, Object>> rawData = dataHandler.calculateDilutionStats(run, getUser(), null, true, true);
+                            if (!rawData.isEmpty())
+                            {
+                                ExpData data = run.getDataOutputs().get(0);
+                                List<Map<String, Object>> specimenRows = new ArrayList<>();
+                                List<Map<String, Object>> cutoffRows = new ArrayList<>();
+                                Map<String, Integer> specimenLsidToRowid = new HashMap<>();
+                                dataHandler.recalculateDilutionStats(data, run, protocol, rawData, specimenRows, cutoffRows);
+
+                                Map<String, Map<String, Object>> existingSpecimen = new HashMap<>();
+                                for (Map<String, Object> row : new TableSelector(DilutionManager.getTableInfoNAbSpecimen(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRunId()), null).getMapCollection())
+                                    existingSpecimen.put(getSpecimenKey(row), row);
+
+                                for (Map<String, Object> row : specimenRows)
+                                {
+                                    String key = getSpecimenKey(row);
+                                    if (existingSpecimen.containsKey(key))
+                                    {
+                                        Map<String, Object> current = existingSpecimen.get(key);
+                                        specimenLsidToRowid.put(String.valueOf(current.get("specimenLsid")), (Integer)current.get("rowId"));
+                                        Table.update(getUser(), DilutionManager.getTableInfoNAbSpecimen(), row, current.get("rowId"));
+                                    }
+                                }
+
+                                // get current cutoff values
+                                Map<String, Map<String, Object>> existingCutoffs = new HashMap<>();
+                                SQLFragment cutoffSql = new SQLFragment("SELECT * FROM ").append(DilutionManager.getTableInfoCutoffValue(), "").append(" WHERE nabSpecimenId ");
+                                schema.getSqlDialect().appendInClauseSql(cutoffSql, specimenLsidToRowid.values());
+                                for (Map<String, Object> row : new SqlSelector(schema, cutoffSql).getMapCollection())
+                                    existingCutoffs.put(getCutoffKey(row), row);
+
+                                for (Map<String, Object> row : cutoffRows)
+                                {
+                                    String specimenLsid = String.valueOf(row.get("nabSpecimenId"));
+                                    Double cutoff = (Double)row.get("cutoff");
+
+                                    if (specimenLsid != null && cutoff != null && specimenLsidToRowid.containsKey(specimenLsid))
+                                    {
+                                        Integer rowId = specimenLsidToRowid.get(specimenLsid);
+                                        String key = getCutoffKey(rowId, cutoff);
+
+                                        if (existingCutoffs.containsKey(key))
+                                        {
+                                            Map<String, Object> current = existingCutoffs.get(key);
+                                            row.put("nabSpecimenId", rowId);
+                                            Table.update(getUser(), DilutionManager.getTableInfoCutoffValue(), row, current.get("rowId"));
+                                        }
+                                    }
+                                }
+                            }
+                            transaction.commit();
+                            // clear the nab run cache
+                            getViewContext().getSession().removeAttribute(LAST_NAB_RUN_KEY);
+                            NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
+                            response.put("success", true);
+                        }
+                    }
+                }
+            }
+            return response;
+        }
+
+        private String getCutoffKey(Integer specimenId, Double cutoff)
+        {
+            return specimenId + "-" + cutoff;
+        }
+
+        private String getCutoffKey(Map<String, Object> row)
+        {
+            return getCutoffKey((Integer)row.get("nabSpecimenId"), (Double)row.get("cutoff"));
+        }
+
+        private String getSpecimenKey(Map<String, Object> row)
+        {
+            return row.get("runId") + "-" + row.get("wellGroupName");
+        }
+
+        private String getDilutionKey(DilutionDataRow row)
+        {
+            return row.getRunId() + "-" + row.getWellgroupName() + "-" + row.getReplicateName() + "-" + row.getPlateNumber();
+        }
+
+        private String getDilutionKey(Map<String, Object> row)
+        {
+            return row.get("runId") + "-" + row.get("wellGroupName") + "-" + row.get("replicateName") + "-" + row.get("plateNumber");
+        }
+
+        private String getKey(WellDataRow row)
+        {
+            return NabAssayController.getKey(row.getPlateNumber(), row.getRow(), row.getColumn());
+        }
+    }
+
+    private static String getKey(Object plate, Object row, Object col)
+    {
+        return String.format("%s-%s-%s", String.valueOf(plate), String.valueOf(row), String.valueOf(col));
     }
 
     public static class QCControlInfo implements CustomApiForm
     {
-        private List<Map<String, Object>> _exclusions = new ArrayList<>();
+        private List<WellExclusion> _exclusions = new ArrayList<>();
+        private int _runId;
+
+        public int getRunId()
+        {
+            return _runId;
+        }
+
+        public List<WellExclusion> getExclusions()
+        {
+            return _exclusions;
+        }
 
         @Override
         public void bindProperties(Map<String, Object> props)
         {
             Object excludedProp = props.get("excluded");
+            Object runId = props.get("runId");
+
+            if (runId instanceof Integer)
+            {
+                _runId = (Integer)runId;
+            }
+
             if (excludedProp != null)
             {
                 for (JSONObject excluded : ((JSONArray) excludedProp).toJSONObjectArray())
                 {
-                    Map<String, Object> exclusion = new HashMap<>();
-
-                    exclusion.put("row", excluded.getInt("row"));
-                    exclusion.put("col", excluded.getInt("col"));
-                    exclusion.put("plate", excluded.getInt("plate"));
-                    _exclusions.add(exclusion);
+                    _exclusions.add(new WellExclusion(excluded.getInt("plate"),
+                            excluded.getInt("row"),
+                            excluded.getInt("col")));
                 }
             }
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    @Marshal(Marshaller.Jackson)
+    public class GetExcludedWellsAction extends ApiAction<RenderAssayBean>
+    {
+        @Override
+        public ApiResponse execute(RenderAssayBean form, BindException errors) throws Exception
+        {
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run != null)
+            {
+                List<WellExclusion> exclusions = new ArrayList<>();
+                DbSchema schema = DilutionManager.getSchema();
+                for (WellDataRow well : DilutionManager.getExcludedWellDataRows(run))
+                {
+                    // need the specimen name
+                    String specimenName = null;
+                    ExpMaterial material = ExperimentService.get().getExpMaterial(well.getSpecimenLsid());
+                    if (material != null)
+                    {
+                        // try to find the specimen id entered for this run
+                        for (Map.Entry<PropertyDescriptor, Object> entry : material.getPropertyValues().entrySet())
+                        {
+                            if (AbstractAssayProvider.SPECIMENID_PROPERTY_NAME.equals(entry.getKey().getName()))
+                            {
+                                if (entry.getValue() != null)
+                                    specimenName = String.valueOf(entry.getValue());
+                                break;
+                            }
+                        }
+                    }
+
+                    // nothing found or entered, just default to the specimen well group name
+                    if (specimenName == null)
+                    {
+                        SQLFragment sql = new SQLFragment("SELECT WellGroupName FROM ").append(DilutionManager.getTableInfoNAbSpecimen(), "").
+                                append(" WHERE RunId = ? AND SpecimenLsid = ?");
+                        sql.addAll(form.getRowId(), well.getSpecimenLsid());
+
+                        specimenName = new SqlSelector(schema, sql).getObject(String.class);
+                    }
+                    exclusions.add(new WellExclusion(well.getPlateNumber(), well.getRow(), well.getColumn(), specimenName));
+                }
+                response.put("excluded", exclusions);
+            }
+            else
+            {
+                errors.reject(ERROR_MSG, "NAb Run " + form.getRunId() + " does not exist.");
+            }
+            return response;
+        }
+    }
+
+    public static class WellExclusion
+    {
+        private int _row;
+        private int _col;
+        private int _plate;
+        private String _specimen;
+
+        public WellExclusion(int plate, int row, int col, String specimen)
+        {
+            _plate = plate;
+            _row = row;
+            _col = col;
+            _specimen = specimen;
+        }
+
+        public WellExclusion(int plate, int row, int col)
+        {
+            this(plate, row, col, null);
+        }
+
+        public String getKey()
+        {
+            return NabAssayController.getKey(_plate, _row, _col);
+        }
+
+        public int getRow()
+        {
+            return _row;
+        }
+
+        public void setRow(int row)
+        {
+            _row = row;
+        }
+
+        public int getCol()
+        {
+            return _col;
+        }
+
+        public void setCol(int col)
+        {
+            _col = col;
+        }
+
+        public int getPlate()
+        {
+            return _plate;
+        }
+
+        public void setPlate(int plate)
+        {
+            _plate = plate;
+        }
+
+        public char getRowLabel()
+        {
+            return (char)(('A' + _row));
+        }
+
+        public String getSpecimen()
+        {
+            return _specimen;
+        }
+
+        public void setSpecimen(String specimen)
+        {
+            _specimen = specimen;
         }
     }
 }

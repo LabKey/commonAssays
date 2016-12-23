@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="org.labkey.nab.NabAssayController" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
@@ -37,8 +38,8 @@
 %>
 
 <%
-    JspView<RenderAssayBean> me = (JspView<RenderAssayBean>) HttpView.currentView();
-    RenderAssayBean bean = me.getModelBean();
+    JspView<NabAssayController.NabQCForm> me = (JspView<NabAssayController.NabQCForm>) HttpView.currentView();
+    NabAssayController.NabQCForm bean = me.getModelBean();
     DilutionAssayRun assay = bean.getAssay();
     ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -69,6 +70,7 @@
 
         new LABKEY.ext4.NabQCPanel({
             renderTo    : 'nabQCDiv',
+            edit        : <%=bean.isEdit()%>,
             runId       : <%=bean.getRunId()%>,
             runName     : <%=q(assay.getRunName())%>,
             runProperties : <%=text(jsonMapper.writeValueAsString(runProperties))%>,

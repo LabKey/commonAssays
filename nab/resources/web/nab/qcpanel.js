@@ -23,9 +23,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     constructor: function (config)
     {
         this.callParent([config]);
-
-        // objects to track QC selections
-        this.fieldSelections = {};
     },
 
     initComponent: function ()
@@ -52,14 +49,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             else {
                 this.onSave();
             }
-
         }});
 
         this.cancelBtn = new Ext4.Button({text: 'Cancel', scope: this, handler: function(){
             window.location = LABKEY.ActionURL.buildURL('nabassay', 'details.view', null, {rowId : this.runId});
         }});
 
-        this.bbar = ['->', this.nextBtn, this.prevBtn, this.cancelBtn];
+        if (this.edit)
+            this.bbar = ['->', this.nextBtn, this.prevBtn, this.cancelBtn];
+        else
+            this.bbar = ['->', {text: 'Done', scope: this, handler: function(){
+                window.location = LABKEY.ActionURL.buildURL('nabassay', 'details.view', null, {rowId : this.runId});
+            }}];
 
         this.items = [];
         this.items.push(this.getSelectionPanel());
@@ -126,7 +127,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 tplText.push(this.getDilutionSummaryTpl());
                 tplText.push('</td></tr></table>');
 
-                // create the template ant add the template functions to the configuration
+                // create the template and add the template functions to the configuration
                 items.push({
                     xtype : 'panel',
                     tpl : new Ext4.XTemplate(tplText.join(''),
@@ -151,7 +152,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 var selectionPanel = this.getSelectionPanel();
                 selectionPanel.getEl().unmask();
                 selectionPanel.removeAll();
-                selectionPanel.add(items);
+
+                if (this.edit) {
+                    selectionPanel.add(items);
+                }
+                else {
+                    // create the store to get the initial load
+                    var store = this.getFieldSelectionStore();
+                    store.on('load', function(){
+                        this.activeItem = 'confirmationpanel';
+                        this.getLayout().setActiveItem(this.activeItem);
+                    }, this, {single : true})
+                }
             }
         });
     },
@@ -233,9 +245,9 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
         tpl.push('<tpl for="dilutionSummaries">',
                 '<table class="dilution-summary">',
+                '<tr><td colspan="10" class="labkey-data-region-header-container" style="text-align:center;">{name}</td></tr>',
                 '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
-                    '<td><table class="labkey-data-region">',
-                        '<tr><td colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{name}</td></tr>',
+                    '<td valign="top"><table class="labkey-data-region">',
                         '<tr>',
                             '<td>{methodLabel}</td><td>{neutLabel}</td>',
                             '<td class="dilution-checkbox-addall" id="{[this.getId(this)]}" specimen="{name}"></td><td></td></tr>',
@@ -293,15 +305,15 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 var field = Ext4.create('widget.checkbox', {
                     renderTo : cmp.getAttribute('id'),
                     boxLabel : cmp.getAttribute('label'),
-                    row : cmp.getAttribute('row'),
+                    row      : cmp.getAttribute('row'),
                     rowlabel : cmp.getAttribute('rowlabel'),
-                    col : cmp.getAttribute('col'),
+                    col      : cmp.getAttribute('col'),
                     specimen : cmp.getAttribute('specimen'),
-                    plate : cmp.getAttribute('plate'),
+                    plate    : cmp.getAttribute('plate'),
                     listeners : {
                         scope   : this,
                         change  : function(cmp, newValue) {
-                            var store = this.createFieldSelectionStore();
+                            var store = this.getFieldSelectionStore();
                             if (store){
                                 var key = this.getKey(cmp);
                                 var rec = store.findRecord('key', key);
@@ -313,12 +325,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                                         fieldPanel.refresh();
                                     }
                                 }
-                                else {
+                                else if (newValue && !rec){
                                     // add the record to the store
                                     store.add({
-                                        key : key,
-                                        plate : cmp.plate,
-                                        row : cmp.row,
+                                        key     : key,
+                                        plate   : cmp.plate,
+                                        row     : cmp.row,
                                         rowlabel : cmp.rowlabel,
                                         col : cmp.col,
                                         specimen : cmp.specimen,
@@ -326,7 +338,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                                     });
                                 }
                             }
-                            //this.fieldSelections[this.getKey(cmp.plate, cmp.row, cmp.col)] = newValue;
                         }
                     }
                 });
@@ -346,7 +357,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     listeners : {
                         scope   : this,
                         change  : function(cmp, newValue) {
-
                             // get all of the checkboxes with the same specimen and plate
                             var checkboxes = Ext4.ComponentQuery.query('checkbox[specimen=' + cmp.specimen + ']');
                             Ext4.each(checkboxes, function(ck){
@@ -358,8 +368,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 });
             }
         }, this);
-
-        this.doLayout();
     },
 
     getKey : function(cmp){
@@ -394,15 +402,15 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     tpl     : this.getFieldSelectionTpl(),
                     width   : '100%',
                     autoScroll : true,
-                    store   : this.createFieldSelectionStore(),
+                    store   : this.getFieldSelectionStore(),
                     itemSelector :  'tr.field-exclusion',
                     disableSelection: true,
                     listeners : {
                         scope   : this,
                         itemclick : function(view, rec, item, idx, event){
                             if (event.target.getAttribute('class') == 'fa labkey-link fa-times') {
-                                this.removeExclusion(rec.getData().key);
                                 view.getStore().remove(rec);
+                                this.setWellCheckbox(rec, false);
                             }
                         }
                     }
@@ -427,17 +435,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                                     }
                             ),
                             data : {
-                                plates : this.plates,
+                                plates : this.plates
                             },
                             listeners : {
                                 scope   : this,
                                 render : function(cmp){
-                                    var store = this.createFieldSelectionStore();
+                                    // need to pick up any selections made prior to component render
+                                    var store = this.getFieldSelectionStore();
                                     if (store){
                                         store.each(function(rec){
 
                                             var key = this.getKey(rec.getData());
-                                            this.addExclusion(key);
+                                            this.setWellExclusion(key, true);
 
                                         }, this);
                                     }
@@ -452,23 +461,32 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     },
 
     getFieldSelectionTpl : function(){
-        var tpl = [];
-        tpl.push('<table>',
-                '<tr class="labkey-data-region-header-container" style="text-align:center;"><th colspan="5">Excluded Field Wells</th></tr>',
-                '<tr><th></th><th>Row</th><th>Column</th><th>Specimen</th><th>Plate</th><th>Comment</th></tr>',
-                '<tpl for=".">',
-                    '<tr class="field-exclusion">',
-                    '<td class="remove-exclusion" data-qtip="Click to delete"><div><span class="fa labkey-link fa-times"></div></span></td>',
-                    '<td style="text-align: left">{rowlabel}</td>',
-                    '<td style="text-align: left">{col}</td>',
-                    '<td style="text-align: left">{specimen}</td>',
-                    '<td style="text-align: left">Plate {plate}</td>',
-                    '<td style="text-align: left"><input type="text" name="comment" size="60"></td>',
-                    '</tr>',
-                '</tpl>',
-                '</table>'
+        return new Ext4.XTemplate(
+            '<table>',
+            '<tr class="labkey-data-region-header-container" style="text-align:center;"><th colspan="5">Excluded Field Wells</th></tr>',
+            '<tr><th></th><th>Row</th><th>Column</th><th>Specimen</th><th>Plate</th><th>Comment</th></tr>',
+            '<tpl for=".">',
+                '<tr class="field-exclusion">',
+                '<td class="remove-exclusion" data-qtip="Click to delete">{[this.getDeleteIcon(values)]}</td>',
+                '<td style="text-align: left">{rowlabel}</td>',
+                '<td style="text-align: left">{col}</td>',
+                '<td style="text-align: left">{specimen}</td>',
+                '<td style="text-align: left">Plate {plate}</td>',
+                '<td style="text-align: left"><input type="text" name="comment" size="60"></td>',
+                '</tr>',
+            '</tpl>',
+            '</table>',
+            {
+                // don't show the remove icon if we aren't in edit mode
+                getDeleteIcon : function(rec){
+                    if (this.me.edit){
+                        return '<div><span class="fa labkey-link fa-times"></span></div>';
+                    }
+                    return '';
+                },
+                me : this
+            }
         );
-        return tpl.join('');
     },
 
     getPlateTpl : function(){
@@ -500,7 +518,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         return tpl.join('');
     },
 
-    createFieldSelectionStore : function() {
+    getFieldSelectionStore : function() {
 
         if (!this.fieldSelectionStore) {
 
@@ -508,10 +526,16 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
                 Ext4.define('LABKEY.Nab.SelectedFields', {
                     extend: 'Ext.data.Model',
+                    proxy : {
+                        type : 'ajax',
+                        url : LABKEY.ActionURL.buildURL('nabassay', 'getExcludedWells.api'),
+                        extraParams : {rowId : this.runId},
+                        reader : { type : 'json', root : 'excluded' }
+                    },
                     fields : [
                         {name: 'key'},
                         {name: 'row'},
-                        {name: 'rowlabel'},
+                        {name: 'rowlabel', mapping : 'rowLabel'},
                         {name: 'col'},
                         {name: 'specimen'},
                         {name: 'plate'},
@@ -521,7 +545,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             }
             this.fieldSelectionStore = Ext4.create('Ext.data.Store', {
                 model : 'LABKEY.Nab.SelectedFields',
-                autoLoad: false,
+                autoLoad: true,
                 pageSize: 10000,
                 listeners : {
                     scope   : this,
@@ -529,14 +553,20 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         Ext4.each(records, function(rec){
 
                             var key = this.getKey(rec.getData());
-                            this.addExclusion(key);
+                            this.setWellExclusion(key, true);
                         }, this);
                     },
                     remove : function(store, records){
                         Ext4.each(records, function(rec){
 
                             var key = this.getKey(rec.getData());
-                            this.removeExclusion(key);
+                            this.setWellExclusion(key, false);
+                        }, this);
+                    },
+                    load : function(store, records){
+                        Ext4.each(records, function(rec){
+
+                            this.setWellCheckbox(rec, true);
                         }, this);
                     }
                 }
@@ -545,14 +575,17 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         return this.fieldSelectionStore;
     },
 
-    addExclusion : function(key){
+    /**
+     * mark the well as excluded (or clear) on the plate diagram
+     */
+    setWellExclusion : function(key, excluded){
 
-        this.applyStyleToClass(key, {backgroundColor: '#FF7A83'})
-    },
-
-    removeExclusion : function(key){
-
-        this.applyStyleToClass(key, {backgroundColor: 'white'})
+        if (excluded) {
+            this.applyStyleToClass(key, {backgroundColor: '#FF7A83'})
+        }
+        else {
+            this.applyStyleToClass(key, {backgroundColor: 'white'})
+        }
     },
 
     applyStyleToClass : function(cls, style) {
@@ -567,7 +600,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     onSave : function(){
 
         var excluded = [];
-        this.createFieldSelectionStore().each(function(rec){
+        this.getFieldSelectionStore().each(function(rec){
 
             excluded.push({
                 row : rec.get('row'),
@@ -581,10 +614,11 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             url: LABKEY.ActionURL.buildURL('nabassay', 'saveQCControlInfo.api'),
             method: 'POST',
             jsonData: {
+                runId : this.runId,
                 excluded : excluded
             },
             success: function (response) {
-                console.log('save success');
+                window.location = LABKEY.ActionURL.buildURL('nabassay', 'details.view', null, {rowId : this.runId});
             },
             failure: this.failureHandler,
             scope: this
@@ -600,5 +634,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             buttons: Ext4.Msg.OK,
             icon: Ext4.Msg.ERROR
         });
+    },
+
+    /**
+     * Set the checked state of the checkbox matching the location specified
+     */
+    setWellCheckbox : function(rec, checked){
+        // get all of the checkboxes with the same specimen and plate
+        var checkboxes = Ext4.ComponentQuery.query('checkbox[plate=' + rec.get('plate') + '][row=' + rec.get('row') + '][col=' + rec.get('col') + ']');
+        Ext4.each(checkboxes, function(ck){
+
+            ck.setValue(checked);
+        }, this);
+
     }
 });
