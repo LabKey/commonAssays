@@ -412,6 +412,20 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                                 view.getStore().remove(rec);
                                 this.setWellCheckbox(rec, false);
                             }
+                        },
+                        refresh : function(cmp){
+                            var commentFieldEls = Ext4.DomQuery.select('input.field-exclusion-comment', this.getEl().dom);
+                            Ext4.each(commentFieldEls, function(cmp) {
+                                Ext4.EventManager.addListener(cmp, 'change', this.onCommentChange, this);
+                            }, this);
+                        },
+                        itemadd : function(rec, idx, nodes){
+                            Ext4.each(nodes, function(node){
+                                this.addCommentFieldListener(node);
+                            }, this);
+                        },
+                        itemupdate : function(rec, idx, node){
+                            this.addCommentFieldListener(node);
                         }
                     }
                 }],
@@ -472,7 +486,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<td style="text-align: left">{col}</td>',
                 '<td style="text-align: left">{specimen}</td>',
                 '<td style="text-align: left">Plate {plate}</td>',
-                '<td style="text-align: left"><input type="text" name="comment" size="60"></td>',
+                '<td style="text-align: left"><input class="field-exclusion-comment" key="{[this.getKey(values)]}" {[this.getReadonly()]} type="text" name="comment" size="60" value="{comment}"></td>',
                 '</tr>',
             '</tpl>',
             '</table>',
@@ -483,6 +497,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         return '<div><span class="fa labkey-link fa-times"></span></div>';
                     }
                     return '';
+                },
+                getKey : function(rec){
+                    return rec.plate + '-' + rec.row + '-' + rec.col;
+                },
+                getReadonly : function(){
+                    return this.me.edit ? '' : 'readonly';
                 },
                 me : this
             }
@@ -539,6 +559,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         {name: 'col'},
                         {name: 'specimen'},
                         {name: 'plate'},
+                        {name: 'comment'},
                         {name: 'excluded'}
                     ]
                 });
@@ -610,6 +631,8 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             });
         }, this);
 
+        this.getEl().mask('Saving QC information');
+
         Ext4.Ajax.request({
             url: LABKEY.ActionURL.buildURL('nabassay', 'saveQCControlInfo.api'),
             method: 'POST',
@@ -647,5 +670,35 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             ck.setValue(checked);
         }, this);
 
+    },
+
+    /**
+     * Adds a change listener to the comment field and pushes any changes into the field selection store
+     */
+    addListenersToCommentFields : function(node, style) {
+
+        // remove existing listeners
+
+        var commentFieldEls = Ext4.DomQuery.select('input.field-exclusion-comment', this.getEl().dom);
+        Ext4.each(commentFieldEls, function(cmp)
+        {
+            Ext4.EventManager.addListener(cmp, 'change', function(event, cmp){
+            }, this);
+        }, this);
+    },
+
+    addCommentFieldListener : function(node){
+        Ext4.EventManager.addListener(node, 'change', this.onCommentChange, this, {single : true});
+    },
+
+    onCommentChange : function(event, cmp){
+        var key = cmp.getAttribute('key');
+        if (key){
+            var store = this.getFieldSelectionStore()
+            var rec = store.findRecord('key', key);
+            if (rec && cmp.value){
+                rec.set('comment', cmp.value);
+            }
+        }
     }
 });

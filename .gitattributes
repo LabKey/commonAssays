@@ -1522,6 +1522,7 @@ nab/src/org/labkey/nab/multiplate/SinglePlateDilutionNabAssayProvider.java -text
 nab/src/org/labkey/nab/multiplate/SinglePlateDilutionNabAssayRun.java -text
 nab/src/org/labkey/nab/multiplate/SinglePlateDilutionNabDataHandler.java -text
 nab/src/org/labkey/nab/multiplate/SinglePlateDilutionSamplePropertyHelper.java -text
+nab/src/org/labkey/nab/qc/NabWellQCFlag.java -text
 nab/src/org/labkey/nab/query/NabBaseTable.java -text
 nab/src/org/labkey/nab/query/NabDataLinkDisplayColumn.java -text
 nab/src/org/labkey/nab/query/NabDilutionDataTable.java -text

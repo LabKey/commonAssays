@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
@@ -119,6 +120,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewContext;
+import org.labkey.nab.qc.NabWellQCFlag;
 import org.labkey.nab.query.NabDataLinkDisplayColumn;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
@@ -1035,12 +1037,18 @@ public class NabAssayController extends SpringActionController
                             sql.addAll(form.getRunId());
                             new SqlExecutor(schema).execute(sql);
 
+                            // clear out prior qc flags
+                            Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRunId()));
                             Set<String> excludedWells = new HashSet<>();
                             Collection<Integer> wellRowIds = new HashSet<>();
 
                             for (WellExclusion well : form.getExclusions())
                             {
                                 excludedWells.add(NabAssayController.getKey(well.getPlate(), well.getRow(), well.getCol()));
+
+                                // add the assay qc flag for the exclusions
+                                NabWellQCFlag flag = new NabWellQCFlag(form.getRunId(), well);
+                                Table.insert(getUser(), ExperimentService.get().getTinfoAssayQCFlag(), flag);
                             }
 
                             // get the rowid's for the wells to exclude
@@ -1214,7 +1222,8 @@ public class NabAssayController extends SpringActionController
                 {
                     _exclusions.add(new WellExclusion(excluded.getInt("plate"),
                             excluded.getInt("row"),
-                            excluded.getInt("col")));
+                            excluded.getInt("col"),
+                            excluded.getString("comment")));
                 }
             }
         }
@@ -1232,6 +1241,14 @@ public class NabAssayController extends SpringActionController
             if (run != null)
             {
                 List<WellExclusion> exclusions = new ArrayList<>();
+                Map<String, NabWellQCFlag> qcFlagMap = new HashMap<>();
+
+                // get the saved assay QC flags to pull comment information from
+                for (NabWellQCFlag flag : new TableSelector(ExperimentService.get().getTinfoAssayQCFlag(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRowId()), null).getArrayList(NabWellQCFlag.class))
+                {
+                    qcFlagMap.put(flag.getKey1(), flag);
+                }
+
                 DbSchema schema = DilutionManager.getSchema();
                 for (WellDataRow well : DilutionManager.getExcludedWellDataRows(run))
                 {
@@ -1261,7 +1278,16 @@ public class NabAssayController extends SpringActionController
 
                         specimenName = new SqlSelector(schema, sql).getObject(String.class);
                     }
-                    exclusions.add(new WellExclusion(well.getPlateNumber(), well.getRow(), well.getColumn(), specimenName));
+                    WellExclusion exclusion = new WellExclusion(well.getPlateNumber(), well.getRow(), well.getColumn(), null);
+                    if (qcFlagMap.containsKey(exclusion.getKey()))
+                    {
+                        NabWellQCFlag flag = qcFlagMap.get(exclusion.getKey());
+                        if (!StringUtils.isBlank(flag.getComment()))
+                            exclusion.setComment(flag.getComment());
+                    }
+                    exclusion.setSpecimen(specimenName);
+
+                    exclusions.add(exclusion);
                 }
                 response.put("excluded", exclusions);
             }
@@ -1278,19 +1304,15 @@ public class NabAssayController extends SpringActionController
         private int _row;
         private int _col;
         private int _plate;
+        private String _comment;
         private String _specimen;
 
-        public WellExclusion(int plate, int row, int col, String specimen)
+        public WellExclusion(int plate, int row, int col, String comment)
         {
             _plate = plate;
             _row = row;
             _col = col;
-            _specimen = specimen;
-        }
-
-        public WellExclusion(int plate, int row, int col)
-        {
-            this(plate, row, col, null);
+            _comment = comment;
         }
 
         public String getKey()
@@ -1341,6 +1363,16 @@ public class NabAssayController extends SpringActionController
         public void setSpecimen(String specimen)
         {
             _specimen = specimen;
+        }
+
+        public String getComment()
+        {
+            return _comment;
+        }
+
+        public void setComment(String comment)
+        {
+            _comment = comment;
         }
     }
 }
