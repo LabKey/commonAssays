@@ -11,16 +11,10 @@ function openExclusionsSinglepointUnknownWindow(assayId, runId)
         {
             if (Ext.isArray(assay) && assay.length == 1)
             {
-                var win = new Ext.Window({
-                    cls: 'extContainer',
+                var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Singlepoint Unknowns from Analysis',
-                    layout:'fit',
                     width: Ext.getBody().getViewSize().width < 550 ? Ext.getBody().getViewSize().width * .9 : 500,
                     height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
-                    padding: 15,
-                    modal: true,
-                    closeAction:'close',
-                    bodyStyle: 'background-color: white;',
                     items: new LABKEY.Exclusions.SinglepointUnknownPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
@@ -300,14 +294,17 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                             }, this);
                             var id = this.getExclusionsStore().findExact(this.ITEM_RECORD_KEY, record.get(this.ITEM_RECORD_KEY));
                             this.preExcludedIds[rowId] = this.getExclusionsStore().getAt(id).get('RowId');
+                            this.exclusionsExist = true;
                         }
                         else if (this.excluded[rowId])
                         {
                             this.getGridCheckboxSelModel().selectRecords(this.excluded[rowId], false);
+                            this.exclusionsExist = true;
                         }
                         else
                         {
                             this.getGridCheckboxSelModel().clearSelections();
+                            this.exclusionsExist = false;
                         }
                         this.getGridCheckboxSelModel().resumeEvents();
 
@@ -449,7 +446,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
             if (analytesForExclusion == undefined)
                 continue;
 
-            // generage a comma delim string of the analyte Ids to exclude
+            // generate a comma delim string of the analyte Ids to exclude
             var analyteRowIds = "";
             var analyteNames = "";
             var sep = "";
@@ -467,10 +464,6 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
 
             // issue 21551: don't insert an exclusion w/out any analytes
             if (command == "insert" && analyteRowIds == "")
-                continue;
-
-            // don't call update if no change to analyte selection for a given titration
-            if (this.preAnalyteRowIds[index] == analyteRowIds)
                 continue;
 
             // config of data to save for a single titration exclusion
@@ -504,6 +497,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
         else
         {
             this.unmask();
+            this.fireEvent('closeWindow');
         }
     }
 });

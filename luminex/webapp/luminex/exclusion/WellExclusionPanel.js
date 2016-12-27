@@ -16,16 +16,10 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
         {
             if (Ext.isArray(assay) && assay.length == 1)
             {
-                var win = new Ext.Window({
-                    cls: 'extContainer',
+                var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Replicate Group from Analysis',
-                    layout:'fit',
                     width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
                     height: Ext.getBody().getViewSize().height > 595 ? 560 : Ext.getBody().getViewSize().height * .75,
-                    padding: 15,
-                    modal: true,
-                    closeAction:'close',
-                    bodyStyle: 'background-color: white;',
                     items: new LABKEY.Exclusions.WellPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
@@ -313,7 +307,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             message = "Saving replicate group exclusion and re-calculating curve...";
         this.mask(message);
 
-        // generage a comma delim string of the analyte Ids to exclude
+        // generate a comma delim string of the analyte Ids to exclude
         var analytesForExclusion = this.findById('availableanalytes').getSelectionModel().getSelections();
         var analyteRowIds = "";
         var analyteNames = "";

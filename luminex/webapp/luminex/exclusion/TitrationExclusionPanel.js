@@ -16,16 +16,10 @@ function openExclusionsTitrationWindow(assayId, runId)
         {
             if (Ext.isArray(assay) && assay.length == 1)
             {
-                var win = new Ext.Window({
-                    cls: 'extContainer',
+                var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Titrations from Analysis',
-                    layout:'fit',
                     width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
                     height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
-                    padding: 15,
-                    modal: true,
-                    closeAction:'close',
-                    bodyStyle: 'background-color: white;',
                     items: new LABKEY.Exclusions.TitrationPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
@@ -244,14 +238,17 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                             }, this);
                             var id = this.getExclusionsStore().findExact('Description', record.get(this.ITEM_RECORD_KEY));
                             this.preExcludedIds[rowId] = this.getExclusionsStore().getAt(id).get('RowId');
+                            this.exclusionsExist = true;
                         }
                         else if (this.excluded[rowId])
                         {
                             this.getGridCheckboxSelModel().selectRecords(this.excluded[rowId], false);
+                            this.exclusionsExist = true;
                         }
                         else
                         {
                             this.getGridCheckboxSelModel().clearSelections();
+                            this.exclusionsExist = false;
                         }
                         this.getGridCheckboxSelModel().resumeEvents();
 

@@ -259,15 +259,26 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 
     mask : function(message)
     {
-        this.findParentByType('window').getEl().mask(message, "x-mask-loading");
+        this.ownerCt.getEl().mask(message, "x-mask-loading");
     },
 
     unmask : function()
     {
-        var windowEl = this.findParentByType('window').getEl();
+        var windowEl = this.ownerCt.getEl();
         if (windowEl.isMasked())
             windowEl.unmask();
     }
+});
+
+LABKEY.Exclusions.BaseWindow = Ext.extend(Ext.Window, {
+    cls: 'extContainer',
+    layout:'fit',
+    padding: 15,
+    modal: true,
+    closeAction:'close',
+    bodyStyle: 'background-color: white;',
+    draggable: false,
+    resizable: false
 });
 
 LABKEY.Luminex = new function()
