@@ -11,7 +11,8 @@ if (!LABKEY.Exclusions)
 
 LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 
-    constructor : function(config){
+    constructor : function(config)
+    {
         // check that the config properties needed are present
         if (!config.protocolSchemaName)
             throw "You must specify a protocolSchemaName!";
@@ -32,13 +33,15 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         LABKEY.Exclusions.BasePanel.superclass.constructor.call(this, config);
     },
 
-    queryExistingExclusions : function(queryName, filterArray, columns) {
+    queryExistingExclusions : function(queryName, filterArray, columns)
+    {
         LABKEY.Query.selectRows({
             schemaName: this.protocolSchemaName,
             queryName: queryName,
             filterArray: filterArray,
             columns: columns,
-            success: function(data){
+            success: function(data)
+            {
                 this.exclusionsExist = false;
                 if (data.rows.length == 1)
                 {
@@ -59,11 +62,13 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         });
     },
 
-    setupWindowPanelItems: function() {
+    setupWindowPanelItems: function()
+    {
         // TO BE OVERRIDDEN
     },
 
-    addHeaderPanel: function(descText) {
+    addHeaderPanel: function(descText)
+    {
         this.add(new Ext.form.FormPanel({
             style: 'padding-bottom: 10px; background: #ffffff',
             html: this.getExclusionPanelHeader(),
@@ -80,7 +85,8 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 
     },
 
-    addCommentPanel: function() {
+    addCommentPanel: function()
+    {
         this.add(new Ext.form.FormPanel({
             height: 75,
             style: 'padding-top: 20px; background: #ffffff',
@@ -96,7 +102,8 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
                     enableKeyEvents: true,
                     listeners: {
                         scope: this,
-                        'keydown': function(){
+                        keydown: function()
+                        {
                             // enable the save changes button when the comment is edited by the user, if exclusions exist
                             if (this.exclusionsExist)
                                 this.getFooterToolbar().findById('saveBtn').enable();
@@ -108,7 +115,8 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         }));
     },
 
-    addStandardButtons: function() {
+    addStandardButtons: function()
+    {
         this.addButton({
             id: 'saveBtn',
             text: 'Save',
@@ -118,30 +126,37 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         });
         this.addButton({
             text: 'Cancel',
-            handler: function(){this.fireEvent('closeWindow');},
-            scope: this
+            scope: this,
+            handler: function()
+            {
+                this.fireEvent('closeWindow');
+            }
         });
     },
 
-    toggleSaveBtn : function(sm, grid){
+    toggleSaveBtn : function(sm, grid)
+    {
         // enable the save button when changes are made to the selection or is exclusions exist
         if (sm.getCount() > 0 || grid.exclusionsExist)
             grid.getFooterToolbar().findById('saveBtn').enable();
 
         // disable the save button if no exclusions exist and no selection is made
-        if(sm.getCount() == 0 && !grid.exclusionsExist)
+        if (sm.getCount() == 0 && !grid.exclusionsExist)
             grid.getFooterToolbar().findById('saveBtn').disable();
     },
 
-    getGridCheckboxSelectionModel : function() {
+    getGridCheckboxSelectionModel : function()
+    {
         // checkbox selection model for selecting which analytes to exclude
         var selMod = new Ext.grid.CheckboxSelectionModel();
-        selMod.on('selectionchange', function(sm){
+        selMod.on('selectionchange', function(sm)
+        {
             this.toggleSaveBtn(sm, this);
         }, this, {buffer: 250});
 
         // Issue 17974: make rowselect behave like checkbox select, i.e. keep existing other selections in the grid
-        selMod.on('beforerowselect', function(sm, rowIndex, keepExisting, record) {
+        selMod.on('beforerowselect', function(sm, rowIndex, keepExisting, record)
+        {
             sm.suspendEvents();
             if (sm.isSelected(rowIndex))
                 sm.deselectRow(rowIndex);
@@ -174,24 +189,25 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
             queryName: 'Runs',
             filterArray: [LABKEY.Filter.create('RowId', this.runId)],
             columns: 'Name',
-            success: function(data){
+            success: function(data)
+            {
                 if (data.rows.length == 1)
-                {
                     Ext.get('run_assay_id').update(data.rows[0].Name);
-                }
             },
             scope: this
         });
     },
 
-    confirmExclusionDeletion : function(config, msg, type) {
+    confirmExclusionDeletion : function(config, msg, type)
+    {
         Ext.Msg.show({
             width: 400,
             title:'Warning',
             msg: msg,
             icon: Ext.MessageBox.WARNING,
             buttons: Ext.Msg.YESNO,
-            fn: function(btnId, text, opt){
+            fn: function(btnId, text, opt)
+            {
                 if (btnId == 'yes')
                     this.saveExclusions(config, type);
                 else
@@ -201,18 +217,21 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         });
     },
 
-    saveExclusions : function(config, type) {
+    saveExclusions : function(config, type)
+    {
         if (!config.commands || !Ext.isArray(config.commands))
             Ext.Msg.alert('Error', 'SaveExclusion API expects an array on commands.');
 
         config.scope = this;
 
-        config.success = function(response) {
+        config.success = function(response)
+        {
             this.fireEvent('closeWindow');
             this.showJobQueuedSuccess(type, response.returnUrl);
         };
 
-        config.failure = function(response) {
+        config.failure = function(response)
+        {
             Ext.Msg.alert('ERROR', response.exception);
             this.unmask();
         };
@@ -220,7 +239,8 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         LABKEY.Luminex.saveExclusion(config);
     },
 
-    showJobQueuedSuccess : function(type, url) {
+    showJobQueuedSuccess : function(type, url)
+    {
         Ext.Msg.show({
             width: 400,
             title:'Success',
@@ -228,7 +248,8 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
                     + ' Would you like to go to the pipeline job status page now to review this exclusion?',
             icon: Ext.MessageBox.INFO,
             buttons: Ext.Msg.YESNO,
-            fn: function(btnId){
+            fn: function(btnId)
+            {
                 if (btnId == 'yes')
                     window.location = url;
             },
@@ -236,11 +257,13 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         });
     },
 
-    mask : function(message) {
+    mask : function(message)
+    {
         this.findParentByType('window').getEl().mask(message, "x-mask-loading");
     },
 
-    unmask : function() {
+    unmask : function()
+    {
         var windowEl = this.findParentByType('window').getEl();
         if (windowEl.isMasked())
             windowEl.unmask();

@@ -12,8 +12,10 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
         id: assayId,
-        success: function(assay) {
-            if (Ext.isArray(assay) && assay.length == 1) {
+        success: function(assay)
+        {
+            if (Ext.isArray(assay) && assay.length == 1)
+            {
                 var win = new Ext.Window({
                     cls: 'extContainer',
                     title: 'Exclude Replicate Group from Analysis',
@@ -33,7 +35,8 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
                         type: type,
                         listeners: {
                             scope: this,
-                            'closeWindow': function(){
+                            closeWindow: function()
+                            {
                                 win.close();
                             }
                         }
@@ -58,7 +61,8 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
  * @params type = type for the selected replicate group (i.e. S1, C2, X3, etc.)
  */
 LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
-    constructor : function(config){
+    constructor : function(config)
+    {
         // check that the config properties needed are present
         if (!config.dataId || !config.type)
             throw "You must specify the following: dataId, and type!";
@@ -66,7 +70,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         LABKEY.Exclusions.WellPanel.superclass.constructor.call(this, config);
     },
 
-    initComponent : function() {
+    initComponent : function()
+    {
         // query the WellExclusion table to see if there are any existing exclusions for this replicate Group
         var filterArray = [
             LABKEY.Filter.create('description', this.description),
@@ -100,7 +105,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     inputValue: 1,
                     listeners: {
                         scope: this,
-                        'check': function(radio, checked)
+                        check: function(radio, checked)
                         {
                             if (checked)
                             {
@@ -116,7 +121,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     inputValue: 2,
                     listeners: {
                         scope: this,
-                        'check': function(radio, checked)
+                        check: function(radio, checked)
                         {
                             if (checked)
                             {
@@ -154,7 +159,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 autoLoad: true,
                 listeners: {
                     scope: this,
-                    'load': function(store, records, options){
+                    load: function(store, records, options)
+                    {
                         if (this.analytes)
                         {
                             // determine if all of the analytes are excluded for this replicate group
@@ -168,7 +174,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
                                 // preselect any previously excluded analytes
                                 availableAnalytesGrid.getSelectionModel().suspendEvents(false);
-                                Ext.each(this.analytes, function(analyte){
+                                Ext.each(this.analytes, function(analyte)
+                                {
                                     var index = store.find('RowId', analyte);
                                     availableAnalytesGrid.getSelectionModel().selectRow(index, true);
                                 });
@@ -244,14 +251,16 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             schemaName: this.protocolSchemaName,
             sql: sql,
             sort: 'Well',
-            success: function(data){
+            success: function(data)
+            {
                 var wells = [];
                 var filename = "";
                 var isTitration = false;
                 for (var i = 0; i < data.rows.length; i++)
                 {
                     // summary rows will have > 1 well (separated by a comma)
-                    Ext.each(data.rows[i].Well.split(","), function(well) {
+                    Ext.each(data.rows[i].Well.split(","), function(well)
+                    {
                         if (wells.indexOf(well) == -1)
                             wells.push(well);
                     });
@@ -276,11 +285,10 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             queryName: 'RunExclusion',
             filterArray: [LABKEY.Filter.create('RunId', this.runId)],
             columns: 'Analytes/Name',
-            success: function(data){
+            success: function(data)
+            {
                 if (data.rows.length == 1)
-                {
                     Ext.get('run_analyte_exclusions').update("The following analytes have been excluded at the assay level: <b>" + data.rows[0]['Analytes/Name'] + "</b>");
-                }
             },
             scope: this
         });
@@ -297,7 +305,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     + "</table>";
     },
 
-    insertUpdateExclusions: function(){
+    insertUpdateExclusions: function()
+    {
         // mask the window until the insert/update is complete (or if something goes wrong)
         var message = "Saving replicate group exclusion...";
         if (this.findById('reCalcDisplay').isVisible())
@@ -309,7 +318,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         var analyteRowIds = "";
         var analyteNames = "";
         var sep = "";
-        Ext.each(analytesForExclusion, function(record){
+        Ext.each(analytesForExclusion, function(record)
+        {
             analyteRowIds += sep.trim() + record.data.RowId;
             analyteNames += sep + record.data.Name;
             sep = ", ";

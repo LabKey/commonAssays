@@ -7,8 +7,10 @@ function openExclusionsSinglepointUnknownWindow(assayId, runId)
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
         id: assayId,
-        success: function(assay) {
-            if (Ext.isArray(assay) && assay.length == 1) {
+        success: function(assay)
+        {
+            if (Ext.isArray(assay) && assay.length == 1)
+            {
                 var win = new Ext.Window({
                     cls: 'extContainer',
                     title: 'Exclude Singlepoint Unknowns from Analysis',
@@ -25,7 +27,8 @@ function openExclusionsSinglepointUnknownWindow(assayId, runId)
                         runId: runId,
                         listeners: {
                             scope: this,
-                            'closeWindow': function(){
+                            closeWindow: function()
+                            {
                                 win.close();
                             }
                         }
@@ -103,10 +106,12 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                 autoLoad : true,
                 listeners : {
                     scope : this,
-                    load : function(store, records){
+                    load : function(store, records)
+                    {
                         // from r44407, multi valued fields come back as arrays. the LABKEY.ext.Store concats this back together
                         // so use the json displayValue (which is a comma separate list of the values) instead
-                        Ext.each(records, function(record) {
+                        Ext.each(records, function(record)
+                        {
                             record.set('Analytes/RowId', record.json['Analytes/RowId'].displayValue);
                             record.set(this.ITEM_RECORD_KEY, record.get('Description') + '|' + record.get('Dilution'))
                         }, this);
@@ -285,8 +290,10 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                         if (typeof this.preExcludedIds[rowId] === 'object')
                         {
                             this.getGridCheckboxSelModel().clearSelections();
-                            Ext.each(this.preExcludedIds[rowId], function(analyte){
-                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id){
+                            Ext.each(this.preExcludedIds[rowId], function(analyte)
+                            {
+                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id)
+                                {
                                     return rec.get(this.ITEM_RECORD_KEY) == record.get(this.ITEM_RECORD_KEY) && rec.get('RowId') == analyte;
                                 }, this);
                                 this.getAvailableAnalytesGrid().getSelectionModel().selectRow(index, true);
@@ -368,11 +375,13 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
         return this.availableAnalytesGrid;
     },
 
-    toggleSaveBtn : function(sm, grid){
+    toggleSaveBtn : function(sm, grid)
+    {
         grid.getFooterToolbar().findById('saveBtn').enable();
     },
 
-    insertUpdateExclusions: function() {
+    insertUpdateExclusions: function()
+    {
         var index = this.getAvailableItemsGrid().getStore().indexOf(this.getItemRowSelectionModel().getSelected());
         this.getItemRowSelectionModel().fireEvent('rowdeselect', this.getItemRowSelectionModel(), index, this.getItemRowSelectionModel().getSelected());
         this.openConfirmWindow();
@@ -403,7 +412,8 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
         return record.get('Description') + ' (Dilution: ' + record.get('Dilution') + ')';
     },
 
-    openConfirmWindow : function(){
+    openConfirmWindow : function()
+    {
         var excludedMessage = this.getExcludedString();
         if (excludedMessage == '')
         {
@@ -414,12 +424,12 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
             Ext.Msg.show({
                 title:'Confirm Exclusions',
                 msg: 'Please verify the excluded analytes for the following ' + this.DISPLAY_NOUN.toLowerCase() + 's. '
-                + 'Continue?<br><br> ' + excludedMessage,
+                        + 'Continue?<br><br> ' + excludedMessage,
                 buttons: Ext.Msg.YESNO,
-                fn: function(button){
-                    if (button == 'yes'){
+                fn: function(button)
+                {
+                    if (button == 'yes')
                         this.insertUpdateExclusionsConfirmed();
-                    }
                 },
                 icon: Ext.MessageBox.QUESTION,
                 scope : this
@@ -443,7 +453,8 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
             var analyteRowIds = "";
             var analyteNames = "";
             var sep = "";
-            Ext.each(analytesForExclusion, function(record){
+            Ext.each(analytesForExclusion, function(record)
+            {
                 analyteRowIds += sep.trim() + record.get('RowId');
                 analyteNames += sep + record.get('Name');
                 sep = ", ";

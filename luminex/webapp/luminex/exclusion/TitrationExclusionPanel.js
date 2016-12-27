@@ -12,8 +12,10 @@ function openExclusionsTitrationWindow(assayId, runId)
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
         id: assayId,
-        success: function(assay) {
-            if (Ext.isArray(assay) && assay.length == 1) {
+        success: function(assay)
+        {
+            if (Ext.isArray(assay) && assay.length == 1)
+            {
                 var win = new Ext.Window({
                     cls: 'extContainer',
                     title: 'Exclude Titrations from Analysis',
@@ -30,7 +32,8 @@ function openExclusionsTitrationWindow(assayId, runId)
                         runId: runId,
                         listeners: {
                             scope: this,
-                            'closeWindow': function(){
+                            closeWindow: function()
+                            {
                                 win.close();
                             }
                         }
@@ -78,10 +81,12 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                 autoLoad : true,
                 listeners : {
                     scope : this,
-                    load : function(store, records){
+                    load : function(store, records)
+                    {
                         // from r44407, multi valued fields come back as arrays. the LABKEY.ext.Store concats this back together
                         // so use the json displayValue (which is a comma separate list of the values) instead
-                        Ext.each(records, function(record) {
+                        Ext.each(records, function(record)
+                        {
                             record.set('Analytes/RowId', record.json['Analytes/RowId'].displayValue);
                         });
 
@@ -229,8 +234,10 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                         if (typeof this.preExcludedIds[rowId] === 'object')
                         {
                             this.getGridCheckboxSelModel().clearSelections();
-                            Ext.each(this.preExcludedIds[rowId], function(analyte){
-                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id){
+                            Ext.each(this.preExcludedIds[rowId], function(analyte)
+                            {
+                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id)
+                                {
                                     return rec.get('Titration') == record.get(this.ITEM_RECORD_KEY) && rec.get('RowId') == analyte;
                                 }, this);
                                 this.getAvailableAnalytesGrid().getSelectionModel().selectRow(index, true);

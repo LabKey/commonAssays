@@ -101,7 +101,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
         if (excluded.booleanValue())
         {
-            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/excluded.png\" height=\"16\" width=\"16\" id=\""+id+"\"");
+            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/exclusion/excluded.png\" height=\"16\" width=\"16\" id=\""+id+"\"");
             if (canEdit)
             {
                 String tooltip = PageFlowUtil.filter(exclusionComment);
@@ -111,7 +111,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         }
         else
         {
-            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/included.png\" height=\"16\" width=\"16\"  id=\""+id+"\"");
+            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/exclusion/included.png\" height=\"16\" width=\"16\"  id=\""+id+"\"");
             if (canEdit)
             {
                 out.write("title=\"Click to add a replicate group exclusion\" alt=\"Click to add a replicate group exclusion\" ");

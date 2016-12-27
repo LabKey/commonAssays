@@ -6,17 +6,16 @@
 
 Ext.namespace('LABKEY');
 
-if (!LABKEY.Exclusions)
-    LABKEY.Exclusions = {};
-
-// function called onclick of 'Exclude Analytes' button to open the run exclusion window 
+// function called onclick of 'Exclude Analytes' button to open the run exclusion window
 function openExclusionsAnalyteWindow(assayId, runId)
 {
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
         id: assayId,
-        success: function(assay) {
-            if (Ext.isArray(assay) && assay.length == 1) {
+        success: function(assay)
+        {
+            if (Ext.isArray(assay) && assay.length == 1)
+            {
                 var win = new Ext.Window({
                     cls: 'extContainer',
                     title: 'Exclude Analytes from Analysis',
@@ -33,7 +32,8 @@ function openExclusionsAnalyteWindow(assayId, runId)
                         runId: runId,
                         listeners: {
                             scope: this,
-                            'closeWindow': function(){
+                            closeWindow: function()
+                            {
                                 win.close();
                             }
                         }
@@ -56,7 +56,8 @@ function openExclusionsAnalyteWindow(assayId, runId)
  */
 LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
-    initComponent : function() {
+    initComponent : function()
+    {
         // query the RunExclusion table to see if there are any existing exclusions for this run
         this.queryExistingExclusions('RunExclusion', [LABKEY.Filter.create('runId', this.runId)], 'RunId,Comment,Analytes/RowId');
 
@@ -90,12 +91,14 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 autoLoad: true,
                 listeners: {
                     scope: this,
-                    'load': function(store, records, options){
+                    load: function(store, records, options)
+                    {
                         if (this.analytes)
                         {
                             // preselect any previously excluded analytes
                             availableAnalytesGrid.getSelectionModel().suspendEvents(false);
-                            Ext.each(this.analytes, function(analyte){
+                            Ext.each(this.analytes, function(analyte)
+                            {
                                 var index = store.find('RowId', analyte);
                                 availableAnalytesGrid.getSelectionModel().selectRow(index, true);
                             });
@@ -135,8 +138,8 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         this.queryForRunAssayId();
     },
 
-    insertUpdateExclusions: function(){
-
+    insertUpdateExclusions: function()
+    {
         this.mask("Saving analyte exclusions...");
 
         // generage a comma delim string of the analyte Ids to exclude
@@ -144,7 +147,8 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         var analyteRowIds = "";
         var analyteNames = "";
         var sep = "";
-        Ext.each(analytesForExclusion, function(record){
+        Ext.each(analytesForExclusion, function(record)
+        {
             analyteRowIds += sep.trim() + record.data.RowId;
             analyteNames += sep + record.data.Name;
             sep = ", ";
