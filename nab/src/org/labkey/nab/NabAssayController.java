@@ -99,6 +99,7 @@ import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
+import org.labkey.api.study.PositionImpl;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
@@ -904,12 +905,14 @@ public class NabAssayController extends SpringActionController
             for (Integer col : colOrder)
             {
                 Map<String, Object> well = new HashMap<>();
+                Position pos = new PositionImpl(getContainer(), row, col);
 
                 well.put("plate", plate.getPlateNumber());
                 well.put("col", col);
                 well.put("rowlabel", (char) ('A' + row));
                 well.put("row", row);
                 well.put("value", plate.getWell(row, col).getValue());
+                well.put("sampleName", virusGroup.contains(pos) ? DilutionManager.VIRUS_CONTROL_SAMPLE : DilutionManager.CELL_CONTROL_SAMPLE);
                 r.add(well);
             }
             rows.add(r);
@@ -1223,7 +1226,8 @@ public class NabAssayController extends SpringActionController
                     _exclusions.add(new WellExclusion(excluded.getInt("plate"),
                             excluded.getInt("row"),
                             excluded.getInt("col"),
-                            excluded.getString("comment")));
+                            excluded.getString("comment"),
+                            excluded.getString("specimen")));
                 }
             }
         }
@@ -1272,13 +1276,20 @@ public class NabAssayController extends SpringActionController
                     // nothing found or entered, just default to the specimen well group name
                     if (specimenName == null)
                     {
-                        SQLFragment sql = new SQLFragment("SELECT WellGroupName FROM ").append(DilutionManager.getTableInfoNAbSpecimen(), "").
-                                append(" WHERE RunId = ? AND SpecimenLsid = ?");
-                        sql.addAll(form.getRowId(), well.getSpecimenLsid());
+                        if (well.getSpecimenLsid() != null)
+                        {
+                            SQLFragment sql = new SQLFragment("SELECT WellGroupName FROM ").append(DilutionManager.getTableInfoNAbSpecimen(), "").
+                                    append(" WHERE RunId = ? AND SpecimenLsid = ?");
+                            sql.addAll(form.getRowId(), well.getSpecimenLsid());
 
-                        specimenName = new SqlSelector(schema, sql).getObject(String.class);
+                            specimenName = new SqlSelector(schema, sql).getObject(String.class);
+                        }
+                        else
+                        {
+                            specimenName = well.getControlWellgroup();
+                        }
                     }
-                    WellExclusion exclusion = new WellExclusion(well.getPlateNumber(), well.getRow(), well.getColumn(), null);
+                    WellExclusion exclusion = new WellExclusion(well.getPlateNumber(), well.getRow(), well.getColumn(), null, null);
                     if (qcFlagMap.containsKey(exclusion.getKey()))
                     {
                         NabWellQCFlag flag = qcFlagMap.get(exclusion.getKey());
@@ -1307,12 +1318,13 @@ public class NabAssayController extends SpringActionController
         private String _comment;
         private String _specimen;
 
-        public WellExclusion(int plate, int row, int col, String comment)
+        public WellExclusion(int plate, int row, int col, String comment, String specimen)
         {
             _plate = plate;
             _row = row;
             _col = col;
             _comment = comment;
+            _specimen = specimen;
         }
 
         public String getKey()

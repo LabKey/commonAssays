@@ -115,7 +115,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
                 var tplText = [];
 
-                tplText.push('<table class="qc-panel"><tr><td colspan="2">');
+                tplText.push('<table class="qc-panel"><tr><td colspan="4">');
                 tplText.push(this.getSummaryTpl());
 /*
                 tplText.push('</td></tr><tr><td valign="top">');
@@ -123,9 +123,10 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 tplText.push('</td><td>');
                 tplText.push(this.getControlWellsTpl());
 */
-                tplText.push('</td></tr><tr><td colspan="2">');
+                tplText.push('</td></tr>');
+                tplText.push(this.getControlWellsTpl());
                 tplText.push(this.getDilutionSummaryTpl());
-                tplText.push('</td></tr></table>');
+                tplText.push('</table>');
 
                 // create the template and add the template functions to the configuration
                 items.push({
@@ -212,9 +213,11 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
         tpl.push(//'<table class="labkey-data-region labkey-show-borders">',
                 '<tpl for="plates">',
+                '<tpl if="xindex % 2 === 1"><tr><td></tpl>',
+                '<tpl if="xindex % 2 != 1"><td></tpl>',
                 '<table>',
                 '<tpl for="controls">',
-                '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName}</th></tr>',
+                '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName} Controls</th></tr>',
                 '<tr><td colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
                 '<tr><td><div class="plate-columnlabel"></div></td>',
                 '<tpl for="columnLabel">',
@@ -225,12 +228,14 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<tr>',
                 '<tpl for=".">',
                 '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
-                '<td class="control-checkbox" id="{[this.getId(this)]}" label="{value}"></td>',
+                '<td class="control-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{sampleName}" plate="{plate}"></td>',
                 '</tpl>',           // end cols
                 '</tr>',
                 '</tpl>',           // end rows
                 '</tpl>',           // end controls
                 '</table>',
+                '<tpl if="xindex % 2 != 0"></td></tpl>',
+                '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
                 '</tpl>'           // end plates
                 //'</table>'
         );
@@ -243,7 +248,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getDilutionSummaryTpl : function(){
         var tpl = [];
 
-        tpl.push('<tpl for="dilutionSummaries">',
+        tpl.push(
+                '<tpl for="dilutionSummaries">',
+/*
+                '<tpl if="xindex % 2 === 1"><tr><td colspan="2"></tpl>',
+                '<tpl if="xindex % 2 != 1"><td colspan="2"></tpl>',
+*/
                 '<table class="dilution-summary">',
                 '<tr><td colspan="10" class="labkey-data-region-header-container" style="text-align:center;">{name}</td></tr>',
                 '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
@@ -260,6 +270,10 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         '</tpl>',               // end dilutions
                     '</table></td></tr>',
                 '</table>',
+/*
+                '<tpl if="xindex % 2 != 0"></td></tpl>',
+                '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
+*/
                 '</tpl>'
         );
         return tpl.join('');
@@ -270,78 +284,33 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
      */
     renderControls : function(){
 
-        var addCheckboxEls = Ext4.DomQuery.select('td.plate-checkbox', this.getEl().dom);
-        Ext4.each(addCheckboxEls, function(cmp)
+/*
+         var addCheckboxEls = Ext4.DomQuery.select('td.plate-checkbox', this.getEl().dom);
+         Ext4.each(addCheckboxEls, function(cmp)
+         {
+         if (cmp.hasAttribute('id')){
+
+         var field = Ext4.create('widget.checkbox', {
+         renderTo : cmp.getAttribute('id')
+         });
+
+         // add a listener...
+         }
+         }, this);
+         */
+
+        // create the checkbox controls for the virus and cell controls
+        Ext4.each(Ext4.DomQuery.select('td.control-checkbox', this.getEl().dom), function(cmp)
         {
-            if (cmp.hasAttribute('id')){
-
-                var field = Ext4.create('widget.checkbox', {
-                    renderTo : cmp.getAttribute('id')
-                });
-
-                // add a listener...
-            }
+            if (cmp.hasAttribute('id'))
+                this.createExclusionCheckbox(cmp);
         }, this);
 
-        var addCheckboxEls = Ext4.DomQuery.select('td.control-checkbox', this.getEl().dom);
-        Ext4.each(addCheckboxEls, function(cmp)
+        // create the checkbox controls for the sample dilutions
+        Ext4.each(Ext4.DomQuery.select('td.dilution-checkbox', this.getEl().dom), function(cmp)
         {
-            if (cmp.hasAttribute('id')){
-
-                var field = Ext4.create('widget.checkbox', {
-                    renderTo : cmp.getAttribute('id'),
-                    boxLabel : cmp.getAttribute('label')
-                });
-
-                // add a listener...
-            }
-        }, this);
-
-        var addCheckboxEls = Ext4.DomQuery.select('td.dilution-checkbox', this.getEl().dom);
-        Ext4.each(addCheckboxEls, function(cmp)
-        {
-            if (cmp.hasAttribute('id')){
-
-                var field = Ext4.create('widget.checkbox', {
-                    renderTo : cmp.getAttribute('id'),
-                    boxLabel : cmp.getAttribute('label'),
-                    row      : cmp.getAttribute('row'),
-                    rowlabel : cmp.getAttribute('rowlabel'),
-                    col      : cmp.getAttribute('col'),
-                    specimen : cmp.getAttribute('specimen'),
-                    plate    : cmp.getAttribute('plate'),
-                    listeners : {
-                        scope   : this,
-                        change  : function(cmp, newValue) {
-                            var store = this.getFieldSelectionStore();
-                            if (store){
-                                var key = this.getKey(cmp);
-                                var rec = store.findRecord('key', key);
-                                if (rec && !newValue){
-                                    store.remove(rec);
-                                    // seriously?
-                                    var fieldPanel = this.confirmationPanel.getComponent('field-selection-view');
-                                    if (fieldPanel){
-                                        fieldPanel.refresh();
-                                    }
-                                }
-                                else if (newValue && !rec){
-                                    // add the record to the store
-                                    store.add({
-                                        key     : key,
-                                        plate   : cmp.plate,
-                                        row     : cmp.row,
-                                        rowlabel : cmp.rowlabel,
-                                        col : cmp.col,
-                                        specimen : cmp.specimen,
-                                        excluded : newValue
-                                    });
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+            if (cmp.hasAttribute('id'))
+                this.createExclusionCheckbox(cmp);
         }, this);
 
         var addCheckboxSelectAllEls = Ext4.DomQuery.select('td.dilution-checkbox-addall', this.getEl().dom);
@@ -368,6 +337,52 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 });
             }
         }, this);
+    },
+
+    /**
+     * Create the checkbox control for well level exclusions
+     */
+    createExclusionCheckbox : function(cmp){
+
+        return Ext4.create('widget.checkbox', {
+            renderTo : cmp.getAttribute('id'),
+            boxLabel : cmp.getAttribute('label'),
+            row      : cmp.getAttribute('row'),
+            rowlabel : cmp.getAttribute('rowlabel'),
+            col      : cmp.getAttribute('col'),
+            specimen : cmp.getAttribute('specimen'),
+            plate    : cmp.getAttribute('plate'),
+            listeners : {
+                scope   : this,
+                change  : function(cmp, newValue) {
+                    var store = this.getFieldSelectionStore();
+                    if (store){
+                        var key = this.getKey(cmp);
+                        var rec = store.findRecord('key', key);
+                        if (rec && !newValue){
+                            store.remove(rec);
+                            // seriously?
+                            var fieldPanel = this.confirmationPanel.getComponent('field-selection-view');
+                            if (fieldPanel){
+                                fieldPanel.refresh();
+                            }
+                        }
+                        else if (newValue && !rec){
+                            // add the record to the store
+                            store.add({
+                                key     : key,
+                                plate   : cmp.plate,
+                                row     : cmp.row,
+                                rowlabel : cmp.rowlabel,
+                                col      : cmp.col,
+                                specimen : cmp.specimen,
+                                excluded : newValue
+                            });
+                        }
+                    }
+                }
+            }
+        });
     },
 
     getKey : function(cmp){
@@ -627,7 +642,8 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 row : rec.get('row'),
                 col : rec.get('col'),
                 plate : rec.get('plate'),
-                comment : rec.get('comment')
+                comment : rec.get('comment'),
+                specimen: rec.get('specimen')
             });
         }, this);
 
@@ -650,6 +666,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     failureHandler : function(response)
     {
+        this.getEl().unmask();
         var msg = response.status == 403 ? response.statusText : Ext4.JSON.decode(response.responseText).exception;
         Ext4.Msg.show({
             title:'Error',

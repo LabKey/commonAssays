@@ -8,7 +8,7 @@ import org.labkey.nab.NabAssayController;
  */
 public class NabWellQCFlag extends ExpQCFlag
 {
-    public static final String FLAG_TYPE = "WellQC";
+    public static final String FLAG_TYPE = "Well QC";
 
     public NabWellQCFlag(){}
 
@@ -22,6 +22,6 @@ public class NabWellQCFlag extends ExpQCFlag
 
     private static String getDescription(NabAssayController.WellExclusion exclusion)
     {
-        return String.format("well location : %s%s plate: %s", exclusion.getRowLabel(), exclusion.getCol(), exclusion.getPlate());
+        return String.format("Well group name : %s, location : %s%s plate: %s", exclusion.getSpecimen(), exclusion.getRowLabel(), exclusion.getCol(), exclusion.getPlate());
     }
 }
