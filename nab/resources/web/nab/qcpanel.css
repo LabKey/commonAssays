@@ -4,27 +4,37 @@
  * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 
-div.plate-columnlabel {
-    width : 53px;
-    height : 40px;
-    text-align : center;
+table.run-summary {
+    margin-bottom: 25px;
+    width: 100%;
 }
 
-div.plate-rowlabel {
-    width : 45px;
-    height : 40px;
-    text-align : center;
+table.run-summary td,
+table.field-exclusions td,
+table.plate-summary td {
+    padding: 3px 10px 0 10px;
 }
 
-div.plate-well-td-div {
-    border : 1px solid gray;
-    width : 49px;
-    height : 35px;
-    vertical-align : middle;
-    text-align : center;
-    background-color : #AAAAAA;
+td.prop-name {
+    font-weight: bold;
 }
 
-a.labkey-cls-spotcount, a.labkey-cls-activity, a.labkey-cls-intensity, a.labkey-cls-spotsize {
-    color : white;
+table.plate-controls,
+table.dilution-summary,
+table.field-exclusions,
+table.plate-summary {
+    margin-bottom: 25px;
+}
+
+td.control-checkbox,
+table.dilution-summary td {
+    padding: 2px 20px 0 2px;
+}
+
+table.plate-summary td.excluded {
+    background-color: #ff5751;
+}
+
+input:read-only {
+    background-color: #EFEFEF;
 }

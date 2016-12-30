@@ -115,7 +115,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
                 var tplText = [];
 
-                tplText.push('<table class="qc-panel"><tr><td colspan="4">');
+                tplText.push('<table class="qc-panel"><tr><td colspan="2">');
                 tplText.push(this.getSummaryTpl());
 /*
                 tplText.push('</td></tr><tr><td valign="top">');
@@ -175,13 +175,13 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
      */
     getSummaryTpl : function(){
         var tpl = [];
-        tpl.push('<table>',
-                '<tr class="labkey-data-region-header-container" style="text-align:center;"><th colspan="8">Run Summary: {runName}</th></tr>',
+        tpl.push('<table class="run-summary">',
+                '<tr style="text-align:center;"><th class="labkey-data-region-header-container" colspan="8">Run Summary: {runName}</th></tr>',
                 '<tr><td>',
                 '<tr>',
                 '<tpl for="runProperties">',
-                '<th style="text-align: left">{name}</th>',
-                '<td>{value}</td>',
+                '<td class="prop-name">{name}</td>',
+                '<td class="prop-value">{value}</td>',
                 '<tpl if="xindex % 2 === 0"></tr><tr></tpl>',
                 '</tpl>',
                 '</td></tr>',
@@ -215,10 +215,10 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<tpl for="plates">',
                 '<tpl if="xindex % 2 === 1"><tr><td></tpl>',
                 '<tpl if="xindex % 2 != 1"><td></tpl>',
-                '<table>',
+                '<table class="plate-controls">',
                 '<tpl for="controls">',
                 '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName} Controls</th></tr>',
-                '<tr><td colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
+                '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
                 '<tr><td><div class="plate-columnlabel"></div></td>',
                 '<tpl for="columnLabel">',
                 '<td><div class="plate-columnlabel">{.}</div></td>',
@@ -254,12 +254,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<tpl if="xindex % 2 === 1"><tr><td colspan="2"></tpl>',
                 '<tpl if="xindex % 2 != 1"><td colspan="2"></tpl>',
 */
-                '<table class="dilution-summary">',
+                '<tr><td colspan="2"><table class="dilution-summary">',
                 '<tr><td colspan="10" class="labkey-data-region-header-container" style="text-align:center;">{name}</td></tr>',
                 '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
                     '<td valign="top"><table class="labkey-data-region">',
                         '<tr>',
-                            '<td>{methodLabel}</td><td>{neutLabel}</td>',
+                            '<td class="prop-name">{methodLabel}</td><td class="prop-name">{neutLabel}</td>',
                             '<td class="dilution-checkbox-addall" id="{[this.getId(this)]}" specimen="{name}"></td><td></td></tr>',
                         '<tpl for="dilutions">',
                         '<tr><td>{dilution}</td><td>{neut} &plusmn; {neutPlusMinus}</td>',
@@ -269,7 +269,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         '</tr>',
                         '</tpl>',               // end dilutions
                     '</table></td></tr>',
-                '</table>',
+                '</td></tr></table>',
 /*
                 '<tpl if="xindex % 2 != 0"></td></tpl>',
                 '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
@@ -404,6 +404,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 items : [{
                     xtype : 'panel',
                     tpl : new Ext4.XTemplate(tplText.join('')),
+                    border  : false,
                     data : {
                         runName         : this.runName,
                         runProperties   : this.runProperties
@@ -415,7 +416,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     frame   : false,
                     flex    : 1.2,
                     tpl     : this.getFieldSelectionTpl(),
-                    width   : '100%',
                     autoScroll : true,
                     store   : this.getFieldSelectionStore(),
                     itemSelector :  'tr.field-exclusion',
@@ -456,6 +456,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
                         cmp.add({
                             xtype : 'panel',
+                            border  : false,
                             tpl : new Ext4.XTemplate(plateTpl.join(''),
                                     {
                                         getKey : function(rec) {
@@ -491,14 +492,15 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     getFieldSelectionTpl : function(){
         return new Ext4.XTemplate(
-            '<table>',
-            '<tr class="labkey-data-region-header-container" style="text-align:center;"><th colspan="5">Excluded Field Wells</th></tr>',
-            '<tr><th></th><th>Row</th><th>Column</th><th>Specimen</th><th>Plate</th><th>Comment</th></tr>',
+            '<table class="field-exclusions">',
+            '<tr style="text-align:center;"><th class="labkey-data-region-header-container" colspan="6">Excluded Field Wells</th></tr>',
+            '<tr><td colspan="6">The following wells will be excluded from the curve fit calculations:</td></tr>',
+            '<tr><td></td><td class="prop-name">Row</td><td class="prop-name">Column</td><td class="prop-name">Specimen</td><td class="prop-name">Plate</td><td class="prop-name">Comment</td></tr>',
             '<tpl for=".">',
                 '<tr class="field-exclusion">',
                 '<td class="remove-exclusion" data-qtip="Click to delete">{[this.getDeleteIcon(values)]}</td>',
                 '<td style="text-align: left">{rowlabel}</td>',
-                '<td style="text-align: left">{col}</td>',
+                '<td style="text-align: left">{[this.getColumnLabel(values)]}</td>',
                 '<td style="text-align: left">{specimen}</td>',
                 '<td style="text-align: left">Plate {plate}</td>',
                 '<td style="text-align: left"><input class="field-exclusion-comment" key="{[this.getKey(values)]}" {[this.getReadonly()]} type="text" name="comment" size="60" value="{comment}"></td>',
@@ -519,6 +521,10 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 getReadonly : function(){
                     return this.me.edit ? '' : 'readonly';
                 },
+                getColumnLabel : function(rec){
+
+                    return rec.col + 1;
+                },
                 me : this
             }
         );
@@ -529,7 +535,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
         tpl.push(//'<table class="labkey-data-region labkey-show-borders">',
                 '<tpl for="plates">',
-                '<table>',
+                '<table class="plate-summary">',
                 '<tpl for="rawdata">',
                 '<tr><th colspan="40" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName}</th></tr>',
                 '<tr><td><div class="plate-columnlabel"></div></td>',
@@ -616,20 +622,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
      */
     setWellExclusion : function(key, excluded){
 
-        if (excluded) {
-            this.applyStyleToClass(key, {backgroundColor: '#FF7A83'})
+        var el = Ext4.select('.' + key, true);
+        if (excluded && el) {
+            el.addCls('excluded');
         }
-        else {
-            this.applyStyleToClass(key, {backgroundColor: 'white'})
-        }
-    },
-
-    applyStyleToClass : function(cls, style) {
-
-        var el = Ext4.select('.' + cls, true);
-        if (el) {
-            el.applyStyles(style);
-            el.repaint();
+        else if (el) {
+            el.removeCls('excluded');
         }
     },
 
