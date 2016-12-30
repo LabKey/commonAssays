@@ -67,11 +67,11 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
             '<div>',
                 '<table>',
                     '<tpl for=".">',
-                    '<tr><td style="padding-right: 10px;">Name</td><td>{Name}</td></tr>',
-                    '<tr><td style="padding-right: 10px;">Curve Fit Type</td><td>Linear</td></tr>',
-                    '<tr><td style="padding-right: 10px;">Curve Fit Parameters</td><td>{[this.formatFitParams(values)]}</td></tr>',
-                    '<tr><td style="padding-right: 10px;">Coefficient of Determination</td><td>{[Ext.util.Format.number(values.RSquared, "0.00000")]}</td></tr>',
-                    '<tr><td style="padding-right: 10px;">Created</td><td>{Created}</td></tr>',
+                    '<tr><td style="padding-right: 10px; font-weight: bold;">Name</td><td>{Name}</td></tr>',
+                    '<tr><td style="padding-right: 10px; font-weight: bold;">Curve Fit Type</td><td>Linear</td></tr>',
+                    '<tr><td style="padding-right: 10px; font-weight: bold;">Curve Fit Parameters</td><td>{[this.formatFitParams(values)]}</td></tr>',
+                    '<tr><td style="padding-right: 10px; font-weight: bold;">Coefficient of Determination</td><td>{[Ext.util.Format.number(values.RSquared, "0.00000")]}</td></tr>',
+                    '<tr><td style="padding-right: 10px; font-weight: bold;">Created</td><td>{Created}</td></tr>',
                 '</tpl></table>',
             '</div>',
             {
@@ -93,7 +93,6 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
             tpl     : tpl,
             ui      : 'custom',
             flex    : 1,
-            padding : '20, 8',
             scope   : this
         });
     },

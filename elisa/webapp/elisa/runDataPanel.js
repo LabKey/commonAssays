@@ -23,37 +23,38 @@ Ext4.define('LABKEY.elisa.RunDataPanel', {
 
     initComponent : function() {
 
-        this.items = [
-                this.createDataView()
-        ];
+        this.items = [this.getOuterPanel()];
 
         this.callParent([arguments]);
     },
 
-    createDataView : function() {
+    getOuterPanel : function() {
+        if (!this.outerPanel)
+        {
+            var dataGrid = Ext4.create('Ext.Component', {
+                autoScroll  : true,
+                cls         : 'iScroll',
+                listeners   : {
+                    render : {fn : function(cmp){this.renderDataGrid(cmp.getId());}, scope : this}
+                }
+            });
 
-        var dataGrid = Ext4.create('Ext.Component', {
-            autoScroll  : true,
-            cls         : 'iScroll',
-            listeners   : {
-                render : {fn : function(cmp){this.renderDataGrid(cmp.getId());}, scope : this}
-            }
-        });
+            this.outerPanel = Ext4.create('Ext.panel.Panel', {
+                flex        : 1.2,
+                layout      : 'fit',
+                height      : 650,
+                border      : false,
+                frame       : false,
+                items       : dataGrid
+            });
+        }
 
-        return Ext4.create('Ext.panel.Panel', {
-            flex        : 1.2,
-            layout      : 'fit',
-            padding     : '20, 0',
-            height      : 650,
-            border      : false,
-            frame       : false,
-            items       : dataGrid
-        });
+        return this.outerPanel;
     },
 
     renderDataGrid : function(renderTo) {
 
-        var sampleColumns = '';
+        var sampleColumns = '', me = this;
 
         for (var i=0; i < this.sampleColumns.length; i++)
         {
@@ -82,7 +83,13 @@ Ext4.define('LABKEY.elisa.RunDataPanel', {
                         renderTo    : renderTo,
                         showDetailsColumn       : false,
                         showUpdateColumn        : false,
-                        showRecordSelectors     : false
+                        showRecordSelectors     : false,
+                        listeners   : {
+                            render: function() {
+                                var height = Math.max(650, wp.form.getBoundingClientRect().height + 20);
+                                me.getOuterPanel().setHeight(height);
+                            }
+                        }
 /*
                         buttonBar   : {
                             position : 'none'

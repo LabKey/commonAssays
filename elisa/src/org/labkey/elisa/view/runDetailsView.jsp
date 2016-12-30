@@ -71,20 +71,20 @@
 
     Ext4.onReady(function(){
 
-        var items = [];
-
-        items.push(Ext4.create('LABKEY.elisa.RunDetailsPanel', {
-
+        Ext4.create('LABKEY.elisa.RunDetailsPanel', {
+            renderTo        : <%=q(renderId)%>,
             schemaName      : <%=q(form.getSchemaName())%>,
             queryName       : <%=q(form.getQueryName())%>,
             runTableName    : <%=q(form.getRunTableName())%>,
             runId           : <%=form.getRunId()%>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
             baseUrl         : <%=q(baseUrl.getLocalURIString())%>
-        }));
+        });
 
-        items.push(Ext4.create('LABKEY.ext4.GenericChartPanel', {
+        Ext4.create('LABKEY.ext4.GenericChartPanel', {
+            renderTo        : <%=q(renderId)%>,
             height          : 500,
+            padding         : '20px 0',
             schemaName      : <%=q(form.getSchemaName() != null ? form.getSchemaName() : null) %>,
             queryName       : <%=q(form.getQueryName() != null ? form.getQueryName() : null) %>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
@@ -100,29 +100,14 @@
             allowEditMode   : <%=!user.isGuest() && c.hasPermission(user, UpdatePermission.class)%>,
             curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>},
             defaultTitleFn  : function(){ return 'Calibration Curve '; }
-        }));
+        });
 
-        items.push(Ext4.create('LABKEY.elisa.RunDataPanel', {
-
+        Ext4.create('LABKEY.elisa.RunDataPanel', {
+            renderTo        : <%=q(renderId)%>,
             schemaName      : <%=q(form.getSchemaName())%>,
             queryName       : <%=q(form.getQueryName())%>,
             sampleColumns   : <%=text(jsonMapper.writeValueAsString(form.getSampleColumns()))%>
-        }));
-
-        var panel = Ext4.create('Ext.panel.Panel', {
-
-            layout      : 'auto',
-            border      : false,
-            frame       : false,
-            renderTo    : <%=q(renderId)%>,
-            items       : items
         });
-
-        var _resize = function(w,h) {
-            LABKEY.ext4.Util.resizeToViewport(panel, w, -1); // don't fit to height
-        };
-
-        Ext4.EventManager.onWindowResize(_resize);
     });
 
     function customizeGenericReport(elementId) {
