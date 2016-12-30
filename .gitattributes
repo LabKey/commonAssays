@@ -658,7 +658,17 @@ luminex/src/org/labkey/luminex/view/guideSetConfirmDelete.jsp -text
 luminex/src/org/labkey/luminex/view/leveyJenningsMenu.jsp -text
 luminex/src/org/labkey/luminex/view/leveyJenningsReport.jsp -text
 luminex/src/org/labkey/luminex/view/titrationWellRoles.jsp -text
+luminex/test/src/org/labkey/test/components/luminex/dialogs/BaseExclusionDialog.java -text
+luminex/test/src/org/labkey/test/components/luminex/dialogs/SinglepointExclusionDialog.java -text
+luminex/test/src/org/labkey/test/components/luminex/exclusionreport/BaseExclusionWebpart.java -text
+luminex/test/src/org/labkey/test/components/luminex/exclusionreport/ExcludedSinglepointUnknownsWebpart.java -text
+luminex/test/src/org/labkey/test/components/luminex/importwizard/AnalytePropertiesWebPart.java -text
+luminex/test/src/org/labkey/test/components/luminex/importwizard/BatchPropertiesWebPart.java -text
+luminex/test/src/org/labkey/test/components/luminex/importwizard/DefineWellRoleWebPart.java -text
+luminex/test/src/org/labkey/test/components/luminex/importwizard/RunPropertiesWebPart.java -text
+luminex/test/src/org/labkey/test/pages/luminex/ExclusionReportPage.java -text
 luminex/test/src/org/labkey/test/pages/luminex/LeveyJenningsPlotWindow.java -text
+luminex/test/src/org/labkey/test/pages/luminex/LuminexImportWizard.java -text
 luminex/test/src/org/labkey/test/pages/luminex/SetAnalyteDefaultValuesPage.java -text
 luminex/test/src/org/labkey/test/tests/luminex/AssayTransformWarningTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexAsyncImportTest.java -text

@@ -15,15 +15,21 @@
  */
 package org.labkey.test.tests.luminex;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
+import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
+import org.labkey.test.components.luminex.dialogs.SinglepointExclusionDialog;
 import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.luminex.ExclusionReportPage;
+import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.util.DataRegionTable;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +45,8 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     private String excludedWellDescription = null;
     private String excludedWellType = null;
     private Set<String> excludedWells = null;
+    private static final File SINGLEPOINT_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
+
 
     @BeforeClass
     public static void updateAssayDefinition()
@@ -48,6 +56,12 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.saveAndClose();
+    }
+
+    @Before
+    public void preTest()
+    {
+        cleanupPipelineJobs();
     }
 
     /**
@@ -76,23 +90,23 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         excludedWellDescription = "Standard2";
         excludedWellType = "S3";
         excludedWells = new HashSet<>(Arrays.asList("C3", "D3"));
-        excludeAllAnalytesForSingleWellTest("Standard", "C3", false, 2);
+        excludeAllAnalytesForSingleWellTest("Standard", "C3", false, 1);
 
         // QC control titration well group exclusion
         excludedWellDescription = "Standard1";
         excludedWellType = "C2";
         excludedWells = new HashSet<>(Arrays.asList("E2", "F2"));
-        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false, 3);
+        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false, 2);
 
         // unknown titration well group exclusion
         excludedWellDescription = "Sample 2";
         excludedWellType = "X25";
         excludedWells = new HashSet<>(Arrays.asList("E1", "F1"));
-        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, 4);
-        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], 6);
+        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, 3);
+        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], 5);
 
         // analyte exclusion
-        excludeAnalyteForAllWellsTest(analytes[1], 7);
+        excludeAnalyteForAllWellsTest(analytes[1], 6);
 
         // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
@@ -107,6 +121,116 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertTextPresentInThisOrder("C3", "E2", "E1");
     }
 
+
+    @Test
+    public void testSinglePointExclusions()
+    {
+        String runId = "Singlepoint Exclusion run";
+        goToTestAssayHome();
+
+        LuminexImportWizard importWizard = new LuminexImportWizard(this);
+        // Create a run that imports 1 file
+        importWizard.createNewAssayRun(runId,
+                null,
+                (wizard) -> wizard.addFilesToAssayRun(SINGLEPOINT_RUN_FILE),
+                (wizard) -> {
+                    wizard.setStandardRole("Standard1", false);
+                    wizard.setQCControlRole("Standard1", true);
+                });
+
+        String[] analytes = {"ENV1", "ENV2", "ENV3",
+                "ENV4", "Blank"};
+        clickAndWait(Locator.linkWithText(runId));
+
+        SinglepointExclusionDialog dialog = SinglepointExclusionDialog.beginAt(this.getDriver());
+
+        String  toDelete = "112",
+                toUpdate = "113",
+                toKeep = "114"
+        ;
+
+        String dilution = "200";
+        String dilutionDecimal = "200.0";
+
+        //Check dialog Exclusion info field
+        assertTextNotPresent("1 analyte excluded");
+        dialog.selectDilution(toDelete, dilution);
+        dialog.checkAnalyte(analytes[0]);
+        dialog.selectDilution(toUpdate, dilution);    //Exclusion info not set until singlepoint is deselected
+        assertTextPresent("1 analyte excluded");
+
+        dialog.selectDilution(toDelete, dilution);
+        dialog.checkAnalyte(analytes[1]);
+        dialog.selectDilution(toUpdate, dilution);
+        assertTextNotPresent("1 analyte excluded");
+        assertTextPresent("2 analytes excluded");
+
+        dialog.selectDilution(toDelete, dilution);
+        dialog.uncheckAnalyte(analytes[0]);
+        dialog.uncheckAnalyte(analytes[1]);
+        dialog.selectDilution(toUpdate, dilution);   //Exclusion info not set until singlepoint is deselected
+        assertTextNotPresent("2 analytes excluded");
+
+        dialog.selectDilution(toKeep, dilution);
+        dialog.checkAnalyte(analytes[0]);
+        dialog.selectDilution(toDelete, dilution);
+        dialog.checkAnalyte(analytes[0]);
+        dialog.selectDilution(toUpdate, dilution);
+        dialog.checkAnalyte(analytes[0]);
+        dialog.checkAnalyte(analytes[1]);
+        dialog.selectDilution(toKeep, dilution);    //Exclusion info not set until singlepoint is deselected
+        assertTextPresent("1 analyte excluded", 2);
+        assertTextPresent("2 analytes excluded");
+
+        //Save Exclusion
+        _extHelper.clickExtButton("Save", 0);
+        _extHelper.clickExtButton("Yes", 0);
+        verifyExclusionPipelineJobComplete(1, "MULTIPLE singlepoint unknown exclusions", runId, "", 3, 1);
+
+        //Check ExclusionReport for changes
+        ExclusionReportPage exclusionReportPage = ExclusionReportPage.beginAt(this);
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toKeep, dilutionDecimal, analytes[0]);
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toDelete, dilutionDecimal, analytes[0]);
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toUpdate, dilutionDecimal, analytes[0], analytes[1]);
+
+        //Verify we can delete an exclusion
+        goToTestAssayHome();
+        clickAndWait(Locator.linkWithText(runId));
+
+        dialog = SinglepointExclusionDialog.beginAt(this.getDriver());
+        assertTextPresent("1 analyte excluded", 2);    //Verify exclusion retained across page loads
+        assertTextPresent("2 analytes excluded");   //Verify exclusion retained across page loads
+        dialog.selectDilution(toDelete, dilution);
+        dialog.uncheckAnalyte(analytes[0]);
+        _extHelper.clickExtButton("Save", 0);
+        _extHelper.clickExtButton("Yes", 0);
+        verifyExclusionPipelineJobComplete(2, String.format("DELETE singlepoint unknown exclusion (Description: %1$s, Dilution: %2$s)", toDelete, dilutionDecimal), runId, "");
+
+        //Check ExclusionReport for changes
+        exclusionReportPage = ExclusionReportPage.beginAt(this);
+        //Check deleted exclusion is absent
+        exclusionReportPage.assertSinglepointUnknownExclusionNotPresent(runId, toDelete, dilutionDecimal, analytes[0], analytes[1]);
+        //Check retained exclusion is still present
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toKeep, dilutionDecimal, analytes[0]);
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toUpdate, dilutionDecimal, analytes[0], analytes[1]);
+
+        //Verify we can update an exclusion
+        goToTestAssayHome();
+        clickAndWait(Locator.linkWithText(runId));
+
+        dialog = SinglepointExclusionDialog.beginAt(this.getDriver());
+        assertTextPresent("1 analyte excluded");   //Verify deletion (2 occurrences -> 1)
+        assertTextPresent("2 analytes excluded");   //Verify exclusion retained
+        dialog.selectDilution(toUpdate, dilution);
+        dialog.uncheckAnalyte(analytes[0]);
+        _extHelper.clickExtButton("Save", 0);
+        _extHelper.clickExtButton("Yes", 0);
+        verifyExclusionPipelineJobComplete(3, String.format("UPDATE singlepoint unknown exclusion (Description: %1s, Dilution: %2s)", toUpdate, dilutionDecimal), runId, "");
+
+        exclusionReportPage = ExclusionReportPage.beginAt(this);
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toKeep, dilutionDecimal, analytes[0]);
+        exclusionReportPage.assertSinglepointUnknownExclusion(runId, toUpdate, dilutionDecimal, analytes[1]);  //Verify update
+    }
     /**
      * verify that a user can exclude every analyte for a single well, and that this
      * successfully applies to both the original well and its duplicates

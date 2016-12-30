@@ -29,10 +29,12 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
+import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.QCAssayScriptHelper;
 import org.labkey.test.util.RReportHelper;
@@ -514,8 +516,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected void createNewAssayRun(String assayName, String runId)
     {
         goToTestAssayHome(assayName);
-        clickButtonContainingText("Import Data");
-        checkCheckbox(Locator.radioButtonByNameAndValue("participantVisitResolver", "SampleInfo"));
+        LuminexImportWizard wiz = new LuminexImportWizard(this);
+        wiz.startImport();
+        wiz.checkParticipantVisitResolver();
         clickButtonContainingText("Next");
         setFormElement(Locator.name(ASSAY_ID_FIELD), runId);
     }
@@ -728,4 +731,19 @@ public abstract class LuminexTest extends BaseWebDriverTest
         waitForText(" - " + isotype + " " + conjugate);
         assertTextPresent("Levey-Jennings Report", "Standard1");
     }
+
+    protected void cleanupPipelineJobs()
+    {
+        //Cleanup pipeline jobs
+        goToModule("Pipeline");
+        PipelineStatusTable table = new PipelineStatusTable(this);
+
+        if(table.getDataRowCount() > 0)
+        {
+            table.checkAll();
+            clickButton("Delete");
+            clickButton("Confirm Delete");
+        }
+    }
+
 }

@@ -8,9 +8,10 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
+import org.labkey.test.components.luminex.dialogs.SinglepointExclusionDialog;
 import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.luminex.ExclusionReportPage;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.PipelineStatusTable;
 
 import java.io.File;
 
@@ -58,19 +59,6 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickButton("Save and Finish");
     }
 
-    private void cleanupPipelineJobs()
-    {
-        //Cleanup pipeline jobs
-        goToModule("Pipeline");
-        PipelineStatusTable table = new PipelineStatusTable(this);
-
-        if(table.getDataRowCount() > 0)
-        {
-            table.checkAll();
-            clickButton("Delete");
-            clickButton("Confirm Delete");
-        }
-    }
 
     private void cleanupRuns()
     {
@@ -207,6 +195,71 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         assertTextPresent(analyteMatchComment);
         assertTextNotPresent(analyteNonMatchComment);
         assertTextPresent("No data to show.", 3);
+    }
+
+    @Test
+    public void testSinglepointExclusionRetention()
+    {
+        SinglepointExclusionDialog dialog = SinglepointExclusionDialog.beginAt(this.getDriver());
+
+        String matchingAnalyte = ANALYTE_NAMES[0];
+        String changedAnalyte = ANALYTE_NAMES[1];
+
+        String  toKeep = "120",
+                partialAnalyteMatch = "121",
+                analyteNotMatched = "122",
+                dilutionNotMatched = "123";
+
+        String dilution = "200";
+        String dilutionDecimal = "200.0";
+
+        //Check dialog Exclusion info field
+        //Add matching exclusion
+        assertTextNotPresent("1 analyte excluded");
+        dialog.selectDilution(toKeep, dilution);
+        dialog.checkAnalyte(matchingAnalyte);
+        //Add partial match
+        dialog.selectDilution(partialAnalyteMatch, dilution);    //Exclusion info not set until singlepoint is deselected
+        dialog.checkAnalyte(matchingAnalyte);
+        dialog.checkAnalyte(changedAnalyte);
+
+        //Add analyte not matched
+        dialog.selectDilution(analyteNotMatched, dilution);    //Exclusion info not set until singlepoint is deselected
+        dialog.checkAnalyte(changedAnalyte);
+        dialog.selectDilution(dilutionNotMatched, dilution);    //Exclusion info not set until singlepoint is deselected
+        dialog.checkAnalyte(matchingAnalyte);
+        dialog.selectDilution(toKeep, dilution);
+        assertTextPresent("1 analyte excluded", 3);
+        assertTextPresent("2 analytes excluded");
+
+        //Save Exclusion
+        _extHelper.clickExtButton("Save", 0);
+        _extHelper.clickExtButton("Yes", 0);
+        verifyExclusionPipelineJobComplete(1, "MULTIPLE singlepoint unknown exclusions", RUN_NAME, "", 4, 1);
+
+        //Verify exclusions created
+        ExclusionReportPage exclusionReportPage = ExclusionReportPage.beginAt(this);
+        exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, toKeep, dilutionDecimal, matchingAnalyte);
+        exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, partialAnalyteMatch, dilutionDecimal, matchingAnalyte, changedAnalyte);
+        exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, analyteNotMatched, dilutionDecimal, changedAnalyte);
+        exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, dilutionNotMatched, dilutionDecimal, matchingAnalyte);
+
+        goToTestAssayHome();
+        clickAndWait(Locator.linkWithText(RUN_NAME));
+        //Re-import
+        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a");
+
+        //Verify exclusions created
+        exclusionReportPage = ExclusionReportPage.beginAt(this);
+        //Verify exclusion retained
+        exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, toKeep, dilutionDecimal, matchingAnalyte);
+
+        //verify partial analyte exclusion retained
+        exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, partialAnalyteMatch, dilutionDecimal, matchingAnalyte);
+
+        //Verify changes not retained
+        exclusionReportPage.assertSinglepointUnknownExclusionNotPresent(RUN_NAME, analyteNotMatched, dilutionDecimal, changedAnalyte);
+        exclusionReportPage.assertSinglepointUnknownExclusionNotPresent(RUN_NAME, dilutionNotMatched, dilutionDecimal, matchingAnalyte);
     }
 
     private void reimportAndReplaceRunFile(File replacedFile, File newFile, String titrationName)
