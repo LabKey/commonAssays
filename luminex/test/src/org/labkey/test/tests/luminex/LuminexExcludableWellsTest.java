@@ -183,8 +183,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertTextPresent("2 analytes excluded");
 
         //Save Exclusion
-        _extHelper.clickExtButton("Save", 0);
-        _extHelper.clickExtButton("Yes", 0);
+        clickSaveAndAcceptConfirm("Confirm Exclusions");
         verifyExclusionPipelineJobComplete(1, "MULTIPLE singlepoint unknown exclusions", runId, "", 3, 1);
 
         //Check ExclusionReport for changes
@@ -202,8 +201,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertTextPresent("2 analytes excluded");   //Verify exclusion retained across page loads
         dialog.selectDilution(toDelete, dilution);
         dialog.uncheckAnalyte(analytes[0]);
-        _extHelper.clickExtButton("Save", 0);
-        _extHelper.clickExtButton("Yes", 0);
+        clickSaveAndAcceptConfirm("Confirm Exclusions");
         verifyExclusionPipelineJobComplete(2, String.format("DELETE singlepoint unknown exclusion (Description: %1$s, Dilution: %2$s)", toDelete, dilutionDecimal), runId, "");
 
         //Check ExclusionReport for changes
@@ -223,8 +221,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertTextPresent("2 analytes excluded");   //Verify exclusion retained
         dialog.selectDilution(toUpdate, dilution);
         dialog.uncheckAnalyte(analytes[0]);
-        _extHelper.clickExtButton("Save", 0);
-        _extHelper.clickExtButton("Yes", 0);
+        clickSaveAndAcceptConfirm("Confirm Exclusions");
         verifyExclusionPipelineJobComplete(3, String.format("UPDATE singlepoint unknown exclusion (Description: %1s, Dilution: %2s)", toUpdate, dilutionDecimal), runId, "");
 
         exclusionReportPage = ExclusionReportPage.beginAt(this);
@@ -257,12 +254,17 @@ public final class LuminexExcludableWellsTest extends LuminexTest
             table.setFilter("WellRole", "Equals", wellRole);
             clickExclusionMenuIconForWell(wellName);
             click(Locator.radioButtonById("excludeselected"));
-            clickButton(SAVE_CHANGES_BUTTON, 0);
-            _extHelper.waitForExtDialog("Warning");
-            clickButton("Yes", 0);
+            clickSaveAndAcceptConfirm("Warning");
             expectedInfo = expectedInfo.replace("INSERT", "DELETE");
             verifyExclusionPipelineJobComplete(jobCount + 1, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, comment);
         }
+    }
+
+    private void clickSaveAndAcceptConfirm(String dialogTitle)
+    {
+        clickButton(SAVE_CHANGES_BUTTON, 0);
+        _extHelper.waitForExtDialog(dialogTitle);
+        clickButton("Yes", 0);
     }
 
     private void excludeOneAnalyteForSingleWellTest(String wellRole, String wellName, String excludedAnalyte, int jobCount)
