@@ -10,9 +10,12 @@ table.run-summary {
 }
 
 table.run-summary td,
-table.field-exclusions td,
-table.plate-summary td {
+table.field-exclusions td {
     padding: 3px 10px 0 10px;
+}
+
+table.plate-summary td {
+    padding: 2px 2px 0 2px;
 }
 
 td.prop-name {
@@ -33,8 +36,13 @@ table.dilution-summary td {
 
 table.plate-summary td.excluded {
     background-color: #ff5751;
+    cursor: pointer;
 }
 
 input:read-only {
+    background-color: #EFEFEF;
+}
+
+input:-moz-read-only {
     background-color: #EFEFEF;
 }

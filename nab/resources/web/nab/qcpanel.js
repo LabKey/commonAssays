@@ -358,7 +358,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     var store = this.getFieldSelectionStore();
                     if (store){
                         var key = this.getKey(cmp);
-                        var rec = store.findRecord('key', key);
+                        var rec = store.findRecord('key', key, 0, false, true, true);
                         if (rec && !newValue){
                             store.remove(rec);
                             // seriously?
@@ -523,7 +523,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 },
                 getColumnLabel : function(rec){
 
-                    return rec.col + 1;
+                    return parseInt(rec.col) + 1;
                 },
                 me : this
             }
@@ -589,6 +589,14 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 model : 'LABKEY.Nab.SelectedFields',
                 autoLoad: true,
                 pageSize: 10000,
+                sorters : [{
+                    sorterFn : function(o1, o2){
+                        var aso = o1.get('key');
+                        var bso = o2.get('key');
+
+                        return LABKEY.internal.SortUtil.naturalSort(aso, bso);
+                    }
+                }],
                 listeners : {
                     scope   : this,
                     add : function(store, records){
@@ -622,12 +630,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
      */
     setWellExclusion : function(key, excluded){
 
-        var el = Ext4.select('.' + key, true);
-        if (excluded && el) {
-            el.addCls('excluded');
-        }
-        else if (el) {
-            el.removeCls('excluded');
+        var elements = Ext4.select('.' + key, true);
+        if (elements){
+            elements.each(function(el){
+                if (excluded && el) {
+                    el.addCls('excluded');
+                    el.dom.setAttribute('data-qtip', 'This well will be excluded from calculations');
+                }
+                else if (el) {
+                    el.removeCls('excluded');
+                    el.dom.removeAttribute('data-qtip');
+                }
+            }, this);
         }
     },
 
