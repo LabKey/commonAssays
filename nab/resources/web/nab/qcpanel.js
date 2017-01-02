@@ -113,48 +113,42 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     dilutionSummaries  : json.dilutionSummaries
                 };
 
-                var tplText = [];
-
-                tplText.push('<table class="qc-panel"><tr><td colspan="2">');
-                tplText.push(this.getSummaryTpl());
-/*
-                tplText.push('</td></tr><tr><td valign="top">');
-                tplText.push(this.getPlateControlsTpl());
-                tplText.push('</td><td>');
-                tplText.push(this.getControlWellsTpl());
-*/
-                tplText.push('</td></tr>');
-                tplText.push(this.getControlWellsTpl());
-                tplText.push(this.getDilutionSummaryTpl());
-                tplText.push('</table>');
-
-                // create the template and add the template functions to the configuration
-                items.push({
-                    xtype : 'panel',
-                    tpl : new Ext4.XTemplate(tplText.join(''),
-                            {
-                                getId : function(cmp) {
-                                    return Ext4.id();
-                                },
-                                getColspan : function(cmp, values){
-                                    return values.columnLabel.length / 2;
-                                },
-                                me : this
-                            }
-                    ),
-                    data : data,
-                    listeners : {
-                        scope   : this,
-                        render  : function(cmp) {
-                            this.renderControls();
-                        }
-                    }
-                });
                 var selectionPanel = this.getSelectionPanel();
                 selectionPanel.getEl().unmask();
                 selectionPanel.removeAll();
 
                 if (this.edit) {
+                    var tplText = [];
+
+                    tplText.push('<table class="qc-panel"><tr><td colspan="2">');
+                    tplText.push(this.getSummaryTpl());
+                    tplText.push('</td></tr>');
+                    tplText.push(this.getControlWellsTpl());
+                    tplText.push(this.getDilutionSummaryTpl());
+                    tplText.push('</table>');
+
+                    // create the template and add the template functions to the configuration
+                    items.push({
+                        xtype : 'panel',
+                        tpl : new Ext4.XTemplate(tplText.join(''),
+                                {
+                                    getId : function(cmp) {
+                                        return Ext4.id();
+                                    },
+                                    getColspan : function(cmp, values){
+                                        return values.columnLabel.length / 2;
+                                    },
+                                    me : this
+                                }
+                        ),
+                        data : data,
+                        listeners : {
+                            scope   : this,
+                            render  : function(cmp) {
+                                this.renderControls();
+                            }
+                        }
+                    });
                     selectionPanel.add(items);
                 }
                 else {
@@ -176,15 +170,15 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getSummaryTpl : function(){
         var tpl = [];
         tpl.push('<table class="run-summary">',
-                '<tr style="text-align:center;"><th class="labkey-data-region-header-container" colspan="8">Run Summary: {runName}</th></tr>',
-                '<tr><td>',
-                '<tr>',
-                '<tpl for="runProperties">',
-                '<td class="prop-name">{name}</td>',
-                '<td class="prop-value">{value}</td>',
-                '<tpl if="xindex % 2 === 0"></tr><tr></tpl>',
-                '</tpl>',
-                '</td></tr>',
+                    '<tr style="text-align:center;"><th class="labkey-data-region-header-container" colspan="8">Run Summary: {runName}</th></tr>',
+                        '<tr><td>',
+                    '<tr>',
+                        '<tpl for="runProperties">',
+                            '<td class="prop-name">{name}</td>',
+                            '<td class="prop-value">{value}</td>',
+                            '<tpl if="xindex % 2 === 0"></tr><tr></tpl>',
+                        '</tpl>',
+                    '</td></tr>',
                 '</table>'
         );
         return tpl.join('');
@@ -193,16 +187,16 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getPlateControlsTpl : function(){
         var tpl = [];
         tpl.push('<table class="labkey-data-region labkey-show-borders">',
-                '<tr><th></th><th>Plate</th><th>Range</th><th>Virus Control</th><th>Cell Control</th></tr>',
-                '<tpl for="controls">',
-                '<tr>',
-                '<td class="plate-checkbox" plateNumm="{[xindex]}" id="{[this.getId(this)]}"></td>',
-                '<td style="font-weight:bold">{[xindex]}</td>',
-                '<td align="left">{controlRange}</td>',
-                '<td align="left">{virusControlMean} &plusmn; {virusControlPlusMinus}</td>',
-                '<td align="left">{cellControlMean} &plusmn; {cellControlPlusMinus}</td>',
-                '</tr>',
-                '</tpl>',
+                    '<tr><th></th><th>Plate</th><th>Range</th><th>Virus Control</th><th>Cell Control</th></tr>',
+                    '<tpl for="controls">',
+                        '<tr>',
+                            '<td class="plate-checkbox" plateNumm="{[xindex]}" id="{[this.getId(this)]}"></td>',
+                            '<td style="font-weight:bold">{[xindex]}</td>',
+                            '<td align="left">{controlRange}</td>',
+                            '<td align="left">{virusControlMean} &plusmn; {virusControlPlusMinus}</td>',
+                            '<td align="left">{cellControlMean} &plusmn; {cellControlPlusMinus}</td>',
+                        '</tr>',
+                    '</tpl>',
                 '</table>'
         );
         return tpl.join('');
@@ -213,29 +207,29 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
         tpl.push(//'<table class="labkey-data-region labkey-show-borders">',
                 '<tpl for="plates">',
-                '<tpl if="xindex % 2 === 1"><tr><td></tpl>',
-                '<tpl if="xindex % 2 != 1"><td></tpl>',
-                '<table class="plate-controls">',
-                '<tpl for="controls">',
-                '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName} Controls</th></tr>',
-                '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
-                '<tr><td><div class="plate-columnlabel"></div></td>',
-                '<tpl for="columnLabel">',
-                '<td><div class="plate-columnlabel">{.}</div></td>',
-                '</tpl>',
-                '</tr>',
-                '<tpl for="rows">',
-                '<tr>',
-                '<tpl for=".">',
-                '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
-                '<td class="control-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{sampleName}" plate="{plate}"></td>',
-                '</tpl>',           // end cols
-                '</tr>',
-                '</tpl>',           // end rows
-                '</tpl>',           // end controls
-                '</table>',
-                '<tpl if="xindex % 2 != 0"></td></tpl>',
-                '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
+                    '<tpl if="xindex % 2 === 1"><tr><td></tpl>',
+                    '<tpl if="xindex % 2 != 1"><td></tpl>',
+                    '<table class="plate-controls">',
+                        '<tpl for="controls">',
+                            '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName} Controls</th></tr>',
+                            '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
+                            '<tr><td><div class="plate-columnlabel"></div></td>',
+                            '<tpl for="columnLabel">',
+                            '<td><div class="plate-columnlabel">{.}</div></td>',
+                            '</tpl>',
+                            '</tr>',
+                            '<tpl for="rows">',
+                                '<tr>',
+                                    '<tpl for=".">',
+                                    '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
+                                    '<td class="control-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{sampleName}" plate="{plate}"></td>',
+                                    '</tpl>',           // end cols
+                                '</tr>',
+                            '</tpl>',                   // end rows
+                        '</tpl>',                       // end controls
+                    '</table>',
+                    '<tpl if="xindex % 2 != 0"></td></tpl>',
+                    '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
                 '</tpl>'           // end plates
                 //'</table>'
         );
@@ -283,21 +277,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
      * Add check controls and register listeners
      */
     renderControls : function(){
-
-/*
-         var addCheckboxEls = Ext4.DomQuery.select('td.plate-checkbox', this.getEl().dom);
-         Ext4.each(addCheckboxEls, function(cmp)
-         {
-         if (cmp.hasAttribute('id')){
-
-         var field = Ext4.create('widget.checkbox', {
-         renderTo : cmp.getAttribute('id')
-         });
-
-         // add a listener...
-         }
-         }, this);
-         */
 
         // create the checkbox controls for the virus and cell controls
         Ext4.each(Ext4.DomQuery.select('td.control-checkbox', this.getEl().dom), function(cmp)
@@ -562,31 +541,14 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getFieldSelectionStore : function() {
 
         if (!this.fieldSelectionStore) {
-
-            if (!Ext4.ModelManager.isRegistered('LABKEY.Nab.SelectedFields')) {
-
-                Ext4.define('LABKEY.Nab.SelectedFields', {
-                    extend: 'Ext.data.Model',
-                    proxy : {
-                        type : 'ajax',
-                        url : LABKEY.ActionURL.buildURL('nabassay', 'getExcludedWells.api'),
-                        extraParams : {rowId : this.runId},
-                        reader : { type : 'json', root : 'excluded' }
-                    },
-                    fields : [
-                        {name: 'key'},
-                        {name: 'row'},
-                        {name: 'rowlabel', mapping : 'rowLabel'},
-                        {name: 'col'},
-                        {name: 'specimen'},
-                        {name: 'plate'},
-                        {name: 'comment'},
-                        {name: 'excluded'}
-                    ]
-                });
-            }
             this.fieldSelectionStore = Ext4.create('Ext.data.Store', {
                 model : 'LABKEY.Nab.SelectedFields',
+                proxy : {
+                    type : 'ajax',
+                    url : LABKEY.ActionURL.buildURL('nabassay', 'getExcludedWells.api'),
+                    extraParams : {rowId : this.runId},
+                    reader : { type : 'json', root : 'excluded' }
+                },
                 autoLoad: true,
                 pageSize: 10000,
                 sorters : [{
@@ -701,21 +663,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     },
 
-    /**
-     * Adds a change listener to the comment field and pushes any changes into the field selection store
-     */
-    addListenersToCommentFields : function(node, style) {
-
-        // remove existing listeners
-
-        var commentFieldEls = Ext4.DomQuery.select('input.field-exclusion-comment', this.getEl().dom);
-        Ext4.each(commentFieldEls, function(cmp)
-        {
-            Ext4.EventManager.addListener(cmp, 'change', function(event, cmp){
-            }, this);
-        }, this);
-    },
-
     addCommentFieldListener : function(node){
         Ext4.EventManager.addListener(node, 'change', this.onCommentChange, this, {single : true});
     },
@@ -731,3 +678,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         }
     }
 });
+
+Ext4.define('LABKEY.Nab.SelectedFields', {
+    extend: 'Ext.data.Model',
+    fields : [
+        {name: 'key'},
+        {name: 'row'},
+        {name: 'rowlabel', mapping : 'rowLabel'},
+        {name: 'col'},
+        {name: 'specimen'},
+        {name: 'plate'},
+        {name: 'comment'},
+        {name: 'excluded'}
+    ]
+});
+

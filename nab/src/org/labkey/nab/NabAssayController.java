@@ -42,7 +42,6 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.assay.nab.Luc5Assay;
-import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.nab.RenderAssayBean;
 import org.labkey.api.assay.nab.RenderAssayForm;
 import org.labkey.api.assay.nab.view.DilutionGraphAction;
@@ -60,7 +59,6 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
@@ -112,7 +110,6 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
@@ -122,7 +119,6 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.qc.NabWellQCFlag;
-import org.labkey.nab.query.NabDataLinkDisplayColumn;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -773,9 +769,14 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class QCDataAction extends SimpleViewAction<NabQCForm>
     {
+        private int _runId;
+        private boolean _editMode;
+
         @Override
         public ModelAndView getView(NabQCForm form, BindException errors) throws Exception
         {
+            _runId = form.getRowId();
+            _editMode = form.isEdit();
             if (!getContainer().hasPermission(getUser(), AdminPermission.class))
                 form.setEdit(false);
 
@@ -804,7 +805,8 @@ public class NabAssayController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Review/QC NAb Data");
+            ActionURL detailsURL = new ActionURL(DetailsAction.class, getContainer()).addParameter("rowId", _runId);
+            return root.addChild("Run " + _runId + " Details", detailsURL).addChild(_editMode ? "QC NAb Data" : "Excluded Data");
         }
     }
 
@@ -1035,10 +1037,7 @@ public class NabAssayController extends SpringActionController
                         try (DbScope.Transaction transaction = scope.ensureTransaction())
                         {
                             // clear all well exclusions for this run
-                            SQLFragment sql = new SQLFragment("UPDATE ").append(DilutionManager.getTableInfoWellData(), "").
-                                    append(" SET excluded = false WHERE runid = ?");
-                            sql.addAll(form.getRunId());
-                            new SqlExecutor(schema).execute(sql);
+                            DilutionManager.clearWellExclusions(form.getRunId());
 
                             // clear out prior qc flags
                             Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRunId()));
@@ -1066,10 +1065,7 @@ public class NabAssayController extends SpringActionController
                             // set the updated well exclusions and create the QC flags
                             if (!wellRowIds.isEmpty())
                             {
-                                SQLFragment update = new SQLFragment("UPDATE ").append(DilutionManager.getTableInfoWellData(), "").
-                                        append(" SET excluded = true WHERE rowid ");
-                                schema.getSqlDialect().appendInClauseSql(update, wellRowIds);
-                                new SqlExecutor(schema).execute(update);
+                                DilutionManager.setWellExclusions(wellRowIds);
                             }
 
                             // update the dilutiondata tables to reflect the exclusions
