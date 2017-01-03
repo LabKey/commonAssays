@@ -336,7 +336,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 change  : function(cmp, newValue) {
                     var store = this.getFieldSelectionStore();
                     if (store){
-                        var key = this.getKey(cmp);
+                        var key = LABKEY.nab.QCUtil.getModelKey(cmp);
                         var rec = store.findRecord('key', key, 0, false, true, true);
                         if (rec && !newValue){
                             store.remove(rec);
@@ -362,10 +362,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 }
             }
         });
-    },
-
-    getKey : function(cmp){
-        return cmp.plate + '-' + cmp.row + '-' + cmp.col;
     },
 
     getConfirmationPanel : function(){
@@ -439,7 +435,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                             tpl : new Ext4.XTemplate(plateTpl.join(''),
                                     {
                                         getKey : function(rec) {
-                                            return rec.plate + '-' + rec.row + '-' + rec.col;
+                                            return LABKEY.nab.QCUtil.getModelKey(rec);
                                         }
                                     }
                             ),
@@ -454,8 +450,8 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                                     if (store){
                                         store.each(function(rec){
 
-                                            var key = this.getKey(rec.getData());
-                                            this.setWellExclusion(key, true);
+                                            var key = LABKEY.nab.QCUtil.getModelKey(rec.getData());
+                                            LABKEY.nab.QCUtil.setWellExclusion(key, true, rec.get('comment'), this);
 
                                         }, this);
                                     }
@@ -494,8 +490,8 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     }
                     return '';
                 },
-                getKey : function(rec){
-                    return rec.plate + '-' + rec.row + '-' + rec.col;
+                getKey : function(cmp){
+                    return LABKEY.nab.QCUtil.getModelKey(cmp);
                 },
                 getReadonly : function(){
                     return this.me.edit ? '' : 'readonly';
@@ -514,25 +510,25 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
         tpl.push(//'<table class="labkey-data-region labkey-show-borders">',
                 '<tpl for="plates">',
-                '<table class="plate-summary">',
-                '<tpl for="rawdata">',
-                '<tr><th colspan="40" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName}</th></tr>',
-                '<tr><td><div class="plate-columnlabel"></div></td>',
-                '<tpl for="columnLabel">',
-                '<td><div class="plate-columnlabel">{.}</div></td>',
-                '</tpl>',
-                '</tr>',
-                '<tpl for="data">',
-                '<tr>',
-                '<tpl for=".">',
-                '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
-                '<td class="{[this.getKey(values)]}">{value}</td>',
-                '</tpl>',           // end cols
-                '</tr>',
-                '</tpl>',           // end rows
-                '</tpl>',           // end controls
-                '</table>',
-                '</tpl>'           // end plates
+                    '<table class="plate-summary">',
+                        '<tpl for="rawdata">',
+                            '<tr><th colspan="40" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName}</th></tr>',
+                            '<tr><td><div class="plate-columnlabel"></div></td>',
+                            '<tpl for="columnLabel">',
+                                '<td><div class="plate-columnlabel">{.}</div></td>',
+                            '</tpl>',
+                            '</tr>',
+                            '<tpl for="data">',
+                                '<tr>',
+                                '<tpl for=".">',
+                                '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
+                                '<td class="{[this.getKey(values)]}">{value}</td>',
+                                '</tpl>',           // end cols
+                                '</tr>',
+                            '</tpl>',               // end rows
+                        '</tpl>',                   // end controls
+                    '</table>',
+                '</tpl>'                            // end plates
                 //'</table>'
         );
         return tpl.join('');
@@ -564,15 +560,15 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     add : function(store, records){
                         Ext4.each(records, function(rec){
 
-                            var key = this.getKey(rec.getData());
-                            this.setWellExclusion(key, true);
+                            var key = LABKEY.nab.QCUtil.getModelKey(rec.getData());
+                            LABKEY.nab.QCUtil.setWellExclusion(key, true, rec.get('comment'), this);
                         }, this);
                     },
                     remove : function(store, records){
                         Ext4.each(records, function(rec){
 
-                            var key = this.getKey(rec.getData());
-                            this.setWellExclusion(key, false);
+                            var key = LABKEY.nab.QCUtil.getModelKey(rec.getData());
+                            LABKEY.nab.QCUtil.setWellExclusion(key, false, undefined, this);
                         }, this);
                     },
                     load : function(store, records){
@@ -585,26 +581,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             });
         }
         return this.fieldSelectionStore;
-    },
-
-    /**
-     * mark the well as excluded (or clear) on the plate diagram
-     */
-    setWellExclusion : function(key, excluded){
-
-        var elements = Ext4.select('.' + key, true);
-        if (elements){
-            elements.each(function(el){
-                if (excluded && el) {
-                    el.addCls('excluded');
-                    el.dom.setAttribute('data-qtip', 'This well will be excluded from calculations');
-                }
-                else if (el) {
-                    el.removeCls('excluded');
-                    el.dom.removeAttribute('data-qtip');
-                }
-            }, this);
-        }
     },
 
     onSave : function(){
@@ -678,6 +654,51 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         }
     }
 });
+
+if (!LABKEY.nab)
+    LABKEY.nab = {};
+
+/**
+ * Utility class for well level QC
+ * @type {QCUtil}
+ */
+LABKEY.nab.QCUtil = new function() {
+
+    function _getKey(plate, row, col)
+    {
+        return plate + '-' + row + '-' + col;
+    }
+
+    return {
+        /**
+         * mark the well as excluded (or clear) on the plate diagram
+         */
+        setWellExclusion : function(key, excluded, comment, scope){
+
+            var elements = Ext4.select('.' + key, true);
+            if (elements){
+                elements.each(function(el){
+                    if (excluded && el) {
+                        el.addCls('excluded');
+                        el.dom.setAttribute('data-qtip', comment ? comment : 'excluded from calculations');
+                    }
+                    else if (el) {
+                        el.removeCls('excluded');
+                        el.dom.removeAttribute('data-qtip');
+                    }
+                }, scope ? scope : this);
+            }
+        },
+
+        getModelKey : function(rec){
+            return _getKey(rec.plate, rec.row, rec.col);
+        },
+
+        getKey : function(plate, row, col){
+            return _getKey(plate, row, col);
+        }
+    }
+};
 
 Ext4.define('LABKEY.Nab.SelectedFields', {
     extend: 'Ext.data.Model',
