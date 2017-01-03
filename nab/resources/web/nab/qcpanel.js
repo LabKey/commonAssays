@@ -478,7 +478,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<td style="text-align: left">{[this.getColumnLabel(values)]}</td>',
                 '<td style="text-align: left">{specimen}</td>',
                 '<td style="text-align: left">Plate {plate}</td>',
-                '<td style="text-align: left"><input class="field-exclusion-comment" key="{[this.getKey(values)]}" {[this.getReadonly()]} type="text" name="comment" size="60" value="{comment}"></td>',
+                '<td style="text-align: left"><input class="field-exclusion-comment" key="{[this.getKey(values)]}" {[this.getReadonly()]} type="text" name="comment" size="60" value="{comment:htmlEncode}"></td>',
                 '</tr>',
             '</tpl>',
             '</table>',
@@ -680,7 +680,7 @@ LABKEY.nab.QCUtil = new function() {
                 elements.each(function(el){
                     if (excluded && el) {
                         el.addCls('excluded');
-                        el.dom.setAttribute('data-qtip', comment ? comment : 'excluded from calculations');
+                        el.dom.setAttribute('data-qtip', comment ? Ext4.util.Format.htmlEncode(comment) : 'excluded from calculations');
                     }
                     else if (el) {
                         el.removeCls('excluded');
