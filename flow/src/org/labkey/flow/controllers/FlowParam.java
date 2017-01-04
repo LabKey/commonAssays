@@ -36,4 +36,5 @@ public enum FlowParam
     statisticSetId,
     objectId,
     protocolId,
+    objectId_graph
 }

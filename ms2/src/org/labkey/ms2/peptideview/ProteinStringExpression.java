@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpression;
 import org.labkey.data.xml.StringExpressionType;
 
@@ -47,7 +48,7 @@ public class ProteinStringExpression implements StringExpression, Cloneable
         Integer seqId = (Integer)ctx.get("SeqId");
 
         // Always include protein (use as a title in the details page); include SeqId if it's not null
-        return _localURI + (null != seqId ? "&seqId=" + seqId : "") + "&protein=" + ctx.get("Protein");
+        return _localURI + (null != seqId ? "&seqId=" + seqId : "") + "&protein=" + PageFlowUtil.encode((String)ctx.get("Protein"));
     }
 
     public String getSource()

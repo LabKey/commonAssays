@@ -17,23 +17,25 @@
 package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.query.FlowQuerySettings;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Set;
 
 public class GraphColumn extends DataColumn
 {
+    public static final String SEP = "~~~";
+
     private static final String INCLUDE_UTIL_SCRIPT = "~~~Flow/util.js~~~";
     private Logger _log = Logger.getLogger(GraphColumn.class);
     private FlowQuerySettings.ShowGraphs _showGraphs;
@@ -43,12 +45,40 @@ public class GraphColumn extends DataColumn
         super(colinfo);
     }
 
-    @Override
-    public void addQueryFieldKeys(Set<FieldKey> keys)
+    /**
+     * Parse the column value formatted as objectId~~~graphSpec into parts.  The objectId may be null, graphSpec will not be null.
+     */
+    @NotNull
+    static public Pair<Integer, String> parseObjectIdGraph(@NotNull String objectIdGraph)
     {
-        super.addQueryFieldKeys(keys);
-        keys.add(getColumnInfo().getDisplayField().getFieldKey());
+        Integer objectId = null;
+        String graphSpec = null;
+
+        String[] parts = objectIdGraph.split(SEP, 2);
+        if (parts.length != 2)
+            throw new IllegalArgumentException("error parsing graph spec: expected pair of values: " + objectIdGraph);
+
+        if (parts[0].length() > 0)
+        {
+            try
+            {
+                objectId = Integer.parseInt(parts[0]);
+            }
+            catch (NumberFormatException nfe)
+            {
+                throw new IllegalArgumentException("error parsing graph spec: expected first part to be integer value: " + objectIdGraph);
+            }
+        }
+
+        graphSpec = parts[1];
+        if (graphSpec.length() == 0)
+        {
+            throw new IllegalArgumentException("error parsing graph spec: expected second part to be non-empty string: " + objectIdGraph);
+        }
+
+        return Pair.of(objectId, graphSpec);
     }
+
 
     protected FlowQuerySettings.ShowGraphs showGraphs(RenderContext ctx)
     {
@@ -85,15 +115,41 @@ public class GraphColumn extends DataColumn
             ctx.put(INCLUDE_UTIL_SCRIPT, true);
         }
 
+        Integer objectId = null;
+        String graphSpec = null;
+        String graphTitle;
         Object boundValue = getColumnInfo().getValue(ctx);
+        if ((boundValue instanceof String))
+        {
+            try
+            {
+                Pair<Integer, String> pair = parseObjectIdGraph((String) boundValue);
+                objectId = pair.first;
+                graphSpec = pair.second;
+            }
+            catch (IllegalArgumentException ex)
+            {
+                _log.debug(ex.getMessage());
+                out.write("&nbsp;");
+                return;
+            }
+
+            graphTitle = PageFlowUtil.filter(graphSpec);
+        }
+        else
+        {
+            _log.debug("error parsing graph spec: expected pair of values, but got '" + String.valueOf(boundValue) + "'");
+            out.write("&nbsp;");
+            return;
+        }
+
+
         String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest()) + "px";
-        Object displayValue = getColumnInfo().getDisplayField().getValue(ctx);
-        String graphTitle = PageFlowUtil.filter(displayValue);
 
         if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Inline)
         {
             out.write("<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + ";\">");
-            if (boundValue == null)
+            if (objectId == null)
             {
                 out.write("<span class=\"labkey-disabled labkey-flow-graph\">No graph for:<br>" + graphTitle + "</span>");
             }
@@ -109,7 +165,7 @@ public class GraphColumn extends DataColumn
         }
         else if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Thumbnail)
         {
-            if (boundValue == null)
+            if (objectId == null)
             {
                 out.write("&nbsp;");
             }
@@ -126,7 +182,7 @@ public class GraphColumn extends DataColumn
                 StringBuilder imageHtml = new StringBuilder();
                 imageHtml.append("<img src=\"").append(PageFlowUtil.filter(urlGraph)).append("\" />");
 
-                out.write(PageFlowUtil.helpPopup(graphTitle, imageHtml.toString(), true, iconHtml.toString(), 310));
+                out.write(PageFlowUtil.helpPopup(graphSpec, imageHtml.toString(), true, iconHtml.toString(), 310));
             }
         }
     }

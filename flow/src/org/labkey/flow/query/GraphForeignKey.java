@@ -16,20 +16,21 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.*;
-import org.labkey.api.util.StringExpression;
 import org.labkey.api.view.ActionURL;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.view.GraphColumn;
-
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.SubsetSpec;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,39 +71,11 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 
     protected void initColumn(final GraphSpec spec, String preferredName, ColumnInfo column)
     {
-        column.setSqlTypeName("INTEGER");
+        column.setSqlTypeName("VARCHAR");
         SubsetSpec subset = _fps.simplifySubset(spec.getSubset());
         GraphSpec captionSpec = new GraphSpec(subset, spec.getParameters());
         column.setLabel(captionSpec.toString());
-        column.setFk(new AbstractForeignKey() {
-            public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
-            {
-                if (displayField != null && !"$".equals(displayField))
-                    return null;
-                SQLFragment sqlExpr = new SQLFragment();
-                sqlExpr.appendStringLiteral(spec.toString());
-                ExprColumn col = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(),"$"), sqlExpr, JdbcType.VARCHAR);
-                col.setAlias(parent.getAlias() + "$");
-                return col;
-            }
-
-            public TableInfo getLookupTableInfo()
-            {
-                return null;
-            }
-
-            public StringExpression getURL(ColumnInfo parent)
-            {
-                return null;
-            }
-        });
-        column.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new GraphColumn(colInfo);
-            }
-        });
+        column.setDisplayColumnFactory(GraphColumn::new);
 
         // Set the DetailsURL for the column using ContainerContext.
         // By explicitly setting the ContainerContext, the URL's container will point to the original flow assay data
@@ -110,8 +83,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         // If we ever make FlowProtocol work in multiple containers, we will need to pull the Container from the ResultSet instead.
         ActionURL baseURL = new ActionURL(WellController.ShowGraphAction.class, null);
         Map<String, FieldKey> graphParams = new HashMap<>();
-        graphParams.put(FlowParam.objectId.toString(), column.getFieldKey());
-        graphParams.put(FlowParam.graph.toString(), new FieldKey(column.getFieldKey(), "$"));
+        graphParams.put(FlowParam.objectId_graph.toString(), column.getFieldKey());
         DetailsURL urlGraph = new DetailsURL(baseURL, graphParams);
         urlGraph.setContainerContext(_container);
         column.setURL(urlGraph);
@@ -120,10 +92,19 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         column.setDimension(false);
     }
 
+    // Select the string concatenated value of objectId+'~~~'+graphSpec
+    // When rendering the image URL, we will split the values apart again.
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, int attrId)
     {
-        SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.ObjectId IS NOT NULL THEN ");
-        sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        final SqlDialect dialect = objectIdColumn.getSqlDialect();
+        final SQLFragment sepAndGraphSpec =
+            dialect.concatenate(new SQLFragment("'" + GraphColumn.SEP + "'"), new SQLFragment("?").add(attrName.toString()));
+
+        SQLFragment sql = new SQLFragment("(SELECT CASE WHEN COUNT(flow.Graph.ObjectId) = 1");
+        sql.append("\nTHEN ");
+        sql.append(dialect.concatenate(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), sepAndGraphSpec));
+        sql.append("\nELSE ");
+        sql.append(sepAndGraphSpec);
         sql.append(" END");
         sql.append("\nFROM flow.Graph WHERE flow.Graph.GraphId = ");
         sql.append(attrId);
@@ -131,14 +112,6 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sql.append(")");
 
-        //SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.ObjectId IS NOT NULL THEN ");
-        //sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
-        //sql.append(" END");
-        //sql.append("\nFROM flow.Graph WHERE flow.Graph.GraphId = flow.GraphAttr.Id AND flow.GraphAttr.Name = ?");
-        //sql.add(attrName);
-        //sql.append("\nAND flow.Graph.ObjectId = ");
-        //sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
-        //sql.append(")");
         return sql;
     }
 }

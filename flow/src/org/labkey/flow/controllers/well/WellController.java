@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.well;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
@@ -42,6 +43,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
@@ -63,10 +65,11 @@ import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.view.GraphColumn;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -292,10 +295,14 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
+            Pair<Integer, String> objectId_graph = parseObjectIdGraph();
+
             well = getWell();
             if (well == null)
             {
                 int objectId = getIntParam(FlowParam.objectId);
+                if (objectId == 0 && objectId_graph != null)
+                    objectId = objectId_graph.first;
                 if (objectId == 0)
                     return null;
                 FlowDataObject obj = FlowDataObject.fromAttrObjectId(objectId);
@@ -306,6 +313,8 @@ public class WellController extends BaseFlowController
             }
 
             String graph = getParam(FlowParam.graph);
+            if (graph == null && objectId_graph != null)
+                graph = objectId_graph.second;
             if (graph == null)
                 throw new NotFoundException("Graph spec required");
 
@@ -327,6 +336,16 @@ public class WellController extends BaseFlowController
                         bytes, "image/png", HeartBeat.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
             }
             return null;
+        }
+
+        @Nullable
+        private Pair<Integer, String> parseObjectIdGraph()
+        {
+            String param = getParam(FlowParam.objectId_graph);
+            if (param == null)
+                return null;
+
+            return GraphColumn.parseObjectIdGraph(param);
         }
 
         public NavTree appendNavTrail(NavTree root)
