@@ -100,9 +100,15 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         final SQLFragment sepAndGraphSpec =
             dialect.concatenate(new SQLFragment("'" + GraphColumn.SEP + "'"), new SQLFragment("?").add(attrName.toString()));
 
+        SQLFragment objectIdSql = objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS);
+        if (dialect.isSqlServer())
+        {
+            objectIdSql = new SQLFragment("CAST(").append(objectIdSql).append(" AS NVARCHAR(100))");
+        }
+
         SQLFragment sql = new SQLFragment("(SELECT CASE WHEN COUNT(flow.Graph.ObjectId) = 1");
         sql.append("\nTHEN ");
-        sql.append(dialect.concatenate(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), sepAndGraphSpec));
+        sql.append(dialect.concatenate(objectIdSql, sepAndGraphSpec));
         sql.append("\nELSE ");
         sql.append(sepAndGraphSpec);
         sql.append(" END");
