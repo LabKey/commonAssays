@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -63,8 +64,18 @@ public class ExcludedSinglepointUnknownsWebpart extends BaseExclusionWebpart
         assertEquals("Exclusion was found", 1, table.getDataRowCount());
 
         assertEquals("Exclusion doesn't match criteria",
-                Arrays.asList(runName, description, dilution, String.join(", ", analytes)),
-                table.getRowDataAsText(0, RUN_COLUMN, DESCRIPTION_COLUMN, DILUTION_COLUMN, ANALYTES_COLUMN));
+                Arrays.asList(runName, description, dilution),
+                table.getRowDataAsText(0, RUN_COLUMN, DESCRIPTION_COLUMN, DILUTION_COLUMN));
+
+        //Breaking out analyte check since order can't be trusted
+        String analyteValue = table.getDataAsText(0, ANALYTES_COLUMN);
+        List<String> analyteValues = Arrays.asList(analyteValue.split(", "));
+        analyteValues.sort(String::compareToIgnoreCase);
+
+        List<String> expectedAnalytes = Arrays.asList(analytes);
+        expectedAnalytes.sort(String::compareToIgnoreCase);
+
+        assertEquals("Exclusion analytes not as expected", expectedAnalytes, analyteValues);
 
         table.clearFilter(DILUTION_COLUMN);
         table.clearFilter(DESCRIPTION_COLUMN);
