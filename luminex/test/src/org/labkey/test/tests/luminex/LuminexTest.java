@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.util.ListHelper.ListColumnType;
 
+@BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
