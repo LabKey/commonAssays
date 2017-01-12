@@ -93,7 +93,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
             this.exclusionsStore = new LABKEY.ext.Store({
                 schemaName: this.protocolSchemaName,
                 queryName: this.EXCLUSION_TABLE_NAME,
-                columns: 'Description,Dilution,Analytes/RowId,RowId,Comment,DataId/Run',
+                columns: 'Description,Dilution,Analytes/RowId,RowId,Comment,DataId,DataId/Run',
                 filterArray : [
                     LABKEY.Filter.create('DataId/Run', this.runId, LABKEY.Filter.Types.EQUALS)
                 ],
@@ -107,7 +107,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                         Ext.each(records, function(record)
                         {
                             record.set('Analytes/RowId', record.json['Analytes/RowId'].displayValue);
-                            record.set(this.ITEM_RECORD_KEY, record.get('Description') + '|' + record.get('Dilution'))
+                            record.set(this.ITEM_RECORD_KEY, record.get('DataId') + '|' + record.get('Description') + '|' + record.get('Dilution'))
                         }, this);
 
                         this.getDistinctItemGridStore().load();
@@ -138,8 +138,8 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
         {
             this.distinctItemGridStore = new LABKEY.ext.Store({
                 schemaName: this.protocolSchemaName,
-                sql: 'SELECT DISTINCT (x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, x.Description, x.Dilution, '
-                    + 'x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId '
+                sql: 'SELECT DISTINCT (CONVERT(x.Data.RowId, VARCHAR) || \'|\' || x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, '
+                    + 'x.Description, x.Dilution, x.Data.RowId AS DataId, x.Data.Run.RowId AS RunId '
                     + 'FROM Data AS x WHERE x.Description IS NOT NULL AND x.Dilution IS NOT NULL AND x.Titration IS NULL AND x.WellRole = \'Unknown\' '
                     + 'AND x.Data.Run.RowId = ' + this.runId,
                 sort: 'Description,Dilution',
@@ -339,8 +339,8 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                 headerStyle: 'font-weight: normal; background-color: #ffffff',
                 store: new LABKEY.ext.Store({
                     schemaName: this.protocolSchemaName,
-                    sql: "SELECT DISTINCT (x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, x.Description, x.Dilution, "
-                        + "x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
+                    sql: "SELECT DISTINCT (CONVERT(x.Data.RowId, VARCHAR) || \'|\' || x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, "
+                        + "x.Description, x.Dilution, x.Data.RowId AS DataId, x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                         + " FROM Data AS x WHERE x.Description IS NOT NULL AND x.Dilution IS NOT NULL AND x.Titration IS NULL AND x.WellRole = \'Unknown\'"
                         + " AND x.Data.Run.RowId = " + this.runId,
                     sort: 'Description,Dilution,Name',
