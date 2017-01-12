@@ -44,14 +44,19 @@ public class SinglepointExclusionDialog extends BaseExclusionDialog
     public void checkAnalyte(String analyte)
     {
         //TODO: do something more robust
-        click(ExtHelper.locateGridRowCheckbox(analyte));
+        clickAnalyteGridRowCheckbox(analyte);
     }
-
 
     public void uncheckAnalyte(String analyte)
     {
         //TODO: do something more robust
+        clickAnalyteGridRowCheckbox(analyte);
+    }
+
+    private void clickAnalyteGridRowCheckbox(String analyte)
+    {
         click(ExtHelper.locateGridRowCheckbox(analyte));
+        sleep(500);
     }
 
     protected Elements elements()
