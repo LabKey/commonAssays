@@ -254,11 +254,11 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     '<td valign="top"><table class="labkey-data-region">',
                         '<tr>',
                             '<td class="prop-name">{methodLabel}</td><td class="prop-name">{neutLabel}</td>',
-                            '<td class="dilution-checkbox-addall" id="{[this.getId(this)]}" specimen="{name}"></td><td></td></tr>',
+                            '<td class="dilution-checkbox-addall" id="{[this.getId(this)]}" specimen="{name}" samplenum="{sampleNum}"></td><td></td></tr>',
                         '<tpl for="dilutions">',
                         '<tr><td>{dilution}</td><td>{neut} &plusmn; {neutPlusMinus}</td>',
                             '<tpl for="wells">',
-                            '<td class="dilution-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{parent.sampleName}" plate="{plateNum}"></td>',
+                            '<td class="dilution-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{parent.sampleName}" plate="{plateNum}" samplenum="{parent.sampleNum}"></td>',
                             '</tpl>',           // end wells
                         '</tr>',
                         '</tpl>',               // end dilutions
@@ -301,12 +301,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     renderTo : cmp.getAttribute('id'),
                     boxLabel : 'Select all',
                     specimen : cmp.getAttribute('specimen'),
-                    plate    : cmp.getAttribute('plate'),
+                    sampleNum: cmp.getAttribute('samplenum'),
                     listeners : {
                         scope   : this,
                         change  : function(cmp, newValue) {
                             // get all of the checkboxes with the same specimen and plate
-                            var checkboxes = Ext4.ComponentQuery.query('checkbox[specimen=' + cmp.specimen + ']');
+                            var checkboxes = Ext4.ComponentQuery.query('checkbox[sampleNum=' + cmp.sampleNum + ']');
                             Ext4.each(checkboxes, function(ck){
 
                                 ck.setValue(newValue);
@@ -331,6 +331,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             col      : cmp.getAttribute('col'),
             specimen : cmp.getAttribute('specimen'),
             plate    : cmp.getAttribute('plate'),
+            sampleNum: cmp.getAttribute('samplenum'),
             listeners : {
                 scope   : this,
                 change  : function(cmp, newValue) {

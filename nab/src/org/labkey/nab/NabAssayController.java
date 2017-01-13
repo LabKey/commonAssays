@@ -837,7 +837,7 @@ public class NabAssayController extends SpringActionController
                 for (DilutionAssayRun.SampleResult sampleResult : assay.getSampleResults())
                 {
                     DilutionSummary summary = sampleResult.getDilutionSummary();
-                    Map<String, Object> summaryMap = serializeDilutionSummary(form, summary);
+                    Map<String, Object> summaryMap = serializeDilutionSummary(form, summary, sampleNum);
 
                     ActionURL graphUrl = PageFlowUtil.urlProvider(NabUrls.class).urlGraph(getContainer());
                     graphUrl.addParameter("rowId", form.getRowId())
@@ -953,7 +953,7 @@ public class NabAssayController extends SpringActionController
         return o;
     }
 
-    private Map<String, Object> serializeDilutionSummary(RenderAssayBean form, DilutionSummary summary) throws FitFailedException
+    private Map<String, Object> serializeDilutionSummary(RenderAssayBean form, DilutionSummary summary, int sampleNum) throws FitFailedException
     {
         Map<String, Object> o = new HashMap<>();
         DecimalFormat shortDecFormat = new DecimalFormat("0.###");
@@ -964,6 +964,7 @@ public class NabAssayController extends SpringActionController
         o.put("name", sampleName);
         o.put("methodLabel", summary.getMethod().getAbbreviation());
         o.put("neutLabel", form.getNeutralizationAbrev());
+        o.put("sampleNum", sampleNum);
 
         List<Map<String, Object>> dilutions = new ArrayList<>();
         o.put("dilutions", dilutions);
@@ -977,6 +978,7 @@ public class NabAssayController extends SpringActionController
             row.put("neut", Luc5Assay.percentString(summary.getPercent(data)));
             row.put("neutPlusMinus", Luc5Assay.percentString(summary.getPlusMinus(data)));
             row.put("sampleName", sampleName);
+            row.put("sampleNum", sampleNum);
 
             if (data instanceof WellGroup)
             {
