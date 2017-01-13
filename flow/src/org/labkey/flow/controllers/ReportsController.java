@@ -171,7 +171,7 @@ public class ReportsController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);
-            root.addChild("Create new report");
+            root.addChild("Create new report: " + r.getTypeDescription());
             return root;
         }
     }
