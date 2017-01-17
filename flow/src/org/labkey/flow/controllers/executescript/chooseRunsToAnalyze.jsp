@@ -41,6 +41,8 @@
         dependencies.add("vis/ColumnVisualizationAnalytics.js");
         dependencies.add("vis/ColumnVisualizationAnalytics.css");
         dependencies.add("query/ColumnQueryAnalytics.js");
+        dependencies.add("query/ColumnSummaryStatistics.js");
+        dependencies.add("query/ColumnSummaryStatistics.css");
     }
 
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)

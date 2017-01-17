@@ -17,6 +17,7 @@
 package org.labkey.flow.webparts;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.analytics.ColumnAnalyticsProvider;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
@@ -46,6 +47,7 @@ import org.springframework.web.servlet.mvc.Controller;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -123,6 +125,13 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         public String getFormattedValue(RenderContext ctx)
         {
             return _actionName;
+        }
+
+        @NotNull
+        @Override
+        public List<ColumnAnalyticsProvider> getAnalyticsProviders()
+        {
+            return Collections.emptyList();
         }
     }
 
