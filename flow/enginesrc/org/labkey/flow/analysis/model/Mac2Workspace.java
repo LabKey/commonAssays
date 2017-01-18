@@ -30,19 +30,9 @@ public class Mac2Workspace extends MacWorkspace
 
     protected void readSamples(Element elDoc)
     {
-        for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
-        {
-            for (Element elSample : getElementsByTagName(elSampleList, "Sample"))
-            {
-                readSample(elSample);
-
-                for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
-                {
-                    readSampleAnalysis(elSampleNode);
-                }
-            }
-        }
-    }
+        String samplesTagName = "SampleList";
+        addSamplesToMaps(elDoc, samplesTagName);
+   }
 
     protected SampleInfo readSample(Element elSample)
     {
@@ -110,5 +100,25 @@ public class Mac2Workspace extends MacWorkspace
     protected void readGroupAnalyses(Element elDoc)
     {
         assert false : "readGroupAnalysis() now called form readGroups()";
+    }
+
+    protected void addSamplesToMaps(Element elDoc, String samplesTagName)
+    {
+        for (Element elSamples : getElementsByTagName(elDoc, samplesTagName))
+        {
+            for (Element elSample : getElementsByTagName(elSamples, "Sample"))
+            {
+                if(sampleHasNodeNotMarkedDeleted(elSample))
+                {
+
+                    readSample(elSample);
+
+                    for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
+                    {
+                        readSampleAnalysis(elSampleNode);
+                    }
+                }
+            }
+        }
     }
 }

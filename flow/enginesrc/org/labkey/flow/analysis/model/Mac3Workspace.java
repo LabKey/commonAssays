@@ -33,18 +33,8 @@ public class Mac3Workspace extends Mac2Workspace
     @Override
     protected void readSamples(Element elDoc)
     {
-        for (Element elSamples : getElementsByTagName(elDoc, "Samples"))
-        {
-            for (Element elSample : getElementsByTagName(elSamples, "Sample"))
-            {
-                readSample(elSample);
-
-                for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
-                {
-                    readSampleAnalysis(elSampleNode);
-                }
-            }
-        }
+        String samplesTagName = "Samples";
+        addSamplesToMaps(elDoc, samplesTagName);
     }
 
     // FlowJo v9.7 uses 'nodeName' attribute on Sample, GroupNode, Population, and Statistic elements

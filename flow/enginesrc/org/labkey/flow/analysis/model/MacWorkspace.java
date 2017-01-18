@@ -124,6 +124,19 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
+    protected boolean sampleHasNodeNotMarkedDeleted(Element elSample)
+    {
+        for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
+        {
+            boolean deleted = "1".equals(elSampleNode.getAttribute("deleted"));
+            if (!deleted)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected Analysis readSampleAnalysis(Element elSampleAnalysis)
     {
         // Don't read analysis if sample has been marked as 'deleted'
