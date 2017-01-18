@@ -66,7 +66,59 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         this.items.push(this.getSelectionPanel());
         this.items.push(this.getConfirmationPanel());
 
+        // create a delayed task for checkbox change events
+         this.checkboxChangeTask = new Ext4.util.DelayedTask(this.exclusionChanged, this);
+         this.checkboxChangeQueue = {};
+
         this.callParent(arguments);
+    },
+
+    exclusionChanged : function(){
+        var queue = Ext4.clone(this.checkboxChangeQueue);
+        this.checkboxChangeQueue = {};
+
+        var store = this.getFieldSelectionStore();
+        if (store){
+            var refreshConfirmationPanel = false;
+            var removed = [];
+            var added = [];
+
+            for (var key in queue){
+                if (queue.hasOwnProperty(key)){
+
+                    var item = queue[key];
+                    var rec = store.findRecord('key', item.key, 0, false, true, true);
+                    if (rec && !item.checked){
+                        removed.push(rec);
+                        // seriously?
+                        refreshConfirmationPanel = true;
+                    }
+                    else if (item.checked && !rec){
+                        // add the record to the store
+                        added.push({
+                            key     : item.key,
+                            plate   : item.plate,
+                            row     : item.row,
+                            rowlabel : item.rowlabel,
+                            col      : item.col,
+                            specimen : item.specimen,
+                            excluded : item.checked
+                        });
+                    }
+                }
+            }
+            if (removed.length > 0)
+                store.remove(removed);
+            if (added.length > 0)
+                store.add(added);
+
+            if (refreshConfirmationPanel){
+                var fieldPanel = this.confirmationPanel.getComponent('field-selection-view');
+                if (fieldPanel){
+                    fieldPanel.refresh();
+                }
+            }
+        }
     },
 
     getSelectionPanel : function(){
@@ -213,6 +265,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         '<tpl for="controls">',
                             '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName} Controls</th></tr>',
                             '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
+                            '<tr><td class="prop-value" colspan="{[this.getColspan(this, values) + 1]}">{virusControlMean} &plusmn; {virusControlPlusMinus}</td><td class="prop-value" colspan="{[this.getColspan(this, values)]}">{cellControlMean} &plusmn; {cellControlPlusMinus}</td></tr>',
                             '<tr><td><div class="plate-columnlabel"></div></td>',
                             '<tpl for="columnLabel">',
                             '<td><div class="plate-columnlabel">{.}</div></td>',
@@ -334,32 +387,18 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             sampleNum: cmp.getAttribute('samplenum'),
             listeners : {
                 scope   : this,
-                change  : function(cmp, newValue) {
-                    var store = this.getFieldSelectionStore();
-                    if (store){
-                        var key = LABKEY.nab.QCUtil.getModelKey(cmp);
-                        var rec = store.findRecord('key', key, 0, false, true, true);
-                        if (rec && !newValue){
-                            store.remove(rec);
-                            // seriously?
-                            var fieldPanel = this.confirmationPanel.getComponent('field-selection-view');
-                            if (fieldPanel){
-                                fieldPanel.refresh();
-                            }
-                        }
-                        else if (newValue && !rec){
-                            // add the record to the store
-                            store.add({
-                                key     : key,
-                                plate   : cmp.plate,
-                                row     : cmp.row,
-                                rowlabel : cmp.rowlabel,
-                                col      : cmp.col,
-                                specimen : cmp.specimen,
-                                excluded : newValue
-                            });
-                        }
-                    }
+                change  : function(cmp, checked) {
+                    var key = LABKEY.nab.QCUtil.getModelKey(cmp);
+                    this.checkboxChangeQueue[key] = {
+                        key     : key,
+                        checked : checked,
+                        plate   : cmp.plate,
+                        row     : cmp.row,
+                        rowlabel : cmp.rowlabel,
+                        col      : cmp.col,
+                        specimen : cmp.specimen
+                    };
+                    this.checkboxChangeTask.delay(500);
                 }
             }
         });

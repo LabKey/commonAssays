@@ -828,7 +828,10 @@ public class NabAssayController extends SpringActionController
                 List<Map<String, Object>> plates = new ArrayList<>();
 
                 // serialize the plates
-                plates.addAll(assay.getPlates().stream().map(NabAssayController.this::serializePlate).collect(Collectors.toList()));
+                for (Plate plate : assay.getPlates())
+                {
+                    plates.add(serializePlate(plate, assay));
+                }
                 response.put("plates", plates);
 
                 List<Map<String, Object>> dilutionSummaries = new ArrayList<>();
@@ -864,7 +867,7 @@ public class NabAssayController extends SpringActionController
      * @param plate
      * @return
      */
-    private Map<String, Object> serializePlate(Plate plate)
+    private Map<String, Object> serializePlate(Plate plate, DilutionAssayRun assay)
     {
         Map<String, Object> o = new HashMap<>();
         List<String> columnLabel = new ArrayList<>();
@@ -873,6 +876,10 @@ public class NabAssayController extends SpringActionController
         Map<String, Object> controls = new HashMap<>();
         o.put("controls", controls);
         controls.put("columnLabel", columnLabel);
+        controls.put("virusControlMean", Luc5Assay.intString(assay.getVirusControlMean(plate, null)));
+        controls.put("virusControlPlusMinus", Luc5Assay.percentString(assay.getVirusControlPlusMinus(plate, null)));
+        controls.put("cellControlMean", Luc5Assay.intString(assay.getCellControlMean(plate, null)));
+        controls.put("cellControlPlusMinus", Luc5Assay.percentString(assay.getCellControlPlusMinus(plate, null)));
 
         WellGroup virusGroup = plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.VIRUS_CONTROL_SAMPLE);
         WellGroup cellGroup = plate.getWellGroup(WellGroup.Type.CONTROL, DilutionManager.CELL_CONTROL_SAMPLE);
