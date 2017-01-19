@@ -326,7 +326,7 @@ Ext.onReady(function() {
         defaultType: 'textfield',
         filterCount: filterIdx,
         items:items,
-        bbar:[
+        buttons:[
             {text:'Save', handler:Form_onSave},
             {text:'Cancel', handler:Form_onCancel},
             {text:'Delete', handler:Form_onDelete}
