@@ -20,21 +20,14 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.view.GraphColumn;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 {
@@ -76,18 +69,6 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         GraphSpec captionSpec = new GraphSpec(subset, spec.getParameters());
         column.setLabel(captionSpec.toString());
         column.setDisplayColumnFactory(GraphColumn::new);
-
-        // Set the DetailsURL for the column using ContainerContext.
-        // By explicitly setting the ContainerContext, the URL's container will point to the original flow assay data
-        // instead of the current container (which may be a different container for flow copied-to-study datasets.)
-        // If we ever make FlowProtocol work in multiple containers, we will need to pull the Container from the ResultSet instead.
-        ActionURL baseURL = new ActionURL(WellController.ShowGraphAction.class, null);
-        Map<String, FieldKey> graphParams = new HashMap<>();
-        graphParams.put(FlowParam.objectId_graph.toString(), column.getFieldKey());
-        DetailsURL urlGraph = new DetailsURL(baseURL, graphParams);
-        urlGraph.setContainerContext(_container);
-        column.setURL(urlGraph);
-
         column.setMeasure(false);
         column.setDimension(false);
     }

@@ -19,6 +19,7 @@ package org.labkey.flow.view;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
@@ -26,7 +27,10 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowPreference;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.query.FlowQuerySettings;
 
 import java.io.IOException;
@@ -155,7 +159,7 @@ public class GraphColumn extends DataColumn
             }
             else
             {
-                String urlGraph = renderURL(ctx);
+                String urlGraph = urlGraph(objectId, graphSpec, ctx.getContainer());
                 out.write("<img alt=\"Graph of: " + graphTitle + "\" title=\"" + graphTitle + "\"");
                 out.write(" style=\"height: " + graphSize + "; width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
                 out.write(PageFlowUtil.filter(urlGraph));
@@ -171,7 +175,7 @@ public class GraphColumn extends DataColumn
             }
             else
             {
-                String urlGraph = renderURL(ctx);
+                String urlGraph = urlGraph(objectId, graphSpec, ctx.getContainer());
 
                 StringBuilder iconHtml = new StringBuilder();
                 iconHtml.append("<img width=32 height=32");
@@ -185,5 +189,15 @@ public class GraphColumn extends DataColumn
                 out.write(PageFlowUtil.helpPopup(graphSpec, imageHtml.toString(), true, iconHtml.toString(), 310));
             }
         }
+    }
+
+    // NOTE: We generate the URL for the current container, but the ShowGraphAction
+    // will redirect to the objectId's container if the user has read permission there.
+    private String urlGraph(Integer objectId, String graphSpec, Container container)
+    {
+        return new ActionURL(WellController.ShowGraphAction.class, container)
+                .addParameter(FlowParam.objectId, objectId)
+                .addParameter(FlowParam.graph, graphSpec)
+                .toString();
     }
 }
