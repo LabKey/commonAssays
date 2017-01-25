@@ -26,7 +26,15 @@
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReportManager" %>
 <%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("Ext4ClientApi"); // needed for mask
+    }
+%>
 <%
     ViewContext context = getViewContext();
     User user = getUser();
@@ -53,7 +61,7 @@
 <script type="text/javascript">
     function Select_onChange(url)
     {
-        Ext.getBody().mask();
+        Ext4.getBody().mask();
         window.location=url;
     }
 </script>
