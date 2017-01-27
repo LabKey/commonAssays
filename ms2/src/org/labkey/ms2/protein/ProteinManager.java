@@ -670,6 +670,7 @@ public class ProteinManager
         return new TableSelector(getTableInfoIdentifiers(), filter, null).exists();
     }
 
+    @Nullable
     private static Integer ensureIdentifierType(String identifierType)
     {
         identifierType = StringUtils.trimToNull(identifierType);
@@ -677,7 +678,7 @@ public class ProteinManager
             return null;
 
         Integer identTypeId = new SqlSelector(getSchema(),
-                            "SELECT identTypeId FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
+                            "SELECT MIN(identTypeId) FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
                             identifierType.toLowerCase()).getObject(Integer.class);
 
         if(identTypeId == null)
