@@ -50,6 +50,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.WellExclusion;
 import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
@@ -435,14 +436,7 @@ public class LuminexManager
         return replacementCommands.values();
     }
 
-    public Long getRetainedExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<Double> dilutions, Set<String> descriptions)
-    {
-        Long result = getRetainedWellExclusionCount(replacedRunId, analyteNames, fileNames, types, dilutions, descriptions);
-        result += getRetainedRunExclusionCount(replacedRunId, analyteNames);
-        return result;
-    }
-
-    private Long getRetainedRunExclusionCount(Integer replacedRunId, Set<String> analyteNames)
+    public Long getRetainedRunExclusionCount(Integer replacedRunId, Set<String> analyteNames)
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT COUNT(DISTINCT re.RunId) FROM ")
@@ -459,11 +453,11 @@ public class LuminexManager
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
 
-    private Long getRetainedWellExclusionCount(Integer replacedRunId, Set<String> analyteNames, Set<String> fileNames, Set<String> types, Set<Double> dilutions, Set<String> descriptions)
+    public Collection<WellExclusion> getRetainedWellExclusions(Integer replacedRunId)
     {
         SQLFragment sql = new SQLFragment();
-        sql.append( "SELECT COUNT(DISTINCT we.RowId) FROM ")
-            .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(",")
+        sql.append( "SELECT opv.StringValue AS FileName, a.Name AS Analyte, we.Description, we.Type, we.Dilution\n")
+            .append("FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(",")
             .append(OntologyManager.getTinfoObjectPropertiesView(), "opv").append(",")
@@ -474,22 +468,7 @@ public class LuminexManager
             .append(" AND opv.name = 'FileName' AND opv.Container = d.Container AND opv.ObjectURI = d.LSID")
             .append(" AND d.RunId = ?").add(replacedRunId);
 
-        //Add filename filter
-        appendInClause(sql, "opv.StringValue ", fileNames, "\n");
-
-        //Add analyte filter
-        appendInClause(sql, "a.Name ", analyteNames, "\n");
-
-        //Add titration filter
-        appendInClause(sql, "(we.Description IS NULL OR we.Description ", descriptions, ")\n");
-
-        //Add dilution filter: Null is for well replicate group and titration exclusions
-        appendInClause(sql, "(we.dilution IS NULL OR we.dilution ", dilutions, ")\n");
-
-        //Add type filter: Null is for singlepoint unknowns and titration exclusions
-        appendInClause(sql, "(we.type IS NULL OR we.type ", types, ")\n");
-
-        return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
+        return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getCollection(WellExclusion.class);
     }
 
     private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set, String closeOutString)

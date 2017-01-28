@@ -16,7 +16,7 @@
 
 package org.labkey.luminex;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.SpringActionController;
@@ -57,6 +57,7 @@ import org.labkey.api.view.ViewServlet;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
+import org.labkey.luminex.model.WellExclusion;
 import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
@@ -71,6 +72,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -469,6 +471,43 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return vbox;
     }
 
+    private int getRetainedWellExclusions(LuminexRunUploadForm form) throws ExperimentException
+    {
+        Collection<WellExclusion> notRetained = LuminexManager.get().getRetainedWellExclusions(form.getReRun().getRowId()         );
+
+        //Get Filename from the Run filename property
+        LuminexExcelParser parser = form.getParser();
+        Map<String, String> fileNames = new HashMap<>();
+        for (File file : form.getUploadedData().values())
+            fileNames.put(file.getName(), LuminexManager.get().getFileNameKey(form.getProtocol(), file));
+
+        Set retainedExclusions = new HashSet();
+
+        parser.getSheets().forEach((analyte, datRowList) ->
+            datRowList.forEach(row ->
+            {
+                String fileName = fileNames.get(row.getDataFile());
+                String analyteName = analyte.getName();
+                String description = row.getDescription();
+                String type = row.getType();
+                String dilution = row.getDilution().toString();
+
+                for (WellExclusion ex : notRetained)
+                {
+                    if (ex.wouldExclude(fileName, analyteName, description, type, dilution))
+                    {
+                        //Aggregate retained exclusions by analyte
+                        retainedExclusions.add(new MultiKey(ex.getFileName(), ex.getDescription(), ex.getType(), ex.getDilution()));
+                        notRetained.remove(ex);
+                        return;
+                    }
+                }
+            })
+        );
+
+        return retainedExclusions.size();
+    }
+
     @Nullable
     private JspView addExclusionWarning(LuminexRunUploadForm form, String[] analyteNames) throws ExperimentException
     {
@@ -480,32 +519,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             form.setExclusionCount(exclusionCount);
 
-            //Get Filename from the Run filename property
-            LuminexExcelParser parser = form.getParser();
-            Set<String> fileNames = new HashSet<>();
-            for (File file : form.getUploadedData().values())
-                fileNames.add(LuminexManager.get().getFileNameKey(form.getProtocol(), file));
+            int retainedWellExclusions = getRetainedWellExclusions(form);
 
-            //Get well types from the run files
-            Set<String> wellTypes = new HashSet<>();
-            Set<Double> dilutions = new HashSet<>();
-            Set<String> descriptions = new HashSet<>();
-            parser.getSheets().values().forEach(datRowList ->
-                    datRowList.forEach(row ->
-                    {
-                        if (StringUtils.isNotBlank(row.getType()))
-                            wellTypes.add(row.getType());
-                        if (row.getDilution() != null)
-                            dilutions.add(row.getDilution());
-                        if (StringUtils.isNotBlank(row.getDescription()))
-                            descriptions.add(row.getDescription());
-                    })
-            );
+            long retainedRunExclusionCount = LuminexManager.get().getRetainedRunExclusionCount(form.getReRun().getRowId(), new HashSet<String>(Arrays.asList(analyteNames)));
 
-            long retainedCount = LuminexManager.get().getRetainedExclusionCount(form.getReRun().getRowId(),
-                    new HashSet<>(Arrays.asList(analyteNames)), fileNames, wellTypes, dilutions, descriptions);
-            form.setLostExclusions(exclusionCount - retainedCount);
-
+            form.setLostExclusions(exclusionCount - retainedWellExclusions - retainedRunExclusionCount);
             form.setRetainExclusions(true); //Default to true
             JspView<LuminexRunUploadForm> warningView = new JspView<>("/org/labkey/luminex/view/exclusionWarning.jsp", form);
             warningView.setTitle("Exclusion Warning");

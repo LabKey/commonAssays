@@ -632,6 +632,7 @@ luminex/src/org/labkey/luminex/model/LuminexWell.java -text
 luminex/src/org/labkey/luminex/model/LuminexWellGroup.java -text
 luminex/src/org/labkey/luminex/model/SinglePointControl.java -text
 luminex/src/org/labkey/luminex/model/Titration.java -text
+luminex/src/org/labkey/luminex/model/WellExclusion.java -text
 luminex/src/org/labkey/luminex/query/AbstractCurveFitPivotTable.java -text
 luminex/src/org/labkey/luminex/query/AbstractExclusionTable.java -text
 luminex/src/org/labkey/luminex/query/AbstractLuminexTable.java -text
