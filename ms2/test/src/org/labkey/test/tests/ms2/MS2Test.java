@@ -17,6 +17,7 @@
 package org.labkey.test.tests.ms2;
 
 import org.junit.experimental.categories.Category;
+import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestFileUtils;
@@ -1202,10 +1203,10 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.TQMPAASICVNYK.G");
 
         log("Test exporting in Query Peptides Comparision");
-        File lastPeptideFile = new DataRegionExportHelper(new DataRegionTable("query", getDriver())).exportText();
+        File lastPeptideFile = new DataRegionExportHelper(new DataRegionTable("query", getDriver())).exportText(ColumnHeaderType.Caption, DataRegionExportHelper.TextSeparator.TAB);
         TextSearcher lastPeptideSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(lastPeptideFile));
         assertTextPresent(lastPeptideSearcher,
-                "AVG_XCorr",
+                "Avg XCorr",
                 "K.EIRQRQGDDLDGLSFAELR.G",
                 "11.200",
                 "13.800");
