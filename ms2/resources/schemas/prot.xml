@@ -124,14 +124,26 @@
 	</table>
 	<table tableName="Identifiers" tableDbType="TABLE">
 		<columns>
-			<column columnName="IdentId"/>
-			<column columnName="IdentTypeId"/>
+			<column columnName="IdentId">
+				<isHidden>true</isHidden>
+			</column>
+			<column columnName="IdentTypeId">
+				<columnTitle>Identifier Type</columnTitle>
+			</column>
 			<column columnName="Identifier"/>
-			<column columnName="SeqId"/>
-			<column columnName="SourceId"/>
+			<column columnName="SeqId">
+				<columnTitle>Sequence</columnTitle>
+			</column>
+			<column columnName="SourceId">
+				<columnTitle>Source</columnTitle>
+			</column>
 			<column columnName="EntryDate"/>
-			<column columnName="SourceVersion"/>
-			<column columnName="Deleted"/>
+			<column columnName="SourceVersion">
+				<isHidden>true</isHidden>
+			</column>
+			<column columnName="Deleted">
+				<isHidden>true</isHidden>
+			</column>
 		</columns>
 	</table>
 	<table tableName="IdentTypes" tableDbType="TABLE">
@@ -140,10 +152,14 @@
                 <isHidden>true</isHidden>
             </column>
 			<column columnName="Name"/>
-			<column columnName="CannonicalSourceId"/>
+			<column columnName="CannonicalSourceId">
+				<columnTitle>Canonical Source</columnTitle>
+			</column>
 			<column columnName="EntryDate"/>
 			<column columnName="Description"/>
-			<column columnName="Deleted"/>
+			<column columnName="Deleted">
+				<isHidden>true</isHidden>
+			</column>
 		</columns>
 	</table>
 	<table tableName="InfoSources" tableDbType="TABLE">

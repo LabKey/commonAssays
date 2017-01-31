@@ -52,8 +52,6 @@ public class ProteinUserSchema extends UserSchema
     public static final String FASTA_FILE_TABLE_NAME = TableType.FastaFiles.name();
     public static final String SEQUENCES_TABLE_NAME = TableType.Sequences.name();
 
-
-
     public ProteinUserSchema(User user, Container container)
     {
         super(NAME, "Protein annotation, gene ontology, and sequence tables", user, container, ProteinManager.getSchema());
@@ -90,96 +88,131 @@ public class ProteinUserSchema extends UserSchema
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createAnnotationsTable(name);
+                return schema.createAnnotationsTable();
             }
         },
         AnnotationTypes {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createAnnotationTypesTable(name);
+                return schema.createAnnotationTypesTable();
             }
         },
         GoGraphPath {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createGoGraphPath(name);
+                return schema.createGoGraphPath();
             }
         },
         GoTerm {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createGoTerm(name);
+                return schema.createGoTerm();
             }
         },
         GoTerm2Term {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createGoTerm2Term(name);
+                return schema.createGoTerm2Term();
             }
         },
         GoTermDefinition {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createGoTermDefinition(name);
+                return schema.createGoTermDefinition();
             }
         },
         GoTermSynonym {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createGoTermSynonym(name);
+                return schema.createGoTermSynonym();
             }
         },
         InfoSources {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createInfoSourcesTable(name);
+                return schema.createInfoSourcesTable();
             }
         },
         Organisms {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createOrganisms(name);
+                return schema.createOrganisms();
             }
         },
         Sequences {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createSequences(name);
+                return schema.createSequences();
+            }
+        },
+        Identifiers {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createIdentifiersTable();
+            }
+        },
+        IdentTypes {
+            @Override
+            public TableInfo createTable(ProteinUserSchema schema, String name)
+            {
+                return schema.createIdentTypesTable();
             }
         },
         FastaSequences {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createFastaSequencesTable(name);
+                return schema.createFastaSequencesTable();
             }
         },
         FastaFiles {
             @Override
             public TableInfo createTable(ProteinUserSchema schema, String name)
             {
-                return schema.createFastaFileTable(name);
+                return schema.createFastaFileTable();
             }
         };
 
         public abstract TableInfo createTable(ProteinUserSchema schema, String name);
     }
 
-    private TableInfo createFastaSequencesTable(String name)
+    private TableInfo createFastaSequencesTable()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaSequences());
         table.init();
+        table.setReadOnly(true);
         table.getColumn("SeqId").setFk(new QueryForeignKey(this, null, TableType.Sequences.name(), null, null));
         table.getColumn("FastaId").setFk(new QueryForeignKey(this, null, TableType.FastaFiles.name(), null, null));
+        return table;
+    }
+
+    private TableInfo createIdentifiersTable()
+    {
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoIdentifiers());
+        table.init();
+        table.setReadOnly(true);
+        table.getColumn("SeqId").setFk(new QueryForeignKey(this, null, TableType.Sequences.name(), null, null));
+        table.getColumn("IdentTypeId").setFk(new QueryForeignKey(this, null, TableType.IdentTypes.name(), null, null));
+        table.getColumn("SourceId").setFk(new QueryForeignKey(this, null, TableType.InfoSources.name(), null, null));
+        return table;
+    }
+
+    private TableInfo createIdentTypesTable()
+    {
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoIdentTypes());
+        table.init();
+        table.setReadOnly(true);
+        table.getColumn("CannonicalSourceId").setFk(new QueryForeignKey(this, null, TableType.InfoSources.name(), null, null));
         return table;
     }
 
@@ -209,81 +242,92 @@ public class ProteinUserSchema extends UserSchema
         return result;
     }
 
-    private TableInfo createAnnotationTypesTable(String name)
+    private SimpleUserSchema.SimpleTable createAnnotationTypesTable()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoAnnotationTypes());
         table.init();
+        table.setReadOnly(true);
         table.getColumn("SourceId").setFk(new QueryForeignKey(this, null, TableType.InfoSources.name(), null, null));
         return table;
     }
 
-    private TableInfo createInfoSourcesTable(String name)
+    private SimpleUserSchema.SimpleTable createInfoSourcesTable()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoInfoSources());
         table.init();
+        table.setReadOnly(true);
         return table;
     }
 
-    protected TableInfo createAnnotationsTable(String name)
+    protected TableInfo createAnnotationsTable()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoAnnotations());
         table.init();
+        table.setReadOnly(true);
         table.getColumn("AnnotTypeId").setFk(new QueryForeignKey(this, null, TableType.AnnotationTypes.name(), null, null));
         table.getColumn("AnnotSourceId").setFk(new QueryForeignKey(this, null, TableType.InfoSources.name(), null, null));
+        table.getColumn("AnnotIdent").setFk(new QueryForeignKey(this, null, TableType.Identifiers.name(), null, null));
+        table.getColumn("SeqId").setFk(new QueryForeignKey(this, null, TableType.Sequences.name(), null, null));
         return table;
     }
 
-    protected TableInfo createGoGraphPath(String name)
+    protected TableInfo createGoGraphPath()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoGraphPath());
         table.init();
+        table.setReadOnly(true);
         return table;
     }
 
-    protected TableInfo createGoTerm(String name)
+    protected TableInfo createGoTerm()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTerm());
         table.init();
+        table.setReadOnly(true);
         return table;
     }
 
-    protected TableInfo createGoTerm2Term(String name)
+    protected TableInfo createGoTerm2Term()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTerm2Term());
         table.init();
+        table.setReadOnly(true);
         table.getColumn("term1id").setFk(new QueryForeignKey(this, null, TableType.GoTerm.name(), null, null));
         table.getColumn("term2id").setFk(new QueryForeignKey(this, null, TableType.GoTerm.name(), null, null));
         return table;
     }
 
-    protected TableInfo createGoTermDefinition(String name)
+    protected TableInfo createGoTermDefinition()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTermDefinition());
         table.init();
+        table.setReadOnly(true);
         return table;
     }
 
-    protected TableInfo createGoTermSynonym(String name)
+    protected TableInfo createGoTermSynonym()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTermSynonym());
         table.init();
+        table.setReadOnly(true);
         return table;
     }
 
-    protected TableInfo createOrganisms(String name)
+    protected TableInfo createOrganisms()
     {
         return new OrganismTableInfo(this);
     }
 
-    protected SequencesTableInfo<ProteinUserSchema> createSequences(String name)
+    protected SequencesTableInfo<ProteinUserSchema> createSequences()
     {
         return new SequencesTableInfo<>(this);
     }
 
-    protected TableInfo createFastaFileTable(String name)
+    protected TableInfo createFastaFileTable()
     {
         SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaFiles());
         table.init();
+        table.setReadOnly(true);
         ColumnInfo shortName = table.addWrapColumn("ShortName", table.getRealTable().getColumn("FileName"));
         shortName.setLabel("FASTA Name");
 
