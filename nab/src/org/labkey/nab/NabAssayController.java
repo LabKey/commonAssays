@@ -1046,7 +1046,7 @@ public class NabAssayController extends SpringActionController
                         try (DbScope.Transaction transaction = scope.ensureTransaction())
                         {
                             // clear all well exclusions for this run
-                            DilutionManager.clearWellExclusions(form.getRunId());
+                            DilutionManager.clearWellExclusions(scope.getSqlDialect(), form.getRunId());
 
                             // clear out prior qc flags
                             Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRunId()));
@@ -1074,7 +1074,7 @@ public class NabAssayController extends SpringActionController
                             // set the updated well exclusions and create the QC flags
                             if (!wellRowIds.isEmpty())
                             {
-                                DilutionManager.setWellExclusions(wellRowIds);
+                                DilutionManager.setWellExclusions(scope.getSqlDialect(), wellRowIds);
                             }
 
                             // update the dilutiondata tables to reflect the exclusions
