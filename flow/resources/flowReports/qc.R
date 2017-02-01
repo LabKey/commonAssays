@@ -72,17 +72,17 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
   if (!is.finite(s) || !is.finite(m) || m < 0.01)
     return;
 
-  # calculate the 1CV, 2CV, 3CV values for the plot
-  scale = 100 / max(1,m);
-  s1 = 1 * s * scale
-  s2 = 2 * s * scale
-  s3 = 3 * s * scale
-  s4 = 4 * s * scale
+  # calculate CV and the 1SD, 2SD, 3SD values for the plot
+  cv = s / m * 100
+  s1 = 1 * s
+  s2 = 2 * s
+  s3 = 3 * s
 
-  # calculate the deviation from mean for each data point as a percentage
-  D$diff = (D$value - m) * scale
-
+  # calcualte min/max ranges for the plot
   xmax= ceiling(length * 1.05)
+  s4 = 4 * s
+  ymin = min(m-s4, min(D$value, na.rm=TRUE))
+  ymax = max(m+s4, max(D$value, na.rm=TRUE))
 
   # set up the x-axis labels to be the Experiment Dates
   ticks = generateDateLabels(D[,"date"])
@@ -97,37 +97,35 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
   par(cex.main=1.5)
 
   # round the mean and cv values for display purposes
-  m = round(m, digits=1)
-  s1 = round(s1, digits=0)
+  mainLabel = paste("Levey-Jennings Chart","(Mean:", round(m, digits=1), "CV:", round(cv, digits=1), "%)")
 
-  # build the plot area without the data, y-limits to be 4CV above and below 0
+  # build the plot area without the data and set the x/y limits
   plot(NA, NA, type = c("b"),
-        ylim=c(-s4,s4), ylab="Deviation from mean (%)",
+        ylim=c(ymin, ymax), ylab="",
         xlim=c(1,xmax), xlab="",
-        axes=F, main=paste("Levey-Jennings Chart","(Mean:", m, "CV:", s1, "%)"))
+        axes=F, main=mainLabel)
 
-  # add the horizontal lines for the mean, 1CV, -1CV, 2CV, -2CV, 3CV, and -3CV
-  lines(x=c(1,length), y=c(0,0), col="black")
-  text(x=xmax, y=0,labels=c("Mean"))
+  # add the horizontal lines for the mean, 1SD, -1SD, 2SD, -2SD, 3SD, and -3SD
+  lines(x=c(1,length), y=c(m,m), col="black")
+  text(x=xmax, y=m,labels=c("Mean"))
 
-  lines(x=c(1,length), y=c(s1,s1), col="green", lty=2)
-  text(x=xmax, y=s1,labels=c("1 SD"))
-  lines(x=c(1,length), y=c(-s1,-s1), col="green", lty=2)
-  text(x=xmax, y=-s1,labels=c("-1 SD"))
+  lines(x=c(1,length), y=c(m+s1,m+s1), col="green", lty=2)
+  text(x=xmax, y=m+s1,labels=c("1 SD"))
+  lines(x=c(1,length), y=c(m-s1,m-s1), col="green", lty=2)
+  text(x=xmax, y=m-s1,labels=c("-1 SD"))
 
-  lines(x=c(1,length), y=c(s2,s2), col="blue", lty=2)
-  text(x=xmax, y=s2,labels=c("2 SD"))
-  lines(x=c(1,length), y=c(-s2,-s2), col="blue", lty=2)
-  text(x=xmax, y=-s2,labels=c("-2 SD"))
+  lines(x=c(1,length), y=c(m+s2,m+s2), col="blue", lty=2)
+  text(x=xmax, y=m+s2,labels=c("2 SD"))
+  lines(x=c(1,length), y=c(m-s2,m-s2), col="blue", lty=2)
+  text(x=xmax, y=m-s2,labels=c("-2 SD"))
 
-  lines(x=c(1,length), y=c(s3,s3), col="red", lty=2)
-  text(x=xmax, y=s3,labels=c("3 SD"))
-  lines(x=c(1,length), y=c(-s3,-s3), col="red", lty=2)
-  text(x=xmax, y=-s3,labels=c("-3 SD"))
+  lines(x=c(1,length), y=c(m+s3,m+s3), col="red", lty=2)
+  text(x=xmax, y=m+s3,labels=c("3 SD"))
+  lines(x=c(1,length), y=c(m-s3,m-s3), col="red", lty=2)
+  text(x=xmax, y=m-s3,labels=c("-3 SD"))
 
   # add the actual data lines and points
-#  lines(seq, D$diff, col='black')
-  points(seq, D$diff, col='black', pch=16, cex=1.2)
+  points(seq, D$value, col='black', pch=16, cex=1.2)
 
   # set parameter for rotating the axis labels to be perpendicular to axis
   par(las=2)
