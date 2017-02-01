@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.reports;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -62,7 +63,6 @@ abstract public class FlowReport extends AbstractReport
         return this.getDescriptor().getProperty(to);
     }
 
-
     protected String updateFromPropertyValues(PropertyValues pvs, String from)
     {
         return updateFromPropertyValues(pvs, from, from);
@@ -73,12 +73,10 @@ abstract public class FlowReport extends AbstractReport
         return updateFromPropertyValues(pvs, from, to.name());
     }
 
-
     protected String updateFromPropertyValues(PropertyValues pvs, Enum to)
     {
         return updateFromPropertyValues(pvs, to.name(), to.name());
     }
-    
 
     protected void updateBaseProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override)
     {
@@ -114,14 +112,16 @@ abstract public class FlowReport extends AbstractReport
         updateFromPropertyValues(pvs, ReportDescriptor.Prop.reportDescription);
     }
 
-
     @Override
     public ActionURL getRunReportURL(ViewContext context)
     {
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.ExecuteAction.class, c);
         url.addParameter("reportId", getReportId().toString());
-        url.addParameter(ActionURL.Param.returnUrl, context.cloneActionURL().getLocalURIString());
+        String returnUrl = context.getActionURL().getParameter(ActionURL.Param.returnUrl);
+        if (StringUtils.trimToEmpty(returnUrl).isEmpty())
+            returnUrl = context.cloneActionURL().getLocalURIString();
+        url.addParameter(ActionURL.Param.returnUrl, returnUrl);
         return url;
     }
 
@@ -132,10 +132,12 @@ abstract public class FlowReport extends AbstractReport
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.UpdateAction.class, c);
         url.addParameter("reportId", getReportId().toString());
-        url.addParameter(ActionURL.Param.returnUrl, context.cloneActionURL().getLocalURIString());
+        String returnUrl = context.getActionURL().getParameter(ActionURL.Param.returnUrl);
+        if (StringUtils.trimToEmpty(returnUrl).isEmpty())
+            returnUrl = context.cloneActionURL().getLocalURIString();
+        url.addParameter(ActionURL.Param.returnUrl, returnUrl);
         return url;
     }
-
 
     String getScriptResource(String file) throws IOException
     {
@@ -146,7 +148,6 @@ abstract public class FlowReport extends AbstractReport
             return PageFlowUtil.getStreamContentsAsString(is);
         }
     }
-
 
     public abstract HttpView getConfigureForm(ViewContext context, ActionURL returnURL);
 
@@ -209,6 +210,4 @@ abstract public class FlowReport extends AbstractReport
         super.beforeDelete(context);
         deleteSavedResults(context.getContainer());
     }
-
 }
-
