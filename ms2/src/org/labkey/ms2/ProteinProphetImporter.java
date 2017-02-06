@@ -39,6 +39,7 @@ import org.labkey.api.util.*;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -335,15 +336,19 @@ public class ProteinProphetImporter
         String pepXMLFileNameOriginal = getPepXMLFileName();
         File pepXMLFile = null;
 
+        List<String> attemptedFiles = new ArrayList<>();
+
         for (int attempts=0;attempts++<2;) // try it straight up, then try finding .gz version
         {
             // First, see if our usual XAR lookups can find it
             String pepXMLFileName = pepXMLFileNameOriginal + ((attempts>1)?".gz":"");
+            attemptedFiles.add(pepXMLFileName);
             pepXMLFile = _context.findFile(pepXMLFileName, _file.getParentFile());
             if (pepXMLFile == null)
             {
                 // Second, try the file name in the XML in the current directory
                 pepXMLFile = new File(_file.getParentFile(), new File(pepXMLFileName).getName());
+                attemptedFiles.add(pepXMLFile.getAbsolutePath());
                 if (!NetworkDrive.exists(pepXMLFile))
                 {
                     // Third, try replacing the .pep-prot.xml on the file name with .pep.xml
@@ -352,11 +357,12 @@ public class ProteinProphetImporter
                     {
                         String baseName = TPPTask.FT_PROT_XML.getBaseName(_file);
                         pepXMLFile = TPPTask.getPepXMLFile(_file.getParentFile(), baseName);
+                        attemptedFiles.add(pepXMLFile.getAbsolutePath());
                         if (!NetworkDrive.exists(pepXMLFile))
                         {
                             if (attempts>1)
                             {
-                                throw new FileNotFoundException(pepXMLFileNameOriginal + " could not be found on disk.");
+                                throw new FileNotFoundException("Unable to resolve pepXML file: " + pepXMLFileNameOriginal + " could not be found on disk. Additional file paths checked include: " + attemptedFiles);
                             }
                         }
                     }
