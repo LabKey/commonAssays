@@ -218,7 +218,7 @@ public class ProteinUserSchema extends UserSchema
 
     @Nullable
     @Override
-    protected TableInfo createTable(String name)
+    public TableInfo createTable(String name)
     {
         for (TableType tableType : TableType.values())
         {
