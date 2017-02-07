@@ -17,7 +17,7 @@
 package org.labkey.flow.webparts;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.analytics.ColumnAnalyticsProvider;
+import org.labkey.api.stats.ColumnAnalyticsProvider;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
