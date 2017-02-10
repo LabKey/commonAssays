@@ -109,7 +109,7 @@
             <td></td>
             <td class="labkey-form-label">Adjust FDR To</td>
             <td style="text-align:right">
-                <select name="desiredFdr" id="desiredFdr" onchange="if(document.getElementById('isIonCutoff').checked) {setFilterParameter(this.value)} this.form.submit();">
+                <select name="desiredFdr" id="desiredFdr" onchange="setFilterParameter(this.value); this.form.submit();">
                     <%
                         List<Float> fdrOptions = bean.getFdrOptions();
                         defaultFormat.setMinimumIntegerDigits(1);
@@ -141,14 +141,23 @@
         %>
         // next value is intentionally not escaped -- comes from server and won't be parsed correctly in escaped form
         var fdrOptionToThresholdMap = JSON.parse( '<%= jsonObj.toString() %>' );
-        if(document.getElementById('isIonCutoff').checked)
-        {
-            var input = document.createElement("input");
-            input.setAttribute("type", "hidden");
-            input.setAttribute("name", "MS2Peptides.Ion~gte");
-            input.setAttribute("id", "MS2Peptides.Ion~gte");
-            input.setAttribute("value", fdrOptionToThresholdMap[desiredFdr])
-            document.getElementById('decoySummaryForm').appendChild(input);
+        if(document.getElementById('isIonCutoff').checked) {
+            this.setGteParameter(fdrOptionToThresholdMap[desiredFdr]);
         }
+        else {
+            var gte = LABKEY.ActionURL.getParameter("MS2Peptides.Ion~gte");
+            if(typeof gte !== "undefined") {
+                this.setGteParameter(gte)
+            }
+        }
+    }
+
+    function setGteParameter(desiredGte) {
+        var input = document.createElement("input");
+        input.setAttribute("type", "hidden");
+        input.setAttribute("name", "MS2Peptides.Ion~gte");
+        input.setAttribute("id", "MS2Peptides.Ion~gte");
+        input.setAttribute("value", desiredGte);
+        document.getElementById('decoySummaryForm').appendChild(input);
     }
 </script>
