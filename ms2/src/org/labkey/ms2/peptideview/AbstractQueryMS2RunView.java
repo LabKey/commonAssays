@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.RenderContext;
@@ -257,11 +258,15 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         {
             DataView result = super.createDataView();
             SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());
+
             if (_selectedRows != null)
             {
-                FieldKey column = _selectedNestingOption == null ? FieldKey.fromParts("RowId") : _selectedNestingOption.getRowIdFieldKey();
+                // Don't used _selectedNestingOption one because we want to export as if we're a simple flat view
+                QueryNestingOption nesting = determineNestingOption();
+                FieldKey column = nesting == null ? FieldKey.fromParts("RowId") : nesting.getRowIdFieldKey();
                 filter.addClause(new SimpleFilter.InClause(column, _selectedRows));
             }
+
             filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER | ProteinManager.PROTEIN_FILTER, getUser(), _runs));
             result.getRenderContext().setBaseFilter(filter);
             return result;
