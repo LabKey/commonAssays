@@ -189,7 +189,8 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             {
                 Map<String, Object> row = iter.next();
                 String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
-                assert poolID != null;
+                if (poolID == null)
+                    throw new ExperimentException("Row " + rowIndex + " missing required property " + ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
                 if (firstPass)
                 {
                     poolIDs.add(poolID);
