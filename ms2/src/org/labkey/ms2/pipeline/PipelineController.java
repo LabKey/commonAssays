@@ -464,7 +464,7 @@ public class PipelineController extends SpringActionController
                     _protocol.setDbPath(form.getSequenceDBPath());
                     _protocol.setDbNames(form.getSequenceDB());
                     _protocol.setEmail(getUser().getEmail());
-                    _protocol.validateToSave(_root);
+                    _protocol.validateToSave(_root, true, true);
                     if (form.isSaveProtocol())
                     {
                         _protocol.saveDefinition(_root);
