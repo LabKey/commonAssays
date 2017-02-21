@@ -135,6 +135,7 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
 
         AssayDesignerPage assayDesigner = _assayHelper.createAssayAndEdit("General", assayName);
         assayDesigner.addTransformScript(R_TRANSFORM_SCRIPT);
+        assayDesigner.addRunField("myFile", "My File", "File");
         assayDesigner.save();
         assayDesigner.saveAndClose();
 
@@ -142,10 +143,18 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         clickButton("Import Data");
         clickButton("Next");
         setFormElement(Locator.name("name"), runName);
+
+        // Use this file as a sample upload file parameter
+        setFormElement(Locator.name("myFile"), JAVA_TRANSFORM_SCRIPT);
         setFormElement(Locator.name("TextAreaDataCollector.textArea"), importData);
 
         clickButton("Save and Finish");
         assertElementPresent(Locators.labkeyError.containing("Inline warning from R transform."));
+
+        // Verify file parameter is still present. 1 visible + 1 hidden + 2 js texts.
+        assertTextPresent(JAVA_TRANSFORM_SCRIPT.getName(), 4);
+        assertElementPresent(Locator.linkWithText("remove"));
+
         assertElementPresent(Locator.linkWithText("Warning link").withAttribute("href", "http://www.labkey.test"));
 
         File rOutFile = clickAndWaitForDownload(Locator.linkContainingText(R_TRANSFORM_SCRIPT.getName() + "out"));
@@ -161,6 +170,9 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         clickButton("Proceed");
 
         clickAndWait(Locator.linkWithText(runName), longWaitForPage);
+
+        // Verify file uploaded
+        assertTextPresent("assaydata" + File.separator + JAVA_TRANSFORM_SCRIPT.getName(), 1);
 
         DataRegionTable table = new DataRegionTable("Data", this);
         assertEquals(1, table.getDataRowCount());
