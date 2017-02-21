@@ -27,6 +27,11 @@ import java.util.Map;
 public interface ISampleInfo
 {
     /**
+     * Returns true if the sample is marked as deleted in the workspace.
+     */
+    boolean isDeleted();
+
+    /**
      * Internal sample id used by the workspace or analysis archive.
      * Not a stable identifier.
      * @return

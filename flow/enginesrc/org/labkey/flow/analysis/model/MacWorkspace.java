@@ -24,12 +24,18 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.persist.ObjectType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
@@ -122,39 +128,6 @@ public class MacWorkspace extends FlowJoWorkspace
                 _calibrationTables.add(FixedCalibrationTable.fromString(getInnerText(elCalibrationTable)));
             }
         }
-    }
-
-    protected boolean sampleHasNodeNotMarkedDeleted(Element elSample)
-    {
-        for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
-        {
-            boolean deleted = "1".equals(elSampleNode.getAttribute("deleted"));
-            if (!deleted)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected Analysis readSampleAnalysis(Element elSampleAnalysis)
-    {
-        // Don't read analysis if sample has been marked as 'deleted'
-        boolean deleted = "1".equals(elSampleAnalysis.getAttribute("deleted"));
-        if (deleted)
-            return null;
-
-        // Don't read analysis if sampleID isn't in "All Samples" group.
-        String sampleId = elSampleAnalysis.getAttribute("sampleID");
-        GroupInfo allSamplesGroup = getAllSamplesGroup();
-        if (allSamplesGroup != null && !allSamplesGroup.getSampleIds().contains(sampleId))
-            return null;
-
-        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
-        Analysis ret = readAnalysis(elSampleAnalysis, results, sampleId, true);
-        _sampleAnalyses.put(sampleId, ret);
-        addSampleAnalysisResults(results, sampleId);
-        return ret;
     }
 
     protected SubsetExpression remapExpression(final SubsetExpression expr, final Map<SubsetSpec, SubsetSpec> specs)
@@ -264,23 +237,10 @@ public class MacWorkspace extends FlowJoWorkspace
 
         return true;
     }
-    
-    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
+
+    @Override
+    protected void readStatsOther(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
     {
-        String strCount = elPopulation.getAttribute("count");
-        if (results != null)
-        {
-            if (!StringUtils.isEmpty(strCount))
-            {
-                StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
-                results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
-            }
-            else
-            {
-                if (warnOnMissingStats)
-                    warning(sampleId, analysis.getName(), subset, "Count statistic missing");
-            }
-        }
         for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
         {
             readStat(elStat, subset, results, analysis, sampleId, warnOnMissingStats,

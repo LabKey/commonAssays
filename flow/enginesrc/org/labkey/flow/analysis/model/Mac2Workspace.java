@@ -31,8 +31,22 @@ public class Mac2Workspace extends MacWorkspace
     protected void readSamples(Element elDoc)
     {
         String samplesTagName = "SampleList";
-        addSamplesToMaps(elDoc, samplesTagName);
+        readSamples(elDoc, samplesTagName);
    }
+
+    protected void readSamples(Element elDoc, String samplesTagName)
+    {
+        for (Element elSamples : getElementsByTagName(elDoc, samplesTagName))
+        {
+            for (Element elSample : getElementsByTagName(elSamples, "Sample"))
+            {
+                readSample(elSample);
+
+                Element elSampleNode = getElementByTagName(elSample, "SampleNode");
+                readSampleAnalysis(elSampleNode);
+            }
+        }
+    }
 
     protected SampleInfo readSample(Element elSample)
     {
@@ -47,9 +61,13 @@ public class Mac2Workspace extends MacWorkspace
         {
             readKeywords(ret, elFCSHeader);
         }
+        ret._deleted = readSampleDeletedFlag(elSample);
 
         readParameterInfo(elSample);
-        _sampleInfos.put(ret._sampleId, ret);
+        if (ret._deleted)
+            _deletedInfos.put(ret._sampleId, ret);
+        else
+            _sampleInfos.put(ret._sampleId, ret);
         return ret;
     }
 
@@ -102,23 +120,4 @@ public class Mac2Workspace extends MacWorkspace
         assert false : "readGroupAnalysis() now called form readGroups()";
     }
 
-    protected void addSamplesToMaps(Element elDoc, String samplesTagName)
-    {
-        for (Element elSamples : getElementsByTagName(elDoc, samplesTagName))
-        {
-            for (Element elSample : getElementsByTagName(elSamples, "Sample"))
-            {
-                if(sampleHasNodeNotMarkedDeleted(elSample))
-                {
-
-                    readSample(elSample);
-
-                    for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
-                    {
-                        readSampleAnalysis(elSampleNode);
-                    }
-                }
-            }
-        }
-    }
 }

@@ -59,6 +59,7 @@ public abstract class Workspace implements IWorkspace, Serializable
     protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<>();
     protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<>();
     protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
+    protected Map<String, SampleInfo> _deletedInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
     protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, ParameterInfo>());
     protected List<CalibrationTable> _calibrationTables = new ArrayList<>();
     protected ScriptSettings _settings = new ScriptSettings();
@@ -303,7 +304,7 @@ public abstract class Workspace implements IWorkspace, Serializable
     }
 
     /**
-     * Get all samples in the workspace, including samples that are no longer referened by any group.
+     * Get all samples in the workspace, including samples that are no longer referenced by any group.
      * Usually using .getSamples() is preferred.
      * After deleting samples from a FlowJo workspace, the workspace may retain the sample info and just
      * remove it from the "All Samples" group.
@@ -409,11 +410,25 @@ public abstract class Workspace implements IWorkspace, Serializable
      */
     public SampleInfo getSample(String sampleIdOrLabel)
     {
-        SampleInfo sample = _sampleInfos.get(sampleIdOrLabel);
+        SampleInfo sample = findSample(_sampleInfos, sampleIdOrLabel);
+        assert sample == null || !sample.isDeleted();
+        return sample;
+    }
+
+    public SampleInfo getDeletedSample(String sampleIdOrLabel)
+    {
+        SampleInfo sample = findSample(_deletedInfos, sampleIdOrLabel);
+        assert sample == null || sample.isDeleted();
+        return sample;
+    }
+
+    private SampleInfo findSample(Map<String, SampleInfo> samples, String sampleIdOrLabel)
+    {
+        SampleInfo sample = samples.get(sampleIdOrLabel);
         if (sample != null)
             return sample;
 
-        for (SampleInfo sampleInfo : _sampleInfos.values())
+        for (SampleInfo sampleInfo : samples.values())
         {
             if (sampleIdOrLabel.equals(sampleInfo.getLabel()))
                 return sampleInfo;
@@ -514,6 +529,11 @@ public abstract class Workspace implements IWorkspace, Serializable
     public class SampleInfo extends SampleInfoBase
     {
         String _compensationId;
+
+        public void setDeleted(boolean deleted)
+        {
+            _deleted = deleted;
+        }
 
         public void setSampleId(String id)
         {

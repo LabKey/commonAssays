@@ -45,17 +45,14 @@
     List<String> warnings = workspace.getWarnings();
     if (warnings.size() > 0)
     {
-        %><p class="labkey-warning-messages"><b>Warning:</b><br><%
-        int len = Math.min(10, warnings.size());
-        int i = 0;
-        for (; i < len; i++)
+        %><p class="labkey-warning-messages" style="display:inline-block">
+        <b>Warnings (<%=warnings.size()%>):</b><br>
+        <textarea rows="10" cols="140" readonly><%
+        for (String warning : warnings)
         {
-            %><%=h(warnings.get(i))%><br><%
+            %><%=h(warning)%><%=text("\n")%><%
         }
-        if (i < warnings.size()) {
-            %><em>not showing <%=warnings.size() - i%> more warnings ...</em><%
-        }
-        %></p><%
+        %></textarea></p><%
     }
 %>
 <script type="text/javascript">

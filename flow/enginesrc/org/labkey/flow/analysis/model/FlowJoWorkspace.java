@@ -27,11 +27,19 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
-import org.w3c.dom.*;
+import org.labkey.flow.persist.ObjectType;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 abstract public class FlowJoWorkspace extends Workspace
@@ -197,16 +205,7 @@ abstract public class FlowJoWorkspace extends Workspace
             Double total = statistics.get(totalSpec);
             if (total == null || total == 0.0d || total == -1.0d)
             {
-                SampleInfo sampleInfo = _sampleInfos.get(sampleId);
-                if (sampleInfo != null)
-                {
-                    String strTot = sampleInfo.getKeywords().get("$TOT");
-                    if (strTot != null)
-                    {
-                        total = Double.valueOf(strTot).doubleValue();
-                        results.setStatistic(totalSpec, total);
-                    }
-                }
+                throw new IllegalStateException("Reading the total event count should be covered by readStats method now");
             }
 
             // Fill in the Freq_Of_Parent and Frequency stats that can be determined from the existing stats
@@ -250,7 +249,18 @@ abstract public class FlowJoWorkspace extends Workspace
                     results.setStatistic(freqOfParentSpec, count / denominator * 100);
 
             }
+
+            if (results.getStatistics().size() == 1)
+            {
+                StatisticSpec spec = statistics.keySet().iterator().next();
+                warning(sampleId, null, null, "Analysis contains only " + spec + " statistic and no others");
+            }
+
             _sampleAnalysisResults.put(sampleId, results);
+        }
+        else
+        {
+            warning(sampleId, null, null, "No statistics found, no results will be imported for this sample");
         }
     }
 
@@ -395,6 +405,86 @@ abstract public class FlowJoWorkspace extends Workspace
             sample.putKeyword(name, value);
         }
     }
+
+    protected Analysis readSampleAnalysis(Element elSampleNode)
+    {
+        String sampleId = elSampleNode.getAttribute("sampleID");
+        SampleInfo sample = getSample(sampleId);
+        if (sample == null)
+        {
+            // Don't read analysis if sample has been marked as 'deleted'
+            sample = getDeletedSample(sampleId);
+            if (sample != null)
+                warning(sample, null, null, "Ignoring deleted sample");
+            else
+                warning(sampleId, null, null, "No sample info found");
+            return null;
+        }
+
+        // Don't read analysis if sampleID isn't in "All Samples" group.
+        GroupInfo allSamplesGroup = getAllSamplesGroup();
+        if (allSamplesGroup != null && !allSamplesGroup.getSampleIds().contains(sampleId))
+        {
+            warning(sampleId, null, null, "orphaned from the 'All Samples' group -- it may have been deleted");
+            return null;
+        }
+
+        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
+        Analysis ret = readAnalysis(elSampleNode, results, sampleId, true);
+        _sampleAnalyses.put(sampleId, ret);
+        addSampleAnalysisResults(results, sampleId);
+        return ret;
+    }
+
+    protected abstract Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats);
+
+    protected boolean readSampleDeletedFlag(Element elSample)
+    {
+        for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
+        {
+            boolean deleted = "1".equals(elSampleNode.getAttribute("deleted"));
+            if (deleted)
+                return true;
+        }
+        return false;
+    }
+
+    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
+    {
+        readStatsCount(subset, elPopulation, results, analysis, sampleId, warnOnMissingStats);
+        readStatsOther(subset, elPopulation, results, analysis, sampleId, warnOnMissingStats);
+    }
+
+    protected void readStatsCount(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
+    {
+        String strCount = elPopulation.getAttribute("count");
+        if (results != null)
+        {
+            StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
+            Double count = null;
+            if (!StringUtils.isEmpty(strCount))
+                count = Double.valueOf(strCount);
+
+            // If we are at the root and "count" is unavailable, try to get it from the "$TOT" keyword
+            if (subset == null && (count == null || count == 0.0d || count == -1.0d))
+            {
+                SampleInfo sampleInfo = getSample(sampleId);
+                if (sampleInfo != null)
+                {
+                    String strTot = sampleInfo.getKeywords().get("$TOT");
+                    if (strTot != null)
+                        count = Double.valueOf(strTot);
+                }
+            }
+
+            if (count != null)
+                results.setStatistic(statCount, count);
+            else if (warnOnMissingStats)
+                warning(sampleId, analysis.getName(), subset, "Count statistic missing");
+        }
+    }
+
+    protected abstract void readStatsOther(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats);
 
     protected void readStat(Element elStat, SubsetSpec subset, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats,
                             String statisticAttr, String parameterAttr, String percentileAttr, String ancestorAttr)
@@ -550,18 +640,29 @@ abstract public class FlowJoWorkspace extends Workspace
 
     protected void warning(String sampleId, PopulationName name, SubsetSpec subset, String msg)
     {
-        StringBuilder sb = new StringBuilder();
+        SampleInfo sampleInfo = null;
         if (sampleId != null)
         {
-            String label = sampleId;
-            SampleInfo sampleInfo = getSample(sampleId);
-            if (sampleInfo != null)
-                label = sampleInfo.getLabel();
-            sb.append("Sample ").append(label);
-            if (!label.equals(sampleId))
-                sb.append(" (").append(sampleId).append(")");
-            sb.append(": ");
+            sampleInfo = getSample(sampleId);
+            if (sampleInfo == null)
+                sampleInfo = getDeletedSample(sampleId);
+
+            if (sampleInfo == null)
+            {
+                // Just create a dummy sample for error reporting
+                sampleInfo = new SampleInfo();
+                sampleInfo._sampleId = sampleId;
+            }
         }
+
+        warning(sampleInfo, name, subset, msg);
+    }
+
+    protected void warning(SampleInfo sample, PopulationName name, SubsetSpec subset, String msg)
+    {
+        StringBuilder sb = new StringBuilder();
+        if (sample != null)
+            sb.append("Sample ").append(sample.toString()).append(": ");
 
         if (name != null)
             sb.append(name.toString()).append(": ");

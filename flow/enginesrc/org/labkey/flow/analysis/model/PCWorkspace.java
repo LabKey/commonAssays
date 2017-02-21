@@ -22,7 +22,6 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.persist.ObjectType;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return "FlowJo Workspace";
     }
 
-    protected void readSample(Element elSample)
+    protected SampleInfo readSample(Element elSample)
     {
         SampleInfo sampleInfo = new SampleInfo();
         for (Element elKeywords : getElementsByTagName(elSample, "Keywords"))
@@ -55,12 +54,16 @@ public class PCWorkspace extends FlowJoWorkspace
         Element elSampleNode = getElementByTagName(elSample, "SampleNode");
         sampleInfo._sampleName = elSampleNode.getAttribute("name");
         sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
+        sampleInfo._deleted = readSampleDeletedFlag(elSampleNode);
 
         readSampleCompensation(sampleInfo, elSample);
         readSampleTransformations(sampleInfo, elSample);
 
-        _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
-        readSampleAnalysis(elSampleNode);
+        if (sampleInfo._deleted)
+            _deletedInfos.put(sampleInfo.getSampleId(), sampleInfo);
+        else
+            _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
+        return sampleInfo;
     }
 
     protected void readSampleCompensation(SampleInfo sampleInfo, Element elSample)
@@ -94,22 +97,9 @@ public class PCWorkspace extends FlowJoWorkspace
         }
     }
 
-    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
+    @Override
+    protected void readStatsOther(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, String sampleId, boolean warnOnMissingStats)
     {
-        String strCount = elPopulation.getAttribute("count");
-        if (results != null)
-        {
-            if (!StringUtils.isEmpty(strCount))
-            {
-                StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
-                results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
-            }
-            else
-            {
-                if (warnOnMissingStats)
-                    warning(sampleId, analysis.getName(), subset, "Count statistic missing");
-            }
-        }
         for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
         {
             for (Element elStat : getElementsByTagName(elSubpopulations, "Statistic"))
@@ -346,26 +336,6 @@ public class PCWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected Analysis readSampleAnalysis(Element elSampleNode)
-    {
-        // Don't read analysis if sample has been marked as 'deleted'
-        boolean deleted = "1".equals(elSampleNode.getAttribute("deleted"));
-        if (deleted)
-            return null;
-
-        // Don't read analysis if sampleID isn't in "All Samples" group.
-        String sampleId = elSampleNode.getAttribute("sampleID");
-        GroupInfo allSamplesGroup = getAllSamplesGroup();
-        if (allSamplesGroup != null && !allSamplesGroup.getSampleIds().contains(sampleId))
-            return null;
-
-        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
-        Analysis ret = readAnalysis(elSampleNode, results, sampleId, true);
-        _sampleAnalyses.put(sampleId, ret);
-        addSampleAnalysisResults(results, sampleId);
-        return ret;
-    }
-
     protected void readSamples(Element elDoc)
     {
         for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
@@ -373,6 +343,9 @@ public class PCWorkspace extends FlowJoWorkspace
             for (Element elSample : getElementsByTagName(elSampleList, "Sample"))
             {
                 readSample(elSample);
+
+                Element elSampleNode = getElementByTagName(elSample, "SampleNode");
+                readSampleAnalysis(elSampleNode);
             }
         }
     }

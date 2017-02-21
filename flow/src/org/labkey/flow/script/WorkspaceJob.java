@@ -331,9 +331,23 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         }
                     }
                 }
+                else
+                {
+                    debug("No sample analysis for " + sample.toString());
+                }
+
+                debug("Analysis results contains " + results.getStatistics().size() + " statistics, " + results.getGraphs().size() + " graphs");
+                if (results.getStatistics().size() == 0)
+                    warn("No sample analysis results for '" + sample + "'.  The sample may be marked as deleted in the FlowJo workspace or has no gating and statistics");
+                else if (results.getStatistics().size() == 1)
+                    warn("Analysis results only contains '" + results.getStatistics().keySet().iterator().next() + "' statistic for '" + sample + "'.");
 
                 AttributeSetHelper.prepareForSave(results, container, false);
                 resultsMap.put(sample.getLabel(), results);
+            }
+            else
+            {
+                warn("No sample analysis results for '" + sample.toString() + "'.  The sample may be marked as deleted in the FlowJo workspace or has no gating and statistics");
             }
 
             if (comp != null)

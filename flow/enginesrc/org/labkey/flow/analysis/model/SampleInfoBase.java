@@ -30,6 +30,13 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
     protected Map<String, String> _keywords = new CaseInsensitiveTreeMap<>();
     protected String _sampleId;
     protected String _sampleName;
+    protected boolean _deleted = false;
+
+    @Override
+    public boolean isDeleted()
+    {
+        return _deleted;
+    }
 
     @Override
     public String getSampleId()
@@ -55,7 +62,7 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
         String ret = _sampleName;
         if (ret == null || ret.length() == 0)
             ret = getFilename();
-        if (ret == null)
+        if (ret == null || ret.length() == 0)
             return _sampleId;
         return ret;
     }
@@ -68,12 +75,10 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
 
     public String toString()
     {
-        String name = _sampleName;
-        if (name == null || name.length() == 0)
-            name = getFilename();
-        if (name == null)
-            return _sampleId;
-
-        return name + " (" + _sampleId + ")";
+        String label = getLabel();
+        if (label.equals(_sampleId))
+            return label;
+        else
+            return label + " (" + _sampleId + ")";
     }
 }
