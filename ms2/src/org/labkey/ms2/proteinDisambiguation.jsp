@@ -77,13 +77,19 @@
     List<Protein> proteins = actionWithProteins.second;
     ActionURL baseUrl = actionWithProteins.first;
 
+    ActionURL formUrl = baseUrl.clone();
+    formUrl.deleteParameters();
+
     if (proteins.isEmpty()) { %>
         No proteins match. Please try another name. <%
     }
     else { %>
         Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
-<form action="<%=baseUrl%>" method="post" onsubmit="return validate();">
+<form action="<%=formUrl%>" method="get" onsubmit="return validate();">
+    <% for (Pair<String, String> param : baseUrl.getParameters()) { %>
+        <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
+    <% } %>
     <div style="margin-top: 10px;"><input type=checkbox name=checkall checked id=checkallproteins style="margin-right: 12px;" onclick="checkAll();">All</div>
     <%
         for (Protein protein : proteins) {
