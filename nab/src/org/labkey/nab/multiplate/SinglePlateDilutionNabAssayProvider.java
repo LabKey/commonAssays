@@ -164,42 +164,6 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
         };
     }
 
-    private static class HighThroughputRunsQueryView extends RunListQueryView
-    {
-        public HighThroughputRunsQueryView(AssayProtocolSchema schema, QuerySettings settings)
-        {
-            super(schema, settings);//, NabAssayController.DetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
-        }
-
-        @Override
-        public DataView createDataView()
-        {
-            DataView view = super.createDataView();
-            DataRegion rgn = view.getDataRegion();
-            rgn.addDisplayColumn(0, new SimpleDisplayColumn()
-            {
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                {
-                    Object runId = ctx.getRow().get(ExpRunTable.Column.RowId.name());
-                    if (runId != null)
-                    {
-                        ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).
-                                addParameter("rowId", "" + runId).
-                                addParameter("maxSamplesPerGraph", 20).
-                                addParameter("graphWidth", 550).
-                                addParameter("graphHeight", 600).
-                                addParameter("graphsPerRow", 1);
-
-                        Map<String, String> map = new HashMap<>();
-                        map.put("title", "View run details");
-                        out.write(PageFlowUtil.textLink("run details", url, null, null, map));
-                    }
-                }
-            });
-            return view;
-        }
-    }
-
     @Override
     public ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
     {

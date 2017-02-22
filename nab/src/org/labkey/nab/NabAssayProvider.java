@@ -58,6 +58,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 import org.labkey.nab.query.NabRunCreator;
@@ -380,8 +381,12 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
 
     @Nullable
     @Override
-    public ActionURL getAssayQCRunURL(Container container, ExpRun run)
+    public ActionURL getAssayQCRunURL(ViewContext context, ExpRun run)
     {
-        return new ActionURL(NabAssayController.QCDataAction.class, container).addParameter("rowId", run.getRowId());
+        ActionURL url = new ActionURL(NabAssayController.QCDataAction.class, context.getContainer());
+        url.addParameters(context.getActionURL().getParameters());
+        //url.addParameter("rowId", run.getRowId());
+
+        return url;
     }
 }

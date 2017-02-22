@@ -754,6 +754,10 @@ public class NabAssayController extends SpringActionController
     public static class NabQCForm extends RenderAssayBean
     {
         private boolean _edit = true;
+        private int _maxSamplesPerGraph;
+        private int _graphsPerRow;
+        private int _graphHeight;
+        private int _graphWidth;
 
         public boolean isEdit()
         {
@@ -763,6 +767,69 @@ public class NabAssayController extends SpringActionController
         public void setEdit(boolean edit)
         {
             _edit = edit;
+        }
+
+        @Override
+        public int getMaxSamplesPerGraph()
+        {
+            return _maxSamplesPerGraph;
+        }
+
+        @Override
+        public void setMaxSamplesPerGraph(int maxSamplesPerGraph)
+        {
+            _maxSamplesPerGraph = maxSamplesPerGraph;
+        }
+
+        @Override
+        public int getGraphsPerRow()
+        {
+            return _graphsPerRow;
+        }
+
+        @Override
+        public void setGraphsPerRow(int graphsPerRow)
+        {
+            _graphsPerRow = graphsPerRow;
+        }
+
+        @Override
+        public int getGraphHeight()
+        {
+            return _graphHeight;
+        }
+
+        @Override
+        public void setGraphHeight(int graphHeight)
+        {
+            _graphHeight = graphHeight;
+        }
+
+        @Override
+        public int getGraphWidth()
+        {
+            return _graphWidth;
+        }
+
+        @Override
+        public void setGraphWidth(int graphWidth)
+        {
+            _graphWidth = graphWidth;
+        }
+
+        public ActionURL getReturnUrl(Container container)
+        {
+            ActionURL url = new ActionURL(DetailsAction.class, container).addParameter("rowId", getRunId());
+            if (getMaxSamplesPerGraph() > 0)
+                url.addParameter("maxSamplesPerGraph", getMaxSamplesPerGraph());
+            if (getGraphsPerRow() > 0)
+                url.addParameter("graphsPerRow", getGraphsPerRow());
+            if (getGraphHeight() > 0)
+                url.addParameter("graphHeight", getGraphHeight());
+            if (getGraphWidth() > 0)
+                url.addParameter("graphWidth", getGraphWidth());
+
+            return url;
         }
     }
 

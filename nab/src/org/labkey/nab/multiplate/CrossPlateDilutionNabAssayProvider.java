@@ -15,8 +15,22 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.security.User;
+import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.view.ViewContext;
+import org.labkey.nab.query.NabProtocolSchema;
+import org.springframework.validation.BindException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: klum
@@ -59,5 +73,45 @@ public class CrossPlateDilutionNabAssayProvider extends HighThroughputNabAssayPr
     public DilutionDataHandler getDataHandler()
     {
         return new CrossPlateDilutionNabDataHandler();
+    }
+
+    @Override
+    public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
+    {
+        return new NabProtocolSchema(user, container, this, protocol, targetStudy)
+        {
+            Map<String, Object> _extraParams = new HashMap<>();
+
+            @Override
+            protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
+            {
+                NabRunListQueryView queryView = new NabRunListQueryView(this, settings);
+                queryView.setExtraDetailsUrlParams(getDetailUrlParams());
+
+                return queryView;
+            }
+
+            @Override
+            protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
+            {
+                NabResultsQueryView queryView = new NabResultsQueryView(getProtocol(), context, settings);
+                queryView.setExtraDetailsUrlParams(getDetailUrlParams());
+
+                return queryView;
+            }
+
+            private Map<String, Object> getDetailUrlParams()
+            {
+                if (_extraParams.isEmpty())
+                {
+                    _extraParams.put("maxSamplesPerGraph", 20);
+                    _extraParams.put("graphWidth", 600);
+                    _extraParams.put("graphHeight", 550);
+                    _extraParams.put("graphsPerRow", 1);
+                    _extraParams.put("sampleNoun", "Virus");
+                }
+                return _extraParams;
+            }
+        };
     }
 }

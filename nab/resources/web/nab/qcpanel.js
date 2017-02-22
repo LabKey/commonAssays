@@ -52,14 +52,14 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         }});
 
         this.cancelBtn = new Ext4.Button({text: 'Cancel', scope: this, handler: function(){
-            window.location = LABKEY.ActionURL.buildURL('nabassay', 'details.view', null, {rowId : this.runId});
+            window.location = this.returnUrl;
         }});
 
         if (this.edit)
             this.bbar = ['->', this.nextBtn, this.prevBtn, this.cancelBtn];
         else
             this.bbar = ['->', {text: 'Done', scope: this, handler: function(){
-                window.location = LABKEY.ActionURL.buildURL('nabassay', 'details.view', null, {rowId : this.runId});
+                window.location = this.returnUrl;
             }}];
 
         this.items = [];
@@ -647,7 +647,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 excluded : excluded
             },
             success: function (response) {
-                window.location = LABKEY.ActionURL.buildURL('nabassay', 'details.view', null, {rowId : this.runId});
+                window.location = this.returnUrl;
             },
             failure: this.failureHandler,
             scope: this
