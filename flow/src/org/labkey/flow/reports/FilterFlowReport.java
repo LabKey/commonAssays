@@ -358,7 +358,7 @@ public abstract class FilterFlowReport extends FlowReport
             }
             else if ("fieldkey".equals(f.type))
             {
-                FieldKey key = FieldKey.fromParts(f.property);
+                FieldKey key = FieldKey.fromString(f.property);
                 filter.addCondition("A/" + key.toString(), f.value, CompareType.getByURLKey(f.op));
                 fieldKeys.add(key);
             }
