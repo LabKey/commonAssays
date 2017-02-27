@@ -237,9 +237,9 @@ public abstract class PeptideImporter extends MS2Importer
         }
 
         stmt.setString(n++, peptide.getPeptide());
-        stmt.setString(n++, peptide.getPrevAA());
+        stmt.setString(n++, peptide.getPrevAA() == null ? "?" : peptide.getPrevAA());
         stmt.setString(n++, peptide.getTrimmedPeptide());
-        stmt.setString(n++, peptide.getNextAA());
+        stmt.setString(n++, peptide.getNextAA() == null ? "?" : peptide.getNextAA());
         stmt.setInt(n++, peptide.getProteinHits());
         stmt.setString(n++, peptide.getProtein());
 

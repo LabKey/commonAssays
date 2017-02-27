@@ -214,7 +214,14 @@ public class PepXmlLoader extends MS2XmlLoader
                             _dataSuffix = _dataSuffix.substring(1);
                     }
                     else if (element.equals("search_database"))
-                        _databaseLocalPaths.add(_parser.getAttributeValue(null, "local_path"));
+                    {
+                        String fastaPath = _parser.getAttributeValue(null, "local_path");
+                        if (StringUtils.isEmpty(fastaPath))
+                        {
+                            throw new XMLStreamException("Reference to FASTA file in <search_database> element via local_path attribute is empty");
+                        }
+                        _databaseLocalPaths.add(fastaPath);
+                    }
                     else if (element.equals("aminoacid_modification"))
                         handleModification();
                     else if (element.equals("enzymatic_search_constraint"))
