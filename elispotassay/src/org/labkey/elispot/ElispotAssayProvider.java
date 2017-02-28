@@ -261,6 +261,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
             prop.setShownInUpdateView(false);
             prop.setShownInDetailsView(false);
             prop.setHidden(true);
+            prop.setPropertyURI(null);      // Issue 29277; URI here, which addProperty created, is presubstitution and does not later get substituted
         }
 
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
