@@ -91,7 +91,7 @@ function getRunFiltersContent()
         queryName: "MS2SearchRuns",
         successCallback: function(data) { allRuns = data; setQueryOptions(); },
         containerFilter: "AllFolders",
-        columns: "Folder, Folder/EntityId, Name, CreatedBy/DisplayName, Input/FASTA/Name, MS2Details/SearchEngine"
+        columns: "Folder, Folder/EntityId, Name, CreatedBy/DisplayName, Input/FASTA/Name, MS2Details/SearchEngine, RowId"
     });
 }
 
@@ -343,7 +343,7 @@ function setQueryOptions()
             schemaName      : "ms2",
             queryName       : "MS2SearchRuns",
             containerFilter : "AllFolders",
-            columns         : "Name, Folder/Path, Input/FASTA, CreatedBy/DisplayName, MS2Details/Run, MS2Details/SearchEngine, MS2Details/",
+            columns         : "Name, Folder/Path, Input/FASTA, CreatedBy/DisplayName, MS2Details/Run, MS2Details/SearchEngine, MS2Details, RowId",
             filterArray     : runsFilterArray
         };
 
